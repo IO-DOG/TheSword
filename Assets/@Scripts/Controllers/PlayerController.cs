@@ -7,11 +7,14 @@ using static Define;
 public class PlayerController : MonoBehaviour
 {
     public Grid _grid;
+    public GameObject _startPoint;
     public float _speed = 15.0f;
+
     float _duration;
     bool _isMoving = false;
 
-    Vector3 _interpolatePos = new Vector3(0.5f, 1.5f, Mathf.Sqrt(2)/2);
+    Vector3 _interpolateGridPos = new Vector3(0.5f, 1.5f, Mathf.Sqrt(2)/2);
+    Vector3 _interpolateRayPos = new Vector3(0f, -0.5f, 0f);
     Vector3 _cellPos;
 
     void Start()
@@ -21,9 +24,8 @@ public class PlayerController : MonoBehaviour
 
         _duration = 1 / _speed;
 
-        Vector3 startPoint = GameObject.Find("StartPoint").transform.position + _interpolatePos;
-        transform.position = startPoint;
-        _cellPos = startPoint;
+        transform.position = _startPoint.transform.position + _interpolateGridPos;
+        _cellPos = _startPoint.transform.position + _interpolateGridPos;
 
         Managers.Game.Player = this; // 던전 돌 때 죽으면 연동하도록 하기 위함.
     }
@@ -53,28 +55,39 @@ public class PlayerController : MonoBehaviour
     }
 
     #region Moving
-    void Moving(MoveDir dir)
+    void Moving(MoveDir moveDir)
     {
         if (_isMoving)
             return;
 
         _isMoving = true;
-        switch (dir) 
+
+        Vector3 nextCellPosition = Vector3.zero;
+        switch (moveDir) 
         {
             case MoveDir.Up:
-                _cellPos += Vector3Int.forward;
+                nextCellPosition = Vector3Int.forward;
                 break;
             case MoveDir.Down:
-                _cellPos += Vector3Int.back;
+                nextCellPosition = Vector3Int.back;
                 break;
             case MoveDir.Left:
-                _cellPos += Vector3Int.left;
+                nextCellPosition = Vector3Int.left;
                 break;
             case MoveDir.Right:
-                _cellPos += Vector3Int.right;
+                nextCellPosition = Vector3Int.right;
                 break;
         }
 
+        // Checking Wall
+        if (Physics.Raycast(transform.position + _interpolateRayPos, nextCellPosition, 1f, 1 << (int)Layer.Wall))
+        {
+            _isMoving = false;
+            return;
+        }
+
+        // Move
+        _cellPos += nextCellPosition;
         transform.DOMove(_cellPos, _duration).OnComplete(()=> _isMoving = false);
     }
     #endregion

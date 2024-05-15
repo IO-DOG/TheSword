@@ -33,6 +33,11 @@ public class Define
         EndDrag,
     }
 
+    public enum Layer
+    {
+        Wall = 6,
+    }
+
     public enum MoveDir
     {
         None,
