@@ -11,6 +11,7 @@ public class Define
         Unknown,
         TitleScene,
         SHJTestScene,
+        InputTestScene,
     }
 
     public enum Sound

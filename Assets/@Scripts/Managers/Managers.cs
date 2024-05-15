@@ -20,12 +20,14 @@ public class Managers : MonoBehaviour
 
     #region Core
     DataManager _data = new DataManager();
+    InputManager _input = new InputManager();
     ResourceManager _resource = new ResourceManager();
     SceneManagerEx _scene = new SceneManagerEx();
     SoundManager _sound = new SoundManager();
     UIManager _ui = new UIManager();
 
     public static DataManager Data { get { return Instance?._data; } }
+    public static InputManager Input { get { return Instance._input; } }
     public static ResourceManager Resource { get { return Instance?._resource; } }
     public static SceneManagerEx Scene { get { return Instance?._scene; } }
     public static SoundManager Sound { get { return Instance?._sound; } }
@@ -50,6 +52,11 @@ public class Managers : MonoBehaviour
             //s_instance._time = go.AddComponent<TimeManager>();
 
         }
+    }
+
+    private void Update()
+    {
+        _input.OnUpdate();
     }
 
     public static void Clear()
