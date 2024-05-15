@@ -19,6 +19,8 @@ public class CreateMapEditor : MonoBehaviour
         string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/MapData.csv").Split("\n");
 
         GameObject parent = GameObject.Find("Parent");
+        GameObject monsters = GameObject.Find("Monsters");
+        GameObject items = GameObject.Find("Items");
         float coX = 0, coY = 0, coZ = 0;
         float toAdd = 1f;
         float addToFloorY = 0.465f;
@@ -58,7 +60,7 @@ public class CreateMapEditor : MonoBehaviour
 
                     // TODO 몬스터 생성
                     GameObject monster = Resources.Load<GameObject>($"Monster");
-                    UnityEngine.Object.Instantiate(monster, new Vector3(coX, coY + 1f, coZ), Quaternion.identity, parent.transform);
+                    UnityEngine.Object.Instantiate(monster, new Vector3(coX, coY + 1f, coZ), Quaternion.identity, monsters.transform);
                     monster.transform.localScale = new Vector3(1f, 1.4f, 1.4f);
                     monster.GetComponent<MonsterController>().id = block[2] - '0';
                 }

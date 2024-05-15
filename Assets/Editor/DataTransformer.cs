@@ -18,7 +18,6 @@ public class DataTransformer : EditorWindow
     {
         ParsePlayerData("Player");
         ParseMonsterData("Monster");
-        //ParseMapData("Map");
         Debug.Log("Complete DataTransformer");
     }
 
@@ -104,76 +103,6 @@ public class DataTransformer : EditorWindow
         string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
         File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
         AssetDatabase.Refresh();
-    }
-
-    static void ParseMapData(string filename)
-    {
-        #region ExcelData
-        string str = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv");
-        Debug.Log(str);
-        string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv").Split("\n");
-
-        GameObject parent = GameObject.Find("Parent");
-        float coX = 0, coY = 0, coZ = 0;
-        float toAdd = 3.2f;
-
-        for (int y = 0; y < lines.Length; y++)
-        {
-            string[] row = lines[y].Replace("\r", "").Split(',');
-
-            if (row.Length == 0)
-                continue;
-            if (string.IsNullOrEmpty(row[0]))
-                continue;
-
-            for (int x = 0; x < row.Length; ++x)
-            {
-                string block = row[x];
-
-                if (block == "0")
-                {
-
-                }
-                else if (block[0] == 'I') // 아이템일 경우
-                {
-                    GameObject floor = Resources.Load<GameObject>($"Tilemap_1");
-                    UnityEngine.Object.Instantiate(floor, new Vector3(coX, coY + 1.55f, coZ), Quaternion.identity, parent.transform);
-
-                    // TODO 아이템 생성
-
-                }
-                else if (block[0] == 'M') // 몬스터일 경우
-                {
-                    GameObject floor = Resources.Load<GameObject>($"Tilemap_1");
-                    UnityEngine.Object.Instantiate(floor, new Vector3(coX, coY + 1.55f, coZ), Quaternion.identity, parent.transform);
-
-                    // TODO 몬스터 생성
-                    GameObject monster = Resources.Load<GameObject>($"Monster");
-                    UnityEngine.Object.Instantiate(monster, new Vector3(coX, coY, coZ), Quaternion.identity, parent.transform);
-                    monster.GetComponent<MonsterController>().id = block[2] - '0';
-                }
-                else if (block[0] == 'B') // 보스 몬스터일 경우
-                {
-                    GameObject floor = Resources.Load<GameObject>($"Tilemap_1");
-                    UnityEngine.Object.Instantiate(floor, new Vector3(coX, coY + 1.55f, coZ), Quaternion.identity, parent.transform);
-
-                    // TODO 보스 몬스터 생성
-                }
-                else
-                {
-                    GameObject floor = Resources.Load<GameObject>($"Tilemap_1");
-                    UnityEngine.Object.Instantiate(floor, new Vector3(coX, coY + 1.55f, coZ), Quaternion.identity, parent.transform);
-                    // TODO 타일 생성
-                    GameObject tile = Resources.Load<GameObject>($"Tilemap_{block}");
-                    UnityEngine.Object.Instantiate(tile, new Vector3(coX, coY, coZ), Quaternion.identity, parent.transform);
-                }
-                coX += toAdd;
-            }
-            coZ += toAdd;
-            coX = 0;
-        }
-
-        #endregion
     }
 
     public static T ConvertValue<T>(string value)
