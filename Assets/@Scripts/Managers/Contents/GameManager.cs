@@ -59,6 +59,7 @@ public class GameManager
         public float RewardExp { get; set; }
         public float RewardItem { get; set; }
         public bool IsDefence { get; set; }
+        public int IsActiveIndex { get; set; }
     }
     #endregion
 
@@ -72,8 +73,15 @@ public class GameManager
 
     public void SaveGame()
     {
-        string jsonStr = JsonConvert.SerializeObject(CurPlayerData);
+        string jsonStr = JsonConvert.SerializeObject(CurPlayerData, Formatting.Indented);
         File.WriteAllText(_path, jsonStr);
+
+        string monsterActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.MonsterActiveDic, Formatting.Indented);
+        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json", monsterActiveDicJsonStr);
+        string bossMonsterActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.BossMonsterActiveDic, Formatting.Indented);
+        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json", bossMonsterActiveDicJsonStr);
+        string itemActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.ItemActiveDic, Formatting.Indented);
+        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveItemActiveData.json", itemActiveDicJsonStr);
     }
 
     public bool LoadGame()
@@ -83,6 +91,7 @@ public class GameManager
             string path = Application.dataPath + "/@Resources/Data/SaveData.json";
             if (File.Exists(path))
                 File.Delete(path);
+
             return false;
         }
 
@@ -93,6 +102,16 @@ public class GameManager
         ContinueData data = JsonConvert.DeserializeObject<ContinueData>(fileStr);
         if (data != null)
             CurPlayerData = data;
+
+        string monsterActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json");
+        Dictionary<int, bool> monsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(monsterActiveDicFile);
+        Managers.Data.MonsterActiveDic = monsterActiveDic;
+        string bossMonsterActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json");
+        Dictionary<int, bool> bossMonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(bossMonsterActiveDicFile);
+        Managers.Data.BossMonsterActiveDic = bossMonsterActiveDic;
+        string itemActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveItemActiveData.json");
+        Dictionary<int, bool> itemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(itemActiveDicFile);
+        Managers.Data.ItemActiveDic = itemActiveDic;
 
         return true;
     }

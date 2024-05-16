@@ -5,6 +5,7 @@ using UnityEngine;
 public class MonsterController : MonoBehaviour
 {
     public int id = 0;
+    public int _monsterIndex_forActive = 0;
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.name == "Player")
@@ -23,6 +24,8 @@ public class MonsterController : MonoBehaviour
             Managers.Game.MonsterData.DefenceSpeed = Managers.Data.MonsterDic[id].DefenceSpeed;
             Managers.Game.MonsterData.RewardExp = Managers.Data.MonsterDic[id].Exp;
             Managers.Game.MonsterData.IsDefence = false;
+            Managers.Game.MonsterData.IsActiveIndex = _monsterIndex_forActive;
+            Debug.Log($"monster index for active : {_monsterIndex_forActive}");
             //Managers.Game.MonsterData.Image = Managers.Data.MonsterDic[id].Image;
 
             Managers.Game.Monster = this;
@@ -48,6 +51,7 @@ public class MonsterController : MonoBehaviour
             Managers.Game.MonsterData.DefenceSpeed = Managers.Data.MonsterDic[id].DefenceSpeed;
             Managers.Game.MonsterData.RewardExp = Managers.Data.MonsterDic[id].Exp;
             Managers.Game.MonsterData.IsDefence = false;
+            Managers.Game.MonsterData.IsActiveIndex = _monsterIndex_forActive;
             //Managers.Game.MonsterData.Image = Managers.Data.MonsterDic[id].Image;
 
             Managers.Game.Monster = this;

@@ -71,5 +71,26 @@ namespace Data
     }
     #endregion
 
+    #region MapData
 
+    [Serializable]
+    public class MapData
+    {
+        public int id;
+    }
+
+    [Serializable]
+    public class MapDataLoader : ILoader<int, MapData>
+    {
+        public List<MapData> data = new List<MapData>();
+        public Dictionary<int, MapData> MakeDict()
+        {
+            Dictionary<int, MapData> dict = new Dictionary<int, MapData>();
+            foreach (MapData creature in data)
+                dict.Add(creature.id, creature);
+            return dict;
+        }
+    }
+
+    #endregion
 }
