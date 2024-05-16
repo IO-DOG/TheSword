@@ -15,6 +15,7 @@ public class GameManager
     public MonsterController Monster; // 전투후 삭제를 위해
     public CurMonsterData MonsterData = new CurMonsterData(); // 실제 사용될 몬스터 정보
     public ContinueData CurPlayerData = new ContinueData(); // 실제 사용될 플레이어 정보
+    public Inventory Inventory = new Inventory(); //Inventory
 
     public Action OnBattleAction;
     public Action OnBattleDataRefreshAction;

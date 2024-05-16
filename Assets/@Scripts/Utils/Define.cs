@@ -36,6 +36,8 @@ public class Define
     public enum Layer
     {
         Wall = 6,
+        Key = 7,
+        Player = 8,
     }
 
     public enum MoveDir
@@ -47,5 +49,12 @@ public class Define
         Right,
     }
 
+    public enum ItemType
+    {
+        Unknown,
+        Key,
+        Potion,
+        Equipment,
+    }
     #endregion
 }
