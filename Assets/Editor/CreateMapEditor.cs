@@ -20,6 +20,7 @@ public class CreateMapEditor : MonoBehaviour
 
         GameObject parent = GameObject.Find("Parent");
         GameObject monsters = GameObject.Find("Monsters");
+        GameObject bossMonsters = GameObject.Find("BossMonsters");
         GameObject items = GameObject.Find("Items");
         float coX = 0, coY = 0, coZ = 0;
         float toAdd = 1f;
@@ -53,7 +54,12 @@ public class CreateMapEditor : MonoBehaviour
                     floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
 
                     // TODO 아이템 생성
-
+                    //GameObject item = Resources.Load<GameObject>($"Item");
+                    //UnityEngine.Object.Instantiate(item, new Vector3(coX, coY + 1f, coZ), Quaternion.identity, items.transform);
+                    //item.transform.localScale = new Vector3(1f, 1.4f, 1.4f);
+                    //item.GetComponent<ItemController>().id = block[2] - '0';
+                    //item.name = $"item{itemIndex}";
+                    //item.GetComponent<ItemController>()._index_forActive = itemIndex++;
                 }
                 else if (block[0] == 'M') // 몬스터일 경우
                 {
@@ -76,6 +82,12 @@ public class CreateMapEditor : MonoBehaviour
                     floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
 
                     // TODO 보스 몬스터 생성
+                    //GameObject bossMonster = Resources.Load<GameObject>($"BossMonster");
+                    //UnityEngine.Object.Instantiate(bossMonster, new Vector3(coX, coY + 1f, coZ), Quaternion.identity, bossMonsters.transform);
+                    //bossMonster.transform.localScale = new Vector3(1f, 1.4f, 1.4f);
+                    //bossMonster.GetComponent<BossMonsterController>().id = block[2] - '0';
+                    //bossMonster.name = $"monster{bossMonsterIndex}";
+                    //bossMonster.GetComponent<BossMonsterController>()._index_forActive = bossMonsterIndex++;
                 }
                 else
                 {
