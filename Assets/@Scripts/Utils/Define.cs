@@ -38,6 +38,7 @@ public class Define
         Wall = 6,
         Key = 7,
         Player = 8,
+        Door = 9,
     }
 
     public enum MoveDir

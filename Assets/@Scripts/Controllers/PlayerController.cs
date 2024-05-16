@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
     Vector3 _interpolateGridPos = new Vector3(0f, 0f, Mathf.Sqrt(2));
     Vector3 _interpolateRayPos = new Vector3(0f, -0.5f, 0.4f);
     Vector3 _cellPos;
+    Vector3 _nextCellPos;
 
     void Start()
     {
@@ -63,46 +64,44 @@ public class PlayerController : MonoBehaviour
 
         _isMoving = true;
 
-        Vector3 nextCellPosition = Vector3.zero;
+        _nextCellPos = Vector3.zero;
         switch (moveDir) 
         {
             case MoveDir.Up:
-                nextCellPosition = _interpolateGridPos;
+                _nextCellPos = _interpolateGridPos;
                 break;
             case MoveDir.Down:
-                nextCellPosition = (-1) * _interpolateGridPos;
+                _nextCellPos = (-1) * _interpolateGridPos;
                 break;
             case MoveDir.Left:
-                nextCellPosition = Vector3Int.left;
+                _nextCellPos = Vector3Int.left;
                 break;
             case MoveDir.Right:
-                nextCellPosition = Vector3Int.right;
+                _nextCellPos = Vector3Int.right;
                 break;
         }
 
-        Debug.DrawRay(transform.position + _interpolateRayPos, nextCellPosition, Color.red, 0.75f);
-
         // Checking Forward
         // If Obstacles, Stop
-        if (CheckSomething(nextCellPosition))
+        if (CheckSomething())
         {
             _isMoving = false;
             return;
         }
 
         // Move
-        _cellPos += nextCellPosition;
+        _cellPos += _nextCellPos;
         transform.DOMove(_cellPos, _duration).OnComplete(()=> _isMoving = false);
     }
     #endregion
 
-    bool CheckSomething(Vector3 nextCellPosition)
+    bool CheckSomething()
     {
         bool somethingExist = false;
-        int layerMask = (1 << (int)Define.Layer.Wall) + (1 << (int)Define.Layer.Key);
+        int layerMask = (1 << (int)Define.Layer.Wall) + (1 << (int)Define.Layer.Key) + (1 << (int)Define.Layer.Door);
 
         RaycastHit hit;
-        Physics.Raycast(transform.position + _interpolateRayPos, nextCellPosition, out hit, 0.8f, layerMask);
+        Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, 0.8f, layerMask);
 
         if(hit.collider != null)
         {
@@ -112,10 +111,21 @@ public class PlayerController : MonoBehaviour
                 somethingExist = true;
             }
             // Checking Key
-            else if (hit.collider.gameObject.layer == (int)Define.Layer.Key)
+            if (hit.collider.gameObject.layer == (int)Define.Layer.Key)
             {
                 hit.collider.gameObject.GetComponent<Key>().PickUp();
-                somethingExist = true;
+            }
+            //Checking Door
+            if (hit.collider.gameObject.layer == (int)Define.Layer.Door)
+            {
+                if(Managers.Game.Inventory.HasKey(hit.collider.gameObject.name))
+                {
+                    Managers.Game.Inventory.UseKey(hit.collider.gameObject);
+                }
+                else
+                {
+                    somethingExist = true;
+                }
             }
         }
 
