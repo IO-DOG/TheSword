@@ -1,6 +1,58 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1107 &-5215825936964955465
+--- !u!1102 &-7605570942216057299
+AnimatorState:
+  serializedVersion: 6
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: UIMonster6Anim
+  m_Speed: 1
+  m_CycleOffset: 0
+  m_Transitions: []
+  m_StateMachineBehaviours: []
+  m_Position: {x: 50, y: 50, z: 0}
+  m_IKOnFeet: 0
+  m_WriteDefaultValues: 1
+  m_Mirror: 0
+  m_SpeedParameterActive: 0
+  m_MirrorParameterActive: 0
+  m_CycleOffsetParameterActive: 0
+  m_TimeParameterActive: 0
+  m_Motion: {fileID: 7400000, guid: 5f4e60a84ad9dfd45b89a6b106cb3a3f, type: 2}
+  m_Tag: 
+  m_SpeedParameter: 
+  m_MirrorParameter: 
+  m_CycleOffsetParameter: 
+  m_TimeParameter: 
+--- !u!1102 &-6530911743169533379
+AnimatorState:
+  serializedVersion: 6
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: UIMonster4Anim
+  m_Speed: 1
+  m_CycleOffset: 0
+  m_Transitions: []
+  m_StateMachineBehaviours: []
+  m_Position: {x: 50, y: 50, z: 0}
+  m_IKOnFeet: 0
+  m_WriteDefaultValues: 1
+  m_Mirror: 0
+  m_SpeedParameterActive: 0
+  m_MirrorParameterActive: 0
+  m_CycleOffsetParameterActive: 0
+  m_TimeParameterActive: 0
+  m_Motion: {fileID: 7400000, guid: f7b21b243f48826448fb5e59e9f4c9ef, type: 2}
+  m_Tag: 
+  m_SpeedParameter: 
+  m_MirrorParameter: 
+  m_CycleOffsetParameter: 
+  m_TimeParameter: 
+--- !u!1107 &-6210594614681626223
 AnimatorStateMachine:
   serializedVersion: 6
   m_ObjectHideFlags: 1
@@ -10,32 +62,29 @@ AnimatorStateMachine:
   m_Name: Base Layer
   m_ChildStates:
   - serializedVersion: 1
-    m_State: {fileID: 2414565452425058820}
-    m_Position: {x: 200, y: 0, z: 0}
+    m_State: {fileID: 366934945897800996}
+    m_Position: {x: 420, y: -10, z: 0}
   - serializedVersion: 1
-    m_State: {fileID: 8594092544034716253}
-    m_Position: {x: 235, y: 65, z: 0}
+    m_State: {fileID: 594087806374327583}
+    m_Position: {x: 420, y: 40, z: 0}
   - serializedVersion: 1
-    m_State: {fileID: 7408160821145298178}
-    m_Position: {x: 270, y: 130, z: 0}
+    m_State: {fileID: 1308561602163088283}
+    m_Position: {x: 420, y: 90, z: 0}
   - serializedVersion: 1
-    m_State: {fileID: -4872874964598307725}
-    m_Position: {x: 305, y: 195, z: 0}
+    m_State: {fileID: -2840511970179508295}
+    m_Position: {x: 420, y: 140, z: 0}
   - serializedVersion: 1
-    m_State: {fileID: -754115532564784319}
-    m_Position: {x: 340, y: 260, z: 0}
+    m_State: {fileID: -6530911743169533379}
+    m_Position: {x: 420, y: 190, z: 0}
   - serializedVersion: 1
-    m_State: {fileID: -4533274970767107936}
-    m_Position: {x: 375, y: 325, z: 0}
+    m_State: {fileID: 4115289924699831645}
+    m_Position: {x: 420, y: 290, z: 0}
   - serializedVersion: 1
-    m_State: {fileID: 8442840410634073405}
-    m_Position: {x: 410, y: 390, z: 0}
+    m_State: {fileID: -7605570942216057299}
+    m_Position: {x: 420, y: 240, z: 0}
   - serializedVersion: 1
-    m_State: {fileID: -5075283091504592129}
-    m_Position: {x: 445, y: 455, z: 0}
-  - serializedVersion: 1
-    m_State: {fileID: -1953016937939746800}
-    m_Position: {x: 480, y: 520, z: 0}
+    m_State: {fileID: -2310629019688215979}
+    m_Position: {x: 420, y: 340, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
@@ -45,15 +94,15 @@ AnimatorStateMachine:
   m_EntryPosition: {x: 50, y: 120, z: 0}
   m_ExitPosition: {x: 800, y: 120, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}
-  m_DefaultState: {fileID: 8594092544034716253}
---- !u!1102 &-5075283091504592129
+  m_DefaultState: {fileID: 366934945897800996}
+--- !u!1102 &-2840511970179508295
 AnimatorState:
   serializedVersion: 6
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Monster6IdleAnim
+  m_Name: UIMonster3Anim
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -66,20 +115,20 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 8dfa90f35de89a74bb5119ca0274665f, type: 2}
+  m_Motion: {fileID: 7400000, guid: 521568a5ac849444ab9d67b95f3f9a8b, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
---- !u!1102 &-4872874964598307725
+--- !u!1102 &-2310629019688215979
 AnimatorState:
   serializedVersion: 6
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Monster2IdleAnim
+  m_Name: UIMonster7Anim
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -92,85 +141,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 0bde94e367b0ebb41b641a7bbdd885ba, type: 2}
-  m_Tag: 
-  m_SpeedParameter: 
-  m_MirrorParameter: 
-  m_CycleOffsetParameter: 
-  m_TimeParameter: 
---- !u!1102 &-4533274970767107936
-AnimatorState:
-  serializedVersion: 6
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Monster4IdleAnim
-  m_Speed: 1
-  m_CycleOffset: 0
-  m_Transitions: []
-  m_StateMachineBehaviours: []
-  m_Position: {x: 50, y: 50, z: 0}
-  m_IKOnFeet: 0
-  m_WriteDefaultValues: 1
-  m_Mirror: 0
-  m_SpeedParameterActive: 0
-  m_MirrorParameterActive: 0
-  m_CycleOffsetParameterActive: 0
-  m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: de42cceb51f63ba4ab53dee3e27c9a8f, type: 2}
-  m_Tag: 
-  m_SpeedParameter: 
-  m_MirrorParameter: 
-  m_CycleOffsetParameter: 
-  m_TimeParameter: 
---- !u!1102 &-1953016937939746800
-AnimatorState:
-  serializedVersion: 6
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Monster7IdleAnim
-  m_Speed: 1
-  m_CycleOffset: 0
-  m_Transitions: []
-  m_StateMachineBehaviours: []
-  m_Position: {x: 50, y: 50, z: 0}
-  m_IKOnFeet: 0
-  m_WriteDefaultValues: 1
-  m_Mirror: 0
-  m_SpeedParameterActive: 0
-  m_MirrorParameterActive: 0
-  m_CycleOffsetParameterActive: 0
-  m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 5e009f1685d4cd6489fa4e438c20c9df, type: 2}
-  m_Tag: 
-  m_SpeedParameter: 
-  m_MirrorParameter: 
-  m_CycleOffsetParameter: 
-  m_TimeParameter: 
---- !u!1102 &-754115532564784319
-AnimatorState:
-  serializedVersion: 6
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Monster3IdleAnim
-  m_Speed: 1
-  m_CycleOffset: 0
-  m_Transitions: []
-  m_StateMachineBehaviours: []
-  m_Position: {x: 50, y: 50, z: 0}
-  m_IKOnFeet: 0
-  m_WriteDefaultValues: 1
-  m_Mirror: 0
-  m_SpeedParameterActive: 0
-  m_MirrorParameterActive: 0
-  m_CycleOffsetParameterActive: 0
-  m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: d907aa5ffb0bc9e4a949fb9eb76bf82a, type: 2}
+  m_Motion: {fileID: 7400000, guid: d2a0381664c9a484d99d4c82024172a5, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -182,13 +153,13 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MonsterAnim
+  m_Name: UIMonsterAnimController
   serializedVersion: 5
   m_AnimatorParameters: []
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer
-    m_StateMachine: {fileID: -5215825936964955465}
+    m_StateMachine: {fileID: -6210594614681626223}
     m_Mask: {fileID: 0}
     m_Motions: []
     m_Behaviours: []
@@ -198,14 +169,14 @@ AnimatorController:
     m_IKPass: 0
     m_SyncedLayerAffectsTiming: 0
     m_Controller: {fileID: 9100000}
---- !u!1102 &2414565452425058820
+--- !u!1102 &366934945897800996
 AnimatorState:
   serializedVersion: 6
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Boss0IdleAnim
+  m_Name: UIMonster0Anim
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -218,20 +189,20 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 52a38eccda74f374698dbde8096a8ae3, type: 2}
+  m_Motion: {fileID: 7400000, guid: f1163cea7e663334b9340e2b69e976b3, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
---- !u!1102 &7408160821145298178
+--- !u!1102 &594087806374327583
 AnimatorState:
   serializedVersion: 6
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Monster1IdleAnim
+  m_Name: UIMonster1Anim
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -244,20 +215,20 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 14374b6e198d09a41930a6f01c3f4cb8, type: 2}
+  m_Motion: {fileID: 7400000, guid: 6ea43777a6be8674fb362204cb0962f1, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
---- !u!1102 &8442840410634073405
+--- !u!1102 &1308561602163088283
 AnimatorState:
   serializedVersion: 6
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Monster5IdleAnim
+  m_Name: UIMonster2Anim
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -270,20 +241,20 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 4d05a801f1cf8324ba8ecd1057f6e8f2, type: 2}
+  m_Motion: {fileID: 7400000, guid: 0f6a82ee01c258445ae16f10583350c1, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
---- !u!1102 &8594092544034716253
+--- !u!1102 &4115289924699831645
 AnimatorState:
   serializedVersion: 6
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Monster0IdleAnim
+  m_Name: UIMonster5Anim
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -296,7 +267,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: a299e6c0fe9821549992155f9a3473a9, type: 2}
+  m_Motion: {fileID: 7400000, guid: 9e2fbbc638c52834bb688a812de9d757, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
