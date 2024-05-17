@@ -51,7 +51,14 @@ public class UI_SHJTestScene : UI_Scene
         foreach(MonsterController monster in monsters)
         {
             if (Managers.Data.MonsterActiveDic[monster._monsterIndex_forActive] == false)
+            {
                 monster.gameObject.SetActive(false);
+                continue;
+            }
+
+            int id = monster.id;
+            //Managers.Resource.Load<Animation>($"Monster{id}IdleAnim");
+            monster.GetComponent<Animator>().Play($"Monster{id}IdleAnim");
         }
     }
 }
