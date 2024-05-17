@@ -22,7 +22,12 @@ public class MonsterController : MonoBehaviour
             Managers.Game.MonsterData.Defence = Managers.Data.MonsterDic[id].Defence;
             Managers.Game.MonsterData.AttackSpeed = Managers.Data.MonsterDic[id].AttackSpeed;
             Managers.Game.MonsterData.DefenceSpeed = Managers.Data.MonsterDic[id].DefenceSpeed;
-            Managers.Game.MonsterData.RewardExp = Managers.Data.MonsterDic[id].Exp;
+            Managers.Game.MonsterData.RewardExp = Managers.Data.MonsterDic[id].RewardExp;
+            Managers.Game.MonsterData.RewardItem = Managers.Data.MonsterDic[id].RewardItem;
+            Managers.Game.MonsterData.IdleAnimStr = Managers.Data.MonsterDic[id].IdleAnimStr;
+            Managers.Game.MonsterData.AttackAnimStr = Managers.Data.MonsterDic[id].AttackAnimStr;
+            Managers.Game.MonsterData.DefenceAnimStr = Managers.Data.MonsterDic[id].DefenceAnimStr;
+            Managers.Game.MonsterData.HitAnimStr = Managers.Data.MonsterDic[id].HitAnimStr;
             Managers.Game.MonsterData.IsDefence = false;
             Managers.Game.MonsterData.IsActiveIndex = _monsterIndex_forActive;
             Debug.Log($"monster index for active : {_monsterIndex_forActive}");
@@ -49,7 +54,12 @@ public class MonsterController : MonoBehaviour
             Managers.Game.MonsterData.Defence = Managers.Data.MonsterDic[id].Defence;
             Managers.Game.MonsterData.AttackSpeed = Managers.Data.MonsterDic[id].AttackSpeed;
             Managers.Game.MonsterData.DefenceSpeed = Managers.Data.MonsterDic[id].DefenceSpeed;
-            Managers.Game.MonsterData.RewardExp = Managers.Data.MonsterDic[id].Exp;
+            Managers.Game.MonsterData.RewardExp = Managers.Data.MonsterDic[id].RewardExp;
+            Managers.Game.MonsterData.RewardItem = Managers.Data.MonsterDic[id].RewardItem;
+            Managers.Game.MonsterData.IdleAnimStr = Managers.Data.MonsterDic[id].IdleAnimStr;
+            Managers.Game.MonsterData.AttackAnimStr = Managers.Data.MonsterDic[id].AttackAnimStr;
+            Managers.Game.MonsterData.DefenceAnimStr = Managers.Data.MonsterDic[id].DefenceAnimStr;
+            Managers.Game.MonsterData.HitAnimStr = Managers.Data.MonsterDic[id].HitAnimStr;
             Managers.Game.MonsterData.IsDefence = false;
             Managers.Game.MonsterData.IsActiveIndex = _monsterIndex_forActive;
             //Managers.Game.MonsterData.Image = Managers.Data.MonsterDic[id].Image;

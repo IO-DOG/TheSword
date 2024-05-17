@@ -53,8 +53,13 @@ namespace Data
         public float AttackSpeed { get; set; }
         public float DefenceSpeed { get; set; }
         public float Critical { get; set; }
-        public float Exp { get; set; }
-        //public string Image { get; set; }
+        public float CriticalAttack { get; set; }
+        public float RewardExp { get; set; }
+        public int RewardItem { get; set; }
+        public string IdleAnimStr { get; set; }
+        public string AttackAnimStr { get; set; }
+        public string DefenceAnimStr { get; set; }
+        public string HitAnimStr { get; set; }
     }
 
     [Serializable]
