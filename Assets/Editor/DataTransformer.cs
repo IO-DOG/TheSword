@@ -121,6 +121,7 @@ public class DataTransformer : EditorWindow
             cd.AttackSpeed = ConvertValue<float>(row[i++]);
             cd.DefenceSpeed = ConvertValue<float>(row[i++]);
             cd.Critical = ConvertValue<float>(row[i++]);
+            cd.CriticalAttack = ConvertValue<float>(row[i++]);
             cd.RewardExp = ConvertValue<float>(row[i++]);
             cd.RewardItem = ConvertValue<int>(row[i++]);
             cd.IdleAnimStr = ConvertValue<string>(row[i++]);

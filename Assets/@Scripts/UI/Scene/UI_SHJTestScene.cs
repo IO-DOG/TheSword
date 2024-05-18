@@ -48,7 +48,7 @@ public class UI_SHJTestScene : UI_Scene
         GameObject go = GameObject.Find("Monsters");
         MonsterController[] monsters = go.GetComponentsInChildren<MonsterController>();
 
-        foreach(MonsterController monster in monsters)
+        foreach (MonsterController monster in monsters)
         {
             if (Managers.Data.MonsterActiveDic[monster._monsterIndex_forActive] == false)
             {
@@ -57,8 +57,8 @@ public class UI_SHJTestScene : UI_Scene
             }
 
             int id = monster.id;
-            //Managers.Resource.Load<Animation>($"Monster{id}IdleAnim");
-            monster.GetComponent<Animator>().Play($"Monster{id}IdleAnim");
+            monster.GetComponent<Animator>().Play($"{Managers.Data.MonsterDic[id].IdleAnimStr}");
+            Debug.Log($"{Managers.Data.MonsterDic[id].IdleAnimStr}");
         }
     }
 }

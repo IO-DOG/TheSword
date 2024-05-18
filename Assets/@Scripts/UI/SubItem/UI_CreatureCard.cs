@@ -47,6 +47,7 @@ public class UI_CreatureCard : UI_Base
         GetText((int)Texts.AttackStatusText).text = Managers.Game.MonsterData.AttackSpeed.ToString();
         GetText((int)Texts.DefenceStatusText).text = Managers.Game.MonsterData.DefenceSpeed.ToString();
         GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play($"{Managers.Game.MonsterData.IdleAnimStr}");
+        Debug.Log($"{Managers.Game.MonsterData.IdleAnimStr}");
 
         Managers.Game.OnBattleDataRefreshAction -= Refresh;
         Managers.Game.OnBattleDataRefreshAction += Refresh;

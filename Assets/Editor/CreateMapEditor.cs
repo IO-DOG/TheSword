@@ -19,7 +19,16 @@ public class CreateMapEditor : MonoBehaviour
         string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/MapData.csv").Split("\n");
 
         GameObject parent = GameObject.Find("Parent");
+        if (parent == null)
+            parent = new GameObject { name = "Parent" };
+        else
+            Debug.Log("Parent 오브젝트 삭제 후 진행 바람.");
         GameObject monsters = GameObject.Find("Monsters");
+        if (monsters == null)
+            monsters = new GameObject { name = "Monsters" };
+        else
+            Debug.Log("Monsters 오브젝트 삭제 후 진행 바람.");
+
         GameObject bossMonsters = GameObject.Find("BossMonsters");
         GameObject items = GameObject.Find("Items");
         float coX = 0, coY = 0, coZ = 0;
