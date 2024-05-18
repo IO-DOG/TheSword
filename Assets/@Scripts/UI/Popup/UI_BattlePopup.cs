@@ -41,13 +41,13 @@ public class UI_BattlePopup : UI_Popup
 
     public void BattleEnd()
     {
-
         Destroy(playerCard.gameObject);
         Destroy(monsterCard.gameObject);
 
         Managers.Game.OnBattleDataRefreshAction = null;
         Managers.Game.OnBattleCreatureDefeceAction = null;
         Managers.Game.OnBattleAction = null;
+        Managers.Game.SaveGame();
         ClosePopupUI();
     }
 }

@@ -19,11 +19,24 @@ public class CreateMapEditor : MonoBehaviour
         string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/MapData.csv").Split("\n");
 
         GameObject parent = GameObject.Find("Parent");
+        if (parent == null)
+            parent = new GameObject { name = "Parent" };
+        else
+            Debug.Log("Parent 오브젝트 삭제 후 진행 바람.");
         GameObject monsters = GameObject.Find("Monsters");
+        if (monsters == null)
+            monsters = new GameObject { name = "Monsters" };
+        else
+            Debug.Log("Monsters 오브젝트 삭제 후 진행 바람.");
+
+        GameObject bossMonsters = GameObject.Find("BossMonsters");
         GameObject items = GameObject.Find("Items");
         float coX = 0, coY = 0, coZ = 0;
         float toAdd = 1f;
         float addToFloorY = 0.465f;
+        int monsterIndex = 0;
+        int bossMonsterIndex = 0;
+        int itemIndex = 0;
 
         for (int y = 0; y < lines.Length; y++)
         {
@@ -50,7 +63,12 @@ public class CreateMapEditor : MonoBehaviour
                     floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
 
                     // TODO 아이템 생성
-
+                    //GameObject item = Resources.Load<GameObject>($"Item");
+                    //UnityEngine.Object.Instantiate(item, new Vector3(coX, coY + 1f, coZ), Quaternion.identity, items.transform);
+                    //item.transform.localScale = new Vector3(1f, 1.4f, 1.4f);
+                    //item.GetComponent<ItemController>().id = block[2] - '0';
+                    //item.name = $"item{itemIndex}";
+                    //item.GetComponent<ItemController>()._index_forActive = itemIndex++;
                 }
                 else if (block[0] == 'M') // 몬스터일 경우
                 {
@@ -63,6 +81,8 @@ public class CreateMapEditor : MonoBehaviour
                     UnityEngine.Object.Instantiate(monster, new Vector3(coX, coY + 1f, coZ), Quaternion.identity, monsters.transform);
                     monster.transform.localScale = new Vector3(1f, 1.4f, 1.4f);
                     monster.GetComponent<MonsterController>().id = block[2] - '0';
+                    monster.name = $"monster{monsterIndex}";
+                    monster.GetComponent<MonsterController>()._monsterIndex_forActive = monsterIndex++;
                 }
                 else if (block[0] == 'B') // 보스 몬스터일 경우
                 {
@@ -71,6 +91,12 @@ public class CreateMapEditor : MonoBehaviour
                     floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
 
                     // TODO 보스 몬스터 생성
+                    //GameObject bossMonster = Resources.Load<GameObject>($"BossMonster");
+                    //UnityEngine.Object.Instantiate(bossMonster, new Vector3(coX, coY + 1f, coZ), Quaternion.identity, bossMonsters.transform);
+                    //bossMonster.transform.localScale = new Vector3(1f, 1.4f, 1.4f);
+                    //bossMonster.GetComponent<BossMonsterController>().id = block[2] - '0';
+                    //bossMonster.name = $"monster{bossMonsterIndex}";
+                    //bossMonster.GetComponent<BossMonsterController>()._index_forActive = bossMonsterIndex++;
                 }
                 else
                 {
@@ -78,7 +104,7 @@ public class CreateMapEditor : MonoBehaviour
                     UnityEngine.Object.Instantiate(floor, new Vector3(coX, coY + addToFloorY, coZ), Quaternion.identity, parent.transform);
                     floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
                     // TODO 타일 생성
-                    if (block != "1")
+                    if (block != "1") // 바닥 타일이 아닐경우.
                     {
                         GameObject tile = Resources.Load<GameObject>($"Tilemap_{block}");
                         UnityEngine.Object.Instantiate(tile, new Vector3(coX, coY, coZ), Quaternion.identity, parent.transform);

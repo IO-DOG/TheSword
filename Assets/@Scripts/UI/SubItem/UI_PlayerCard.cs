@@ -97,6 +97,8 @@ public class UI_PlayerCard : UI_Base
 
             if (Managers.Game.MonsterData.CurHP <= 0)
             {
+                Managers.Data.MonsterActiveDic[Managers.Game.MonsterData.IsActiveIndex] = false;
+
                 Destroy(Managers.Game.Monster.gameObject);
                 Managers.Game.OnBattleAction.Invoke();
                 Managers.Game.OnBattle = false;
