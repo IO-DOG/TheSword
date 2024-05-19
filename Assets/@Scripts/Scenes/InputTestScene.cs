@@ -11,8 +11,6 @@ public class InputTestScene : BaseScene
 
         SceneType = Define.Scene.InputTestScene;
         //TitleUI
-
-        Managers.UI.ShowSceneUI<UI_InputTestScene>();
     }
 
     public override void Clear()

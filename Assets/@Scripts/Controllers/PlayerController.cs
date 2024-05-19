@@ -15,7 +15,7 @@ public class PlayerController : MonoBehaviour
     float _duration;
     bool _isMoving = false;
 
-    Vector3 _interpolateGridPos = new Vector3(0f, 0f, Mathf.Sqrt(2));
+    Vector3 _interpolateGridPos = new Vector3(0f, 0f, 1f);
     Vector3 _interpolateRayPos = new Vector3(0f, -0.5f, 0.4f);
     Vector3 _cellPos;
     Vector3 _nextCellPos;
@@ -90,7 +90,6 @@ public class PlayerController : MonoBehaviour
             _isMoving = false;
             return;
         }
-
         // Move
         _cellPos += _nextCellPos;
         transform.DOMove(_cellPos, _duration).OnComplete(()=> _isMoving = false);
@@ -103,7 +102,7 @@ public class PlayerController : MonoBehaviour
         int layerMask = (1 << (int)Define.Layer.Wall) + (1 << (int)Define.Layer.Key) + (1 << (int)Define.Layer.Door);
 
         RaycastHit hit;
-        Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, 0.8f, layerMask);
+        Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, 1f, layerMask);
 
         if(hit.collider != null)
         {

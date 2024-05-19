@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UI_InputTestScene : UI_Scene
+public class UI_GameScene : UI_Scene
 {
     enum GameObjects
     {

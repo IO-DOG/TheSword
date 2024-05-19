@@ -33,7 +33,7 @@ public class CreateMapEditor : MonoBehaviour
         GameObject items = GameObject.Find("Items");
         float coX = 0, coY = 0, coZ = 0;
         float toAdd = 0;
-        float addToFloorY = 0.465f;
+        float addToFloorY = 1.5f;
         int monsterIndex = 0;
         int bossMonsterIndex = 0;
         int itemIndex = 0;
@@ -81,8 +81,8 @@ public class CreateMapEditor : MonoBehaviour
 
                     // TODO 몬스터 생성
                     GameObject monster = Resources.Load<GameObject>($"Monster");
-                    UnityEngine.Object.Instantiate(monster, new Vector3(coX, coY + 6f, coZ), Quaternion.identity, monsters.transform);
-                    monster.transform.localScale = new Vector3(3f, 6f, 6f);
+                    UnityEngine.Object.Instantiate(monster, new Vector3(coX, coY + 4.5f, coZ - 1f), Quaternion.identity, monsters.transform);
+                    monster.transform.localScale = new Vector3(2f, 4f, 4f);
                     monster.GetComponent<MonsterController>().id = block[2] - '0';
                     monster.name = $"monster{monsterIndex}";
                     monster.GetComponent<MonsterController>()._monsterIndex_forActive = monsterIndex++;
