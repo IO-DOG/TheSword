@@ -18,7 +18,7 @@ public class UI_InputTestScene : UI_Scene
         BindImage(typeof(Images));
         #endregion
 
-        GetImage((int)Images.Slot)
+        //GetImage((int)Images.Slot)
 
         return true;
     }
