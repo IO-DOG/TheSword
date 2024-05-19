@@ -61,7 +61,7 @@ public class Define
     public enum KeyColor
     {
         Red = 0,
-        Blue = 1,
+        Yellow = 1,
         Green = 2,
     }
 
