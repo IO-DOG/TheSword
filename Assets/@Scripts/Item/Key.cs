@@ -14,7 +14,7 @@ public class Key : Item
     public void PickUp()
     {
         Debug.Log(gameObject.name + "is Picked up!");
-        Managers.Game.Inventory.AddItem(this);
+        //Managers.Game.Inventory.AddItem(this);
         gameObject.SetActive(false);
     }
 }

@@ -118,14 +118,14 @@ public class PlayerController : MonoBehaviour
             //Checking Door
             if (hit.collider.gameObject.layer == (int)Define.Layer.Door)
             {
-                if(Managers.Game.Inventory.HasKey(hit.collider.gameObject.name))
-                {
-                    Managers.Game.Inventory.UseKey(hit.collider.gameObject);
-                }
-                else
-                {
-                    somethingExist = true;
-                }
+                //if(Managers.Game.Inventory.HasKey(hit.collider.gameObject.name))
+                //{
+                //    Managers.Game.Inventory.UseKey(hit.collider.gameObject);
+                //}
+                //else
+                //{
+                //    somethingExist = true;
+                //}
             }
         }
 
