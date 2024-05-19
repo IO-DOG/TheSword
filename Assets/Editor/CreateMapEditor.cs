@@ -32,7 +32,7 @@ public class CreateMapEditor : MonoBehaviour
         GameObject bossMonsters = GameObject.Find("BossMonsters");
         GameObject items = GameObject.Find("Items");
         float coX = 0, coY = 0, coZ = 0;
-        float toAdd = 1f;
+        float toAdd = 0;
         float addToFloorY = 0.465f;
         int monsterIndex = 0;
         int bossMonsterIndex = 0;
@@ -54,13 +54,15 @@ public class CreateMapEditor : MonoBehaviour
                 if (block == "0")
                 {
                     GameObject voidObject = Resources.Load<GameObject>($"Tilemap_0");
+                    toAdd = voidObject.GetComponentInChildren<BoxCollider>().size.x;
                     UnityEngine.Object.Instantiate(voidObject, new Vector3(coX, coY + addToFloorY, coZ), Quaternion.identity, parent.transform);
                 }
                 else if (block[0] == 'I') // 아이템일 경우
                 {
                     GameObject floor = Resources.Load<GameObject>($"Tilemap_1");
+                    toAdd = floor.GetComponentInChildren<BoxCollider>().size.x;
                     UnityEngine.Object.Instantiate(floor, new Vector3(coX, coY + addToFloorY, coZ), Quaternion.identity, parent.transform);
-                    floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
+                    //floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
 
                     // TODO 아이템 생성
                     //GameObject item = Resources.Load<GameObject>($"Item");
@@ -73,8 +75,9 @@ public class CreateMapEditor : MonoBehaviour
                 else if (block[0] == 'M') // 몬스터일 경우
                 {
                     GameObject floor = Resources.Load<GameObject>($"Tilemap_1");
+                    toAdd = floor.GetComponentInChildren<BoxCollider>().size.x;
                     UnityEngine.Object.Instantiate(floor, new Vector3(coX, coY + addToFloorY, coZ), Quaternion.identity, parent.transform);
-                    floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
+                    //floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
 
                     // TODO 몬스터 생성
                     GameObject monster = Resources.Load<GameObject>($"Monster");
@@ -87,8 +90,9 @@ public class CreateMapEditor : MonoBehaviour
                 else if (block[0] == 'B') // 보스 몬스터일 경우
                 {
                     GameObject floor = Resources.Load<GameObject>($"Tilemap_1");
+                    toAdd = floor.GetComponentInChildren<BoxCollider>().size.x;
                     UnityEngine.Object.Instantiate(floor, new Vector3(coX, coY + addToFloorY, coZ), Quaternion.identity, parent.transform);
-                    floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
+                    //floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
 
                     // TODO 보스 몬스터 생성
                     //GameObject bossMonster = Resources.Load<GameObject>($"BossMonster");
@@ -101,14 +105,15 @@ public class CreateMapEditor : MonoBehaviour
                 else
                 {
                     GameObject floor = Resources.Load<GameObject>($"Tilemap_1");
+                    toAdd = floor.GetComponentInChildren<BoxCollider>().size.x;
                     UnityEngine.Object.Instantiate(floor, new Vector3(coX, coY + addToFloorY, coZ), Quaternion.identity, parent.transform);
-                    floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
+                    //floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
                     // TODO 타일 생성
                     if (block != "1") // 바닥 타일이 아닐경우.
                     {
                         GameObject tile = Resources.Load<GameObject>($"Tilemap_{block}");
                         UnityEngine.Object.Instantiate(tile, new Vector3(coX, coY, coZ), Quaternion.identity, parent.transform);
-                        tile.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
+                        //tile.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
                     }
                 }
                 coX += toAdd;

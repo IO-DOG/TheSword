@@ -15,7 +15,7 @@ public class SceneManagerEx
                 Managers.Clear();
                 SceneManager.LoadScene(GetSceneName(type));
                 break;
-            case Define.Scene.SHJTestScene:
+            case Define.Scene.GameScene:
                 Managers.Clear();
                 SceneManager.LoadScene(GetSceneName(type));
                 break;

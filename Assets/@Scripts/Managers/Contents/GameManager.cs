@@ -22,6 +22,12 @@ public class GameManager
     public Action OnBattleCreatureDefeceAction;
     public Action OnBattlePlayerDefeceAction;
 
+    #region Camera Adjusting
+
+    public Camera MainCamera = Camera.main;
+
+    #endregion
+
     #region CurPlayerData
     public class ContinueData
     {

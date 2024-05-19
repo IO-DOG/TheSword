@@ -10,7 +10,7 @@ public class Define
     {
         Unknown,
         TitleScene,
-        SHJTestScene,
+        GameScene,
         InputTestScene,
     }
 

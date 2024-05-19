@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SHJTestScene : BaseScene
+public class GameScene : BaseScene
 {
     protected override void Init()
     {
         base.Init();
 
-        SceneType = Define.Scene.SHJTestScene;
+        SceneType = Define.Scene.GameScene;
         //TitleUI
     }
 

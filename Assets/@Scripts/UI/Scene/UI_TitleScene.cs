@@ -38,7 +38,7 @@ public class UI_TitleScene : UI_Scene
         GetButton((int)Buttons.TestButton).gameObject.BindEvent(() =>
         {
             if (isPreload)
-                Managers.Scene.LoadScene(Define.Scene.SHJTestScene, transform);
+                Managers.Scene.LoadScene(Define.Scene.GameScene, transform);
         });
         GetButton((int)Buttons.TestButton).gameObject.SetActive(false);
         GetButton((int)Buttons.GameSpeedButton).gameObject.BindEvent(() => {
