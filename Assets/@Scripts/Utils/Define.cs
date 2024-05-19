@@ -57,5 +57,13 @@ public class Define
         Potion,
         Equipment,
     }
+
+    public enum KeyColor
+    {
+        Red = 0,
+        Blue = 1,
+        Green = 2,
+    }
+
     #endregion
 }

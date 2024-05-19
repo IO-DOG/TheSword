@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.U2D.Animation;
 using UnityEngine;
 
 [SerializeField]
@@ -12,6 +13,9 @@ public class Item : MonoBehaviour
 
     [Tooltip("아이템 인덱스")]
     public int Index;
+
+    [Tooltip("아이템 아이콘")]
+    public Sprite Icon;
 
     [Tooltip("아이템 이름")]
     public string Name;
