@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class UI_InputTestScene : UI_Scene
 {
-    enum Images
+    enum GameObjects
     {
-        Slot,
+        KeyInventory,
     }
 
     public override bool Init()
@@ -15,10 +15,10 @@ public class UI_InputTestScene : UI_Scene
             return false;
 
         #region Bind
-        BindImage(typeof(Images));
+        BindObject(typeof(GameObjects));
         #endregion
 
-        //GetImage((int)Images.Slot)
+        Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
 
         return true;
     }
