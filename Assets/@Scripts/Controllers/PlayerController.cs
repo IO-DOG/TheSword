@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
 {
     public Grid _grid;
     public GameObject _startPoint;
+    public GameObject _keyInventory;
     public float _speed = 15.0f;
 
     float _duration;
@@ -28,6 +29,7 @@ public class PlayerController : MonoBehaviour
 
         transform.position = _startPoint.transform.position;
         _cellPos = _startPoint.transform.position;
+        _keyInventory = GameObject.Find("KeyInventory");
 
         Managers.Game.Player = this; // 던전 돌 때 죽으면 연동하도록 하기 위함.
     }
@@ -118,11 +120,8 @@ public class PlayerController : MonoBehaviour
             //Checking Door
             if (hit.collider.gameObject.layer == (int)Define.Layer.Door)
             {
-                if(Managers.Game.Inventory.HasKey(hit.collider.gameObject.name))
-                {
-                    Managers.Game.Inventory.UseKey(hit.collider.gameObject);
-                }
-                else
+
+                if(!Managers.Game.Inventory.TryUseKey(hit.collider.gameObject))
                 {
                     somethingExist = true;
                 }
