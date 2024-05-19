@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using static Define;
+using Unity.Burst.CompilerServices;
 
 public class PlayerController : MonoBehaviour
 {
@@ -13,9 +14,10 @@ public class PlayerController : MonoBehaviour
     float _duration;
     bool _isMoving = false;
 
-    Vector3 _interpolateGridPos = new Vector3(0.5f, 1.5f, Mathf.Sqrt(2)/2);
-    Vector3 _interpolateRayPos = new Vector3(0f, -0.5f, 0f);
+    Vector3 _interpolateGridPos = new Vector3(0f, 0f, Mathf.Sqrt(2));
+    Vector3 _interpolateRayPos = new Vector3(0f, -0.5f, 0.4f);
     Vector3 _cellPos;
+    Vector3 _nextCellPos;
 
     void Start()
     {
@@ -24,8 +26,8 @@ public class PlayerController : MonoBehaviour
 
         _duration = 1 / _speed;
 
-        transform.position = _startPoint.transform.position + _interpolateGridPos;
-        _cellPos = _startPoint.transform.position + _interpolateGridPos;
+        transform.position = _startPoint.transform.position;
+        _cellPos = _startPoint.transform.position;
 
         Managers.Game.Player = this; // 던전 돌 때 죽으면 연동하도록 하기 위함.
     }
@@ -62,33 +64,71 @@ public class PlayerController : MonoBehaviour
 
         _isMoving = true;
 
-        Vector3 nextCellPosition = Vector3.zero;
+        _nextCellPos = Vector3.zero;
         switch (moveDir) 
         {
             case MoveDir.Up:
-                nextCellPosition = Vector3Int.forward;
+                _nextCellPos = _interpolateGridPos;
                 break;
             case MoveDir.Down:
-                nextCellPosition = Vector3Int.back;
+                _nextCellPos = (-1) * _interpolateGridPos;
                 break;
             case MoveDir.Left:
-                nextCellPosition = Vector3Int.left;
+                _nextCellPos = Vector3Int.left;
                 break;
             case MoveDir.Right:
-                nextCellPosition = Vector3Int.right;
+                _nextCellPos = Vector3Int.right;
                 break;
         }
 
-        // Checking Wall
-        if (Physics.Raycast(transform.position + _interpolateRayPos, nextCellPosition, 1f, 1 << (int)Layer.Wall))
+        // Checking Forward
+        // If Obstacles, Stop
+        if (CheckSomething())
         {
             _isMoving = false;
             return;
         }
 
         // Move
-        _cellPos += nextCellPosition;
+        _cellPos += _nextCellPos;
         transform.DOMove(_cellPos, _duration).OnComplete(()=> _isMoving = false);
     }
     #endregion
+
+    bool CheckSomething()
+    {
+        bool somethingExist = false;
+        int layerMask = (1 << (int)Define.Layer.Wall) + (1 << (int)Define.Layer.Key) + (1 << (int)Define.Layer.Door);
+
+        RaycastHit hit;
+        Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, 0.8f, layerMask);
+
+        if(hit.collider != null)
+        {
+            // Checking Wall
+            if (hit.collider.gameObject.layer == (int)Define.Layer.Wall)
+            {
+                somethingExist = true;
+            }
+            // Checking Key
+            if (hit.collider.gameObject.layer == (int)Define.Layer.Key)
+            {
+                hit.collider.gameObject.GetComponent<Key>().PickUp();
+            }
+            //Checking Door
+            if (hit.collider.gameObject.layer == (int)Define.Layer.Door)
+            {
+                if(Managers.Game.Inventory.HasKey(hit.collider.gameObject.name))
+                {
+                    Managers.Game.Inventory.UseKey(hit.collider.gameObject);
+                }
+                else
+                {
+                    somethingExist = true;
+                }
+            }
+        }
+
+        return somethingExist;
+    }
 }
