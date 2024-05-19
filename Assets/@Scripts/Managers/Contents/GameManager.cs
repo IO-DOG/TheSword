@@ -24,7 +24,7 @@ public class GameManager
 
     #region Camera Adjusting
 
-    public Camera MainCamera = Camera.main;
+    //public Camera MainCamera = Camera.main;
 
     #endregion
 

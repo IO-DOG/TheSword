@@ -81,8 +81,8 @@ public class CreateMapEditor : MonoBehaviour
 
                     // TODO 몬스터 생성
                     GameObject monster = Resources.Load<GameObject>($"Monster");
-                    UnityEngine.Object.Instantiate(monster, new Vector3(coX, coY + 1f, coZ), Quaternion.identity, monsters.transform);
-                    monster.transform.localScale = new Vector3(1f, 1.4f, 1.4f);
+                    UnityEngine.Object.Instantiate(monster, new Vector3(coX, coY + 6f, coZ), Quaternion.identity, monsters.transform);
+                    monster.transform.localScale = new Vector3(3f, 6f, 6f);
                     monster.GetComponent<MonsterController>().id = block[2] - '0';
                     monster.name = $"monster{monsterIndex}";
                     monster.GetComponent<MonsterController>()._monsterIndex_forActive = monsterIndex++;
