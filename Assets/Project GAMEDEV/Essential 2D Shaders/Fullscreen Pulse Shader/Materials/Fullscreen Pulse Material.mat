@@ -1,0 +1,162 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-1885713732625940680
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 6
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Fullscreen Pulse Material
+  m_Shader: {fileID: -6465566751694194690, guid: bd9d6c64dc0b8b242b38afb00ec6453c,
+    type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - ETC1_EXTERNAL_ALPHA
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SpecGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - Boolean_2b589b78be6c4ee389d19459dc6709aa: 0
+    - Vector1_00ead05bbb2c467287f5098790b36471: 1.777
+    - Vector1_1c1e4b1b502645f19a5cbbb47d401bc9: 18
+    - Vector1_62891ac032e2460fb3c9a983f4a0534d: 20
+    - Vector1_72ff02eeae394856b3b6c42ca57bebab: 0.1
+    - Vector1_8c9ef0532e054fc8a017d6e9d3b55e92: 5
+    - Vector1_a4bd5c7deb10412197e16f290ae1e341: 0.5
+    - Vector1_b1cb8c880a824395b93ee79e4a6d6f26: 0.35
+    - Vector1_c4e1b4f7753046519bbaefd8feb82341: 1.5
+    - Vector1_ec0ac86266db4c2fb67997c70d5251ce: 20
+    - _AlphaClip: 0
+    - _Blend: 0
+    - _BumpScale: 1
+    - _ClearCoatMask: 0
+    - _ClearCoatSmoothness: 0
+    - _Controller: 1
+    - _Cull: 2
+    - _Cutoff: 0.5
+    - _Debug: 0
+    - _DetailAlbedoMapScale: 1
+    - _DetailNormalMapScale: 1
+    - _DstBlend: 0
+    - _EnvironmentReflections: 1
+    - _FadeController: 0
+    - _GlossMapScale: 0
+    - _Glossiness: 0
+    - _GlossyReflections: 0
+    - _Metallic: 0
+    - _OcclusionStrength: 1
+    - _Parallax: 0.005
+    - _PulseEdgeThickness: 0.4
+    - _PulseLength: 3.5
+    - _PulseStrength: 0.2
+    - _QueueControl: 0
+    - _QueueOffset: 0
+    - _ReceiveShadows: 1
+    - _ScreenSizeRatio: 1.7775551
+    - _Smoothness: 0.5
+    - _SmoothnessTextureChannel: 0
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _Stretch: 1.4
+    - _Surface: 0
+    - _WorkflowMode: 1
+    - _ZWrite: 1
+    - controller: 1
+    - enable: 1
+    - fadeController: 0
+    - pulseLength: 2
+    - pulseSpeed: 0.3
+    m_Colors:
+    - Color_00bfb58f0c494eaa945f88b8d05ea343: {r: 0.5058824, g: 0.9294118, b: 1, a: 1}
+    - Color_087f42a525984f3c93254c69dc63d78b: {r: 0, g: 0.9016843, b: 1, a: 1}
+    - Color_f2da1053b3bb4b4c82d426d2c38afc9a: {r: 0.504717, g: 0.9299262, b: 1, a: 0}
+    - Vector2_80100eae3c384406b4c91518485ccdd6: {r: 0, g: 0, b: 0, a: 0}
+    - Vector2_b4da75b5e4eb4a8eb3e305aa8df6c20d: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _MainTex: {r: 0.504717, g: 0.9299262, b: 1, a: 1}
+    - _PulseCenter: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _PulseEdgeColor: {r: 0.41981125, g: 0.8807734, b: 1, a: 1}
+    - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+  m_BuildTextureStacks: []
