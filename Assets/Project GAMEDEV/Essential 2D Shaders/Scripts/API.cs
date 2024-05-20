@@ -10,7 +10,7 @@ namespace ProjectGamedev.Shaders
     {
         /// <summary>
         /// Method lerps a material property variable of type float from a minimal value to a maximal value for a passed duration in seconds.
-        /// Parameter "step" determines the smoothness of the effect – higher values result in a smoother transition.
+        /// Parameter "step" determines the smoothness of the effect ?higher values result in a smoother transition.
         /// </summary>
         public static IEnumerator LerpShaderVariable<Float>(Material material, string varName, float initVal, float endVal, float step, float seconds)
         {
