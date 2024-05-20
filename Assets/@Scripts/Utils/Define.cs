@@ -11,7 +11,6 @@ public class Define
         Unknown,
         TitleScene,
         GameScene,
-        InputTestScene,
     }
 
     public enum Sound

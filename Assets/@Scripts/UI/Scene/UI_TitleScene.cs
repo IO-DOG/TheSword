@@ -16,7 +16,6 @@ public class UI_TitleScene : UI_Scene
     {
         TestButton,
         GameSpeedButton,
-        InputManagerTestButton,
     }
 
     #endregion
@@ -49,12 +48,6 @@ public class UI_TitleScene : UI_Scene
             else
                 Managers.Game.GameSpeed = 1;
         });
-        GetButton((int)Buttons.InputManagerTestButton).gameObject.BindEvent(() =>
-        {
-            if (isPreload)
-                Managers.Scene.LoadScene(Define.Scene.InputTestScene, transform);
-        });
-        GetButton((int)Buttons.InputManagerTestButton).gameObject.SetActive(false);
 
         return true;
     }
@@ -73,7 +66,6 @@ public class UI_TitleScene : UI_Scene
             {
                 isPreload = true;
                 GetButton((int)Buttons.TestButton).gameObject.SetActive(true);
-                GetButton((int)Buttons.InputManagerTestButton).gameObject.SetActive(true);
                 Managers.Data.Init();
                 Managers.Game.Init();
                 // continueData로 플레이어 적용시키기. TODO
