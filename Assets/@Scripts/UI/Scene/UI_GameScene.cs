@@ -27,6 +27,7 @@ public class UI_GameScene : UI_Scene
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
         //GetButton((int)Buttons.ToTitleButton).gameObject.BindEvent(() => Managers.Scene.LoadScene(Define.Scene.TitleScene));
         CheckMonster();
+        CheckItem();
 
         return true;
     }
@@ -46,6 +47,23 @@ public class UI_GameScene : UI_Scene
 
             int id = monster.id;
             monster.GetComponent<Animator>().Play($"{Managers.Data.MonsterDic[id].IdleAnimStr}");
+        }
+    }
+    void CheckItem()
+    {
+        GameObject go = GameObject.Find("Items");
+        Item[] items = go.GetComponentsInChildren<Item>();
+
+        foreach (Item item in items)
+        {
+            if (Managers.Data.ItemActiveDic[item._itemIndex_forActive] == false)
+            {
+                item.gameObject.SetActive(false);
+                continue;
+            }
+
+            int id = item.id;
+            item.GetComponent<Animator>().Play($"ConsumableItem_{id}");
         }
     }
 }
