@@ -45,11 +45,9 @@ public class UI_CreatureCard : UI_Base
 
         GetText((int)Texts.CreatureName).text = Managers.Game.MonsterData.Name;
         GetText((int)Texts.HPBarText).text = Managers.Game.MonsterData.MaxHP.ToString();
-        GetText((int)Texts.AttackStatusText).text = Managers.Game.MonsterData.AttackSpeed.ToString();
-        GetText((int)Texts.DefenceStatusText).text = Managers.Game.MonsterData.DefenceSpeed.ToString();
-        GetImage((int)Images.CreatureImage).sprite = Managers.Resource.Load<Sprite>($"{Managers.Game.MonsterData.IdleAnimStr}_0");
-        GetImage((int)Images.CreatureImage).SetNativeSize();
-        //GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play($"{Managers.Game.MonsterData.IdleAnimStr}");
+        GetText((int)Texts.AttackStatusText).text = Managers.Game.MonsterData.Attack.ToString();
+        GetText((int)Texts.DefenceStatusText).text = Managers.Game.MonsterData.Defence.ToString();
+        GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play($"{Managers.Game.MonsterData.IdleAnimStr}");
 
         Managers.Game.OnBattleDataRefreshAction -= Refresh;
         Managers.Game.OnBattleDataRefreshAction += Refresh;
@@ -57,6 +55,8 @@ public class UI_CreatureCard : UI_Base
 
         StartCoroutine(CoDelayAttack());
         StartCoroutine(CoDelayDefence());
+
+        GetImage((int)Images.CreatureImage).SetNativeSize();
 
         return true;
     }
@@ -68,6 +68,7 @@ public class UI_CreatureCard : UI_Base
 
     IEnumerator CoRefresh()
     {
+        GetImage((int)Images.CreatureImage).SetNativeSize();
         GetText((int)Texts.HPBarText).text = Managers.Game.MonsterData.CurHP.ToString();
         GetImage((int)Images.HPHar).fillAmount = Managers.Game.MonsterData.CurHP / Managers.Game.MonsterData.MaxHP;
         yield return new WaitForSeconds(0.2f);
