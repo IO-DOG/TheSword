@@ -76,6 +76,32 @@ namespace Data
     }
     #endregion
 
+    #region Consumable Item Data
+    [Serializable]
+    public class ConsumableItemData
+    {
+        public int id { get; set; }
+        public string Name { get; set; }
+        public float Heal { get; set; }
+        public float AttackUp { get; set; }
+        public float DefenceUp { get; set; }
+        public float HPUp { get; set; }
+        public string Description { get; set; }
+    }
+
+    [Serializable]
+    public class ConsumableItemDataLoader : ILoader<int, ConsumableItemData>
+    {
+        public List<ConsumableItemData> consumableItems = new List<ConsumableItemData>();
+        public Dictionary<int, ConsumableItemData> MakeDict()
+        {
+            Dictionary<int, ConsumableItemData> dict = new Dictionary<int, ConsumableItemData>();
+            foreach (ConsumableItemData consumableItem in consumableItems)
+                dict.Add(consumableItem.id, consumableItem);
+            return dict;
+        }
+    }
+    #endregion
 
     #region MapData
 
