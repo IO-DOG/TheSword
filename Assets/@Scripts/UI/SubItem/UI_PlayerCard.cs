@@ -87,14 +87,17 @@ public class UI_PlayerCard : UI_Base
 
             if (_isCri == true)
             {
-                Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * Managers.Game.CurPlayerData.CriticalAttack / 100 - Managers.Game.MonsterData.Defence) * 0.2f;
+                Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence) * 0.2f;
                 _isCri = false;
             }
         }
         else
         {
             if (_isCri)
-                Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * Managers.Game.CurPlayerData.CriticalAttack / 100 - Managers.Game.MonsterData.Defence);
+            {
+                Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence);
+                _isCri = false;
+            }
             else
                 Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack - Managers.Game.MonsterData.Defence);
 

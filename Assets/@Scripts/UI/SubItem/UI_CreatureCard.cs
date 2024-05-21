@@ -99,14 +99,17 @@ public class UI_CreatureCard : UI_Base
 
             if (_isCri == true)
             {
-                Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack * Managers.Game.MonsterData.CriticalAttack / 100 - Managers.Game.CurPlayerData.Defence) * 0.2f;
+                Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack * (Managers.Game.MonsterData.CriticalAttack / 100) - Managers.Game.CurPlayerData.Defence) * 0.2f;
                 _isCri = false;
             }
         }
         else
         {
             if (_isCri)
-                Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack * Managers.Game.MonsterData.CriticalAttack / 100 - Managers.Game.CurPlayerData.Defence);
+            {
+                Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack * (Managers.Game.MonsterData.CriticalAttack / 100) - Managers.Game.CurPlayerData.Defence);
+                _isCri = false;
+            }
             else
                 Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack - Managers.Game.CurPlayerData.Defence);
 
