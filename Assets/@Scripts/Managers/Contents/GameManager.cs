@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Playables;
 
@@ -28,7 +29,30 @@ public class GameManager
     public class ContinueData
     {
         public int Level { get; set; } // Lv
-        public float CurExp { get; set; }
+        public float curExp;
+        public float CurExp
+        {
+            get
+            {
+                return curExp;
+            }
+            set
+            {
+                curExp = value;
+
+                float needExp = Managers.Data.PlayerDic[Level + 1].NeedExp;
+                Debug.Log($"CurExp : {CurExp}");
+                Debug.Log($"NeedExp : {Managers.Data.PlayerDic[Level + 1].NeedExp}");
+
+                if (curExp >= needExp)
+                {
+                    curExp = curExp - needExp;
+                    Level++;
+                    Debug.Log("Level UP!!");
+                    LevelUp();
+                }
+            }
+        }
         public float MaxHP { get; set; }
         public float CurHP { get; set; }
         public float Attack { get; set; }
@@ -86,6 +110,19 @@ public class GameManager
 
     #region InGame
     public int GameSpeed = 1;
+
+    public static void LevelUp()
+    {
+        Managers.Game.CurPlayerData.MaxHP += Managers.Data.PlayerDic[Managers.Game.CurPlayerData.Level].MaxHP;
+        Managers.Game.CurPlayerData.CurHP += Managers.Data.PlayerDic[Managers.Game.CurPlayerData.Level].MaxHP;
+        Managers.Game.CurPlayerData.Attack += Managers.Data.PlayerDic[Managers.Game.CurPlayerData.Level].Attack;
+        Managers.Game.CurPlayerData.Defence += Managers.Data.PlayerDic[Managers.Game.CurPlayerData.Level].Defence;
+        Managers.Game.CurPlayerData.AttackSpeed += Managers.Data.PlayerDic[Managers.Game.CurPlayerData.Level].AttackSpeed;
+        Managers.Game.CurPlayerData.DefenceSpeed += Managers.Data.PlayerDic[Managers.Game.CurPlayerData.Level].DefenceSpeed;
+        Managers.Game.CurPlayerData.Critical += Managers.Data.PlayerDic[Managers.Game.CurPlayerData.Level].Critical;
+        Managers.Game.CurPlayerData.CriticalAttack += Managers.Data.PlayerDic[Managers.Game.CurPlayerData.Level].CriticalAttack;
+        Managers.Game.CurPlayerData.MoveSpeed += Managers.Data.PlayerDic[Managers.Game.CurPlayerData.Level].MoveSpeed;
+    }
     #endregion
 
     #region Save&Load
@@ -113,16 +150,36 @@ public class GameManager
             if (File.Exists(path))
                 File.Delete(path);
 
+            int level = 1;
+            Managers.Game.CurPlayerData.Level = Managers.Data.PlayerDic[level].id;
+            Managers.Game.CurPlayerData.CurExp = 0;
+            Managers.Game.CurPlayerData.MaxHP = Managers.Data.PlayerDic[level].MaxHP;
+            Managers.Game.CurPlayerData.CurHP = Managers.Data.PlayerDic[level].MaxHP;
+            Managers.Game.CurPlayerData.Attack = Managers.Data.PlayerDic[level].Attack;
+            Managers.Game.CurPlayerData.Defence = Managers.Data.PlayerDic[level].Defence;
+            Managers.Game.CurPlayerData.AttackSpeed = Managers.Data.PlayerDic[level].AttackSpeed;
+            Managers.Game.CurPlayerData.DefenceSpeed = Managers.Data.PlayerDic[level].DefenceSpeed;
+            Managers.Game.CurPlayerData.Critical = Managers.Data.PlayerDic[level].Critical;
+            Managers.Game.CurPlayerData.CriticalAttack = Managers.Data.PlayerDic[level].CriticalAttack;
+            Managers.Game.CurPlayerData.MoveSpeed = Managers.Data.PlayerDic[level].MoveSpeed;
+            Managers.Game.CurPlayerData.IsDefence = false;
+
             return false;
         }
 
         if (File.Exists(_path) == false)
+        {
+            Debug.Log("플레이어 데이터 로딩 실패");
             return false;
+        }
 
         string fileStr = File.ReadAllText(_path);
         ContinueData data = JsonConvert.DeserializeObject<ContinueData>(fileStr);
         if (data != null)
+        {
             CurPlayerData = data;
+            Debug.Log("플레이어 데이터 로딩 완료");
+        }
 
         string monsterActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json");
         Dictionary<int, bool> monsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(monsterActiveDicFile);
@@ -146,21 +203,7 @@ public class GameManager
         if (LoadGame())
             return;
 
-        PlayerPrefs.SetInt("ISFIRST", 1);
-
-        int level = 0;
-        Managers.Game.CurPlayerData.Level = Managers.Data.PlayerDic[level].id;
-        Managers.Game.CurPlayerData.CurExp = 0;
-        Managers.Game.CurPlayerData.MaxHP = Managers.Data.PlayerDic[level].MaxHP;
-        Managers.Game.CurPlayerData.CurHP = Managers.Data.PlayerDic[level].MaxHP;
-        Managers.Game.CurPlayerData.Attack = Managers.Data.PlayerDic[level].Attack;
-        Managers.Game.CurPlayerData.Defence = Managers.Data.PlayerDic[level].Defence;
-        Managers.Game.CurPlayerData.AttackSpeed = Managers.Data.PlayerDic[level].AttackSpeed;
-        Managers.Game.CurPlayerData.DefenceSpeed = Managers.Data.PlayerDic[level].DefenceSpeed;
-        Managers.Game.CurPlayerData.Critical = Managers.Data.PlayerDic[level].Critical;
-        Managers.Game.CurPlayerData.CriticalAttack = Managers.Data.PlayerDic[level].CriticalAttack;
-        Managers.Game.CurPlayerData.MoveSpeed = Managers.Data.PlayerDic[level].MoveSpeed;
-        Managers.Game.CurPlayerData.IsDefence = false;
+        PlayerPrefs.SetInt("ISFIRST", 0);
 
         SaveGame();
     }

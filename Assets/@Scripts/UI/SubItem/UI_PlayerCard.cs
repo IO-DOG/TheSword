@@ -13,6 +13,8 @@ public class UI_PlayerCard : UI_Base
         HPHarGauge,
         AttackDelayGauge,
         DefenceDelayGauge,
+        AttackIcon,
+        DefenceIcon,
     }
 
     enum Texts
@@ -42,8 +44,8 @@ public class UI_PlayerCard : UI_Base
 
         GetText((int)Texts.CreatureName).text = "Player!";
         GetText((int)Texts.HPBarText).text = Managers.Game.CurPlayerData.CurHP.ToString();
-        GetText((int)Texts.AttackStatusText).text = Managers.Game.CurPlayerData.AttackSpeed.ToString();
-        GetText((int)Texts.DefenceStatusText).text = Managers.Game.CurPlayerData.DefenceSpeed.ToString();
+        GetText((int)Texts.AttackStatusText).text = Managers.Game.CurPlayerData.Attack.ToString();
+        GetText((int)Texts.DefenceStatusText).text = Managers.Game.CurPlayerData.Defence.ToString();
 
         Managers.Game.OnBattleDataRefreshAction -= Refresh;
         Managers.Game.OnBattleDataRefreshAction += Refresh;
@@ -70,6 +72,8 @@ public class UI_PlayerCard : UI_Base
 
     public void Attack()
     {
+        GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
+
         if (_attackCount == Managers.Game.CurPlayerData.Critical)
         {
             _isCri = true;
@@ -83,20 +87,26 @@ public class UI_PlayerCard : UI_Base
 
             if (_isCri == true)
             {
-                Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * Managers.Game.CurPlayerData.CriticalAttack / 100 - Managers.Game.MonsterData.Defence) * 0.2f;
+                Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence) * 0.2f;
                 _isCri = false;
             }
         }
         else
         {
             if (_isCri)
-                Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * Managers.Game.CurPlayerData.CriticalAttack / 100 - Managers.Game.MonsterData.Defence);
+            {
+                Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence);
+                _isCri = false;
+            }
             else
                 Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack - Managers.Game.MonsterData.Defence);
 
 
             if (Managers.Game.MonsterData.CurHP <= 0)
             {
+                // add exp
+                Managers.Game.CurPlayerData.CurExp += Managers.Game.MonsterData.RewardExp;
+
                 Managers.Data.MonsterActiveDic[Managers.Game.MonsterData.IsActiveIndex] = false;
 
                 Destroy(Managers.Game.Monster.gameObject);
@@ -105,12 +115,13 @@ public class UI_PlayerCard : UI_Base
                 return;
             }
         }
-        Managers.Game.OnBattleDataRefreshAction.Invoke();
         _attackCount++;
+        Managers.Game.OnBattleDataRefreshAction.Invoke();
     }
 
     public void Defence()
     {
+        GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIDefenceIcon");
         Managers.Game.CurPlayerData.IsDefence = true;
     }
 
@@ -135,6 +146,7 @@ public class UI_PlayerCard : UI_Base
         }
     }
 
+    public bool _defenseFlag = false;
     IEnumerator CoDelayDefence()
     {
         _maxDefenceCoolTime = _maxDefenceCoolTime / Managers.Game.CurPlayerData.AttackSpeed;
@@ -143,7 +155,11 @@ public class UI_PlayerCard : UI_Base
         {
             if (_defenceCoolTime >= _maxDefenceCoolTime)
             {
-                Defence();
+                if (_defenseFlag == false)
+                {
+                    _defenseFlag = true;
+                    Defence();
+                }
                 _defenceCoolTime = _maxDefenceCoolTime;
                 //_defenceCoolTime = 0f;
             }
@@ -158,5 +174,8 @@ public class UI_PlayerCard : UI_Base
     public void ClearDefence()
     {
         _defenceCoolTime = 0f;
+        _defenseFlag = false;
+        if (GetImage((int)Images.DefenceIcon) != null)
+            GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
     }
 }

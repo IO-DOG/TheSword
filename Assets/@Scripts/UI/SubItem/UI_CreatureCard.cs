@@ -15,6 +15,8 @@ public class UI_CreatureCard : UI_Base
         HPHarGauge,
         AttackDelayGauge,
         DefenceDelayGauge,
+        AttackIcon,
+        DefenceIcon,
     }
 
     enum Texts
@@ -77,6 +79,8 @@ public class UI_CreatureCard : UI_Base
 
     public void Attack()
     {
+        GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
+
         if (_totalAttackCount > 0 && _totalAttackCount % 20 == 0)
         {
             Berserk();
@@ -95,14 +99,17 @@ public class UI_CreatureCard : UI_Base
 
             if (_isCri == true)
             {
-                Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack * Managers.Game.MonsterData.CriticalAttack / 100 - Managers.Game.CurPlayerData.Defence) * 0.2f;
+                Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack * (Managers.Game.MonsterData.CriticalAttack / 100) - Managers.Game.CurPlayerData.Defence) * 0.2f;
                 _isCri = false;
             }
         }
         else
         {
             if (_isCri)
-                Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack * Managers.Game.MonsterData.CriticalAttack / 100 - Managers.Game.CurPlayerData.Defence);
+            {
+                Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack * (Managers.Game.MonsterData.CriticalAttack / 100) - Managers.Game.CurPlayerData.Defence);
+                _isCri = false;
+            }
             else
                 Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack - Managers.Game.CurPlayerData.Defence);
 
@@ -121,6 +128,7 @@ public class UI_CreatureCard : UI_Base
 
     public void Defence()
     {
+        GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIDefenceIcon");
         Managers.Game.MonsterData.IsDefence = true;
     }
 
@@ -145,6 +153,7 @@ public class UI_CreatureCard : UI_Base
         }
     }
 
+    public bool _defenseFlag = false;
     IEnumerator CoDelayDefence()
     {
 
@@ -154,7 +163,11 @@ public class UI_CreatureCard : UI_Base
         {
             if (_defenceCoolTime >= _maxDefenceCoolTime)
             {
-                Defence();
+                if (_defenseFlag == false)
+                {
+                    _defenseFlag = true;
+                    Defence();
+                }
                 _defenceCoolTime = _maxDefenceCoolTime;
                 //_defenceCoolTime = 0f;
             }
@@ -177,5 +190,8 @@ public class UI_CreatureCard : UI_Base
     public void ClearDefence()
     {
         _defenceCoolTime = 0f;
+        _defenseFlag = false;
+        if (GetImage((int)Images.DefenceIcon) != null)
+            GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
     }
 }

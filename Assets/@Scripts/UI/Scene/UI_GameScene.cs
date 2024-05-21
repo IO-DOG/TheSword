@@ -49,6 +49,7 @@ public class UI_GameScene : UI_Scene
             monster.GetComponent<Animator>().Play($"{Managers.Data.MonsterDic[id].IdleAnimStr}");
         }
     }
+    
     void CheckItem()
     {
         GameObject go = GameObject.Find("Items");
@@ -64,6 +65,14 @@ public class UI_GameScene : UI_Scene
 
             int id = item.id;
             item.GetComponent<Animator>().Play($"ConsumableItem_{id}");
+        }
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            Managers.Game.CurPlayerData.CurExp += 10;
         }
     }
 }
