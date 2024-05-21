@@ -44,8 +44,8 @@ public class UI_PlayerCard : UI_Base
 
         GetText((int)Texts.CreatureName).text = "Player!";
         GetText((int)Texts.HPBarText).text = Managers.Game.CurPlayerData.CurHP.ToString();
-        GetText((int)Texts.AttackStatusText).text = Managers.Game.CurPlayerData.AttackSpeed.ToString();
-        GetText((int)Texts.DefenceStatusText).text = Managers.Game.CurPlayerData.DefenceSpeed.ToString();
+        GetText((int)Texts.AttackStatusText).text = Managers.Game.CurPlayerData.Attack.ToString();
+        GetText((int)Texts.DefenceStatusText).text = Managers.Game.CurPlayerData.Defence.ToString();
 
         Managers.Game.OnBattleDataRefreshAction -= Refresh;
         Managers.Game.OnBattleDataRefreshAction += Refresh;
@@ -104,6 +104,9 @@ public class UI_PlayerCard : UI_Base
 
             if (Managers.Game.MonsterData.CurHP <= 0)
             {
+                // add exp
+                Managers.Game.CurPlayerData.CurExp += Managers.Game.MonsterData.RewardExp;
+
                 Managers.Data.MonsterActiveDic[Managers.Game.MonsterData.IsActiveIndex] = false;
 
                 Destroy(Managers.Game.Monster.gameObject);

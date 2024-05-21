@@ -48,4 +48,12 @@ public class UI_GameScene : UI_Scene
             monster.GetComponent<Animator>().Play($"{Managers.Data.MonsterDic[id].IdleAnimStr}");
         }
     }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            Managers.Game.CurPlayerData.CurExp += 10;
+        }
+    }
 }
