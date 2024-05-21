@@ -23,6 +23,7 @@ public class GameManager
     public Action OnBattleCreatureDefeceAction;
     public Action OnBattlePlayerDefeceAction;
 
+    public Sprite[] KeyIcon = new Sprite[ConsumableItem.NUM_OF_KEYS];
 
     #region CurPlayerData
     public class ContinueData
@@ -81,6 +82,16 @@ public class GameManager
         public float HPUp { get; set; }
         public string Description { get; set; }
         public int IsActiveIndex { get; set; }
+    }
+    #endregion
+
+    #region Load Key Icon
+    void LoadKeyIcon()
+    {
+        for(int i = 0; i < KeyIcon.Length; i++)
+        {
+            KeyIcon[i] = Resources.LoadAll<Sprite>($"Icon/DoorKey{i}")[1];
+        }
     }
     #endregion
 
@@ -163,6 +174,7 @@ public class GameManager
         Managers.Game.CurPlayerData.IsDefence = false;
 
         SaveGame();
+        LoadKeyIcon();
     }
 
 }

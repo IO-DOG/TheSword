@@ -35,7 +35,7 @@ public class Define
     public enum Layer
     {
         Wall = 6,
-        Key = 7,
+        Item = 7,
         Player = 8,
         Door = 9,
     }
@@ -48,21 +48,5 @@ public class Define
         Left,
         Right,
     }
-
-    public enum ItemType
-    {
-        Unknown,
-        Key,
-        Potion,
-        Equipment,
-    }
-
-    public enum KeyColor
-    {
-        Red = 0,
-        Yellow = 1,
-        Green = 2,
-    }
-
     #endregion
 }

@@ -99,7 +99,7 @@ public class PlayerController : MonoBehaviour
     bool CheckSomething()
     {
         bool somethingExist = false;
-        int layerMask = (1 << (int)Define.Layer.Wall) + (1 << (int)Define.Layer.Key) + (1 << (int)Define.Layer.Door);
+        int layerMask = (1 << (int)Define.Layer.Wall) + (1 << (int)Define.Layer.Item) + (1 << (int)Define.Layer.Door);
 
         RaycastHit hit;
         Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, 1f, layerMask);
@@ -111,20 +111,20 @@ public class PlayerController : MonoBehaviour
             {
                 somethingExist = true;
             }
-            //// Checking Key
-            //if (hit.collider.gameObject.layer == (int)Define.Layer.Key)
-            //{
-            //    hit.collider.gameObject.GetComponent<Key>().PickUp();
-            //}
-            ////Checking Door
-            //if (hit.collider.gameObject.layer == (int)Define.Layer.Door)
-            //{
-
-            //    if(!Managers.Game.Inventory.TryUseKey(hit.collider.gameObject))
-            //    {
-            //        somethingExist = true;
-            //    }
-            //}
+            // Checking Key
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.Item)
+            {
+                if(hit.collider.gameObject.GetComponent<ConsumableItem>()._consumableItemIndex < ConsumableItem.NUM_OF_KEYS)
+                    hit.collider.gameObject.GetComponent<ConsumableItem>().PickUp();
+            }
+            //Checking Door
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.Door)
+            {
+                if (!Managers.Game.Inventory.TryUseKey(hit.collider.gameObject))
+                {
+                    somethingExist = true;
+                }
+            }
         }
 
         return somethingExist;

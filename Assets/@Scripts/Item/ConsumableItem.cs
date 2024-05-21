@@ -8,11 +8,12 @@ using UnityEngine;
 [SerializeField]
 public class ConsumableItem : Item
 {
-    //[Tooltip("¿­¼èÀÇ »ö")]
-    //public Define.KeyColor _keyColor;
+    public const int NUM_OF_KEYS = 3;
+    public int _consumableItemIndex;
 
     private void Start()
     {
+        _consumableItemIndex = Managers.Data.ConsumableItemDic[id].id;
         Managers.Game.ConsumableItemData.id = Managers.Data.ConsumableItemDic[id].id;
         Managers.Game.ConsumableItemData.Name = Managers.Data.ConsumableItemDic[id].Name;
         Managers.Game.ConsumableItemData.Heal = Managers.Data.ConsumableItemDic[id].Heal;
@@ -26,7 +27,7 @@ public class ConsumableItem : Item
     public void PickUp()
     {
         Debug.Log(gameObject.name + "is Picked up!");
-        //Managers.Game.Inventory.AddItem(this);
+        Managers.Game.Inventory.AddItem(this);
         gameObject.SetActive(false);
     }
 }
