@@ -13,6 +13,8 @@ public class UI_PlayerCard : UI_Base
         HPHarGauge,
         AttackDelayGauge,
         DefenceDelayGauge,
+        AttackIcon,
+        DefenceIcon,
     }
 
     enum Texts
@@ -70,6 +72,8 @@ public class UI_PlayerCard : UI_Base
 
     public void Attack()
     {
+        GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
+
         if (_attackCount == Managers.Game.CurPlayerData.Critical)
         {
             _isCri = true;
@@ -105,12 +109,13 @@ public class UI_PlayerCard : UI_Base
                 return;
             }
         }
-        Managers.Game.OnBattleDataRefreshAction.Invoke();
         _attackCount++;
+        Managers.Game.OnBattleDataRefreshAction.Invoke();
     }
 
     public void Defence()
     {
+        GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIDefenceIcon");
         Managers.Game.CurPlayerData.IsDefence = true;
     }
 

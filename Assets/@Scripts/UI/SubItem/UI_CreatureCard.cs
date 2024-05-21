@@ -15,6 +15,8 @@ public class UI_CreatureCard : UI_Base
         HPHarGauge,
         AttackDelayGauge,
         DefenceDelayGauge,
+        AttackIcon,
+        DefenceIcon,
     }
 
     enum Texts
@@ -77,6 +79,8 @@ public class UI_CreatureCard : UI_Base
 
     public void Attack()
     {
+        GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
+
         if (_totalAttackCount > 0 && _totalAttackCount % 20 == 0)
         {
             Berserk();
@@ -121,6 +125,7 @@ public class UI_CreatureCard : UI_Base
 
     public void Defence()
     {
+        GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIDefenceIcon");
         Managers.Game.MonsterData.IsDefence = true;
     }
 
