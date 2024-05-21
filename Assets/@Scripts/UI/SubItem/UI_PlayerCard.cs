@@ -169,5 +169,7 @@ public class UI_PlayerCard : UI_Base
     {
         _defenceCoolTime = 0f;
         _defenseFlag = false;
+        if (GetImage((int)Images.DefenceIcon) != null)
+            GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
     }
 }
