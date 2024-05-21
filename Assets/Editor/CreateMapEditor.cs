@@ -28,9 +28,14 @@ public class CreateMapEditor : MonoBehaviour
             monsters = new GameObject { name = "Monsters" };
         else
             Debug.Log("Monsters 오브젝트 삭제 후 진행 바람.");
+        GameObject items = GameObject.Find("Items");
+        if (items == null)
+            items = new GameObject { name = "Items" };
+        else
+            Debug.Log("Items 오브젝트 삭제 후 진행 바람.");
 
         GameObject bossMonsters = GameObject.Find("BossMonsters");
-        GameObject items = GameObject.Find("Items");
+
         float coX = 0, coY = 0, coZ = 0;
         float toAdd = 0;
         float addToFloorY = 1.5f;
@@ -65,12 +70,12 @@ public class CreateMapEditor : MonoBehaviour
                     //floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
 
                     // TODO 아이템 생성
-                    //GameObject item = Resources.Load<GameObject>($"Item");
-                    //UnityEngine.Object.Instantiate(item, new Vector3(coX, coY + 1f, coZ), Quaternion.identity, items.transform);
+                    GameObject item = Resources.Load<GameObject>($"Item");
+                    UnityEngine.Object.Instantiate(item, new Vector3(coX, coY + 3f, coZ), Quaternion.identity, items.transform);
                     //item.transform.localScale = new Vector3(1f, 1.4f, 1.4f);
-                    //item.GetComponent<ItemController>().id = block[2] - '0';
-                    //item.name = $"item{itemIndex}";
-                    //item.GetComponent<ItemController>()._index_forActive = itemIndex++;
+                    item.GetComponent<Item>().id = block[2] - '0';
+                    item.name = $"item{itemIndex}";
+                    item.GetComponent<Item>()._itemIndex_forActive = itemIndex++;
                 }
                 else if (block[0] == 'M') // 몬스터일 경우
                 {

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8394445782509018793}
   - component: {fileID: 374805202375864314}
   m_Layer: 7
-  m_Name: GreenKey
+  m_Name: Item
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 9, y: 1, z: 2.4}
-  m_LocalScale: {x: 2, y: 2.828, z: 2}
+  m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -141,9 +141,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46035d43712fd4f4f9d1f4c012fe006a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemType: 1
-  Index: 0
-  Icon: {fileID: 723326297, guid: 80cac6f3d59b30344b78c58516e34ea8, type: 3}
-  Name: "\uCD08\uB85D \uC5F4\uC1E0"
-  Description: "\uCD08\uB85D \uBB38\uC744 \uC5F4 \uC218 \uC788\uB294 \uC5F4\uC1E0"
-  _keyColor: 2
+  id: 0
+  _itemIndex_forActive: 27

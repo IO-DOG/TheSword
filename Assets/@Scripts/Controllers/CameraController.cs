@@ -3,6 +3,7 @@ using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public class CameraController : MonoBehaviour
 {
@@ -12,10 +13,12 @@ public class CameraController : MonoBehaviour
     GameObject _parent;
     GameObject _player;
     GameObject _monsters;
+    GameObject _items;
 
     Vector3 _tileOriginScale;
     Vector3 _playerOriginScale;
     Vector3 _monsterOriginScale;
+    Vector3 _itemOriginScale;
 
     float Angle
     {
@@ -35,10 +38,12 @@ public class CameraController : MonoBehaviour
         _parent = GameObject.Find("Parent");
         _player = GameObject.Find("Player");
         _monsters = GameObject.Find("Monsters");
+        _items = GameObject.Find ("Items");
 
         _tileOriginScale = _parent.transform.GetChild(0).localScale;
         _playerOriginScale = _player.transform.localScale;
         _monsterOriginScale = _monsters.transform.GetChild(0).localScale;
+        _itemOriginScale = _items.transform.GetChild(0).localScale;
 
         if (GetComponent<CinemachineVirtualCamera>() != null)
         {
@@ -79,6 +84,12 @@ public class CameraController : MonoBehaviour
         {
             Transform child = _monsters.transform.GetChild(i);
             child.transform.localScale = new Vector3(_monsterOriginScale.x, _monsterOriginScale.y * scaleMultiplier, _monsterOriginScale.z * scaleMultiplier);
+        }
+
+        for (int i = 0; i < _items.transform.childCount; i++)
+        {
+            Transform child = _items.transform.GetChild(i);
+            child.transform.localScale = new Vector3(_itemOriginScale.x, _itemOriginScale.y * scaleMultiplier, _itemOriginScale.z * scaleMultiplier);
         }
 
         _player.transform.localScale = new Vector3(_playerOriginScale.x, _playerOriginScale.y * scaleMultiplier, _playerOriginScale.z * scaleMultiplier);

@@ -15,6 +15,7 @@ public class GameManager
     public MonsterController Monster; // 전투후 삭제를 위해
     public CurMonsterData MonsterData = new CurMonsterData(); // 실제 사용될 몬스터 정보
     public ContinueData CurPlayerData = new ContinueData(); // 실제 사용될 플레이어 정보
+    public CurConsumableItemData ConsumableItemData = new CurConsumableItemData(); // Current Consumable Item Data
     public Inventory Inventory = new Inventory(); //Inventory
 
     public Action OnBattleAction;
@@ -65,6 +66,20 @@ public class GameManager
         public string DefenceAnimStr { get; set; }
         public string HitAnimStr { get; set; }
         public bool IsDefence { get; set; }
+        public int IsActiveIndex { get; set; }
+    }
+    #endregion
+
+    #region CurConsumableItemData
+    public class CurConsumableItemData
+    {
+        public int id { get; set; }
+        public string Name { get; set; }
+        public float Heal { get; set; }
+        public float AttackUp { get; set; }
+        public float DefenceUp { get; set; }
+        public float HPUp { get; set; }
+        public string Description { get; set; }
         public int IsActiveIndex { get; set; }
     }
     #endregion

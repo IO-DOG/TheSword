@@ -111,20 +111,20 @@ public class PlayerController : MonoBehaviour
             {
                 somethingExist = true;
             }
-            // Checking Key
-            if (hit.collider.gameObject.layer == (int)Define.Layer.Key)
-            {
-                hit.collider.gameObject.GetComponent<Key>().PickUp();
-            }
-            //Checking Door
-            if (hit.collider.gameObject.layer == (int)Define.Layer.Door)
-            {
+            //// Checking Key
+            //if (hit.collider.gameObject.layer == (int)Define.Layer.Key)
+            //{
+            //    hit.collider.gameObject.GetComponent<Key>().PickUp();
+            //}
+            ////Checking Door
+            //if (hit.collider.gameObject.layer == (int)Define.Layer.Door)
+            //{
 
-                if(!Managers.Game.Inventory.TryUseKey(hit.collider.gameObject))
-                {
-                    somethingExist = true;
-                }
-            }
+            //    if(!Managers.Game.Inventory.TryUseKey(hit.collider.gameObject))
+            //    {
+            //        somethingExist = true;
+            //    }
+            //}
         }
 
         return somethingExist;

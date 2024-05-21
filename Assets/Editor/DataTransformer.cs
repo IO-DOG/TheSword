@@ -36,6 +36,11 @@ public class DataTransformer : EditorWindow
             if (File.Exists(path))
                 File.Delete(path);
         }
+        {
+            string path = Application.dataPath + "/@Resources/Data/ConsumableItemData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
 
         Debug.Log("Complete DeleteGameData");
     }
@@ -45,6 +50,7 @@ public class DataTransformer : EditorWindow
     {
         ParsePlayerData("Player");
         ParseMonsterData("Monster");
+        ParseConsumableItemData("ConsumableItem");
         ParseMapData();
         Debug.Log("Complete DataTransformer");
     }
@@ -139,6 +145,43 @@ public class DataTransformer : EditorWindow
     }
 
     //public Dictionary<int, bool> monsterActiveDic = new Dictionary<int, bool>();
+
+    static void ParseConsumableItemData(string filename)
+    {
+        ConsumableItemDataLoader loader = new ConsumableItemDataLoader();
+
+        #region ExcelData
+        string str = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv");
+        Debug.Log(str);
+        string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv").Split("\n");
+
+        for (int y = 1; y < lines.Length; y++)
+        {
+            string[] row = lines[y].Replace("\r", "").Split(',');
+
+            if (row.Length == 0)
+                continue;
+            if (string.IsNullOrEmpty(row[0]))
+                continue;
+
+            int i = 0;
+            ConsumableItemData cd = new ConsumableItemData();
+            cd.id = ConvertValue<int>(row[i++]);
+            cd.Name = ConvertValue<string>(row[i++]);
+            cd.Heal = ConvertValue<float>(row[i++]);
+            cd.AttackUp = ConvertValue<float>(row[i++]);
+            cd.DefenceUp = ConvertValue<float>(row[i++]);
+            cd.HPUp = ConvertValue<float>(row[i++]);
+            cd.Description = ConvertValue<string>(row[i++]);
+            loader.consumableItems.Add(cd);
+        }
+
+        #endregion
+
+        string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
+        AssetDatabase.Refresh();
+    }
 
     static void ParseMapData()
     {
