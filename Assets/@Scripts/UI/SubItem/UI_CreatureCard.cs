@@ -150,6 +150,7 @@ public class UI_CreatureCard : UI_Base
         }
     }
 
+    public bool _defenseFlag = false;
     IEnumerator CoDelayDefence()
     {
 
@@ -159,7 +160,11 @@ public class UI_CreatureCard : UI_Base
         {
             if (_defenceCoolTime >= _maxDefenceCoolTime)
             {
-                Defence();
+                if (_defenseFlag == false)
+                {
+                    _defenseFlag = true;
+                    Defence();
+                }
                 _defenceCoolTime = _maxDefenceCoolTime;
                 //_defenceCoolTime = 0f;
             }
@@ -182,5 +187,6 @@ public class UI_CreatureCard : UI_Base
     public void ClearDefence()
     {
         _defenceCoolTime = 0f;
+        _defenseFlag = false;
     }
 }

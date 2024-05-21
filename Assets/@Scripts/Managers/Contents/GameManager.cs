@@ -27,7 +27,10 @@ public class GameManager
     public class ContinueData
     {
         public int Level { get; set; } // Lv
-        public float CurExp { get; set; }
+        public float CurExp { 
+            get; 
+            set; 
+        }
         public float MaxHP { get; set; }
         public float CurHP { get; set; }
         public float Attack { get; set; }

@@ -140,6 +140,7 @@ public class UI_PlayerCard : UI_Base
         }
     }
 
+    public bool _defenseFlag = false;
     IEnumerator CoDelayDefence()
     {
         _maxDefenceCoolTime = _maxDefenceCoolTime / Managers.Game.CurPlayerData.AttackSpeed;
@@ -148,7 +149,11 @@ public class UI_PlayerCard : UI_Base
         {
             if (_defenceCoolTime >= _maxDefenceCoolTime)
             {
-                Defence();
+                if (_defenseFlag == false)
+                {
+                    _defenseFlag = true;
+                    Defence();
+                }
                 _defenceCoolTime = _maxDefenceCoolTime;
                 //_defenceCoolTime = 0f;
             }
@@ -163,5 +168,6 @@ public class UI_PlayerCard : UI_Base
     public void ClearDefence()
     {
         _defenceCoolTime = 0f;
+        _defenseFlag = false;
     }
 }

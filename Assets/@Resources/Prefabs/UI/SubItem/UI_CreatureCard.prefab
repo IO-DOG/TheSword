@@ -782,6 +782,7 @@ MonoBehaviour:
   _totalAttackCount: 0
   _maxDefenceCoolTime: 3
   _defenceCoolTime: 0
+  _defenseFlag: 0
 --- !u!1 &4009190380330149614
 GameObject:
   m_ObjectHideFlags: 0
@@ -1233,7 +1234,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 32.8}
+  m_AnchoredPosition: {x: 0, y: -110}
   m_SizeDelta: {x: 100, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6430109041835429938
@@ -1495,7 +1496,7 @@ Animator:
   m_GameObject: {fileID: 7231473848173692116}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: f54595926b5d5f74c8386e87d2981c24, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
