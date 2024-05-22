@@ -122,6 +122,9 @@ public class PlayerController : MonoBehaviour
                 if (Managers.Game.Inventory.TryUseKey(hit.collider.gameObject))
                 {
                     somethingExist = true;
+
+                    hit.collider.gameObject.GetComponentInChildren<Door>().CoDoorLockAnim();
+                    hit.collider.gameObject.GetComponentInChildren<Door>().CoOpenDoor(2.5f);
                     hit.collider.gameObject.GetComponentInChildren<Door>().FadeDoor().OnComplete(() =>
                     {
                         hit.collider.gameObject.SetActive(false);

@@ -38,6 +38,7 @@ public class Door : MonoBehaviour
 
     IEnumerator OpenDoor(float time)
     {
+        yield return new WaitForSeconds(1f);
         float elapsedTime = 0.0f;
         Quaternion targetRotation = Quaternion.Euler(_rotateAngle);
 
@@ -65,11 +66,15 @@ public class Door : MonoBehaviour
         Managers.Resource.Destroy(go);
     }
 
-    public Tween FadeDoor()
+    public Sequence FadeDoor()
     {
-        Tween tween = gameObject.GetComponent<MeshRenderer>().material.DOFade(0.0f, 2.5f);
+        Tween tween1 = gameObject.GetComponent<MeshRenderer>().material.DOFade(1f, 1f);
+        Tween tween2 = gameObject.GetComponent<MeshRenderer>().material.DOFade(0.0f, 2f);
 
-        return tween;
+        Sequence seq = DOTween.Sequence();
+        seq.Append(tween1).Append(tween2);
+
+        return seq;
     }
     #endregion Effect
 }

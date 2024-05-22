@@ -34,8 +34,6 @@ public class Inventory
         }
         else
         {
-            door.GetComponentInChildren<Door>().CoOpenDoor(2.5f);
-            door.GetComponentInChildren<Door>().CoDoorLockAnim();
             // TODO Save
             _keys[door.GetComponentInChildren<Door>()._keyIndex]--;
             ShowKeySlot(Managers.Game.Player._keyInventory);
