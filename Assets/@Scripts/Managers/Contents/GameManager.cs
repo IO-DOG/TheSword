@@ -209,6 +209,7 @@ public class GameManager
 
     public void Init()
     {
+        LoadKeyIcon();
         _path = Application.dataPath + "/@Resources/Data/SaveData.json";
 
         if (LoadGame())
@@ -217,7 +218,6 @@ public class GameManager
         PlayerPrefs.SetInt("ISFIRST", 0);
 
         SaveGame();
-        LoadKeyIcon();
     }
 
 }
