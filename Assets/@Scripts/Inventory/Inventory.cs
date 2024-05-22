@@ -28,17 +28,16 @@ public class Inventory
 
     public bool TryUseKey(GameObject door)
     {
-        if (_keys[door.GetComponent<Door>()._keyIndex] == 0)
+        if (_keys[door.GetComponentInChildren<Door>()._keyIndex] == 0)
         {
             return false;
         }
         else
         {
-            door.GetComponent<Door>().CoOpenDoor(0.5f);
-            door.GetComponent<Door>().CoDoorLockAnim();
-            door.layer = (int)Define.Layer.Wall;
-            // TODO 불러오기
-            _keys[door.GetComponent<Door>()._keyIndex]--;
+            door.GetComponentInChildren<Door>().CoOpenDoor(2.5f);
+            door.GetComponentInChildren<Door>().CoDoorLockAnim();
+            // TODO Save
+            _keys[door.GetComponentInChildren<Door>()._keyIndex]--;
             ShowKeySlot(Managers.Game.Player._keyInventory);
             return true;
         }

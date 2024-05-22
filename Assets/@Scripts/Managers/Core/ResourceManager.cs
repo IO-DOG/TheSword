@@ -52,7 +52,7 @@ public class ResourceManager
         return go;
     }
 
-    public void Destroy(GameObject go)
+    public void Destroy(GameObject go, float time = 0.0f)
     {
         if (go == null)
             return;
@@ -60,7 +60,7 @@ public class ResourceManager
         //if (Managers.Pool.Push(go))
         //    return;
 
-        Object.Destroy(go);
+        Object.Destroy(go, time);
     }
 
     #endregion
