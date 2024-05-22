@@ -9,6 +9,7 @@ public class CameraController : MonoBehaviour
 {
     // ToDo Object y position adjusting
     float _angle = 60f; // 원하는 x축 회전 각도
+    public float scaleMultiplier;
 
     GameObject _parent;
     GameObject _player;
@@ -72,7 +73,7 @@ public class CameraController : MonoBehaviour
 
     void ChangeView(float angle)
     {
-        float scaleMultiplier = 1 / Mathf.Cos(angle * Mathf.Deg2Rad);
+        scaleMultiplier = 1 / Mathf.Cos(angle * Mathf.Deg2Rad);
 
         //for (int i = 0; i < _parent.transform.childCount; i++)
         //{

@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -33,7 +34,10 @@ public class Inventory
         }
         else
         {
-            door.SetActive(false);
+            door.GetComponent<Door>().CoOpenDoor(0.5f);
+            door.GetComponent<Door>().CoDoorLockAnim();
+            door.layer = (int)Define.Layer.Wall;
+            // TODO 불러오기
             _keys[door.GetComponent<Door>()._keyIndex]--;
             ShowKeySlot(Managers.Game.Player._keyInventory);
             return true;

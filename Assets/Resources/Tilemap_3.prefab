@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6635194478506506205
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3555329715693545481}
+  m_Layer: 9
+  m_Name: DoorLockPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3555329715693545481
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6635194478506506205}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 5.25, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 902834827452746909}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &796356482996202358
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -74,7 +105,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1151388028547126963, guid: 2f0992d6c7876784aa8dd3cab0d2069d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 1151388028547126963, guid: 2f0992d6c7876784aa8dd3cab0d2069d, type: 3}
       propertyPath: m_LocalRotation.w
@@ -102,7 +133,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 2f0992d6c7876784aa8dd3cab0d2069d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3555329715693545481}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 8164078558771037576, guid: 2f0992d6c7876784aa8dd3cab0d2069d, type: 3}
       insertIndex: -1
@@ -111,6 +145,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 229295823889036695}
   m_SourcePrefab: {fileID: 100100000, guid: 2f0992d6c7876784aa8dd3cab0d2069d, type: 3}
+--- !u!4 &902834827452746909 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 2f0992d6c7876784aa8dd3cab0d2069d, type: 3}
+  m_PrefabInstance: {fileID: 796356482996202358}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &8809489683114307326 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8164078558771037576, guid: 2f0992d6c7876784aa8dd3cab0d2069d, type: 3}
@@ -128,7 +167,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b76b2936ecec2749a199a018d0b8569, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _doorColor: 2
+  _keyIndex: 0
 --- !u!65 &229295823889036695
 BoxCollider:
   m_ObjectHideFlags: 0
