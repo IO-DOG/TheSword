@@ -24,6 +24,17 @@ public class GameManager
     public Action OnBattleCreatureDefeceAction;
     public Action OnBattlePlayerDefeceAction;
 
+    public Sprite[] KeyIcon = new Sprite[ConsumableItem.NUM_OF_KEYS];
+
+    #region Load Key Icon
+    void LoadKeyIcon()
+    {
+        for (int i = 0; i < KeyIcon.Length; i++)
+        {
+            KeyIcon[i] = Resources.LoadAll<Sprite>($"Icon/DoorKey{i}")[1];
+        }
+    }
+    #endregion
 
     #region CurPlayerData
     public class ContinueData
@@ -206,6 +217,7 @@ public class GameManager
         PlayerPrefs.SetInt("ISFIRST", 0);
 
         SaveGame();
+        LoadKeyIcon();
     }
 
 }
