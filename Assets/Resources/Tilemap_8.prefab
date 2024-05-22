@@ -60,6 +60,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -6400281290468069383, guid: c46b6d349a750ac4a8ffe8e173a03c82, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: -8118939644635235561, guid: 4760fdfd7626cfa458e16dd69c4ae162, type: 3}
     - target: {fileID: 919132149155446097, guid: c46b6d349a750ac4a8ffe8e173a03c82, type: 3}
       propertyPath: m_Name
       value: Tilemap_8
@@ -97,7 +101,7 @@ PrefabInstance:
       addedObject: {fileID: 4877922937095450870}
     - targetCorrespondingSourceObject: {fileID: 8164078558771037576, guid: c46b6d349a750ac4a8ffe8e173a03c82, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 7300324691827282965}
+      addedObject: {fileID: 8938124541058329775}
   m_SourcePrefab: {fileID: 100100000, guid: c46b6d349a750ac4a8ffe8e173a03c82, type: 3}
 --- !u!1 &6888939225812592356 stripped
 GameObject:
@@ -117,7 +121,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _doorColor: 0
---- !u!65 &7300324691827282965
+--- !u!65 &8938124541058329775
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -137,4 +141,4 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 3.0000007, y: 2.5, z: 0.8000002}
-  m_Center: {x: 0.100000046, y: 3.75, z: 0}
+  m_Center: {x: -1.4000005, y: 3.75, z: 0}
