@@ -98,8 +98,10 @@ public class UI_GameScene : UI_Scene
                     Debug.Log($"MonsterImage : {Managers.Data.MonsterDic[id].IdleAnimStr}");
                     Debug.Log($"MonsterImage : {Managers.Data.MonsterDic[id].IdleAnimStr}");
 
-                    UI_MonsterInfo monsterInfo = Managers.UI.MakeSubItem<UI_MonsterInfo>();
-                    monsterInfo.Position = monster.gameObject.transform.localToWorldMatrix.GetPosition();
+                    UI_MonsterInfo monsterInfo = Managers.UI.MakeSubItem<UI_MonsterInfo>(monster.transform);
+                    //monsterInfo.Position = monster.gameObject.transform.localToWorldMatrix.GetPosition();
+                    monsterInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
+                    Debug.Log($"{Input.mousePosition.x},{Input.mousePosition.y},{Input.mousePosition.z}");
                     Debug.Log($"Monster Position X : {monster.gameObject.transform.position.x}, Monster Position Y : {monster.gameObject.transform.position.y}, Monster Position Z : {monster.gameObject.transform.position.z}");
                 }
             }
