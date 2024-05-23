@@ -38,6 +38,7 @@ public class Define
         Item = 7,
         Player = 8,
         Door = 9,
+        Monster = 10,
     }
 
     public enum MoveDir
