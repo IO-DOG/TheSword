@@ -52,6 +52,7 @@ public class DataTransformer : EditorWindow
         ParseMonsterData("Monster");
         ParseConsumableItemData("ConsumableItem");
         ParseMapData();
+        ParseMonsterClassData("MonsterClass");
         Debug.Log("Complete DataTransformer");
     }
 
@@ -144,8 +145,6 @@ public class DataTransformer : EditorWindow
         AssetDatabase.Refresh();
     }
 
-    //public Dictionary<int, bool> monsterActiveDic = new Dictionary<int, bool>();
-
     static void ParseConsumableItemData(string filename)
     {
         ConsumableItemDataLoader loader = new ConsumableItemDataLoader();
@@ -229,6 +228,43 @@ public class DataTransformer : EditorWindow
         AssetDatabase.Refresh();
         string itemActiveDicJsonStr = JsonConvert.SerializeObject(itemActiveDic, Formatting.Indented);
         File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/ItemActiveData.json", itemActiveDicJsonStr);
+        AssetDatabase.Refresh();
+    }
+
+    static void ParseMonsterClassData(string filename)
+    {
+        MonsterClassDataLoader loader = new MonsterClassDataLoader();
+
+        #region ExcelData
+        string str = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv");
+        Debug.Log(str);
+        string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv").Split("\n");
+
+        for (int y = 1; y < lines.Length; y++)
+        {
+            string[] row = lines[y].Replace("\r", "").Split(',');
+
+            if (row.Length == 0)
+                continue;
+            if (string.IsNullOrEmpty(row[0]))
+                continue;
+
+            int i = 0;
+            MonsterClassData cd = new MonsterClassData();
+            cd.id = ConvertValue<int>(row[i++]);
+            cd.ClassName = ConvertValue<string>(row[i++]);
+            cd.ClassDesc = ConvertValue<string>(row[i++]);
+            cd.Image = ConvertValue<string>(row[i++]);
+            cd.AttackFX = ConvertValue<string>(row[i++]);
+            cd.ClassId = ConvertValue<int>(row[i++]);
+            cd.EffectDescId = ConvertValue<int>(row[i++]);
+            loader.monsterClasses.Add(cd);
+        }
+
+        #endregion
+
+        string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
         AssetDatabase.Refresh();
     }
 

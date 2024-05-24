@@ -15,6 +15,7 @@ public class UI_MonsterInfo : UI_Base
     enum Texts
     {
         MonsterNameText,
+        MonsterClassText,
         MonsterAttackText,
         MonsterDefenseText,
         MonsterHPText,
@@ -32,7 +33,7 @@ public class UI_MonsterInfo : UI_Base
         {
             _position = value;
             Debug.Log("change monster info position");
-            GetComponentsInChildren<UnityEngine.UI.Image>()[0].GetComponent<RectTransform>().anchoredPosition = _position + 
+            GetComponentsInChildren<UnityEngine.UI.Image>()[0].GetComponent<RectTransform>().anchoredPosition = _position +
                 new Vector3((float)(GetComponentsInChildren<BoxCollider>()[0].bounds.max.x - GetComponentsInChildren<BoxCollider>()[0].bounds.min.x) / 2 + 50, 0, 0);
             Debug.Log($"GetComponentsInChildren<BoxCollider>()[0].bounds.max.x : {GetComponentsInChildren<BoxCollider>()[0].bounds.max.x}");
             Debug.Log($"GetComponentsInChildren<BoxCollider>()[0].bounds.min.x : {GetComponentsInChildren<BoxCollider>()[0].bounds.min.x}");
@@ -59,6 +60,7 @@ public class UI_MonsterInfo : UI_Base
     {
         int id = gameObject.transform.parent.GetComponent<MonsterController>().id;
         GetText((int)Texts.MonsterNameText).text = "Name : " + Managers.Data.MonsterDic[id].Name;
+        GetText((int)Texts.MonsterClassText).text = "Æ¯¼º : " + Managers.Data.MonsterClassDic[Managers.Data.MonsterDic[id].Feature].ClassName;
         GetText((int)Texts.MonsterAttackText).text = "Attack : " + Managers.Data.MonsterDic[id].Attack.ToString();
         GetText((int)Texts.MonsterDefenseText).text = "Defense : " + Managers.Data.MonsterDic[id].Defence.ToString();
         GetText((int)Texts.MonsterHPText).text = "HP : " + Managers.Data.MonsterDic[id].MaxHP.ToString();

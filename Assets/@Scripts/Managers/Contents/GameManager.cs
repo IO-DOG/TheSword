@@ -102,6 +102,7 @@ public class GameManager
         public string HitAnimStr { get; set; }
         public bool IsDefence { get; set; }
         public int IsActiveIndex { get; set; }
+        public int DamagedCount { get; set; }
     }
     #endregion
 

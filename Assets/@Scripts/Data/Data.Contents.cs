@@ -37,7 +37,6 @@ namespace Data
     }
     #endregion
 
-
     #region MonsterData
     [Serializable]
     public class MonsterData
@@ -124,5 +123,32 @@ namespace Data
         }
     }
 
+    #endregion
+
+    #region MonsterClassData
+    [Serializable]
+    public class MonsterClassData
+    {
+        public int id { get; set; }
+        public string ClassName { get; set; }
+        public string ClassDesc { get; set; }
+        public string Image { get; set; }
+        public string AttackFX { get; set; }
+        public int ClassId { get; set; }
+        public int EffectDescId { get; set; }
+    }
+
+    [Serializable]
+    public class MonsterClassDataLoader : ILoader<int, MonsterClassData>
+    {
+        public List<MonsterClassData> monsterClasses = new List<MonsterClassData>();
+        public Dictionary<int, MonsterClassData> MakeDict()
+        {
+            Dictionary<int, MonsterClassData> dict = new Dictionary<int, MonsterClassData>();
+            foreach (MonsterClassData monsterClass in monsterClasses)
+                dict.Add(monsterClass.id, monsterClass);
+            return dict;
+        }
+    }
     #endregion
 }

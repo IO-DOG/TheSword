@@ -27,13 +27,33 @@ public class UI_CreatureCard : UI_Base
         DefenceStatusText,
     }
 
+    public enum MonsterClass
+    {
+        None = 0,
+        Beast = 1,
+        Magic = 2,
+        Guard = 3,
+        Immort = 4,
+        Knight = 5,
+        Giant = 6,
+        Assassin = 7,
+        Armor = 8,
+    }
+
     #endregion
 
+    #region Member
     public bool _isCri = false;
     public int _attackCount = 0;
     public int _totalAttackCount = 0;
     public float _maxDefenceCoolTime = 3f;
     public float _defenceCoolTime = 0f;
+    public MonsterClass _monsterClass = MonsterClass.None;
+    public bool _forBeast = false;
+    public bool _forGuard = false;
+    public int _forGiant = 0;
+    public float _forArmor = 0;
+    #endregion
 
     public override bool Init()
     {
@@ -45,6 +65,7 @@ public class UI_CreatureCard : UI_Base
         BindText(typeof(Texts));
         #endregion
 
+        _monsterClass = (MonsterClass)Managers.Game.MonsterData.Feature;
         GetText((int)Texts.CreatureName).text = Managers.Game.MonsterData.Name;
         GetText((int)Texts.HPBarText).text = Managers.Game.MonsterData.MaxHP.ToString();
         GetText((int)Texts.AttackStatusText).text = Managers.Game.MonsterData.Attack.ToString();
@@ -56,9 +77,22 @@ public class UI_CreatureCard : UI_Base
         Managers.Game.OnBattleCreatureDefeceAction += ClearDefence;
 
         StartCoroutine(CoDelayAttack());
-        StartCoroutine(CoDelayDefence());
+        if (_monsterClass != MonsterClass.Armor)
+            StartCoroutine(CoDelayDefence());
 
         GetImage((int)Images.CreatureImage).SetNativeSize();
+
+        if (_monsterClass == MonsterClass.Guard)
+        {
+            Defence();
+            Debug.Log("수호 효과 발동");
+        }
+
+        if (_monsterClass == MonsterClass.Armor)
+        {
+            _forArmor = Managers.Game.MonsterData.Defence;
+            Debug.Log("갑옷 효과 발동");
+        }
 
         return true;
     }
@@ -70,6 +104,32 @@ public class UI_CreatureCard : UI_Base
 
     IEnumerator CoRefresh()
     {
+        if (_monsterClass == MonsterClass.Beast && _forBeast == false && Managers.Game.MonsterData.CurHP <= Managers.Game.MonsterData.MaxHP * 0.1)
+        {
+            _forBeast = true;
+            Managers.Game.MonsterData.CurHP += Managers.Game.MonsterData.MaxHP * 0.4f;
+            Debug.Log("비스트 효과 발동");
+        }
+
+        if (_monsterClass == MonsterClass.Armor)
+        {
+            if (_forArmor > 0)
+            {
+                Debug.Log("갑옷 효과 발동 방어막부터 감소");
+                float gap = Managers.Game.MonsterData.MaxHP - Managers.Game.MonsterData.CurHP;
+                if (_forArmor >= gap)
+                {
+                    Managers.Game.MonsterData.CurHP = Managers.Game.MonsterData.MaxHP;
+                    _forArmor -= gap;
+                }
+                else
+                {
+                    Managers.Game.MonsterData.CurHP += (gap - _forArmor);
+                    _forArmor = 0;
+                }
+            }
+        }
+
         GetImage((int)Images.CreatureImage).SetNativeSize();
         GetText((int)Texts.HPBarText).text = Managers.Game.MonsterData.CurHP.ToString();
         GetImage((int)Images.HPHar).fillAmount = Managers.Game.MonsterData.CurHP / Managers.Game.MonsterData.MaxHP;
@@ -79,6 +139,12 @@ public class UI_CreatureCard : UI_Base
 
     public void Attack()
     {
+        if (_monsterClass == MonsterClass.Magic)
+        {
+            _isCri = true;
+            Debug.Log("마법 효과 발동");
+        }
+
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
 
         if (_totalAttackCount > 0 && _totalAttackCount % 20 == 0)
@@ -128,6 +194,9 @@ public class UI_CreatureCard : UI_Base
 
     public void Defence()
     {
+        _defenceCoolTime = _maxDefenceCoolTime;
+        GetImage((int)Images.DefenceDelayGauge).fillAmount = _defenceCoolTime / _maxDefenceCoolTime;
+
         GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIDefenceIcon");
         Managers.Game.MonsterData.IsDefence = true;
     }
@@ -144,6 +213,11 @@ public class UI_CreatureCard : UI_Base
             {
                 attackCoolTime = 0f;
                 Attack();
+                if (_monsterClass == MonsterClass.Knight)
+                {
+                    Attack();
+                    Debug.Log("검사 효과 발동");
+                }
             }
             attackCoolTime += Time.deltaTime * Managers.Game.GameSpeed;
 
