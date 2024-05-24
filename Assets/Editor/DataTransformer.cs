@@ -37,7 +37,7 @@ public class DataTransformer : EditorWindow
                 File.Delete(path);
         }
         {
-            string path = Application.dataPath + "/@Resources/Data/ConsumableItemData.json";
+            string path = Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
@@ -188,10 +188,12 @@ public class DataTransformer : EditorWindow
         int monsterIndex = 0;
         int bossMonsterIndex = 0;
         int itemIndex = 0;
+        int doorIndex = 0;
 
         Dictionary<int, bool> monsterActiveDic = new Dictionary<int, bool>();
         Dictionary<int, bool> bossMonsterActiveDic = new Dictionary<int, bool>();
         Dictionary<int, bool> itemActiveDic = new Dictionary<int, bool>();
+        Dictionary<int, bool> doorActiveDic = new Dictionary<int, bool>();
 
         string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/MapData.csv").Split("\n");
         for (int y = 0; y < lines.Length; y++)
@@ -218,6 +220,11 @@ public class DataTransformer : EditorWindow
                 {
                     itemActiveDic.Add(itemIndex++, true);
                 }
+                // door is 3, 4, 5, 6, 7, 8
+                else if (block[0] >= '3' && block[0] <= '8')
+                {
+                    doorActiveDic.Add(doorIndex++, true);
+                }
             }
         }
 
@@ -230,6 +237,8 @@ public class DataTransformer : EditorWindow
         string itemActiveDicJsonStr = JsonConvert.SerializeObject(itemActiveDic, Formatting.Indented);
         File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/ItemActiveData.json", itemActiveDicJsonStr);
         AssetDatabase.Refresh();
+        string doorActiveDicJsonStr = JsonConvert.SerializeObject(doorActiveDic, Formatting.Indented);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/DoorActiveData.json", doorActiveDicJsonStr);
     }
 
     public static T ConvertValue<T>(string value)

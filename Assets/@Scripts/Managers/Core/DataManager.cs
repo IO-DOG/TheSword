@@ -17,6 +17,7 @@ public class DataManager
     public Dictionary<int, bool> MonsterActiveDic { get; set; } = new Dictionary<int, bool>();
     public Dictionary<int, bool> BossMonsterActiveDic { get; set; } = new Dictionary<int, bool>();
     public Dictionary<int, bool> ItemActiveDic { get; set; } = new Dictionary<int, bool>();
+    public Dictionary<int, bool> DoorActiveDic { get; set; } = new Dictionary<int, bool>();
 
     public void Init()
     {
@@ -30,6 +31,8 @@ public class DataManager
         BossMonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(bossMonsterActiveDataTextAsset.text);
         TextAsset itemActiveDataTextAsset = Managers.Resource.Load<TextAsset>("ItemActiveData");
         ItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(itemActiveDataTextAsset.text);
+        TextAsset doorAcriveDataTextAsset = Managers.Resource.Load<TextAsset>("DoorActiveData");
+        DoorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(doorAcriveDataTextAsset.text);
 
         CheckSaveData();
     }
@@ -67,6 +70,15 @@ public class DataManager
                 string file = Application.dataPath + "/@Resources/Data/SaveItemActiveData.json";
                 string fileStr = File.ReadAllText(file);
                 ItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
+            }
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveDoorActiveData.Json";
+            if(File.Exists(path))
+            {
+                string file = Application.dataPath + "/@Resources/Data/SaveDoorActiveData.Json";
+                string fileStr = File.ReadAllText(file);
+                DoorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
             }
         }
     }

@@ -28,6 +28,7 @@ public class UI_GameScene : UI_Scene
         //GetButton((int)Buttons.ToTitleButton).gameObject.BindEvent(() => Managers.Scene.LoadScene(Define.Scene.TitleScene));
         CheckMonster();
         CheckItem();
+        CheckDoor();
 
         return true;
     }
@@ -65,6 +66,21 @@ public class UI_GameScene : UI_Scene
 
             int id = item.id;
             item.GetComponent<Animator>().Play($"ConsumableItem_{id}");
+        }
+    }
+
+    void CheckDoor()
+    {
+        GameObject go = GameObject.Find("Parent");
+        Door[] doors = go.GetComponentsInChildren<Door>();
+
+        foreach (Door door in doors)
+        {
+            if (Managers.Data.ItemActiveDic[door._doorIndex_forActive] == false)
+            {
+                door.gameObject.transform.parent.gameObject.SetActive(false);
+                continue;
+            }
         }
     }
 

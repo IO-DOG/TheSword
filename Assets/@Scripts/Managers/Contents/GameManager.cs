@@ -12,10 +12,10 @@ public class GameManager
 {
     public bool OnBattle = false;
 
-    public PlayerController Player; // ÀüÅõÈÄ »èÁ¦¸¦ À§ÇØ
-    public MonsterController Monster; // ÀüÅõÈÄ »èÁ¦¸¦ À§ÇØ
-    public CurMonsterData MonsterData = new CurMonsterData(); // ½ÇÁ¦ »ç¿ëµÉ ¸ó½ºÅÍ Á¤º¸
-    public ContinueData CurPlayerData = new ContinueData(); // ½ÇÁ¦ »ç¿ëµÉ ÇÃ·¹ÀÌ¾î Á¤º¸
+    public PlayerController Player; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    public MonsterController Monster; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    public CurMonsterData MonsterData = new CurMonsterData(); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    public ContinueData CurPlayerData = new ContinueData(); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½
     public CurConsumableItemData ConsumableItemData = new CurConsumableItemData(); // Current Consumable Item Data
     public Inventory Inventory = new Inventory(); //Inventory
 
@@ -151,6 +151,8 @@ public class GameManager
         File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json", bossMonsterActiveDicJsonStr);
         string itemActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.ItemActiveDic, Formatting.Indented);
         File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveItemActiveData.json", itemActiveDicJsonStr);
+        string doorActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.DoorActiveDic, Formatting.Indented);
+        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json", doorActiveDicJsonStr);
     }
 
     public bool LoadGame()
@@ -180,7 +182,7 @@ public class GameManager
 
         if (File.Exists(_path) == false)
         {
-            Debug.Log("ÇÃ·¹ÀÌ¾î µ¥ÀÌÅÍ ·Îµù ½ÇÆÐ");
+            Debug.Log("ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½");
             return false;
         }
 
@@ -189,7 +191,7 @@ public class GameManager
         if (data != null)
         {
             CurPlayerData = data;
-            Debug.Log("ÇÃ·¹ÀÌ¾î µ¥ÀÌÅÍ ·Îµù ¿Ï·á");
+            Debug.Log("ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ ï¿½Ï·ï¿½");
         }
 
         string monsterActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json");
@@ -201,6 +203,9 @@ public class GameManager
         string itemActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveItemActiveData.json");
         Dictionary<int, bool> itemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(itemActiveDicFile);
         Managers.Data.ItemActiveDic = itemActiveDic;
+        string doorActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json");
+        Dictionary<int, bool> doorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(doorActiveDicFile);
+        Managers.Data.DoorActiveDic = doorActiveDic;
 
         return true;
     }
