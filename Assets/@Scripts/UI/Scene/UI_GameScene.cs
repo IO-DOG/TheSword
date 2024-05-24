@@ -15,6 +15,14 @@ public class UI_GameScene : UI_Scene
     {
         KeyInventory,
     }
+
+    enum Texts
+    {
+        PlayerNameText,
+        PlayerHPText,
+        PlayerAttackText,
+        PlayerDefenseText,
+    }
     #endregion
 
     int _mask = (1 << (int)Define.Layer.Monster);
@@ -27,12 +35,14 @@ public class UI_GameScene : UI_Scene
         #region Bind
         BindButton(typeof(Buttons));
         BindObject(typeof(GameObjects));
+        BindText(typeof(Texts));
         #endregion
 
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
         //GetButton((int)Buttons.ToTitleButton).gameObject.BindEvent(() => Managers.Scene.LoadScene(Define.Scene.TitleScene));
         CheckMonster();
         CheckItem();
+        SetPlayerInfo();
 
         return true;
     }
@@ -106,5 +116,17 @@ public class UI_GameScene : UI_Scene
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// 보여지는 플레이어 정보를 갱신하는 함수
+    /// 플레이어 정보가 추가되면 이함수 역시 추가되어야함.
+    /// </summary>
+    public void SetPlayerInfo()
+    {
+        GetText((int)Texts.PlayerNameText).text = "PlayerName";
+        GetText((int)Texts.PlayerHPText).text = $"HP : {Managers.Game.CurPlayerData.MaxHP} / {Managers.Game.CurPlayerData.CurHP}";
+        GetText((int)Texts.PlayerAttackText).text = $"Attack : {Managers.Game.CurPlayerData.Attack}";
+        GetText((int)Texts.PlayerDefenseText).text = $"Defense : {Managers.Game.CurPlayerData.Defence}";
     }
 }

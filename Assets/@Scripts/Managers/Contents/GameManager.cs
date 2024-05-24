@@ -121,7 +121,7 @@ public class GameManager
 
     #region InGame
     public int GameSpeed = 1;
-
+    public UI_GameScene GameScene = null;
     public static void LevelUp()
     {
         Managers.Game.CurPlayerData.MaxHP += Managers.Data.PlayerDic[Managers.Game.CurPlayerData.Level].MaxHP;
