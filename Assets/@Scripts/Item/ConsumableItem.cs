@@ -31,8 +31,6 @@ public class ConsumableItem : Item
         Managers.Data.ItemActiveDic[_itemIndex_forActive] = false;
         gameObject.SetActive(false);
 
-        Debug.Log(Managers.Game.CurPlayerData.Attack);
-
         if(_consumableItemIndex < NUM_OF_KEYS)
         {
             Managers.Game.Inventory.AddItem(this);
@@ -44,11 +42,11 @@ public class ConsumableItem : Item
         else if(_consumableItemIndex < NUM_OF_RUNES)
         {
             Managers.Game.CurPlayerData.Attack += Managers.Game.ConsumableItemData.AttackUp;
-            Debug.Log(Managers.Game.CurPlayerData.Attack); ;
             Managers.Game.CurPlayerData.Defence += Managers.Game.ConsumableItemData.DefenceUp;   
             Managers.Game.CurPlayerData.MaxHP += Managers.Game.ConsumableItemData.HPUp;   
         }
 
         Managers.Game.SaveGame();
+        Managers.Game.GameScene.Refresh();
     }
 }
