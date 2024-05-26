@@ -39,7 +39,7 @@ public class GameManager
     #region CurPlayerData
     public class ContinueData
     {
-        public int Level { get; set; } // Lv
+        public int Level { get; set; } = 1; // Lv
         public float curExp;
         public float CurExp
         {

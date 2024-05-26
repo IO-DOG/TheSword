@@ -17,11 +17,23 @@ public class UI_GameScene : UI_Scene
 
     enum Texts
     {
-        PlayerNameText,
+        //PlayerNameText,
         PlayerHPText,
         PlayerAttackText,
         PlayerDefenseText,
+        PlayerLevelText,
     }
+
+    enum Images
+    {
+        MainUIEXPGaugeImage,
+        MainUIAuxiliaryHPGaugeImage,
+        MainUIOptionAImage,
+        MainUIInventoryAImage,
+        MainUISwordAImage,
+        MainUIWarpAImage,
+    }
+
     #endregion
 
     int _mask = (1 << (int)Define.Layer.Monster);
@@ -35,16 +47,51 @@ public class UI_GameScene : UI_Scene
         BindButton(typeof(Buttons));
         BindObject(typeof(GameObjects));
         BindText(typeof(Texts));
+        BindImage(typeof(Images));
         #endregion
 
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
         //GetButton((int)Buttons.ToTitleButton).gameObject.BindEvent(() => Managers.Scene.LoadScene(Define.Scene.TitleScene));
+
+        #region PointerEnter&PointerExit
+        GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
+        { GetImage((int)Images.MainUIOptionAImage).sprite = Managers.Resource.Load<Sprite>(Define.MainUI_Option_B); }, null, Define.UIEvent.PointerEnter);
+        GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
+        { GetImage((int)Images.MainUIOptionAImage).sprite = Managers.Resource.Load<Sprite>(Define.MainUI_Option_A); ; }, null, Define.UIEvent.PointerExit);
+
+        GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(() =>
+        { GetImage((int)Images.MainUIInventoryAImage).sprite = Managers.Resource.Load<Sprite>(Define.MainUI_Inventory_B); }, null, Define.UIEvent.PointerEnter);
+        GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(() =>
+        { GetImage((int)Images.MainUIInventoryAImage).sprite = Managers.Resource.Load<Sprite>(Define.MainUI_Inventory_A); ; }, null, Define.UIEvent.PointerExit);
+
+        GetImage((int)Images.MainUISwordAImage).gameObject.BindEvent(() =>
+        { GetImage((int)Images.MainUISwordAImage).sprite = Managers.Resource.Load<Sprite>(Define.MainUI_Sword_B); }, null, Define.UIEvent.PointerEnter);
+        GetImage((int)Images.MainUISwordAImage).gameObject.BindEvent(() =>
+        { GetImage((int)Images.MainUISwordAImage).sprite = Managers.Resource.Load<Sprite>(Define.MainUI_Sword_A); ; }, null, Define.UIEvent.PointerExit);
+
+        GetImage((int)Images.MainUIWarpAImage).gameObject.BindEvent(() =>
+        { GetImage((int)Images.MainUIWarpAImage).sprite = Managers.Resource.Load<Sprite>(Define.MainUI_Warp_B); }, null, Define.UIEvent.PointerEnter);
+        GetImage((int)Images.MainUIWarpAImage).gameObject.BindEvent(() =>
+        { GetImage((int)Images.MainUIWarpAImage).sprite = Managers.Resource.Load<Sprite>(Define.MainUI_Warp_A); ; }, null, Define.UIEvent.PointerExit);
+        #endregion
+
+
         CheckMonster();
         CheckItem();
         CheckDoor();
         SetPlayerInfo();
+        Refresh();
 
         return true;
+    }
+
+    public void Refresh()
+    {
+        GetText((int)Texts.PlayerLevelText).text = Managers.Game.CurPlayerData.Level.ToString();
+        int level = Managers.Game.CurPlayerData.Level;
+        Debug.Log($"{Managers.Game.CurPlayerData.CurExp} , {Managers.Data.PlayerDic[level].NeedExp}");
+        //GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurExp / Managers.Data.PlayerDic[level].NeedExp;
+        GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurHP / Managers.Game.CurPlayerData.MaxHP;
     }
 
     void CheckMonster()
@@ -112,7 +159,7 @@ public class UI_GameScene : UI_Scene
     /// </summary>
     public void SetPlayerInfo()
     {
-        GetText((int)Texts.PlayerNameText).text = "PlayerName";
+        //GetText((int)Texts.PlayerNameText).text = "PlayerName";
         GetText((int)Texts.PlayerHPText).text = $"HP : {Managers.Game.CurPlayerData.MaxHP} / {Managers.Game.CurPlayerData.CurHP}";
         GetText((int)Texts.PlayerAttackText).text = $"Attack : {Managers.Game.CurPlayerData.Attack}";
         GetText((int)Texts.PlayerDefenseText).text = $"Defense : {Managers.Game.CurPlayerData.Defence}";

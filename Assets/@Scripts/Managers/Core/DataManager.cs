@@ -25,7 +25,7 @@ public class DataManager
         PlayerDic = LoadJson<Data.PlayerDataLoader, int, Data.PlayerData>("PlayerData").MakeDict();
         MonsterDic = LoadJson<Data.MonsterDataLoader, int, Data.MonsterData>("MonsterData").MakeDict();
         ConsumableItemDic = LoadJson<Data.ConsumableItemDataLoader, int, Data.ConsumableItemData>("ConsumableItemData").MakeDict();
-        MonsterClassDic = LoadJson<Data.MonsterClassDataLoader, int, Data.MonsterClassData>("MonsterClass").MakeDict();
+        MonsterClassDic = LoadJson<Data.MonsterClassDataLoader, int, Data.MonsterClassData>("MonsterClassData").MakeDict();
 
         TextAsset monsterActiveDataTextAsset = Managers.Resource.Load<TextAsset>("MonsterActiveData");
         MonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(monsterActiveDataTextAsset.text);
