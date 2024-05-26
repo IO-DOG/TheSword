@@ -102,6 +102,7 @@ public class GameManager
         public string HitAnimStr { get; set; }
         public bool IsDefence { get; set; }
         public int IsActiveIndex { get; set; }
+        public int DamagedCount { get; set; }
     }
     #endregion
 
@@ -121,7 +122,7 @@ public class GameManager
 
     #region InGame
     public int GameSpeed = 1;
-
+    public UI_GameScene GameScene = null;
     public static void LevelUp()
     {
         Managers.Game.CurPlayerData.MaxHP += Managers.Data.PlayerDic[Managers.Game.CurPlayerData.Level].MaxHP;

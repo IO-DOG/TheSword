@@ -31,6 +31,7 @@ public class UI_PlayerCard : UI_Base
     public int _attackCount = 0;
     public float _maxDefenceCoolTime = 3f;
     public float _defenceCoolTime = 0f;
+    public bool _forAssassin = false;
 
     public override bool Init()
     {
@@ -72,14 +73,35 @@ public class UI_PlayerCard : UI_Base
 
     public void Attack()
     {
+        _attackCount++;
+
+        if (Managers.Game.MonsterData.Feature == 6)
+        {
+            Managers.Game.MonsterData.DamagedCount++;
+            if (Managers.Game.MonsterData.DamagedCount == 5)
+            {
+                Debug.Log("거대 효과 발동");
+                Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack - Managers.Game.CurPlayerData.Defence) * 0.2f;
+                Refresh();
+            }
+        }
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
 
         if (_attackCount == Managers.Game.CurPlayerData.Critical)
         {
             _isCri = true;
+            _forAssassin= true;
             _attackCount = 0;
         }
 
+        // 몬스터가 암살일 경우
+        if (Managers.Game.MonsterData.Feature == 7 && _forAssassin == false)
+        {
+            Debug.Log("암살 효과 발동");
+            return;
+        }
+
+        // 몬스터가 방어 상태일 경우
         if (Managers.Game.MonsterData.IsDefence == true)
         {
             Managers.Game.MonsterData.IsDefence = false;
@@ -91,15 +113,31 @@ public class UI_PlayerCard : UI_Base
                 _isCri = false;
             }
         }
-        else
+        else // 일반 공격
         {
             if (_isCri)
             {
-                Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence);
+                // 몬스터가 불사 효과일 경우
+                if (Managers.Game.MonsterData.Feature == 4)
+                {
+                    Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence) * 20;
+                    Debug.Log("불사 효과 발동 치명 데미지 200퍼");
+                }
+                else
+                    Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence);
                 _isCri = false;
             }
             else
-                Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack - Managers.Game.MonsterData.Defence);
+            {
+                // 몬스터가 불사 효과일 경우
+                if (Managers.Game.MonsterData.Feature == 4)
+                {
+                    Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence) * 0.2f;
+                    Debug.Log("불사 효과 발동 일반 데미지 20퍼");
+                }
+                else
+                    Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack - Managers.Game.MonsterData.Defence);
+            }
 
 
             if (Managers.Game.MonsterData.CurHP <= 0)
@@ -115,7 +153,6 @@ public class UI_PlayerCard : UI_Base
                 return;
             }
         }
-        _attackCount++;
         Managers.Game.OnBattleDataRefreshAction.Invoke();
     }
 

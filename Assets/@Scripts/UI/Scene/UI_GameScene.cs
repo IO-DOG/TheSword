@@ -14,6 +14,17 @@ public class UI_GameScene : UI_Scene
         KeyInventory,
     }
 
+    enum Texts
+    {
+        PlayerNameText,
+        PlayerHPText,
+        PlayerAttackText,
+        PlayerDefenseText,
+    }
+    #endregion
+
+    int _mask = (1 << (int)Define.Layer.Monster);
+
     public override bool Init()
     {
         if (base.Init() == false)
@@ -22,6 +33,7 @@ public class UI_GameScene : UI_Scene
         #region Bind
         BindButton(typeof(Buttons));
         BindObject(typeof(GameObjects));
+        BindText(typeof(Texts));
         #endregion
 
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
@@ -29,6 +41,7 @@ public class UI_GameScene : UI_Scene
         CheckMonster();
         CheckItem();
         CheckDoor();
+        SetPlayerInfo();
 
         return true;
     }
@@ -90,5 +103,17 @@ public class UI_GameScene : UI_Scene
         {
             Managers.Game.CurPlayerData.CurExp += 10;
         }
+    }
+
+    /// <summary>
+    /// �������� �÷��̾� ������ �����ϴ� �Լ�
+    /// �÷��̾� ������ �߰��Ǹ� ���Լ� ���� �߰��Ǿ����.
+    /// </summary>
+    public void SetPlayerInfo()
+    {
+        GetText((int)Texts.PlayerNameText).text = "PlayerName";
+        GetText((int)Texts.PlayerHPText).text = $"HP : {Managers.Game.CurPlayerData.MaxHP} / {Managers.Game.CurPlayerData.CurHP}";
+        GetText((int)Texts.PlayerAttackText).text = $"Attack : {Managers.Game.CurPlayerData.Attack}";
+        GetText((int)Texts.PlayerDefenseText).text = $"Defense : {Managers.Game.CurPlayerData.Defence}";
     }
 }
