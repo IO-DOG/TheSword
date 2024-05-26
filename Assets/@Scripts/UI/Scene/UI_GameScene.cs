@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class UI_GameScene : UI_Scene
 {
+    #region Enum
     enum Buttons
     {
         //ToTitleButton,
