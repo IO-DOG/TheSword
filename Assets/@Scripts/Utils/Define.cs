@@ -30,6 +30,8 @@ public class Define
         BeginDrag,
         Drag,
         EndDrag,
+        PointerEnter,
+        PointerExit,
     }
 
     public enum Layer
@@ -51,4 +53,14 @@ public class Define
     }
 
     #endregion
+
+
+    public static string MainUI_Inventory_A = "MainUI_Inventory_A.sprite";
+    public static string MainUI_Inventory_B = "MainUI_Inventory_B.sprite";
+    public static string MainUI_Option_A = "MainUI_Option_A.sprite";
+    public static string MainUI_Option_B = "MainUI_Option_B.sprite";
+    public static string MainUI_Sword_A = "MainUI_Sword_A.sprite";
+    public static string MainUI_Sword_B = "MainUI_Sword_B.sprite";
+    public static string MainUI_Warp_A = "MainUI_Warp_A.sprite";
+    public static string MainUI_Warp_B = "MainUI_Warp_B.sprite";
 }
