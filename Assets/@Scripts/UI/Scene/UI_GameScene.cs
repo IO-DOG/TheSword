@@ -75,6 +75,7 @@ public class UI_GameScene : UI_Scene
         { GetImage((int)Images.MainUIWarpAImage).sprite = Managers.Resource.Load<Sprite>(Define.MainUI_Warp_A); ; }, null, Define.UIEvent.PointerExit);
         #endregion
 
+        GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() => { Managers.UI.ShowPopupUI<UI_SettingPopup>(); });
 
         CheckMonster();
         CheckItem();
@@ -82,6 +83,10 @@ public class UI_GameScene : UI_Scene
         SetPlayerInfo();
         Refresh();
 
+        if (PlayerPrefs.GetInt("ISOPENSWORD") == 0)
+            GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(false);
+        if (PlayerPrefs.GetInt("ISOPENPORTAL") == 0)
+            GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(false);
         return true;
     }
 
@@ -90,7 +95,7 @@ public class UI_GameScene : UI_Scene
         GetText((int)Texts.PlayerLevelText).text = Managers.Game.CurPlayerData.Level.ToString();
         int level = Managers.Game.CurPlayerData.Level;
         Debug.Log($"{Managers.Game.CurPlayerData.CurExp} , {Managers.Data.PlayerDic[level].NeedExp}");
-        //GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurExp / Managers.Data.PlayerDic[level].NeedExp;
+        GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurExp / Managers.Data.PlayerDic[level].NeedExp;
         GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurHP / Managers.Game.CurPlayerData.MaxHP;
     }
 
@@ -111,7 +116,7 @@ public class UI_GameScene : UI_Scene
             monster.GetComponent<Animator>().Play($"{Managers.Data.MonsterDic[id].IdleAnimStr}");
         }
     }
-    
+
     void CheckItem()
     {
         GameObject go = GameObject.Find("Items");
@@ -150,6 +155,29 @@ public class UI_GameScene : UI_Scene
         if (Input.GetKeyDown(KeyCode.F1))
         {
             Managers.Game.CurPlayerData.CurExp += 10;
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            bool raycastHit = Physics.Raycast(ray, out hit, 100.0f, _mask);
+            Debug.DrawRay(Camera.main.transform.position, ray.direction * 100.0f, Color.red, 1.0f);
+
+            if (raycastHit)
+            {
+                if (hit.collider.gameObject.layer == (int)Define.Layer.Monster)
+                {
+                    MonsterController monster = hit.collider.gameObject.GetComponent<MonsterController>();
+                    int id = monster.id;
+                    Debug.Log($"MonsterName : {Managers.Data.MonsterDic[id].Name}");
+                    Debug.Log($"MonsterImage : {Managers.Data.MonsterDic[id].IdleAnimStr}");
+                    Debug.Log($"MonsterImage : {Managers.Data.MonsterDic[id].IdleAnimStr}");
+
+                    UI_MonsterInfo monsterInfo = Managers.UI.MakeSubItem<UI_MonsterInfo>(monster.transform);
+                    monsterInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
+                }
+            }
         }
     }
 

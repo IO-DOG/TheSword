@@ -19,6 +19,7 @@ public class UI_MonsterInfo : UI_Base
         MonsterAttackText,
         MonsterDefenseText,
         MonsterHPText,
+        MonsterDescText,
     }
     #endregion
 
@@ -59,11 +60,12 @@ public class UI_MonsterInfo : UI_Base
     void SetInfo()
     {
         int id = gameObject.transform.parent.GetComponent<MonsterController>().id;
-        GetText((int)Texts.MonsterNameText).text = "Name : " + Managers.Data.MonsterDic[id].Name;
+        GetText((int)Texts.MonsterNameText).text = Managers.Data.MonsterDic[id].Name;
         GetText((int)Texts.MonsterClassText).text = "Æ¯¼º : " + Managers.Data.MonsterClassDic[Managers.Data.MonsterDic[id].Feature].ClassName;
-        GetText((int)Texts.MonsterAttackText).text = "Attack : " + Managers.Data.MonsterDic[id].Attack.ToString();
-        GetText((int)Texts.MonsterDefenseText).text = "Defense : " + Managers.Data.MonsterDic[id].Defence.ToString();
-        GetText((int)Texts.MonsterHPText).text = "HP : " + Managers.Data.MonsterDic[id].MaxHP.ToString();
+        GetText((int)Texts.MonsterAttackText).text = Managers.Data.MonsterDic[id].Attack.ToString();
+        GetText((int)Texts.MonsterDefenseText).text = Managers.Data.MonsterDic[id].Defence.ToString();
+        GetText((int)Texts.MonsterHPText).text = Managers.Data.MonsterDic[id].MaxHP.ToString();
+        //GetText((int)Texts.MonsterDescText).text = Managers.Data.MonsterDic[id].
     }
 
     private void Update()

@@ -39,7 +39,7 @@ public class GameManager
     #region CurPlayerData
     public class ContinueData
     {
-        public int Level { get; set; } = 1; // Lv
+        public int Level { get; set; } // Lv
         public float curExp;
         public float CurExp
         {
@@ -165,7 +165,7 @@ public class GameManager
                 File.Delete(path);
 
             int level = 1;
-            Managers.Game.CurPlayerData.Level = Managers.Data.PlayerDic[level].id;
+            Managers.Game.CurPlayerData.Level = Managers.Data.PlayerDic[level].id + 1;
             Managers.Game.CurPlayerData.CurExp = 0;
             Managers.Game.CurPlayerData.MaxHP = Managers.Data.PlayerDic[level].MaxHP;
             Managers.Game.CurPlayerData.CurHP = Managers.Data.PlayerDic[level].MaxHP;
@@ -177,6 +177,10 @@ public class GameManager
             Managers.Game.CurPlayerData.CriticalAttack = Managers.Data.PlayerDic[level].CriticalAttack;
             Managers.Game.CurPlayerData.MoveSpeed = Managers.Data.PlayerDic[level].MoveSpeed;
             Managers.Game.CurPlayerData.IsDefence = false;
+
+            // 오픈하면 1로 변경해야함.
+            PlayerPrefs.SetInt("ISOPENSWORD", 0);
+            PlayerPrefs.SetInt("ISOPENPORTAL", 0);
 
             return false;
         }
