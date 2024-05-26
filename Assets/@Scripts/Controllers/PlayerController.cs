@@ -111,10 +111,10 @@ public class PlayerController : MonoBehaviour
             {
                 somethingExist = true;
             }
+            // Checking Item
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Item)
             {
-                if (hit.collider.gameObject.GetComponent<ConsumableItem>()._consumableItemIndex < ConsumableItem.NUM_OF_KEYS)
-                    hit.collider.gameObject.GetComponent<ConsumableItem>().PickUp();
+                hit.collider.gameObject.GetComponent<ConsumableItem>().PickUp();
             }
             //Checking Door
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Door)
