@@ -15,7 +15,7 @@ public class UI_MonsterInfo : UI_Base
     enum Texts
     {
         MonsterNameText,
-        MonsterClassText,
+        //MonsterClassText,
         MonsterAttackText,
         MonsterDefenseText,
         MonsterHPText,
@@ -61,7 +61,7 @@ public class UI_MonsterInfo : UI_Base
     {
         int id = gameObject.transform.parent.GetComponent<MonsterController>().id;
         GetText((int)Texts.MonsterNameText).text = Managers.Data.MonsterDic[id].Name;
-        GetText((int)Texts.MonsterClassText).text = "특성 : " + Managers.Data.MonsterClassDic[Managers.Data.MonsterDic[id].Feature].ClassName;
+        //GetText((int)Texts.MonsterClassText).text = "특성 : " + Managers.Data.MonsterClassDic[Managers.Data.MonsterDic[id].Feature].ClassName;
         GetText((int)Texts.MonsterAttackText).text = Managers.Data.MonsterDic[id].Attack.ToString();
         GetText((int)Texts.MonsterDefenseText).text = Managers.Data.MonsterDic[id].Defence.ToString();
         GetText((int)Texts.MonsterHPText).text = Managers.Data.MonsterDic[id].MaxHP.ToString();
