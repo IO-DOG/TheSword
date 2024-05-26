@@ -27,7 +27,9 @@ public class ConsumableItem : Item
     public void PickUp()
     {
         Debug.Log(gameObject.name + "is Picked up!");
+        Managers.Data.ItemActiveDic[_itemIndex_forActive] = false;
         Managers.Game.Inventory.AddItem(this);
+        Managers.Game.SaveGame();
         gameObject.SetActive(false);
     }
 }

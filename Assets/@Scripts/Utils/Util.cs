@@ -80,11 +80,4 @@ public static class Util
         return (T)Enum.Parse(typeof(T), value, true);
     }
 
-    public static Vector3 ScreenToWorldCood(Vector3 input)
-    {
-        int width = Screen.width;
-        int height = Screen.height;
-
-        return new Vector3(input.x - width / 2, input.y - height / 2, input.z);
-    }
 }

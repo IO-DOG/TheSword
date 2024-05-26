@@ -22,17 +22,17 @@ public class CreateMapEditor : MonoBehaviour
         if (parent == null)
             parent = new GameObject { name = "Parent" };
         else
-            Debug.Log("Parent ¿ÀºêÁ§Æ® »èÁ¦ ÈÄ ÁøÇà ¹Ù¶÷.");
+            Debug.Log("Parent ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ù¶ï¿½.");
         GameObject monsters = GameObject.Find("Monsters");
         if (monsters == null)
             monsters = new GameObject { name = "Monsters" };
         else
-            Debug.Log("Monsters ¿ÀºêÁ§Æ® »èÁ¦ ÈÄ ÁøÇà ¹Ù¶÷.");
+            Debug.Log("Monsters ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ù¶ï¿½.");
         GameObject items = GameObject.Find("Items");
         if (items == null)
             items = new GameObject { name = "Items" };
         else
-            Debug.Log("Items ¿ÀºêÁ§Æ® »èÁ¦ ÈÄ ÁøÇà ¹Ù¶÷.");
+            Debug.Log("Items ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ù¶ï¿½.");
 
         GameObject bossMonsters = GameObject.Find("BossMonsters");
 
@@ -42,6 +42,7 @@ public class CreateMapEditor : MonoBehaviour
         int monsterIndex = 0;
         int bossMonsterIndex = 0;
         int itemIndex = 0;
+        int doorIndex = 0;
 
         for (int y = 0; y < lines.Length; y++)
         {
@@ -62,14 +63,14 @@ public class CreateMapEditor : MonoBehaviour
                     toAdd = voidObject.GetComponentInChildren<BoxCollider>().size.x;
                     UnityEngine.Object.Instantiate(voidObject, new Vector3(coX, coY + addToFloorY, coZ), Quaternion.identity, parent.transform);
                 }
-                else if (block[0] == 'I') // ¾ÆÀÌÅÛÀÏ °æ¿ì
+                else if (block[0] == 'I') // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
                 {
                     GameObject floor = Resources.Load<GameObject>($"Tilemap_1");
                     toAdd = floor.GetComponentInChildren<BoxCollider>().size.x;
                     UnityEngine.Object.Instantiate(floor, new Vector3(coX, coY + addToFloorY, coZ), Quaternion.identity, parent.transform);
                     //floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
 
-                    // TODO ¾ÆÀÌÅÛ »ý¼º
+                    // TODO ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
                     GameObject item = Resources.Load<GameObject>($"Item");
                     UnityEngine.Object.Instantiate(item, new Vector3(coX, coY + 3f, coZ), Quaternion.identity, items.transform);
                     //item.transform.localScale = new Vector3(1f, 1.4f, 1.4f);
@@ -77,14 +78,14 @@ public class CreateMapEditor : MonoBehaviour
                     item.name = $"item{itemIndex}";
                     item.GetComponent<Item>()._itemIndex_forActive = itemIndex++;
                 }
-                else if (block[0] == 'M') // ¸ó½ºÅÍÀÏ °æ¿ì
+                else if (block[0] == 'M') // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
                 {
                     GameObject floor = Resources.Load<GameObject>($"Tilemap_1");
                     toAdd = floor.GetComponentInChildren<BoxCollider>().size.x;
                     UnityEngine.Object.Instantiate(floor, new Vector3(coX, coY + addToFloorY, coZ), Quaternion.identity, parent.transform);
                     //floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
 
-                    // TODO ¸ó½ºÅÍ »ý¼º
+                    // TODO ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
                     GameObject monster = Resources.Load<GameObject>($"Monster");
                     UnityEngine.Object.Instantiate(monster, new Vector3(coX, coY + 4.5f, coZ - 1f), Quaternion.identity, monsters.transform);
                     //monster.transform.localScale = new Vector3(2f, 4f, 4f);
@@ -92,14 +93,14 @@ public class CreateMapEditor : MonoBehaviour
                     monster.name = $"monster{monsterIndex}";
                     monster.GetComponent<MonsterController>()._monsterIndex_forActive = monsterIndex++;
                 }
-                else if (block[0] == 'B') // º¸½º ¸ó½ºÅÍÀÏ °æ¿ì
+                else if (block[0] == 'B') // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
                 {
                     GameObject floor = Resources.Load<GameObject>($"Tilemap_1");
                     toAdd = floor.GetComponentInChildren<BoxCollider>().size.x;
                     UnityEngine.Object.Instantiate(floor, new Vector3(coX, coY + addToFloorY, coZ), Quaternion.identity, parent.transform);
                     //floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
 
-                    // TODO º¸½º ¸ó½ºÅÍ »ý¼º
+                    // TODO ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
                     //GameObject bossMonster = Resources.Load<GameObject>($"BossMonster");
                     //UnityEngine.Object.Instantiate(bossMonster, new Vector3(coX, coY + 1f, coZ), Quaternion.identity, bossMonsters.transform);
                     //bossMonster.transform.localScale = new Vector3(1f, 1.4f, 1.4f);
@@ -113,12 +114,18 @@ public class CreateMapEditor : MonoBehaviour
                     toAdd = floor.GetComponentInChildren<BoxCollider>().size.x;
                     UnityEngine.Object.Instantiate(floor, new Vector3(coX, coY + addToFloorY, coZ), Quaternion.identity, parent.transform);
                     //floor.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
-                    // TODO Å¸ÀÏ »ý¼º
-                    if (block != "1") // ¹Ù´Ú Å¸ÀÏÀÌ ¾Æ´Ò°æ¿ì.
+                    // TODO Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+                    if (block != "1") // ï¿½Ù´ï¿½ Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½Æ´Ò°ï¿½ï¿½.
                     {
                         GameObject tile = Resources.Load<GameObject>($"Tilemap_{block}");
                         UnityEngine.Object.Instantiate(tile, new Vector3(coX, coY, coZ), Quaternion.identity, parent.transform);
                         //tile.transform.localScale = new Vector3(0.312f, 0.312f, 0.312f);
+
+                        if (block[0] >= '3' && block[0] <= '8')
+                        {
+                            tile.name = $"door{doorIndex}";
+                            tile.GetComponentInChildren<Door>()._doorIndex_forActive = doorIndex++;
+                        }
                     }
                 }
                 coX += toAdd;

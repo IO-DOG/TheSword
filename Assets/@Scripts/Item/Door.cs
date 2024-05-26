@@ -6,6 +6,7 @@ using UnityEngine;
 public class Door : MonoBehaviour
 {
     public int _keyIndex = 0;
+    public int _doorIndex_forActive = 0;
     CameraController _camera;
 
     private void Start()
@@ -38,6 +39,8 @@ public class Door : MonoBehaviour
 
     IEnumerator OpenDoor(float time)
     {
+        Managers.Data.DoorActiveDic[_doorIndex_forActive] = false;
+        Managers.Game.SaveGame();
         yield return new WaitForSeconds(1f);
         float elapsedTime = 0.0f;
         Quaternion targetRotation = Quaternion.Euler(_rotateAngle);
