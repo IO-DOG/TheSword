@@ -35,6 +35,8 @@ public class CreateMapEditor : MonoBehaviour
             Debug.Log("Items ������Ʈ ���� �� ���� �ٶ�.");
 
         GameObject bossMonsters = GameObject.Find("BossMonsters");
+        if (bossMonsters == null)
+            bossMonsters = new GameObject { name = "BossMonters" };
 
         float coX = 0, coY = 0, coZ = 0;
         float toAdd = 0;

@@ -28,7 +28,6 @@ public class UI_PlayerCard : UI_Base
     #endregion
 
     public bool _isCri = false;
-    public int _attackCount = 0;
     public float _maxDefenceCoolTime = 3f;
     public float _defenceCoolTime = 0f;
     public bool _forAssassin = false;
@@ -73,7 +72,7 @@ public class UI_PlayerCard : UI_Base
 
     public void Attack()
     {
-        _attackCount++;
+        Managers.Game.AttackCount++;
 
         if (Managers.Game.MonsterData.Feature == 6)
         {
@@ -87,11 +86,11 @@ public class UI_PlayerCard : UI_Base
         }
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
 
-        if (_attackCount == Managers.Game.CurPlayerData.Critical)
+        if (Managers.Game.AttackCount == Managers.Game.CurPlayerData.Critical)
         {
             _isCri = true;
             _forAssassin= true;
-            _attackCount = 0;
+            Managers.Game.AttackCount = 0;
         }
 
         // 몬스터가 암살일 경우
