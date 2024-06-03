@@ -55,6 +55,8 @@ public class UI_GameScene : UI_Scene
         #endregion
 
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
+        Managers.Game.MainCamera = Camera.main;
+
         //GetButton((int)Buttons.ToTitleButton).gameObject.BindEvent(() => Managers.Scene.LoadScene(Define.Scene.TitleScene));
 
         #region PointerEnter&PointerExit
@@ -86,9 +88,8 @@ public class UI_GameScene : UI_Scene
 
         GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() => { Managers.UI.ShowPopupUI<UI_SettingPopup>(); });
 
-        CheckMonster();
-        CheckItem();
-        CheckDoor();
+        Managers.Game.InstantiateMap("Dungeon_02");
+
         SetPlayerInfo();
         Refresh();
 
@@ -107,57 +108,6 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurExp / Managers.Data.PlayerDic[level].NeedExp;
         GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurHP / Managers.Game.CurPlayerData.MaxHP;
         Managers.Game.Inventory.ShowKeySlot(Managers.Game.Player._keyInventory);
-    }
-
-    void CheckMonster()
-    {
-        GameObject go = GameObject.Find("Monsters");
-        MonsterController[] monsters = go.GetComponentsInChildren<MonsterController>();
-
-        foreach (MonsterController monster in monsters)
-        {
-            if (Managers.Data.MonsterActiveDic[monster._monsterIndex_forActive] == false)
-            {
-                monster.gameObject.SetActive(false);
-                continue;
-            }
-
-            int id = monster.id;
-            monster.GetComponent<Animator>().Play($"{Managers.Data.MonsterDic[id].IdleAnimStr}");
-        }
-    }
-
-    void CheckItem()
-    {
-        GameObject go = GameObject.Find("Items");
-        Item[] items = go.GetComponentsInChildren<Item>();
-
-        foreach (Item item in items)
-        {
-            if (Managers.Data.ItemActiveDic[item._itemIndex_forActive] == false)
-            {
-                item.gameObject.SetActive(false);
-                continue;
-            }
-
-            int id = item.id;
-            item.GetComponent<Animator>().Play($"ConsumableItem_{id}");
-        }
-    }
-
-    void CheckDoor()
-    {
-        GameObject go = GameObject.Find("Parent");
-        Door[] doors = go.GetComponentsInChildren<Door>();
-
-        foreach (Door door in doors)
-        {
-            if (Managers.Data.ItemActiveDic[door._doorIndex_forActive] == false)
-            {
-                door.gameObject.transform.parent.gameObject.SetActive(false);
-                continue;
-            }
-        }
     }
 
     private void Update()

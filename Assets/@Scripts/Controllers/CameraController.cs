@@ -2,6 +2,7 @@ using Cinemachine;
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEditor.Progress;
 
@@ -16,40 +17,37 @@ public class CameraController : MonoBehaviour
     GameObject _monsters;
     GameObject _items;
 
-    Vector3 _tileOriginScale;
+    Vector3 _goOriginScale;
     Vector3 _playerOriginScale;
     Vector3 _monsterOriginScale;
     Vector3 _itemOriginScale;
 
-    float Angle
-    {
-        get { return _angle; }
-        set
-        {
-            if (_angle != value)
-            {
-                _angle = value;
-                AdjustCameraPitch(_angle);
-            }
-        }
-    }
+    //float Angle
+    //{
+    //    get { return _angle; }
+    //    set
+    //    {
+    //        if (_angle != value)
+    //        {
+    //            _angle = value;
+    //            AdjustCameraPitch(_angle);
+    //        }
+    //    }
+    //}
 
     void Start()
     {
-        _parent = GameObject.Find("Parent");
-        _player = GameObject.Find("Player");
-        _monsters = GameObject.Find("Monsters");
-        _items = GameObject.Find ("Items");
+        //_parent = GameObject.Find("Map");
+        //_monsters = GameObject.Find("Monsters");
+        //_items = GameObject.Find ("Items");
 
-        _tileOriginScale = _parent.transform.GetChild(0).localScale;
-        _playerOriginScale = _player.transform.localScale;
-        _monsterOriginScale = _monsters.transform.GetChild(0).localScale;
-        _itemOriginScale = _items.transform.GetChild(0).localScale;
+        //_monsterOriginScale = _monsters.transform.GetChild(0).localScale;
+        //_itemOriginScale = _items.transform.GetChild(0).localScale;
 
-        if (GetComponent<CinemachineVirtualCamera>() != null)
-        {
-            AdjustCameraPitch(_angle);
-        }
+        //if (GetComponent<CinemachineVirtualCamera>() != null)
+        //{
+        //    AdjustCameraPitch(_angle);
+        //}
     }
 
     //private void Update()
@@ -60,7 +58,7 @@ public class CameraController : MonoBehaviour
     //        Angle++;
     //}
 
-    void AdjustCameraPitch(float angle)
+    public void AdjustCameraPitch(float angle, GameObject go)
     {
         CinemachineTransposer transposer = GetComponent<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>();
         Vector3 offset = transposer.m_FollowOffset;
@@ -68,31 +66,18 @@ public class CameraController : MonoBehaviour
 
         transposer.m_FollowOffset = offset;
 
-        ChangeView(angle);
+        ChangeView(angle, go);
     }
 
-    void ChangeView(float angle)
+    void ChangeView(float angle, GameObject go)
     {
         scaleMultiplier = 1 / Mathf.Cos(angle * Mathf.Deg2Rad);
+        _playerOriginScale = Managers.Game.Player.transform.localScale;
+        _goOriginScale = go.transform.localScale;
 
-        //for (int i = 0; i < _parent.transform.childCount; i++)
-        //{
-        //    Transform child = _parent.transform.GetChild(i);
-        //    child.transform.localScale = new Vector3(_tileOriginScale.x, _tileOriginScale.y, _tileOriginScale.z * scaleMultiplier);
-        //}
-
-        for (int i = 0; i< _monsters.transform.childCount; i++)
-        {
-            Transform child = _monsters.transform.GetChild(i);
-            child.transform.localScale = new Vector3(_monsterOriginScale.x, _monsterOriginScale.y * scaleMultiplier, _monsterOriginScale.z * scaleMultiplier);
-        }
-
-        for (int i = 0; i < _items.transform.childCount; i++)
-        {
-            Transform child = _items.transform.GetChild(i);
-            child.transform.localScale = new Vector3(_itemOriginScale.x, _itemOriginScale.y * scaleMultiplier, _itemOriginScale.z * scaleMultiplier);
-        }
-
-        _player.transform.localScale = new Vector3(_playerOriginScale.x, _playerOriginScale.y * scaleMultiplier, _playerOriginScale.z * scaleMultiplier);
+        if (go.GetComponent<PlayerController>() != null)
+            go.transform.localScale = new Vector3(_playerOriginScale.x, _playerOriginScale.y * scaleMultiplier, _playerOriginScale.z * scaleMultiplier);
+        else
+            go.transform.localScale = new Vector3(_goOriginScale.x, _goOriginScale.y * scaleMultiplier, _goOriginScale.z);
     }
 }

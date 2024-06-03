@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class MonsterController : MonoBehaviour
 {
     public int id = 0;
     public int _monsterIndex_forActive = 0;
+
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.name == "Player")
@@ -70,6 +73,7 @@ public class MonsterController : MonoBehaviour
 
     private void Start()
     {
+        GetComponent<Animator>().Play($"{Managers.Data.MonsterDic[id].IdleAnimStr}");
         //id = 1;
     }
 }

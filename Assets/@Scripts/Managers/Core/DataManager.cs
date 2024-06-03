@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using UnityEditor;
 using UnityEngine;
 
 public interface ILoader<Key, Value>
@@ -15,28 +16,17 @@ public class DataManager
     public Dictionary<int, Data.MonsterData> MonsterDic { get; private set; } = new Dictionary<int, Data.MonsterData>();
     public Dictionary<int, Data.ConsumableItemData> ConsumableItemDic { get; private set; } = new Dictionary<int, Data.ConsumableItemData>();
     public Dictionary<int, Data.MonsterClassData> MonsterClassDic { get; set; } = new Dictionary<int, Data.MonsterClassData>();
-    public Dictionary<int, bool> MonsterActiveDic { get; set; } = new Dictionary<int, bool>();
-    public Dictionary<int, bool> BossMonsterActiveDic { get; set; } = new Dictionary<int, bool>();
-    public Dictionary<int, bool> ItemActiveDic { get; set; } = new Dictionary<int, bool>();
-    public Dictionary<int, bool> DoorActiveDic { get; set; } = new Dictionary<int, bool>();
+    public Dictionary<string, Data.MapData> MapDic { get; set; } = new Dictionary<string, Data.MapData>();
 
     public void Init()
     {
+        AssetDatabase.Refresh();
+
         PlayerDic = LoadJson<Data.PlayerDataLoader, int, Data.PlayerData>("PlayerData").MakeDict();
         MonsterDic = LoadJson<Data.MonsterDataLoader, int, Data.MonsterData>("MonsterData").MakeDict();
         ConsumableItemDic = LoadJson<Data.ConsumableItemDataLoader, int, Data.ConsumableItemData>("ConsumableItemData").MakeDict();
         MonsterClassDic = LoadJson<Data.MonsterClassDataLoader, int, Data.MonsterClassData>("MonsterClassData").MakeDict();
-
-        TextAsset monsterActiveDataTextAsset = Managers.Resource.Load<TextAsset>("MonsterActiveData");
-        MonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(monsterActiveDataTextAsset.text);
-        TextAsset bossMonsterActiveDataTextAsset = Managers.Resource.Load<TextAsset>("BossMonsterActiveData");
-        BossMonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(bossMonsterActiveDataTextAsset.text);
-        TextAsset itemActiveDataTextAsset = Managers.Resource.Load<TextAsset>("ItemActiveData");
-        ItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(itemActiveDataTextAsset.text);
-        TextAsset doorAcriveDataTextAsset = Managers.Resource.Load<TextAsset>("DoorActiveData");
-        DoorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(doorAcriveDataTextAsset.text);
-
-        CheckSaveData();
+        MapDic = LoadJson<Data.MapDataLoader, string, Data.MapData>("MapData").MakeDict();
     }
 
     Loader LoadJson<Loader, Key, Value>(string path) where Loader : ILoader<Key, Value>
@@ -45,43 +35,57 @@ public class DataManager
         return JsonConvert.DeserializeObject<Loader>(textAsset.text);
     }
 
-    void CheckSaveData()
+    #region Active Off
+    public void MonsterActiveOff(int index)
     {
+        foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json";
-            if (File.Exists(path))
+            string key = entry.Key;
+            Data.MapData mapData = entry.Value;
+
+            foreach (Data.Tile tile in mapData.Tile)
             {
-                string file = Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json";
-                string fileStr = File.ReadAllText(file);
-                MonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
-            }
-        }
-        {
-            string path = Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json";
-            if (File.Exists(path))
-            {
-                string file = Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json";
-                string fileStr = File.ReadAllText(file);
-                BossMonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
-            }
-        }
-        {
-            string path = Application.dataPath + "/@Resources/Data/SaveItemActiveData.json";
-            if (File.Exists(path))
-            {
-                string file = Application.dataPath + "/@Resources/Data/SaveItemActiveData.json";
-                string fileStr = File.ReadAllText(file);
-                ItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
-            }
-        }
-        {
-            string path = Application.dataPath + "/@Resources/Data/SaveDoorActiveData.Json";
-            if(File.Exists(path))
-            {
-                string file = Application.dataPath + "/@Resources/Data/SaveDoorActiveData.Json";
-                string fileStr = File.ReadAllText(file);
-                DoorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
+               if(tile.Occupied.Type == "Monster" && tile.Occupied.TotalIndex == index)
+                {
+                    tile.Occupied.IsActive = false;
+                }
             }
         }
     }
+
+    public void ItemActiveOff(int index)
+    {
+        foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
+        {
+            string key = entry.Key;
+            Data.MapData mapData = entry.Value;
+
+            foreach (Data.Tile tile in mapData.Tile)
+            {
+                if (tile.Occupied.Type == "Item" && tile.Occupied.TotalIndex == index)
+                {
+                    tile.Occupied.IsActive = false;
+                }
+            }
+        }
+    }
+
+    public void DoorActiveOff(int index)
+    {
+        foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
+        {
+            string key = entry.Key;
+            Data.MapData mapData = entry.Value;
+
+            foreach (Data.Tile tile in mapData.Tile)
+            {
+                if (tile.Occupied.Type == "Door" && tile.Occupied.TotalIndex == index)
+                {
+                    tile.Occupied.IsActive = false;
+                }
+            }
+        }
+    }
+    #endregion
+
 }

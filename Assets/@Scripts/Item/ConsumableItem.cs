@@ -13,6 +13,11 @@ public class ConsumableItem : Item
     public const int NUM_OF_RUNES = NUM_OF_POTIONS + 3;
     public int _consumableItemIndex;
 
+    private void Start()
+    {
+        GetComponent<Animator>().Play($"ConsumableItem_{id}");
+    }
+
     public void PickUp()
     {
         #region Data Loading
@@ -28,7 +33,7 @@ public class ConsumableItem : Item
         #endregion
 
         Debug.Log(Managers.Game.ConsumableItemData.Name + "is Picked up!");
-        Managers.Data.ItemActiveDic[_itemIndex_forActive] = false;
+        Managers.Data.ItemActiveOff(_itemIndex_forActive);
         gameObject.SetActive(false);
 
         if(_consumableItemIndex < NUM_OF_KEYS)

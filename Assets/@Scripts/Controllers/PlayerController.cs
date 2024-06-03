@@ -15,8 +15,8 @@ public class PlayerController : MonoBehaviour
     float _duration;
     bool _isMoving = false;
 
-    Vector3 _interpolateGridPos = new Vector3(0f, 0f, 1f);
-    Vector3 _interpolateRayPos = new Vector3(0f, -0.5f, 0.4f);
+    float _offset = Define.TILE_SIZE * 0.33f;
+    Vector3 _interpolateRayPos = new Vector3(0f, -0.5f, 0f);
     Vector3 _cellPos;
     Vector3 _nextCellPos;
 
@@ -56,6 +56,8 @@ public class PlayerController : MonoBehaviour
         {
             Moving(MoveDir.Right);
         }
+
+        //Debug.DrawRay(transform.position + _interpolateRayPos, _nextCellPos * _offset, Color.red);
     }
 
     #region Moving
@@ -70,16 +72,16 @@ public class PlayerController : MonoBehaviour
         switch (moveDir) 
         {
             case MoveDir.Up:
-                _nextCellPos = _interpolateGridPos;
+                _nextCellPos = Vector3.forward * _offset;
                 break;
             case MoveDir.Down:
-                _nextCellPos = (-1) * _interpolateGridPos;
+                _nextCellPos = Vector3.back * _offset;
                 break;
             case MoveDir.Left:
-                _nextCellPos = Vector3Int.left;
+                _nextCellPos = Vector3.left  * _offset;
                 break;
             case MoveDir.Right:
-                _nextCellPos = Vector3Int.right;
+                _nextCellPos = Vector3.right * _offset;
                 break;
         }
 
@@ -102,7 +104,7 @@ public class PlayerController : MonoBehaviour
         int layerMask = (1 << (int)Define.Layer.Wall) + (1 << (int)Define.Layer.Item) + (1 << (int)Define.Layer.Door);
 
         RaycastHit hit;
-        Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, 1f, layerMask);
+        Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset, layerMask);
 
         if(hit.collider != null)
         {
