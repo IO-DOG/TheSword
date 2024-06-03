@@ -47,7 +47,6 @@ public class Inventory
         {
             for (int i = 0; i < NUM_OF_KEYS; i++)
             {
-               keyInventory.transform.GetChild(i).GetChild(0).GetComponent<Image>().sprite = Managers.Game.KeyIcon[i];
                keyInventory.transform.GetChild(i).GetComponentInChildren<TMP_Text>().text = _keys[i].ToString();
             }
         }

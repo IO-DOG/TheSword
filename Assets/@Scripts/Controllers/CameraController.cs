@@ -12,15 +12,9 @@ public class CameraController : MonoBehaviour
     float _angle = 60f; // 원하는 x축 회전 각도
     public float scaleMultiplier;
 
-    GameObject _parent;
-    GameObject _player;
-    GameObject _monsters;
-    GameObject _items;
 
     Vector3 _goOriginScale;
     Vector3 _playerOriginScale;
-    Vector3 _monsterOriginScale;
-    Vector3 _itemOriginScale;
 
     //float Angle
     //{
@@ -35,20 +29,6 @@ public class CameraController : MonoBehaviour
     //    }
     //}
 
-    void Start()
-    {
-        //_parent = GameObject.Find("Map");
-        //_monsters = GameObject.Find("Monsters");
-        //_items = GameObject.Find ("Items");
-
-        //_monsterOriginScale = _monsters.transform.GetChild(0).localScale;
-        //_itemOriginScale = _items.transform.GetChild(0).localScale;
-
-        //if (GetComponent<CinemachineVirtualCamera>() != null)
-        //{
-        //    AdjustCameraPitch(_angle);
-        //}
-    }
 
     //private void Update()
     //{

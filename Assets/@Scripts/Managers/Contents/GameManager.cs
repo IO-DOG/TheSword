@@ -32,16 +32,6 @@ public class GameManager
 
     public Camera MainCamera;
 
-    #region Load Key Icon
-    void LoadKeyIcon()
-    {
-        for (int i = 0; i < KeyIcon.Length; i++)
-        {
-            KeyIcon[i] = Resources.LoadAll<Sprite>($"Icon/DoorKey{i}")[1];
-        }
-    }
-    #endregion
-
     #region CurPlayerData
     public class ContinueData
     {
@@ -305,7 +295,7 @@ public class GameManager
 
             parent.transform.localScale = new Vector3(0.33f, 0.33f, 0.33f);
             items.transform.localPosition = items.transform.localPosition + Vector3.up * 2f + Vector3.forward * 0.7f * (-1);
-            monsters.transform.localPosition = monsters.transform.localPosition + Vector3.up * 2f + Vector3.forward * 0.7f * (-1);
+            monsters.transform.localPosition = monsters.transform.localPosition + Vector3.up * 3f + Vector3.forward * 0.7f * (-1);
             MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, items);
             MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, monsters);
             count++;
@@ -316,9 +306,7 @@ public class GameManager
     #endregion
 
     public void Init()
-    {
-        LoadKeyIcon();
-
+    { 
         _path = Application.dataPath + "/@Resources/Data/SaveData.json";
 
         if (LoadGame())
