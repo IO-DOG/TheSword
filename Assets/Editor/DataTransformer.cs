@@ -23,26 +23,10 @@ public class DataTransformer : EditorWindow
                 File.Delete(path);
         }
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json";
+            string path = Application.dataPath + "/@Resources/Data/JsonData/KeyInventory.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
-        {
-            string path = Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json";
-            if (File.Exists(path))
-                File.Delete(path);
-        }
-        {
-            string path = Application.dataPath + "/@Resources/Data/SaveItemActiveData.json";
-            if (File.Exists(path))
-                File.Delete(path);
-        }
-        {
-            string path = Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json";
-            if (File.Exists(path))
-                File.Delete(path);
-        }
-
         Debug.Log("Complete DeleteGameData");
     }
 

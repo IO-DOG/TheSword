@@ -170,6 +170,9 @@ public class GameManager
             Managers.Game.CurPlayerData.MoveSpeed = Managers.Data.PlayerDic[level].MoveSpeed;
             Managers.Game.CurPlayerData.IsDefence = false;
 
+
+            KeyInventory.InitKeyInventory();
+
             // 오픈하면 1로 변경해야함.
             PlayerPrefs.SetInt("ISOPENSWORD", 0);
             PlayerPrefs.SetInt("ISOPENPORTAL", 0);
