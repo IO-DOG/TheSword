@@ -85,6 +85,7 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false);
 
         GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() => { Managers.UI.ShowPopupUI<UI_SettingPopup>(); });
+        GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(OnClickMainUIInventoryAImage);
 
         CheckMonster();
         CheckItem();
@@ -200,5 +201,10 @@ public class UI_GameScene : UI_Scene
         GetText((int)Texts.PlayerHPText).text = $"{Managers.Game.CurPlayerData.CurHP}";
         GetText((int)Texts.PlayerAttackText).text = $"{Managers.Game.CurPlayerData.Attack}";
         GetText((int)Texts.PlayerDefenseText).text = $"{Managers.Game.CurPlayerData.Defence}";
+    }
+
+    public void OnClickMainUIInventoryAImage()
+    {
+        Managers.UI.ShowPopupUI<UI_InvenPopup>();
     }
 }
