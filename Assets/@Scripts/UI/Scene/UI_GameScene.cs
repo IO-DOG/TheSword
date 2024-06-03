@@ -107,7 +107,7 @@ public class UI_GameScene : UI_Scene
         Debug.Log($"{Managers.Game.CurPlayerData.CurExp} , {Managers.Data.PlayerDic[level].NeedExp}");
         GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurExp / Managers.Data.PlayerDic[level].NeedExp;
         GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurHP / Managers.Game.CurPlayerData.MaxHP;
-        Managers.Game.Inventory.ShowKeySlot(Managers.Game.Player._keyInventory);
+        Managers.Game.KeyInventory.ShowKeySlot(Managers.Game.Player._keyInventory);
     }
 
     private void Update()

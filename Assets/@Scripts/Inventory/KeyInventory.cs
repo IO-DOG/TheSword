@@ -1,17 +1,32 @@
+using Data;
 using DG.Tweening;
+using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using TMPro;
 using TMPro.EditorUtilities;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Inventory
+public class KeyInventory
 {
     const int NUM_OF_KEYS = ConsumableItem.NUM_OF_KEYS;
     List<Item> _items = new List<Item>();
-    int[] _keys = new int[NUM_OF_KEYS];
+    public List<int> _keys = new List<int>(NUM_OF_KEYS);
+
+    string _jsonPath = "/@Resources/Data/JsonData/KeyInventory.json";
+
+    public void InitKeyInventory()
+    {
+        for(int i = 0; i < NUM_OF_KEYS; i++)
+        {
+            _keys.Add(0);
+        }
+
+        LoadKeyInventory();
+    }
 
     public void AddItem(Item item)
     {
@@ -21,9 +36,25 @@ public class Inventory
         if (item.GetComponent<ConsumableItem>().id < NUM_OF_KEYS)
         {
             _keys[item.GetComponent<ConsumableItem>().id]++;
-        }
 
-        ShowKeySlot(Managers.Game.Player._keyInventory);
+            ShowKeySlot(Managers.Game.Player._keyInventory);
+            SaveKeyInventory();
+        }
+    }
+
+    public void SaveKeyInventory()
+    {
+        string MapDicJsonStr = JsonConvert.SerializeObject(_keys, Formatting.Indented);
+        File.WriteAllText(Application.dataPath + _jsonPath, MapDicJsonStr);
+    }
+
+    public void LoadKeyInventory()
+    {
+        if (!File.Exists(Application.dataPath + _jsonPath))
+            return;
+
+        string keyInventoryFile = File.ReadAllText(Application.dataPath + _jsonPath);
+        _keys = JsonConvert.DeserializeObject<List<int>>(keyInventoryFile);
     }
 
     public bool TryUseKey(GameObject door)

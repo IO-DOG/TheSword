@@ -121,7 +121,7 @@ public class PlayerController : MonoBehaviour
             //Checking Door
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Door)
             {
-                if (Managers.Game.Inventory.TryUseKey(hit.collider.gameObject))
+                if (Managers.Game.KeyInventory.TryUseKey(hit.collider.gameObject))
                 {
                     somethingExist = true;
 

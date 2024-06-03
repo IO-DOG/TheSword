@@ -21,7 +21,7 @@ public class GameManager
     public CurMonsterData MonsterData = new CurMonsterData(); // ���� ���� ���� ����
     public ContinueData CurPlayerData = new ContinueData(); // ���� ���� �÷��̾� ����
     public CurConsumableItemData ConsumableItemData = new CurConsumableItemData(); // Current Consumable Item Data
-    public Inventory Inventory = new Inventory(); //Inventory
+    public KeyInventory KeyInventory = new KeyInventory(); //Inventory
 
     public Action OnBattleAction;
     public Action OnBattleDataRefreshAction;
@@ -190,6 +190,9 @@ public class GameManager
             CurPlayerData = data;
             Debug.Log("�÷��̾� ������ �ε� �Ϸ�");
         }
+
+        KeyInventory.InitKeyInventory();
+
         return true;
     }
 

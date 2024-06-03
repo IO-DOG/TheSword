@@ -38,7 +38,7 @@ public class ConsumableItem : Item
 
         if(_consumableItemIndex < NUM_OF_KEYS)
         {
-            Managers.Game.Inventory.AddItem(this);
+            Managers.Game.KeyInventory.AddItem(this);
         }
         else if(_consumableItemIndex < NUM_OF_POTIONS)
         {
