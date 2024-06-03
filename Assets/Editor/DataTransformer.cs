@@ -198,6 +198,7 @@ public class DataTransformer : EditorWindow
 
             if (file.Name.Contains("Dungeon") && !file.Name.Contains("meta"))
             {
+                int totalStairsIndex = 0;
                 List<Tile> tiles = new List<Tile>();
                 string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{file.Name}").Split("\n");
                 float zPos = 0;
@@ -266,15 +267,23 @@ public class DataTransformer : EditorWindow
                             {
                                 tileID = int.Parse(Regex.Replace(block, "[^0-9]", ""));
 
-                                if (block[0] >= '3' && block[0] <= '8')
+                                if (tileID >= 3 && tileID <= 8)
                                 {
                                     occupiedType = "Door";
                                     occupiedTotalIndex = totalDoorIndex++;
                                     occupiedIsActive = true;
                                 }
-                                if (block[0] == '9')
+                                if (tileID == 9)
                                 {
                                     occupiedType = "Stairs";
+                                    occupiedTotalIndex = totalStairsIndex++;
+                                    occupiedIndex = (int)Define.Stairs.Upstairs;
+                                }
+                                else if(tileID == 10)
+                                {
+                                    occupiedType = "Stairs";
+                                    occupiedTotalIndex = totalStairsIndex++;
+                                    occupiedIndex = (int)Define.Stairs.Downstairs;
                                 }
                             }
                         }

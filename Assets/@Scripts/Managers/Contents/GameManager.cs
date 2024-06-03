@@ -285,11 +285,20 @@ public class GameManager
                 }
                 else if(tile.Occupied.Type == "Stairs")
                 {
-                    GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
-                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-
                     GameObject stairs = Managers.Resource.Instantiate($"Tilemap_{tile.ID}", tiles.transform);
-                    stairs.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
+                    stairs.name = $"stairs{tile.Occupied.TotalIndex}";
+
+                    if (tile.Occupied.Index == (int)Define.Stairs.Downstairs)
+                    {
+                        stairs.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE * 1.5f, tile.Position.Z);
+                    }
+                    else
+                    {
+                        GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
+                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+
+                        stairs.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
+                    }
 
                 }
             }

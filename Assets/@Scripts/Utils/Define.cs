@@ -52,6 +52,12 @@ public class Define
         Right,
     }
 
+    public enum Stairs
+    {
+        Upstairs = 0,
+        Downstairs = 1,
+    }
+
     #endregion
 
     #region Map
