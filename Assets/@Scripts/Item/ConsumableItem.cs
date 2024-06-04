@@ -6,12 +6,13 @@ using UnityEngine;
 
 
 [SerializeField]
-public class ConsumableItem : Item
+public class ConsumableItem : MonoBehaviour
 {
     public const int NUM_OF_KEYS = 3;
     public const int NUM_OF_POTIONS = NUM_OF_KEYS + 6;
     public const int NUM_OF_RUNES = NUM_OF_POTIONS + 3;
-    public int _consumableItemIndex;
+    public int id;
+    public int _itemIndex_forActive;
 
     private void Start()
     {
@@ -21,7 +22,6 @@ public class ConsumableItem : Item
     public void PickUp()
     {
         #region Data Loading
-        _consumableItemIndex = id;
         Managers.Game.ConsumableItemData.id = id;
         Managers.Game.ConsumableItemData.Name = Managers.Data.ConsumableItemDic[id].Name;
         Managers.Game.ConsumableItemData.Heal = Managers.Data.ConsumableItemDic[id].Heal;
@@ -33,18 +33,18 @@ public class ConsumableItem : Item
         #endregion
 
         Debug.Log(Managers.Game.ConsumableItemData.Name + "is Picked up!");
-        Managers.Data.ItemActiveOff(_itemIndex_forActive);
+        Managers.Data.CItemActiveOff(_itemIndex_forActive);
         gameObject.SetActive(false);
 
-        if(_consumableItemIndex < NUM_OF_KEYS)
+        if(id < NUM_OF_KEYS)
         {
             Managers.Game.KeyInventory.AddItem(this);
         }
-        else if(_consumableItemIndex < NUM_OF_POTIONS)
+        else if(id < NUM_OF_POTIONS)
         {
             Managers.Game.CurPlayerData.CurHP += Managers.Game.ConsumableItemData.Heal;
         }
-        else if(_consumableItemIndex < NUM_OF_RUNES)
+        else if(id < NUM_OF_RUNES)
         {
             Managers.Game.CurPlayerData.Attack += Managers.Game.ConsumableItemData.AttackUp;
             Managers.Game.CurPlayerData.Defence += Managers.Game.ConsumableItemData.DefenceUp;   

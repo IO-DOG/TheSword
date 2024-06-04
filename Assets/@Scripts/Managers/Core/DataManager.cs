@@ -53,7 +53,7 @@ public class DataManager
         }
     }
 
-    public void ItemActiveOff(int index)
+    public void CItemActiveOff(int index)
     {
         foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
         {
@@ -62,7 +62,7 @@ public class DataManager
 
             foreach (Data.Tile tile in mapData.Tile)
             {
-                if (tile.Occupied.Type == "Item" && tile.Occupied.TotalIndex == index)
+                if (tile.Occupied.Type == "CItem" && tile.Occupied.TotalIndex == index)
                 {
                     tile.Occupied.IsActive = false;
                 }

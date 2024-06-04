@@ -175,7 +175,8 @@ public class DataTransformer : EditorWindow
         #region Excel
         foreach (FileInfo file in di.GetFiles())
         {
-            int totalItemIndex = 0;
+            int totalCItemIndex = 0;
+            int totalEItemIndex = 0;
             int totalMonsterIndex = 0;
             int totalBossIndex = 0;
             int totalDoorIndex = 0;
@@ -216,8 +217,17 @@ public class DataTransformer : EditorWindow
                             tileID = 1;
 
                             occupiedIndex = int.Parse(Regex.Replace(block, "[^0-9]", ""));
-                            occupiedType = "Item";
-                            occupiedTotalIndex = totalItemIndex++;
+                            occupiedType = "CItem";
+                            occupiedTotalIndex = totalCItemIndex++;
+                            occupiedIsActive = true;
+                        }
+                        else if (block[0] == 'E')
+                        {
+                            tileID = 1;
+
+                            occupiedIndex = int.Parse(Regex.Replace(block, "[^0-9]", ""));
+                            occupiedType = "EItem";
+                            occupiedTotalIndex = totalEItemIndex++;
                             occupiedIsActive = true;
                         }
                         else if (block[0] == 'M')

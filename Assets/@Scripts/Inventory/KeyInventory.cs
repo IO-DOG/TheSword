@@ -13,7 +13,7 @@ using UnityEngine.UI;
 public class KeyInventory
 {
     const int NUM_OF_KEYS = ConsumableItem.NUM_OF_KEYS;
-    List<Item> _items = new List<Item>();
+    List<ConsumableItem> _items = new List<ConsumableItem>();
     public List<int> _keys = new List<int>(NUM_OF_KEYS);
 
     string _jsonPath = "/@Resources/Data/JsonData/KeyInventory.json";
@@ -28,7 +28,7 @@ public class KeyInventory
         LoadKeyInventory();
     }
 
-    public void AddItem(Item item)
+    public void AddItem(ConsumableItem item)
     {
         if (item != null)
             _items.Add(item);

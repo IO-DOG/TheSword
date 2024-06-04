@@ -238,16 +238,30 @@ public class GameManager
                     else
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
                 }
-                else if (tile.Occupied.Type == "Item")
+                else if (tile.Occupied.Type == "CItem")
                 {
                     GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.ID}", tiles.transform);
                     go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
 
-                    GameObject item = Managers.Resource.Instantiate("Item", items.transform);
+                    GameObject item = Managers.Resource.Instantiate("ConsumableItem", items.transform);
                     item.transform.position = go.transform.position;
-                    item.GetComponent<Item>().id = tile.Occupied.Index;
-                    item.name = $"Item{tile.Occupied.TotalIndex}";
-                    item.GetComponent<Item>()._itemIndex_forActive = tile.Occupied.TotalIndex;
+                    item.GetComponent<ConsumableItem>().id = tile.Occupied.Index;
+                    item.name = $"CItem{tile.Occupied.TotalIndex}";
+                    item.GetComponent<ConsumableItem>()._itemIndex_forActive = tile.Occupied.TotalIndex;
+
+                    if (tile.Occupied.IsActive == false)
+                        item.SetActive(false);
+                }
+                else if (tile.Occupied.Type == "EItem")
+                {
+                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.ID}", tiles.transform);
+                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+
+                    GameObject item = Managers.Resource.Instantiate("EquipItem", items.transform);
+                    item.transform.position = go.transform.position;
+                    item.GetComponent<EquipItem>().id = tile.Occupied.Index;
+                    item.name = $"EItem{tile.Occupied.TotalIndex}";
+                    item.GetComponent<EquipItem>()._itemIndex_forActive = tile.Occupied.TotalIndex;
 
                     if (tile.Occupied.IsActive == false)
                         item.SetActive(false);
