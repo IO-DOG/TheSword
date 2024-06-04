@@ -87,6 +87,7 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false);
 
         GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() => { Managers.UI.ShowPopupUI<UI_SettingPopup>(); });
+        GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(OnClickMainUIInventoryAImage);
 
         Managers.Game.InstantiateMap("Dungeon_02");
 
@@ -140,6 +141,21 @@ public class UI_GameScene : UI_Scene
                 }
             }
         }
+
+        #region for_test
+        if (Input.GetKeyDown(KeyCode.F2))
+        {
+            Managers.Game.SaveGame();
+        }
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            Managers.Game.LoadGame();
+        }
+        if (Input.GetKeyDown(KeyCode.F4))
+        {
+            Managers.Game.CurPlayerData.Inventory[0].Add(0);
+        }
+        #endregion
     }
 
     /// <summary>
@@ -152,5 +168,10 @@ public class UI_GameScene : UI_Scene
         GetText((int)Texts.PlayerHPText).text = $"{Managers.Game.CurPlayerData.CurHP}";
         GetText((int)Texts.PlayerAttackText).text = $"{Managers.Game.CurPlayerData.Attack}";
         GetText((int)Texts.PlayerDefenseText).text = $"{Managers.Game.CurPlayerData.Defence}";
+    }
+
+    public void OnClickMainUIInventoryAImage()
+    {
+        Managers.UI.ShowPopupUI<UI_InvenPopup>();
     }
 }

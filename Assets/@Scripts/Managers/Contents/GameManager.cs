@@ -7,6 +7,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Playables;
@@ -70,6 +71,8 @@ public class GameManager
         public float CriticalAttack { get; set; }
         public float MoveSpeed { get; set; }
         public bool IsDefence { get; set; }
+        //public Dictionary<int, int> Inventory = new Dictionary<int, int>();
+        public List<List<int>> Inventory = new List<List<int>>();
     }
     #endregion
 
@@ -119,6 +122,8 @@ public class GameManager
     #region InGame
     public int GameSpeed = 1;
     public UI_GameScene GameScene = null;
+    public int AttackCount { get; set; }
+
     public static void LevelUp()
     {
         Managers.Game.CurPlayerData.MaxHP += Managers.Data.PlayerDic[Managers.Game.CurPlayerData.Level].MaxHP;
@@ -173,6 +178,10 @@ public class GameManager
 
             KeyInventory.InitKeyInventory();
 
+            for (int i = 0; i < 10; ++i)
+            {
+                Managers.Game.CurPlayerData.Inventory.Add(new List<int>());
+            }
             // 오픈하면 1로 변경해야함.
             PlayerPrefs.SetInt("ISOPENSWORD", 0);
             PlayerPrefs.SetInt("ISOPENPORTAL", 0);
@@ -335,5 +344,4 @@ public class GameManager
         PlayerPrefs.SetInt("ISFIRST", 0);
         SaveGame();
     }
-
 }
