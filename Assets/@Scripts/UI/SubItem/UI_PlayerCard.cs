@@ -144,7 +144,7 @@ public class UI_PlayerCard : UI_Base
                 // add exp
                 Managers.Game.CurPlayerData.CurExp += Managers.Game.MonsterData.RewardExp;
 
-                Managers.Data.MonsterActiveDic[Managers.Game.MonsterData.IsActiveIndex] = false;
+                Managers.Data.MonsterActiveOff(Managers.Game.MonsterData.IsActiveIndex);
 
                 Destroy(Managers.Game.Monster.gameObject);
                 Managers.Game.OnBattleAction.Invoke();

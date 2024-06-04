@@ -34,7 +34,6 @@ public class Managers : MonoBehaviour
     public static UIManager UI { get { return Instance?._ui; } }
     #endregion
 
-
     public static void Init()
     {
         if (s_instance == null)

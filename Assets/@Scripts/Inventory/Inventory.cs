@@ -47,16 +47,8 @@ public class Inventory
         {
             for (int i = 0; i < NUM_OF_KEYS; i++)
             {
-                if (_keys[i] != 0)
-                {
-                    keyInventory.transform.GetChild(i).GetChild(0).GetComponent<Image>().sprite = Managers.Game.KeyIcon[i];
-                    keyInventory.transform.GetChild(i).GetComponentInChildren<TMP_Text>().text = _keys[i].ToString();
-                }
-                else
-                {
-                    keyInventory.transform.GetChild(i).GetChild(0).GetComponent<Image>().sprite = null;
-                    keyInventory.transform.GetChild(i).GetComponentInChildren<TMP_Text>().text = "";
-                }
+               keyInventory.transform.GetChild(i).GetChild(0).GetComponent<Image>().sprite = Managers.Game.KeyIcon[i];
+               keyInventory.transform.GetChild(i).GetComponentInChildren<TMP_Text>().text = _keys[i].ToString();
             }
         }
     }

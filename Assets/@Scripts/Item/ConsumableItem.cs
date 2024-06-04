@@ -9,12 +9,20 @@ using UnityEngine;
 public class ConsumableItem : Item
 {
     public const int NUM_OF_KEYS = 3;
+    public const int NUM_OF_POTIONS = NUM_OF_KEYS + 6;
+    public const int NUM_OF_RUNES = NUM_OF_POTIONS + 3;
     public int _consumableItemIndex;
 
     private void Start()
     {
-        _consumableItemIndex = Managers.Data.ConsumableItemDic[id].id;
-        Managers.Game.ConsumableItemData.id = Managers.Data.ConsumableItemDic[id].id;
+        GetComponent<Animator>().Play($"ConsumableItem_{id}");
+    }
+
+    public void PickUp()
+    {
+        #region Data Loading
+        _consumableItemIndex = id;
+        Managers.Game.ConsumableItemData.id = id;
         Managers.Game.ConsumableItemData.Name = Managers.Data.ConsumableItemDic[id].Name;
         Managers.Game.ConsumableItemData.Heal = Managers.Data.ConsumableItemDic[id].Heal;
         Managers.Game.ConsumableItemData.AttackUp = Managers.Data.ConsumableItemDic[id].AttackUp;
@@ -22,14 +30,28 @@ public class ConsumableItem : Item
         Managers.Game.ConsumableItemData.HPUp = Managers.Data.ConsumableItemDic[id].HPUp;
         Managers.Game.ConsumableItemData.Description = Managers.Data.ConsumableItemDic[id].Description;
         Managers.Game.ConsumableItemData.IsActiveIndex = _itemIndex_forActive;
-    }
+        #endregion
 
-    public void PickUp()
-    {
-        Debug.Log(gameObject.name + "is Picked up!");
-        Managers.Data.ItemActiveDic[_itemIndex_forActive] = false;
-        Managers.Game.Inventory.AddItem(this);
-        Managers.Game.SaveGame();
+        Debug.Log(Managers.Game.ConsumableItemData.Name + "is Picked up!");
+        Managers.Data.ItemActiveOff(_itemIndex_forActive);
         gameObject.SetActive(false);
+
+        if(_consumableItemIndex < NUM_OF_KEYS)
+        {
+            Managers.Game.Inventory.AddItem(this);
+        }
+        else if(_consumableItemIndex < NUM_OF_POTIONS)
+        {
+            Managers.Game.CurPlayerData.CurHP += Managers.Game.ConsumableItemData.Heal;
+        }
+        else if(_consumableItemIndex < NUM_OF_RUNES)
+        {
+            Managers.Game.CurPlayerData.Attack += Managers.Game.ConsumableItemData.AttackUp;
+            Managers.Game.CurPlayerData.Defence += Managers.Game.ConsumableItemData.DefenceUp;   
+            Managers.Game.CurPlayerData.MaxHP += Managers.Game.ConsumableItemData.HPUp;   
+        }
+
+        Managers.Game.SaveGame();
+        Managers.Game.GameScene.Refresh();
     }
 }

@@ -64,6 +64,11 @@ public class Define
     }
     #endregion
 
+    #region Map
+    public static float TILE_SIZE = 3.2f;
+    public static int TILE_COUNT = 11;
+    public static float CAMERA_ANGLE = 60;
+    #endregion
 
     public static string MainUI_Inventory_A = "MainUI_Inventory_A.sprite";
     public static string MainUI_Inventory_B = "MainUI_Inventory_B.sprite";

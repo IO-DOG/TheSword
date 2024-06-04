@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
@@ -185,60 +186,134 @@ public class DataTransformer : EditorWindow
 
     static void ParseMapData()
     {
-        int monsterIndex = 0;
-        int bossMonsterIndex = 0;
-        int itemIndex = 0;
-        int doorIndex = 0;
+        MapDataLoader loader = new MapDataLoader();
+        DirectoryInfo di = new DirectoryInfo($"{Application.dataPath}/@Resources/Data/Excel/");
 
-        Dictionary<int, bool> monsterActiveDic = new Dictionary<int, bool>();
-        Dictionary<int, bool> bossMonsterActiveDic = new Dictionary<int, bool>();
-        Dictionary<int, bool> itemActiveDic = new Dictionary<int, bool>();
-        Dictionary<int, bool> doorActiveDic = new Dictionary<int, bool>();
-
-        string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/MapData.csv").Split("\n");
-        for (int y = 0; y < lines.Length; y++)
+        #region Excel
+        foreach (FileInfo file in di.GetFiles())
         {
-            string[] row = lines[y].Replace("\r", "").Split(',');
+            int totalItemIndex = 0;
+            int totalMonsterIndex = 0;
+            int totalBossIndex = 0;
+            int totalDoorIndex = 0;
 
-            if (row.Length == 0)
-                continue;
-            if (string.IsNullOrEmpty(row[0]))
-                continue;
-            for (int x = 0; x < row.Length; ++x)
+            if (file.Name.Contains("Dungeon") && !file.Name.Contains("meta"))
             {
-                string block = row[x];
+                List<Tile> tiles = new List<Tile>();
+                string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{file.Name}").Split("\n");
+                float zPos = 0;
 
-                if (block[0] == 'M')
+                for (int y = 0; y < lines.Length; y++)
                 {
-                    monsterActiveDic.Add(monsterIndex++, true);
+                    string[] row = lines[y].Replace("\r", "").Split(',');
+                    float xPos = 0;
+                    zPos = y * Define.TILE_SIZE;
+
+                    if (row.Length == 0)
+                        continue;
+                    if (string.IsNullOrEmpty(row[0]))
+                        continue;
+
+                    for (int x = 0; x < row.Length; x++)
+                    {
+                        string block = row[x];
+
+                        int tileID;
+
+                        string occupiedType;
+                        int occupiedIndex;
+                        int occupiedTotalIndex;
+                        bool occupiedIsActive;
+
+                        xPos = x * Define.TILE_SIZE;
+
+                        if (block[0] == 'I')
+                        {
+                            tileID = 1;
+
+                            occupiedIndex = int.Parse(Regex.Replace(block, "[^0-9]", ""));
+                            occupiedType = "Item";
+                            occupiedTotalIndex = totalItemIndex++;
+                            occupiedIsActive = true;
+                        }
+                        else if (block[0] == 'M')
+                        {
+                            tileID = 1;
+
+                            occupiedIndex = int.Parse(Regex.Replace(block, "[^0-9]", ""));
+                            occupiedType = "Monster";
+                            occupiedTotalIndex = totalMonsterIndex++;
+                            occupiedIsActive = true;
+                        }
+                        else if (block[0] == 'B')
+                        {
+                            tileID = 1;
+
+                            occupiedIndex = int.Parse(Regex.Replace(block, "[^0-9]", ""));
+                            occupiedType = "Boss";
+                            occupiedTotalIndex = totalBossIndex++;
+                            occupiedIsActive = true;
+                        }
+                        else
+                        {
+                            tileID = 1;
+
+                            occupiedType = "none";
+                            occupiedIndex = -1;
+                            occupiedTotalIndex = -1;
+                            occupiedIsActive = false;
+
+                            if (block != "1")
+                            {
+                                tileID = int.Parse(Regex.Replace(block, "[^0-9]", ""));
+
+                                if (block[0] >= '3' && block[0] <= '8')
+                                {
+                                    occupiedType = "Door";
+                                    occupiedTotalIndex = totalDoorIndex++;
+                                    occupiedIsActive = true;
+                                }
+                                if (block[0] == '9')
+                                {
+                                    occupiedType = "Stairs";
+                                }
+                            }
+                        }
+
+                        Tile tile = new Tile
+                        {
+                            ID = tileID,
+                            Position = new Position
+                            {
+                                X = xPos,
+                                Y = 0,
+                                Z = zPos,
+                            },
+                            Occupied = new Occupied
+                            {
+                                Type = occupiedType,
+                                Index = occupiedIndex,
+                                TotalIndex = occupiedTotalIndex,
+                                IsActive = occupiedIsActive
+                            }
+                        };
+                        tiles.Add(tile);
+                    }
                 }
-                else if (block[0] == 'B')
+                MapData mapData = new MapData
                 {
-                    bossMonsterActiveDic.Add(bossMonsterIndex++, true);
-                }
-                else if (block[0] == 'I')
-                {
-                    itemActiveDic.Add(itemIndex++, true);
-                }
-                // door is 3, 4, 5, 6, 7, 8
-                else if (block[0] >= '3' && block[0] <= '8')
-                {
-                    doorActiveDic.Add(doorIndex++, true);
-                }
+                    Key = file.Name.Replace(".csv", ""),
+                    Tile = tiles,
+                };
+
+                loader.maps.Add(mapData);
             }
         }
+        #endregion
 
-        string monsterActiveDicJsonStr = JsonConvert.SerializeObject(monsterActiveDic, Formatting.Indented);
-        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/MonsterActiveData.json", monsterActiveDicJsonStr);
+        string mapDicJsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/MapData.json", mapDicJsonStr);
         AssetDatabase.Refresh();
-        string bossMonsterActiveDicJsonStr = JsonConvert.SerializeObject(bossMonsterActiveDic, Formatting.Indented);
-        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/BossMonsterActiveData.json", bossMonsterActiveDicJsonStr);
-        AssetDatabase.Refresh();
-        string itemActiveDicJsonStr = JsonConvert.SerializeObject(itemActiveDic, Formatting.Indented);
-        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/ItemActiveData.json", itemActiveDicJsonStr);
-        AssetDatabase.Refresh();
-        string doorActiveDicJsonStr = JsonConvert.SerializeObject(doorActiveDic, Formatting.Indented);
-        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/DoorActiveData.json", doorActiveDicJsonStr);
     }
 
     static void ParseMonsterClassData(string filename)

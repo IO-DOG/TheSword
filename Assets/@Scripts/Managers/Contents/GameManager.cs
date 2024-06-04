@@ -4,10 +4,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
+using System.Threading;
 using Unity.Mathematics;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Playables;
+using static UnityEditor.Progress;
 
 public class GameManager
 {
@@ -26,6 +30,8 @@ public class GameManager
     public Action OnBattlePlayerDefeceAction;
 
     public Sprite[] KeyIcon = new Sprite[ConsumableItem.NUM_OF_KEYS];
+
+    public Camera MainCamera;
 
     #region Load Key Icon
     void LoadKeyIcon()
@@ -151,14 +157,10 @@ public class GameManager
         string jsonStr = JsonConvert.SerializeObject(CurPlayerData, Formatting.Indented);
         File.WriteAllText(_path, jsonStr);
 
-        string monsterActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.MonsterActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json", monsterActiveDicJsonStr);
-        string bossMonsterActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.BossMonsterActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json", bossMonsterActiveDicJsonStr);
-        string itemActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.ItemActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveItemActiveData.json", itemActiveDicJsonStr);
-        string doorActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.DoorActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json", doorActiveDicJsonStr);
+        List<MapData> mapData = new List<MapData>(Managers.Data.MapDic.Values);
+        var mapContainer = new { Maps = mapData };
+        string MapDicJsonStr = JsonConvert.SerializeObject(mapContainer, Formatting.Indented);
+        File.WriteAllText(Application.dataPath + "/@Resources/Data/JsonData/MapData.json", MapDicJsonStr);
     }
 
     public bool LoadGame()
@@ -206,23 +208,110 @@ public class GameManager
             CurPlayerData = data;
             Debug.Log("�÷��̾� ������ �ε� �Ϸ�");
         }
-
-        string monsterActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json");
-        Dictionary<int, bool> monsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(monsterActiveDicFile);
-        Managers.Data.MonsterActiveDic = monsterActiveDic;
-        string bossMonsterActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json");
-        Dictionary<int, bool> bossMonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(bossMonsterActiveDicFile);
-        Managers.Data.BossMonsterActiveDic = bossMonsterActiveDic;
-        string itemActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveItemActiveData.json");
-        Dictionary<int, bool> itemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(itemActiveDicFile);
-        Managers.Data.ItemActiveDic = itemActiveDic;
-        string doorActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json");
-        Dictionary<int, bool> doorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(doorActiveDicFile);
-        Managers.Data.DoorActiveDic = doorActiveDic;
-
         return true;
     }
 
+    #endregion
+
+    #region Map Instantiate
+
+    public void InstantiateMap(string mapName)
+    {
+
+        int count = 0;
+
+        foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
+        {
+            string key = entry.Key;
+            Data.MapData mapData = entry.Value;
+
+            if (!key.Contains(mapName))
+                continue;
+
+            GameObject parent = new GameObject() { name = key };
+            GameObject tiles = new GameObject() { name = "Tiles" };
+            GameObject items = new GameObject() { name = "Items" };
+            GameObject monsters = new GameObject() { name = "Monsters" };
+
+            parent.transform.localPosition += new Vector3(count * 100, 0, 0);
+            parent.transform.parent = GameObject.Find("Map").transform;
+            tiles.transform.parent = parent.transform;
+            items.transform.parent = parent.transform;
+            monsters.transform.parent = parent.transform;
+
+            foreach (Data.Tile tile in mapData.Tile)
+            {
+                if (tile.Occupied.Type == "none")
+                {
+                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.ID}", tiles.transform);
+
+                    if (tile.ID != 1 && tile.ID != 11)
+                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
+                    else
+                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+                }
+                else if (tile.Occupied.Type == "Item")
+                {
+                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.ID}", tiles.transform);
+                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+
+                    GameObject item = Managers.Resource.Instantiate("Item", items.transform);
+                    item.transform.position = go.transform.position;
+                    item.GetComponent<Item>().id = tile.Occupied.Index;
+                    item.name = $"Item{tile.Occupied.TotalIndex}";
+                    item.GetComponent<Item>()._itemIndex_forActive = tile.Occupied.TotalIndex;
+
+                    if (tile.Occupied.IsActive == false)
+                        item.SetActive(false);
+                }
+                else if (tile.Occupied.Type == "Monster")
+                {
+                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.ID}", tiles.transform);
+                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+
+                    GameObject monster = Managers.Resource.Instantiate("Monster", monsters.transform);
+                    monster.transform.position = go.transform.position;
+                    monster.GetComponent<MonsterController>().id = tile.Occupied.Index;
+                    monster.name = $"monster{tile.Occupied.TotalIndex}";
+                    monster.GetComponent<MonsterController>()._monsterIndex_forActive = tile.Occupied.TotalIndex;
+
+                    if (tile.Occupied.IsActive == false)
+                        monster.SetActive(false);
+                }
+                else if (tile.Occupied.Type == "Door")
+                {
+                    GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
+                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+
+                    GameObject door = Managers.Resource.Instantiate($"Tilemap_{tile.ID}", tiles.transform);
+                    door.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
+                    door.name = $"door{tile.Occupied.TotalIndex}";
+                    door.GetComponentInChildren<Door>()._doorIndex_forActive = tile.Occupied.TotalIndex;
+
+                    if (tile.Occupied.IsActive == false)
+                        door.SetActive(false);
+                }
+                else if(tile.Occupied.Type == "Stairs")
+                {
+                    GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
+                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+
+                    GameObject stairs = Managers.Resource.Instantiate($"Tilemap_{tile.ID}", tiles.transform);
+                    stairs.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
+
+                }
+            }
+
+            parent.transform.localScale = new Vector3(0.33f, 0.33f, 0.33f);
+            items.transform.localPosition = items.transform.localPosition + Vector3.up * 2f + Vector3.forward * 0.7f * (-1);
+            monsters.transform.localPosition = monsters.transform.localPosition + Vector3.up * 2f + Vector3.forward * 0.7f * (-1);
+            MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, items);
+            MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, monsters);
+            count++;
+        }
+
+        MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, Player.gameObject);
+    }
     #endregion
 
     public void Init()

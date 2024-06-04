@@ -107,22 +107,48 @@ namespace Data
     [Serializable]
     public class MapData
     {
-        public int id;
+        public string Key { get; set; }
+        public List<Data.Tile> Tile { get; set; }
     }
 
     [Serializable]
-    public class MapDataLoader : ILoader<int, MapData>
+    public class Tile
     {
-        public List<MapData> data = new List<MapData>();
-        public Dictionary<int, MapData> MakeDict()
+        public int ID;
+        public Position Position { get; set; }
+        public Occupied Occupied { get; set; }
+    }
+
+    [Serializable]
+    public class Occupied
+    {
+        public string Type { get; set; }
+        public int Index { get; set; }
+        public int TotalIndex { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    [Serializable]
+    public class Position
+    {
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Z { get; set; }
+    }
+
+
+    [Serializable]
+    public class MapDataLoader : ILoader<string, MapData>
+    {
+        public List<MapData> maps = new List<MapData>();
+        public Dictionary<string, MapData> MakeDict()
         {
-            Dictionary<int, MapData> dict = new Dictionary<int, MapData>();
-            foreach (MapData creature in data)
-                dict.Add(creature.id, creature);
+            Dictionary<string, MapData> dict = new Dictionary<string, MapData>();
+            foreach (MapData map in maps)
+                dict.Add(map.Key, map);
             return dict;
         }
     }
-
     #endregion
 
     #region MonsterClassData
