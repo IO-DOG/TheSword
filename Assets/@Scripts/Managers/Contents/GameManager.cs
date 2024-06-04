@@ -268,9 +268,9 @@ public class GameManager
 
                     GameObject item = Managers.Resource.Instantiate("EquipItem", items.transform);
                     item.transform.position = go.transform.position;
-                    item.GetComponent<EquipItem>().id = tile.Occupied.Index;
+                    item.GetComponent<Equip>().Id = tile.Occupied.Index;
                     item.name = $"EItem{tile.Occupied.TotalIndex}";
-                    item.GetComponent<EquipItem>()._itemIndex_forActive = tile.Occupied.TotalIndex;
+                    item.GetComponent<Equip>()._itemIndex_forActive = tile.Occupied.TotalIndex;
 
                     if (tile.Occupied.IsActive == false)
                         item.SetActive(false);

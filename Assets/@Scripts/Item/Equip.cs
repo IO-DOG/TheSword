@@ -6,6 +6,7 @@ public class Equip : MonoBehaviour
 {
     public Define.Types _type = Define.Types.None;
     public int _id = 0;
+    public int _itemIndex_forActive;
 
     public Define.Types Types 
     { 
@@ -31,9 +32,8 @@ public class Equip : MonoBehaviour
         }
     }
 
-    void Start()
+    private void Start()
     {
-        
+        GetComponent<Animator>().Play($"EquipItem_{Id}");
     }
-
 }
