@@ -361,7 +361,38 @@ public class DataTransformer : EditorWindow
         EquipDataLoader loader = new EquipDataLoader();
 
         #region ExcelData
+        string str = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv");
+        Debug.Log(str);
+        string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv").Split("\n");
 
+        for (int y = 1; y < lines.Length; y++)
+        {
+            string[] row = lines[y].Replace("\r", "").Split(',');
+
+            if (row.Length == 0)
+                continue;
+            if (string.IsNullOrEmpty(row[0]))
+                continue;
+
+            int i = 0;
+            EquipData ed = new EquipData();
+            ed.id = ConvertValue<int>(row[i++]);
+            ed.Name = ConvertValue<string>(row[i++]);
+            ed.Type = ConvertValue<int>(row[i++]);
+            ed.ATK = ConvertValue<float>(row[i++]);
+            ed.DEF = ConvertValue<float>(row[i++]);
+            ed.HP = ConvertValue<float>(row[i++]);
+            ed.ASPD = ConvertValue<float>(row[i++]);
+            ed.DSPD = ConvertValue<float>(row[i++]);
+            ed.CRI = ConvertValue<float>(row[i++]);
+            ed.CRIATK = ConvertValue<float>(row[i++]);
+            ed.MSPD = ConvertValue<float>(row[i++]);
+            ed.AbilityId = ConvertValue<int>(row[i++]);
+            ed.ImageName = ConvertValue<string>(row[i++]);
+            ed.NameId = ConvertValue<int>(row[i++]);
+            ed.DescId = ConvertValue<int>(row[i++]);
+            loader.equips.Add(ed);
+        }
         #endregion
 
         string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);

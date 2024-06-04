@@ -195,7 +195,8 @@ namespace Data
         public float MSPD { get; set; }
         public int AbilityId { get; set; }
         public string ImageName { get; set; }
-        public int ScriptId { get; set; }
+        public int NameId { get; set; }
+        public int DescId { get; set; }
     }
 
     [Serializable]
