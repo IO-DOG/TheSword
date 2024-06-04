@@ -151,4 +151,38 @@ namespace Data
         }
     }
     #endregion
+
+    #region EquipData
+    [Serializable]
+    public class EquipData
+    {
+        public int id { get; set; }
+        public string Name { get; set; }
+        public int Type { get; set; }
+        public float ATK { get; set; }
+        public float DEF { get; set; }
+        public float HP { get; set; }
+        public float ASPD { get; set; }
+        public float DSPD { get; set; }
+        public float CRI { get; set; }
+        public float CRIATK { get; set; }
+        public float MSPD { get; set; }
+        public int AbilityId { get; set; }
+        public string ImageName { get; set; }
+        public int ScriptId { get; set; }
+    }
+
+    [Serializable]
+    public class EquipDataLoader : ILoader<int, EquipData>
+    {
+        public List<EquipData> equips = new List<EquipData>();
+        public Dictionary<int, EquipData> MakeDict()
+        {
+            Dictionary<int, EquipData> dict = new Dictionary<int, EquipData>();
+            foreach (EquipData equip in equips)
+                dict.Add(equip.id, equip);
+            return dict;
+        }
+    }
+    #endregion
 }

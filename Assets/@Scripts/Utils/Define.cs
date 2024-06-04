@@ -52,6 +52,16 @@ public class Define
         Right,
     }
 
+    public enum Types
+    {
+        None = 0,
+        Sword = 1,
+        Shield = 2,
+        Necklace = 3,
+        ring = 4,
+        Shoes = 5,
+        Book = 6,
+    }
     #endregion
 
 

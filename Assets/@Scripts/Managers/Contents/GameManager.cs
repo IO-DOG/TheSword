@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Playables;
 
@@ -74,6 +75,8 @@ public class GameManager
         public float CriticalAttack { get; set; }
         public float MoveSpeed { get; set; }
         public bool IsDefence { get; set; }
+        //public Dictionary<int, int> Inventory = new Dictionary<int, int>();
+        public List<List<int>> Inventory = new List<List<int>>();
     }
     #endregion
 
@@ -179,7 +182,10 @@ public class GameManager
             Managers.Game.CurPlayerData.CriticalAttack = Managers.Data.PlayerDic[level].CriticalAttack;
             Managers.Game.CurPlayerData.MoveSpeed = Managers.Data.PlayerDic[level].MoveSpeed;
             Managers.Game.CurPlayerData.IsDefence = false;
-
+            for (int i = 0; i < 10; ++i)
+            {
+                Managers.Game.CurPlayerData.Inventory.Add(new List<int>());
+            }
             // 오픈하면 1로 변경해야함.
             PlayerPrefs.SetInt("ISOPENSWORD", 0);
             PlayerPrefs.SetInt("ISOPENPORTAL", 0);
@@ -231,5 +237,4 @@ public class GameManager
         PlayerPrefs.SetInt("ISFIRST", 0);
         SaveGame();
     }
-
 }

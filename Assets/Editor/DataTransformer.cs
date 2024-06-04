@@ -53,6 +53,7 @@ public class DataTransformer : EditorWindow
         ParseConsumableItemData("ConsumableItem");
         ParseMapData();
         ParseMonsterClassData("MonsterClass");
+        ParseEquipData("Equip");
         Debug.Log("Complete DataTransformer");
     }
 
@@ -269,6 +270,19 @@ public class DataTransformer : EditorWindow
             cd.EffectDescId = ConvertValue<int>(row[i++]);
             loader.monsterClasses.Add(cd);
         }
+
+        #endregion
+
+        string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
+        AssetDatabase.Refresh();
+    }
+
+    static void ParseEquipData(string filename)
+    {
+        EquipDataLoader loader = new EquipDataLoader();
+
+        #region ExcelData
 
         #endregion
 

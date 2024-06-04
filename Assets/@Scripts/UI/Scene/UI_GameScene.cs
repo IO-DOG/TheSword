@@ -189,6 +189,21 @@ public class UI_GameScene : UI_Scene
                 }
             }
         }
+
+        #region for_test
+        if (Input.GetKeyDown(KeyCode.F2))
+        {
+            Managers.Game.SaveGame();
+        }
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            Managers.Game.LoadGame();
+        }
+        if (Input.GetKeyDown(KeyCode.F4))
+        {
+            Managers.Game.CurPlayerData.Inventory[0].Add(0);
+        }
+        #endregion
     }
 
     /// <summary>
