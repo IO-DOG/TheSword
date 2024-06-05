@@ -71,8 +71,13 @@ public class GameManager
         public bool IsDefence { get; set; }
         //public Dictionary<int, int> Inventory = new Dictionary<int, int>();
         public List<List<int>> Inventory = new List<List<int>>();
-
         public List<int> KeyInventory = new List<int>();
+        public int CurSword { get; set; }
+        public int CurShield { get; set; }
+        public int CurNecklace { get; set; }
+        public int CurRing { get; set; }
+        public int CurShoes { get; set; }
+        public int CurBook { get; set; }
     }
     #endregion
 

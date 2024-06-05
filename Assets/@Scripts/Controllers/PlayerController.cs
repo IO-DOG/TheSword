@@ -119,6 +119,11 @@ public class PlayerController : MonoBehaviour
             {
                 hit.collider.gameObject.GetComponent<ConsumableItem>().PickUp();
             }
+            // Checking Item
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.EItem)
+            {
+                hit.collider.gameObject.GetComponent<Equip>().PickUp();
+            }
             //Checking Door
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Door)
             {

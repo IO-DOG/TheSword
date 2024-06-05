@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UI_InvenPopup : UI_Popup
 {
@@ -143,16 +145,16 @@ public class UI_InvenPopup : UI_Popup
         GetImage((int)Images.ring).gameObject.BindEvent(OnClickRing);
         GetImage((int)Images.shoes).gameObject.BindEvent(OnClickShoes);
         GetImage((int)Images.book).gameObject.BindEvent(OnClickBook);
-        GetImage((int)Images.EquipList1).gameObject.BindEvent(OnClickEquipList1);
-        GetImage((int)Images.EquipList2).gameObject.BindEvent(OnClickEquipList2);
-        GetImage((int)Images.EquipList3).gameObject.BindEvent(OnClickEquipList3);
-        GetImage((int)Images.EquipList4).gameObject.BindEvent(OnClickEquipList4);
-        GetImage((int)Images.EquipList5).gameObject.BindEvent(OnClickEquipList5);
-        GetImage((int)Images.EquipList6).gameObject.BindEvent(OnClickEquipList6);
-        GetImage((int)Images.EquipList7).gameObject.BindEvent(OnClickEquipList7);
-        GetImage((int)Images.EquipList8).gameObject.BindEvent(OnClickEquipList8);
-        GetImage((int)Images.EquipList9).gameObject.BindEvent(OnClickEquipList9);
-        GetImage((int)Images.EquipList10).gameObject.BindEvent(OnClickEquipList10);
+        GetImage((int)Images.EquipList1).gameObject.BindEvent(() => { OnClickEquipList(1); });
+        GetImage((int)Images.EquipList2).gameObject.BindEvent(() => { OnClickEquipList(2); });
+        GetImage((int)Images.EquipList3).gameObject.BindEvent(() => { OnClickEquipList(3); });
+        GetImage((int)Images.EquipList4).gameObject.BindEvent(() => { OnClickEquipList(4); });
+        GetImage((int)Images.EquipList5).gameObject.BindEvent(() => { OnClickEquipList(5); });
+        GetImage((int)Images.EquipList6).gameObject.BindEvent(() => { OnClickEquipList(6); });
+        GetImage((int)Images.EquipList7).gameObject.BindEvent(() => { OnClickEquipList(7); });
+        GetImage((int)Images.EquipList8).gameObject.BindEvent(() => { OnClickEquipList(8); });
+        GetImage((int)Images.EquipList9).gameObject.BindEvent(() => { OnClickEquipList(9); });
+        GetImage((int)Images.EquipList10).gameObject.BindEvent(() => { OnClickEquipList(10); });
 
 
         OnClickInventory_MyInfo_On();
@@ -220,7 +222,7 @@ public class UI_InvenPopup : UI_Popup
         {
             GetImage((int)Images.necklace).color = new Color(1, 1, 1, 1);
             int idx = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Necklace][Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Necklace].Count - 1];
-            GetImage((int)Images.necklace).sprite = Managers.Resource.Load<Sprite>($"" +
+            GetImage((int)Images.necklace).sprite = Managers.Resource.Load<Sprite>(
                 $"{Managers.Data.EquipDic[idx].ImageName}");
         }
 
@@ -230,7 +232,7 @@ public class UI_InvenPopup : UI_Popup
         {
             GetImage((int)Images.ring).color = new Color(1, 1, 1, 1);
             int idx = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Ring][Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Ring].Count - 1];
-            GetImage((int)Images.ring).sprite = Managers.Resource.Load<Sprite>($"" +
+            GetImage((int)Images.ring).sprite = Managers.Resource.Load<Sprite>(
                 $"{Managers.Data.EquipDic[idx].ImageName}");
         }
 
@@ -240,7 +242,7 @@ public class UI_InvenPopup : UI_Popup
         {
             GetImage((int)Images.shoes).color = new Color(1, 1, 1, 1);
             int idx = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shoes][Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shoes].Count - 1];
-            GetImage((int)Images.shoes).sprite = Managers.Resource.Load<Sprite>($"" +
+            GetImage((int)Images.shoes).sprite = Managers.Resource.Load<Sprite>(
                 $"{Managers.Data.EquipDic[idx].ImageName}");
         }
 
@@ -250,14 +252,33 @@ public class UI_InvenPopup : UI_Popup
         {
             GetImage((int)Images.book).color = new Color(1, 1, 1, 1);
             int idx = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Book][Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Book].Count - 1];
-            GetImage((int)Images.book).sprite = Managers.Resource.Load<Sprite>($"" +
+            GetImage((int)Images.book).sprite = Managers.Resource.Load<Sprite>(
                 $"{Managers.Data.EquipDic[idx].ImageName}");
         }
 
         // todo check curplayer's sowrd
-        GetImage((int)Images.sword).color = new Color(1, 1, 1, 0);
+        if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Count == 0)
+            GetImage((int)Images.sword).color = new Color(1, 1, 1, 0);
+        else
+        {
+            GetImage((int)Images.sword).color = new Color(1, 1, 1, 1);
+            int idx = Managers.Game.CurPlayerData.CurSword;
+            GetImage((int)Images.sword).sprite = Managers.Resource.Load<Sprite>(
+                $"{Managers.Data.EquipDic[idx].ImageName}");
+        }
+
+        // to check player class
         GetImage((int)Images.Class).color = new Color(1, 1, 1, 0);
-        GetImage((int)Images.shield).color = new Color(1, 1, 1, 0);
+
+        if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shield].Count == 0)
+            GetImage((int)Images.shield).color = new Color(1, 1, 1, 0);
+        else
+        {
+            GetImage((int)Images.shield).color = new Color(1, 1, 1, 1);
+            int idx = Managers.Game.CurPlayerData.CurShield;
+            GetImage((int)Images.shield).sprite = Managers.Resource.Load<Sprite>(
+                $"{Managers.Data.EquipDic[idx].ImageName}");
+        }
 
         GetImage((int)Images.EquipList1).color = new Color(1, 1, 1, 0);
         GetImage((int)Images.EquipList2).color = new Color(1, 1, 1, 0);
@@ -301,32 +322,46 @@ public class UI_InvenPopup : UI_Popup
             GetText((int)Texts.InfoText).gameObject.SetActive(true);
             GetText((int)Texts.InfoText).text = "";
         }
-
     }
 
     void OnClickSword()
     {
         Refresh();
+        SetSwordListImage();
 
         GetImage((int)Images.Inventory_Sword_Get).gameObject.SetActive(true);
         GetImage((int)Images.Inventory_Sword_On).gameObject.SetActive(true);
 
         GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
+    }
 
-        // TODO Check get sword
-        // test
+    void SetSwordListImage()
+    {
+        UnityEngine.UI.Image[] equipList =
+            { GetImage((int)Images.EquipList1), GetImage((int)Images.EquipList2), GetImage((int)Images.EquipList3), GetImage((int)Images.EquipList4)
+        , GetImage((int)Images.EquipList5), GetImage((int)Images.EquipList6), GetImage((int)Images.EquipList7), GetImage((int)Images.EquipList8), GetImage((int)Images.EquipList9)
+        , GetImage((int)Images.EquipList10)};
+        UnityEngine.UI.Image[] inventory_equipList_get =
+            { GetImage((int)Images.Inventory_EquipList1_Get), GetImage((int)Images.Inventory_EquipList2_Get), GetImage((int)Images.Inventory_EquipList3_Get), GetImage((int)Images.Inventory_EquipList4_Get)
+        , GetImage((int)Images.Inventory_EquipList5_Get), GetImage((int)Images.Inventory_EquipList6_Get), GetImage((int)Images.Inventory_EquipList7_Get), GetImage((int)Images.Inventory_EquipList8_Get)
+        , GetImage((int)Images.Inventory_EquipList9_Get), GetImage((int)Images.Inventory_EquipList10_Get)};
 
-        if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Count >= 1 && Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword][0] == 0)
+        for (int i = 1; i <= 10; ++i)
         {
-            GetImage((int)Images.EquipList1).color = Color.white;
-            GetImage((int)Images.Inventory_EquipList1_Get).gameObject.SetActive(true);
-
+            if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Count >= i)
+            {
+                equipList[i].color = Color.white;
+                int idx = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword][i - 1];
+                equipList[i].sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[idx].ImageName}");
+                inventory_equipList_get[i].gameObject.SetActive(true);
+            }
         }
     }
 
     void OnClickShield()
     {
         Refresh();
+        SetShieldListImage();
 
         GetImage((int)Images.Inventory_Shield_Get).gameObject.SetActive(true);
         GetImage((int)Images.Inventory_Shield_On).gameObject.SetActive(true);
@@ -336,12 +371,37 @@ public class UI_InvenPopup : UI_Popup
         // TODO Check get shield
     }
 
+    void SetShieldListImage()
+    {
+        UnityEngine.UI.Image[] equipList =
+            { GetImage((int)Images.EquipList1), GetImage((int)Images.EquipList2), GetImage((int)Images.EquipList3), GetImage((int)Images.EquipList4)
+        , GetImage((int)Images.EquipList5), GetImage((int)Images.EquipList6), GetImage((int)Images.EquipList7), GetImage((int)Images.EquipList8), GetImage((int)Images.EquipList9)
+        , GetImage((int)Images.EquipList10)};
+        UnityEngine.UI.Image[] inventory_equipList_get =
+            { GetImage((int)Images.Inventory_EquipList1_Get), GetImage((int)Images.Inventory_EquipList2_Get), GetImage((int)Images.Inventory_EquipList3_Get), GetImage((int)Images.Inventory_EquipList4_Get)
+        , GetImage((int)Images.Inventory_EquipList5_Get), GetImage((int)Images.Inventory_EquipList6_Get), GetImage((int)Images.Inventory_EquipList7_Get), GetImage((int)Images.Inventory_EquipList8_Get)
+        , GetImage((int)Images.Inventory_EquipList9_Get), GetImage((int)Images.Inventory_EquipList10_Get)};
+
+        for (int i = 1; i <= 10; ++i)
+        {
+            if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shield].Count >= i)
+            {
+                equipList[i].color = Color.white;
+                int idx = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shield][i - 1];
+                equipList[i].sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[idx].ImageName}");
+                inventory_equipList_get[i].gameObject.SetActive(true);
+            }
+        }
+    }
+
     void OnClickNecklace()
     {
         Refresh();
         GetImage((int)Images.Inventory_accessory_necklace_Get).gameObject.SetActive(true);
         GetImage((int)Images.Inventory_accessory_necklace_On).gameObject.SetActive(true);
 
+        int idx = Managers.Game.CurPlayerData.CurNecklace;
+        PrintAbilityAndDesc(idx);
     }
 
     void OnClickRing()
@@ -350,6 +410,8 @@ public class UI_InvenPopup : UI_Popup
         GetImage((int)Images.Inventory_accessory_ring_Get).gameObject.SetActive(true);
         GetImage((int)Images.Inventory_accessory_ring_On).gameObject.SetActive(true);
 
+        int idx = Managers.Game.CurPlayerData.CurRing;
+        PrintAbilityAndDesc(idx);
     }
 
     void OnClickShoes()
@@ -358,6 +420,8 @@ public class UI_InvenPopup : UI_Popup
         GetImage((int)Images.Inventory_accessory_shoes_Get).gameObject.SetActive(true);
         GetImage((int)Images.Inventory_accessory_shoes_On).gameObject.SetActive(true);
 
+        int idx = Managers.Game.CurPlayerData.CurShoes;
+        PrintAbilityAndDesc(idx);
     }
 
     void OnClickBook()
@@ -366,106 +430,73 @@ public class UI_InvenPopup : UI_Popup
         GetImage((int)Images.Inventory_accessory_book_Get).gameObject.SetActive(true);
         GetImage((int)Images.Inventory_accessory_book_On).gameObject.SetActive(true);
 
+        int idx = Managers.Game.CurPlayerData.CurBook;
+        PrintAbilityAndDesc(idx);
     }
 
-    void OnClickEquipList1()
+    void OnClickEquipList(int idx)
     {
-        Refresh();
-        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList1_Get).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList1_On).gameObject.SetActive(true);
-    }
-
-    void OnClickEquipList2()
-    {
-        Refresh();
-        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList2_Get).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList2_On).gameObject.SetActive(true);
-    }
-
-    void OnClickEquipList3()
-    {
-        Refresh();
-        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList3_Get).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList3_On).gameObject.SetActive(true);
-    }
-
-    void OnClickEquipList4()
-    {
-        Refresh();
-        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList4_Get).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList4_On).gameObject.SetActive(true);
-    }
-
-    void OnClickEquipList5()
-    {
-        Refresh();
-        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList5_Get).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList5_On).gameObject.SetActive(true);
-    }
-
-    void OnClickEquipList6()
-    {
-        Refresh();
-        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList6_Get).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList6_On).gameObject.SetActive(true);
-    }
-
-    void OnClickEquipList7()
-    {
-        Refresh();
-        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList7_Get).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList7_On).gameObject.SetActive(true);
-    }
-
-    void OnClickEquipList8()
-    {
-        Refresh();
-        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList8_Get).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList8_On).gameObject.SetActive(true);
-    }
-
-    void OnClickEquipList9()
-    {
-        Refresh();
-        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList9_Get).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList9_On).gameObject.SetActive(true);
-    }
-
-    void OnClickEquipList10()
-    {
-        Refresh();
-        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList10_Get).gameObject.SetActive(true);
-        GetImage((int)Images.Inventory_EquipList10_On).gameObject.SetActive(true);
-    }
-
-    void SetSwordEquipImage()
-    {
-        if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Count >= 1 && Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword][0] == 0)
+        UnityEngine.UI.Image[] equipList =
         {
-            GetImage((int)Images.EquipList1).color = Color.white;
-            GetImage((int)Images.Inventory_EquipList1_Get).gameObject.SetActive(true);
-            GetImage((int)Images.EquipList1).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[(int)Define.Types.Sword].ImageName}");
+            GetImage((int)Images.EquipList1), GetImage((int)Images.EquipList2), GetImage((int)Images.EquipList3), GetImage((int)Images.EquipList4), GetImage((int)Images.EquipList5), 
+            GetImage((int)Images.EquipList6), GetImage((int)Images.EquipList7), GetImage((int)Images.EquipList8), GetImage((int)Images.EquipList9), GetImage((int)Images.EquipList10)
+        };
+        UnityEngine.UI.Image[] inventory_equipList_get =
+        {
+            GetImage((int)Images.Inventory_EquipList1_Get), GetImage((int)Images.Inventory_EquipList2_Get), GetImage((int)Images.Inventory_EquipList3_Get), GetImage((int)Images.Inventory_EquipList4_Get),
+            GetImage((int)Images.Inventory_EquipList5_Get), GetImage((int)Images.Inventory_EquipList6_Get), GetImage((int)Images.Inventory_EquipList7_Get), GetImage((int)Images.Inventory_EquipList8_Get),
+            GetImage((int)Images.Inventory_EquipList9_Get), GetImage((int)Images.Inventory_EquipList10_Get)
+        };
+        UnityEngine.UI.Image[] inventory_equipList_on =
+        {
+            GetImage((int)Images.Inventory_EquipList1_On), GetImage((int)Images.Inventory_EquipList2_On), GetImage((int)Images.Inventory_EquipList3_On), GetImage((int)Images.Inventory_EquipList4_On),
+            GetImage((int)Images.Inventory_EquipList5_On), GetImage((int)Images.Inventory_EquipList6_On), GetImage((int)Images.Inventory_EquipList7_On), GetImage((int)Images.Inventory_EquipList8_On),
+            GetImage((int)Images.Inventory_EquipList9_On), GetImage((int)Images.Inventory_EquipList10_On)
+        };
+
+        Refresh();
+        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
+        // 검 리스트를 보여줘야 할 때
+        if (GetImage((int)Images.Inventory_Sword_On).gameObject.activeSelf == true)
+        {
+            if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Count >= idx)
+            {
+                inventory_equipList_get[idx].gameObject.SetActive(true);
+                inventory_equipList_on[idx].gameObject.SetActive(true);
+                int temp = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword][idx];
+                PrintAbilityAndDesc(temp);
+                Managers.Game.CurPlayerData.CurSword = temp;
+                GetImage((int)Images.sword).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[temp].ImageName}");
+            }
+        }
+        else // 방패 리스트를 보여줘야 할 때
+        {
+            if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shield].Count >= idx)
+            {
+                inventory_equipList_get[idx].gameObject.SetActive(true);
+                inventory_equipList_on[idx].gameObject.SetActive(true);
+                int temp = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shield][idx];
+                PrintAbilityAndDesc(temp);
+                Managers.Game.CurPlayerData.CurShield = temp;
+                GetImage((int)Images.shield).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[temp].ImageName}");
+            }
         }
     }
 
-    void SetSheildEquipImage()
+    /// <summary>
+    /// 인덱스에 맞는 장비에 대한 능력치와 설명을 보여준다.
+    /// </summary>
+    /// <param name="idx"> 
+    /// 장비의 인덱스 
+    /// </param>
+    void PrintAbilityAndDesc(int idx)
     {
-        if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shield].Count >= 1 && Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shield][0] == 0)
-        {
-            GetImage((int)Images.EquipList1).color = Color.white;
-            GetImage((int)Images.Inventory_EquipList1_Get).gameObject.SetActive(true);
-            GetImage((int)Images.EquipList1).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[(int)Define.Types.Shield].ImageName}");
-        }
+        GetImage((int)Images.Inventory_MyInfo).gameObject.SetActive(false);
+        GetText((int)Texts.InfoText).gameObject.SetActive(true);
+
+        int descId = Managers.Data.EquipDic[idx].DescId;
+        // todo script dic to script
+        //GetText((int)Texts.InfoText).text = Managers.Data.ScriptDic[descId].ToString();
     }
 
     void SetPlayerStatusInfo()
