@@ -153,7 +153,7 @@ public class UI_GameScene : UI_Scene
         }
         if (Input.GetKeyDown(KeyCode.F4))
         {
-            Managers.Game.CurPlayerData.Inventory[0].Add(0);
+            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(0);
         }
         #endregion
     }
@@ -172,6 +172,9 @@ public class UI_GameScene : UI_Scene
 
     public void OnClickMainUIInventoryAImage()
     {
-        Managers.UI.ShowPopupUI<UI_InvenPopup>();
+        if (GameObject.Find("UI_InvenPopup") == null)
+            Managers.UI.ShowPopupUI<UI_InvenPopup>();
+        else
+            Managers.UI.ClosePopupUI();
     }
 }

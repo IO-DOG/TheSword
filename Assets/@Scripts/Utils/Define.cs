@@ -64,7 +64,7 @@ public class Define
         Sword = 1,
         Shield = 2,
         Necklace = 3,
-        ring = 4,
+        Ring = 4,
         Shoes = 5,
         Book = 6,
     }
