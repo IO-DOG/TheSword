@@ -281,6 +281,7 @@ public class UI_CreatureCard : UI_Base
         WaitForSeconds delay = new WaitForSeconds(0.1f);
         GameObject go = Managers.Resource.Instantiate("UI_CreatureCardCopyImage", GetImage((int)Images.CreatureImage).transform);
         Image image = go.GetOrAddComponent<Image>();
+        image.rectTransform.sizeDelta = GetImage((int)Images.CreatureImage).rectTransform.sizeDelta;
         Animator animator = go.GetOrAddComponent<Animator>();
         animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIMonsterAnimController");
         animator.Play($"{Managers.Game.MonsterData.IdleAnimStr}");
