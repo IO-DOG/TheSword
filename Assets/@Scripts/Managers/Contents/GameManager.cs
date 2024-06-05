@@ -29,8 +29,6 @@ public class GameManager
     public Action OnBattleCreatureDefeceAction;
     public Action OnBattlePlayerDefeceAction;
 
-    public Sprite[] KeyIcon = new Sprite[ConsumableItem.NUM_OF_KEYS];
-
     public Camera MainCamera;
 
     #region CurPlayerData
@@ -73,6 +71,8 @@ public class GameManager
         public bool IsDefence { get; set; }
         //public Dictionary<int, int> Inventory = new Dictionary<int, int>();
         public List<List<int>> Inventory = new List<List<int>>();
+
+        public List<int> KeyInventory = new List<int>();
     }
     #endregion
 
@@ -175,7 +175,6 @@ public class GameManager
             Managers.Game.CurPlayerData.MoveSpeed = Managers.Data.PlayerDic[level].MoveSpeed;
             Managers.Game.CurPlayerData.IsDefence = false;
 
-
             KeyInventory.InitKeyInventory();
 
             for (int i = 0; i < 10; ++i)
@@ -268,9 +267,9 @@ public class GameManager
 
                     GameObject item = Managers.Resource.Instantiate("EquipItem", items.transform);
                     item.transform.position = go.transform.position;
-                    item.GetComponent<EquipItem>().id = tile.Occupied.Index;
+                    item.GetComponent<Equip>().Id = tile.Occupied.Index;
                     item.name = $"EItem{tile.Occupied.TotalIndex}";
-                    item.GetComponent<EquipItem>()._itemIndex_forActive = tile.Occupied.TotalIndex;
+                    item.GetComponent<Equip>()._itemIndex_forActive = tile.Occupied.TotalIndex;
 
                     if (tile.Occupied.IsActive == false)
                         item.SetActive(false);
@@ -306,6 +305,8 @@ public class GameManager
                 {
                     GameObject stairs = Managers.Resource.Instantiate($"Tilemap_{tile.ID}", tiles.transform);
                     stairs.name = $"stairs{tile.Occupied.TotalIndex}";
+                    stairs.GetComponentInChildren<PortalController>()._floor = tile.Occupied.TotalIndex;
+                    stairs.GetComponentInChildren<PortalController>()._stairs = (int)tile.Occupied.Index;
 
                     if (tile.Occupied.Index == (int)Define.Stairs.Downstairs)
                     {

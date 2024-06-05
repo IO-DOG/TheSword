@@ -27,6 +27,7 @@ public class DataTransformer : EditorWindow
             if (File.Exists(path))
                 File.Delete(path);
         }
+        ParseMapData();
         Debug.Log("Complete DeleteGameData");
     }
 
@@ -172,6 +173,7 @@ public class DataTransformer : EditorWindow
     {
         MapDataLoader loader = new MapDataLoader();
         DirectoryInfo di = new DirectoryInfo($"{Application.dataPath}/@Resources/Data/Excel/");
+        int floorIndex = 1;
 
         #region Excel
         foreach (FileInfo file in di.GetFiles())
@@ -182,9 +184,9 @@ public class DataTransformer : EditorWindow
             int totalBossIndex = 0;
             int totalDoorIndex = 0;
 
+
             if (file.Name.Contains("Dungeon") && !file.Name.Contains("meta"))
             {
-                int totalStairsIndex = 0;
                 List<Tile> tiles = new List<Tile>();
                 string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{file.Name}").Split("\n");
                 float zPos = 0;
@@ -271,13 +273,13 @@ public class DataTransformer : EditorWindow
                                 if (tileID == 9)
                                 {
                                     occupiedType = "Stairs";
-                                    occupiedTotalIndex = totalStairsIndex++;
+                                    occupiedTotalIndex = floorIndex;
                                     occupiedIndex = (int)Define.Stairs.Upstairs;
                                 }
                                 else if(tileID == 10)
                                 {
                                     occupiedType = "Stairs";
-                                    occupiedTotalIndex = totalStairsIndex++;
+                                    occupiedTotalIndex = floorIndex;
                                     occupiedIndex = (int)Define.Stairs.Downstairs;
                                 }
                             }
@@ -303,13 +305,14 @@ public class DataTransformer : EditorWindow
                         tiles.Add(tile);
                     }
                 }
+
                 MapData mapData = new MapData
                 {
                     Key = file.Name.Replace(".csv", ""),
                     Tile = tiles,
                 };
-
                 loader.maps.Add(mapData);
+                floorIndex++;
             }
         }
         #endregion

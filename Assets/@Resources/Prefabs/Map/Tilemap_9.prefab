@@ -53,11 +53,65 @@ PrefabInstance:
       value: Tilemap_9
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: e63f659fe870fa34995efb290f948792, type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: e63f659fe870fa34995efb290f948792, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8164078558771037576, guid: e63f659fe870fa34995efb290f948792, type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8164078558771037576, guid: e63f659fe870fa34995efb290f948792, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4445075717145243553}
+    - targetCorrespondingSourceObject: {fileID: 8164078558771037576, guid: e63f659fe870fa34995efb290f948792, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4125651168963183721}
   m_SourcePrefab: {fileID: 100100000, guid: e63f659fe870fa34995efb290f948792, type: 3}
+--- !u!1 &6251501144592313687 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8164078558771037576, guid: e63f659fe870fa34995efb290f948792, type: 3}
+  m_PrefabInstance: {fileID: 2850049703371942111}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &4445075717145243553
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6251501144592313687}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 3.2, y: 3.1999998, z: 3.2}
+  m_Center: {x: 0, y: 3.6, z: 0}
+--- !u!114 &4125651168963183721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6251501144592313687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a0ee7c008425264aa125e802eb7bd32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _floor: 1
+  _stairs: -1
