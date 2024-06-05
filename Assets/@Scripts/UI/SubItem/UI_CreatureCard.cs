@@ -279,13 +279,24 @@ public class UI_CreatureCard : UI_Base
     IEnumerator CoDefenceMat()
     {
         WaitForSeconds delay = new WaitForSeconds(0.1f);
-        GetImage((int)Images.CreatureImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
-        GetImage((int)Images.CreatureImage).color = Util.DefenceColor();
+        GameObject go = Managers.Resource.Instantiate("UI_CreatureCardCopyImage", GetImage((int)Images.CreatureImage).transform);
+        Image image = go.GetOrAddComponent<Image>();
+        Animator animator = go.GetOrAddComponent<Animator>();
+        animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIMonsterAnimController");
+        animator.Play($"{Managers.Game.MonsterData.IdleAnimStr}");
+        image.sprite = GetImage((int)Images.CreatureImage).sprite;
+        image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        image.color = Util.DefenceColor();
+        float i = 0;
+        while (i < 20)
+        {
+            image.SetNativeSize();
+            i += 1;
+            image.color += new Color(0, 0, 0, -0.05f);
+            yield return new WaitForSeconds(0.01f);
+        }
         yield return delay;
-        GetImage((int)Images.CreatureImage).color = Color.white;
-        yield return delay;
-        GetImage((int)Images.CreatureImage).material = null;
-        GetImage((int)Images.CreatureImage).color = Color.white;
+        Destroy(go);
     }
 
     public void StartDamagedMat()
