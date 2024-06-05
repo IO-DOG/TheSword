@@ -56,7 +56,7 @@ public class UI_PlayerCard : UI_Base
         Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
 
         StartCoroutine(CoDelayAttack());
-        StartCoroutine(CoDelayDefence());
+        //StartCoroutine(CoDelayDefence());
 
         if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shield].Count == 0)
         {
@@ -297,23 +297,47 @@ public class UI_PlayerCard : UI_Base
 
     IEnumerator CoDamagedMat()
     {
+        int width = 660;
+        int height = 660;
+
         WaitForSeconds delay = new WaitForSeconds(0.1f);
-        GetImage((int)Images.CreatureImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
-        GetImage((int)Images.CreatureSwordImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
-        GetImage((int)Images.CreatureShieldImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
-        GetImage((int)Images.CreatureImage).color = Util.DamagedColor();
-        GetImage((int)Images.CreatureSwordImage).color = Util.DamagedColor();
-        GetImage((int)Images.CreatureShieldImage).color = Util.DamagedColor();
+        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureImage).transform);
+        Image image = go.GetOrAddComponent<Image>();
+        image.rectTransform.sizeDelta = GetImage((int)Images.CreatureImage).rectTransform.sizeDelta;
+        Animator animator = go.GetOrAddComponent<Animator>();
+        animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIPlayerAnimController");
+        animator.Play($"UIPlayerIdleAnim");
+        image.sprite = GetImage((int)Images.CreatureImage).sprite;
+        image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        image.color = Util.DamagedColor();
+        image.rectTransform.sizeDelta = new Vector2(width, height);
+        float i = 0;
+        while (i < 20)
+        {
+            i += 1;
+            image.color += new Color(0, 0, 0, -0.05f);
+            yield return new WaitForSeconds(0.01f);
+        }
         yield return delay;
-        GetImage((int)Images.CreatureImage).color = Color.white;
-        GetImage((int)Images.CreatureSwordImage).color = Color.white;
-        GetImage((int)Images.CreatureShieldImage).color = Color.white;
-        yield return delay;
-        GetImage((int)Images.CreatureImage).material = null;
-        GetImage((int)Images.CreatureSwordImage).material = null;
-        GetImage((int)Images.CreatureShieldImage).material = null;
-        GetImage((int)Images.CreatureImage).color = Color.white;
-        GetImage((int)Images.CreatureSwordImage).color = Color.white;
-        GetImage((int)Images.CreatureShieldImage).color = Color.white;
+        Destroy(go);
+
+        //WaitForSeconds delay = new WaitForSeconds(0.1f);
+        //GetImage((int)Images.CreatureImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        //GetImage((int)Images.CreatureSwordImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        //GetImage((int)Images.CreatureShieldImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        //GetImage((int)Images.CreatureImage).color = Util.DamagedColor();
+        //GetImage((int)Images.CreatureSwordImage).color = Util.DamagedColor();
+        //GetImage((int)Images.CreatureShieldImage).color = Util.DamagedColor();
+        //yield return delay;
+        //GetImage((int)Images.CreatureImage).color = Color.white;
+        //GetImage((int)Images.CreatureSwordImage).color = Color.white;
+        //GetImage((int)Images.CreatureShieldImage).color = Color.white;
+        //yield return delay;
+        //GetImage((int)Images.CreatureImage).material = null;
+        //GetImage((int)Images.CreatureSwordImage).material = null;
+        //GetImage((int)Images.CreatureShieldImage).material = null;
+        //GetImage((int)Images.CreatureImage).color = Color.white;
+        //GetImage((int)Images.CreatureSwordImage).color = Color.white;
+        //GetImage((int)Images.CreatureShieldImage).color = Color.white;
     }
 }
