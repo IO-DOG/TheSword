@@ -15,6 +15,8 @@ public class UI_PlayerCard : UI_Base
         DefenceDelayGauge,
         AttackIcon,
         DefenceIcon,
+        CreatureSwordImage,
+        CreatureShieldImage,
     }
 
     enum Texts
@@ -54,6 +56,11 @@ public class UI_PlayerCard : UI_Base
         StartCoroutine(CoDelayAttack());
         StartCoroutine(CoDelayDefence());
 
+        if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shield].Count == 0)
+        {
+            GetImage((int)Images.CreatureShieldImage).gameObject.SetActive(false);
+        }
+
         return true;
     }
 
@@ -84,6 +91,9 @@ public class UI_PlayerCard : UI_Base
                 Refresh();
             }
         }
+        GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play("UIPlayerAttackAnim");
+        GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play("UISword1AttackAnim");
+        GetImage((int)Images.CreatureShieldImage).gameObject.GetComponent<Animator>().Play("UIShield1AttackAnim");
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
 
         if (Managers.Game.AttackCount == Managers.Game.CurPlayerData.Critical)
