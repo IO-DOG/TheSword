@@ -312,11 +312,11 @@ public class UI_PlayerCard : UI_Base
         image.color = Util.DamagedColor();
         image.rectTransform.sizeDelta = new Vector2(width, height);
         float i = 0;
-        while (i < 20)
+        while (i < 10)
         {
             i += 1;
-            image.color += new Color(0, 0, 0, -0.05f);
-            yield return new WaitForSeconds(0.01f);
+            image.color += new Color(0, 0, 0, -0.1f);
+            yield return new WaitForSeconds(0.005f);
         }
         yield return delay;
         Destroy(go);

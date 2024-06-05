@@ -318,12 +318,12 @@ public class UI_CreatureCard : UI_Base
         image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         image.color = Util.DamagedColor();
         float i = 0;
-        while (i < 20)
+        while (i < 10)
         {
             image.SetNativeSize();
             i += 1;
-            image.color += new Color(0, 0, 0, -0.05f);
-            yield return new WaitForSeconds(0.01f);
+            image.color += new Color(0, 0, 0, -0.1f);
+            yield return new WaitForSeconds(0.005f);
         }
         yield return delay;
         Destroy(go);
