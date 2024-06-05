@@ -37,11 +37,12 @@ public class Define
     public enum Layer
     {
         Wall = 6,
-        Item = 7,
+        CItem = 7,
         Player = 8,
         Door = 9,
         Monster = 10,
         Portal = 11,
+        EItem = 12,
     }
 
     public enum MoveDir
