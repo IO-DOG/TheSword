@@ -8,8 +8,8 @@ using static UnityEditor.Progress;
 
 public class CameraController : MonoBehaviour
 {
-    // ToDo Object y position adjusting
-    float _angle = 60f; // 원하는 x축 회전 각도
+    //// ToDo Object y position adjusting
+    //float _angle = 60f; // 원하는 x축 회전 각도
     public float scaleMultiplier;
 
 

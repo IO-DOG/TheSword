@@ -29,8 +29,6 @@ public class GameManager
     public Action OnBattleCreatureDefeceAction;
     public Action OnBattlePlayerDefeceAction;
 
-    public Sprite[] KeyIcon = new Sprite[ConsumableItem.NUM_OF_KEYS];
-
     public Camera MainCamera;
 
     #region CurPlayerData
@@ -73,6 +71,8 @@ public class GameManager
         public bool IsDefence { get; set; }
         //public Dictionary<int, int> Inventory = new Dictionary<int, int>();
         public List<List<int>> Inventory = new List<List<int>>();
+
+        public List<int> KeyInventory = new List<int>();
     }
     #endregion
 
@@ -174,7 +174,6 @@ public class GameManager
             Managers.Game.CurPlayerData.CriticalAttack = Managers.Data.PlayerDic[level].CriticalAttack;
             Managers.Game.CurPlayerData.MoveSpeed = Managers.Data.PlayerDic[level].MoveSpeed;
             Managers.Game.CurPlayerData.IsDefence = false;
-
 
             KeyInventory.InitKeyInventory();
 

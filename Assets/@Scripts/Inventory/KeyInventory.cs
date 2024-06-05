@@ -16,16 +16,19 @@ public class KeyInventory
     List<ConsumableItem> _items = new List<ConsumableItem>();
     public List<int> _keys = new List<int>(NUM_OF_KEYS);
 
-    string _jsonPath = "/@Resources/Data/JsonData/KeyInventory.json";
-
     public void InitKeyInventory()
     {
-        for(int i = 0; i < NUM_OF_KEYS; i++)
+        for (int i = 0; i < ConsumableItem.NUM_OF_KEYS; ++i)
+        {
+            Managers.Game.CurPlayerData.KeyInventory.Add(0);
+        }
+
+        for (int i = 0; i < NUM_OF_KEYS; i++)
         {
             _keys.Add(0);
         }
 
-        LoadKeyInventory();
+        _keys = Managers.Game.CurPlayerData.KeyInventory;
     }
 
     public void AddItem(ConsumableItem item)
@@ -38,23 +41,8 @@ public class KeyInventory
             _keys[item.GetComponent<ConsumableItem>().id]++;
 
             ShowKeySlot(Managers.Game.Player._keyInventory);
-            SaveKeyInventory();
+            Managers.Game.CurPlayerData.KeyInventory = _keys;
         }
-    }
-
-    public void SaveKeyInventory()
-    {
-        string MapDicJsonStr = JsonConvert.SerializeObject(_keys, Formatting.Indented);
-        File.WriteAllText(Application.dataPath + _jsonPath, MapDicJsonStr);
-    }
-
-    public void LoadKeyInventory()
-    {
-        if (!File.Exists(Application.dataPath + _jsonPath))
-            return;
-
-        string keyInventoryFile = File.ReadAllText(Application.dataPath + _jsonPath);
-        _keys = JsonConvert.DeserializeObject<List<int>>(keyInventoryFile);
     }
 
     public bool TryUseKey(GameObject door)
