@@ -27,7 +27,9 @@ public class GameManager
     public Action OnBattleAction;
     public Action OnBattleDataRefreshAction;
     public Action OnBattleCreatureDefeceAction;
+    public Action OnBattleCreatureDamagedAction;
     public Action OnBattlePlayerDefeceAction;
+    public Action OnBattlePlayerDamagedAction;
 
     public Camera MainCamera;
 

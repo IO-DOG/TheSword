@@ -52,6 +52,7 @@ public class UI_PlayerCard : UI_Base
         Managers.Game.OnBattleDataRefreshAction -= Refresh;
         Managers.Game.OnBattleDataRefreshAction += Refresh;
         Managers.Game.OnBattlePlayerDefeceAction += ClearDefence;
+        Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
 
         StartCoroutine(CoDelayAttack());
         StartCoroutine(CoDelayDefence());
@@ -99,7 +100,7 @@ public class UI_PlayerCard : UI_Base
         if (Managers.Game.AttackCount == Managers.Game.CurPlayerData.Critical)
         {
             _isCri = true;
-            _forAssassin= true;
+            _forAssassin = true;
             Managers.Game.AttackCount = 0;
         }
 
@@ -130,10 +131,14 @@ public class UI_PlayerCard : UI_Base
                 if (Managers.Game.MonsterData.Feature == 4)
                 {
                     Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence) * 20;
+                    Managers.Game.OnBattleCreatureDamagedAction.Invoke();
                     Debug.Log("불사 효과 발동 치명 데미지 200퍼");
                 }
                 else
+                {
                     Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence);
+                    Managers.Game.OnBattleCreatureDamagedAction.Invoke();
+                }
                 _isCri = false;
             }
             else
@@ -142,10 +147,14 @@ public class UI_PlayerCard : UI_Base
                 if (Managers.Game.MonsterData.Feature == 4)
                 {
                     Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence) * 0.2f;
+                    Managers.Game.OnBattleCreatureDamagedAction.Invoke();
                     Debug.Log("불사 효과 발동 일반 데미지 20퍼");
                 }
                 else
+                {
                     Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack - Managers.Game.MonsterData.Defence);
+                    Managers.Game.OnBattleCreatureDamagedAction.Invoke();
+                }
             }
 
 
@@ -219,9 +228,60 @@ public class UI_PlayerCard : UI_Base
 
     public void ClearDefence()
     {
+        // TODO play damaged anim
+        StartCoroutine(CoDefenceMat());
         _defenceCoolTime = 0f;
         _defenseFlag = false;
         if (GetImage((int)Images.DefenceIcon) != null)
             GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
+    }
+
+    IEnumerator CoDefenceMat()
+    {
+        WaitForSeconds delay = new WaitForSeconds(0.1f);
+        GetImage((int)Images.CreatureImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        GetImage((int)Images.CreatureSwordImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        GetImage((int)Images.CreatureShieldImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        GetImage((int)Images.CreatureImage).color = Util.DefenceColor();
+        GetImage((int)Images.CreatureSwordImage).color = Util.DefenceColor();
+        GetImage((int)Images.CreatureShieldImage).color = Util.DefenceColor();
+        yield return delay;
+        GetImage((int)Images.CreatureImage).color = Color.white;
+        GetImage((int)Images.CreatureSwordImage).color = Color.white;
+        GetImage((int)Images.CreatureShieldImage).color = Color.white;
+        yield return delay;
+        GetImage((int)Images.CreatureImage).material = null;
+        GetImage((int)Images.CreatureSwordImage).material = null;
+        GetImage((int)Images.CreatureShieldImage).material = null;
+        GetImage((int)Images.CreatureImage).color = Color.white;
+        GetImage((int)Images.CreatureSwordImage).color = Color.white;
+        GetImage((int)Images.CreatureShieldImage).color = Color.white;
+    }
+
+    public void StartDamagedMat()
+    {
+        StartCoroutine(CoDamagedMat());
+    }
+
+    IEnumerator CoDamagedMat()
+    {
+        WaitForSeconds delay = new WaitForSeconds(0.1f);
+        GetImage((int)Images.CreatureImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        GetImage((int)Images.CreatureSwordImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        GetImage((int)Images.CreatureShieldImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        GetImage((int)Images.CreatureImage).color = Util.DamagedColor();
+        GetImage((int)Images.CreatureSwordImage).color = Util.DamagedColor();
+        GetImage((int)Images.CreatureShieldImage).color = Util.DamagedColor();
+        yield return delay;
+        GetImage((int)Images.CreatureImage).color = Color.white;
+        GetImage((int)Images.CreatureSwordImage).color = Color.white;
+        GetImage((int)Images.CreatureShieldImage).color = Color.white;
+        yield return delay;
+        GetImage((int)Images.CreatureImage).material = null;
+        GetImage((int)Images.CreatureSwordImage).material = null;
+        GetImage((int)Images.CreatureShieldImage).material = null;
+        GetImage((int)Images.CreatureImage).color = Color.white;
+        GetImage((int)Images.CreatureSwordImage).color = Color.white;
+        GetImage((int)Images.CreatureShieldImage).color = Color.white;
     }
 }

@@ -75,6 +75,7 @@ public class UI_CreatureCard : UI_Base
         Managers.Game.OnBattleDataRefreshAction -= Refresh;
         Managers.Game.OnBattleDataRefreshAction += Refresh;
         Managers.Game.OnBattleCreatureDefeceAction += ClearDefence;
+        Managers.Game.OnBattleCreatureDamagedAction += StartDamagedMat;
 
         StartCoroutine(CoDelayAttack());
         if (_monsterClass != MonsterClass.Armor)
@@ -174,10 +175,14 @@ public class UI_CreatureCard : UI_Base
             if (_isCri)
             {
                 Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack * (Managers.Game.MonsterData.CriticalAttack / 100) - Managers.Game.CurPlayerData.Defence);
+                Managers.Game.OnBattlePlayerDamagedAction.Invoke();
                 _isCri = false;
             }
             else
+            {
                 Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack - Managers.Game.CurPlayerData.Defence);
+                Managers.Game.OnBattlePlayerDamagedAction.Invoke();
+            }
 
             if (Managers.Game.CurPlayerData.CurHP <= 0)
             {
@@ -263,9 +268,40 @@ public class UI_CreatureCard : UI_Base
 
     public void ClearDefence()
     {
+        // TODO play damaged anim
+        StartCoroutine(CoDefenceMat());
         _defenceCoolTime = 0f;
         _defenseFlag = false;
         if (GetImage((int)Images.DefenceIcon) != null)
             GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
+    }
+
+    IEnumerator CoDefenceMat()
+    {
+        WaitForSeconds delay = new WaitForSeconds(0.1f);
+        GetImage((int)Images.CreatureImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        GetImage((int)Images.CreatureImage).color = Util.DefenceColor();
+        yield return delay;
+        GetImage((int)Images.CreatureImage).color = Color.white;
+        yield return delay;
+        GetImage((int)Images.CreatureImage).material = null;
+        GetImage((int)Images.CreatureImage).color = Color.white;
+    }
+
+    public void StartDamagedMat()
+    {
+        StartCoroutine(CoDamagedMat());
+    }
+
+    IEnumerator CoDamagedMat()
+    {
+        WaitForSeconds delay = new WaitForSeconds(0.1f);
+        GetImage((int)Images.CreatureImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        GetImage((int)Images.CreatureImage).color = Util.DamagedColor();
+        yield return delay;
+        GetImage((int)Images.CreatureImage).color = Color.white;
+        yield return delay;
+        GetImage((int)Images.CreatureImage).material = null;
+        GetImage((int)Images.CreatureImage).color = Color.white;
     }
 }

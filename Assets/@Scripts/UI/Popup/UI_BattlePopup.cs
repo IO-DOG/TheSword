@@ -46,6 +46,7 @@ public class UI_BattlePopup : UI_Popup
 
         Managers.Game.OnBattleDataRefreshAction = null;
         Managers.Game.OnBattleCreatureDefeceAction = null;
+        Managers.Game.OnBattleCreatureDamagedAction = null;
         Managers.Game.OnBattleAction = null;
         if (Managers.Game.GameScene != null)
             Managers.Game.GameScene.SetPlayerInfo();
