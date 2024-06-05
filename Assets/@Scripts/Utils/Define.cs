@@ -41,6 +41,7 @@ public class Define
         Player = 8,
         Door = 9,
         Monster = 10,
+        Portal = 11,
     }
 
     public enum MoveDir
@@ -54,6 +55,7 @@ public class Define
 
     public enum Stairs
     {
+        None = -1,
         Upstairs = 0,
         Downstairs = 1,
     }

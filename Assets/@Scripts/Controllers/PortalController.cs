@@ -4,24 +4,24 @@ using UnityEngine;
 
 public class PortalController : MonoBehaviour
 {
-    public int _id = 0;
+    public int _floor = 1;
+    public int _stairs = (int)Define.Stairs.None;
 
-    void Start()
+    public void Stairs()
     {
-        
-    }
+        PortalController[] portals = transform.root.GetComponentsInChildren<PortalController>();
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.name == "Player")
+        foreach (PortalController portal in portals)
         {
-
+            if (_stairs == (int)Define.Stairs.Upstairs && portal._floor == _floor + 1 && portal._stairs == (int)Define.Stairs.Downstairs)
+            {
+                Managers.Game.Player.transform.position = new Vector3(portal.transform.position.x, 1, portal.transform.position.z);
+            }
+            else if (_stairs == (int)Define.Stairs.Downstairs && portal._floor == _floor - 1 && portal._stairs == (int)Define.Stairs.Upstairs)
+            {
+                Managers.Game.Player.transform.position = new Vector3(portal.transform.position.x, 1, portal.transform.position.z);
+            }
         }
     }
+
 }

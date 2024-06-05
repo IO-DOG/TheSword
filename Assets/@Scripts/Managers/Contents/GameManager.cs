@@ -306,6 +306,8 @@ public class GameManager
                 {
                     GameObject stairs = Managers.Resource.Instantiate($"Tilemap_{tile.ID}", tiles.transform);
                     stairs.name = $"stairs{tile.Occupied.TotalIndex}";
+                    stairs.GetComponentInChildren<PortalController>()._floor = tile.Occupied.TotalIndex;
+                    stairs.GetComponentInChildren<PortalController>()._stairs = (int)tile.Occupied.Index;
 
                     if (tile.Occupied.Index == (int)Define.Stairs.Downstairs)
                     {
