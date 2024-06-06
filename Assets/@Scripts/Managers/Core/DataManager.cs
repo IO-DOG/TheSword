@@ -88,6 +88,23 @@ public class DataManager
             }
         }
     }
+
+    public void EItemActiveOff(int index)
+    {
+        foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
+        {
+            string key = entry.Key;
+            Data.MapData mapData = entry.Value;
+
+            foreach (Data.Tile tile in mapData.Tile)
+            {
+                if (tile.Occupied.Type == "EItem" && tile.Occupied.TotalIndex == index)
+                {
+                    tile.Occupied.IsActive = false;
+                }
+            }
+        }
+    }
     #endregion
 
 }
