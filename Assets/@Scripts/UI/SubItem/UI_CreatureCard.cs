@@ -269,11 +269,13 @@ public class UI_CreatureCard : UI_Base
     public void ClearDefence()
     {
         // TODO play damaged anim
+        if (GetImage((int)Images.DefenceIcon) != null)
+            GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIShieldFX");
         StartCoroutine(CoDefenceMat());
         _defenceCoolTime = 0f;
         _defenseFlag = false;
-        if (GetImage((int)Images.DefenceIcon) != null)
-            GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
+        //if (GetImage((int)Images.DefenceIcon) != null)
+        //    GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
     }
 
     IEnumerator CoDefenceMat()
