@@ -269,13 +269,30 @@ public class UI_CreatureCard : UI_Base
     public void ClearDefence()
     {
         // TODO play damaged anim
-        if (GetImage((int)Images.DefenceIcon) != null)
-            GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIShieldFX");
+        //if (GetImage((int)Images.DefenceIcon) != null)
+        //    GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIShieldFX");
+        StartCoroutine(CoStartShieldFX());
         StartCoroutine(CoDefenceMat());
         _defenceCoolTime = 0f;
         _defenseFlag = false;
-        //if (GetImage((int)Images.DefenceIcon) != null)
-        //    GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
+        if (GetImage((int)Images.DefenceIcon) != null)
+            GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
+    }
+
+    IEnumerator CoStartShieldFX()
+    {
+        int width = 75;
+        int height = 75;
+
+        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", this.transform);
+        Image image = go.GetOrAddComponent<Image>();
+        Animator animator = go.GetOrAddComponent<Animator>();
+        animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIFXAnimation");
+        animator.Play($"UIShieldFX");
+        image.rectTransform.sizeDelta = new Vector2(width, height);
+        float delay = animator.GetCurrentAnimatorStateInfo(0).length;
+        yield return new WaitForSeconds(delay);
+        Destroy(go);
     }
 
     IEnumerator CoDefenceMat()
