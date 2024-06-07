@@ -149,6 +149,13 @@ namespace Data
             return dict;
         }
     }
+
+    [Serializable]
+    public class LightData
+    {
+        public Define.LightType LightType { get; set; }
+        public Position Position { get; set; }
+    }
     #endregion
 
     #region MonsterClassData

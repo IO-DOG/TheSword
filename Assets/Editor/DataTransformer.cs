@@ -8,7 +8,9 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
+using UnityEditor.ShaderGraph.Serialization;
 using UnityEngine;
+using static Codice.Client.Commands.WkTree.WorkspaceTreeNode;
 
 public class DataTransformer : EditorWindow
 {
@@ -42,6 +44,71 @@ public class DataTransformer : EditorWindow
         ParseEquipData("Equip");
         Debug.Log("Complete DataTransformer");
     }
+
+    [MenuItem("Tools/SaveLightAsJson ")]
+    public static void SaveLightAsJson()
+    {
+        GameObject parent = GameObject.Find("Lights");
+        string path = Application.dataPath + "/@Resources/Data/JsonData/LightData.json";
+        string dungeon = parent.transform.parent.name; // DG Name
+        if (parent == null)
+        {
+            Debug.Log("Parent is not exists!");
+            return;
+        }
+
+        Transform[] lights = parent.GetComponentsInChildren<Transform>();
+        Dictionary<string, List<Data.LightData>> lightDic = new Dictionary<string, List<Data.LightData>>();
+        lightDic[dungeon] = new List<LightData>();
+
+        for (int i = 1; i < lights.Length; i++)
+        {
+            Position pos = new Position { X = lights[i].localPosition.x, Y = lights[i].localPosition.y, Z = lights[i].localPosition.z };
+
+            if (lights[i].name.Contains(Define.LightType.Torch.ToString()))
+            {
+                lightDic[dungeon].Add(new LightData { LightType = Define.LightType.Torch, Position = pos });
+            }
+            else if (lights[i].name.Contains(Define.LightType.Bowl.ToString()))
+            {
+                lightDic[dungeon].Add(new LightData { LightType = Define.LightType.Bowl, Position = pos });
+            }
+        }
+
+        if(File.Exists(path))
+        {
+            string oldJson = File.ReadAllText(path);
+            Dictionary<string, List<Data.LightData>> dic = JsonConvert.DeserializeObject<Dictionary<string, List<Data.LightData>>>(oldJson);
+
+            List<string> keysToRemove = new List<string>();
+
+            foreach (string DGName in dic.Keys)
+            {
+                if(dungeon == DGName)
+                {
+                    keysToRemove.Add(DGName);
+                }
+            }
+            foreach(string DGname in keysToRemove)
+            {
+                dic.Remove(DGname);
+            }
+
+
+            dic[dungeon] = lightDic[dungeon];
+            string newJson = JsonConvert.SerializeObject(dic, Formatting.Indented);
+            File.WriteAllText(path, newJson);
+        }
+        else
+        {
+            string newJson = JsonConvert.SerializeObject(lightDic, Formatting.Indented);
+            File.WriteAllText(path, newJson);
+        }
+
+        Debug.Log("Complete SaveLightAsJson");
+    }
+
+    
 
     static void ParsePlayerData(string filename)
     {
