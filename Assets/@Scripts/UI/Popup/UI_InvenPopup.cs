@@ -85,7 +85,6 @@ public class UI_InvenPopup : UI_Popup
 
     enum Texts
     {
-        InfoText,
         TotalATK,
         AddATK,
         BaseATK,
@@ -117,7 +116,7 @@ public class UI_InvenPopup : UI_Popup
 
     enum GameObjects
     {
-
+        EquipInfo,
     }
 
     #endregion
@@ -309,8 +308,7 @@ public class UI_InvenPopup : UI_Popup
             GetImage((int)Images.Inventory_MyInfo_On).color = new Color(1, 1, 1, 1);
             GetImage((int)Images.Inventory_InfoFrame).gameObject.SetActive(true);
             GetImage((int)Images.Inventory_MyInfo).gameObject.SetActive(true);
-            GetText((int)Texts.InfoText).text = "";
-            GetText((int)Texts.InfoText).gameObject.SetActive(false);
+            GetObject((int)GameObjects.EquipInfo).gameObject.SetActive(false);
             // TODO Add status
         }
         else
@@ -319,8 +317,7 @@ public class UI_InvenPopup : UI_Popup
             GetImage((int)Images.Inventory_MyInfo_On).color = new Color(1, 1, 1, 0);
             GetImage((int)Images.Inventory_InfoFrame).gameObject.SetActive(false);
             GetImage((int)Images.Inventory_MyInfo).gameObject.SetActive(false);
-            GetText((int)Texts.InfoText).gameObject.SetActive(true);
-            GetText((int)Texts.InfoText).text = "";
+            GetObject((int)GameObjects.EquipInfo).gameObject.SetActive(true);
         }
     }
 
@@ -492,11 +489,11 @@ public class UI_InvenPopup : UI_Popup
     void PrintAbilityAndDesc(int idx)
     {
         GetImage((int)Images.Inventory_MyInfo).gameObject.SetActive(false);
-        GetText((int)Texts.InfoText).gameObject.SetActive(true);
+        GetObject((int)GameObjects.EquipInfo).gameObject.SetActive(true);
 
         int descId = Managers.Data.EquipDic[idx].DescId;
         // todo script dic to script
-        //GetText((int)Texts.InfoText).text = Managers.Data.ScriptDic[descId].ToString();
+        //GetText((int)Texts.EquipInfo).text = Managers.Data.ScriptDic[descId].ToString();
     }
 
     void SetPlayerStatusInfo()
