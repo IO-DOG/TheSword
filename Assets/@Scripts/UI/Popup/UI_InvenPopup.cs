@@ -112,11 +112,14 @@ public class UI_InvenPopup : UI_Popup
         TotalMOVESPEED,
         AddMOVESPEED,
         BaseMOVESPEED,
+        EquipName,
+        InfoText,
     }
 
     enum GameObjects
     {
         EquipInfo,
+        StatusInfoList,
     }
 
     #endregion
@@ -398,7 +401,7 @@ public class UI_InvenPopup : UI_Popup
         GetImage((int)Images.Inventory_accessory_necklace_On).gameObject.SetActive(true);
 
         int idx = Managers.Game.CurPlayerData.CurNecklace;
-        PrintAbilityAndDesc(idx);
+        PrintEquipAbilityAndDesc(idx);
     }
 
     void OnClickRing()
@@ -408,7 +411,7 @@ public class UI_InvenPopup : UI_Popup
         GetImage((int)Images.Inventory_accessory_ring_On).gameObject.SetActive(true);
 
         int idx = Managers.Game.CurPlayerData.CurRing;
-        PrintAbilityAndDesc(idx);
+        PrintEquipAbilityAndDesc(idx);
     }
 
     void OnClickShoes()
@@ -418,7 +421,7 @@ public class UI_InvenPopup : UI_Popup
         GetImage((int)Images.Inventory_accessory_shoes_On).gameObject.SetActive(true);
 
         int idx = Managers.Game.CurPlayerData.CurShoes;
-        PrintAbilityAndDesc(idx);
+        PrintEquipAbilityAndDesc(idx);
     }
 
     void OnClickBook()
@@ -428,7 +431,7 @@ public class UI_InvenPopup : UI_Popup
         GetImage((int)Images.Inventory_accessory_book_On).gameObject.SetActive(true);
 
         int idx = Managers.Game.CurPlayerData.CurBook;
-        PrintAbilityAndDesc(idx);
+        PrintEquipAbilityAndDesc(idx);
     }
 
     void OnClickEquipList(int idx)
@@ -461,7 +464,7 @@ public class UI_InvenPopup : UI_Popup
                 inventory_equipList_get[idx].gameObject.SetActive(true);
                 inventory_equipList_on[idx].gameObject.SetActive(true);
                 int temp = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword][idx];
-                PrintAbilityAndDesc(temp);
+                PrintEquipAbilityAndDesc(temp);
                 Managers.Game.CurPlayerData.CurSword = temp;
                 GetImage((int)Images.sword).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[temp].ImageName}");
             }
@@ -473,7 +476,7 @@ public class UI_InvenPopup : UI_Popup
                 inventory_equipList_get[idx].gameObject.SetActive(true);
                 inventory_equipList_on[idx].gameObject.SetActive(true);
                 int temp = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shield][idx];
-                PrintAbilityAndDesc(temp);
+                PrintEquipAbilityAndDesc(temp);
                 Managers.Game.CurPlayerData.CurShield = temp;
                 GetImage((int)Images.shield).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[temp].ImageName}");
             }
@@ -482,18 +485,51 @@ public class UI_InvenPopup : UI_Popup
 
     /// <summary>
     /// 인덱스에 맞는 장비에 대한 능력치와 설명을 보여준다.
+    ///         public float ATK { get; set; }
+    ///         public float DEF { get; set; }
+    ///         public float HP { get; set; }
+    ///         public float ASPD { get; set; }
+    ///         public float DSPD { get; set; }
+    ///         public float CRI { get; set; }
+    ///         public float CRIATK { get; set; }
+    ///         public float MSPD { get; set; }
+    ///         이 순서로 seq 값이 씌워짐. seq는 0부터.
     /// </summary>
     /// <param name="idx"> 
     /// 장비의 인덱스 
     /// </param>
-    void PrintAbilityAndDesc(int idx)
+    void PrintEquipAbilityAndDesc(int equipId)
     {
         GetImage((int)Images.Inventory_MyInfo).gameObject.SetActive(false);
         GetObject((int)GameObjects.EquipInfo).gameObject.SetActive(true);
 
-        int descId = Managers.Data.EquipDic[idx].DescId;
         // todo script dic to script
         //GetText((int)Texts.EquipInfo).text = Managers.Data.ScriptDic[descId].ToString();
+
+        // todo for scriptDic
+        //GetText((int)Texts.EquipName).text = Managers.Data.EquipDic[equipId].NameId.ToString();
+        GetText((int)Texts.EquipName).text = Managers.Data.EquipDic[equipId].NameId.ToString();
+
+        // todo for scriptDic
+        //GetText((int)Texts.InfoText).text = Managers.Data.EquipDic[equipId].DescId.ToString();
+        GetText((int)Texts.InfoText).text = Managers.Data.EquipDic[equipId].DescId.ToString();
+
+        GetObject((int)GameObjects.StatusInfoList).gameObject.SetActive(true);
+
+        float[] statList =
+        {
+            Managers.Data.EquipDic[equipId].ATK, Managers.Data.EquipDic[equipId].DEF, Managers.Data.EquipDic[equipId].HP, Managers.Data.EquipDic[equipId].ASPD,
+            Managers.Data.EquipDic[equipId].DSPD, Managers.Data.EquipDic[equipId].CRI, Managers.Data.EquipDic[equipId].CRIATK, Managers.Data.EquipDic[equipId].MSPD
+        };
+
+        for (int i = 0; i < statList.Length; i++)
+        {
+            if (statList[i] != 0)
+            {
+                UI_StatusInfo statusInfo = Managers.UI.MakeSubItem<UI_StatusInfo>(GetObject((int)GameObjects.StatusInfoList).transform);
+                statusInfo.Refresh(equipId, i);
+            }
+        }
     }
 
     void SetPlayerStatusInfo()
