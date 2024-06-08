@@ -1,76 +1,71 @@
 // Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
 
-Shader "Unlit/PhotoshopOverlayShader"
+//Somehow achieves an effect similar to this:
+//#define BlendOverlayf(base, blend) 	(base < 0.5 ? (2.0 * base * blend) : (1.0 - 2.0 * (1.0 - base) * (1.0 - blend)))
+
+Shader "Photoshop/Overlay"
 {
 	Properties
 	{
-		_MainTex("Sprite Texture", 2D) = "white" {}
+		_MainTex("Base (RGB) Trans (A)", 2D) = "white" {}
 	}
+
 		SubShader
 	{
-		Tags 
-		{ 
-			"Queue" = "Transparent"
-			"IgnoreProjector" = "True"
-			"RenderType" = "Overlay"
-			"PreviewType" = "Plane"
-			"CanUseSpriteAtlas" = "True"
-		}
-		//LOD 100
-
-		Cull Off
-		Lighting On
-		ZWrite Off
-		ZTest Always
-		Blend One OneMinusSrcAlpha
+		Tags {"Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent"}
+		ZWrite Off Lighting Off Cull Off Fog { Mode Off } Blend DstColor SrcColor
+		LOD 110
 
 		Pass
 		{
 			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
+			#pragma vertex vert_vct
+			#pragma fragment frag_mult 
 			#pragma fragmentoption ARB_precision_hint_fastest
-
 			#include "UnityCG.cginc"
 
-			struct appdata_custom
-			{
-				float4 vertex : POSITION;
-				fixed4 color : COLOR;
-				fixed2 uv : TEXCOORD0;
-			};
-
-			struct v2f
-			{
-				float4 vertex : POSITION;
-				fixed4 color : COLOR;
-				fixed2 uv : TEXCOORD0;
-			};
-
 			sampler2D _MainTex;
-			fixed4 _MainTex_ST;
+			float4 _MainTex_ST;
 
-
-			v2f vert(appdata_custom v)
+			struct vin_vct
 			{
-				v2f o;
+				float4 vertex : POSITION;
+				float4 color : COLOR;
+				float2 texcoord : TEXCOORD0;
+			};
+
+			struct v2f_vct
+			{
+				float4 vertex : POSITION;
+				fixed4 color : COLOR;
+				half2 texcoord : TEXCOORD0;
+			};
+
+			v2f_vct vert_vct(vin_vct v)
+			{
+				v2f_vct o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.color = v.color;
-				o.uv = TRANSFORM_TEX(v.uv,_MainTex);
+				o.texcoord = v.texcoord;
 				return o;
 			}
 
-			fixed4 frag(v2f i) : COLOR
+			float4 frag_mult(v2f_vct i) : COLOR
 			{
-				fixed4 diffuse = tex2D(_MainTex, i.uv);
-				fixed oldAlpha = diffuse.a;
+				float4 tex = tex2D(_MainTex, i.texcoord);
 
-				diffuse = lerp(1 - 2 * (1 - diffuse) * (1 - i.color), 2 * diffuse * i.color, step(diffuse, 0.5));
-				diffuse.a = oldAlpha * i.color.a;
-				return diffuse;
+				float4 final;
+				final.rgb = i.color.rgb * tex.rgb * 2;
+				final.a = i.color.a * tex.a;
+				return lerp(float4(0.5f,0.5f,0.5f,0.5f), final, final.a);
+
 			}
+
 			ENDCG
+
 		}
 
+
 	}
+
 }
