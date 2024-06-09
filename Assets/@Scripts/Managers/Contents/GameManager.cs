@@ -235,12 +235,14 @@ public class GameManager
             GameObject tiles = new GameObject() { name = "Tiles" };
             GameObject items = new GameObject() { name = "Items" };
             GameObject monsters = new GameObject() { name = "Monsters" };
+            GameObject lights = new GameObject() { name = "Lights" };
 
             parent.transform.localPosition += new Vector3(count * 100, 0, 0);
             parent.transform.parent = GameObject.Find("Map").transform;
             tiles.transform.parent = parent.transform;
             items.transform.parent = parent.transform;
             monsters.transform.parent = parent.transform;
+            lights.transform.parent = parent.transform;
 
             foreach (Data.Tile tile in mapData.Tile)
             {
@@ -335,10 +337,39 @@ public class GameManager
             monsters.transform.localPosition = monsters.transform.localPosition + Vector3.up * 3f + Vector3.forward * 0.7f * (-1);
             MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, items);
             MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, monsters);
+            MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, lights);
             count++;
+
+            InstantiateLights(key, lights.transform);
         }
 
         MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, Player.gameObject);
+    }
+
+    void InstantiateLights(string DGName, Transform parent)
+    {
+        foreach (KeyValuePair<string, DungeonLightData> entry in Managers.Data.LightDic)
+        {
+            string key = entry.Key;
+            Data.DungeonLightData lightList = entry.Value;
+
+            if (!key.Contains(DGName))
+                continue;
+
+            foreach (LightData data in lightList.LightData)
+            {
+                if(data.LightType == (int)Define.LightType.Torch)
+                {
+                    GameObject go = Managers.Resource.Instantiate("Object_DungeonTorch", parent.transform);
+                    go.transform.localPosition = new Vector3(data.Position.X, data.Position.Y, data.Position.Z);
+                }
+                else if(data.LightType == (int)Define.LightType.Bowl)
+                {
+                    GameObject go = Managers.Resource.Instantiate("Object_FireBowl", parent.transform);
+                    go.transform.localPosition = new Vector3(data.Position.X, data.Position.Y, data.Position.Z);
+                }
+            }
+        }
     }
     #endregion
 

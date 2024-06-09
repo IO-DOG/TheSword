@@ -1,3 +1,4 @@
+using Data;
 using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ public class DataManager
     public Dictionary<int, Data.MonsterClassData> MonsterClassDic { get; set; } = new Dictionary<int, Data.MonsterClassData>();
     public Dictionary<string, Data.MapData> MapDic { get; set; } = new Dictionary<string, Data.MapData>();
     public Dictionary<int, Data.EquipData> EquipDic { get; set; } = new Dictionary<int, Data.EquipData>();
+    public Dictionary<string, Data.DungeonLightData> LightDic { get; set; } = new Dictionary<string, Data.DungeonLightData>();
 
     public void Init()
     {
@@ -29,6 +31,7 @@ public class DataManager
         MonsterClassDic = LoadJson<Data.MonsterClassDataLoader, int, Data.MonsterClassData>("MonsterClassData").MakeDict();
         MapDic = LoadJson<Data.MapDataLoader, string, Data.MapData>("MapData").MakeDict();
         EquipDic = LoadJson<Data.EquipDataLoader, int, Data.EquipData>("EquipData").MakeDict();
+        LightDic = LoadJson<Data.DungeonLightDataLoader, string, Data.DungeonLightData>("LightData").MakeDict();
     }
 
     Loader LoadJson<Loader, Key, Value>(string path) where Loader : ILoader<Key, Value>

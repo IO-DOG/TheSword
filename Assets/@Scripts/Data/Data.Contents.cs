@@ -149,6 +149,32 @@ namespace Data
             return dict;
         }
     }
+
+    [Serializable]
+    public class DungeonLightData
+    {
+        public string DGName { get; set; }
+        public List<LightData> LightData { get; set; }
+    }
+
+    public class LightData
+    {
+        public int LightType { get; set; }
+        public Position Position { get; set; }
+    }
+
+    [Serializable]
+    public class DungeonLightDataLoader : ILoader<string, DungeonLightData>
+    {
+        public List<DungeonLightData> lights = new List<DungeonLightData>();
+        public Dictionary<string, DungeonLightData> MakeDict()
+        {
+            Dictionary<string, DungeonLightData> dict = new Dictionary<string, DungeonLightData>();
+            foreach (DungeonLightData light in lights)
+                dict.Add(light.DGName, light);
+            return dict;
+        }
+    }
     #endregion
 
     #region MonsterClassData

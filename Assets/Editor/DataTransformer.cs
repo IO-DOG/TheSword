@@ -8,7 +8,9 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
+using UnityEditor.ShaderGraph.Serialization;
 using UnityEngine;
+using static Codice.Client.Commands.WkTree.WorkspaceTreeNode;
 
 public class DataTransformer : EditorWindow
 {
@@ -42,6 +44,57 @@ public class DataTransformer : EditorWindow
         ParseEquipData("Equip");
         Debug.Log("Complete DataTransformer");
     }
+
+    [MenuItem("Tools/SaveLightAsJson ")]
+    public static void SaveLightAsJson()
+    {
+        string path = Application.dataPath + "/@Resources/Data/JsonData/LightData.json";
+        DungeonLightDataLoader loader = new DungeonLightDataLoader();
+
+        foreach(KeyValuePair<string, Data.MapData> data in Managers.Data.MapDic)
+        {
+            if (GameObject.Find(data.Key) == null)
+                return;
+            GameObject parent = GameObject.Find(data.Key).transform.Find("Lights").gameObject;
+            string dungeon = parent.transform.parent.name; // DG Name
+            if (parent == null)
+            {
+                Debug.Log("Parent is not exists!");
+                return;
+            }
+
+            Transform[] lights = parent.GetComponentsInChildren<Transform>();
+            List<LightData> lightDatas = new List<LightData>();
+
+            for (int i = 1; i < lights.Length; i++)
+            {
+                Position pos = new Position { X = lights[i].localPosition.x, Y = lights[i].localPosition.y, Z = lights[i].localPosition.z };
+
+                if (lights[i].name.Contains(Define.LightType.Torch.ToString()))
+                {
+                    lightDatas.Add(new LightData { LightType = (int)Define.LightType.Torch, Position = pos });
+                }
+                else if (lights[i].name.Contains(Define.LightType.Bowl.ToString()))
+                {
+                    lightDatas.Add(new LightData { LightType = (int)Define.LightType.Bowl, Position = pos });
+                }
+            }
+
+            loader.lights.Add(new DungeonLightData
+            {
+                DGName = dungeon,
+                LightData = lightDatas
+            });
+
+        }
+
+        string newJson = JsonConvert.SerializeObject(loader, Formatting.Indented);
+        File.WriteAllText(path, newJson);
+
+        Debug.Log("Complete SaveLightAsJson");
+    }
+
+    
 
     static void ParsePlayerData(string filename)
     {
