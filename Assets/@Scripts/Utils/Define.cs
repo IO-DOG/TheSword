@@ -54,13 +54,6 @@ public class Define
         Right,
     }
 
-    public enum Stairs
-    {
-        None = -1,
-        Upstairs = 0,
-        Downstairs = 1,
-    }
-
     public enum Types
     {
         None = 0,
@@ -72,18 +65,45 @@ public class Define
         Book = 6,
     }
 
-    public enum LightType
-    {
-        Torch = 0,
-        Bowl = 1,
-    }
-
     #endregion
 
     #region Map
     public static float TILE_SIZE = 3.2f;
-    public static int TILE_COUNT = 11;
     public static float CAMERA_ANGLE = 60;
+
+    public enum TileType
+    {
+        Void = 0,
+        Floor,
+        Wall,
+        Door,
+        Stairs,
+        SpawnPoint = 11,
+    }
+
+    public enum OccupiedType
+    {
+        None = 0,
+        Monster,
+        CItem,
+        EItem,
+        Boss,
+    }
+
+    public enum Stairs
+    {
+        None = -1,
+        Upstairs = 0,
+        Downstairs = 1,
+    }
+
+    public enum LightType
+    {
+        Torch = 0,
+        Bowl = 1,
+        Linear = 2,
+        Circle = 3,
+    }
     #endregion
 
     public static string MainUI_Inventory_A = "MainUI_Inventory_A.sprite";

@@ -231,16 +231,16 @@ public class DataTransformer : EditorWindow
         #region Excel
         foreach (FileInfo file in di.GetFiles())
         {
-            int totalCItemIndex = 0;
-            int totalEItemIndex = 0;
-            int totalMonsterIndex = 0;
-            int totalBossIndex = 0;
-            int totalDoorIndex = 0;
+            int totalCItemCount = 0;
+            int totalEItemCount = 0;
+            int totalMonsterCount = 0;
+            int totalBossCount = 0;
+            int totalDoorCount = 0;
 
 
             if (file.Name.Contains("Dungeon") && !file.Name.Contains("meta"))
             {
-                List<Tile> tiles = new List<Tile>();
+                List<Data.TileData> tiles = new List<Data.TileData>();
                 string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{file.Name}").Split("\n");
                 float zPos = 0;
 
@@ -259,110 +259,171 @@ public class DataTransformer : EditorWindow
                     {
                         string block = row[x];
 
-                        int tileID;
-
-                        string occupiedType;
-                        int occupiedIndex;
-                        int occupiedTotalIndex;
-                        bool occupiedIsActive;
-
                         xPos = x * Define.TILE_SIZE;
 
                         if (block[0] == 'I')
                         {
-                            tileID = 1;
+                            Data.Occupied tile = new Data.Occupied
+                            {
+                                PrefabID = 1,
+                                Position = new Data.Position
+                                {
+                                    X = xPos,
+                                    Y = 0,
+                                    Z = zPos,
+                                },
+                                TileType = (int)Define.TileType.Floor,
 
-                            occupiedIndex = int.Parse(Regex.Replace(block, "[^0-9]", ""));
-                            occupiedType = "CItem";
-                            occupiedTotalIndex = totalCItemIndex++;
-                            occupiedIsActive = true;
+                                Type = (int)Define.OccupiedType.CItem,
+                                Index = int.Parse(Regex.Replace(block, "[^0-9]", "")),
+                                TotalCount = totalCItemCount++,
+                                IsActive = true,
+                            };
+                            tiles.Add(tile);
+
                         }
                         else if (block[0] == 'E')
                         {
-                            tileID = 1;
+                            Data.Occupied tile = new Data.Occupied
+                            {
+                                PrefabID = 1,
+                                Position = new Data.Position
+                                {
+                                    X = xPos,
+                                    Y = 0,
+                                    Z = zPos,
+                                },
+                                TileType = (int)Define.TileType.Floor,
 
-                            occupiedIndex = int.Parse(Regex.Replace(block, "[^0-9]", ""));
-                            occupiedType = "EItem";
-                            occupiedTotalIndex = totalEItemIndex++;
-                            occupiedIsActive = true;
+                                Type = (int)Define.OccupiedType.EItem,
+                                Index = int.Parse(Regex.Replace(block, "[^0-9]", "")),
+                                TotalCount = totalEItemCount++,
+                                IsActive = true,
+                            };
+                            tiles.Add(tile);
                         }
                         else if (block[0] == 'M')
                         {
-                            tileID = 1;
+                            Data.Occupied tile = new Data.Occupied
+                            {
+                                PrefabID = 1,
+                                Position = new Data.Position
+                                {
+                                    X = xPos,
+                                    Y = 0,
+                                    Z = zPos,
+                                },
+                                TileType = (int)Define.TileType.Floor,
 
-                            occupiedIndex = int.Parse(Regex.Replace(block, "[^0-9]", ""));
-                            occupiedType = "Monster";
-                            occupiedTotalIndex = totalMonsterIndex++;
-                            occupiedIsActive = true;
+                                Type = (int)Define.OccupiedType.Monster,
+                                Index = int.Parse(Regex.Replace(block, "[^0-9]", "")),
+                                TotalCount = totalMonsterCount++,
+                                IsActive = true,
+                            };
+                            tiles.Add(tile);
                         }
                         else if (block[0] == 'B')
                         {
-                            tileID = 1;
+                            Data.Occupied tile = new Data.Occupied
+                            {
+                                PrefabID = 1,
+                                Position = new Data.Position
+                                {
+                                    X = xPos,
+                                    Y = 0,
+                                    Z = zPos,
+                                },
+                                TileType = (int)Define.TileType.Floor,
 
-                            occupiedIndex = int.Parse(Regex.Replace(block, "[^0-9]", ""));
-                            occupiedType = "Boss";
-                            occupiedTotalIndex = totalBossIndex++;
-                            occupiedIsActive = true;
+                                Type = (int)Define.OccupiedType.Boss,
+                                Index = int.Parse(Regex.Replace(block, "[^0-9]", "")),
+                                TotalCount = totalBossCount++,
+                                IsActive = true,
+                            };
+                            tiles.Add(tile);
                         }
                         else
                         {
-                            tileID = 1;
+                            int prefabID = int.Parse(Regex.Replace(block, "[^0-9]", ""));
 
-                            occupiedType = "none";
-                            occupiedIndex = -1;
-                            occupiedTotalIndex = -1;
-                            occupiedIsActive = false;
-
-                            if (block != "1")
+                           
+                            if (prefabID >= 3 && prefabID <= 8)
                             {
-                                tileID = int.Parse(Regex.Replace(block, "[^0-9]", ""));
+                                Data.DoorData tile = new Data.DoorData
+                                 {
+                                     PrefabID = prefabID,
+                                     Position = new Data.Position
+                                     {
+                                         X = xPos,
+                                         Y = 0,
+                                         Z = zPos,
+                                     },
+                                     TileType = (int)Define.TileType.Door,
 
-                                if (tileID >= 3 && tileID <= 8)
+                                     TotalCount = totalDoorCount++,
+                                     IsActive = true,
+                                 };
+                                 tiles.Add(tile);
+                             }
+                             else if (prefabID == 9)
+                             {
+                                Data.StairsData tile = new Data.StairsData
+                                 {
+                                     PrefabID = prefabID,
+                                     Position = new Data.Position
+                                     {
+                                         X = xPos,
+                                         Y = 0,
+                                         Z = zPos,
+                                     },
+                                     TileType = (int)Define.TileType.Stairs,
+                   
+                                     Floor = floorIndex,
+                                     StairsType = (int)Define.Stairs.Upstairs,
+                                 };
+                                 tiles.Add(tile);
+                             }
+                            else if (prefabID == 10)
+                            {
+                                Data.StairsData tile = new Data.StairsData
                                 {
-                                    occupiedType = "Door";
-                                    occupiedTotalIndex = totalDoorIndex++;
-                                    occupiedIsActive = true;
-                                }
-                                if (tileID == 9)
+                                    PrefabID = prefabID,
+                                    Position = new Data.Position
+                                    {
+                                        X = xPos,
+                                        Y = 0,
+                                        Z = zPos,
+                                    },
+                                    TileType = (int)Define.TileType.Stairs,
+
+                                    Floor = floorIndex,
+                                    StairsType = (int)Define.Stairs.Downstairs,
+                                };
+                                tiles.Add(tile);
+                            }
+                            else
+                            {
+                                Data.TileData tile = new Data.TileData
                                 {
-                                    occupiedType = "Stairs";
-                                    occupiedTotalIndex = floorIndex;
-                                    occupiedIndex = (int)Define.Stairs.Upstairs;
-                                }
-                                else if(tileID == 10)
-                                {
-                                    occupiedType = "Stairs";
-                                    occupiedTotalIndex = floorIndex;
-                                    occupiedIndex = (int)Define.Stairs.Downstairs;
-                                }
+                                    PrefabID = prefabID,
+                                    Position = new Data.Position
+                                    {
+                                        X = xPos,
+                                        Y = 0,
+                                        Z = zPos,
+                                    },
+                                    TileType = prefabID,
+                                };
+                                tiles.Add(tile);
                             }
                         }
-
-                        Tile tile = new Tile
-                        {
-                            ID = tileID,
-                            Position = new Position
-                            {
-                                X = xPos,
-                                Y = 0,
-                                Z = zPos,
-                            },
-                            Occupied = new Occupied
-                            {
-                                Type = occupiedType,
-                                Index = occupiedIndex,
-                                TotalIndex = occupiedTotalIndex,
-                                IsActive = occupiedIsActive
-                            }
-                        };
-                        tiles.Add(tile);
                     }
                 }
 
                 MapData mapData = new MapData
                 {
                     Key = file.Name.Replace(".csv", ""),
-                    Tile = tiles,
+                    Tiles = tiles,
                 };
                 loader.maps.Add(mapData);
                 floorIndex++;
@@ -370,7 +431,10 @@ public class DataTransformer : EditorWindow
         }
         #endregion
 
-        string mapDicJsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
+        string mapDicJsonStr = JsonConvert.SerializeObject(loader, new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Auto
+        });
         File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/MapData.json", mapDicJsonStr);
         AssetDatabase.Refresh();
     }

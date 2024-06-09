@@ -108,23 +108,38 @@ namespace Data
     public class MapData
     {
         public string Key { get; set; }
-        public List<Data.Tile> Tile { get; set; }
+        public List<Data.TileData> Tiles { get; set; }
     }
 
     [Serializable]
-    public class Tile
+    public class TileData
     {
-        public int ID;
+        public int PrefabID { get; set; }
         public Position Position { get; set; }
-        public Occupied Occupied { get; set; }
+        public int TileType { get; set; }
     }
 
     [Serializable]
-    public class Occupied
+    public class StairsData : TileData
     {
-        public string Type { get; set; }
+        public int Floor { get; set; }
+        public int StairsType { get; set; }
+    }
+
+    [Serializable]
+    public class DoorData : TileData
+    {
+        public int TotalCount { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+
+    [Serializable]
+    public class Occupied : TileData
+    {
+        public int Type { get; set; }
         public int Index { get; set; }
-        public int TotalIndex { get; set; }
+        public int TotalCount { get; set; }
         public bool IsActive { get; set; }
     }
 

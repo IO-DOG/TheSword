@@ -29,13 +29,24 @@ public class DataManager
         ConsumableItemDic = LoadJson<Data.ConsumableItemDataLoader, int, Data.ConsumableItemData>("ConsumableItemData").MakeDict();
         MonsterClassDic = LoadJson<Data.MonsterClassDataLoader, int, Data.MonsterClassData>("MonsterClassData").MakeDict();
         MapDic = LoadJson<Data.MapDataLoader, string, Data.MapData>("MapData").MakeDict();
-        LightDic = LoadJson<Data.DungeonLightDataLoader, string, Data.DungeonLightData>("LightData").MakeDict();
+        //LightDic = LoadJson<Data.DungeonLightDataLoader, string, Data.DungeonLightData>("LightData").MakeDict();
     }
 
     Loader LoadJson<Loader, Key, Value>(string path) where Loader : ILoader<Key, Value>
     {
         TextAsset textAsset = Managers.Resource.Load<TextAsset>($"{path}");
-        return JsonConvert.DeserializeObject<Loader>(textAsset.text);
+
+        if (path == "MapData")
+        {
+            return JsonConvert.DeserializeObject<Loader>(textAsset.text, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto
+            });
+        }
+        else
+        {
+            return JsonConvert.DeserializeObject<Loader>(textAsset.text);
+        }
     }
 
     #region Active Off
@@ -46,11 +57,11 @@ public class DataManager
             string key = entry.Key;
             Data.MapData mapData = entry.Value;
 
-            foreach (Data.Tile tile in mapData.Tile)
+            foreach (Data.TileData tile in mapData.Tiles)
             {
-               if(tile.Occupied.Type == "Monster" && tile.Occupied.TotalIndex == index)
+               if(tile is Occupied monsterTile && monsterTile.Type == (int)Define.OccupiedType.Monster && monsterTile.TotalCount == index)
                 {
-                    tile.Occupied.IsActive = false;
+                    monsterTile.IsActive = false;
                 }
             }
         }
@@ -63,11 +74,11 @@ public class DataManager
             string key = entry.Key;
             Data.MapData mapData = entry.Value;
 
-            foreach (Data.Tile tile in mapData.Tile)
+            foreach (Data.TileData tile in mapData.Tiles)
             {
-                if (tile.Occupied.Type == "CItem" && tile.Occupied.TotalIndex == index)
+                if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem && citemTile.TotalCount == index)
                 {
-                    tile.Occupied.IsActive = false;
+                    citemTile.IsActive = false;
                 }
             }
         }
@@ -80,11 +91,11 @@ public class DataManager
             string key = entry.Key;
             Data.MapData mapData = entry.Value;
 
-            foreach (Data.Tile tile in mapData.Tile)
+            foreach (Data.TileData tile in mapData.Tiles)
             {
-                if (tile.Occupied.Type == "Door" && tile.Occupied.TotalIndex == index)
+                if (tile is DoorData doorTile && doorTile.TileType == (int)Define.TileType.Door && doorTile.TotalCount == index)
                 {
-                    tile.Occupied.IsActive = false;
+                    doorTile.IsActive = false;
                 }
             }
         }

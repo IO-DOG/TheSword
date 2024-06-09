@@ -149,7 +149,10 @@ public class GameManager
 
         List<MapData> mapData = new List<MapData>(Managers.Data.MapDic.Values);
         var mapContainer = new { Maps = mapData };
-        string MapDicJsonStr = JsonConvert.SerializeObject(mapContainer, Formatting.Indented);
+        string MapDicJsonStr = JsonConvert.SerializeObject(mapContainer, new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Auto
+        });
         File.WriteAllText(Application.dataPath + "/@Resources/Data/JsonData/MapData.json", MapDicJsonStr);
     }
 
@@ -213,7 +216,6 @@ public class GameManager
 
     public void InstantiateMap(string mapName)
     {
-
         int count = 0;
 
         foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
@@ -237,91 +239,91 @@ public class GameManager
             monsters.transform.parent = parent.transform;
             lights.transform.parent = parent.transform;
 
-            foreach (Data.Tile tile in mapData.Tile)
+            foreach (Data.TileData tile in mapData.Tiles)
             {
-                if (tile.Occupied.Type == "none")
+                if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
                 {
-                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.ID}", tiles.transform);
-
-                    if (tile.ID != 1 && tile.ID != 11)
-                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
-                    else
-                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-                }
-                else if (tile.Occupied.Type == "CItem")
-                {
-                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.ID}", tiles.transform);
-                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{citemTile.PrefabID}", tiles.transform);
+                    go.transform.position = new Vector3(citemTile.Position.X, citemTile.Position.Y, citemTile.Position.Z);
 
                     GameObject item = Managers.Resource.Instantiate("ConsumableItem", items.transform);
                     item.transform.position = go.transform.position;
-                    item.GetComponent<ConsumableItem>().id = tile.Occupied.Index;
-                    item.name = $"CItem{tile.Occupied.TotalIndex}";
-                    item.GetComponent<ConsumableItem>()._itemIndex_forActive = tile.Occupied.TotalIndex;
+                    item.GetComponent<ConsumableItem>().id = citemTile.Index;
+                    item.name = $"CItem{citemTile.TotalCount}";
+                    item.GetComponent<ConsumableItem>()._itemIndex_forActive = citemTile.TotalCount;
 
-                    if (tile.Occupied.IsActive == false)
+                    if (citemTile.IsActive == false)
                         item.SetActive(false);
                 }
-                else if (tile.Occupied.Type == "EItem")
+                else if (tile is Occupied eitemTile && eitemTile.Type == (int)Define.OccupiedType.EItem)
                 {
-                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.ID}", tiles.transform);
-                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{eitemTile.PrefabID}", tiles.transform);
+                    go.transform.position = new Vector3(eitemTile.Position.X, eitemTile.Position.Y, eitemTile.Position.Z);
 
                     GameObject item = Managers.Resource.Instantiate("EquipItem", items.transform);
                     item.transform.position = go.transform.position;
-                    item.GetComponent<Equip>().Id = tile.Occupied.Index;
-                    item.name = $"EItem{tile.Occupied.TotalIndex}";
-                    item.GetComponent<Equip>()._itemIndex_forActive = tile.Occupied.TotalIndex;
+                    item.GetComponent<Equip>().Id = eitemTile.Index;
+                    item.name = $"EItem{eitemTile.TotalCount}";
+                    item.GetComponent<Equip>()._itemIndex_forActive = eitemTile.TotalCount;
 
-                    if (tile.Occupied.IsActive == false)
+                    if (eitemTile.IsActive == false)
                         item.SetActive(false);
                 }
-                else if (tile.Occupied.Type == "Monster")
+                else if (tile is Occupied monsterTile && monsterTile.Type == (int)Define.OccupiedType.Monster)
                 {
-                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.ID}", tiles.transform);
-                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{monsterTile.PrefabID}", tiles.transform);
+                    go.transform.position = new Vector3(monsterTile.Position.X, monsterTile.Position.Y, monsterTile.Position.Z);
 
                     GameObject monster = Managers.Resource.Instantiate("Monster", monsters.transform);
                     monster.transform.position = go.transform.position;
-                    monster.GetComponent<MonsterController>().id = tile.Occupied.Index;
-                    monster.name = $"monster{tile.Occupied.TotalIndex}";
-                    monster.GetComponent<MonsterController>()._monsterIndex_forActive = tile.Occupied.TotalIndex;
+                    monster.GetComponent<MonsterController>().id = monsterTile.Index;
+                    monster.name = $"monster{monsterTile.TotalCount}";
+                    monster.GetComponent<MonsterController>()._monsterIndex_forActive = monsterTile.TotalCount;
 
-                    if (tile.Occupied.IsActive == false)
+                    if (monsterTile.IsActive == false)
                         monster.SetActive(false);
                 }
-                else if (tile.Occupied.Type == "Door")
+                else if (tile is DoorData doorTile)
                 {
                     GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
                     go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
 
-                    GameObject door = Managers.Resource.Instantiate($"Tilemap_{tile.ID}", tiles.transform);
-                    door.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
-                    door.name = $"door{tile.Occupied.TotalIndex}";
-                    door.GetComponentInChildren<Door>()._doorIndex_forActive = tile.Occupied.TotalIndex;
+                    GameObject door = Managers.Resource.Instantiate($"Tilemap_{doorTile.PrefabID}", tiles.transform);
+                    door.transform.position = new Vector3(doorTile.Position.X, doorTile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
+                    door.name = $"door{doorTile.TotalCount}";
+                    door.GetComponentInChildren<Door>()._doorIndex_forActive = doorTile.TotalCount;
 
-                    if (tile.Occupied.IsActive == false)
+                    if (doorTile.IsActive == false)
                         door.SetActive(false);
                 }
-                else if(tile.Occupied.Type == "Stairs")
+                else if (tile is StairsData stairsTile)
                 {
-                    GameObject stairs = Managers.Resource.Instantiate($"Tilemap_{tile.ID}", tiles.transform);
-                    stairs.name = $"stairs{tile.Occupied.TotalIndex}";
-                    stairs.GetComponentInChildren<PortalController>()._floor = tile.Occupied.TotalIndex;
-                    stairs.GetComponentInChildren<PortalController>()._stairs = (int)tile.Occupied.Index;
+                    GameObject stairs = Managers.Resource.Instantiate($"Tilemap_{stairsTile.PrefabID}", tiles.transform);
+                    stairs.name = $"stairs{stairsTile.Floor}";
+                    stairs.GetComponentInChildren<PortalController>()._floor = stairsTile.Floor;
+                    stairs.GetComponentInChildren<PortalController>()._stairs = stairsTile.StairsType;
 
-                    if (tile.Occupied.Index == (int)Define.Stairs.Downstairs)
+                    if (stairsTile.StairsType == (int)Define.Stairs.Downstairs)
                     {
-                        stairs.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE * 1.5f, tile.Position.Z);
+                        stairs.transform.position = new Vector3(stairsTile.Position.X, stairsTile.Position.Y - Define.TILE_SIZE * 1.5f, stairsTile.Position.Z);
                     }
                     else
                     {
                         GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
-                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+                        go.transform.position = new Vector3(stairsTile.Position.X, stairsTile.Position.Y, stairsTile.Position.Z);
 
-                        stairs.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
+                        stairs.transform.position = new Vector3(stairsTile.Position.X, stairsTile.Position.Y - Define.TILE_SIZE / 2, stairsTile.Position.Z);
                     }
 
+                }
+                else
+                {
+                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", tiles.transform);
+
+                    if (tile.PrefabID != (int)Define.TileType.Floor && tile.PrefabID != (int)Define.TileType.SpawnPoint)
+                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
+                    else
+                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
                 }
             }
 
