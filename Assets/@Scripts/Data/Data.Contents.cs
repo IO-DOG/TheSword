@@ -115,7 +115,7 @@ namespace Data
     public class TileData
     {
         public int PrefabID { get; set; }
-        public Position Position { get; set; }
+        public MyVector3 Position { get; set; }
         public int TileType { get; set; }
     }
 
@@ -144,7 +144,7 @@ namespace Data
     }
 
     [Serializable]
-    public class Position
+    public class MyVector3
     {
         public float X { get; set; }
         public float Y { get; set; }
@@ -166,26 +166,28 @@ namespace Data
     }
 
     [Serializable]
-    public class DungeonLightData
+    public class DungeonDecoData
     {
         public string DGName { get; set; }
-        public List<LightData> LightData { get; set; }
+        public List<DecoData> DecoData { get; set; }
     }
 
-    public class LightData
+    public class DecoData
     {
         public int LightType { get; set; }
-        public Position Position { get; set; }
+        public MyVector3 Position { get; set; }
+        public MyVector3 Scale { get; set; }
+        public MyVector3 Rotation { get; set;}
     }
 
     [Serializable]
-    public class DungeonLightDataLoader : ILoader<string, DungeonLightData>
+    public class DungeonDecoDataLoader : ILoader<string, DungeonDecoData>
     {
-        public List<DungeonLightData> lights = new List<DungeonLightData>();
-        public Dictionary<string, DungeonLightData> MakeDict()
+        public List<DungeonDecoData> lights = new List<DungeonDecoData>();
+        public Dictionary<string, DungeonDecoData> MakeDict()
         {
-            Dictionary<string, DungeonLightData> dict = new Dictionary<string, DungeonLightData>();
-            foreach (DungeonLightData light in lights)
+            Dictionary<string, DungeonDecoData> dict = new Dictionary<string, DungeonDecoData>();
+            foreach (DungeonDecoData light in lights)
                 dict.Add(light.DGName, light);
             return dict;
         }

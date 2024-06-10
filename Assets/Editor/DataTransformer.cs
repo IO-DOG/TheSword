@@ -45,17 +45,17 @@ public class DataTransformer : EditorWindow
         Debug.Log("Complete DataTransformer");
     }
 
-    [MenuItem("Tools/SaveLightAsJson ")]
+    [MenuItem("Tools/SaveDecoAsJson ")]
     public static void SaveLightAsJson()
     {
-        string path = Application.dataPath + "/@Resources/Data/JsonData/LightData.json";
-        DungeonLightDataLoader loader = new DungeonLightDataLoader();
+        string path = Application.dataPath + "/@Resources/Data/JsonData/DecoData.json";
+        DungeonDecoDataLoader loader = new DungeonDecoDataLoader();
 
         foreach(KeyValuePair<string, Data.MapData> data in Managers.Data.MapDic)
         {
             if (GameObject.Find(data.Key) == null)
                 return;
-            GameObject parent = GameObject.Find(data.Key).transform.Find("Lights").gameObject;
+            GameObject parent = GameObject.Find(data.Key).transform.Find("Deco").gameObject;
             string dungeon = parent.transform.parent.name; // DG Name
             if (parent == null)
             {
@@ -64,26 +64,40 @@ public class DataTransformer : EditorWindow
             }
 
             Transform[] lights = parent.GetComponentsInChildren<Transform>();
-            List<LightData> lightDatas = new List<LightData>();
+            List<DecoData> lightDatas = new List<DecoData>();
 
             for (int i = 1; i < lights.Length; i++)
             {
-                Position pos = new Position { X = lights[i].localPosition.x, Y = lights[i].localPosition.y, Z = lights[i].localPosition.z };
+                MyVector3 pos = new MyVector3 { X = lights[i].localPosition.x, Y = lights[i].localPosition.y, Z = lights[i].localPosition.z };
+                MyVector3 scale = new MyVector3 { X = lights[i].localScale.x, Y = lights[i].localScale.y, Z = lights[i].localScale.z };
+                MyVector3 rot = new MyVector3 { X = lights[i].localRotation.x, Y = lights[i].localRotation.y, Z = lights[i].localRotation.z };
 
-                if (lights[i].name.Contains(Define.LightType.Torch.ToString()))
+                if (lights[i].name.Contains(Define.DecoType.Torch.ToString()))
                 {
-                    lightDatas.Add(new LightData { LightType = (int)Define.LightType.Torch, Position = pos });
+                    lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.Torch, Position = pos, Scale = scale, Rotation = rot });
                 }
-                else if (lights[i].name.Contains(Define.LightType.Bowl.ToString()))
+                else if (lights[i].name.Contains(Define.DecoType.FireBowl.ToString()))
                 {
-                    lightDatas.Add(new LightData { LightType = (int)Define.LightType.Bowl, Position = pos });
+                    lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.FireBowl, Position = pos, Scale = scale, Rotation = rot });
+                }
+                else if (lights[i].name.Contains(Define.DecoType.PointLight.ToString()))
+                {
+                    lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.PointLight, Position = pos, Scale = scale, Rotation = rot });
+                }
+                else if (lights[i].name.Contains(Define.DecoType.Handcuff.ToString()))
+                {
+                    lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.Handcuff, Position = pos, Scale = scale, Rotation = rot });
+                }
+                else if (lights[i].name.Contains(Define.DecoType.GodRay.ToString()))
+                {
+                    lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.GodRay, Position = pos, Scale = scale, Rotation = rot });
                 }
             }
 
-            loader.lights.Add(new DungeonLightData
+            loader.lights.Add(new DungeonDecoData
             {
                 DGName = dungeon,
-                LightData = lightDatas
+                DecoData = lightDatas
             });
 
         }
@@ -266,7 +280,7 @@ public class DataTransformer : EditorWindow
                             Data.Occupied tile = new Data.Occupied
                             {
                                 PrefabID = 1,
-                                Position = new Data.Position
+                                Position = new Data.MyVector3
                                 {
                                     X = xPos,
                                     Y = 0,
@@ -287,7 +301,7 @@ public class DataTransformer : EditorWindow
                             Data.Occupied tile = new Data.Occupied
                             {
                                 PrefabID = 1,
-                                Position = new Data.Position
+                                Position = new Data.MyVector3
                                 {
                                     X = xPos,
                                     Y = 0,
@@ -307,7 +321,7 @@ public class DataTransformer : EditorWindow
                             Data.Occupied tile = new Data.Occupied
                             {
                                 PrefabID = 1,
-                                Position = new Data.Position
+                                Position = new Data.MyVector3
                                 {
                                     X = xPos,
                                     Y = 0,
@@ -327,7 +341,7 @@ public class DataTransformer : EditorWindow
                             Data.Occupied tile = new Data.Occupied
                             {
                                 PrefabID = 1,
-                                Position = new Data.Position
+                                Position = new Data.MyVector3
                                 {
                                     X = xPos,
                                     Y = 0,
@@ -352,7 +366,7 @@ public class DataTransformer : EditorWindow
                                 Data.DoorData tile = new Data.DoorData
                                  {
                                      PrefabID = prefabID,
-                                     Position = new Data.Position
+                                     Position = new Data.MyVector3
                                      {
                                          X = xPos,
                                          Y = 0,
@@ -370,7 +384,7 @@ public class DataTransformer : EditorWindow
                                 Data.StairsData tile = new Data.StairsData
                                  {
                                      PrefabID = prefabID,
-                                     Position = new Data.Position
+                                     Position = new Data.MyVector3
                                      {
                                          X = xPos,
                                          Y = 0,
@@ -388,7 +402,7 @@ public class DataTransformer : EditorWindow
                                 Data.StairsData tile = new Data.StairsData
                                 {
                                     PrefabID = prefabID,
-                                    Position = new Data.Position
+                                    Position = new Data.MyVector3
                                     {
                                         X = xPos,
                                         Y = 0,
@@ -406,7 +420,7 @@ public class DataTransformer : EditorWindow
                                 Data.TileData tile = new Data.TileData
                                 {
                                     PrefabID = prefabID,
-                                    Position = new Data.Position
+                                    Position = new Data.MyVector3
                                     {
                                         X = xPos,
                                         Y = 0,

@@ -97,12 +97,13 @@ public class Define
         Downstairs = 1,
     }
 
-    public enum LightType
+    public enum DecoType
     {
         Torch = 0,
-        Bowl = 1,
-        Linear = 2,
-        Circle = 3,
+        FireBowl = 1,
+        GodRay = 2,
+        PointLight = 3,
+        Handcuff = 4,
     }
     #endregion
 

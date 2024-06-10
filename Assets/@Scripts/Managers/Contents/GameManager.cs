@@ -230,7 +230,7 @@ public class GameManager
             GameObject tiles = new GameObject() { name = "Tiles" };
             GameObject items = new GameObject() { name = "Items" };
             GameObject monsters = new GameObject() { name = "Monsters" };
-            GameObject lights = new GameObject() { name = "Lights" };
+            GameObject lights = new GameObject() { name = "Deco" };
 
             parent.transform.localPosition += new Vector3(count * 100, 0, 0);
             parent.transform.parent = GameObject.Find("Map").transform;
@@ -343,24 +343,39 @@ public class GameManager
 
     void InstantiateLights(string DGName, Transform parent)
     {
-        foreach (KeyValuePair<string, DungeonLightData> entry in Managers.Data.LightDic)
+        foreach (KeyValuePair<string, DungeonDecoData> entry in Managers.Data.DecoDic)
         {
             string key = entry.Key;
-            Data.DungeonLightData lightList = entry.Value;
+            Data.DungeonDecoData lightList = entry.Value;
 
             if (!key.Contains(DGName))
                 continue;
 
-            foreach (LightData data in lightList.LightData)
+            foreach (DecoData data in lightList.DecoData)
             {
-                if(data.LightType == (int)Define.LightType.Torch)
+                if(data.LightType == (int)Define.DecoType.Torch)
                 {
-                    GameObject go = Managers.Resource.Instantiate("Object_DungeonTorch", parent.transform);
+                    GameObject go = Managers.Resource.Instantiate($"Deco_{Define.DecoType.Torch.ToString()}", parent.transform);
                     go.transform.localPosition = new Vector3(data.Position.X, data.Position.Y, data.Position.Z);
                 }
-                else if(data.LightType == (int)Define.LightType.Bowl)
+                else if(data.LightType == (int)Define.DecoType.FireBowl)
                 {
-                    GameObject go = Managers.Resource.Instantiate("Object_FireBowl", parent.transform);
+                    GameObject go = Managers.Resource.Instantiate($"Deco_{Define.DecoType.FireBowl.ToString()}", parent.transform);
+                    go.transform.localPosition = new Vector3(data.Position.X, data.Position.Y, data.Position.Z);
+                }
+                else if (data.LightType == (int)Define.DecoType.Handcuff)
+                {
+                    GameObject go = Managers.Resource.Instantiate($"Deco_{Define.DecoType.Handcuff.ToString()}", parent.transform);
+                    go.transform.localPosition = new Vector3(data.Position.X, data.Position.Y, data.Position.Z);
+                }
+                else if (data.LightType == (int)Define.DecoType.GodRay)
+                {
+                    GameObject go = Managers.Resource.Instantiate($"Deco_{Define.DecoType.GodRay.ToString()}", parent.transform);
+                    go.transform.localPosition = new Vector3(data.Position.X, data.Position.Y, data.Position.Z);
+                }
+                else if (data.LightType == (int)Define.DecoType.PointLight)
+                {
+                    GameObject go = Managers.Resource.Instantiate($"Deco_{Define.DecoType.PointLight.ToString()}", parent.transform);
                     go.transform.localPosition = new Vector3(data.Position.X, data.Position.Y, data.Position.Z);
                 }
             }
