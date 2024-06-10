@@ -71,6 +71,13 @@ public class Define
         Shoes = 5,
         Book = 6,
     }
+
+    public enum LightType
+    {
+        Torch = 0,
+        Bowl = 1,
+    }
+
     #endregion
 
     #region Map
