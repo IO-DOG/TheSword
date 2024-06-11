@@ -238,4 +238,29 @@ namespace Data
         }
     }
     #endregion
+
+    #region ScriptData
+    [Serializable]
+    public class ScriptData
+    {
+        public int id;
+        public string ScriptKr;
+        public string ScriptEn;
+        public string ScriptJp;
+        public string ScriptCn;
+    }
+
+    [Serializable]
+    public class ScriptDataLoader : ILoader<int, ScriptData>
+    {
+        public List<ScriptData> scripts = new List<ScriptData>();
+        public Dictionary<int, ScriptData> MakeDict()
+        {
+            Dictionary<int, ScriptData> dict = new Dictionary<int, ScriptData>();
+            foreach (ScriptData script in scripts)
+                dict.Add(script.id, script);
+            return dict;
+        }
+    }
+    #endregion
 }

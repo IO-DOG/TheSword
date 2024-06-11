@@ -20,7 +20,9 @@ public class DataManager
     public Dictionary<string, Data.MapData> MapDic { get; set; } = new Dictionary<string, Data.MapData>();
     public Dictionary<int, Data.EquipData> EquipDic { get; set; } = new Dictionary<int, Data.EquipData>();
     public Dictionary<string, Data.DungeonLightData> LightDic { get; set; } = new Dictionary<string, Data.DungeonLightData>();
+    public Dictionary<int, Data.ScriptData> ScriptDic { get; set; } = new Dictionary<int, Data.ScriptData>();
 
+    
     public void Init()
     {
         AssetDatabase.Refresh();
@@ -32,6 +34,7 @@ public class DataManager
         MapDic = LoadJson<Data.MapDataLoader, string, Data.MapData>("MapData").MakeDict();
         EquipDic = LoadJson<Data.EquipDataLoader, int, Data.EquipData>("EquipData").MakeDict();
         LightDic = LoadJson<Data.DungeonLightDataLoader, string, Data.DungeonLightData>("LightData").MakeDict();
+        ScriptDic = LoadJson<Data.ScriptDataLoader, int, Data.ScriptData>("ScriptData").MakeDict();
     }
 
     Loader LoadJson<Loader, Key, Value>(string path) where Loader : ILoader<Key, Value>
