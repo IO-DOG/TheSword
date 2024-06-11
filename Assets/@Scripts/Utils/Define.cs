@@ -78,6 +78,14 @@ public class Define
         Bowl = 1,
     }
 
+    public enum ScriptType
+    {
+        None = 0,
+        Kr = 1,
+        En = 2,
+        Jp = 3,
+        Cn = 4,
+    }
     #endregion
 
     #region Map

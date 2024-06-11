@@ -53,6 +53,35 @@ public class Managers : MonoBehaviour
         }
     }
 
+    public static string GetString(int id)
+    {
+        int scriptType = (int)Managers.Game.ScriptType;
+        string ret = "";
+        switch (scriptType)
+        {
+            case 0:
+                ret = Managers.Data.ScriptDic[id].ScriptKr;
+                break;
+            case 1:
+                ret = Managers.Data.ScriptDic[id].ScriptKr;
+                break;
+            case 2:
+                ret = Managers.Data.ScriptDic[id].ScriptEn;
+                break;
+            case 3:
+                ret = Managers.Data.ScriptDic[id].ScriptJp;
+                break;
+            case 4:
+                ret = Managers.Data.ScriptDic[id].ScriptCn;
+                break;
+            default:
+                ret = Managers.Data.ScriptDic[id].ScriptKr;
+                break;
+        }
+
+        return ret;
+    }
+
     private void Update()
     {
         _input.OnUpdate();

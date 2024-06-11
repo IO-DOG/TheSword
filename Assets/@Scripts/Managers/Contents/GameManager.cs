@@ -373,6 +373,10 @@ public class GameManager
     }
     #endregion
 
+    #region ForData
+    public Define.ScriptType ScriptType = Define.ScriptType.None;
+    #endregion
+
     public void Init()
     { 
         _path = Application.dataPath + "/@Resources/Data/SaveData.json";
