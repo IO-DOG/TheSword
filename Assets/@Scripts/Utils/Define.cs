@@ -105,6 +105,16 @@ public class Define
         PointLight = 3,
         Handcuff = 4,
     }
+
+    public enum PlayerState
+    {
+        Left,
+        Right,
+        Up,
+        Down,
+        IdleUp,
+        IdleDown,
+    }
     #endregion
 
     public static string MainUI_Inventory_A = "MainUI_Inventory_A.sprite";
