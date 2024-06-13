@@ -113,11 +113,11 @@ public class DataManager
             string key = entry.Key;
             Data.MapData mapData = entry.Value;
 
-            foreach (Data.Tile tile in mapData.Tile)
+            foreach (Data.TileData tile in mapData.Tiles)
             {
-                if (tile.Occupied.Type == "EItem" && tile.Occupied.TotalIndex == index)
+                if (tile is Occupied eItemTile && eItemTile.Type == (int)Define.OccupiedType.EItem && eItemTile.TotalCount == index)
                 {
-                    tile.Occupied.IsActive = false;
+                    eItemTile.IsActive = false;
                 }
             }
         }

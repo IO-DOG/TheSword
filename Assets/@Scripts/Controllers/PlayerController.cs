@@ -11,7 +11,7 @@ public class PlayerController : MonoBehaviour
     public Grid _grid;
     public GameObject _startPoint;
     public GameObject _keyInventory;
-    public float _speed = 15.0f;
+    public float _speed = 10.0f;
     public bool _isEquiptWeapon = true;
     public bool _isEquiptShield = true;
 
@@ -109,9 +109,9 @@ public class PlayerController : MonoBehaviour
         {
             case PlayerState.IdleUp:
                 GetComponent<Animator>().Play("Player_Idle_B");
-                if (_weapon.GetComponent<Animator>() != null)
+                if (_weapon.activeSelf)
                     _weapon.GetComponent<Animator>().Play($"{_weaponName}_Idle_B");
-                if (_shield.GetComponent<Animator>() != null)
+                if (_shield.activeSelf)
                     _shield.GetComponent<Animator>().Play($"{_shieldName}_Idle_B");
 
                 _weapon.transform.localPosition = Vector3.forward * adjustingDis;
@@ -120,9 +120,9 @@ public class PlayerController : MonoBehaviour
                 break;
             case PlayerState.IdleDown:
                 GetComponent<Animator>().Play("Player_Idle_F");
-                if (_weapon.GetComponent<Animator>() != null)
+                if (_weapon.activeSelf)
                     _weapon.GetComponent<Animator>().Play($"{_weaponName}_Idle_F");
-                if (_shield.GetComponent<Animator>() != null)
+                if (_shield.activeSelf)
                     _shield.GetComponent<Animator>().Play($"{_shieldName}_Idle_F");
 
                 _weapon.transform.localPosition = Vector3.back * adjustingDis;
@@ -130,9 +130,9 @@ public class PlayerController : MonoBehaviour
                 break;
             case PlayerState.Left:
                 GetComponent<Animator>().Play("Player_Run_L");
-                if (_weapon.GetComponent<Animator>() != null)
+                if (_weapon.activeSelf)
                     _weapon.GetComponent<Animator>().Play($"{_weaponName}_Run_L");
-                if (_shield.GetComponent<Animator>() != null)
+                if (_shield.activeSelf)
                     _shield.GetComponent<Animator>().Play($"{_shieldName}_Run_L");
 
                 _weapon.transform.localPosition = Vector3.forward * adjustingDis;
@@ -140,9 +140,9 @@ public class PlayerController : MonoBehaviour
                 break;
             case PlayerState.Right:
                 GetComponent<Animator>().Play("Player_Run_R");
-                if (_weapon.GetComponent<Animator>() != null)
+                if (_weapon.activeSelf)
                     _weapon.GetComponent<Animator>().Play($"{_weaponName}_Run_R");
-                if (_shield.GetComponent<Animator>() != null)
+                if (_shield.activeSelf)
                     _shield.GetComponent<Animator>().Play($"{_shieldName}_Run_R");
 
                 _weapon.transform.localPosition = Vector3.back * adjustingDis;
@@ -150,9 +150,9 @@ public class PlayerController : MonoBehaviour
                 break;
             case PlayerState.Up:
                 GetComponent<Animator>().Play("Player_Run_B");
-                if (_weapon.GetComponent<Animator>() != null)
+                if (_weapon.activeSelf)
                     _weapon.GetComponent<Animator>().Play($"{_weaponName}_Run_B");
-                if (_shield.GetComponent<Animator>() != null)
+                if (_shield.activeSelf)
                     _shield.GetComponent<Animator>().Play($"{_shieldName}_Run_B");
 
                 _weapon.transform.localPosition = Vector3.forward * adjustingDis;
@@ -160,9 +160,9 @@ public class PlayerController : MonoBehaviour
                 break;
             case PlayerState.Down:
                 GetComponent<Animator>().Play("Player_Run_F");
-                if (_weapon.GetComponent<Animator>() != null)
+                if (_weapon.activeSelf)
                     _weapon.GetComponent<Animator>().Play($"{_weaponName}_Run_F");
-                if (_shield.GetComponent<Animator>() != null)
+                if (_shield.activeSelf)
                     _shield.GetComponent<Animator>().Play($"{_shieldName}_Run_F");
 
                 _weapon.transform.localPosition = Vector3.back * adjustingDis;
