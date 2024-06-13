@@ -280,4 +280,35 @@ namespace Data
         }
     }
     #endregion
+
+    #region ConversationData
+    [Serializable]
+    public class ConversationData
+    {
+        public string ConversationName;
+        public List<ConversationInfo> ConversationInfo;
+    }
+
+    [SerializeField]
+    public class ConversationInfo
+    {
+        public int id;
+        public char Speaker;
+        public string PlayerPortrait;
+        public string OpponentPortrait;
+    }
+
+    [Serializable]
+    public class ConversationDataLoader : ILoader<string, ConversationData>
+    {
+        public List<ConversationData> conversations = new List<ConversationData>();
+        public Dictionary<string, ConversationData> MakeDict()
+        {
+            Dictionary<string, ConversationData> dict = new Dictionary<string, ConversationData>();
+            foreach (ConversationData conversation in conversations)
+                dict.Add(conversation.ConversationName, conversation);
+            return dict;
+        }
+    }
+    #endregion
 }

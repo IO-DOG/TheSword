@@ -43,6 +43,7 @@ public class DataTransformer : EditorWindow
         ParseMonsterClassData("MonsterClass");
         ParseEquipData("Equip");
         ParseScriptData("Script");
+        ParseConversationData("ConversationTest");
         Debug.Log("Complete DataTransformer");
     }
 
@@ -561,6 +562,63 @@ public class DataTransformer : EditorWindow
             sd.ScriptJp = ConvertValue<string>(row[i++]);
             sd.ScriptCn = ConvertValue<string>(row[i++]);
             loader.scripts.Add(sd);
+        }
+        #endregion
+
+        string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
+        AssetDatabase.Refresh();
+    }
+
+    static void ParseConversationData(string filename)
+    {
+        ConversationDataLoader loader = new ConversationDataLoader();
+
+        #region ExcelData
+        string str = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv");
+        Debug.Log(str);
+        string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv").Split("\n");
+        lines = lines.SkipLast(1).ToArray();
+
+        ConversationData cd = null;
+
+        for (int y = 1; y < lines.Length; y++)
+        {
+            string[] row = lines[y].Replace("\r", "").Split(',');
+
+            if (row.Length == 0)
+                continue;
+
+            // New Conversation Data
+            // 대화 이름이 비어 있지 않을 때 = 새로운 대화 데이터가 들어왔을 때
+            if (!string.IsNullOrEmpty(row[0]))
+            {
+                // 이전까지 파싱했던 것을 저장한다.
+                if (y != 1) // 근데 처음엔 바로 저장 ㄴㄴ
+                {
+                    loader.conversations.Add(cd);
+                }
+
+                cd = new ConversationData();
+                cd.ConversationName = ConvertValue<string>(row[0]);
+
+                cd.ConversationInfo = new List<ConversationInfo>();
+            }
+
+            int i = 1;
+            cd.ConversationInfo.Add(new ConversationInfo 
+            {
+                id = ConvertValue<int>(row[i++]),
+                Speaker = ConvertValue<char>(row[i++]),
+                PlayerPortrait = ConvertValue<string>(row[i++]),
+                OpponentPortrait = ConvertValue<string>(row[i++])
+            });
+
+            // 마지막 데이터를 저장
+            if (y == lines.Length - 1)
+            {
+                loader.conversations.Add(cd);
+            }
         }
         #endregion
 
