@@ -16,6 +16,7 @@ using static UnityEditor.Progress;
 public class GameManager
 {
     public bool OnBattle = false;
+    public bool OnConversation = false;
 
     public PlayerController Player; // ������ ������ ����
     public MonsterController Monster; // ������ ������ ����

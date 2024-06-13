@@ -8,6 +8,7 @@ public class UI_GameScene : UI_Scene
     enum Buttons
     {
         //ToTitleButton,
+        PlayConversation,
     }
 
     enum GameObjects
@@ -88,6 +89,8 @@ public class UI_GameScene : UI_Scene
 
         GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() => { Managers.UI.ShowPopupUI<UI_SettingPopup>(); });
         GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(OnClickMainUIInventoryAImage);
+
+        GetButton((int)Buttons.PlayConversation).gameObject.BindEvent(() => { Managers.UI.ShowPopupUI<UI_ConversationPopup>(); });
 
         Managers.Game.InstantiateMap("Dungeon_02");
 

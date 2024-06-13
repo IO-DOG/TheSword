@@ -49,10 +49,11 @@ public class PlayerController : MonoBehaviour
 
     void OnKeyboard()
     {
-        if (Managers.Game.OnBattle == true)
+        if (Managers.Game.OnBattle == true || Managers.Game.OnConversation)
         {
             return;
         }
+
         if (Input.GetKey(KeyCode.UpArrow))
         {
             Moving(MoveDir.Up);
@@ -282,10 +283,6 @@ public class PlayerController : MonoBehaviour
                 somethingExist = true;
                 hit.collider.gameObject.GetComponentInChildren<PortalController>().Stairs();
                 _cellPos = transform.position;
-            }
-            else if(hit.collider.gameObject.layer == (int)Define.Layer.EItem)
-            {
-                Managers.UI.ShowPopupUI<UI_DialogPopup>();
             }
         }
 
