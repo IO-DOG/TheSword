@@ -117,25 +117,49 @@ public class UI_TitleScene : UI_Scene
             buttonsIdx = Mathf.Max(buttonsIdx, 0);
             SetButtonColorAndButtonsText(buttonsIdx);
         }
+
+        if (Input.GetKeyDown(KeyCode.Return) && !GetText((int)Texts.PessAnyKeyText).gameObject.activeSelf)
+        {
+            switch (buttonsIdx)
+            {
+                case 0:
+                    OnClickNewGameButton();
+                    break;
+                case 1:
+                    OnClickLoadGameButton();
+                    break;
+                case 2:
+                    OnClickSettingButton();
+                    break;
+                case 3:
+                    OnClickExitButton();
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     void OnClickNewGameButton()
     {
-
+        Debug.Log("Cllck OnClickNewGameButton");
     }
 
     void OnClickLoadGameButton()
     {
+        Debug.Log("Cllck OnClickLoadGameButton");
 
     }
 
     void OnClickSettingButton()
     {
+        Debug.Log("Cllck OnClickSettingButton");
 
     }
 
     void OnClickExitButton()
     {
+        Debug.Log("Cllck OnClickExitButton");
 
     }
 
