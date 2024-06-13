@@ -27,7 +27,9 @@ public class GameManager
     public Action OnBattleAction;
     public Action OnBattleDataRefreshAction;
     public Action OnBattleCreatureDefeceAction;
+    public Action OnBattleCreatureDamagedAction;
     public Action OnBattlePlayerDefeceAction;
+    public Action OnBattlePlayerDamagedAction;
 
     public Camera MainCamera;
 
@@ -71,8 +73,13 @@ public class GameManager
         public bool IsDefence { get; set; }
         //public Dictionary<int, int> Inventory = new Dictionary<int, int>();
         public List<List<int>> Inventory = new List<List<int>>();
-
         public List<int> KeyInventory = new List<int>();
+        public int CurSword { get; set; }
+        public int CurShield { get; set; }
+        public int CurNecklace { get; set; }
+        public int CurRing { get; set; }
+        public int CurShoes { get; set; }
+        public int CurBook { get; set; }
     }
     #endregion
 
@@ -381,6 +388,10 @@ public class GameManager
             }
         }
     }
+    #endregion
+
+    #region ForData
+    public Define.ScriptType ScriptType = Define.ScriptType.None;
     #endregion
 
     public void Init()

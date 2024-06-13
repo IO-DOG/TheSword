@@ -60,11 +60,19 @@ public class Define
         Sword = 1,
         Shield = 2,
         Necklace = 3,
-        ring = 4,
+        Ring = 4,
         Shoes = 5,
         Book = 6,
     }
-
+    
+    public enum ScriptType
+    {
+        None = 0,
+        Kr = 1,
+        En = 2,
+        Jp = 3,
+        Cn = 4,
+    }
     #endregion
 
     #region Map

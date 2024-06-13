@@ -36,4 +36,16 @@ public class Equip : MonoBehaviour
     {
         GetComponent<Animator>().Play($"EquipItem_{Id}");
     }
+
+    public void PickUp()
+    {
+        Define.Types type = (Define.Types)Managers.Data.EquipDic[Id].Type;
+        Managers.Game.CurPlayerData.Inventory[(int)type].Add(Id);
+        Managers.Data.EItemActiveOff(_itemIndex_forActive);
+
+        gameObject.SetActive(false);
+
+        Managers.Game.SaveGame();
+        Managers.Game.GameScene.Refresh();
+    }
 }

@@ -19,7 +19,10 @@ public class DataManager
     public Dictionary<int, Data.MonsterClassData> MonsterClassDic { get; set; } = new Dictionary<int, Data.MonsterClassData>();
     public Dictionary<string, Data.MapData> MapDic { get; set; } = new Dictionary<string, Data.MapData>();
     public Dictionary<string, Data.DungeonDecoData> DecoDic { get; set; } = new Dictionary<string, Data.DungeonDecoData>();
+    public Dictionary<int, Data.EquipData> EquipDic { get; set; } = new Dictionary<int, Data.EquipData>();
+    public Dictionary<int, Data.ScriptData> ScriptDic { get; set; } = new Dictionary<int, Data.ScriptData>();
 
+    
     public void Init()
     {
         AssetDatabase.Refresh();
@@ -30,6 +33,8 @@ public class DataManager
         MonsterClassDic = LoadJson<Data.MonsterClassDataLoader, int, Data.MonsterClassData>("MonsterClassData").MakeDict();
         MapDic = LoadJson<Data.MapDataLoader, string, Data.MapData>("MapData").MakeDict();
         DecoDic = LoadJson<Data.DungeonDecoDataLoader, string, Data.DungeonDecoData>("DecoData").MakeDict();
+        EquipDic = LoadJson<Data.EquipDataLoader, int, Data.EquipData>("EquipData").MakeDict();
+        ScriptDic = LoadJson<Data.ScriptDataLoader, int, Data.ScriptData>("ScriptData").MakeDict();
     }
 
     Loader LoadJson<Loader, Key, Value>(string path) where Loader : ILoader<Key, Value>
@@ -96,6 +101,23 @@ public class DataManager
                 if (tile is DoorData doorTile && doorTile.TileType == (int)Define.TileType.Door && doorTile.TotalCount == index)
                 {
                     doorTile.IsActive = false;
+                }
+            }
+        }
+    }
+
+    public void EItemActiveOff(int index)
+    {
+        foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
+        {
+            string key = entry.Key;
+            Data.MapData mapData = entry.Value;
+
+            foreach (Data.Tile tile in mapData.Tile)
+            {
+                if (tile.Occupied.Type == "EItem" && tile.Occupied.TotalIndex == index)
+                {
+                    tile.Occupied.IsActive = false;
                 }
             }
         }

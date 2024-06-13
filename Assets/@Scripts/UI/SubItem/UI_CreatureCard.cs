@@ -75,6 +75,7 @@ public class UI_CreatureCard : UI_Base
         Managers.Game.OnBattleDataRefreshAction -= Refresh;
         Managers.Game.OnBattleDataRefreshAction += Refresh;
         Managers.Game.OnBattleCreatureDefeceAction += ClearDefence;
+        Managers.Game.OnBattleCreatureDamagedAction += StartDamagedMat;
 
         StartCoroutine(CoDelayAttack());
         if (_monsterClass != MonsterClass.Armor)
@@ -174,10 +175,14 @@ public class UI_CreatureCard : UI_Base
             if (_isCri)
             {
                 Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack * (Managers.Game.MonsterData.CriticalAttack / 100) - Managers.Game.CurPlayerData.Defence);
+                Managers.Game.OnBattlePlayerDamagedAction.Invoke();
                 _isCri = false;
             }
             else
+            {
                 Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack - Managers.Game.CurPlayerData.Defence);
+                Managers.Game.OnBattlePlayerDamagedAction.Invoke();
+            }
 
             if (Managers.Game.CurPlayerData.CurHP <= 0)
             {
@@ -263,9 +268,92 @@ public class UI_CreatureCard : UI_Base
 
     public void ClearDefence()
     {
+        // TODO play damaged anim
+        //if (GetImage((int)Images.DefenceIcon) != null)
+        //    GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIShieldFX");
+        StartCoroutine(CoStartShieldFX());
+        StartCoroutine(CoDefenceMat());
         _defenceCoolTime = 0f;
         _defenseFlag = false;
         if (GetImage((int)Images.DefenceIcon) != null)
             GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
+    }
+
+    IEnumerator CoStartShieldFX()
+    {
+        int width = 75;
+        int height = 75;
+
+        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", this.transform);
+        Image image = go.GetOrAddComponent<Image>();
+        Animator animator = go.GetOrAddComponent<Animator>();
+        animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIFXAnimation");
+        animator.Play($"UIShieldFX");
+        image.rectTransform.sizeDelta = new Vector2(width, height);
+        float delay = animator.GetCurrentAnimatorStateInfo(0).length;
+        yield return new WaitForSeconds(delay);
+        Destroy(go);
+    }
+
+    IEnumerator CoDefenceMat()
+    {
+        WaitForSeconds delay = new WaitForSeconds(0.1f);
+        GameObject go = Managers.Resource.Instantiate("UI_CreatureCardCopyImage", GetImage((int)Images.CreatureImage).transform);
+        Image image = go.GetOrAddComponent<Image>();
+        image.rectTransform.sizeDelta = GetImage((int)Images.CreatureImage).rectTransform.sizeDelta;
+        Animator animator = go.GetOrAddComponent<Animator>();
+        animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIMonsterAnimController");
+        animator.Play($"{Managers.Game.MonsterData.IdleAnimStr}");
+        image.sprite = GetImage((int)Images.CreatureImage).sprite;
+        image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        image.color = Util.DefenceColor();
+        float i = 0;
+        while (i < 20)
+        {
+            image.SetNativeSize();
+            i += 1;
+            image.color += new Color(0, 0, 0, -0.05f);
+            yield return new WaitForSeconds(0.01f);
+        }
+        yield return delay;
+        Destroy(go);
+    }
+
+    public void StartDamagedMat()
+    {
+        StartCoroutine(CoDamagedMat());
+    }
+
+    IEnumerator CoDamagedMat()
+    {
+        WaitForSeconds delay = new WaitForSeconds(0.1f);
+        GameObject go = Managers.Resource.Instantiate("UI_CreatureCardCopyImage", GetImage((int)Images.CreatureImage).transform);
+        Image image = go.GetOrAddComponent<Image>();
+        image.rectTransform.sizeDelta = GetImage((int)Images.CreatureImage).rectTransform.sizeDelta;
+        Animator animator = go.GetOrAddComponent<Animator>();
+        animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIMonsterAnimController");
+        animator.Play($"{Managers.Game.MonsterData.IdleAnimStr}");
+        image.sprite = GetImage((int)Images.CreatureImage).sprite;
+        image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        image.color = Util.DamagedColor();
+        float i = 0;
+        while (i < 10)
+        {
+            image.SetNativeSize();
+            i += 1;
+            image.color += new Color(0, 0, 0, -0.1f);
+            yield return new WaitForSeconds(0.005f);
+        }
+        yield return delay;
+        Destroy(go);
+
+        //WaitForSeconds delay = new WaitForSeconds(0.1f);
+        //GetImage((int)Images.CreatureImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        //GetImage((int)Images.CreatureImage).color = Util.DamagedColor();
+        //yield return delay;
+        //GetImage((int)Images.CreatureImage).color = Color.white;
+        //yield return delay;
+        //GetImage((int)Images.CreatureImage).material = null;
+        //GetImage((int)Images.CreatureImage).color = Color.white;
     }
 }

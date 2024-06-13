@@ -87,4 +87,14 @@ public static class Util
 
         return new Vector3(input.x - width / 2, input.y - height / 2, input.z);
     }
+
+    public static Color DamagedColor()
+    {
+        return new Color((float)190 / 255, (float)38 / 255, (float)51 / 255);
+    }
+
+    public static Color DefenceColor()
+    {
+        return new Color((float)0, (float)140 / 255, (float)255 / 255);
+    }
 }

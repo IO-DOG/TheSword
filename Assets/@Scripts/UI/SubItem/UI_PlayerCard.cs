@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UI_PlayerCard : UI_Base
 {
@@ -15,6 +16,8 @@ public class UI_PlayerCard : UI_Base
         DefenceDelayGauge,
         AttackIcon,
         DefenceIcon,
+        CreatureSwordImage,
+        CreatureShieldImage,
     }
 
     enum Texts
@@ -50,9 +53,15 @@ public class UI_PlayerCard : UI_Base
         Managers.Game.OnBattleDataRefreshAction -= Refresh;
         Managers.Game.OnBattleDataRefreshAction += Refresh;
         Managers.Game.OnBattlePlayerDefeceAction += ClearDefence;
+        Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
 
         StartCoroutine(CoDelayAttack());
         StartCoroutine(CoDelayDefence());
+
+        if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shield].Count == 0)
+        {
+            GetImage((int)Images.CreatureShieldImage).gameObject.SetActive(false);
+        }
 
         return true;
     }
@@ -84,12 +93,15 @@ public class UI_PlayerCard : UI_Base
                 Refresh();
             }
         }
+        GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play("UIPlayerAttackAnim");
+        GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play("UISword1AttackAnim");
+        GetImage((int)Images.CreatureShieldImage).gameObject.GetComponent<Animator>().Play("UIShield1AttackAnim");
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
 
         if (Managers.Game.AttackCount == Managers.Game.CurPlayerData.Critical)
         {
             _isCri = true;
-            _forAssassin= true;
+            _forAssassin = true;
             Managers.Game.AttackCount = 0;
         }
 
@@ -120,10 +132,14 @@ public class UI_PlayerCard : UI_Base
                 if (Managers.Game.MonsterData.Feature == 4)
                 {
                     Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence) * 20;
+                    Managers.Game.OnBattleCreatureDamagedAction.Invoke();
                     Debug.Log("불사 효과 발동 치명 데미지 200퍼");
                 }
                 else
+                {
                     Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence);
+                    Managers.Game.OnBattleCreatureDamagedAction.Invoke();
+                }
                 _isCri = false;
             }
             else
@@ -132,10 +148,14 @@ public class UI_PlayerCard : UI_Base
                 if (Managers.Game.MonsterData.Feature == 4)
                 {
                     Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence) * 0.2f;
+                    Managers.Game.OnBattleCreatureDamagedAction.Invoke();
                     Debug.Log("불사 효과 발동 일반 데미지 20퍼");
                 }
                 else
+                {
                     Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack - Managers.Game.MonsterData.Defence);
+                    Managers.Game.OnBattleCreatureDamagedAction.Invoke();
+                }
             }
 
 
@@ -209,9 +229,134 @@ public class UI_PlayerCard : UI_Base
 
     public void ClearDefence()
     {
+        //// TODO play damaged anim
+        //if (GetImage((int)Images.DefenceIcon) != null)
+        //    GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIShieldFX");
+        StartCoroutine(CoStartShieldFX());
+        StartCoroutine(CoDefenceMat());
         _defenceCoolTime = 0f;
         _defenseFlag = false;
         if (GetImage((int)Images.DefenceIcon) != null)
             GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
+    }
+
+    IEnumerator CoStartShieldFX()
+    {
+        int width = 75;
+        int height = 75;
+
+        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", this.transform);
+        Image image = go.GetOrAddComponent<Image>();
+        Animator animator = go.GetOrAddComponent<Animator>();
+        animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIFXAnimation");
+        animator.Play($"UIShieldFX");
+        image.rectTransform.sizeDelta = new Vector2(width, height);
+        float delay = animator.GetCurrentAnimatorStateInfo(0).length;
+        yield return new WaitForSeconds(delay);
+        Destroy(go);
+    }
+
+    IEnumerator CoDefenceMat()
+    {
+        int width = 660;
+        int height = 660;
+        WaitForSeconds delay = new WaitForSeconds(0.1f);
+        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureImage).transform);
+        go.transform.position = GetImage((int)Images.CreatureImage).transform.position;
+        GameObject sword = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureSwordImage).transform);
+        sword.transform.position = GetImage((int)Images.CreatureSwordImage).transform.position;
+        GameObject shield = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureShieldImage).transform);
+        shield.transform.position = GetImage((int)Images.CreatureShieldImage).transform.position;
+        Image image = go.GetOrAddComponent<Image>();
+        image.rectTransform.sizeDelta = new Vector2(width, height);
+        Image swordImage = sword.GetOrAddComponent<Image>();
+        swordImage.rectTransform.sizeDelta = new Vector2(width, height);
+        Image shieldImage = shield.GetOrAddComponent<Image>();
+        shieldImage.rectTransform.sizeDelta = new Vector2(width, height);
+        Animator animator = go.GetOrAddComponent<Animator>();
+        Animator swordanimator = sword.GetOrAddComponent<Animator>();
+        Animator shieldanimator = shield.GetOrAddComponent<Animator>();
+        animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIPlayerAnimController");
+        swordanimator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("CreatureSwordImage");
+        shieldanimator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("CreatureShieldImage");
+        animator.Play($"UIPlayerIdleAnim");
+        swordanimator.Play($"UISword1IdleAnim");
+        shieldanimator.Play($"UIShield1IdleAnim");
+        image.sprite = GetImage((int)Images.CreatureImage).sprite;
+        swordImage.sprite = GetImage((int)Images.CreatureImage).sprite;
+        shieldImage.sprite = GetImage((int)Images.CreatureImage).sprite;
+        image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        swordImage.material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        shieldImage.material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        image.color = Util.DefenceColor();
+        swordImage.color = Util.DefenceColor();
+        shieldImage.color = Util.DefenceColor();
+        float i = 0;
+        while (i < 20)
+        {
+            //image.SetNativeSize();
+            //swordImage.SetNativeSize();
+            //shieldImage.SetNativeSize();
+            i += 1;
+            image.color += new Color(0, 0, 0, -0.05f);
+            swordImage.color += new Color(0, 0, 0, -0.05f);
+            shieldImage.color += new Color(0, 0, 0, -0.05f);
+            yield return new WaitForSeconds(0.01f);
+        }
+        yield return delay;
+        Destroy(go);
+        Destroy(sword);
+        Destroy(shield);
+    }
+
+    public void StartDamagedMat()
+    {
+        StartCoroutine(CoDamagedMat());
+    }
+
+    IEnumerator CoDamagedMat()
+    {
+        int width = 660;
+        int height = 660;
+
+        WaitForSeconds delay = new WaitForSeconds(0.1f);
+        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureImage).transform);
+        Image image = go.GetOrAddComponent<Image>();
+        image.rectTransform.sizeDelta = GetImage((int)Images.CreatureImage).rectTransform.sizeDelta;
+        Animator animator = go.GetOrAddComponent<Animator>();
+        animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIPlayerAnimController");
+        animator.Play($"UIPlayerIdleAnim");
+        image.sprite = GetImage((int)Images.CreatureImage).sprite;
+        image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        image.color = Util.DamagedColor();
+        image.rectTransform.sizeDelta = new Vector2(width, height);
+        float i = 0;
+        while (i < 10)
+        {
+            i += 1;
+            image.color += new Color(0, 0, 0, -0.1f);
+            yield return new WaitForSeconds(0.005f);
+        }
+        yield return delay;
+        Destroy(go);
+
+        //WaitForSeconds delay = new WaitForSeconds(0.1f);
+        //GetImage((int)Images.CreatureImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        //GetImage((int)Images.CreatureSwordImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        //GetImage((int)Images.CreatureShieldImage).material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        //GetImage((int)Images.CreatureImage).color = Util.DamagedColor();
+        //GetImage((int)Images.CreatureSwordImage).color = Util.DamagedColor();
+        //GetImage((int)Images.CreatureShieldImage).color = Util.DamagedColor();
+        //yield return delay;
+        //GetImage((int)Images.CreatureImage).color = Color.white;
+        //GetImage((int)Images.CreatureSwordImage).color = Color.white;
+        //GetImage((int)Images.CreatureShieldImage).color = Color.white;
+        //yield return delay;
+        //GetImage((int)Images.CreatureImage).material = null;
+        //GetImage((int)Images.CreatureSwordImage).material = null;
+        //GetImage((int)Images.CreatureShieldImage).material = null;
+        //GetImage((int)Images.CreatureImage).color = Color.white;
+        //GetImage((int)Images.CreatureSwordImage).color = Color.white;
+        //GetImage((int)Images.CreatureShieldImage).color = Color.white;
     }
 }

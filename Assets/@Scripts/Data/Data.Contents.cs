@@ -238,7 +238,8 @@ namespace Data
         public float MSPD { get; set; }
         public int AbilityId { get; set; }
         public string ImageName { get; set; }
-        public int ScriptId { get; set; }
+        public int NameId { get; set; }
+        public int DescId { get; set; }
     }
 
     [Serializable]
@@ -250,6 +251,31 @@ namespace Data
             Dictionary<int, EquipData> dict = new Dictionary<int, EquipData>();
             foreach (EquipData equip in equips)
                 dict.Add(equip.id, equip);
+            return dict;
+        }
+    }
+    #endregion
+
+    #region ScriptData
+    [Serializable]
+    public class ScriptData
+    {
+        public int id;
+        public string ScriptKr;
+        public string ScriptEn;
+        public string ScriptJp;
+        public string ScriptCn;
+    }
+
+    [Serializable]
+    public class ScriptDataLoader : ILoader<int, ScriptData>
+    {
+        public List<ScriptData> scripts = new List<ScriptData>();
+        public Dictionary<int, ScriptData> MakeDict()
+        {
+            Dictionary<int, ScriptData> dict = new Dictionary<int, ScriptData>();
+            foreach (ScriptData script in scripts)
+                dict.Add(script.id, script);
             return dict;
         }
     }
