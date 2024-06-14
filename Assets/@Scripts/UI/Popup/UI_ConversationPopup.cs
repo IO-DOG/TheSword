@@ -1,4 +1,5 @@
 using Data;
+using Febucci.UI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,6 +20,7 @@ public class UI_ConversationPopup : UI_Popup
     {
         PlayerPortrait,
         OpponentPortrait,
+        ConversationArrow,
     }
 
     public override bool Init()
@@ -45,6 +47,11 @@ public class UI_ConversationPopup : UI_Popup
         {
             ShowNextConversation();
         }
+
+        if(GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().allLettersShown)
+            GetImage((int)Images.ConversationArrow).gameObject.SetActive(true);
+        else
+            GetImage((int)Images.ConversationArrow).gameObject.SetActive(false);
     }
 
     public void InitConversation(string conversationName)
