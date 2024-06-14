@@ -90,7 +90,14 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() => { Managers.UI.ShowPopupUI<UI_SettingPopup>(); });
         GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(OnClickMainUIInventoryAImage);
 
-        GetButton((int)Buttons.PlayConversation).gameObject.BindEvent(() => { Managers.UI.ShowPopupUI<UI_ConversationPopup>(); });
+        GetButton((int)Buttons.PlayConversation).gameObject.BindEvent(() => 
+        { 
+            if(!Managers.Game.OnBattle)
+            {
+                UI_ConversationPopup conversationPopup = Managers.UI.ShowPopupUI<UI_ConversationPopup>();
+                conversationPopup._conversationName = "TutorialTest2";
+            }
+        });
 
         Managers.Game.InstantiateMap("Dungeon_02");
 

@@ -49,7 +49,7 @@ public class PlayerController : MonoBehaviour
 
     void OnKeyboard()
     {
-        if (Managers.Game.OnBattle == true || Managers.Game.OnConversation)
+        if (Managers.Game.OnBattle == true || Managers.Game.OnConversation == true)
         {
             return;
         }

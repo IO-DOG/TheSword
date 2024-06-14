@@ -609,7 +609,7 @@ public class DataTransformer : EditorWindow
             cd.ConversationInfo.Add(new ConversationInfo 
             {
                 id = ConvertValue<int>(row[i++]),
-                Speaker = ConvertValue<char>(row[i++]),
+                Speaker = ConvertValue<string>(row[i++]),
                 PlayerPortrait = ConvertValue<string>(row[i++]),
                 OpponentPortrait = ConvertValue<string>(row[i++])
             });

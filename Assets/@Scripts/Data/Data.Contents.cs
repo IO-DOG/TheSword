@@ -293,7 +293,7 @@ namespace Data
     public class ConversationInfo
     {
         public int id;
-        public char Speaker;
+        public string Speaker;
         public string PlayerPortrait;
         public string OpponentPortrait;
     }
