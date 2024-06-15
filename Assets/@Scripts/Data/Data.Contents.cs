@@ -311,4 +311,33 @@ namespace Data
         }
     }
     #endregion
+
+    #region StageInfoData
+    [Serializable]
+    public class StageInfoData
+    {
+        public int id;
+        public string DungeonID;
+        public Define.DungeonType Type;
+        public string UpStage;
+        public string DownStage;
+        public int ATK;
+        public int DEF;
+        public int EXP;
+        public string BGM;
+    }
+
+    [Serializable]
+    public class StageInfoDataLoader : ILoader<int, StageInfoData>
+    {
+        public List<StageInfoData> stageInfos = new List<StageInfoData>();
+        public Dictionary<int, StageInfoData> MakeDict()
+        {
+            Dictionary<int, StageInfoData> dict = new Dictionary<int, StageInfoData>();
+            foreach (StageInfoData script in stageInfos)
+                dict.Add(script.id, script);
+            return dict;
+        }
+    }
+    #endregion
 }

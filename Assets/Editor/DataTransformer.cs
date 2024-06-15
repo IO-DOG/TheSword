@@ -24,11 +24,6 @@ public class DataTransformer : EditorWindow
             if (File.Exists(path))
                 File.Delete(path);
         }
-        {
-            string path = Application.dataPath + "/@Resources/Data/JsonData/KeyInventory.json";
-            if (File.Exists(path))
-                File.Delete(path);
-        }
         ParseMapData();
         Debug.Log("Complete DeleteGameData");
     }
@@ -44,6 +39,7 @@ public class DataTransformer : EditorWindow
         ParseEquipData("Equip");
         ParseScriptData("Script");
         ParseConversationData("ConversationTest");
+        ParseStageInfoData("StageInfo");
         Debug.Log("Complete DataTransformer");
     }
 
@@ -626,6 +622,45 @@ public class DataTransformer : EditorWindow
         File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
         AssetDatabase.Refresh();
     }
+
+    static void ParseStageInfoData(string filename)
+    {
+        StageInfoDataLoader loader = new StageInfoDataLoader();
+
+        #region ExcelData
+        string str = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv");
+        Debug.Log(str);
+        string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv").Split("\n");
+
+        for (int y = 1; y < lines.Length; y++)
+        {
+            string[] row = lines[y].Replace("\r", "").Split(',');
+
+            if (row.Length == 0)
+                continue;
+            if (string.IsNullOrEmpty(row[0]))
+                continue;
+
+            int i = 0;
+            StageInfoData sd = new StageInfoData();
+            sd.id = ConvertValue<int>(row[i++]);
+            sd.DungeonID = ConvertValue<string>(row[i++]);
+            sd.Type = ConvertValue<Define.DungeonType>(row[i++]);
+            sd.UpStage = ConvertValue<string>(row[i++]);
+            sd.DownStage = ConvertValue<string>(row[i++]);
+            sd.ATK = ConvertValue<int>(row[i++]);
+            sd.DEF = ConvertValue<int>(row[i++]);
+            sd.EXP = ConvertValue<int>(row[i++]);
+            sd.BGM = ConvertValue<string>(row[i++]);
+            loader.stageInfos.Add(sd);
+        }
+        #endregion
+
+        string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
+        AssetDatabase.Refresh();
+    }
+
 
     public static T ConvertValue<T>(string value)
     {

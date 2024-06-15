@@ -99,7 +99,8 @@ public class UI_GameScene : UI_Scene
             }
         });
 
-        Managers.Game.InstantiateMap("Dungeon_02");
+        Managers.Game.CurPlayerData.CurStageid = 0;
+        Managers.Game.InstantiateMap(Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonID);
 
         SetPlayerInfo();
         Refresh();
