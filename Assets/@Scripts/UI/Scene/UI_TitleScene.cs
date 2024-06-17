@@ -154,10 +154,12 @@ public class UI_TitleScene : UI_Scene
         if (PlayerPrefs.GetInt("ISFIRST", 1) == 1) // 진짜 처음일 떄
         {
             // todo intro story scene
+            Managers.Scene.LoadScene(Define.Scene.IntroScene);
         }
         else
         {
             // todo skip intro story scene
+            Managers.Scene.LoadScene(Define.Scene.IntroScene);
         }
     }
 

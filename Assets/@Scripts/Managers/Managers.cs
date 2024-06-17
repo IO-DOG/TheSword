@@ -79,7 +79,7 @@ public class Managers : MonoBehaviour
                 break;
         }
 
-        return ret;
+        return ret.Replace("\\n", "\n");
     }
 
     private void Update()
@@ -89,9 +89,9 @@ public class Managers : MonoBehaviour
 
     public static void Clear()
     {
-        //Sound.Clear();
-        //Scene.Clear();
-        //UI.Clear();
+        Sound.Clear();
+        Scene.Clear();
+        UI.Clear();
         //Pool.Clear();
         //Object.Clear();
     }

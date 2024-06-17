@@ -88,6 +88,14 @@ public static class Util
         return new Vector3(input.x - width / 2, input.y - height / 2, input.z);
     }
 
+    public static Vector3 WorldToScreenCood(Vector3 input)
+    {
+        int width = Screen.width;
+        int height = Screen.height;
+
+        return new Vector3(input.x + width / 2, input.y + height / 2, input.z);
+    }
+
     public static Color DamagedColor()
     {
         return new Color((float)190 / 255, (float)38 / 255, (float)51 / 255);
