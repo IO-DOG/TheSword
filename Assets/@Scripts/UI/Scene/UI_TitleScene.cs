@@ -111,12 +111,14 @@ public class UI_TitleScene : UI_Scene
 
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
+            if (buttonsIdx != (maxButtonCount - 1)) Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UImove");
             buttonsIdx++;
             buttonsIdx = Mathf.Min(buttonsIdx, maxButtonCount - 1);
             SetButtonColorAndButtonsText(buttonsIdx);
         }
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
+            if (buttonsIdx != 0) Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UImove");
             buttonsIdx--;
             buttonsIdx = Mathf.Max(buttonsIdx, 0);
             SetButtonColorAndButtonsText(buttonsIdx);
@@ -124,6 +126,8 @@ public class UI_TitleScene : UI_Scene
 
         if (Input.GetKeyDown(KeyCode.Return) && !GetText((int)Texts.PessAnyKeyText).gameObject.activeSelf)
         {
+            Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UIselect");
+
             switch (buttonsIdx)
             {
                 case 0:
