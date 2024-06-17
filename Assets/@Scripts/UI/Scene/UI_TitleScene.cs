@@ -90,6 +90,10 @@ public class UI_TitleScene : UI_Scene
                 GetButton((int)Buttons.NewGameButton).gameObject.SetActive(true);
                 Managers.Data.Init();
                 Managers.Game.Init();
+                Managers.Sound.Init();
+                Managers.Sound.Play(Define.Sound.Bgm, "MainTitle_BGM");
+                Managers.Sound.SetVolume(PlayerPrefs.GetFloat("CURSOUND", 1));
+
                 // continueData로 플레이어 적용시키기. TODO
             }
         });
@@ -154,7 +158,7 @@ public class UI_TitleScene : UI_Scene
     void OnClickSettingButton()
     {
         Debug.Log("Cllck OnClickSettingButton");
-
+        Managers.UI.ShowPopupUI<UI_SettingPopup>();
     }
 
     void OnClickExitButton()

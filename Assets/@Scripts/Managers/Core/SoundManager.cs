@@ -154,4 +154,10 @@ public class SoundManager
         //    callback?.Invoke(audioClip);
         //});
     }
+
+    public void SetVolume(float value)
+    {
+        _audioSources[(int)Define.Sound.Bgm].volume = value;
+        _audioSources[(int)Define.Sound.Effect].volume = value;
+    }
 }
