@@ -61,7 +61,7 @@ public class UI_TitleScene : UI_Scene
         });
         GetImage((int)Images.Buttons).gameObject.SetActive(false);
         GetButton((int)Buttons.NewGameButton).gameObject.SetActive(false);
-        //GetButton((int)Buttons.GameSpeedButton).gameObject.BindEvent(() => {
+        //GetButton((int)Buttons.GameSpeedButton).gameObject.BindEvent(() => { // 게임 속도 조절
         //    if (Managers.Game.GameSpeed == 1)
         //        Managers.Game.GameSpeed = 2;
         //    else if (Managers.Game.GameSpeed == 2)
