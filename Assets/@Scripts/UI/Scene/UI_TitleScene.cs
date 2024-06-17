@@ -151,6 +151,14 @@ public class UI_TitleScene : UI_Scene
     void OnClickNewGameButton()
     {
         Debug.Log("Cllck OnClickNewGameButton");
+        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1) // 진짜 처음일 떄
+        {
+            // todo intro story scene
+        }
+        else
+        {
+            // todo skip intro story scene
+        }
     }
 
     void OnClickLoadGameButton()
@@ -168,7 +176,7 @@ public class UI_TitleScene : UI_Scene
     void OnClickExitButton()
     {
         Debug.Log("Cllck OnClickExitButton");
-
+        Application.Quit();
     }
 
     void CheckFirstGame()
