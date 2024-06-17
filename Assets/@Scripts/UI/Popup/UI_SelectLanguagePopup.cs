@@ -8,9 +8,9 @@ public class UI_SelectLanguagePopup : UI_Popup
     #region Enum
     enum Buttons
     {
-        Koarean,
+        Korean,
         English,
-        japan,
+        Japan,
         China,
     }
 
@@ -23,9 +23,9 @@ public class UI_SelectLanguagePopup : UI_Popup
 
         BindButton(typeof(Buttons));
 
-        GetButton((int)Buttons.Koarean).gameObject.BindEvent(OnClickKorean);
+        GetButton((int)Buttons.Korean).gameObject.BindEvent(OnClickKorean);
         GetButton((int)Buttons.English).gameObject.BindEvent(OnClickEnglish);
-        GetButton((int)Buttons.japan).gameObject.BindEvent(OnClickJapan);
+        GetButton((int)Buttons.Japan).gameObject.BindEvent(OnClickJapan);
         GetButton((int)Buttons.China).gameObject.BindEvent(OnClickChina);
 
         return true;
