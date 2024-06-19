@@ -166,6 +166,7 @@ public class UI_TitleScene : UI_Scene
     void OnClickLoadGameButton()
     {
         Debug.Log("Cllck OnClickLoadGameButton");
+        Managers.Scene.LoadScene(Define.Scene.GameScene);
 
     }
 
