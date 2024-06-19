@@ -79,7 +79,10 @@ public class Managers : MonoBehaviour
                 break;
         }
 
-        return ret.Replace("\\n", "\n");
+        ret = ret.Replace("\\n", "\n");
+        ret = ret.Replace(";", ",");
+
+        return ret;
     }
 
     private void Update()
