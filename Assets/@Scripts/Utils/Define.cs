@@ -10,6 +10,7 @@ public class Define
     {
         Unknown,
         TitleScene,
+        IntroScene,
         GameScene,
     }
 

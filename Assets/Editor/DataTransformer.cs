@@ -19,6 +19,7 @@ public class DataTransformer : EditorWindow
     public static void DeleteGameData()
     {
         PlayerPrefs.DeleteAll();
+        PlayerPrefs.DeleteKey("ISFIRST");
         {
             string path = Application.dataPath + "/@Resources/Data/SaveData.json";
             if (File.Exists(path))

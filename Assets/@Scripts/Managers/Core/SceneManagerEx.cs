@@ -15,6 +15,10 @@ public class SceneManagerEx
                 Managers.Clear();
                 SceneManager.LoadScene(GetSceneName(type));
                 break;
+            case Define.Scene.IntroScene:
+                Managers.Clear();
+                SceneManager.LoadScene(GetSceneName(type));
+                break;
             case Define.Scene.GameScene:
                 Managers.Clear();
                 SceneManager.LoadScene(GetSceneName(type));
