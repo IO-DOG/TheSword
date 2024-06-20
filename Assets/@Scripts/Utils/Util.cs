@@ -105,4 +105,35 @@ public static class Util
     {
         return new Color((float)0, (float)140 / 255, (float)255 / 255);
     }
+
+    /// <summary>
+    /// 스크린샷 저장
+    /// </summary>
+    /// <param name="onFinished">텍스쳐 생성 콜백</param>
+    /// <returns></returns>
+    public static IEnumerator Screenshot(Action<Texture2D> onFinished)
+    {
+        yield return new WaitForEndOfFrame();
+        // 텍스쳐 생성
+        Texture2D screenTex = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
+
+        // 스크린샷 영역 설정
+        Rect area = new Rect(0f, 0f, Screen.width, Screen.height);
+
+        // 현재 화면의 픽셀을 읽어온다.
+        screenTex.ReadPixels(area, 0, 0);
+
+        // byte[]로 변환 뒤, 이미지를 읽어온다.
+        screenTex.LoadImage(screenTex.EncodeToPNG());
+
+        onFinished?.Invoke(screenTex);
+    }
+
+    public static IEnumerator Screenshot2(Action<Sprite> onFinished)
+    {
+        yield return new WaitForEndOfFrame();
+        Texture2D texture = ScreenCapture.CaptureScreenshotAsTexture();
+        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+        onFinished?.Invoke(sprite);
+    }
 }

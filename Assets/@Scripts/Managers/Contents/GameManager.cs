@@ -31,6 +31,8 @@ public class GameManager
     public Action OnBattleCreatureDamagedAction;
     public Action OnBattlePlayerDefeceAction;
     public Action OnBattlePlayerDamagedAction;
+    public Texture2D _screenShot = null;
+    public Sprite _screenShot2 = null;
 
     public Camera MainCamera;
 
