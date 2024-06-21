@@ -141,4 +141,18 @@ public class Define
     public static string MainUI_Sword_B = "MainUI_Sword_B.sprite";
     public static string MainUI_Warp_A = "MainUI_Warp_A.sprite";
     public static string MainUI_Warp_B = "MainUI_Warp_B.sprite";
+
+    #region Script Data
+    public static string TITLE_MENU = "TITLE_MENU";
+    public static string INTRO_STORY = "INTRO_STORY";
+    public static string STAGE_NAME = "STAGE_NAME";
+    public static string PLAYER_DEFAULT_NAME = "PLAYER_DEFAULT_NAME";
+    public static string TUTORIAL_SCRIPT = "TUTORIAL_SCRIPT";
+
+    public enum StageName
+    {
+        A_FOREST_OF_EVIL = 0,
+    }
+
+    #endregion
 }

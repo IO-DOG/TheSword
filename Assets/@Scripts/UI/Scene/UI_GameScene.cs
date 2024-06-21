@@ -95,7 +95,7 @@ public class UI_GameScene : UI_Scene
             if(!Managers.Game.OnBattle)
             {
                 UI_ConversationPopup conversationPopup = Managers.UI.ShowPopupUI<UI_ConversationPopup>();
-                conversationPopup._conversationName = "TutorialTest2";
+                conversationPopup._conversationName = Define.TUTORIAL_SCRIPT;
             }
         });
 

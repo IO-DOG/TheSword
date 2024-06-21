@@ -20,9 +20,10 @@ public class DataManager
     public Dictionary<string, Data.MapData> MapDic { get; set; } = new Dictionary<string, Data.MapData>();
     public Dictionary<string, Data.DungeonDecoData> DecoDic { get; set; } = new Dictionary<string, Data.DungeonDecoData>();
     public Dictionary<int, Data.EquipData> EquipDic { get; set; } = new Dictionary<int, Data.EquipData>();
-    public Dictionary<int, Data.ScriptData> ScriptDic { get; set; } = new Dictionary<int, Data.ScriptData>();
-    public Dictionary<string, Data.ConversationData> ConversationDic { get; set; } = new Dictionary<string, ConversationData>();
+    public Dictionary<string, Data.ScriptData> ScriptDic { get; set; } = new Dictionary<string, Data.ScriptData>();
+    public Dictionary<int, Data.ScriptInfo> InverseScriptDic { get; set; } = new Dictionary<int, Data.ScriptInfo>();
     public Dictionary<int, Data.StageInfoData> StageInfoDic { get; set; } = new Dictionary<int, StageInfoData>();
+
 
     
     public void Init()
@@ -36,8 +37,8 @@ public class DataManager
         MapDic = LoadJson<Data.MapDataLoader, string, Data.MapData>("MapData").MakeDict();
         DecoDic = LoadJson<Data.DungeonDecoDataLoader, string, Data.DungeonDecoData>("DecoData").MakeDict();
         EquipDic = LoadJson<Data.EquipDataLoader, int, Data.EquipData>("EquipData").MakeDict();
-        ScriptDic = LoadJson<Data.ScriptDataLoader, int, Data.ScriptData>("ScriptData").MakeDict();
-        ConversationDic = LoadJson<Data.ConversationDataLoader, string, Data.ConversationData>("ConversationTestData").MakeDict();
+        ScriptDic = LoadJson<Data.ScriptDataLoader, string, Data.ScriptData>("ScriptData").MakeDict();
+        InverseScriptDic = LoadJson<Data.InverseScriptDataLoader, int, Data.ScriptInfo>("InverseScriptData").MakeDict();
         StageInfoDic = LoadJson<Data.StageInfoDataLoader, int, Data.StageInfoData>("StageInfoData").MakeDict();
     }
 

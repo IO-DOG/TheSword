@@ -260,53 +260,49 @@ namespace Data
     [Serializable]
     public class ScriptData
     {
+        public string Category;
+        public List<ScriptInfo> ScriptInfo;
+    }
+
+    [SerializeField]
+    public class ScriptInfo
+    {
         public int id;
         public string ScriptKr;
         public string ScriptEn;
         public string ScriptJp;
         public string ScriptCn;
+        public string Speaker;
+        public string PlayerSprite;
+        public string OpponentSprite;
     }
 
     [Serializable]
-    public class ScriptDataLoader : ILoader<int, ScriptData>
+    public class ScriptDataLoader : ILoader<string, ScriptData>
     {
         public List<ScriptData> scripts = new List<ScriptData>();
-        public Dictionary<int, ScriptData> MakeDict()
+        public Dictionary<string, ScriptData> MakeDict()
         {
-            Dictionary<int, ScriptData> dict = new Dictionary<int, ScriptData>();
+            Dictionary<string, ScriptData> dict = new Dictionary<string, ScriptData>();
             foreach (ScriptData script in scripts)
-                dict.Add(script.id, script);
+                dict.Add(script.Category, script);
             return dict;
         }
     }
-    #endregion
-
-    #region ConversationData
-    [Serializable]
-    public class ConversationData
-    {
-        public string ConversationName;
-        public List<ConversationInfo> ConversationInfo;
-    }
-
-    [SerializeField]
-    public class ConversationInfo
-    {
-        public int id;
-        public string Speaker;
-        public string PlayerPortrait;
-        public string OpponentPortrait;
-    }
 
     [Serializable]
-    public class ConversationDataLoader : ILoader<string, ConversationData>
+    public class InverseScriptDataLoader : ILoader<int, ScriptInfo>
     {
-        public List<ConversationData> conversations = new List<ConversationData>();
-        public Dictionary<string, ConversationData> MakeDict()
+        public List<ScriptInfo> scripts = new List<ScriptInfo>(); 
+
+        public Dictionary<int, ScriptInfo> MakeDict()
         {
-            Dictionary<string, ConversationData> dict = new Dictionary<string, ConversationData>();
-            foreach (ConversationData conversation in conversations)
-                dict.Add(conversation.ConversationName, conversation);
+            Dictionary<int, ScriptInfo> dict = new Dictionary<int, ScriptInfo>();
+            foreach (ScriptInfo script in scripts)
+            {
+                dict.Add(script.id, script);
+            }
+
             return dict;
         }
     }

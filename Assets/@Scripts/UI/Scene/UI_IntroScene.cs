@@ -1,3 +1,5 @@
+using Data;
+using Febucci.UI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,7 +19,8 @@ public class UI_IntroScene : UI_Scene
     #endregion
 
     int idx = 0;
-    int totalCount = 5;
+    int totalCount;
+    List<ScriptInfo> _scriptList = new List<ScriptInfo>();
 
     public override bool Init()
     {
@@ -30,13 +33,25 @@ public class UI_IntroScene : UI_Scene
         #endregion
 
         GetImage((int)Images.SceneImage).gameObject.SetActive(false);
-        GetText((int)Texts.SceneText).text = Managers.GetString(6);
+
+        _scriptList = new List<ScriptInfo>();
+        if (Managers.Data.ScriptDic.TryGetValue(Define.INTRO_STORY, out Data.ScriptData data))
+        {
+            _scriptList = data.ScriptInfo;
+        }
+        totalCount = _scriptList.Count;
+
+        GetText((int)Texts.SceneText).text = Managers.GetString(_scriptList[idx++].id);
         return true;
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0))
+        if (!GetText((int)Texts.SceneText).GetComponent<TextAnimator_TMP>().allLettersShown && (Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0)))
+        {
+            GetText((int)Texts.SceneText).GetComponent<TextAnimator_TMP>().SetVisibilityEntireText(true);
+        }
+        else if (GetText((int)Texts.SceneText).GetComponent<TextAnimator_TMP>().allLettersShown && (Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0)))
         {
             NextScene();
         }
@@ -52,16 +67,8 @@ public class UI_IntroScene : UI_Scene
             Managers.Resource.Load<Sprite>("Intro04"),
             Managers.Resource.Load<Sprite>("Intro01"),
         };
-        List<string> TextList = new List<string>()
-        {
-            Managers.GetString(7),
-            Managers.GetString(8),
-            Managers.GetString(9),
-            Managers.GetString(10),
-            Managers.GetString(11),
-        };
 
-        if (idx == 0) // 처음 클릭시
+        if (idx == 1) // 처음 클릭시
         {
             GetImage((int)Images.SceneImage).gameObject.SetActive(true);
             GetText((int)Texts.SceneText).gameObject.transform.position = Util.WorldToScreenCood(new Vector3(0, -400, 0));
@@ -70,8 +77,8 @@ public class UI_IntroScene : UI_Scene
         {
             Debug.Log("인트로 끝 튜토리얼씬으로 넘어가는 코드들어가야함");
         }
-        GetImage((int)Images.SceneImage).sprite = ImageList[idx];
-        GetText((int)Texts.SceneText).text = TextList[idx];
+        GetImage((int)Images.SceneImage).sprite = ImageList[idx - 1];
+        GetText((int)Texts.SceneText).text = Managers.GetString(_scriptList[idx].id);
 
         idx++;
         idx = Mathf.Min(idx, totalCount - 1);

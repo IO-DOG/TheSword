@@ -7,7 +7,7 @@ using UnityEngine;
 public class UI_ConversationPopup : UI_Popup
 {
     public string _conversationName;
-    List<Data.ConversationInfo> _conversationInfo;
+    List<Data.ScriptInfo> _scriptInfo;
     int currentIndex = 0;
 
     enum Texts
@@ -43,7 +43,11 @@ public class UI_ConversationPopup : UI_Popup
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Space))
+        if(!GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().allLettersShown && Input.GetKeyDown(KeyCode.Space))
+        {
+            GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().SetVisibilityEntireText(true);
+        }
+        else if(GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().allLettersShown && Input.GetKeyDown(KeyCode.Space))
         {
             ShowNextConversation();
         }
@@ -56,9 +60,12 @@ public class UI_ConversationPopup : UI_Popup
 
     public void InitConversation(string conversationName)
     {
-        if (Managers.Data.ConversationDic.TryGetValue(conversationName, out Data.ConversationData data))
+        if (Managers.Data.ScriptDic.TryGetValue(conversationName, out Data.ScriptData data))
         {
-            _conversationInfo = data.ConversationInfo;
+            GetImage((int)Images.PlayerPortrait).gameObject.SetActive(false);
+            GetImage((int)Images.OpponentPortrait).gameObject.SetActive(false);
+
+            _scriptInfo = data.ScriptInfo;
             currentIndex = 0; // 대화 인덱스 초기화
             ShowCurrentConversation();
         }
@@ -66,22 +73,40 @@ public class UI_ConversationPopup : UI_Popup
 
     private void ShowCurrentConversation()
     {
-        if (currentIndex < _conversationInfo.Count)
+        if (currentIndex < _scriptInfo.Count)
         {
-            Data.ConversationInfo info = _conversationInfo[currentIndex];
+            Data.ScriptInfo info = _scriptInfo[currentIndex];
             string text = Managers.GetString(info.id);
             GetText((int)Texts.ConversationText).text = text;
 
-            GetImage((int)Images.PlayerPortrait).sprite = Managers.Resource.Load<Sprite>(info.PlayerPortrait);
-            GetImage((int)Images.OpponentPortrait).sprite = Managers.Resource.Load<Sprite>(info.OpponentPortrait);
+            if (!string.IsNullOrEmpty(info.PlayerSprite))
+            {
+                GetImage((int)Images.PlayerPortrait).gameObject.SetActive(true);
+                GetImage((int)Images.PlayerPortrait).sprite = Managers.Resource.Load<Sprite>(info.PlayerSprite);
+            }
+            else
+            {
+                GetImage((int)Images.PlayerPortrait).gameObject.SetActive(false);
+            }
+
+            if (!string.IsNullOrEmpty(info.OpponentSprite))
+            {
+                GetImage((int)Images.OpponentPortrait).gameObject.SetActive(true);
+                GetImage((int)Images.OpponentPortrait).sprite = Managers.Resource.Load<Sprite>(info.OpponentSprite);
+            }
+            else
+            {
+                GetImage((int)Images.OpponentPortrait).gameObject.SetActive(false);
+            }
+
             GetText((int)Texts.SpeakerText).text = info.Speaker;
 
-            if (info.Speaker == "Player")
+            if (info.Speaker == "P" && !string.IsNullOrEmpty(info.PlayerSprite))
             {
                 GetImage((int)Images.OpponentPortrait).color = Color.gray;
                 GetImage((int)Images.PlayerPortrait).color = Color.white;
             }
-            else
+            else if (info.Speaker == "O" && !string.IsNullOrEmpty(info.PlayerSprite))
             {
                 GetImage((int)Images.PlayerPortrait).color = Color.gray;
                 GetImage((int)Images.OpponentPortrait).color = Color.white;
@@ -92,7 +117,7 @@ public class UI_ConversationPopup : UI_Popup
     public void ShowNextConversation()
     {
         currentIndex++;
-        if (currentIndex < _conversationInfo.Count)
+        if (currentIndex < _scriptInfo.Count)
         {
             ShowCurrentConversation();
         }

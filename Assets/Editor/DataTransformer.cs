@@ -39,7 +39,6 @@ public class DataTransformer : EditorWindow
         ParseMonsterClassData("MonsterClass");
         ParseEquipData("Equip");
         ParseScriptData("Script");
-        ParseConversationData("ConversationTest");
         ParseStageInfoData("StageInfo");
         Debug.Log("Complete DataTransformer");
     }
@@ -536,40 +535,7 @@ public class DataTransformer : EditorWindow
     static void ParseScriptData(string filename)
     {
         ScriptDataLoader loader = new ScriptDataLoader();
-
-        #region ExcelData
-        string str = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv");
-        Debug.Log(str);
-        string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv").Split("\n");
-
-        for (int y = 1; y < lines.Length; y++)
-        {
-            string[] row = lines[y].Replace("\r", "").Split(',');
-
-            if (row.Length == 0)
-                continue;
-            if (string.IsNullOrEmpty(row[0]))
-                continue;
-
-            int i = 0;
-            ScriptData sd = new ScriptData();
-            sd.id = ConvertValue<int>(row[i++]);
-            sd.ScriptKr = ConvertValue<string>(row[i++]);
-            sd.ScriptEn = ConvertValue<string>(row[i++]);
-            sd.ScriptJp = ConvertValue<string>(row[i++]);
-            sd.ScriptCn = ConvertValue<string>(row[i++]);
-            loader.scripts.Add(sd);
-        }
-        #endregion
-
-        string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
-        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
-        AssetDatabase.Refresh();
-    }
-
-    static void ParseConversationData(string filename)
-    {
-        ConversationDataLoader loader = new ConversationDataLoader();
+        InverseScriptDataLoader inverseLoader = new InverseScriptDataLoader();
 
         #region ExcelData
         string str = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv");
@@ -577,7 +543,7 @@ public class DataTransformer : EditorWindow
         string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv").Split("\n");
         lines = lines.SkipLast(1).ToArray();
 
-        ConversationData cd = null;
+        ScriptData cd = null;
 
         for (int y = 1; y < lines.Length; y++)
         {
@@ -593,34 +559,43 @@ public class DataTransformer : EditorWindow
                 // 이전까지 파싱했던 것을 저장한다.
                 if (y != 1) // 근데 처음엔 바로 저장 ㄴㄴ
                 {
-                    loader.conversations.Add(cd);
+                    loader.scripts.Add(cd);
                 }
 
-                cd = new ConversationData();
-                cd.ConversationName = ConvertValue<string>(row[0]);
-
-                cd.ConversationInfo = new List<ConversationInfo>();
+                cd = new ScriptData();
+                cd.Category = ConvertValue<string>(row[0]);
+                cd.ScriptInfo = new List<ScriptInfo>();
             }
 
             int i = 1;
-            cd.ConversationInfo.Add(new ConversationInfo 
+            ScriptInfo script = new ScriptInfo
             {
                 id = ConvertValue<int>(row[i++]),
+                ScriptKr = ConvertValue<string>(row[i++]),
+                ScriptEn = ConvertValue<string>(row[i++]),
+                ScriptJp = ConvertValue<string>(row[i++]),
+                ScriptCn = ConvertValue<string>(row[i++]),
                 Speaker = ConvertValue<string>(row[i++]),
-                PlayerPortrait = ConvertValue<string>(row[i++]),
-                OpponentPortrait = ConvertValue<string>(row[i++])
-            });
+                PlayerSprite = ConvertValue<string>(row[i++]),
+                OpponentSprite = ConvertValue<string>(row[i++])
+            };
+
+            cd.ScriptInfo.Add(script);
+            inverseLoader.scripts.Add(script);
 
             // 마지막 데이터를 저장
             if (y == lines.Length - 1)
             {
-                loader.conversations.Add(cd);
+                loader.scripts.Add(cd);
             }
         }
         #endregion
 
         string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
         File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
+
+        jsonStr = JsonConvert.SerializeObject(inverseLoader, Formatting.Indented);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/Inverse{filename}Data.json", jsonStr);
         AssetDatabase.Refresh();
     }
 

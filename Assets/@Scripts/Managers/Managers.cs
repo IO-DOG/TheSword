@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
 using UnityEditor.EditorTools;
@@ -56,26 +57,27 @@ public class Managers : MonoBehaviour
     public static string GetString(int id)
     {
         int scriptType = (int)Managers.Game.ScriptType;
+
         string ret = "";
         switch (scriptType)
         {
             case 0:
-                ret = Managers.Data.ScriptDic[id].ScriptKr;
+                ret = Managers.Data.InverseScriptDic[id].ScriptKr;
                 break;
             case 1:
-                ret = Managers.Data.ScriptDic[id].ScriptKr;
+                ret = Managers.Data.InverseScriptDic[id].ScriptKr;
                 break;
             case 2:
-                ret = Managers.Data.ScriptDic[id].ScriptEn;
+                ret = Managers.Data.InverseScriptDic[id].ScriptEn;
                 break;
             case 3:
-                ret = Managers.Data.ScriptDic[id].ScriptJp;
+                ret = Managers.Data.InverseScriptDic[id].ScriptJp;
                 break;
             case 4:
-                ret = Managers.Data.ScriptDic[id].ScriptCn;
+                ret = Managers.Data.InverseScriptDic[id].ScriptCn;
                 break;
             default:
-                ret = Managers.Data.ScriptDic[id].ScriptKr;
+                ret = Managers.Data.InverseScriptDic[id].ScriptKr;
                 break;
         }
 
