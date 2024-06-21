@@ -22,6 +22,7 @@ public class DataManager
     public Dictionary<int, Data.EquipData> EquipDic { get; set; } = new Dictionary<int, Data.EquipData>();
     public Dictionary<int, Data.ScriptData> ScriptDic { get; set; } = new Dictionary<int, Data.ScriptData>();
     public Dictionary<string, Data.ConversationData> ConversationDic { get; set; } = new Dictionary<string, ConversationData>();
+    public Dictionary<int, Data.StageInfoData> StageInfoDic { get; set; } = new Dictionary<int, StageInfoData>();
 
     
     public void Init()
@@ -37,6 +38,7 @@ public class DataManager
         EquipDic = LoadJson<Data.EquipDataLoader, int, Data.EquipData>("EquipData").MakeDict();
         ScriptDic = LoadJson<Data.ScriptDataLoader, int, Data.ScriptData>("ScriptData").MakeDict();
         ConversationDic = LoadJson<Data.ConversationDataLoader, string, Data.ConversationData>("ConversationTestData").MakeDict();
+        StageInfoDic = LoadJson<Data.StageInfoDataLoader, int, Data.StageInfoData>("StageInfoData").MakeDict();
     }
 
     Loader LoadJson<Loader, Key, Value>(string path) where Loader : ILoader<Key, Value>

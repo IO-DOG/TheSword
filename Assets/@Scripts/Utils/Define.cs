@@ -74,6 +74,13 @@ public class Define
         Jp = 3,
         Cn = 4,
     }
+
+    public enum DungeonType
+    {
+        Common,
+        Special,
+        Boss,
+    }
     #endregion
 
     #region Map

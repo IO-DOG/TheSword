@@ -15,10 +15,12 @@ public class PortalController : MonoBehaviour
         {
             if (_stairs == (int)Define.Stairs.Upstairs && portal._floor == _floor + 1 && portal._stairs == (int)Define.Stairs.Downstairs)
             {
+                Managers.Game.CurPlayerData.CurStageid++;
                 Managers.Game.Player.transform.position = new Vector3(portal.transform.position.x, 1, portal.transform.position.z);
             }
             else if (_stairs == (int)Define.Stairs.Downstairs && portal._floor == _floor - 1 && portal._stairs == (int)Define.Stairs.Upstairs)
             {
+                Managers.Game.CurPlayerData.CurStageid--;
                 Managers.Game.Player.transform.position = new Vector3(portal.transform.position.x, 1, portal.transform.position.z);
             }
         }

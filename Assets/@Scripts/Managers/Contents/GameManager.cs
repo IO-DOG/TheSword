@@ -83,6 +83,8 @@ public class GameManager
         public int CurRing { get; set; }
         public int CurShoes { get; set; }
         public int CurBook { get; set; }
+        public MyVector3 CurPosition { get; set; }
+        public int CurStageid { get; set; }
     }
     #endregion
 
@@ -154,6 +156,13 @@ public class GameManager
 
     public void SaveGame()
     {
+        Managers.Game.CurPlayerData.CurPosition = new Data.MyVector3
+        {
+            X = Managers.Game.Player.transform.position.x,
+            Y = Managers.Game.Player.transform.position.y,
+            Z = Managers.Game.Player.transform.position.z,
+        };
+
         string jsonStr = JsonConvert.SerializeObject(CurPlayerData, Formatting.Indented);
         File.WriteAllText(_path, jsonStr);
 
@@ -227,6 +236,7 @@ public class GameManager
     public void InstantiateMap(string mapName)
     {
         int count = 0;
+        mapName = mapName.Substring(0, mapName.LastIndexOf('_'));
 
         foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
         {
