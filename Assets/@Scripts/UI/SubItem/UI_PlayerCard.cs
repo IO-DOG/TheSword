@@ -166,6 +166,18 @@ public class UI_PlayerCard : UI_Base
 
                 Managers.Data.MonsterActiveOff(Managers.Game.MonsterData.IsActiveIndex);
 
+                int id = Managers.Game.Monster.id;
+                string name = Managers.Data.MonsterDic[id].Name;
+                switch (name)
+                {
+                    case "블랙슬라임":
+                        BlackSlimeController blackSlimeController = Managers.Game.Monster.gameObject.GetOrAddComponent<BlackSlimeController>();
+                        blackSlimeController.Dead();
+                        break;
+                    default:
+                        break;
+                }
+
                 Destroy(Managers.Game.Monster.gameObject);
                 Managers.Game.OnBattleAction.Invoke();
                 Managers.Game.OnBattle = false;

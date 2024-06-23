@@ -250,6 +250,7 @@ public class GameManager
             GameObject tiles = new GameObject() { name = "Tiles" };
             GameObject items = new GameObject() { name = "Items" };
             GameObject monsters = new GameObject() { name = "Monsters" };
+            GameObject bossMonsters = new GameObject() { name = "BossMonsters" };
             GameObject lights = new GameObject() { name = "Deco" };
 
             parent.transform.localPosition += new Vector3(count * 100, 0, 0);
@@ -257,6 +258,7 @@ public class GameManager
             tiles.transform.parent = parent.transform;
             items.transform.parent = parent.transform;
             monsters.transform.parent = parent.transform;
+            bossMonsters.transform.parent = parent.transform;
             lights.transform.parent = parent.transform;
 
             foreach (Data.TileData tile in mapData.Tiles)
@@ -302,6 +304,31 @@ public class GameManager
 
                     if (monsterTile.IsActive == false)
                         monster.SetActive(false);
+                }
+                else if (tile is Occupied bossMonsterTile && bossMonsterTile.Type == (int)Define.OccupiedType.Boss)
+                {
+                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{bossMonsterTile.PrefabID}", tiles.transform);
+                    go.transform.position = new Vector3(bossMonsterTile.Position.X, bossMonsterTile.Position.Y, bossMonsterTile.Position.Z);
+
+                    GameObject boss = Managers.Resource.Instantiate("BossMonster", bossMonsters.transform);
+                    boss.transform.position = go.transform.position;
+                    boss.GetComponent<BossMonsterController>().id = bossMonsterTile.Index;
+                    boss.name = $"bossMonster{bossMonsterTile.TotalCount}";
+                    boss.GetComponent<BossMonsterController>()._monsterIndex_forActive = bossMonsterTile.TotalCount;
+
+                    int id = boss.GetComponent<BossMonsterController>().id;
+                    string name = Managers.Data.MonsterDic[id].Name;
+                    switch (name)
+                    {
+                        case "블랙슬라임":
+                            boss.AddComponent<BlackSlimeController>();
+                            break;
+                        default:
+                            break;
+                    }
+
+                    if (bossMonsterTile.IsActive == false)
+                        boss.SetActive(false);
                 }
                 else if (tile is DoorData doorTile)
                 {
@@ -373,12 +400,12 @@ public class GameManager
 
             foreach (DecoData data in lightList.DecoData)
             {
-                if(data.LightType == (int)Define.DecoType.Torch)
+                if (data.LightType == (int)Define.DecoType.Torch)
                 {
                     GameObject go = Managers.Resource.Instantiate($"Deco_{Define.DecoType.Torch.ToString()}", parent.transform);
                     go.transform.localPosition = new Vector3(data.Position.X, data.Position.Y, data.Position.Z);
                 }
-                else if(data.LightType == (int)Define.DecoType.FireBowl)
+                else if (data.LightType == (int)Define.DecoType.FireBowl)
                 {
                     GameObject go = Managers.Resource.Instantiate($"Deco_{Define.DecoType.FireBowl.ToString()}", parent.transform);
                     go.transform.localPosition = new Vector3(data.Position.X, data.Position.Y, data.Position.Z);
@@ -408,7 +435,7 @@ public class GameManager
     #endregion
 
     public void Init()
-    { 
+    {
         _path = Application.dataPath + "/@Resources/Data/SaveData.json";
 
         if (LoadGame())
