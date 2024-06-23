@@ -321,7 +321,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 6626150538697543150, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
   m_PrefabInstance: {fileID: 1520936586138943099}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &669500929
+--- !u!114 &669500928
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -568,11 +568,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1883170516997004607, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 6.696865e-13
       objectReference: {fileID: 0}
     - target: {fileID: 1883170516997004607, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: -6.696865e-13
       objectReference: {fileID: 0}
     - target: {fileID: 2835394005480972901, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
       propertyPath: m_LocalPosition.x
@@ -596,11 +596,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2835394005480972901, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.00000002248122
+      value: -0.000000022481167
       objectReference: {fileID: 0}
     - target: {fileID: 2835394005480972901, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.000000009312027
+      value: 0.000000009312004
       objectReference: {fileID: 0}
     - target: {fileID: 2835394005480972901, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -658,7 +658,9 @@ PrefabInstance:
       propertyPath: m_LookAt
       value: 
       objectReference: {fileID: 2043663404}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2680534649155363519, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
+    - {fileID: 5324233108033322325, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -673,7 +675,7 @@ PrefabInstance:
       addedObject: {fileID: 1520936586138943104}
     - targetCorrespondingSourceObject: {fileID: 6626150538697543150, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 669500929}
+      addedObject: {fileID: 669500928}
   m_SourcePrefab: {fileID: 100100000, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
 --- !u!1 &1520936586138943100 stripped
 GameObject:
@@ -755,8 +757,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_ComponentVersion: 1
   m_AssetsPPU: 10
-  m_RefResolutionX: 320
-  m_RefResolutionY: 180
+  m_RefResolutionX: 32
+  m_RefResolutionY: 32
   m_CropFrame: 0
   m_GridSnapping: 1
   m_FilterMode: 0
