@@ -236,7 +236,7 @@ public class PlayerController : MonoBehaviour
     {
         bool somethingExist = false;
         int layerMask = (1 << (int)Define.Layer.Wall) + (1 << (int)Define.Layer.CItem) + (1 << (int)Define.Layer.Door) + (1 << (int)Define.Layer.Portal)
-            + (1 << (int)Define.Layer.EItem);
+            + (1 << (int)Define.Layer.EItem) + (1 << (int)Define.Layer.Lever);
 
         RaycastHit hit;
         Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset, layerMask);
@@ -283,6 +283,11 @@ public class PlayerController : MonoBehaviour
                 somethingExist = true;
                 hit.collider.gameObject.GetComponentInChildren<PortalController>().Stairs();
                 _cellPos = transform.position;
+            }
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.Lever)
+            {
+                somethingExist = true;
+                hit.collider.gameObject.GetComponentInChildren<Lever>().Play();
             }
         }
 
