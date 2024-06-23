@@ -143,16 +143,11 @@ public class Define
     public static string MainUI_Warp_B = "MainUI_Warp_B.sprite";
 
     #region Script Data
-    public static string TITLE_MENU = "TITLE_MENU";
-    public static string INTRO_STORY = "INTRO_STORY";
-    public static string STAGE_NAME = "STAGE_NAME";
-    public static string PLAYER_DEFAULT_NAME = "PLAYER_DEFAULT_NAME";
-    public static string TUTORIAL_SCRIPT = "TUTORIAL_SCRIPT";
-
-    public enum StageName
-    {
-        A_FOREST_OF_EVIL = 0,
-    }
+    public static int TITLE_MENU = 0;
+    public static int INTRO_STORY = 10000;
+    public static int STAGE_NAME = 30000;
+    public static int PLAYER_DEFAULT_NAME = 10;
+    public static int TUTORIAL_SCRIPT = 11000;
 
     #endregion
 }

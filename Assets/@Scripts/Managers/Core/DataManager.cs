@@ -20,8 +20,7 @@ public class DataManager
     public Dictionary<string, Data.MapData> MapDic { get; set; } = new Dictionary<string, Data.MapData>();
     public Dictionary<string, Data.DungeonDecoData> DecoDic { get; set; } = new Dictionary<string, Data.DungeonDecoData>();
     public Dictionary<int, Data.EquipData> EquipDic { get; set; } = new Dictionary<int, Data.EquipData>();
-    public Dictionary<string, Data.ScriptData> ScriptDic { get; set; } = new Dictionary<string, Data.ScriptData>();
-    public Dictionary<int, Data.ScriptInfo> InverseScriptDic { get; set; } = new Dictionary<int, Data.ScriptInfo>();
+    public Dictionary<int, Data.ScriptData> ScriptDic { get; set; } = new Dictionary<int, Data.ScriptData>();
     public Dictionary<int, Data.StageInfoData> StageInfoDic { get; set; } = new Dictionary<int, StageInfoData>();
 
 
@@ -37,8 +36,7 @@ public class DataManager
         MapDic = LoadJson<Data.MapDataLoader, string, Data.MapData>("MapData").MakeDict();
         DecoDic = LoadJson<Data.DungeonDecoDataLoader, string, Data.DungeonDecoData>("DecoData").MakeDict();
         EquipDic = LoadJson<Data.EquipDataLoader, int, Data.EquipData>("EquipData").MakeDict();
-        ScriptDic = LoadJson<Data.ScriptDataLoader, string, Data.ScriptData>("ScriptData").MakeDict();
-        InverseScriptDic = LoadJson<Data.InverseScriptDataLoader, int, Data.ScriptInfo>("InverseScriptData").MakeDict();
+        ScriptDic = LoadJson<Data.ScriptDataLoader, int, Data.ScriptData>("ScriptData").MakeDict();
         StageInfoDic = LoadJson<Data.StageInfoDataLoader, int, Data.StageInfoData>("StageInfoData").MakeDict();
     }
 
@@ -57,6 +55,19 @@ public class DataManager
         {
             return JsonConvert.DeserializeObject<Loader>(textAsset.text);
         }
+    }
+
+    public List<ScriptData> LoadScriptData(int scriptCode)
+    {
+        List<ScriptData> scripts = new List<ScriptData>();
+        int i = scriptCode;
+        while (Managers.Data.ScriptDic.ContainsKey(i))
+        {
+            scripts.Add(Managers.Data.ScriptDic[i]);
+            i++;
+        }
+
+        return scripts;
     }
 
     #region Active Off

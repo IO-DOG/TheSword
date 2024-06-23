@@ -20,7 +20,7 @@ public class UI_IntroScene : UI_Scene
 
     int idx = 0;
     int totalCount;
-    List<ScriptInfo> _scriptList = new List<ScriptInfo>();
+    List<ScriptData> _scripts;
 
     public override bool Init()
     {
@@ -34,14 +34,10 @@ public class UI_IntroScene : UI_Scene
 
         GetImage((int)Images.SceneImage).gameObject.SetActive(false);
 
-        _scriptList = new List<ScriptInfo>();
-        if (Managers.Data.ScriptDic.TryGetValue(Define.INTRO_STORY, out Data.ScriptData data))
-        {
-            _scriptList = data.ScriptInfo;
-        }
-        totalCount = _scriptList.Count;
+        _scripts = Managers.Data.LoadScriptData(Define.INTRO_STORY);
+        totalCount = _scripts.Count;
 
-        GetText((int)Texts.SceneText).text = Managers.GetString(_scriptList[idx++].id);
+        GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx++].id);
         return true;
     }
 
@@ -78,7 +74,7 @@ public class UI_IntroScene : UI_Scene
             Debug.Log("인트로 끝 튜토리얼씬으로 넘어가는 코드들어가야함");
         }
         GetImage((int)Images.SceneImage).sprite = ImageList[idx - 1];
-        GetText((int)Texts.SceneText).text = Managers.GetString(_scriptList[idx].id);
+        GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx].id);
 
         idx++;
         idx = Mathf.Min(idx, totalCount - 1);

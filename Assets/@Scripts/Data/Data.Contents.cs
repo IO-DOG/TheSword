@@ -260,13 +260,6 @@ namespace Data
     [Serializable]
     public class ScriptData
     {
-        public string Category;
-        public List<ScriptInfo> ScriptInfo;
-    }
-
-    [SerializeField]
-    public class ScriptInfo
-    {
         public int id;
         public string ScriptKr;
         public string ScriptEn;
@@ -278,31 +271,14 @@ namespace Data
     }
 
     [Serializable]
-    public class ScriptDataLoader : ILoader<string, ScriptData>
+    public class ScriptDataLoader : ILoader<int, ScriptData>
     {
         public List<ScriptData> scripts = new List<ScriptData>();
-        public Dictionary<string, ScriptData> MakeDict()
+        public Dictionary<int, ScriptData> MakeDict()
         {
-            Dictionary<string, ScriptData> dict = new Dictionary<string, ScriptData>();
+            Dictionary<int, ScriptData> dict = new Dictionary<int, ScriptData>();
             foreach (ScriptData script in scripts)
-                dict.Add(script.Category, script);
-            return dict;
-        }
-    }
-
-    [Serializable]
-    public class InverseScriptDataLoader : ILoader<int, ScriptInfo>
-    {
-        public List<ScriptInfo> scripts = new List<ScriptInfo>(); 
-
-        public Dictionary<int, ScriptInfo> MakeDict()
-        {
-            Dictionary<int, ScriptInfo> dict = new Dictionary<int, ScriptInfo>();
-            foreach (ScriptInfo script in scripts)
-            {
                 dict.Add(script.id, script);
-            }
-
             return dict;
         }
     }

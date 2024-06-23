@@ -8,9 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
-using UnityEditor.ShaderGraph.Serialization;
 using UnityEngine;
-using static Codice.Client.Commands.WkTree.WorkspaceTreeNode;
 
 public class DataTransformer : EditorWindow
 {
@@ -535,15 +533,11 @@ public class DataTransformer : EditorWindow
     static void ParseScriptData(string filename)
     {
         ScriptDataLoader loader = new ScriptDataLoader();
-        InverseScriptDataLoader inverseLoader = new InverseScriptDataLoader();
 
         #region ExcelData
         string str = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv");
         Debug.Log(str);
         string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv").Split("\n");
-        lines = lines.SkipLast(1).ToArray();
-
-        ScriptData cd = null;
 
         for (int y = 1; y < lines.Length; y++)
         {
@@ -551,51 +545,26 @@ public class DataTransformer : EditorWindow
 
             if (row.Length == 0)
                 continue;
+            if (string.IsNullOrEmpty(row[0]))
+                continue;
 
-            // New Conversation Data
-            // 대화 이름이 비어 있지 않을 때 = 새로운 대화 데이터가 들어왔을 때
-            if (!string.IsNullOrEmpty(row[0]))
-            {
-                // 이전까지 파싱했던 것을 저장한다.
-                if (y != 1) // 근데 처음엔 바로 저장 ㄴㄴ
-                {
-                    loader.scripts.Add(cd);
-                }
+            int i = 0;
+            ScriptData sd = new ScriptData();
+            sd.id = ConvertValue<int>(row[i++]);
+            sd.ScriptKr = ConvertValue<string>(row[i++]);
+            sd.ScriptEn = ConvertValue<string>(row[i++]);
+            sd.ScriptJp = ConvertValue<string>(row[i++]);
+            sd.ScriptCn = ConvertValue<string>(row[i++]);
+            sd.Speaker = ConvertValue<string>(row[i++]);
+            sd.PlayerSprite = ConvertValue<string>(row[i++]);
+            sd.OpponentSprite = ConvertValue<string>(row[i++]);
 
-                cd = new ScriptData();
-                cd.Category = ConvertValue<string>(row[0]);
-                cd.ScriptInfo = new List<ScriptInfo>();
-            }
-
-            int i = 1;
-            ScriptInfo script = new ScriptInfo
-            {
-                id = ConvertValue<int>(row[i++]),
-                ScriptKr = ConvertValue<string>(row[i++]),
-                ScriptEn = ConvertValue<string>(row[i++]),
-                ScriptJp = ConvertValue<string>(row[i++]),
-                ScriptCn = ConvertValue<string>(row[i++]),
-                Speaker = ConvertValue<string>(row[i++]),
-                PlayerSprite = ConvertValue<string>(row[i++]),
-                OpponentSprite = ConvertValue<string>(row[i++])
-            };
-
-            cd.ScriptInfo.Add(script);
-            inverseLoader.scripts.Add(script);
-
-            // 마지막 데이터를 저장
-            if (y == lines.Length - 1)
-            {
-                loader.scripts.Add(cd);
-            }
+            loader.scripts.Add(sd);
         }
         #endregion
 
         string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
         File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
-
-        jsonStr = JsonConvert.SerializeObject(inverseLoader, Formatting.Indented);
-        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/Inverse{filename}Data.json", jsonStr);
         AssetDatabase.Refresh();
     }
 

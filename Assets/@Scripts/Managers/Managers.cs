@@ -62,22 +62,22 @@ public class Managers : MonoBehaviour
         switch (scriptType)
         {
             case 0:
-                ret = Managers.Data.InverseScriptDic[id].ScriptKr;
+                ret = Managers.Data.ScriptDic[id].ScriptKr;
                 break;
             case 1:
-                ret = Managers.Data.InverseScriptDic[id].ScriptKr;
+                ret = Managers.Data.ScriptDic[id].ScriptKr;
                 break;
             case 2:
-                ret = Managers.Data.InverseScriptDic[id].ScriptEn;
+                ret = Managers.Data.ScriptDic[id].ScriptEn;
                 break;
             case 3:
-                ret = Managers.Data.InverseScriptDic[id].ScriptJp;
+                ret = Managers.Data.ScriptDic[id].ScriptJp;
                 break;
             case 4:
-                ret = Managers.Data.InverseScriptDic[id].ScriptCn;
+                ret = Managers.Data.ScriptDic[id].ScriptCn;
                 break;
             default:
-                ret = Managers.Data.InverseScriptDic[id].ScriptKr;
+                ret = Managers.Data.ScriptDic[id].ScriptKr;
                 break;
         }
 

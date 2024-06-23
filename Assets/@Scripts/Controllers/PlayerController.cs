@@ -18,7 +18,7 @@ public class PlayerController : MonoBehaviour
 
     GameObject _weapon;
     GameObject _shield;
-    string _weaponName = "Sword00";
+    string _weaponName = "Sword01";
     string _shieldName = "Shield00";
 
     float _duration;

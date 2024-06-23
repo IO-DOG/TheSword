@@ -2,13 +2,14 @@ using Data;
 using Febucci.UI;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class UI_ConversationPopup : UI_Popup
 {
-    public string _conversationName;
-    List<Data.ScriptInfo> _scriptInfo;
-    int currentIndex = 0;
+    public int _scriptCode;
+    List<ScriptData> _scripts;
+    int _currentIndex = 0;
 
     enum Texts
     {
@@ -36,7 +37,7 @@ public class UI_ConversationPopup : UI_Popup
         GetImage((int)Images.PlayerPortrait).gameObject.transform.localScale = new Vector3(-1, 1, 1);
 
         Managers.Game.OnConversation = true;
-        InitConversation(_conversationName);
+        InitScript(_scriptCode);
 
         return true;
     }
@@ -49,7 +50,7 @@ public class UI_ConversationPopup : UI_Popup
         }
         else if(GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().allLettersShown && Input.GetKeyDown(KeyCode.Space))
         {
-            ShowNextConversation();
+            ShowNextScript();
         }
 
         if(GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().allLettersShown)
@@ -58,55 +59,52 @@ public class UI_ConversationPopup : UI_Popup
             GetImage((int)Images.ConversationArrow).gameObject.SetActive(false);
     }
 
-    public void InitConversation(string conversationName)
+    public void InitScript(int scriptCode)
     {
-        if (Managers.Data.ScriptDic.TryGetValue(conversationName, out Data.ScriptData data))
-        {
-            GetImage((int)Images.PlayerPortrait).gameObject.SetActive(false);
-            GetImage((int)Images.OpponentPortrait).gameObject.SetActive(false);
+        _scripts = Managers.Data.LoadScriptData(scriptCode);
 
-            _scriptInfo = data.ScriptInfo;
-            currentIndex = 0; // 대화 인덱스 초기화
-            ShowCurrentConversation();
-        }
+        GetImage((int)Images.PlayerPortrait).gameObject.SetActive(false);
+        GetImage((int)Images.OpponentPortrait).gameObject.SetActive(false);
+
+        _currentIndex = 0; // 대화 인덱스 초기화
+        ShowCurrentScript();
     }
 
-    private void ShowCurrentConversation()
+    private void ShowCurrentScript()
     {
-        if (currentIndex < _scriptInfo.Count)
+        if (_currentIndex < _scripts.Count)
         {
-            Data.ScriptInfo info = _scriptInfo[currentIndex];
-            string text = Managers.GetString(info.id);
+            string text = Managers.GetString(_scripts[_currentIndex].id);
             GetText((int)Texts.ConversationText).text = text;
 
-            if (!string.IsNullOrEmpty(info.PlayerSprite))
+            if (!string.IsNullOrEmpty(_scripts[_currentIndex].PlayerSprite))
             {
                 GetImage((int)Images.PlayerPortrait).gameObject.SetActive(true);
-                GetImage((int)Images.PlayerPortrait).sprite = Managers.Resource.Load<Sprite>(info.PlayerSprite);
+                GetImage((int)Images.PlayerPortrait).sprite = Managers.Resource.Load<Sprite>(_scripts[_currentIndex].PlayerSprite);
             }
             else
             {
                 GetImage((int)Images.PlayerPortrait).gameObject.SetActive(false);
             }
 
-            if (!string.IsNullOrEmpty(info.OpponentSprite))
+            if (!string.IsNullOrEmpty(_scripts[_currentIndex].OpponentSprite))
             {
                 GetImage((int)Images.OpponentPortrait).gameObject.SetActive(true);
-                GetImage((int)Images.OpponentPortrait).sprite = Managers.Resource.Load<Sprite>(info.OpponentSprite);
+                GetImage((int)Images.OpponentPortrait).sprite = Managers.Resource.Load<Sprite>(_scripts[_currentIndex].OpponentSprite);
             }
             else
             {
                 GetImage((int)Images.OpponentPortrait).gameObject.SetActive(false);
             }
 
-            GetText((int)Texts.SpeakerText).text = info.Speaker;
+            GetText((int)Texts.SpeakerText).text = _scripts[_currentIndex].Speaker;
 
-            if (info.Speaker == "P" && !string.IsNullOrEmpty(info.PlayerSprite))
+            if (_scripts[_currentIndex].Speaker == "P" && !string.IsNullOrEmpty(_scripts[_currentIndex].PlayerSprite))
             {
                 GetImage((int)Images.OpponentPortrait).color = Color.gray;
                 GetImage((int)Images.PlayerPortrait).color = Color.white;
             }
-            else if (info.Speaker == "O" && !string.IsNullOrEmpty(info.PlayerSprite))
+            else if (_scripts[_currentIndex].Speaker == "O" && !string.IsNullOrEmpty(_scripts[_currentIndex].PlayerSprite))
             {
                 GetImage((int)Images.PlayerPortrait).color = Color.gray;
                 GetImage((int)Images.OpponentPortrait).color = Color.white;
@@ -114,12 +112,12 @@ public class UI_ConversationPopup : UI_Popup
         }
     }
 
-    public void ShowNextConversation()
+    public void ShowNextScript()
     {
-        currentIndex++;
-        if (currentIndex < _scriptInfo.Count)
+        _currentIndex++;
+        if (_currentIndex < _scripts.Count)
         {
-            ShowCurrentConversation();
+            ShowCurrentScript();
         }
         else
         {
