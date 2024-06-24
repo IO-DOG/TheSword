@@ -49,7 +49,7 @@ public class PlayerController : MonoBehaviour
 
     void OnKeyboard()
     {
-        if (Managers.Game.OnBattle == true || Managers.Game.OnConversation == true)
+        if (Managers.Game.OnBattle == true || Managers.Game.OnConversation == true || Managers.Game.OnLever == true)
         {
             return;
         }
@@ -233,11 +233,6 @@ public class PlayerController : MonoBehaviour
         else
             _state = PlayerState.IdleDown;
     }
-
-    public void PlayAnimation(string name)
-    {
-        GetComponent<Animator>().Play(name);
-    }
     #endregion
 
     bool CheckSomething()
@@ -295,18 +290,32 @@ public class PlayerController : MonoBehaviour
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Lever)
             {
                 somethingExist = true;
-                if (hit.collider.gameObject.GetComponentInChildren<Lever>()._IsActive == true)
-                    return somethingExist;
 
-                _state = PlayerState.OnLever;
-                hit.collider.gameObject.GetComponentInChildren<Lever>().Play().OnComplete(()=>
+                if (hit.collider.gameObject.GetComponentInChildren<Lever>()._IsActive == true)
                 {
-                    _state = PlayerState.IdleDown;
-                    hit.collider.gameObject.GetComponentInChildren<Lever>().SetActiveLight();
-                    _isEquiptShield = true;
-                    _isEquiptWeapon = true;
-                    somethingExist = false;
+                    return somethingExist;
+                }
+
+                Vector3 originPos = _cellPos;
+                Vector3 movePos = new Vector3(hit.collider.transform.position.x, transform.position.y + 0.2f, hit.collider.transform.position.z);
+
+                transform.DOMove(movePos, 0.2f).OnComplete(()=>
+                {
+                    _state = PlayerState.OnLever;
+                    Managers.Game.OnLever = true;
+
+                    hit.collider.gameObject.GetComponentInChildren<Lever>().Play().OnComplete(() =>
+                    {
+                        _state = PlayerState.IdleDown;
+                        hit.collider.gameObject.GetComponentInChildren<Lever>().SetActiveLight();
+                        _isEquiptShield = true;
+                        _isEquiptWeapon = true;
+                        transform.DOMove(originPos, 0.2f);
+                        Managers.Game.OnLever = false;
+                    });
                 });
+
+
             }
         }
 
