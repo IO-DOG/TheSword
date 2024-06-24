@@ -131,6 +131,7 @@ public class Define
         Down,
         IdleUp,
         IdleDown,
+        OnLever,
     }
     #endregion
 

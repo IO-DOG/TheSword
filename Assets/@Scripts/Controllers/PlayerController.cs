@@ -169,6 +169,11 @@ public class PlayerController : MonoBehaviour
                 _weapon.transform.localPosition = Vector3.back * adjustingDis;
                 _shield.transform.localPosition = Vector3.back * adjustingDis;
                 break;
+            case PlayerState.OnLever:
+                GetComponent<Animator>().Play("Player_IronLever_B");
+                _isEquiptShield = false;
+                _isEquiptWeapon = false;
+                break;
         }
     }
 
@@ -220,6 +225,9 @@ public class PlayerController : MonoBehaviour
 
     void SetIdleState(MoveDir moveDir)
     {
+        if (_state == PlayerState.OnLever)
+            return;
+
         if (moveDir == MoveDir.Up)
             _state = PlayerState.IdleUp;
         else
@@ -287,7 +295,18 @@ public class PlayerController : MonoBehaviour
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Lever)
             {
                 somethingExist = true;
-                hit.collider.gameObject.GetComponentInChildren<Lever>().Play();
+                if (hit.collider.gameObject.GetComponentInChildren<Lever>()._IsActive == true)
+                    return somethingExist;
+
+                _state = PlayerState.OnLever;
+                hit.collider.gameObject.GetComponentInChildren<Lever>().Play().OnComplete(()=>
+                {
+                    _state = PlayerState.IdleDown;
+                    hit.collider.gameObject.GetComponentInChildren<Lever>().SetActiveLight();
+                    _isEquiptShield = true;
+                    _isEquiptWeapon = true;
+                    somethingExist = false;
+                });
             }
         }
 
