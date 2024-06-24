@@ -156,12 +156,24 @@ public class GameManager
 
     public void SaveGame()
     {
-        Managers.Game.CurPlayerData.CurPosition = new Data.MyVector3
+        if (Managers.Game.Player == null)
         {
-            X = Managers.Game.Player.transform.position.x,
-            Y = Managers.Game.Player.transform.position.y,
-            Z = Managers.Game.Player.transform.position.z,
-        };
+            Managers.Game.CurPlayerData.CurPosition = new Data.MyVector3
+            {
+                X = 0,
+                Y = 0,
+                Z = 0,
+            };
+        }
+        else
+        {
+            Managers.Game.CurPlayerData.CurPosition = new Data.MyVector3
+            {
+                X = Managers.Game.Player.transform.position.x,
+                Y = Managers.Game.Player.transform.position.y,
+                Z = Managers.Game.Player.transform.position.z,
+            };
+        }
 
         string jsonStr = JsonConvert.SerializeObject(CurPlayerData, Formatting.Indented);
         File.WriteAllText(_path, jsonStr);
