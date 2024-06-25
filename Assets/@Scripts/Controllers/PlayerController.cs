@@ -49,7 +49,7 @@ public class PlayerController : MonoBehaviour
 
     void OnKeyboard()
     {
-        if (Managers.Game.OnBattle == true || Managers.Game.OnConversation == true)
+        if (Managers.Game.OnBattle == true || Managers.Game.OnConversation == true || Managers.Game.OnLever == true)
         {
             return;
         }
@@ -169,6 +169,11 @@ public class PlayerController : MonoBehaviour
                 _weapon.transform.localPosition = Vector3.back * adjustingDis;
                 _shield.transform.localPosition = Vector3.back * adjustingDis;
                 break;
+            case PlayerState.OnLever:
+                GetComponent<Animator>().Play("Player_IronLever_B");
+                _isEquiptShield = false;
+                _isEquiptWeapon = false;
+                break;
         }
     }
 
@@ -220,15 +225,13 @@ public class PlayerController : MonoBehaviour
 
     void SetIdleState(MoveDir moveDir)
     {
+        if (_state == PlayerState.OnLever)
+            return;
+
         if (moveDir == MoveDir.Up)
             _state = PlayerState.IdleUp;
         else
             _state = PlayerState.IdleDown;
-    }
-
-    public void PlayAnimation(string name)
-    {
-        GetComponent<Animator>().Play(name);
     }
     #endregion
 
@@ -236,7 +239,7 @@ public class PlayerController : MonoBehaviour
     {
         bool somethingExist = false;
         int layerMask = (1 << (int)Define.Layer.Wall) + (1 << (int)Define.Layer.CItem) + (1 << (int)Define.Layer.Door) + (1 << (int)Define.Layer.Portal)
-            + (1 << (int)Define.Layer.EItem);
+            + (1 << (int)Define.Layer.EItem) + (1 << (int)Define.Layer.Lever);
 
         RaycastHit hit;
         Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset, layerMask);
@@ -283,6 +286,36 @@ public class PlayerController : MonoBehaviour
                 somethingExist = true;
                 hit.collider.gameObject.GetComponentInChildren<PortalController>().Stairs();
                 _cellPos = transform.position;
+            }
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.Lever)
+            {
+                somethingExist = true;
+
+                if (hit.collider.gameObject.GetComponentInChildren<Lever>()._IsActive == true)
+                {
+                    return somethingExist;
+                }
+
+                Vector3 originPos = _cellPos;
+                Vector3 movePos = new Vector3(hit.collider.transform.position.x, transform.position.y + 0.2f, hit.collider.transform.position.z);
+
+                transform.DOMove(movePos, 0.2f).OnComplete(()=>
+                {
+                    _state = PlayerState.OnLever;
+                    Managers.Game.OnLever = true;
+
+                    hit.collider.gameObject.GetComponentInChildren<Lever>().Play().OnComplete(() =>
+                    {
+                        _state = PlayerState.IdleDown;
+                        hit.collider.gameObject.GetComponentInChildren<Lever>().SetActiveLight();
+                        _isEquiptShield = true;
+                        _isEquiptWeapon = true;
+                        transform.DOMove(originPos, 0.2f);
+                        Managers.Game.OnLever = false;
+                    });
+                });
+
+
             }
         }
 

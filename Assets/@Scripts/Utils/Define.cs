@@ -44,6 +44,7 @@ public class Define
         Monster = 10,
         Portal = 11,
         EItem = 12,
+        Lever = 14,
     }
 
     public enum MoveDir
@@ -130,6 +131,7 @@ public class Define
         Down,
         IdleUp,
         IdleDown,
+        OnLever,
     }
     #endregion
 
