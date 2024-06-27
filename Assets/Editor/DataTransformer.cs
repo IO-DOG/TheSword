@@ -262,14 +262,19 @@ public class DataTransformer : EditorWindow
 
                     if (row.Length == 0)
                         continue;
-                    if (string.IsNullOrEmpty(row[0]))
-                        continue;
+                    //if (string.IsNullOrEmpty(row[0]))
+                    //    continue;
 
                     for (int x = 0; x < row.Length; x++)
                     {
                         string block = row[x];
 
                         xPos = x * Define.TILE_SIZE;
+
+                        if (block.Length == 0)
+                        {
+                            block = "0";
+                        }
 
                         if (block[0] == 'I')
                         {
@@ -352,47 +357,62 @@ public class DataTransformer : EditorWindow
                             };
                             tiles.Add(tile);
                         }
+                        else if (block[0] == 'W')
+                        {
+                            int prefabID = int.Parse(Regex.Replace(block, "[^0-9]", ""));
+                            Data.TileData tile = new Data.TileData
+                            {
+                                PrefabID = prefabID,
+                                Position = new Data.MyVector3
+                                {
+                                    X = xPos,
+                                    Y = 0,
+                                    Z = zPos,
+                                },
+                                TileType = (int)Define.TileType.Wall,
+                            };
+                            tiles.Add(tile);
+                        }
                         else
                         {
                             int prefabID = int.Parse(Regex.Replace(block, "[^0-9]", ""));
 
-                           
                             if (prefabID >= 3 && prefabID <= 8)
                             {
                                 Data.DoorData tile = new Data.DoorData
-                                 {
-                                     PrefabID = prefabID,
-                                     Position = new Data.MyVector3
-                                     {
-                                         X = xPos,
-                                         Y = 0,
-                                         Z = zPos,
-                                     },
-                                     TileType = (int)Define.TileType.Door,
+                                {
+                                    PrefabID = prefabID,
+                                    Position = new Data.MyVector3
+                                    {
+                                        X = xPos,
+                                        Y = 0,
+                                        Z = zPos,
+                                    },
+                                    TileType = (int)Define.TileType.Door,
 
-                                     TotalCount = totalDoorCount++,
-                                     IsActive = true,
-                                 };
-                                 tiles.Add(tile);
-                             }
-                             else if (prefabID == 9)
-                             {
+                                    TotalCount = totalDoorCount++,
+                                    IsActive = true,
+                                };
+                                tiles.Add(tile);
+                            }
+                            else if (prefabID == 9)
+                            {
                                 Data.StairsData tile = new Data.StairsData
-                                 {
-                                     PrefabID = prefabID,
-                                     Position = new Data.MyVector3
-                                     {
-                                         X = xPos,
-                                         Y = 0,
-                                         Z = zPos,
-                                     },
-                                     TileType = (int)Define.TileType.Stairs,
-                   
-                                     Floor = floorIndex,
-                                     StairsType = (int)Define.Stairs.Upstairs,
-                                 };
-                                 tiles.Add(tile);
-                             }
+                                {
+                                    PrefabID = prefabID,
+                                    Position = new Data.MyVector3
+                                    {
+                                        X = xPos,
+                                        Y = 0,
+                                        Z = zPos,
+                                    },
+                                    TileType = (int)Define.TileType.Stairs,
+
+                                    Floor = floorIndex,
+                                    StairsType = (int)Define.Stairs.Upstairs,
+                                };
+                                tiles.Add(tile);
+                            }
                             else if (prefabID == 10)
                             {
                                 Data.StairsData tile = new Data.StairsData

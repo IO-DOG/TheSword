@@ -253,7 +253,7 @@ public class GameManager
 
         foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
         {
-            string key = entry.Key;
+            string key = entry.Key.Substring(0, entry.Key.LastIndexOf('_'));
             Data.MapData mapData = entry.Value;
 
             if (!key.Contains(mapName))
@@ -378,12 +378,24 @@ public class GameManager
                 }
                 else
                 {
-                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", tiles.transform);
-
-                    if (tile.PrefabID != (int)Define.TileType.Floor && tile.PrefabID != (int)Define.TileType.SpawnPoint)
-                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
-                    else
+                    if(tile.TileType == (int)Define.TileType.Wall)
+                    {
+                        GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+
+                        GameObject wall = Managers.Resource.Instantiate($"Tilemap_C{mapName}_W{tile.PrefabID.ToString("D2")}", tiles.transform);
+                        wall.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
+                    }
+                    else if(tile.TileType == (int)Define.TileType.Void)
+                    {
+                        GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", tiles.transform);
+                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
+                    }
+                    else if (tile.PrefabID == (int)Define.TileType.Floor || tile.PrefabID == (int)Define.TileType.SpawnPoint)
+                    {
+                        GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", tiles.transform);
+                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+                    }
                 }
             }
 

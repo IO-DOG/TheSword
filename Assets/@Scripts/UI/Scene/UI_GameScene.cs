@@ -101,10 +101,10 @@ public class UI_GameScene : UI_Scene
 
         Managers.Game.CurPlayerData.CurStageid = 0;
         Managers.Game.InstantiateMap(Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonID);
-        // test
-        GameObject go = Managers.Resource.Instantiate("Tilemap_IronLever");
-        go.transform.localPosition = new Vector3(5.27f, -0.6f, 11.55f);
-        go.transform.localScale = new Vector3(0.33f * 0.6f, 0.33f * 0.6f *2f, 0.33f*0.6f);
+        //// test
+        //GameObject go = Managers.Resource.Instantiate("Tilemap_IronLever");
+        //go.transform.localPosition = new Vector3(5.27f, -0.6f, 11.55f);
+        //go.transform.localScale = new Vector3(0.33f * 0.6f, 0.33f * 0.6f *2f, 0.33f*0.6f);
 
         SetPlayerInfo();
         Refresh();
