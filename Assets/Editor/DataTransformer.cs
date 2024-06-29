@@ -258,7 +258,7 @@ public class DataTransformer : EditorWindow
                 {
                     string[] row = lines[y].Replace("\r", "").Split(',');
                     float xPos = 0;
-                    zPos = y * Define.TILE_SIZE;
+                    zPos = (-1) * y * Define.TILE_SIZE;
 
                     if (row.Length == 0)
                         continue;
@@ -428,6 +428,21 @@ public class DataTransformer : EditorWindow
 
                                     Floor = floorIndex,
                                     StairsType = (int)Define.Stairs.Downstairs,
+                                };
+                                tiles.Add(tile);
+                            }
+                            else if (prefabID == 13)
+                            {
+                                Data.DoorData tile = new Data.DoorData
+                                {
+                                    PrefabID = prefabID,
+                                    Position = new Data.MyVector3
+                                    {
+                                        X = xPos,
+                                        Y = 0,
+                                        Z = zPos,
+                                    },
+                                    TileType = (int)Define.TileType.Door,
                                 };
                                 tiles.Add(tile);
                             }

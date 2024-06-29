@@ -403,15 +403,23 @@ public class GameManager
                         GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", tiles.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
 
-                        Managers.Game.Player.transform.position = new Vector3(go.transform.position.x * (-1) * 0.33f, 2.6f, go.transform.position.z * (-1) * 0.33f);
+                        Managers.Game.Player.transform.position = new Vector3(go.transform.position.x * 0.33f, 2.6f, go.transform.position.z * 0.33f);
                         Managers.Game.Player._cellPos = Managers.Game.Player.transform.position;
+                    }
+                    else if (tile.PrefabID == (int)Define.TileType.Lever)
+                    {
+                        GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
+                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+
+                        GameObject lever = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", tiles.transform);
+                        lever.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
                     }
                 }
             }
 
             parent.transform.localScale = new Vector3(0.33f, 0.33f, 0.33f);
-            items.transform.localPosition = items.transform.localPosition + Vector3.up * 2f + Vector3.forward * 0.8f;
-            monsters.transform.localPosition = monsters.transform.localPosition + Vector3.up * 3f + Vector3.forward * 1.5f;
+            items.transform.localPosition = items.transform.localPosition + new Vector3(0f, 1.6f, -0.4f);
+            monsters.transform.localPosition = monsters.transform.localPosition + new Vector3(0f, 3f, -1.1f);
             MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, items);
             MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, monsters);
             MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, lights);
@@ -420,7 +428,6 @@ public class GameManager
             InstantiateLights(key, lights.transform);
         }
 
-        map.transform.rotation = Quaternion.Euler(Vector3.down * 180f);
         MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, Player.gameObject);
     }
 
