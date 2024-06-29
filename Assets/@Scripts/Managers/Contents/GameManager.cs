@@ -251,6 +251,8 @@ public class GameManager
         int count = 0;
         mapName = mapName.Substring(0, mapName.LastIndexOf('_'));
 
+        GameObject map = GameObject.Find("Map");
+
         foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
         {
             string key = entry.Key.Substring(0, entry.Key.LastIndexOf('_'));
@@ -267,7 +269,7 @@ public class GameManager
             GameObject lights = new GameObject() { name = "Deco" };
 
             parent.transform.localPosition += new Vector3(count * 100, 0, 0);
-            parent.transform.parent = GameObject.Find("Map").transform;
+            parent.transform.parent = map.transform;
             tiles.transform.parent = parent.transform;
             items.transform.parent = parent.transform;
             monsters.transform.parent = parent.transform;
@@ -391,17 +393,25 @@ public class GameManager
                         GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", tiles.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
                     }
-                    else if (tile.PrefabID == (int)Define.TileType.Floor || tile.PrefabID == (int)Define.TileType.SpawnPoint)
+                    else if (tile.PrefabID == (int)Define.TileType.Floor)
                     {
                         GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", tiles.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+                    }
+                    else if (tile.PrefabID == (int)Define.TileType.SpawnPoint)
+                    {
+                        GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", tiles.transform);
+                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+
+                        Managers.Game.Player.transform.position = new Vector3(go.transform.position.x * (-1) * 0.33f, 2.6f, go.transform.position.z * (-1) * 0.33f);
+                        Managers.Game.Player._cellPos = Managers.Game.Player.transform.position;
                     }
                 }
             }
 
             parent.transform.localScale = new Vector3(0.33f, 0.33f, 0.33f);
-            items.transform.localPosition = items.transform.localPosition + Vector3.up * 2f + Vector3.forward * 0.7f * (-1);
-            monsters.transform.localPosition = monsters.transform.localPosition + Vector3.up * 3f + Vector3.forward * 0.7f * (-1);
+            items.transform.localPosition = items.transform.localPosition + Vector3.up * 2f + Vector3.forward * 0.8f;
+            monsters.transform.localPosition = monsters.transform.localPosition + Vector3.up * 3f + Vector3.forward * 1.5f;
             MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, items);
             MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, monsters);
             MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, lights);
@@ -410,6 +420,7 @@ public class GameManager
             InstantiateLights(key, lights.transform);
         }
 
+        map.transform.rotation = Quaternion.Euler(Vector3.down * 180f);
         MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, Player.gameObject);
     }
 

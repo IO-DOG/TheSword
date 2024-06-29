@@ -9,7 +9,6 @@ public class PlayerController : MonoBehaviour
 {
     const float adjustingDis = 0.025f;
     public Grid _grid;
-    public GameObject _startPoint;
     public GameObject _keyInventory;
     public float _speed = 10.0f;
     public bool _isEquiptWeapon = true;
@@ -26,7 +25,7 @@ public class PlayerController : MonoBehaviour
 
     float _offset = Define.TILE_SIZE * 0.33f;
     Vector3 _interpolateRayPos = new Vector3(0f, -2f, 0f);
-    Vector3 _cellPos;
+    public Vector3 _cellPos;
     Vector3 _nextCellPos;
 
     PlayerState _state = PlayerState.IdleDown;
@@ -38,8 +37,6 @@ public class PlayerController : MonoBehaviour
 
         _duration = 1 / _speed;
 
-        transform.position = _startPoint.transform.position;
-        _cellPos = _startPoint.transform.position;
         _keyInventory = GameObject.Find("KeyInventory");
         _weapon = GameObject.Find("WeaponSlot");
         _shield = GameObject.Find("ShieldSlot");

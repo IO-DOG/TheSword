@@ -12,6 +12,7 @@ public class Define
         TitleScene,
         IntroScene,
         GameScene,
+        TutorialScene,
     }
 
     public enum Sound

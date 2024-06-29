@@ -51,6 +51,10 @@ public class UI_IntroScene : UI_Scene
         {
             NextScene();
         }
+
+        //test
+        if (Input.GetKeyDown(KeyCode.Escape))
+            Managers.Scene.LoadScene(Define.Scene.TutorialScene);
     }
 
     void NextScene()
@@ -71,7 +75,7 @@ public class UI_IntroScene : UI_Scene
         }
         if (idx == totalCount - 1)
         {
-            Debug.Log("인트로 끝 튜토리얼씬으로 넘어가는 코드들어가야함");
+            Managers.Scene.LoadScene(Define.Scene.TutorialScene);
         }
         GetImage((int)Images.SceneImage).sprite = ImageList[idx - 1];
         GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx].id);
