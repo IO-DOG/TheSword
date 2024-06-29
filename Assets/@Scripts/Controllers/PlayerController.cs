@@ -305,6 +305,7 @@ public class PlayerController : MonoBehaviour
                     {
                         _state = PlayerState.IdleDown;
                         hit.collider.gameObject.GetComponentInChildren<Lever>().SetActiveLight();
+                        hit.collider.gameObject.GetComponentInChildren<Lever>().Open();
                         _isEquiptShield = true;
                         _isEquiptWeapon = true;
                         transform.DOMove(originPos, 0.2f);

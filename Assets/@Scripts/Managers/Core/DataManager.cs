@@ -88,6 +88,24 @@ public class DataManager
         }
     }
 
+    public void PillarActiveOff(int index)
+    {
+        foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
+        {
+            string key = entry.Key;
+            Data.MapData mapData = entry.Value;
+
+            foreach (Data.TileData tile in mapData.Tiles)
+            {
+                if (tile is PillarData pillar && pillar.TileType == (int)Define.TileType.Pillar && pillar.TotalCount == index)
+                {
+                    pillar.IsActive = false;
+                }
+            }
+        }
+    }
+
+
     public void CItemActiveOff(int index)
     {
         foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)

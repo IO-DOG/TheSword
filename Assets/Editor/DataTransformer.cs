@@ -247,9 +247,10 @@ public class DataTransformer : EditorWindow
             int totalBossCount = 0;
             int totalDoorCount = 0;
 
-
             if (file.Name.Contains("Dungeon") && !file.Name.Contains("meta"))
             {
+                int totalPillarCount = 0;
+
                 List<Data.TileData> tiles = new List<Data.TileData>();
                 string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{file.Name}").Split("\n");
                 float zPos = 0;
@@ -433,7 +434,7 @@ public class DataTransformer : EditorWindow
                             }
                             else if (prefabID == 13)
                             {
-                                Data.DoorData tile = new Data.DoorData
+                                Data.PillarData tile = new Data.PillarData
                                 {
                                     PrefabID = prefabID,
                                     Position = new Data.MyVector3
@@ -442,7 +443,10 @@ public class DataTransformer : EditorWindow
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = (int)Define.TileType.Door,
+                                    TileType = (int)Define.TileType.Pillar,
+
+                                    TotalCount = totalPillarCount++,
+                                    IsActive = true,
                                 };
                                 tiles.Add(tile);
                             }

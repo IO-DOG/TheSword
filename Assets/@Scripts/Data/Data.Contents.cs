@@ -133,6 +133,13 @@ namespace Data
         public bool IsActive { get; set; }
     }
 
+    [Serializable]
+    public class PillarData : TileData
+    {
+        public int TotalCount { get; set; }
+        public bool IsActive { get; set; }
+    }
+
 
     [Serializable]
     public class Occupied : TileData

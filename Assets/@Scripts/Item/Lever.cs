@@ -34,4 +34,17 @@ public class Lever : MonoBehaviour
         Off.SetActive(false);
         _IsActive = true;
     }
+
+    public void Open()
+    {
+        GameObject stage = gameObject.transform.parent.parent.parent.gameObject;
+        Debug.Log(stage.name);
+        foreach (Transform child in stage.transform)
+        {
+            if(child.GetComponentInChildren<Pillar>() != null)
+            {
+                child.GetComponentInChildren<Pillar>().Open();
+            }
+        }
+    }
 }

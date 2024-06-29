@@ -52,6 +52,5 @@ public class ConsumableItem : MonoBehaviour
         }
 
         Managers.Game.SaveGame();
-        Managers.Game.GameScene.Refresh();
     }
 }

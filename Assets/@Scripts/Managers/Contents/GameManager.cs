@@ -11,6 +11,7 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Playables;
+using static Define;
 using static UnityEditor.Progress;
 
 public class GameManager
@@ -267,6 +268,7 @@ public class GameManager
             GameObject monsters = new GameObject() { name = "Monsters" };
             GameObject bossMonsters = new GameObject() { name = "BossMonsters" };
             GameObject lights = new GameObject() { name = "Deco" };
+            GameObject pillars = new GameObject() { name = "Pillars" };
 
             parent.transform.localPosition += new Vector3(count * 100, 0, 0);
             parent.transform.parent = map.transform;
@@ -275,6 +277,7 @@ public class GameManager
             monsters.transform.parent = parent.transform;
             bossMonsters.transform.parent = parent.transform;
             lights.transform.parent = parent.transform;
+            pillars.transform.parent = parent.transform;
 
             foreach (Data.TileData tile in mapData.Tiles)
             {
@@ -377,6 +380,21 @@ public class GameManager
                         stairs.transform.position = new Vector3(stairsTile.Position.X, stairsTile.Position.Y - Define.TILE_SIZE / 2, stairsTile.Position.Z);
                     }
 
+                }
+                else if (tile is PillarData pillarTile)
+                {
+                    GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
+                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+
+                    GameObject pillar = Managers.Resource.Instantiate($"Tilemap_{pillarTile.PrefabID}", pillars.transform);
+                    pillar.name = $"pillar{pillarTile.TotalCount}";
+                    pillar.transform.position = new Vector3(pillarTile.Position.X, pillarTile.Position.Y - Define.TILE_SIZE / 2, pillarTile.Position.Z);
+                    pillar.GetComponentInChildren<Pillar>()._pillarIndex_forActive = pillarTile.TotalCount;
+
+                    if (pillarTile.IsActive == false)
+                    {
+                        pillar.transform.GetChild(1).gameObject.SetActive(false);
+                    }
                 }
                 else
                 {

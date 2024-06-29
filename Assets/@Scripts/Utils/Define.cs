@@ -98,6 +98,7 @@ public class Define
         Stairs,
         SpawnPoint = 11,
         Lever = 12,
+        Pillar = 13,
     }
 
     public enum OccupiedType
