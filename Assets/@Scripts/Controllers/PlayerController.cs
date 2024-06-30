@@ -288,11 +288,6 @@ public class PlayerController : MonoBehaviour
             {
                 somethingExist = true;
 
-                if (hit.collider.gameObject.GetComponentInChildren<Lever>()._IsActive == true)
-                {
-                    return somethingExist;
-                }
-
                 Vector3 originPos = _cellPos;
                 Vector3 movePos = new Vector3(hit.collider.transform.position.x, transform.position.y + 0.2f, hit.collider.transform.position.z);
 
@@ -301,7 +296,7 @@ public class PlayerController : MonoBehaviour
                     _state = PlayerState.OnLever;
                     Managers.Game.OnLever = true;
 
-                    hit.collider.gameObject.GetComponentInChildren<Lever>().Play().OnComplete(() =>
+                    hit.collider.gameObject.GetComponentInChildren<Lever>().Play(1.0f).OnComplete(() =>
                     {
                         _state = PlayerState.IdleDown;
                         hit.collider.gameObject.GetComponentInChildren<Lever>().SetActiveLight();
@@ -312,8 +307,6 @@ public class PlayerController : MonoBehaviour
                         Managers.Game.OnLever = false;
                     });
                 });
-
-
             }
         }
 

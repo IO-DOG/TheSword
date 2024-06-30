@@ -381,6 +381,22 @@ public class GameManager
                     }
 
                 }
+                else if (tile is LeverData leverTile)
+                {
+                    GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
+                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+
+                    GameObject lever = Managers.Resource.Instantiate($"Tilemap_{leverTile.PrefabID}", tiles.transform);
+                    lever.name = $"Lever";
+                    lever.transform.position = new Vector3(leverTile.Position.X, leverTile.Position.Y, leverTile.Position.Z);
+
+                    if (leverTile.IsActive == true)
+                    {
+                        lever.GetComponentInChildren<Lever>()._IsActive = true;
+                        lever.GetComponentInChildren<Lever>().SetActiveLight();
+                        lever.GetComponentInChildren<Lever>().Play(0.0f);
+                    }
+                }
                 else if (tile is PillarData pillarTile)
                 {
                     GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
@@ -423,14 +439,6 @@ public class GameManager
 
                         Managers.Game.Player.transform.position = new Vector3(go.transform.position.x * 0.33f, 2.6f, go.transform.position.z * 0.33f);
                         Managers.Game.Player._cellPos = Managers.Game.Player.transform.position;
-                    }
-                    else if (tile.PrefabID == (int)Define.TileType.Lever)
-                    {
-                        GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
-                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-
-                        GameObject lever = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", tiles.transform);
-                        lever.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
                     }
                 }
             }

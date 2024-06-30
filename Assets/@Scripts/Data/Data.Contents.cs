@@ -140,6 +140,12 @@ namespace Data
         public bool IsActive { get; set; }
     }
 
+    [Serializable]
+    public class LeverData : TileData
+    {
+        public bool IsActive { get; set; }
+    }
+
 
     [Serializable]
     public class Occupied : TileData
