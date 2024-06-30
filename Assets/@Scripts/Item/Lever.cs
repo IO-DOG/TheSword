@@ -5,26 +5,34 @@ using UnityEngine;
 
 public class Lever : MonoBehaviour
 {
-    GameObject On;
-    GameObject Off;
-    GameObject lever;
+    public GameObject On;
+    public GameObject Off;
+    public GameObject lever;
 
     public bool _IsActive = false;
 
     void Start()
     {
-        On = GameObject.Find("Tilemap_IronLever_ON");
-        Off = GameObject.Find("Tilemap_IronLever_OFF");
-        lever = GameObject.Find("lever");
-        On.SetActive(false);
+        if(_IsActive == false)
+        {
+            On.SetActive(false);
+        }
+        else
+        {
+            transform.parent.gameObject.layer = (int)Define.Layer.Wall;
+            foreach (Transform component in transform.parent.gameObject.transform)
+            {
+                component.gameObject.layer = (int)Define.Layer.Wall;
+            }
+        }
     }
 
-    public Tween Play()
+    public Tween Play(float time)
     {
         Vector3 rotateAngle = new Vector3(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z + 25f);
         Quaternion targetRotation = Quaternion.Euler(rotateAngle);
 
-        Tween tween = lever.transform.DORotateQuaternion(targetRotation, 1.0f);
+        Tween tween = lever.transform.DORotateQuaternion(targetRotation, time);
         return tween;
     }
 
@@ -44,6 +52,7 @@ public class Lever : MonoBehaviour
             if(child.GetComponentInChildren<Pillar>() != null)
             {
                 child.GetComponentInChildren<Pillar>().Open();
+                Managers.Data.LeverActiveOff();
             }
         }
     }

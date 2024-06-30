@@ -16,9 +16,7 @@ public class UI_TutorialScene : UI_Scene
         Managers.Game.MainCamera = Camera.main;
 
         Managers.Game.CurPlayerData.CurStageid = 0;
-        Managers.Game.InstantiateMap(Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonID);
-
-        Managers.UI.ShowPopupUI<UI_StageNamePopup>();
+        //Managers.Game.InstantiateMap(Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonID);
 
         return true;
     }

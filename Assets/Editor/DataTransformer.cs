@@ -436,6 +436,22 @@ public class DataTransformer : EditorWindow
                                 };
                                 tiles.Add(tile);
                             }
+                            else if (prefabID == 12)
+                            {
+                                Data.LeverData tile = new Data.LeverData
+                                {
+                                    PrefabID = prefabID,
+                                    Position = new Data.MyVector3
+                                    {
+                                        X = xPos,
+                                        Y = 0,
+                                        Z = zPos,
+                                    },
+                                    TileType = (int)Define.TileType.Lever,
+                                    IsActive = false,
+                                };
+                                tiles.Add(tile);
+                            }
                             else if (prefabID == 13)
                             {
                                 Data.PillarData tile = new Data.PillarData
