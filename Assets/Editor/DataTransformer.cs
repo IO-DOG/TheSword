@@ -41,7 +41,7 @@ public class DataTransformer : EditorWindow
         Debug.Log("Complete DataTransformer");
     }
 
-    [MenuItem("Tools/SaveDecoAsJson ")]
+    [MenuItem("Tools/SaveDecoAsJson")]
     public static void SaveLightAsJson()
     {
         string path = Application.dataPath + "/@Resources/Data/JsonData/DecoData.json";
@@ -104,7 +104,11 @@ public class DataTransformer : EditorWindow
         Debug.Log("Complete SaveLightAsJson");
     }
 
-    
+    [MenuItem("Tools/SaveTileDataAsJson")]
+    public static void SaveTitleAsJson()
+    {
+
+    }
 
     static void ParsePlayerData(string filename)
     {

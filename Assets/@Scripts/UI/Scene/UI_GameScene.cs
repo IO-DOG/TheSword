@@ -134,6 +134,11 @@ public class UI_GameScene : UI_Scene
             Managers.Game.CurPlayerData.CurExp += 10;
         }
 
+        if (Input.GetKeyDown(KeyCode.F2))
+        {
+            Managers.Game.CurPlayerData.Attack += 10;
+        }
+
         if (Input.GetMouseButtonDown(0))
         {
             RaycastHit hit;

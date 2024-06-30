@@ -114,6 +114,15 @@ public class UI_InvenPopup : UI_Popup
         BaseMOVESPEED,
         EquipName,
         InfoText,
+        ATKInfoText,
+        DEFInfoText,
+        HPInfoText,
+        CRIInfoText,
+        CRIATKInfoText,
+        LVInfoText,
+        ATKSPEEDText,
+        DEFSPEEDText,
+        MOVESPEEDText,
     }
 
     enum GameObjects
