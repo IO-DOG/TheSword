@@ -14,6 +14,13 @@ public class Define
         GameScene,
         TutorialScene,
     }
+    public enum StageName
+    {
+        None,
+        Dungeon_00_000,
+        Dungeon_00_001,
+    }
+
 
     public enum Sound
     {
