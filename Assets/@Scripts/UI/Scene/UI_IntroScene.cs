@@ -73,14 +73,15 @@ public class UI_IntroScene : UI_Scene
             GetImage((int)Images.SceneImage).gameObject.SetActive(true);
             GetText((int)Texts.SceneText).gameObject.transform.position = Util.WorldToScreenCood(new Vector3(0, -400, 0));
         }
-        if (idx == totalCount - 1)
+        if (idx == totalCount)
         {
             Managers.Scene.LoadScene(Define.Scene.TutorialScene);
+            return;
         }
         GetImage((int)Images.SceneImage).sprite = ImageList[idx - 1];
         GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx].id);
 
         idx++;
-        idx = Mathf.Min(idx, totalCount - 1);
+        idx = Mathf.Min(idx, totalCount);
     }
 }
