@@ -88,12 +88,14 @@ public class UI_IntroScene : UI_Scene
         }
         if (idx == totalCount - 1)
         {
+            StopCoroutine(CoInvertedImage());
             GetImage((int)Images.SceneImage).sprite = ImageList[idx - 1];
             GetImage((int)Images.SceneImage).SetNativeSize();
-            GetImage((int)Images.SceneImage).transform.position = new Vector3(960, 540, 0);
-            GetImage((int)Images.SceneImage).transform.localScale = new Vector3(0.34f, 0.34f, 0);
+            GetImage((int)Images.SceneImage).transform.position = new Vector3(960, 1100, 0);
+            GetImage((int)Images.SceneImage).transform.localScale = new Vector3(0.7f, 0.7f, 0);
+            StartCoroutine(CoLastIntroImage());
         }
-        
+
         idx++;
         idx = Mathf.Min(idx, totalCount);
     }
@@ -102,7 +104,43 @@ public class UI_IntroScene : UI_Scene
     {
         WaitForSeconds delay = new WaitForSeconds(1f);
         GetImage((int)Images.SceneImage).sprite = Managers.Resource.Load<Sprite>("Intro03");
+        StartCoroutine(CoFadeOutImage());
         yield return delay;
         GetImage((int)Images.SceneImage).sprite = Managers.Resource.Load<Sprite>("Intro04");
+        float tick = 0;
+        while (tick < 1)
+        {
+            GetImage((int)Images.SceneImage).color += new Color(0, 0, 0, 0.1f);
+            tick += 0.1f;
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
+
+    IEnumerator CoFadeOutImage()
+    {
+        GetImage((int)Images.SceneImage).color = Color.white;
+        float tick = 0;
+        while (tick < 1)
+        {
+            GetImage((int)Images.SceneImage).color += new Color(0, 0, 0, -0.1f);
+            tick += 0.1f;
+            yield return new WaitForSeconds(0.1f);
+        }
+        yield return null;
+    }
+
+    IEnumerator CoLastIntroImage()
+    {
+        GetImage((int)Images.SceneImage).sprite = Managers.Resource.Load<Sprite>("Intro05");
+
+        WaitForSeconds tick = new WaitForSeconds(0.01f);
+        while (GetImage((int)Images.SceneImage).transform.position.y > 0)
+        {
+            GetImage((int)Images.SceneImage).transform.position -= new Vector3(0, 2f, 0);
+            yield return tick;
+        }
+        yield return null;
+
+        StartCoroutine(CoFadeOutImage());
     }
 }
