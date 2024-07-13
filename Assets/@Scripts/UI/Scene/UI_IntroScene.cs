@@ -1,4 +1,5 @@
 using Data;
+using DG.Tweening;
 using Febucci.UI;
 using System.Collections;
 using System.Collections.Generic;
@@ -75,9 +76,11 @@ public class UI_IntroScene : UI_Scene
         }
         if (idx == totalCount)
         {
-            Managers.Scene.LoadScene(Define.Scene.TutorialScene);
+            FadeInandOut(Define.FadeEvent.LeftToCenter, Define.Scene.TutorialScene);
+
             return;
         }
+
         GetImage((int)Images.SceneImage).sprite = ImageList[idx - 1];
         GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx].id);
 

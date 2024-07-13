@@ -46,7 +46,8 @@ public class PlayerController : MonoBehaviour
 
     void OnKeyboard()
     {
-        if (Managers.Game.OnBattle == true || Managers.Game.OnConversation == true || Managers.Game.OnLever == true)
+        if (Managers.Game.OnBattle == true || Managers.Game.OnConversation == true
+            || Managers.Game.OnLever == true || Managers.Game.OnFade == true)
         {
             return;
         }
@@ -213,10 +214,9 @@ public class PlayerController : MonoBehaviour
         }
         // Move
         _cellPos += _nextCellPos;
-        transform.DOMove(_cellPos, _duration).OnKill(()=> 
-        { 
+        transform.DOMove(_cellPos, _duration).OnComplete(()=> 
+        {
             _isMoving = false;
-            SetIdleState(moveDir);
         });
     }
 
@@ -241,12 +241,12 @@ public class PlayerController : MonoBehaviour
         RaycastHit hit;
         Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset, layerMask);
 
-        if(hit.collider != null)
+        if (hit.collider != null)
         {
             // Checking Wall
             if (hit.collider.gameObject.layer == (int)Define.Layer.Wall)
             {
-                somethingExist = true; 
+                somethingExist = true;
             }
             // Checking Item
             else if (hit.collider.gameObject.layer == (int)Define.Layer.CItem)
@@ -278,7 +278,7 @@ public class PlayerController : MonoBehaviour
                     somethingExist = true;
                 }
             }
-            else if(hit.collider.gameObject.layer == (int)Define.Layer.Portal)
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.Portal)
             {
                 somethingExist = true;
                 hit.collider.gameObject.GetComponentInChildren<PortalController>().Stairs();
@@ -291,7 +291,7 @@ public class PlayerController : MonoBehaviour
                 Vector3 originPos = _cellPos;
                 Vector3 movePos = new Vector3(hit.collider.transform.position.x, transform.position.y + 0.2f, hit.collider.transform.position.z);
 
-                transform.DOMove(movePos, 0.2f).OnComplete(()=>
+                transform.DOMove(movePos, 0.2f).OnComplete(() =>
                 {
                     _state = PlayerState.OnLever;
                     Managers.Game.OnLever = true;

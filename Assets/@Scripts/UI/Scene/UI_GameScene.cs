@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -101,7 +102,6 @@ public class UI_GameScene : UI_Scene
 
         Managers.Game.CurPlayerData.CurStageid = 0;
         Managers.Game.InstantiateMap(Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonID);
-        Managers.UI.ShowPopupUI<UI_StageNamePopup>();
 
         SetPlayerInfo();
         Refresh();
@@ -110,6 +110,10 @@ public class UI_GameScene : UI_Scene
             GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(false);
         if (PlayerPrefs.GetInt("ISOPENPORTAL") == 0)
             GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(false);
+
+        FadeInandOut(Define.FadeEvent.FadnIn);
+        FadeInandOut(Define.FadeEvent.CenterToRight);
+
         return true;
     }
 

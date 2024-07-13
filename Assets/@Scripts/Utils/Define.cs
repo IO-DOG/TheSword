@@ -43,6 +43,14 @@ public class Define
         PointerExit,
     }
 
+    public enum FadeEvent
+    {
+        LeftToCenter,
+        CenterToRight,
+        FadnIn,
+        FadeOut,
+    }
+
     public enum Layer
     {
         Wall = 6,

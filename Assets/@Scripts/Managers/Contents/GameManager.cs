@@ -19,6 +19,7 @@ public class GameManager
     public bool OnBattle = false;
     public bool OnConversation = false;
     public bool OnLever = false;
+    public bool OnFade = false;
 
     public PlayerController Player; // ������ ������ ����
     public MonsterController Monster; // ������ ������ ����

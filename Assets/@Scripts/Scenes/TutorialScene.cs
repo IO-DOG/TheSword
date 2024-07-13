@@ -9,7 +9,7 @@ public class TutorialScene : BaseScene
         base.Init();
 
         SceneType = Define.Scene.TutorialScene;
-        Managers.UI.ShowSceneUI<UI_GameScene>();
+        Managers.UI.ShowSceneUI<UI_TutorialScene>();
     }
 
     public override void Clear()

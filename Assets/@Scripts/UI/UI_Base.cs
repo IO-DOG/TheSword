@@ -119,4 +119,23 @@ public abstract class UI_Base : MonoBehaviour
         contentObject.transform.DOScale(1f, 0.1f).SetEase(Ease.InOutBack).SetUpdate(true);
     }
 
+
+    public void FadeInandOut(Define.FadeEvent type, Define.Scene scene = Define.Scene.Unknown)
+    {
+        if (Managers.Game.OnFade == true)
+            return;
+
+        UI_Fade fade = Managers.Resource.Instantiate("UI_Fade").GetComponent<UI_Fade>();
+        fade.GetSequence(type).OnComplete(() =>
+        {
+            if (scene != Define.Scene.Unknown)
+            {
+                Managers.Scene.LoadScene(scene);
+                //Managers.UI.ShowPopupUI<UI_StageNamePopup>();
+                return;
+            }
+
+            Managers.Resource.Destroy(fade.gameObject);
+        });
+    }
 }
