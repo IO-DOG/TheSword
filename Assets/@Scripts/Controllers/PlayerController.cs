@@ -43,6 +43,7 @@ public class PlayerController : MonoBehaviour
     public Vector3 _cellPos;
     Vector3 _nextCellPos;
 
+    MoveDir _moveDir = MoveDir.None;
     PlayerState _state = PlayerState.IdleDown;
     public void SetState(PlayerState state)
     {
@@ -72,18 +73,22 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.UpArrow))
         {
             Moving(MoveDir.Up);
+            _moveDir = MoveDir.Up;
         }
         else if (Input.GetKey(KeyCode.DownArrow))
         {
             Moving(MoveDir.Down);
+            _moveDir = MoveDir.Down;
         }
         else if (Input.GetKey(KeyCode.LeftArrow))
         {
             Moving(MoveDir.Left);
+            _moveDir = MoveDir.Left;
         }
         else if (Input.GetKey(KeyCode.RightArrow))
         {
             Moving(MoveDir.Right);
+            _moveDir = MoveDir.Right;
         }
     }
 
@@ -99,14 +104,9 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-
-        if (Input.GetKeyUp(KeyCode.DownArrow) || Input.GetKeyUp(KeyCode.LeftArrow) || Input.GetKeyUp(KeyCode.RightArrow))
+        if (_isMoving == false && _moveDir != MoveDir.None)
         {
-            SetIdleState(MoveDir.Down);
-        }
-        if (Input.GetKeyUp(KeyCode.UpArrow))
-        {
-            SetIdleState(MoveDir.Up);
+            SetIdleState(_moveDir);
         }
     }
 
