@@ -57,7 +57,6 @@ public class UI_GameScene : UI_Scene
         #endregion
 
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
-        Managers.Game.MainCamera = Camera.main;
 
         //GetButton((int)Buttons.ToTitleButton).gameObject.BindEvent(() => Managers.Scene.LoadScene(Define.Scene.TitleScene));
 

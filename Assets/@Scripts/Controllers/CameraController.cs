@@ -12,31 +12,37 @@ public class CameraController : MonoBehaviour
     //float _angle = 60f; // 원하는 x축 회전 각도
     public float scaleMultiplier;
 
-
     Vector3 _goOriginScale;
     Vector3 _playerOriginScale;
 
-    //float Angle
-    //{
-    //    get { return _angle; }
-    //    set
-    //    {
-    //        if (_angle != value)
-    //        {
-    //            _angle = value;
-    //            AdjustCameraPitch(_angle);
-    //        }
-    //    }
-    //}
+    float _angle;
+    public float Angle
+    {
+        get { return _angle; }
+        set
+        {
+            if (_angle != value)
+            {
+                _angle = value;
 
+                AdjustCameraPitch(_angle, Managers.Game.Monsters);
+                AdjustCameraPitch(_angle, Managers.Game.Items);
+                AdjustCameraPitch(_angle, Managers.Game.Lights);
+                AdjustCameraPitch(_angle, Managers.Game.Player.gameObject);
+            }
+        }
+    }
 
-    //private void Update()
-    //{
-    //    if (Input.GetKeyDown(KeyCode.A))
-    //        Angle--;
-    //    if (Input.GetKeyDown(KeyCode.S))
-    //        Angle++;
-    //}
+    private void Start()
+    {
+        Managers.Game.MainCamera = this.transform.parent.GetComponent<Camera>();
+    }
+
+    public void SetCameraTarget(GameObject target)
+    {
+        GetComponent<CinemachineVirtualCamera>().Follow = target.transform;
+        GetComponent<CinemachineVirtualCamera>().LookAt = target.transform;
+    }
 
     public void AdjustCameraPitch(float angle, GameObject go)
     {

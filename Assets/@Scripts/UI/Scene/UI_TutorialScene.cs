@@ -13,10 +13,11 @@ public class UI_TutorialScene : UI_Scene
 
         #endregion
 
-        Managers.Game.MainCamera = Camera.main;
-
         Managers.Game.CurPlayerData.CurStageid = 0;
         Managers.Game.InstantiateMap(Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonID);
+
+        FadeInandOut(Define.FadeEvent.FadnIn);
+        FadeInandOut(Define.FadeEvent.CenterToRight);
 
         return true;
     }

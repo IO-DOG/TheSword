@@ -4,13 +4,28 @@ using UnityEngine;
 using DG.Tweening;
 using static Define;
 using Unity.Burst.CompilerServices;
+using Unity.VisualScripting;
 
 public class PlayerController : MonoBehaviour
 {
     const float adjustingDis = 0.025f;
     public Grid _grid;
     public GameObject _keyInventory;
-    public float _speed = 10.0f;
+
+    float _speed = 10.0f;
+    public float Speed
+    {
+        get { return _speed; }
+        set
+        {
+            if (_speed != value)
+            {
+                _speed = value;
+                _duration = 1 / _speed;
+            }
+        }
+    }
+
     public bool _isEquiptWeapon = true;
     public bool _isEquiptShield = true;
 
@@ -29,13 +44,15 @@ public class PlayerController : MonoBehaviour
     Vector3 _nextCellPos;
 
     PlayerState _state = PlayerState.IdleDown;
+    public void SetState(PlayerState state)
+    {
+        _state = state;
+    }
 
     void Start()
     {
         Managers.Input.KeyAction -= OnKeyboard;
         Managers.Input.KeyAction += OnKeyboard;
-
-        _duration = 1 / _speed;
 
         _keyInventory = GameObject.Find("KeyInventory");
         _weapon = GameObject.Find("WeaponSlot");
@@ -46,8 +63,8 @@ public class PlayerController : MonoBehaviour
 
     void OnKeyboard()
     {
-        if (Managers.Game.OnBattle == true || Managers.Game.OnConversation == true
-            || Managers.Game.OnLever == true || Managers.Game.OnFade == true)
+        if (Managers.Game.OnBattle || Managers.Game.OnConversation || Managers.Game.OnLever 
+            || Managers.Game.OnFade || Managers.Game.OnDirect)
         {
             return;
         }
@@ -75,6 +92,13 @@ public class PlayerController : MonoBehaviour
         PlayAnimation();
         CheckWeapon();
         CheckShield();
+
+        if (Managers.Game.OnBattle || Managers.Game.OnConversation || Managers.Game.OnLever
+            || Managers.Game.OnFade || Managers.Game.OnDirect)
+        {
+            return;
+        }
+
 
         if (Input.GetKeyUp(KeyCode.DownArrow) || Input.GetKeyUp(KeyCode.LeftArrow) || Input.GetKeyUp(KeyCode.RightArrow))
         {
@@ -177,7 +201,7 @@ public class PlayerController : MonoBehaviour
 
 
     #region Moving
-    void Moving(MoveDir moveDir)
+    public void Moving(MoveDir moveDir)
     {
         if (_isMoving)
             return;

@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class UI_Fade : UI_Base
 {
-    public float _fadeTime = 2f;
+    public float _fadeTime = Define.FADE_DURATION;
     private float _offset = 300;
     void Start()
     {

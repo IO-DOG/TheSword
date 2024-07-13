@@ -10,6 +10,9 @@ public class InputManager
 
     public void OnUpdate()
     {
+        if (Managers.Game.OnDirect == true)
+            return;
+
         if (Input.anyKey == false)
             return;
 

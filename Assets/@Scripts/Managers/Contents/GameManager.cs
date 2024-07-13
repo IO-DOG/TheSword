@@ -20,6 +20,7 @@ public class GameManager
     public bool OnConversation = false;
     public bool OnLever = false;
     public bool OnFade = false;
+    public bool OnDirect = false;
 
     public PlayerController Player; // ������ ������ ����
     public MonsterController Monster; // ������ ������ ����
@@ -38,6 +39,10 @@ public class GameManager
     public Sprite _screenShot2 = null;
 
     public Camera MainCamera;
+    public GameObject Items;
+    public GameObject Monsters;
+    public GameObject Lights;
+
 
     #region CurPlayerData
     public class ContinueData
@@ -444,18 +449,19 @@ public class GameManager
                 }
             }
 
+            Items = items;
+            Monsters = monsters;
+            Lights = lights;
+
             parent.transform.localScale = new Vector3(0.33f, 0.33f, 0.33f);
             items.transform.localPosition = items.transform.localPosition + new Vector3(0f, 1.6f, -0.4f);
             monsters.transform.localPosition = monsters.transform.localPosition + new Vector3(0f, 3f, -1.1f);
-            MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, items);
-            MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, monsters);
-            MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, lights);
+
             count++;
 
             InstantiateLights(key, lights.transform);
         }
-
-        MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, Player.gameObject);
+        MainCamera.GetComponentInChildren<CameraController>().Angle = Define.CAMERA_ANGLE;
     }
 
     void InstantiateLights(string DGName, Transform parent)
@@ -499,6 +505,7 @@ public class GameManager
         }
     }
     #endregion
+
 
     #region ForData
     public Define.ScriptType ScriptType = Define.ScriptType.None;

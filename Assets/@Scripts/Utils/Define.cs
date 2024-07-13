@@ -170,4 +170,6 @@ public class Define
     public static int TUTORIAL_SCRIPT = 11000;
 
     #endregion
+
+    public static float FADE_DURATION = 2f;
 }
