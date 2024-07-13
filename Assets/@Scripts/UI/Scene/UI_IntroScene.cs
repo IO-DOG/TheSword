@@ -3,6 +3,7 @@ using Febucci.UI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UI_IntroScene : UI_Scene
 {
@@ -10,6 +11,7 @@ public class UI_IntroScene : UI_Scene
     enum Images
     {
         SceneImage,
+        //SceneFrameImage,
     }
 
     enum Texts
@@ -33,6 +35,7 @@ public class UI_IntroScene : UI_Scene
         #endregion
 
         GetImage((int)Images.SceneImage).gameObject.SetActive(false);
+        //GetImage((int)Images.SceneFrameImage).gameObject.SetActive(false);
 
         _scripts = Managers.Data.LoadScriptData(Define.INTRO_STORY);
         totalCount = _scripts.Count;
@@ -88,7 +91,8 @@ public class UI_IntroScene : UI_Scene
         }
         if (idx == totalCount - 1)
         {
-            StopCoroutine(CoInvertedImage());
+            StopAllCoroutines();
+            GetText((int)Texts.SceneText).text = "";
             GetImage((int)Images.SceneImage).sprite = ImageList[idx - 1];
             GetImage((int)Images.SceneImage).SetNativeSize();
             GetImage((int)Images.SceneImage).transform.position = new Vector3(960, 1100, 0);
@@ -129,18 +133,47 @@ public class UI_IntroScene : UI_Scene
         yield return null;
     }
 
+    IEnumerator CoFadeOutImage(Image image)
+    {
+        float tick = 0;
+        while (tick < 1)
+        {
+            image.color += new Color(0, 0, 0, -0.1f);
+            tick += 0.1f;
+            yield return new WaitForSeconds(0.1f);
+        }
+        yield return null;
+    }
+
     IEnumerator CoLastIntroImage()
     {
+        //GetImage((int)Images.SceneFrameImage).gameObject.SetActive(true);
         GetImage((int)Images.SceneImage).sprite = Managers.Resource.Load<Sprite>("Intro05");
 
         WaitForSeconds tick = new WaitForSeconds(0.01f);
+
+        //GetImage((int)Images.SceneFrameImage).color = new Color(1, 1, 1, 0);
+        GetImage((int)Images.SceneImage).color = new Color(1, 1, 1, 0);
+        while (true)
+        {
+            if (GetImage((int)Images.SceneImage).color.a > 1)
+                break;
+            //GetImage((int)Images.SceneFrameImage).color += new Color(0, 0, 0, 0.1f);
+            GetImage((int)Images.SceneImage).color += new Color(0, 0, 0, 0.1f);
+            yield return new WaitForSeconds(0.1f);
+        }
+
         while (GetImage((int)Images.SceneImage).transform.position.y > 0)
         {
-            GetImage((int)Images.SceneImage).transform.position -= new Vector3(0, 2f, 0);
+            GetImage((int)Images.SceneImage).transform.position -= new Vector3(0, 1.5f, 0);
             yield return tick;
         }
         yield return null;
 
         StartCoroutine(CoFadeOutImage());
+        //StartCoroutine(CoFadeOutImage(GetImage((int)Images.SceneFrameImage)));
+
+        GetText((int)Texts.SceneText).gameObject.transform.position = Util.WorldToScreenCood(new Vector3(0, 0, 0));
+        GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[totalCount - 1].id);
     }
 }
