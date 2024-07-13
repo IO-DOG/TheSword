@@ -172,4 +172,5 @@ public class Define
     #endregion
 
     public static float FADE_DURATION = 2f;
+    public static float STAGE_NAME_DURATION = 3f;
 }

@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class UI_StageNamePopup : UI_Popup
 {
-    float _duration = 3f;
+    float _duration = Define.STAGE_NAME_DURATION;
 
     enum Images
     {
@@ -41,7 +41,7 @@ public class UI_StageNamePopup : UI_Popup
         GetImage((int)Images.StageNameStart).DOFade(1f, 1f);
         GetImage((int)Images.StageNameLine).DOFade(1f, 1f);
         GetImage((int)Images.StageNameEnd).DOFade(1f, 1f);
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(_duration);
 
         gameObject.GetComponentInChildren<TypewriterByCharacter>().StartDisappearingText();
         GetImage((int)Images.StageNameStart).DOFade(0f, 1f);

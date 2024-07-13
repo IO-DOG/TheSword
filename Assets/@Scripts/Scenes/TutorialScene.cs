@@ -51,7 +51,19 @@ public class TutorialScene : BaseScene
         // Show Stage Name
         Managers.UI.ShowPopupUI<UI_StageNamePopup>();
 
+        yield return new WaitForSeconds(Define.STAGE_NAME_DURATION);
+
+        UI_ConversationPopup conversation = Managers.UI.ShowPopupUI<UI_ConversationPopup>();
+        conversation._scriptCode = Define.TUTORIAL_SCRIPT;
+
         // Reset Player Stat
         Managers.Game.Player.Speed = originalSpeed;
+
+        while (Managers.Game.OnConversation) 
+        {
+            yield return null;
+        }
+
+        Managers.Game.OnDirect = false;
     }
 }

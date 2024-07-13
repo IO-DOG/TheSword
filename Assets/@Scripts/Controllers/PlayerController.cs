@@ -12,7 +12,7 @@ public class PlayerController : MonoBehaviour
     public Grid _grid;
     public GameObject _keyInventory;
 
-    float _speed = 10.0f;
+    float _speed = 5.0f;
     public float Speed
     {
         get { return _speed; }
@@ -238,7 +238,7 @@ public class PlayerController : MonoBehaviour
         }
         // Move
         _cellPos += _nextCellPos;
-        transform.DOMove(_cellPos, _duration).OnComplete(()=> 
+        transform.DOMove(_cellPos, _duration).SetEase(Ease.Linear).OnComplete(()=> 
         {
             _isMoving = false;
         });
