@@ -93,7 +93,6 @@ public class UI_IntroScene : UI_Scene
 
             return;
         }
-        }
         if (idx == totalCount - 1)
         {
             StopAllCoroutines();
