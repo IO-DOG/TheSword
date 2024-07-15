@@ -88,10 +88,8 @@ public class UI_IntroScene : UI_Scene
         }
         if (idx == totalCount - 2)
         {
-            FadeInandOut(Define.FadeEvent.LeftToCenter, Define.Scene.TutorialScene);
+            FadeEffect(Define.FadeEvent.FadeOut, 0.1f);
             StartCoroutine(CoInvertedImage());
-
-            return;
         }
         if (idx == totalCount - 1)
         {

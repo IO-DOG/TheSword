@@ -16,8 +16,8 @@ public class UI_TutorialScene : UI_Scene
         Managers.Game.CurPlayerData.CurStageid = 0;
         Managers.Game.InstantiateMap(Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonID);
 
-        FadeInandOut(Define.FadeEvent.FadnIn);
-        FadeInandOut(Define.FadeEvent.CenterToRight);
+        FadeEffect(Define.FadeEvent.FadnIn, Define.FADE_DURATION);
+        FadeEffect(Define.FadeEvent.CenterToRight, Define.FADE_DURATION);
 
         return true;
     }

@@ -120,22 +120,12 @@ public abstract class UI_Base : MonoBehaviour
     }
 
 
-    public void FadeInandOut(Define.FadeEvent type, Define.Scene scene = Define.Scene.Unknown)
+    public void FadeEffect(Define.FadeEvent type, float duration, Define.Scene scene = Define.Scene.Unknown)
     {
         if (Managers.Game.OnFade == true)
             return;
 
         UI_Fade fade = Managers.Resource.Instantiate("UI_Fade").GetComponent<UI_Fade>();
-        fade.GetSequence(type).OnComplete(() =>
-        {
-            if (scene != Define.Scene.Unknown)
-            {
-                Managers.Scene.LoadScene(scene);
-                //Managers.UI.ShowPopupUI<UI_StageNamePopup>();
-                return;
-            }
-
-            Managers.Resource.Destroy(fade.gameObject);
-        });
+        fade.PlayFade(type, duration, scene);
     }
 }

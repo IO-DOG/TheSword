@@ -110,8 +110,8 @@ public class UI_GameScene : UI_Scene
         if (PlayerPrefs.GetInt("ISOPENPORTAL") == 0)
             GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(false);
 
-        FadeInandOut(Define.FadeEvent.FadnIn);
-        FadeInandOut(Define.FadeEvent.CenterToRight);
+        FadeEffect(Define.FadeEvent.FadnIn, Define.FADE_DURATION);
+        FadeEffect(Define.FadeEvent.CenterToRight, Define.FADE_DURATION);
 
         return true;
     }
