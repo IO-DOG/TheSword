@@ -90,6 +90,7 @@ public class DecoJSJEditor : Editor
 
             GameObject parent = new GameObject() { name = key };
             GameObject tiles = new GameObject() { name = "Tiles" };
+            GameObject walls = new GameObject() { name = "Walls" };
             GameObject items = new GameObject() { name = "Items" };
             GameObject monsters = new GameObject() { name = "Monsters" };
             GameObject bossMonsters = new GameObject() { name = "BossMonsters" };
@@ -99,6 +100,7 @@ public class DecoJSJEditor : Editor
             parent.transform.localPosition += new Vector3(count * 100, 0, 0);
             parent.transform.parent = map.transform;
             tiles.transform.parent = parent.transform;
+            walls.transform.parent = parent.transform;
             items.transform.parent = parent.transform;
             monsters.transform.parent = parent.transform;
             bossMonsters.transform.parent = parent.transform;
@@ -245,7 +247,7 @@ public class DecoJSJEditor : Editor
                         GameObject go = Instantiate(Tilemap[1], tiles.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
 
-                        GameObject wall = Instantiate(Tilemap[tile.PrefabID + 20], tiles.transform);
+                        GameObject wall = Instantiate(Tilemap[tile.PrefabID + 20], walls.transform);
                         wall.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
                     }
                     else if (tile.TileType == (int)Define.TileType.Void)
