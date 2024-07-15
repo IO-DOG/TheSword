@@ -59,11 +59,20 @@ public class TutorialScene : BaseScene
         // Reset Player Stat
         Managers.Game.Player.Speed = originalSpeed;
 
-        while (Managers.Game.OnConversation) 
+        bool prevConvsersationState = Managers.Game.OnConversation;
+
+        while (true) 
         {
+            bool currentConversationState = Managers.Game.OnConversation;
+            if (prevConvsersationState && !currentConversationState)
+            {
+                Managers.Game.OnDirect = false;
+                Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetCameraTarget(Managers.Game.Player.gameObject);
+            }
+
+            prevConvsersationState = currentConversationState;
+
             yield return null;
         }
-
-        Managers.Game.OnDirect = false;
     }
 }
