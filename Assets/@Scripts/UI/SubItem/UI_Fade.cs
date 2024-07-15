@@ -66,7 +66,7 @@ public class UI_Fade : UI_Base
                     gameObject.GetComponentInChildren<Image>().material = null;
                     gameObject.GetComponentInChildren<Image>().gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, 0);
 
-                    gameObject.GetComponentInChildren<Image>().DOFade(1, 0);
+                    gameObject.GetComponentInChildren<Image>().color = new Color(0, 0, 0, 1);
                     Tween fade = gameObject.GetComponentInChildren<Image>().DOFade(0, duration);
 
                     Sequence seq = DOTween.Sequence();
@@ -80,7 +80,7 @@ public class UI_Fade : UI_Base
                     gameObject.GetComponentInChildren<Image>().material = null;
                     gameObject.GetComponentInChildren<Image>().gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, 0);
 
-                    gameObject.GetComponentInChildren<Image>().DOFade(0, 0);
+                    gameObject.GetComponentInChildren<Image>().color = new Color(0, 0, 0, 0);
                     Tween fade = gameObject.GetComponentInChildren<Image>().DOFade(1, duration);
 
                     Sequence seq = DOTween.Sequence();

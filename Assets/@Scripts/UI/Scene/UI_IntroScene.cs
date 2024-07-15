@@ -88,7 +88,6 @@ public class UI_IntroScene : UI_Scene
         }
         if (idx == totalCount - 2)
         {
-            FadeEffect(Define.FadeEvent.FadeOut, 0.1f);
             StartCoroutine(CoInvertedImage());
         }
         if (idx == totalCount - 1)
@@ -110,7 +109,7 @@ public class UI_IntroScene : UI_Scene
     {
         WaitForSeconds delay = new WaitForSeconds(1f);
         GetImage((int)Images.SceneImage).sprite = Managers.Resource.Load<Sprite>("Intro03");
-        StartCoroutine(CoFadeOutImage());
+        StartCoroutine(CoFadeOutImage(GetImage((int)Images.SceneImage)));
         yield return delay;
         GetImage((int)Images.SceneImage).sprite = Managers.Resource.Load<Sprite>("Intro04");
         float tick = 0;
@@ -174,6 +173,7 @@ public class UI_IntroScene : UI_Scene
 
         StartCoroutine(CoFadeOutImage());
         //StartCoroutine(CoFadeOutImage(GetImage((int)Images.SceneFrameImage)));
+
 
         GetText((int)Texts.SceneText).gameObject.transform.position = Util.WorldToScreenCood(new Vector3(0, 0, 0));
         GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[totalCount - 1].id);
