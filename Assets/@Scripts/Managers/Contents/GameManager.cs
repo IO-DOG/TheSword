@@ -39,10 +39,10 @@ public class GameManager
     public Sprite _screenShot2 = null;
 
     public Camera MainCamera;
-    public GameObject Items;
+    public GameObject Map;
     public GameObject Monsters;
+    public GameObject Items;
     public GameObject Lights;
-
 
     #region CurPlayerData
     public class ContinueData
@@ -256,44 +256,30 @@ public class GameManager
     public void InstantiateMap(string mapName)
     {
         int count = 0;
-        mapName = mapName.Substring(0, mapName.LastIndexOf('_'));
 
-        GameObject map = GameObject.Find("Map");
+        GameObject map = Managers.Resource.Instantiate(mapName);
+        GameObject items = Util.FindChildByName(map.transform, "Items").gameObject;
+        GameObject monsters = Util.FindChildByName(map.transform, "Monsters").gameObject;
+        GameObject bossMonsters = Util.FindChildByName(map.transform, "BossMonsters").gameObject;
 
         foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
         {
-            string key = entry.Key.Substring(0, entry.Key.LastIndexOf('_'));
             Data.MapData mapData = entry.Value;
 
-            if (!key.Contains(mapName))
+            if (!entry.Key.Contains(mapName))
                 continue;
 
-            GameObject parent = new GameObject() { name = key };
-            GameObject tiles = new GameObject() { name = "Tiles" };
-            GameObject items = new GameObject() { name = "Items" };
-            GameObject monsters = new GameObject() { name = "Monsters" };
-            GameObject bossMonsters = new GameObject() { name = "BossMonsters" };
-            GameObject lights = new GameObject() { name = "Deco" };
-            GameObject pillars = new GameObject() { name = "Pillars" };
+            GameObject parent = new GameObject() { name = "Map" };
 
             parent.transform.localPosition += new Vector3(count * 100, 0, 0);
-            parent.transform.parent = map.transform;
-            tiles.transform.parent = parent.transform;
-            items.transform.parent = parent.transform;
-            monsters.transform.parent = parent.transform;
-            bossMonsters.transform.parent = parent.transform;
-            lights.transform.parent = parent.transform;
-            pillars.transform.parent = parent.transform;
+            map.transform.parent = parent.transform;
 
             foreach (Data.TileData tile in mapData.Tiles)
             {
                 if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
                 {
-                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{citemTile.PrefabID}", tiles.transform);
-                    go.transform.position = new Vector3(citemTile.Position.X, citemTile.Position.Y, citemTile.Position.Z);
-
                     GameObject item = Managers.Resource.Instantiate("ConsumableItem", items.transform);
-                    item.transform.position = go.transform.position;
+                    item.transform.localPosition = new Vector3 (citemTile.Position.X, citemTile.Position.Y, citemTile.Position.Z);
                     item.GetComponent<ConsumableItem>().id = citemTile.Index;
                     item.name = $"CItem{citemTile.TotalCount}";
                     item.GetComponent<ConsumableItem>()._itemIndex_forActive = citemTile.TotalCount;
@@ -303,11 +289,8 @@ public class GameManager
                 }
                 else if (tile is Occupied eitemTile && eitemTile.Type == (int)Define.OccupiedType.EItem)
                 {
-                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{eitemTile.PrefabID}", tiles.transform);
-                    go.transform.position = new Vector3(eitemTile.Position.X, eitemTile.Position.Y, eitemTile.Position.Z);
-
                     GameObject item = Managers.Resource.Instantiate("EquipItem", items.transform);
-                    item.transform.position = go.transform.position;
+                    item.transform.localPosition = new Vector3(eitemTile.Position.X, eitemTile.Position.Y, eitemTile.Position.Z);
                     item.GetComponent<Equip>().Id = eitemTile.Index;
                     item.name = $"EItem{eitemTile.TotalCount}";
                     item.GetComponent<Equip>()._itemIndex_forActive = eitemTile.TotalCount;
@@ -317,11 +300,8 @@ public class GameManager
                 }
                 else if (tile is Occupied monsterTile && monsterTile.Type == (int)Define.OccupiedType.Monster)
                 {
-                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{monsterTile.PrefabID}", tiles.transform);
-                    go.transform.position = new Vector3(monsterTile.Position.X, monsterTile.Position.Y, monsterTile.Position.Z);
-
                     GameObject monster = Managers.Resource.Instantiate("Monster", monsters.transform);
-                    monster.transform.position = go.transform.position;
+                    monster.transform.localPosition = new Vector3(monsterTile.Position.X, monsterTile.Position.Y, monsterTile.Position.Z);
                     monster.GetComponent<MonsterController>().id = monsterTile.Index;
                     monster.name = $"monster{monsterTile.TotalCount}";
                     monster.GetComponent<MonsterController>()._monsterIndex_forActive = monsterTile.TotalCount;
@@ -331,11 +311,8 @@ public class GameManager
                 }
                 else if (tile is Occupied bossMonsterTile && bossMonsterTile.Type == (int)Define.OccupiedType.Boss)
                 {
-                    GameObject go = Managers.Resource.Instantiate($"Tilemap_{bossMonsterTile.PrefabID}", tiles.transform);
-                    go.transform.position = new Vector3(bossMonsterTile.Position.X, bossMonsterTile.Position.Y, bossMonsterTile.Position.Z);
-
                     GameObject boss = Managers.Resource.Instantiate("BossMonster", bossMonsters.transform);
-                    boss.transform.position = go.transform.position;
+                    boss.transform.localPosition = new Vector3(bossMonsterTile.Position.X, bossMonsterTile.Position.Y, bossMonsterTile.Position.Z);
                     boss.GetComponent<BossMonsterController>().id = bossMonsterTile.Index;
                     boss.name = $"bossMonster{bossMonsterTile.TotalCount}";
                     boss.GetComponent<BossMonsterController>()._monsterIndex_forActive = bossMonsterTile.TotalCount;
@@ -354,112 +331,28 @@ public class GameManager
                     if (bossMonsterTile.IsActive == false)
                         boss.SetActive(false);
                 }
-                else if (tile is DoorData doorTile)
-                {
-                    GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
-                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-
-                    GameObject door = Managers.Resource.Instantiate($"Tilemap_{doorTile.PrefabID}", tiles.transform);
-                    door.transform.position = new Vector3(doorTile.Position.X, doorTile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
-                    door.name = $"door{doorTile.TotalCount}";
-                    door.GetComponentInChildren<Door>()._doorIndex_forActive = doorTile.TotalCount;
-
-                    if (doorTile.IsActive == false)
-                        door.SetActive(false);
-                }
-                else if (tile is StairsData stairsTile)
-                {
-                    GameObject stairs = Managers.Resource.Instantiate($"Tilemap_{stairsTile.PrefabID}", tiles.transform);
-                    stairs.name = $"stairs{stairsTile.Floor}";
-                    stairs.GetComponentInChildren<PortalController>()._floor = stairsTile.Floor;
-                    stairs.GetComponentInChildren<PortalController>()._stairs = stairsTile.StairsType;
-
-                    if (stairsTile.StairsType == (int)Define.Stairs.Downstairs)
-                    {
-                        stairs.transform.position = new Vector3(stairsTile.Position.X, stairsTile.Position.Y - Define.TILE_SIZE * 1.5f, stairsTile.Position.Z);
-                    }
-                    else
-                    {
-                        GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
-                        go.transform.position = new Vector3(stairsTile.Position.X, stairsTile.Position.Y, stairsTile.Position.Z);
-
-                        stairs.transform.position = new Vector3(stairsTile.Position.X, stairsTile.Position.Y - Define.TILE_SIZE / 2, stairsTile.Position.Z);
-                    }
-
-                }
-                else if (tile is LeverData leverTile)
-                {
-                    GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
-                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-
-                    GameObject lever = Managers.Resource.Instantiate($"Tilemap_{leverTile.PrefabID}", tiles.transform);
-                    lever.name = $"Lever";
-                    lever.transform.position = new Vector3(leverTile.Position.X, leverTile.Position.Y, leverTile.Position.Z);
-
-                    if (leverTile.IsActive == true)
-                    {
-                        lever.GetComponentInChildren<Lever>()._IsActive = true;
-                        lever.GetComponentInChildren<Lever>().SetActiveLight();
-                        lever.GetComponentInChildren<Lever>().Play(0.0f);
-                    }
-                }
-                else if (tile is PillarData pillarTile)
-                {
-                    GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
-                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-
-                    GameObject pillar = Managers.Resource.Instantiate($"Tilemap_{pillarTile.PrefabID}", pillars.transform);
-                    pillar.name = $"pillar{pillarTile.TotalCount}";
-                    pillar.transform.position = new Vector3(pillarTile.Position.X, pillarTile.Position.Y - Define.TILE_SIZE / 2, pillarTile.Position.Z);
-                    pillar.GetComponentInChildren<Pillar>()._pillarIndex_forActive = pillarTile.TotalCount;
-
-                    if (pillarTile.IsActive == false)
-                    {
-                        pillar.transform.GetChild(1).gameObject.SetActive(false);
-                    }
-                }
                 else
                 {
-                    if(tile.TileType == (int)Define.TileType.Wall)
+                    if (tile.PrefabID == (int)Define.TileType.SpawnPoint)
                     {
-                        GameObject go = Managers.Resource.Instantiate($"Tilemap_1", tiles.transform);
-                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-
-                        GameObject wall = Managers.Resource.Instantiate($"Tilemap_C{mapName}_W{tile.PrefabID.ToString("D2")}", tiles.transform);
-                        wall.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
-                    }
-                    else if(tile.TileType == (int)Define.TileType.Void)
-                    {
-                        GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", tiles.transform);
-                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
-                    }
-                    else if (tile.PrefabID == (int)Define.TileType.Floor)
-                    {
-                        GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", tiles.transform);
-                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-                    }
-                    else if (tile.PrefabID == (int)Define.TileType.SpawnPoint)
-                    {
-                        GameObject go = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", tiles.transform);
-                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-
-                        Managers.Game.Player.transform.position = new Vector3(go.transform.position.x * 0.33f, 2.6f, go.transform.position.z * 0.33f);
+                        Managers.Game.Player.transform.position = new Vector3(tile.Position.X * 0.33f, 2.6f, tile.Position.Z * 0.33f);
                         Managers.Game.Player._cellPos = Managers.Game.Player.transform.position;
                     }
                 }
             }
 
+            
+
             Items = items;
             Monsters = monsters;
-            Lights = lights;
+            //Lights = lights;
 
-            parent.transform.localScale = new Vector3(0.33f, 0.33f, 0.33f);
             items.transform.localPosition = items.transform.localPosition + new Vector3(0f, 1.6f, -0.4f);
             monsters.transform.localPosition = monsters.transform.localPosition + new Vector3(0f, 3f, -1.1f);
 
             count++;
 
-            InstantiateLights(key, lights.transform);
+            //InstantiateLights(key, lights.transform);
         }
         MainCamera.GetComponentInChildren<CameraController>().Angle = Define.CAMERA_ANGLE;
     }

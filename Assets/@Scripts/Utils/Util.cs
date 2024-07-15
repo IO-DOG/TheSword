@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static Define;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 using Random = UnityEngine.Random;
 using Transform = UnityEngine.Transform;
 
@@ -55,6 +56,19 @@ public static class Util
 
         return null;
     }
+
+    public static Transform FindChildByName(Transform transform, string childName)
+    {
+        foreach (Transform child in transform)
+        {
+            if (child.name == childName)
+            {
+                return child;
+            }
+        }
+        return null;
+    }
+
 
     public static Vector2 RandomPointInAnnulus(Vector2 origin, float minRadius = 6, float maxRadius = 12)
     {

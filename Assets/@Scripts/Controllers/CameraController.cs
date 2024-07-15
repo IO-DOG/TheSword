@@ -27,7 +27,7 @@ public class CameraController : MonoBehaviour
 
                 AdjustCameraPitch(_angle, Managers.Game.Monsters);
                 AdjustCameraPitch(_angle, Managers.Game.Items);
-                AdjustCameraPitch(_angle, Managers.Game.Lights);
+                //AdjustCameraPitch(_angle, Managers.Game.Lights);
                 AdjustCameraPitch(_angle, Managers.Game.Player.gameObject);
             }
         }
