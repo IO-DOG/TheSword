@@ -306,6 +306,7 @@ namespace Data
         public Define.DungeonType Type;
         public string UpStage;
         public string DownStage;
+        public string BossRoom;
         public int ATK;
         public int DEF;
         public int EXP;

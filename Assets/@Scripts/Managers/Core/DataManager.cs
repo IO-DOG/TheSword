@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using static Define;
 
 public interface ILoader<Key, Value>
 {
@@ -68,6 +69,34 @@ public class DataManager
         }
 
         return scripts;
+    }
+
+    public int FindKeyByValue_StageInfoData(string targetValue)
+    {
+        foreach(KeyValuePair<int, Data.StageInfoData> kvp in Managers.Data.StageInfoDic)
+        {
+            if (kvp.Value.DungeonID == targetValue)
+            {
+                return kvp.Key;
+            }
+        }
+
+        return -1;
+    }
+
+    public int GetChapterCount(string chpater)
+    {
+        int count = 0;
+
+        foreach (KeyValuePair<int, Data.StageInfoData> kvp in Managers.Data.StageInfoDic)
+        {
+            if (kvp.Value.DungeonID.StartsWith(chpater))
+            {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     #region Active Off

@@ -305,7 +305,7 @@ public class PlayerController : MonoBehaviour
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Portal)
             {
                 somethingExist = true;
-                hit.collider.gameObject.GetComponentInChildren<PortalController>().Stairs();
+                hit.collider.gameObject.GetComponentInChildren<PortalController>().UsePortal();
                 _cellPos = transform.position;
             }
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Lever)
