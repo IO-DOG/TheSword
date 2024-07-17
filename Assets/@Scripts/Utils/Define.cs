@@ -153,6 +153,10 @@ public class Define
     }
     #endregion
 
+    #region BossMonsterId
+    public const int KingSlime = 5;
+    #endregion
+
     public static string MainUI_Inventory_A = "MainUI_Inventory_A.sprite";
     public static string MainUI_Inventory_B = "MainUI_Inventory_B.sprite";
     public static string MainUI_Option_A = "MainUI_Option_A.sprite";

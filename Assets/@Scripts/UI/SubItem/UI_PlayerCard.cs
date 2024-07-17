@@ -171,7 +171,7 @@ public class UI_PlayerCard : UI_Base
                 string name = Managers.Data.MonsterDic[id].Name;
                 switch (id)
                 {
-                    case 8:
+                    case Define.KingSlime:
                         BlackSlimeController blackSlimeController = Managers.Game.Monster.gameObject.GetOrAddComponent<BlackSlimeController>();
                         blackSlimeController.Dead();
                         break;
