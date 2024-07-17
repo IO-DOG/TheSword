@@ -21,4 +21,30 @@ public class UI_TutorialScene : UI_Scene
 
         return true;
     }
+
+    private void Update()
+    {
+        #region for_test
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            Managers.Game.CurPlayerData.CurExp += 10;
+        }
+        if (Input.GetKeyDown(KeyCode.F2))
+        {
+            Managers.Game.CurPlayerData.Attack += 10;
+        }
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            Managers.Game.SaveGame();
+        }
+        if (Input.GetKeyDown(KeyCode.F4))
+        {
+            Managers.Game.LoadGame();
+        }
+        if (Input.GetKeyDown(KeyCode.F5))
+        {
+            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(0);
+        }
+        #endregion
+    }
 }
