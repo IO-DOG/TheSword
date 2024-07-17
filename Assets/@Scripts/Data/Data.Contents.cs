@@ -57,8 +57,7 @@ namespace Data
         public int RewardItem { get; set; }
         public string IdleAnimStr { get; set; }
         public string AttackAnimStr { get; set; }
-        public string DefenceAnimStr { get; set; }
-        public string HitAnimStr { get; set; }
+        public string ScriptId { get; set; }
     }
 
     [Serializable]
@@ -251,6 +250,7 @@ namespace Data
         public float MSPD { get; set; }
         public int AbilityId { get; set; }
         public string ImageName { get; set; }
+        public string AttackFX { get; set; }
         public int NameId { get; set; }
         public int DescId { get; set; }
     }

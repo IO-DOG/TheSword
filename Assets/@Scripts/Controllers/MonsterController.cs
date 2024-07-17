@@ -30,8 +30,7 @@ public class MonsterController : MonoBehaviour
             Managers.Game.MonsterData.RewardItem = Managers.Data.MonsterDic[id].RewardItem;
             Managers.Game.MonsterData.IdleAnimStr = Managers.Data.MonsterDic[id].IdleAnimStr;
             Managers.Game.MonsterData.AttackAnimStr = Managers.Data.MonsterDic[id].AttackAnimStr;
-            Managers.Game.MonsterData.DefenceAnimStr = Managers.Data.MonsterDic[id].DefenceAnimStr;
-            Managers.Game.MonsterData.HitAnimStr = Managers.Data.MonsterDic[id].HitAnimStr;
+            Managers.Game.MonsterData.ScriptId = Managers.Data.MonsterDic[id].ScriptId;
             Managers.Game.MonsterData.IsDefence = false;
             Managers.Game.MonsterData.IsActiveIndex = _monsterIndex_forActive;
             //Managers.Game.MonsterData.Image = Managers.Data.MonsterDic[id].Image;

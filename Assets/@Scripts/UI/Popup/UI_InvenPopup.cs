@@ -120,9 +120,9 @@ public class UI_InvenPopup : UI_Popup
         CRIInfoText,
         CRIATKInfoText,
         LVInfoText,
-        ATKSPEEDText,
-        DEFSPEEDText,
-        MOVESPEEDText,
+        ATKSPEEDInfoText,
+        DEFSPEEDInfoText,
+        MOVESPEEDInfoText,
     }
 
     enum GameObjects
@@ -166,7 +166,16 @@ public class UI_InvenPopup : UI_Popup
         GetImage((int)Images.EquipList8).gameObject.BindEvent(() => { OnClickEquipList(8); });
         GetImage((int)Images.EquipList9).gameObject.BindEvent(() => { OnClickEquipList(9); });
         GetImage((int)Images.EquipList10).gameObject.BindEvent(() => { OnClickEquipList(10); });
-
+        int i = 0;
+        GetText((int)Texts.ATKInfoText).text = Managers.GetString(Define.STAT_INFO_SCRIPT + i++);
+        GetText((int)Texts.DEFInfoText).text = Managers.GetString(Define.STAT_INFO_SCRIPT + i++);
+        GetText((int)Texts.HPInfoText).text = Managers.GetString(Define.STAT_INFO_SCRIPT + i++);
+        GetText((int)Texts.CRIInfoText).text = Managers.GetString(Define.STAT_INFO_SCRIPT + i++);
+        GetText((int)Texts.CRIATKInfoText).text = Managers.GetString(Define.STAT_INFO_SCRIPT + i++);
+        GetText((int)Texts.LVInfoText).text = Managers.GetString(Define.STAT_INFO_SCRIPT + i++);
+        GetText((int)Texts.ATKSPEEDInfoText).text = Managers.GetString(Define.STAT_INFO_SCRIPT + i++);
+        GetText((int)Texts.DEFSPEEDInfoText).text = Managers.GetString(Define.STAT_INFO_SCRIPT + i++);
+        GetText((int)Texts.MOVESPEEDInfoText).text = Managers.GetString(Define.STAT_INFO_SCRIPT + i++);
 
         OnClickInventory_MyInfo_On();
         SortInven();
@@ -517,11 +526,13 @@ public class UI_InvenPopup : UI_Popup
 
         // todo for scriptDic
         //GetText((int)Texts.EquipName).text = Managers.Data.EquipDic[equipId].NameId.ToString();
-        GetText((int)Texts.EquipName).text = Managers.Data.EquipDic[equipId].NameId.ToString();
+        int nameId = Managers.Data.EquipDic[equipId].NameId;
+        GetText((int)Texts.EquipName).text = Managers.GetString(nameId);
 
         // todo for scriptDic
         //GetText((int)Texts.InfoText).text = Managers.Data.EquipDic[equipId].DescId.ToString();
-        GetText((int)Texts.InfoText).text = Managers.Data.EquipDic[equipId].DescId.ToString();
+        int descId = Managers.Data.EquipDic[equipId].DescId;
+        GetText((int)Texts.InfoText).text = Managers.GetString(descId);
 
         GetObject((int)GameObjects.StatusInfoList).gameObject.SetActive(true);
 

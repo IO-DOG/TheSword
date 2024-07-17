@@ -117,8 +117,7 @@ public class GameManager
         public int RewardItem { get; set; }
         public string IdleAnimStr { get; set; }
         public string AttackAnimStr { get; set; }
-        public string DefenceAnimStr { get; set; }
-        public string HitAnimStr { get; set; }
+        public string ScriptId { get; set; }
         public bool IsDefence { get; set; }
         public int IsActiveIndex { get; set; }
         public int DamagedCount { get; set; }

@@ -187,8 +187,7 @@ public class DataTransformer : EditorWindow
             cd.RewardItem = ConvertValue<int>(row[i++]);
             cd.IdleAnimStr = ConvertValue<string>(row[i++]);
             cd.AttackAnimStr = ConvertValue<string>(row[i++]);
-            cd.DefenceAnimStr = ConvertValue<string>(row[i++]);
-            cd.HitAnimStr = ConvertValue<string>(row[i++]);
+            cd.ScriptId = ConvertValue<string>(row[i++]);
             loader.creatures.Add(cd);
         }
 
@@ -578,6 +577,7 @@ public class DataTransformer : EditorWindow
             ed.MSPD = ConvertValue<float>(row[i++]);
             ed.AbilityId = ConvertValue<int>(row[i++]);
             ed.ImageName = ConvertValue<string>(row[i++]);
+            ed.AttackFX = ConvertValue<string>(row[i++]);
             ed.NameId = ConvertValue<int>(row[i++]);
             ed.DescId = ConvertValue<int>(row[i++]);
             loader.equips.Add(ed);
