@@ -42,7 +42,8 @@ public class BlackSlimeController : MonoBehaviour
         for (int i = 0; i < s.Count; i++)
         {
             int idx = s[i];
-            Vector3 vector = new Vector3(pos.x + dx[idx] * size, pos.y + dy[idx] * size, pos.z);
+            Vector3 vector = new Vector3(pos.x + dx[idx] * size, pos.y, pos.z + dy[idx] * size);
+            Debug.Log($"vector : {vector.x}, {vector.y}, {vector.z}");
             // todo
             // vector 위치에 분열된 슬라임 생성
 
@@ -50,6 +51,7 @@ public class BlackSlimeController : MonoBehaviour
             GameObject monsters = GameObject.Find("Monsters");
             GameObject monster = Managers.Resource.Instantiate("Monster", monsters.transform);
             monster.GetOrAddComponent<MonsterController>().id = 1;
+            monster.transform.position = vector;
             monster.name = $"black slime split monster";
         }
     }

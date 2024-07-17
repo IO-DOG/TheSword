@@ -129,15 +129,6 @@ public class UI_GameScene : UI_Scene
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F1))
-        {
-            Managers.Game.CurPlayerData.CurExp += 10;
-        }
-
-        if (Input.GetKeyDown(KeyCode.F2))
-        {
-            Managers.Game.CurPlayerData.Attack += 10;
-        }
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -163,15 +154,23 @@ public class UI_GameScene : UI_Scene
         }
 
         #region for_test
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            Managers.Game.CurPlayerData.CurExp += 10;
+        }
         if (Input.GetKeyDown(KeyCode.F2))
         {
-            Managers.Game.SaveGame();
+            Managers.Game.CurPlayerData.Attack += 10;
         }
         if (Input.GetKeyDown(KeyCode.F3))
         {
-            Managers.Game.LoadGame();
+            Managers.Game.SaveGame();
         }
         if (Input.GetKeyDown(KeyCode.F4))
+        {
+            Managers.Game.LoadGame();
+        }
+        if (Input.GetKeyDown(KeyCode.F5))
         {
             Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(0);
         }
