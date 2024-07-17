@@ -21,15 +21,11 @@ public class CameraController : MonoBehaviour
         get { return _angle; }
         set
         {
-            if (_angle != value)
-            {
-                _angle = value;
+            _angle = value;
 
-                AdjustCameraPitch(_angle, Managers.Game.Monsters);
-                AdjustCameraPitch(_angle, Managers.Game.Items);
-                //AdjustCameraPitch(_angle, Managers.Game.Lights);
-                AdjustCameraPitch(_angle, Managers.Game.Player.gameObject);
-            }
+            AdjustCameraPitch(_angle, Managers.Game.Monsters);
+            AdjustCameraPitch(_angle, Managers.Game.Items);
+            //AdjustCameraPitch(_angle, Managers.Game.Lights);
         }
     }
 

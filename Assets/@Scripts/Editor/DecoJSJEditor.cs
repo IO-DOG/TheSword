@@ -36,7 +36,10 @@ public class DecoJSJEditor : Editor
         Tilemap[11]= Resources.Load("DecoTiles/Tilemap_11") as GameObject;
         Tilemap[12] = Resources.Load("DecoTiles/Tilemap_12") as GameObject;
         Tilemap[13] = Resources.Load("DecoTiles/Tilemap_13") as GameObject;
+        Tilemap[14] = Resources.Load("DecoTiles/Tilemap_14") as GameObject;
+        Tilemap[15] = Resources.Load("DecoTiles/Tilemap_15") as GameObject;
 
+        Tilemap[20] = Resources.Load("DecoTiles/Dungeon_00/Tilemap_C00_W00") as GameObject;
         Tilemap[21] = Resources.Load("DecoTiles/Dungeon_00/Tilemap_C00_W01") as GameObject;
         Tilemap[22] = Resources.Load("DecoTiles/Dungeon_00/Tilemap_C00_W02") as GameObject;
         Tilemap[23] = Resources.Load("DecoTiles/Dungeon_00/Tilemap_C00_W03") as GameObject;
@@ -193,10 +196,13 @@ public class DecoJSJEditor : Editor
                 {
                     GameObject stairs = Instantiate(Tilemap[stairsTile.PrefabID], tiles.transform);
                     stairs.name = $"stairs{stairsTile.Floor}";
-                    stairs.GetComponentInChildren<PortalController>()._floor = stairsTile.Floor;
                     stairs.GetComponentInChildren<PortalController>()._stairs = stairsTile.StairsType;
 
-                    if (stairsTile.StairsType == (int)Define.Stairs.Downstairs)
+                    if(stairsTile.PrefabID == 14 || stairsTile.PrefabID == 15)
+                    {
+                        stairs.transform.position = new Vector3(stairsTile.Position.X, stairsTile.Position.Y, stairsTile.Position.Z);
+                    }
+                    else if (stairsTile.StairsType == (int)Define.Stairs.Downstairs)
                     {
                         stairs.transform.position = new Vector3(stairsTile.Position.X, stairsTile.Position.Y - Define.TILE_SIZE * 1.5f, stairsTile.Position.Z);
                     }

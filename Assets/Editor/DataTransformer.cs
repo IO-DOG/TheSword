@@ -239,7 +239,7 @@ public class DataTransformer : EditorWindow
     {
         MapDataLoader loader = new MapDataLoader();
         DirectoryInfo di = new DirectoryInfo($"{Application.dataPath}/@Resources/Data/Excel/");
-        int floorIndex = 1;
+        //int floorIndex = 1;
 
         #region Excel
         foreach (FileInfo file in di.GetFiles())
@@ -410,9 +410,9 @@ public class DataTransformer : EditorWindow
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = (int)Define.TileType.Stairs,
+                                    TileType = (int)Define.TileType.Portal,
 
-                                    Floor = floorIndex,
+                                    //Floor = floorIndex,
                                     StairsType = (int)Define.Stairs.Upstairs,
                                 };
                                 tiles.Add(tile);
@@ -428,9 +428,9 @@ public class DataTransformer : EditorWindow
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = (int)Define.TileType.Stairs,
+                                    TileType = (int)Define.TileType.Portal,
 
-                                    Floor = floorIndex,
+                                    //Floor = floorIndex,
                                     StairsType = (int)Define.Stairs.Downstairs,
                                 };
                                 tiles.Add(tile);
@@ -469,6 +469,38 @@ public class DataTransformer : EditorWindow
                                 };
                                 tiles.Add(tile);
                             }
+                            else if (prefabID == 14)
+                            {
+                                Data.StairsData tile = new Data.StairsData
+                                {
+                                    PrefabID = prefabID,
+                                    Position = new Data.MyVector3
+                                    {
+                                        X = xPos,
+                                        Y = 0,
+                                        Z = zPos,
+                                    },
+                                    TileType = (int)Define.TileType.Portal,
+                                    StairsType = (int)Define.Stairs.Upstairs,
+                                };
+                                tiles.Add(tile);
+                            }
+                            else if (prefabID == 15)
+                            {
+                                Data.StairsData tile = new Data.StairsData
+                                {
+                                    PrefabID = prefabID,
+                                    Position = new Data.MyVector3
+                                    {
+                                        X = xPos,
+                                        Y = 0,
+                                        Z = zPos,
+                                    },
+                                    TileType = (int)Define.TileType.Portal,
+                                    StairsType = (int)Define.Stairs.Downstairs,
+                                };
+                                tiles.Add(tile);
+                            }
                             else
                             {
                                 Data.TileData tile = new Data.TileData
@@ -494,7 +526,7 @@ public class DataTransformer : EditorWindow
                     Tiles = tiles,
                 };
                 loader.maps.Add(mapData);
-                floorIndex++;
+                //floorIndex++;
             }
         }
         #endregion
@@ -652,6 +684,7 @@ public class DataTransformer : EditorWindow
             sd.Type = ConvertValue<Define.DungeonType>(row[i++]);
             sd.UpStage = ConvertValue<string>(row[i++]);
             sd.DownStage = ConvertValue<string>(row[i++]);
+            sd.BossRoom = ConvertValue<string>(row[i++]);
             sd.ATK = ConvertValue<int>(row[i++]);
             sd.DEF = ConvertValue<int>(row[i++]);
             sd.EXP = ConvertValue<int>(row[i++]);

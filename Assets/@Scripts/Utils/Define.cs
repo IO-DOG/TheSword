@@ -16,9 +16,11 @@ public class Define
     }
     public enum StageName
     {
-        None,
+        None = -1,
         Dungeon_00_000,
         Dungeon_00_001,
+        Dungeon_00_002,
+        Dungeon_00_003,
     }
 
 
@@ -110,7 +112,7 @@ public class Define
         Floor,
         Wall,
         Door,
-        Stairs,
+        Portal,
         SpawnPoint = 11,
         Lever = 12,
         Pillar = 13,

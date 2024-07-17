@@ -69,7 +69,6 @@ public static class Util
         return null;
     }
 
-
     public static Vector2 RandomPointInAnnulus(Vector2 origin, float minRadius = 6, float maxRadius = 12)
     {
         float randomDist = UnityEngine.Random.Range(minRadius, maxRadius);

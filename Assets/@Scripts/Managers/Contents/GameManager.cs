@@ -13,6 +13,7 @@ using UnityEngine;
 using UnityEngine.Playables;
 using static Define;
 using static UnityEditor.Progress;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class GameManager
 {
@@ -252,25 +253,47 @@ public class GameManager
 
     #region Map Instantiate
 
-    public void InstantiateMap(string mapName)
+
+    string GetBossRoomName(string chapter)
+    {
+        string bossRoomName = "";
+        foreach (KeyValuePair<int, Data.StageInfoData> entry in Managers.Data.StageInfoDic)
+        {
+            if (entry.Key == Managers.Data.GetChapterCount(chapter) - 1)
+                break;
+
+            if(entry.Value.BossRoom != "-")
+                bossRoomName = entry.Value.BossRoom;
+        }
+        return bossRoomName;
+    }
+
+    public void InstantiateMap(int key)
     {
         int count = 0;
-
-        GameObject map = Managers.Resource.Instantiate(mapName);
-        GameObject items = Util.FindChildByName(map.transform, "Items").gameObject;
-        GameObject monsters = Util.FindChildByName(map.transform, "Monsters").gameObject;
-        GameObject bossMonsters = Util.FindChildByName(map.transform, "BossMonsters").gameObject;
+        string chapter = Managers.Data.StageInfoDic[key].DungeonID.Substring(0, 2) + "_";
+        int maxCount = Managers.Data.GetChapterCount(chapter);
+        bool isSpawned = false;
 
         foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
         {
             Data.MapData mapData = entry.Value;
+            string stageName = entry.Key.Replace("Dungeon_", "");
 
-            if (!entry.Key.Contains(mapName))
+            if (!entry.Key.Contains(chapter))
                 continue;
 
-            GameObject parent = new GameObject() { name = "Map" };
+            GameObject parent = GameObject.Find("Map");
+            if(parent == null)
+                parent = new GameObject() { name = "Map" };
 
-            parent.transform.localPosition += new Vector3(count * 100, 0, 0);
+            GameObject map = Managers.Resource.Instantiate("Dungeon_" + chapter + count.ToString("D3"));
+
+            GameObject items = Util.FindChildByName(map.transform, "Items").gameObject;
+            GameObject monsters = Util.FindChildByName(map.transform, "Monsters").gameObject;
+            GameObject bossMonsters = Util.FindChildByName(map.transform, "BossMonsters").gameObject;
+
+            map.transform.localPosition += new Vector3(count * 100, 0, 0);
             map.transform.parent = parent.transform;
 
             foreach (Data.TileData tile in mapData.Tiles)
@@ -332,15 +355,15 @@ public class GameManager
                 }
                 else
                 {
-                    if (tile.PrefabID == (int)Define.TileType.SpawnPoint)
+                    if (!isSpawned && tile.PrefabID == (int)Define.TileType.SpawnPoint && stageName != GetBossRoomName(chapter))
                     {
-                        Managers.Game.Player.transform.position = new Vector3(tile.Position.X * 0.33f, 2.6f, tile.Position.Z * 0.33f);
+                        Managers.Game.Player.transform.position = new Vector3(tile.Position.X * 0.33f + count * 100, 2.6f, tile.Position.Z * 0.33f);
                         Managers.Game.Player._cellPos = Managers.Game.Player.transform.position;
+
+                        isSpawned = true;
                     }
                 }
             }
-
-            
 
             Items = items;
             Monsters = monsters;
@@ -352,9 +375,14 @@ public class GameManager
 
             count++;
 
+            if (count == maxCount - 1)
+                break;
+
+            MainCamera.GetComponentInChildren<CameraController>().Angle = Define.CAMERA_ANGLE;
             //InstantiateLights(key, lights.transform);
         }
-        MainCamera.GetComponentInChildren<CameraController>().Angle = Define.CAMERA_ANGLE;
+
+        MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, Managers.Game.Player.gameObject);
     }
 
     void InstantiateLights(string DGName, Transform parent)
