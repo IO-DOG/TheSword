@@ -183,14 +183,15 @@ public class UI_CreatureCard : UI_Base
                 Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack - Managers.Game.CurPlayerData.Defence);
                 Managers.Game.OnBattlePlayerDamagedAction.Invoke();
             }
+        }
+        Managers.Game.CurPlayerData.CurHP = Mathf.RoundToInt(Managers.Game.CurPlayerData.CurHP);
 
-            if (Managers.Game.CurPlayerData.CurHP <= 0)
-            {
-                // Game Over Popup TODO
-                Managers.Game.OnBattleAction.Invoke();
-                Managers.Game.OnBattle = false;
-                return;
-            }
+        if (Managers.Game.CurPlayerData.CurHP <= 0)
+        {
+            // Game Over Popup TODO
+            Managers.Game.OnBattleAction.Invoke();
+            Managers.Game.OnBattle = false;
+            return;
         }
 
         _attackCount++;
