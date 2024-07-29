@@ -116,6 +116,50 @@ public class SoundManager
         }
     }
 
+    /// <summary>
+    /// 게임 배속에 따라서 pitch가 달라짐
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="key"></param>
+    public void PlayByGameSpeed(Define.Sound type, string key)
+    {
+        AudioSource audioSource = _audioSources[(int)type];
+
+        if (type == Define.Sound.Bgm)
+        {
+            LoadAudioClip(key, (audioClip) =>
+            {
+                if (audioSource.isPlaying)
+                    audioSource.Stop();
+
+                audioSource.clip = audioClip;
+                //if (Managers.Game.BGMOn)
+                audioSource.Play();
+            });
+        }
+        else if (type == Define.Sound.SubBgm)
+        {
+            LoadAudioClip(key, (audioClip) =>
+            {
+                if (audioSource.isPlaying)
+                    audioSource.Stop();
+
+                audioSource.clip = audioClip;
+                //if (Managers.Game.EffectSoundOn)
+                audioSource.Play();
+            });
+        }
+        else
+        {
+            LoadAudioClip(key, (audioClip) =>
+            {
+                audioSource.pitch = Managers.Game.GameSpeed;
+                //if (Managers.Game.EffectSoundOn)
+                audioSource.PlayOneShot(audioClip);
+            });
+        }
+    }
+
     public void Stop(Define.Sound type)
     {
         AudioSource audioSource = _audioSources[(int)type];
