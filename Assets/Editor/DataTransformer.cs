@@ -501,6 +501,22 @@ public class DataTransformer : EditorWindow
                                 };
                                 tiles.Add(tile);
                             }
+                            else if (prefabID == 16)
+                            {
+                                Data.StairsData tile = new Data.StairsData
+                                {
+                                    PrefabID = prefabID,
+                                    Position = new Data.MyVector3
+                                    {
+                                        X = xPos,
+                                        Y = 0,
+                                        Z = zPos,
+                                    },
+                                    TileType = (int)Define.TileType.Portal,
+                                    StairsType = (int)Define.Stairs.BossRoom,
+                                };
+                                tiles.Add(tile);
+                            }
                             else
                             {
                                 Data.TileData tile = new Data.TileData

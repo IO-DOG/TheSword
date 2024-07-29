@@ -132,6 +132,7 @@ public class Define
         None = -1,
         Upstairs = 0,
         Downstairs = 1,
+        BossRoom = 2,
     }
 
     public enum DecoType
