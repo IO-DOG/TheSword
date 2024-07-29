@@ -41,7 +41,7 @@ public class TutorialScene : BaseScene
         Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetCameraTarget(_directingObjects[0]);
 
         // Player Movement
-        float originalSpeed = Managers.Game.Player.Speed;
+        float originalSpeed = Managers.Game.CurPlayerData.MoveSpeed;
         Managers.Game.Player.Speed = 2f;
         Managers.Game.Player.Moving(Define.MoveDir.Up);
 
