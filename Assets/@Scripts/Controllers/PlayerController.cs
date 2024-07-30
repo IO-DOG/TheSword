@@ -4,7 +4,6 @@ using UnityEngine;
 using DG.Tweening;
 using static Define;
 using Unity.Burst.CompilerServices;
-using Unity.VisualScripting;
 
 public class PlayerController : MonoBehaviour
 {
@@ -36,7 +35,9 @@ public class PlayerController : MonoBehaviour
     string _shieldName = "Shield00";
 
     float _duration;
-    bool _isMoving = false;
+    public bool _isMoving = false;
+
+    bool _isInteracted = false;
 
     float _offset = Define.TILE_SIZE * 0.33f;
     Vector3 _interpolateRayPos = new Vector3(0f, -2f, 0f);
@@ -44,7 +45,7 @@ public class PlayerController : MonoBehaviour
     Vector3 _nextCellPos;
 
     MoveDir _moveDir = MoveDir.None;
-    PlayerState _state = PlayerState.IdleDown;
+    public PlayerState _state = PlayerState.IdleDown;
     public void SetState(PlayerState state)
     {
         _state = state;
@@ -72,23 +73,23 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKey(KeyCode.UpArrow))
         {
-            Moving(MoveDir.Up);
             _moveDir = MoveDir.Up;
+            Moving(_moveDir);
         }
         else if (Input.GetKey(KeyCode.DownArrow))
         {
-            Moving(MoveDir.Down);
             _moveDir = MoveDir.Down;
+            Moving(_moveDir);
         }
         else if (Input.GetKey(KeyCode.LeftArrow))
         {
-            Moving(MoveDir.Left);
             _moveDir = MoveDir.Left;
+            Moving(_moveDir);
         }
         else if (Input.GetKey(KeyCode.RightArrow))
         {
-            Moving(MoveDir.Right);
             _moveDir = MoveDir.Right;
+            Moving(_moveDir);
         }
     }
 
@@ -201,10 +202,12 @@ public class PlayerController : MonoBehaviour
 
 
     #region Moving
-    public void Moving(MoveDir moveDir)
+    public void Moving(Define.MoveDir moveDir)
     {
         if (_isMoving)
+        {
             return;
+        }
 
         _isMoving = true;
 
@@ -233,9 +236,13 @@ public class PlayerController : MonoBehaviour
         // If Obstacles, Stop
         if (CheckSomething())
         {
-            _isMoving = false;;
+            _isMoving = false;
             return;
         }
+
+        if (_isInteracted)
+            return;
+
         // Move
         _cellPos += _nextCellPos;
         transform.DOMove(_cellPos, _duration).SetEase(Ease.Linear).OnComplete(()=> 
@@ -246,6 +253,8 @@ public class PlayerController : MonoBehaviour
 
     void SetIdleState(MoveDir moveDir)
     {
+        _isMoving = false;
+
         if (_state == PlayerState.OnLever)
             return;
 
@@ -260,7 +269,7 @@ public class PlayerController : MonoBehaviour
     {
         bool somethingExist = false;
         int layerMask = (1 << (int)Define.Layer.Wall) + (1 << (int)Define.Layer.CItem) + (1 << (int)Define.Layer.Door) + (1 << (int)Define.Layer.Portal)
-            + (1 << (int)Define.Layer.EItem) + (1 << (int)Define.Layer.Lever);
+            + (1 << (int)Define.Layer.EItem) + (1 << (int)Define.Layer.Lever) + (1 << (int)Define.Layer.Monster);
 
         RaycastHit hit;
         Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset, layerMask);
@@ -271,6 +280,19 @@ public class PlayerController : MonoBehaviour
             if (hit.collider.gameObject.layer == (int)Define.Layer.Wall)
             {
                 somethingExist = true;
+            }
+            //Checking Monster
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.Monster)
+            {
+                _isInteracted = true;
+                InteractAnim().OnComplete(() =>
+                {
+                    if (Managers.Game.OnBattle == false)
+                        hit.collider.gameObject.GetComponent<MonsterController>().StartBattle();
+
+                    SetIdleState(_moveDir);
+                    _isInteracted = false;
+                });
             }
             // Checking Item
             else if (hit.collider.gameObject.layer == (int)Define.Layer.CItem)
@@ -335,5 +357,32 @@ public class PlayerController : MonoBehaviour
         }
 
         return somethingExist;
+    }
+
+    Sequence InteractAnim()
+    {
+        Vector3 interactPos = _cellPos;
+        switch (_moveDir)
+        {
+            case MoveDir.Up:
+                interactPos += Vector3.forward * _offset;
+                break;
+            case MoveDir.Down:
+                interactPos += Vector3.back * _offset;
+                break;
+            case MoveDir.Left:
+                interactPos += Vector3.left * _offset;
+                break;
+            case MoveDir.Right:
+                interactPos += Vector3.right * _offset;
+                break;
+        }
+
+        Sequence seq = DOTween.Sequence();
+
+        seq.Append(gameObject.transform.DOMove(interactPos, 0.2f));
+        seq.Append(gameObject.transform.DOMove(_cellPos, 0.2f));
+
+        return seq;
     }
 }
