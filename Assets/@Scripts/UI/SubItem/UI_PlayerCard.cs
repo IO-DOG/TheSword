@@ -181,6 +181,11 @@ public class UI_PlayerCard : UI_Base
                     break;
             }
 
+            // 몬스터 죽는 파티클 생성
+            Transform particlePos = Managers.Game.Monster.gameObject.transform;
+            GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
+            deathSoulPurple.transform.position = particlePos.position;
+            Destroy(deathSoulPurple, 10);
             Destroy(Managers.Game.Monster.gameObject);
             Managers.Game.OnBattleAction.Invoke();
             Managers.Game.OnBattle = false;

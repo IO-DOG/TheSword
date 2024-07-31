@@ -189,6 +189,7 @@ public class UI_CreatureCard : UI_Base
         if (Managers.Game.CurPlayerData.CurHP <= 0)
         {
             // Game Over Popup TODO
+            CreatePlayerDeathParticle();
             Managers.Game.OnBattleAction.Invoke();
             Managers.Game.OnBattle = false;
             return;
@@ -356,5 +357,13 @@ public class UI_CreatureCard : UI_Base
         //yield return delay;
         //GetImage((int)Images.CreatureImage).material = null;
         //GetImage((int)Images.CreatureImage).color = Color.white;
+    }
+
+    void CreatePlayerDeathParticle()
+    {
+        Transform particlePos = Managers.Game.Player.gameObject.transform;
+        GameObject deathSoulPurple = Managers.Resource.Instantiate("BoneHeadBloodExplosion");
+        deathSoulPurple.transform.position = particlePos.position;
+        Destroy(deathSoulPurple, 10);
     }
 }
