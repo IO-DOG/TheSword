@@ -60,7 +60,7 @@ public class PlayerController : MonoBehaviour
         _weapon = GameObject.Find("WeaponSlot");
         _shield = GameObject.Find("ShieldSlot");
 
-        Managers.Game.Player = this; // ´øÀü µ¹ ¶§ Á×À¸¸é ¿¬µ¿ÇÏµµ·Ï ÇÏ±â À§ÇÔ.
+        Managers.Game.Player = this; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ ï¿½Ï±ï¿½ ï¿½ï¿½ï¿½ï¿½.
     }
 
     void OnKeyboard()
@@ -282,18 +282,10 @@ public class PlayerController : MonoBehaviour
                 somethingExist = true;
             }
             //Checking Monster
-            else if (hit.collider.gameObject.layer == (int)Define.Layer.Monster)
-            {
-                _isInteracted = true;
-                InteractAnim().OnComplete(() =>
-                {
-                    if (Managers.Game.OnBattle == false)
-                        hit.collider.gameObject.GetComponent<MonsterController>().StartBattle();
+            //else if (hit.collider.gameObject.layer == (int)Define.Layer.Monster)
+            //{
 
-                    SetIdleState(_moveDir);
-                    _isInteracted = false;
-                });
-            }
+            //}
             // Checking Item
             else if (hit.collider.gameObject.layer == (int)Define.Layer.CItem)
             {
@@ -322,6 +314,12 @@ public class PlayerController : MonoBehaviour
                 else
                 {
                     somethingExist = true;
+                    _isInteracted = true;
+                    InteractAnim().OnComplete(() =>
+                    {
+                        SetIdleState(_moveDir);
+                        _isInteracted = false;
+                    });
                 }
             }
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Portal)
@@ -365,16 +363,16 @@ public class PlayerController : MonoBehaviour
         switch (_moveDir)
         {
             case MoveDir.Up:
-                interactPos += Vector3.forward * _offset;
+                interactPos += Vector3.forward * _offset / 2;
                 break;
             case MoveDir.Down:
-                interactPos += Vector3.back * _offset;
+                interactPos += Vector3.back * _offset / 2;
                 break;
             case MoveDir.Left:
-                interactPos += Vector3.left * _offset;
+                interactPos += Vector3.left * _offset / 2;
                 break;
             case MoveDir.Right:
-                interactPos += Vector3.right * _offset;
+                interactPos += Vector3.right * _offset / 2;
                 break;
         }
 
