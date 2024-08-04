@@ -129,7 +129,7 @@ public class PlayerController : MonoBehaviour
 
     void PlayAnimation()
     {
-        switch(_state)
+        switch (_state)
         {
             case PlayerState.IdleUp:
                 GetComponent<Animator>().Play("Player_Idle_B");
@@ -199,7 +199,6 @@ public class PlayerController : MonoBehaviour
                 break;
         }
     }
-
 
     #region Moving
     public void Moving(Define.MoveDir moveDir)

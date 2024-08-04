@@ -289,6 +289,8 @@ public class GameManager
 
             GameObject map = Managers.Resource.Instantiate("Dungeon_" + chapter + count.ToString("D3"));
 
+            Door[] doors = map.GetComponentsInChildren<Door>();
+
             GameObject items = Util.FindChildByName(map.transform, "Items").gameObject;
             GameObject monsters = Util.FindChildByName(map.transform, "Monsters").gameObject;
             GameObject bossMonsters = Util.FindChildByName(map.transform, "BossMonsters").gameObject;
@@ -298,7 +300,18 @@ public class GameManager
 
             foreach (Data.TileData tile in mapData.Tiles)
             {
-                if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
+                if (tile is DoorData doorTile)
+                {
+                    if (doorTile.IsActive == false)
+                    {
+                        foreach(Door child in doors)
+                        {
+                            if (doorTile.TotalCount == child._doorIndex_forActive)
+                                child.gameObject.SetActive(false);
+                        }
+                    }
+                }
+                else if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
                 {
                     GameObject item = Managers.Resource.Instantiate("ConsumableItem", items.transform);
                     item.transform.localPosition = new Vector3 (citemTile.Position.X, citemTile.Position.Y, citemTile.Position.Z);

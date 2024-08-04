@@ -29,7 +29,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2719565411418559395}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.5, z: 0}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
@@ -38,7 +38,7 @@ Transform:
   - {fileID: 1849721954681674911}
   - {fileID: 3647684704870461697}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &3803408927236939148
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -155,7 +155,9 @@ MonoBehaviour:
   _keyInventory: {fileID: 0}
   _isEquiptWeapon: 1
   _isEquiptShield: 1
+  _isMoving: 0
   _cellPos: {x: 0, y: 0, z: 0}
+  _state: 5
 --- !u!95 &8201268480784186961
 Animator:
   serializedVersion: 5
