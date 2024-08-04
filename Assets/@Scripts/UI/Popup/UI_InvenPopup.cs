@@ -456,9 +456,11 @@ public class UI_InvenPopup : UI_Popup
 
     void OnClickEquipList(int idx)
     {
+        Debug.Log($"OnClickEquipList 실행. idx : {idx}");
+
         UnityEngine.UI.Image[] equipList =
         {
-            GetImage((int)Images.EquipList1), GetImage((int)Images.EquipList2), GetImage((int)Images.EquipList3), GetImage((int)Images.EquipList4), GetImage((int)Images.EquipList5), 
+            GetImage((int)Images.EquipList1), GetImage((int)Images.EquipList2), GetImage((int)Images.EquipList3), GetImage((int)Images.EquipList4), GetImage((int)Images.EquipList5),
             GetImage((int)Images.EquipList6), GetImage((int)Images.EquipList7), GetImage((int)Images.EquipList8), GetImage((int)Images.EquipList9), GetImage((int)Images.EquipList10)
         };
         UnityEngine.UI.Image[] inventory_equipList_get =
@@ -474,16 +476,27 @@ public class UI_InvenPopup : UI_Popup
             GetImage((int)Images.Inventory_EquipList9_On), GetImage((int)Images.Inventory_EquipList10_On)
         };
 
-        Refresh();
+        //Refresh();
         GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
+        int equipIdx = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword][idx - 1];
         // 검 리스트를 보여줘야 할 때
-        if (GetImage((int)Images.Inventory_Sword_On).gameObject.activeSelf == true)
+        if (equipIdx >= Define.EQUIP_SOWRD_FIRST && equipIdx <= Define.EQUIP_SOWRD_END)
         {
+            //Refresh();
+
+            for (int i = 0; i < inventory_equipList_on.Length; ++i)
+            {
+                inventory_equipList_on[i].gameObject.SetActive(false);
+            }
+
+            Debug.Log($"검 인덱스");
+            SetSwordListImage();
             if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Count >= idx)
             {
-                inventory_equipList_get[idx].gameObject.SetActive(true);
-                inventory_equipList_on[idx].gameObject.SetActive(true);
-                int temp = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword][idx];
+                inventory_equipList_get[idx - 1].gameObject.SetActive(true);
+                inventory_equipList_on[idx - 1].gameObject.SetActive(true);
+                int temp = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword][idx - 1];
+                Debug.Log($"검 인덱스 {temp}");
                 PrintEquipAbilityAndDesc(temp);
                 Managers.Game.CurPlayerData.CurSword = temp;
                 GetImage((int)Images.sword).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[temp].ImageName}");
@@ -491,6 +504,8 @@ public class UI_InvenPopup : UI_Popup
         }
         else // 방패 리스트를 보여줘야 할 때
         {
+            //Refresh();
+
             if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shield].Count >= idx)
             {
                 inventory_equipList_get[idx].gameObject.SetActive(true);
