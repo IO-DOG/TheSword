@@ -346,6 +346,7 @@ public class UI_InvenPopup : UI_Popup
     {
         Refresh();
         SetSwordListImage();
+        PrintEquipAbilityAndDesc(Managers.Game.CurPlayerData.CurSword);
 
         GetImage((int)Images.Inventory_Sword_Get).gameObject.SetActive(true);
         GetImage((int)Images.Inventory_Sword_On).gameObject.SetActive(true);
@@ -368,10 +369,10 @@ public class UI_InvenPopup : UI_Popup
         {
             if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Count >= i)
             {
-                equipList[i].color = Color.white;
+                equipList[i - 1].color = Color.white;
                 int idx = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword][i - 1];
-                equipList[i].sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[idx].ImageName}");
-                inventory_equipList_get[i].gameObject.SetActive(true);
+                equipList[i - 1].sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[idx].ImageName}");
+                inventory_equipList_get[i - 1].gameObject.SetActive(true);
             }
         }
     }
@@ -380,6 +381,7 @@ public class UI_InvenPopup : UI_Popup
     {
         Refresh();
         SetShieldListImage();
+        PrintEquipAbilityAndDesc(Managers.Game.CurPlayerData.CurShield);
 
         GetImage((int)Images.Inventory_Shield_Get).gameObject.SetActive(true);
         GetImage((int)Images.Inventory_Shield_On).gameObject.SetActive(true);
@@ -404,10 +406,10 @@ public class UI_InvenPopup : UI_Popup
         {
             if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shield].Count >= i)
             {
-                equipList[i].color = Color.white;
+                equipList[i - 1].color = Color.white;
                 int idx = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shield][i - 1];
-                equipList[i].sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[idx].ImageName}");
-                inventory_equipList_get[i].gameObject.SetActive(true);
+                equipList[i - 1].sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[idx].ImageName}");
+                inventory_equipList_get[i - 1].gameObject.SetActive(true);
             }
         }
     }
@@ -527,6 +529,7 @@ public class UI_InvenPopup : UI_Popup
         // todo for scriptDic
         //GetText((int)Texts.EquipName).text = Managers.Data.EquipDic[equipId].NameId.ToString();
         int nameId = Managers.Data.EquipDic[equipId].NameId;
+        Debug.Log(nameId);
         GetText((int)Texts.EquipName).text = Managers.GetString(nameId);
 
         // todo for scriptDic

@@ -251,6 +251,7 @@ namespace Data
         public int AbilityId { get; set; }
         public string ImageName { get; set; }
         public string AttackFX { get; set; }
+        public string HitFX { get; set; }
         public int NameId { get; set; }
         public int DescId { get; set; }
     }
@@ -278,9 +279,9 @@ namespace Data
         public string ScriptEn;
         public string ScriptJp;
         public string ScriptCn;
-        public string Speaker;
-        public string PlayerSprite;
-        public string OpponentSprite;
+        //public string Speaker;
+        //public string PlayerSprite;
+        //public string OpponentSprite;
     }
 
     [Serializable]
