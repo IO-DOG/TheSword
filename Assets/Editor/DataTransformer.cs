@@ -633,7 +633,12 @@ public class DataTransformer : EditorWindow
 
         for (int y = 1; y < lines.Length; y++)
         {
-            string[] row = lines[y].Replace("\r", "").Replace("^", ",").Split(',');
+            string[] row = lines[y].Replace("\r", "").Split(',');
+
+            for (int x = 0; x < row.Count(); x++)
+            {
+                row[x].Replace("^", ",");
+            }
 
             if (row.Length == 0)
                 continue;
