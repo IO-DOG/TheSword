@@ -154,6 +154,13 @@ public class Define
         IdleDown,
         OnLever,
     }
+
+    public enum EventClass
+    {
+        Start = 0,
+        InProgress = 1,
+        End = 2,
+    }
     #endregion
 
     #region BossMonsterId
@@ -176,6 +183,10 @@ public class Define
     public static int PLAYER_DEFAULT_NAME = 10;
     public static int TUTORIAL_SCRIPT = 11000;
     public static int STAT_INFO_SCRIPT = 20000;
+    #endregion
+
+    #region Event ID
+    public static int EVENT_SWORD_FIRST = 0;
     #endregion
 
     public static float FADE_DURATION = 2f;
