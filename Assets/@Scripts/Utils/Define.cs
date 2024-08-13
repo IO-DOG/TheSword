@@ -178,11 +178,11 @@ public class Define
 
     #region Script Data
     public static int TITLE_MENU = 0;
-    public static int INTRO_STORY = 10000;
-    public static int STAGE_NAME = 30000;
-    public static int PLAYER_DEFAULT_NAME = 10;
-    public static int TUTORIAL_SCRIPT = 11000;
-    public static int STAT_INFO_SCRIPT = 20000;
+    public static int INTRO_STORY = 100000;
+    public static int STAGE_NAME = 5000;
+    public static int PLAYER_DEFAULT_NAME = 6;
+    public static int TUTORIAL_SCRIPT = 100006;
+    public static int STAT_INFO_SCRIPT = 100;
     #endregion
 
     #region Event ID

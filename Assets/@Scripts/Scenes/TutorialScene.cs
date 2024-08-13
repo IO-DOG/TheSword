@@ -54,7 +54,7 @@ public class TutorialScene : BaseScene
         yield return new WaitForSeconds(Define.STAGE_NAME_DURATION);
 
         UI_ConversationPopup conversation = Managers.UI.ShowPopupUI<UI_ConversationPopup>();
-        conversation._eventID = Define.TUTORIAL_SCRIPT;
+        conversation._eventID = Define.EVENT_SWORD_FIRST;
 
         // Reset Player Stat
         Managers.Game.Player.Speed = originalSpeed;

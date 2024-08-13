@@ -8,6 +8,7 @@ using UnityEngine;
 public class UI_ConversationPopup : UI_Popup
 {
     public int _eventID;
+    bool _endFlag = false;
 
     enum Texts
     {
@@ -66,13 +67,10 @@ public class UI_ConversationPopup : UI_Popup
 
     private void ShowCurrentScript()
     {
-        string text = Managers.GetString(Managers.Data.ScriptDic[Managers.Data.EventDic[_eventID].ScriptID].id);
-        GetText((int)Texts.ConversationText).text = text;
-
         if (!string.IsNullOrEmpty(Managers.Data.EventDic[_eventID].IllustLeft))
         {
             GetImage((int)Images.LeftPortrait).gameObject.SetActive(true);
-            GetImage((int)Images.LeftPortrait).sprite = Managers.Resource.Load<Sprite>(Managers.Data.EventDic[_eventID++].IllustLeft);
+            GetImage((int)Images.LeftPortrait).sprite = Managers.Resource.Load<Sprite>(Managers.Data.EventDic[_eventID].IllustLeft);
             GetImage((int)Images.RightPortrait).color = Color.gray;
             GetImage((int)Images.LeftPortrait).color = Color.white;
 
@@ -88,20 +86,30 @@ public class UI_ConversationPopup : UI_Popup
 
             GetText((int)Texts.SpeakerText).text = "미지의 검";
         }
+
+        string text = Managers.GetString(Managers.Data.ScriptDic[Managers.Data.EventDic[_eventID].ScriptID].id);
+        GetText((int)Texts.ConversationText).text = text;
+
+
+        if (Managers.Data.EventDic[_eventID].Class == (int)Define.EventClass.End)
+        {
+            _endFlag = true;
+            return;
+        }
+
         _eventID++;
     }
 
     public void ShowNextScript()
     {
-        if (Managers.Data.EventDic[_eventID].Class < (int)Define.EventClass.End)
-        {
-            ShowCurrentScript();
-        }
-        else
+        if (_endFlag == true)
         {
             Debug.Log("Conversation ended");
             Managers.Game.OnConversation = false;
             ClosePopupUI();
+            return;
         }
+
+        ShowCurrentScript();
     }
 }
