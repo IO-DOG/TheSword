@@ -108,6 +108,7 @@ public class Define
 
     public enum TileType
     {
+        VoidTile = -1,
         Void = 0,
         Floor,
         Wall,
@@ -186,7 +187,8 @@ public class Define
     #endregion
 
     #region Event ID
-    public static int EVENT_SWORD_FIRST = 0;
+    public static int EVENT_TUTORIAL = 0;
+    public static int EVENT_SWORD_FIRST = 1;
     #endregion
 
     public static float FADE_DURATION = 2f;

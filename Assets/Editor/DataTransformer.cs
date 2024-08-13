@@ -282,7 +282,23 @@ public class DataTransformer : EditorWindow
                             block = "0";
                         }
 
-                        if (block[0] == 'I')
+                        if(block[0] == '-')
+                        {
+                            Data.TileData tile = new Data.TileData
+                            {
+                                PrefabID = -1,
+                                Position = new Data.MyVector3
+                                {
+                                    X = xPos,
+                                    Y = 0,
+                                    Z = zPos,
+                                },
+                                TileType = -1,
+                            };
+                            tiles.Add(tile);
+
+                        }
+                        else if (block[0] == 'I')
                         {
                             Data.Occupied tile = new Data.Occupied
                             {

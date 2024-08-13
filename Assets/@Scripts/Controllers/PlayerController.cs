@@ -91,6 +91,11 @@ public class PlayerController : MonoBehaviour
             _moveDir = MoveDir.Right;
             Moving(_moveDir);
         }
+
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            CheckInteract();
+        }
     }
 
     private void Update()
@@ -263,6 +268,19 @@ public class PlayerController : MonoBehaviour
             _state = PlayerState.IdleDown;
     }
     #endregion
+
+    void CheckInteract()
+    {
+        RaycastHit hit;
+        Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset);
+
+        InteractObjectController interactObejct = hit.collider.gameObject.GetComponent<InteractObjectController>();
+
+        if (interactObejct != null)
+        {
+            interactObejct.Interact();
+        }
+    }
 
     bool CheckSomething()
     {
