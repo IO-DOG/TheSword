@@ -45,6 +45,7 @@ public class UI_PlayerCard : UI_Base
         BindText(typeof(Texts));
         #endregion
 
+        // todo change to nickname
         GetText((int)Texts.CreatureName).text = "Player!";
         GetText((int)Texts.HPBarText).text = Managers.Game.CurPlayerData.CurHP.ToString();
         GetText((int)Texts.AttackStatusText).text = Managers.Game.CurPlayerData.Attack.ToString();
@@ -157,33 +158,38 @@ public class UI_PlayerCard : UI_Base
                     Managers.Game.OnBattleCreatureDamagedAction.Invoke();
                 }
             }
+        }
+        Managers.Game.MonsterData.CurHP = Mathf.RoundToInt(Managers.Game.MonsterData.CurHP);
 
+        if (Managers.Game.MonsterData.CurHP <= 0)
+        {
+            // add exp
+            Managers.Game.CurPlayerData.CurExp += Managers.Game.MonsterData.RewardExp;
 
-            if (Managers.Game.MonsterData.CurHP <= 0)
+            Managers.Data.MonsterActiveOff(Managers.Game.MonsterData.IsActiveIndex);
+
+            int id = Managers.Game.Monster.id;
+            Debug.Log($"Monster Id : {id}");
+            string name = Managers.Data.MonsterDic[id].Name;
+            switch (id)
             {
-                // add exp
-                Managers.Game.CurPlayerData.CurExp += Managers.Game.MonsterData.RewardExp;
-
-                Managers.Data.MonsterActiveOff(Managers.Game.MonsterData.IsActiveIndex);
-
-                int id = Managers.Game.Monster.id;
-                Debug.Log($"Monster Id : {id}");
-                string name = Managers.Data.MonsterDic[id].Name;
-                switch (id)
-                {
-                    case Define.KingSlime:
-                        BlackSlimeController blackSlimeController = Managers.Game.Monster.gameObject.GetOrAddComponent<BlackSlimeController>();
-                        blackSlimeController.Dead();
-                        break;
-                    default:
-                        break;
-                }
-
-                Destroy(Managers.Game.Monster.gameObject);
-                Managers.Game.OnBattleAction.Invoke();
-                Managers.Game.OnBattle = false;
-                return;
+                case Define.KingSlime:
+                    BlackSlimeController blackSlimeController = Managers.Game.Monster.gameObject.GetOrAddComponent<BlackSlimeController>();
+                    blackSlimeController.Dead();
+                    break;
+                default:
+                    break;
             }
+
+            // 몬스터 죽는 파티클 생성
+            Transform particlePos = Managers.Game.Monster.gameObject.transform;
+            GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
+            deathSoulPurple.transform.position = particlePos.position;
+            Destroy(deathSoulPurple, 10);
+            Destroy(Managers.Game.Monster.gameObject);
+            Managers.Game.OnBattleAction.Invoke();
+            Managers.Game.OnBattle = false;
+            return;
         }
         Managers.Game.OnBattleDataRefreshAction.Invoke();
     }

@@ -72,44 +72,44 @@ public class UI_ConversationPopup : UI_Popup
 
     private void ShowCurrentScript()
     {
-        if (_currentIndex < _scripts.Count)
-        {
-            string text = Managers.GetString(_scripts[_currentIndex].id);
-            GetText((int)Texts.ConversationText).text = text;
+        //if (_currentIndex < _scripts.Count)
+        //{
+        //    string text = Managers.GetString(_scripts[_currentIndex].id);
+        //    GetText((int)Texts.ConversationText).text = text;
 
-            if (!string.IsNullOrEmpty(_scripts[_currentIndex].PlayerSprite))
-            {
-                GetImage((int)Images.PlayerPortrait).gameObject.SetActive(true);
-                GetImage((int)Images.PlayerPortrait).sprite = Managers.Resource.Load<Sprite>(_scripts[_currentIndex].PlayerSprite);
-            }
-            else
-            {
-                GetImage((int)Images.PlayerPortrait).gameObject.SetActive(false);
-            }
+        //    if (!string.IsNullOrEmpty(_scripts[_currentIndex].PlayerSprite))
+        //    {
+        //        GetImage((int)Images.PlayerPortrait).gameObject.SetActive(true);
+        //        GetImage((int)Images.PlayerPortrait).sprite = Managers.Resource.Load<Sprite>(_scripts[_currentIndex].PlayerSprite);
+        //    }
+        //    else
+        //    {
+        //        GetImage((int)Images.PlayerPortrait).gameObject.SetActive(false);
+        //    }
 
-            if (!string.IsNullOrEmpty(_scripts[_currentIndex].OpponentSprite))
-            {
-                GetImage((int)Images.OpponentPortrait).gameObject.SetActive(true);
-                GetImage((int)Images.OpponentPortrait).sprite = Managers.Resource.Load<Sprite>(_scripts[_currentIndex].OpponentSprite);
-            }
-            else
-            {
-                GetImage((int)Images.OpponentPortrait).gameObject.SetActive(false);
-            }
+        //    if (!string.IsNullOrEmpty(_scripts[_currentIndex].OpponentSprite))
+        //    {
+        //        GetImage((int)Images.OpponentPortrait).gameObject.SetActive(true);
+        //        GetImage((int)Images.OpponentPortrait).sprite = Managers.Resource.Load<Sprite>(_scripts[_currentIndex].OpponentSprite);
+        //    }
+        //    else
+        //    {
+        //        GetImage((int)Images.OpponentPortrait).gameObject.SetActive(false);
+        //    }
 
-            GetText((int)Texts.SpeakerText).text = _scripts[_currentIndex].Speaker;
+        //    GetText((int)Texts.SpeakerText).text = _scripts[_currentIndex].Speaker;
 
-            if (_scripts[_currentIndex].Speaker == "P" && !string.IsNullOrEmpty(_scripts[_currentIndex].PlayerSprite))
-            {
-                GetImage((int)Images.OpponentPortrait).color = Color.gray;
-                GetImage((int)Images.PlayerPortrait).color = Color.white;
-            }
-            else if (_scripts[_currentIndex].Speaker == "O" && !string.IsNullOrEmpty(_scripts[_currentIndex].PlayerSprite))
-            {
-                GetImage((int)Images.PlayerPortrait).color = Color.gray;
-                GetImage((int)Images.OpponentPortrait).color = Color.white;
-            }
-        }
+        //    if (_scripts[_currentIndex].Speaker == "P" && !string.IsNullOrEmpty(_scripts[_currentIndex].PlayerSprite))
+        //    {
+        //        GetImage((int)Images.OpponentPortrait).color = Color.gray;
+        //        GetImage((int)Images.PlayerPortrait).color = Color.white;
+        //    }
+        //    else if (_scripts[_currentIndex].Speaker == "O" && !string.IsNullOrEmpty(_scripts[_currentIndex].PlayerSprite))
+        //    {
+        //        GetImage((int)Images.PlayerPortrait).color = Color.gray;
+        //        GetImage((int)Images.OpponentPortrait).color = Color.white;
+        //    }
+        //}
     }
 
     public void ShowNextScript()

@@ -626,6 +626,7 @@ public class DataTransformer : EditorWindow
             ed.AbilityId = ConvertValue<int>(row[i++]);
             ed.ImageName = ConvertValue<string>(row[i++]);
             ed.AttackFX = ConvertValue<string>(row[i++]);
+            ed.HitFX = ConvertValue<string>(row[i++]);
             ed.NameId = ConvertValue<int>(row[i++]);
             ed.DescId = ConvertValue<int>(row[i++]);
             loader.equips.Add(ed);
@@ -650,6 +651,11 @@ public class DataTransformer : EditorWindow
         {
             string[] row = lines[y].Replace("\r", "").Split(',');
 
+            for (int x = 0; x < row.Count(); x++)
+            {
+                row[x].Replace("^", ",");
+            }
+
             if (row.Length == 0)
                 continue;
             if (string.IsNullOrEmpty(row[0]))
@@ -658,13 +664,15 @@ public class DataTransformer : EditorWindow
             int i = 0;
             ScriptData sd = new ScriptData();
             sd.id = ConvertValue<int>(row[i++]);
+            Debug.Log(sd.id);
             sd.ScriptKr = ConvertValue<string>(row[i++]);
+            Debug.Log(sd.ScriptKr);
             sd.ScriptEn = ConvertValue<string>(row[i++]);
             sd.ScriptJp = ConvertValue<string>(row[i++]);
             sd.ScriptCn = ConvertValue<string>(row[i++]);
-            sd.Speaker = ConvertValue<string>(row[i++]);
-            sd.PlayerSprite = ConvertValue<string>(row[i++]);
-            sd.OpponentSprite = ConvertValue<string>(row[i++]);
+            //sd.Speaker = ConvertValue<string>(row[i++]);
+            //sd.PlayerSprite = ConvertValue<string>(row[i++]);
+            //sd.OpponentSprite = ConvertValue<string>(row[i++]);
 
             loader.scripts.Add(sd);
         }

@@ -183,14 +183,16 @@ public class UI_CreatureCard : UI_Base
                 Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack - Managers.Game.CurPlayerData.Defence);
                 Managers.Game.OnBattlePlayerDamagedAction.Invoke();
             }
+        }
+        Managers.Game.CurPlayerData.CurHP = Mathf.RoundToInt(Managers.Game.CurPlayerData.CurHP);
 
-            if (Managers.Game.CurPlayerData.CurHP <= 0)
-            {
-                // Game Over Popup TODO
-                Managers.Game.OnBattleAction.Invoke();
-                Managers.Game.OnBattle = false;
-                return;
-            }
+        if (Managers.Game.CurPlayerData.CurHP <= 0)
+        {
+            // Game Over Popup TODO
+            CreatePlayerDeathParticle();
+            Managers.Game.OnBattleAction.Invoke();
+            Managers.Game.OnBattle = false;
+            return;
         }
 
         _attackCount++;
@@ -355,5 +357,13 @@ public class UI_CreatureCard : UI_Base
         //yield return delay;
         //GetImage((int)Images.CreatureImage).material = null;
         //GetImage((int)Images.CreatureImage).color = Color.white;
+    }
+
+    void CreatePlayerDeathParticle()
+    {
+        Transform particlePos = Managers.Game.Player.gameObject.transform;
+        GameObject deathSoulPurple = Managers.Resource.Instantiate("BoneHeadBloodExplosion");
+        deathSoulPurple.transform.position = particlePos.position;
+        Destroy(deathSoulPurple, 10);
     }
 }

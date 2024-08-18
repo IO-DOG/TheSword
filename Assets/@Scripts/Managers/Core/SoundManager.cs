@@ -9,6 +9,7 @@ public class SoundManager
     private Dictionary<string, AudioClip> _audioClips = new Dictionary<string, AudioClip>();
 
     private GameObject _soundRoot = null;
+    public int _totalEffectCount = 1;
 
     public void Init()
     {
@@ -79,9 +80,17 @@ public class SoundManager
         {
             LoadAudioClip(key, (audioClip) =>
             {
-                audioSource.pitch = pitch;
+                audioSource.pitch = Managers.Game.GameSpeed;
+
+                //audioSource.pitch = pitch;
+                audioSource.volume = 1 / (float)_totalEffectCount; // 오디오 수에 따를 볼륨 조절
+                _totalEffectCount++;
                 //if (Managers.Game.EffectSoundOn)
+                float audioLength = audioClip.length;
+
+                CoroutineManager.StartCoroutine(CoTotalEffectCountControl(audioLength)); // 오디오가 끝나면 오디오수 조절
                 audioSource.PlayOneShot(audioClip);
+                
             });
         }
     }
@@ -113,6 +122,50 @@ public class SoundManager
             audioSource.pitch = pitch;
             //if (Managers.Game.EffectSoundOn)
             audioSource.PlayOneShot(audioClip);
+        }
+    }
+
+    /// <summary>
+    /// 게임 배속에 따라서 pitch가 달라짐
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="key"></param>
+    public void PlayByGameSpeed(Define.Sound type, string key)
+    {
+        AudioSource audioSource = _audioSources[(int)type];
+
+        if (type == Define.Sound.Bgm)
+        {
+            LoadAudioClip(key, (audioClip) =>
+            {
+                if (audioSource.isPlaying)
+                    audioSource.Stop();
+
+                audioSource.clip = audioClip;
+                //if (Managers.Game.BGMOn)
+                audioSource.Play();
+            });
+        }
+        else if (type == Define.Sound.SubBgm)
+        {
+            LoadAudioClip(key, (audioClip) =>
+            {
+                if (audioSource.isPlaying)
+                    audioSource.Stop();
+
+                audioSource.clip = audioClip;
+                //if (Managers.Game.EffectSoundOn)
+                audioSource.Play();
+            });
+        }
+        else
+        {
+            LoadAudioClip(key, (audioClip) =>
+            {
+                audioSource.pitch = Managers.Game.GameSpeed;
+                //if (Managers.Game.EffectSoundOn)
+                audioSource.PlayOneShot(audioClip);
+            });
         }
     }
 
@@ -159,5 +212,13 @@ public class SoundManager
     {
         _audioSources[(int)Define.Sound.Bgm].volume = value;
         _audioSources[(int)Define.Sound.Effect].volume = value;
+    }
+
+    IEnumerator CoTotalEffectCountControl(float time)
+    {
+        WaitForSeconds delay = new WaitForSeconds(time);
+        yield return delay;
+        _totalEffectCount--;
+        _totalEffectCount = Mathf.Max(1, _totalEffectCount);
     }
 }

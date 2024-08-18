@@ -175,9 +175,15 @@ public class Define
     public static int STAGE_NAME = 30000;
     public static int PLAYER_DEFAULT_NAME = 10;
     public static int TUTORIAL_SCRIPT = 11000;
-    public static int STAT_INFO_SCRIPT = 20000;
+    public static int STAT_INFO_SCRIPT = 100;
     #endregion
 
     public static float FADE_DURATION = 2f;
     public static float STAGE_NAME_DURATION = 3f;
+
+    #region EquipDataForInven
+    public static int EQUIP_SOWRD_FIRST = 9;
+    public static int EQUIP_SOWRD_END = 19;
+
+    #endregion
 }
