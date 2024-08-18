@@ -187,7 +187,10 @@ public class DataTransformer : EditorWindow
             cd.RewardItem = ConvertValue<int>(row[i++]);
             cd.IdleAnimStr = ConvertValue<string>(row[i++]);
             cd.AttackAnimStr = ConvertValue<string>(row[i++]);
-            cd.ScriptId = ConvertValue<string>(row[i++]);
+            cd.BattleParticleAttack = ConvertValue<string>(row[i++]);
+            cd.BattleParticleHit = ConvertValue<string>(row[i++]);
+            cd.MonsterNameId = ConvertValue<int>(row[i++]);
+            cd.MonsterDescId = ConvertValue<int>(row[i++]);
             loader.creatures.Add(cd);
         }
 

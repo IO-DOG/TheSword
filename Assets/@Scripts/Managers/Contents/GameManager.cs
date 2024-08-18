@@ -118,7 +118,10 @@ public class GameManager
         public int RewardItem { get; set; }
         public string IdleAnimStr { get; set; }
         public string AttackAnimStr { get; set; }
-        public string ScriptId { get; set; }
+        public string BattleParticleAttack { get; set; }
+        public string BattleParticleHit { get; set; }
+        public int MonsterNameId { get; set; }
+        public int MonsterDescId { get; set; }
         public bool IsDefence { get; set; }
         public int IsActiveIndex { get; set; }
         public int DamagedCount { get; set; }
