@@ -16,7 +16,7 @@ public class UI_TutorialScene : UI_Scene
 
         Managers.Game.CurPlayerData.CurStageid = 0;
         Managers.Game.InstantiateMap(Managers.Game.CurPlayerData.CurStageid);
-        Managers.Game.SetCameraConfiner();
+        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetCameraConfiner();
 
         FadeEffect(Define.FadeEvent.FadnIn, Define.FADE_DURATION);
         FadeEffect(Define.FadeEvent.CenterToRight, Define.FADE_DURATION);

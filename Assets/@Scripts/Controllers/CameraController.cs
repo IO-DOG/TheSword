@@ -24,7 +24,16 @@ public class CameraController : MonoBehaviour
 
         CinemachineTransposer transposer = GetComponent<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>();
         transposer.m_FollowOffset = new Vector3(0f, 2f, 0f);
-        //this.transform.eulerAngles = new Vector3(Define.CAMERA_ANGLE, 0f, 0f);
+        this.transform.parent.eulerAngles = new Vector3(Define.CAMERA_ANGLE, 0f, 0f);
+    }
+
+    public void SetCameraConfiner()
+    {
+        Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetComponent<CinemachineConfiner>().m_BoundingVolume
+            = GameObject.Find("Dungeon_" + Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonID).GetComponent<BoxCollider>();
+
+        Managers.Game.RenderCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetComponent<CinemachineConfiner>().m_BoundingVolume
+    = GameObject.Find("Dungeon_" + Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonID).GetComponent<BoxCollider>();
     }
 
     public void SetCameraTarget(GameObject target)

@@ -271,12 +271,6 @@ public class GameManager
         return bossRoomName;
     }
 
-    public void SetCameraConfiner()
-    {
-        Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetComponent<CinemachineConfiner>().m_BoundingVolume
-            = GameObject.Find("Dungeon_" + Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonID).GetComponent<BoxCollider>();
-    }
-
     public void InstantiateMap(int key)
     {
         int count = 0;

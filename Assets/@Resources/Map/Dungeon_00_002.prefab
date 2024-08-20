@@ -31888,6 +31888,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8683877923575655862}
+  - component: {fileID: 8992031909577645546}
   m_Layer: 0
   m_Name: Dungeon_00_002
   m_TagString: Untagged
@@ -31918,6 +31919,27 @@ Transform:
   - {fileID: 6175298505404449292}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &8992031909577645546
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6151546232217506446}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 59.000004, y: 60.000004, z: 30}
+  m_Center: {x: 30, y: 0, z: -28}
 --- !u!1 &6153948055983931242
 GameObject:
   m_ObjectHideFlags: 0

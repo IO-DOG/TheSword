@@ -632,11 +632,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 557126231252593001, guid: ac17f81a7865a9d4890d3ce1da6b5213, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.000000029676647
+      value: 0.00000003521071
       objectReference: {fileID: 0}
     - target: {fileID: 557126231252593001, guid: ac17f81a7865a9d4890d3ce1da6b5213, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.000000012292425
+      value: -0.000000014584689
       objectReference: {fileID: 0}
     - target: {fileID: 557126231252593001, guid: ac17f81a7865a9d4890d3ce1da6b5213, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -651,8 +651,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 686998693613478800, guid: ac17f81a7865a9d4890d3ce1da6b5213, type: 3}
+      propertyPath: near clip plane
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 686998693613478800, guid: ac17f81a7865a9d4890d3ce1da6b5213, type: 3}
       propertyPath: orthographic size
-      value: 5.625
+      value: 4.21875
       objectReference: {fileID: 0}
     - target: {fileID: 686998693613478800, guid: ac17f81a7865a9d4890d3ce1da6b5213, type: 3}
       propertyPath: m_NormalizedViewPortRect.y
@@ -730,6 +734,14 @@ PrefabInstance:
       propertyPath: m_Priority
       value: 11
       objectReference: {fileID: 0}
+    - target: {fileID: 6466215840871827481, guid: ac17f81a7865a9d4890d3ce1da6b5213, type: 3}
+      propertyPath: m_Lens.NearClipPlane
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 6466215840871827481, guid: ac17f81a7865a9d4890d3ce1da6b5213, type: 3}
+      propertyPath: m_Lens.OrthographicSize
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8187148106766444548, guid: ac17f81a7865a9d4890d3ce1da6b5213, type: 3}
       propertyPath: m_TagString
       value: Untagged
@@ -742,6 +754,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3978751994671851123, guid: ac17f81a7865a9d4890d3ce1da6b5213, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1748187736}
+    - targetCorrespondingSourceObject: {fileID: 8187148106766444548, guid: ac17f81a7865a9d4890d3ce1da6b5213, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1748187739}
   m_SourcePrefab: {fileID: 100100000, guid: ac17f81a7865a9d4890d3ce1da6b5213, type: 3}
 --- !u!1 &1748187735 stripped
 GameObject:
@@ -787,6 +802,28 @@ Camera:
   m_CorrespondingSourceObject: {fileID: 686998693613478800, guid: ac17f81a7865a9d4890d3ce1da6b5213, type: 3}
   m_PrefabInstance: {fileID: 1748187734}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1748187738 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8187148106766444548, guid: ac17f81a7865a9d4890d3ce1da6b5213, type: 3}
+  m_PrefabInstance: {fileID: 1748187734}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1748187739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1748187738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2fba25a5cd15594e8f050a11e386c80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ConfineMode: 1
+  m_BoundingVolume: {fileID: 0}
+  m_BoundingShape2D: {fileID: 0}
+  m_ConfineScreenEdges: 1
+  m_Damping: 0
 --- !u!1 &1908555433
 GameObject:
   m_ObjectHideFlags: 0
