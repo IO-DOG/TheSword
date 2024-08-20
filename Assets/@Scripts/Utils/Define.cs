@@ -63,6 +63,7 @@ public class Define
         Portal = 11,
         EItem = 12,
         Lever = 14,
+        InteractObjects = 15,
     }
 
     public enum MoveDir

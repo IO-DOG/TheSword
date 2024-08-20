@@ -23,15 +23,22 @@ public class CameraController : MonoBehaviour
         {
             _angle = value;
 
-            AdjustCameraPitch(_angle, Managers.Game.Monsters);
-            AdjustCameraPitch(_angle, Managers.Game.Items);
+            if(this.transform.parent.tag == "MainCamera")
+            {
+                AdjustCameraPitch(_angle, Managers.Game.Monsters);
+                AdjustCameraPitch(_angle, Managers.Game.Items);
+            }
+
             //AdjustCameraPitch(_angle, Managers.Game.Lights);
         }
     }
 
     private void Start()
     {
-        Managers.Game.MainCamera = this.transform.parent.GetComponent<Camera>();
+        if(this.transform.parent.tag == "MainCamera")
+            Managers.Game.MainCamera = this.transform.parent.GetComponent<Camera>();
+        if (this.transform.parent.tag == "RenderCamera")
+            Managers.Game.RenderCamera = this.transform.parent.GetComponent<Camera>();
     }
 
     public void SetCameraTarget(GameObject target)
@@ -48,7 +55,8 @@ public class CameraController : MonoBehaviour
 
         transposer.m_FollowOffset = offset;
 
-        ChangeView(angle, go);
+        if(this.transform.parent.tag == "MainCamera")
+            ChangeView(angle, go);
     }
 
     void ChangeView(float angle, GameObject go)

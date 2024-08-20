@@ -40,6 +40,7 @@ public class GameManager
     public Sprite _screenShot2 = null;
 
     public Camera MainCamera;
+    public Camera RenderCamera;
     public GameObject Map;
     public GameObject Monsters;
     public GameObject Items;
@@ -395,6 +396,7 @@ public class GameManager
             //InstantiateLights(key, lights.transform);
         }
 
+        RenderCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, Managers.Game.Player.gameObject);
         MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, Managers.Game.Player.gameObject);
     }
 
