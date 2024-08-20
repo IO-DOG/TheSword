@@ -1,3 +1,4 @@
+using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,7 +16,8 @@ public class UI_TutorialScene : UI_Scene
 
         Managers.Game.CurPlayerData.CurStageid = 0;
         Managers.Game.InstantiateMap(Managers.Game.CurPlayerData.CurStageid);
-        
+        Managers.Game.SetCameraConfiner();
+
         FadeEffect(Define.FadeEvent.FadnIn, Define.FADE_DURATION);
         FadeEffect(Define.FadeEvent.CenterToRight, Define.FADE_DURATION);
 

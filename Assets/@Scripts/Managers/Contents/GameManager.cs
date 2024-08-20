@@ -1,3 +1,4 @@
+using Cinemachine;
 using Data;
 using Newtonsoft.Json;
 using System;
@@ -11,6 +12,7 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Playables;
+using UnityEngine.Rendering;
 using static Define;
 using static UnityEditor.Progress;
 using static UnityEngine.EventSystems.EventTrigger;
@@ -269,6 +271,12 @@ public class GameManager
         return bossRoomName;
     }
 
+    public void SetCameraConfiner()
+    {
+        Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetComponent<CinemachineConfiner>().m_BoundingVolume
+            = GameObject.Find("Dungeon_" + Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonID).GetComponent<BoxCollider>();
+    }
+
     public void InstantiateMap(int key)
     {
         int count = 0;
@@ -392,12 +400,12 @@ public class GameManager
             if (count == maxCount - 1)
                 break;
 
-            MainCamera.GetComponentInChildren<CameraController>().Angle = Define.CAMERA_ANGLE;
+            MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Monsters);
+            MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Items);
             //InstantiateLights(key, lights.transform);
         }
 
-        RenderCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, Managers.Game.Player.gameObject);
-        MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, Managers.Game.Player.gameObject);
+        MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Player.gameObject);
     }
 
     void InstantiateLights(string DGName, Transform parent)

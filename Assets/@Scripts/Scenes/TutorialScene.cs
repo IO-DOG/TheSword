@@ -38,7 +38,8 @@ public class TutorialScene : BaseScene
         Managers.Game.OnDirect = true;
 
         // Set Camera Position
-        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetCameraTarget(_directingObjects[0]);
+        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetCameraTarget(Managers.Game.Player.gameObject);
+        //Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetCameraTarget(_directingObjects[0]);
 
         // Player Movement
         float originalSpeed = Managers.Game.CurPlayerData.MoveSpeed;
@@ -67,7 +68,7 @@ public class TutorialScene : BaseScene
             if (prevConvsersationState && !currentConversationState)
             {
                 Managers.Game.OnDirect = false;
-                Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetCameraTarget(Managers.Game.Player.gameObject);
+                //Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetCameraTarget(Managers.Game.Player.gameObject);
             }
 
             prevConvsersationState = currentConversationState;

@@ -15,51 +15,25 @@ public class CameraController : MonoBehaviour
     Vector3 _goOriginScale;
     Vector3 _playerOriginScale;
 
-    float _angle;
-    public float Angle
-    {
-        get { return _angle; }
-        set
-        {
-            _angle = value;
-
-            if(this.transform.parent.tag == "MainCamera")
-            {
-                AdjustCameraPitch(_angle, Managers.Game.Monsters);
-                AdjustCameraPitch(_angle, Managers.Game.Items);
-            }
-
-            //AdjustCameraPitch(_angle, Managers.Game.Lights);
-        }
-    }
-
     private void Start()
     {
         if(this.transform.parent.tag == "MainCamera")
             Managers.Game.MainCamera = this.transform.parent.GetComponent<Camera>();
         if (this.transform.parent.tag == "RenderCamera")
             Managers.Game.RenderCamera = this.transform.parent.GetComponent<Camera>();
+
+        CinemachineTransposer transposer = GetComponent<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>();
+        transposer.m_FollowOffset = new Vector3(0f, 2f, 0f);
+        //this.transform.eulerAngles = new Vector3(Define.CAMERA_ANGLE, 0f, 0f);
     }
 
     public void SetCameraTarget(GameObject target)
     {
         GetComponent<CinemachineVirtualCamera>().Follow = target.transform;
-        GetComponent<CinemachineVirtualCamera>().LookAt = target.transform;
+        GetComponent<CinemachineVirtualCamera>().LookAt = null;
     }
 
-    public void AdjustCameraPitch(float angle, GameObject go)
-    {
-        CinemachineTransposer transposer = GetComponent<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>();
-        Vector3 offset = transposer.m_FollowOffset;
-        offset.y = (-1) * Mathf.Tan(Mathf.Deg2Rad * angle) * offset.z;
-
-        transposer.m_FollowOffset = offset;
-
-        if(this.transform.parent.tag == "MainCamera")
-            ChangeView(angle, go);
-    }
-
-    void ChangeView(float angle, GameObject go)
+    public void ChangeView(float angle, GameObject go)
     {
         scaleMultiplier = 1 / Mathf.Cos(angle * Mathf.Deg2Rad);
         _playerOriginScale = Managers.Game.Player.transform.localScale;
