@@ -34,8 +34,8 @@ public class CameraConfiner : MonoBehaviour
         gameObject.transform.rotation = Quaternion.Euler(new Vector3(90f, 0f, 0f));
         gameObject.transform.localScale = new Vector3(1 / 0.33f, 1 / 0.33f, 1 / 0.33f);
 
-        gameObject.GetComponent<BoxCollider>().size = new Vector3(combineBounds.size.x, combineBounds.size.z - (Define.TILE_SIZE / 2) - (4.6f - Mathf.Sqrt(3)), 50f);
-        gameObject.GetComponent<BoxCollider>().center = new Vector3(combineBounds.center.x - GetMapCount() * 100, combineBounds.center.z - (4.6f - Mathf.Sqrt(3)) / 2, -5f);
+        gameObject.GetComponent<BoxCollider>().size = new Vector3(combineBounds.size.x - (Define.TILE_SIZE / 1.5f), combineBounds.size.z - (Define.TILE_SIZE) - (4.6f / Mathf.Sqrt(3)), 50f);
+        gameObject.GetComponent<BoxCollider>().center = new Vector3(combineBounds.center.x - GetMapCount() * 100, combineBounds.center.z - (Define.TILE_SIZE / 1.5f), -5f);
     }
 
     int GetMapCount()
