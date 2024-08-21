@@ -5,6 +5,12 @@ TagManager:
   serializedVersion: 2
   tags:
   - Light
+  - Missile
+  - Target
+  - InteractObject
+  - RenderCamera
+  - CameraConfiner
+  - ConfinerTaget
   layers:
   - Default
   - TransparentFX
@@ -21,8 +27,8 @@ TagManager:
   - EItem
   - Light
   - Lever
-  - 
-  - 
+  - InteractObjects
+  - FirstRenderer
   - 
   - 
   - 
@@ -41,7 +47,4 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
-    locked: 0
-  - name: Dust
-    uniqueID: 2074352109
     locked: 0
