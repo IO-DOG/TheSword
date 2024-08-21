@@ -279,6 +279,9 @@ namespace Data
         public string ScriptEn;
         public string ScriptJp;
         public string ScriptCn;
+        //public string Speaker;
+        //public string PlayerSprite;
+        //public string OpponentSprite;
     }
 
     [Serializable]
@@ -319,32 +322,6 @@ namespace Data
         {
             Dictionary<int, StageInfoData> dict = new Dictionary<int, StageInfoData>();
             foreach (StageInfoData script in stageInfos)
-                dict.Add(script.id, script);
-            return dict;
-        }
-    }
-    #endregion
-
-    #region EventData
-    [Serializable]
-    public class EventData
-    {
-        public int id;
-        public string IllustLeft;
-        public string IllustRight;
-        public int ScriptID;
-        public int Class;
-        public float Delay;
-    }
-
-    [Serializable]
-    public class EventDataLoader : ILoader<int, EventData>
-    {
-        public List<EventData> events = new List<EventData>();
-        public Dictionary<int, EventData> MakeDict()
-        {
-            Dictionary<int, EventData> dict = new Dictionary<int, EventData>();
-            foreach (EventData script in events)
                 dict.Add(script.id, script);
             return dict;
         }

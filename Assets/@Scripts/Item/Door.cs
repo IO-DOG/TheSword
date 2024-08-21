@@ -72,7 +72,7 @@ public class Door : MonoBehaviour
     public Sequence FadeDoor()
     {
         Tween tween1 = gameObject.GetComponent<MeshRenderer>().material.DOFade(1f, 1f);
-        Tween tween2 = gameObject.GetComponent<MeshRenderer>().material.DOFade(0.0f, 0.8f);
+        Tween tween2 = gameObject.GetComponent<MeshRenderer>().material.DOFade(0.0f, 2f);
 
         Sequence seq = DOTween.Sequence();
         seq.Append(tween1).Append(tween2);

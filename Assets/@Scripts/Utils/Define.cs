@@ -63,7 +63,6 @@ public class Define
         Portal = 11,
         EItem = 12,
         Lever = 14,
-        InteractObjects = 15,
     }
 
     public enum MoveDir
@@ -109,7 +108,6 @@ public class Define
 
     public enum TileType
     {
-        VoidTile = -1,
         Void = 0,
         Floor,
         Wall,
@@ -156,13 +154,6 @@ public class Define
         IdleDown,
         OnLever,
     }
-
-    public enum EventClass
-    {
-        Start = 0,
-        InProgress = 1,
-        End = 2,
-    }
     #endregion
 
     #region BossMonsterId
@@ -180,16 +171,11 @@ public class Define
 
     #region Script Data
     public static int TITLE_MENU = 0;
-    public static int INTRO_STORY = 100000;
-    public static int STAGE_NAME = 5000;
-    public static int PLAYER_DEFAULT_NAME = 6;
-    public static int TUTORIAL_SCRIPT = 100006;
+    public static int INTRO_STORY = 10000;
+    public static int STAGE_NAME = 30000;
+    public static int PLAYER_DEFAULT_NAME = 10;
+    public static int TUTORIAL_SCRIPT = 11000;
     public static int STAT_INFO_SCRIPT = 100;
-    #endregion
-
-    #region Event ID
-    public static int EVENT_TUTORIAL = 0;
-    public static int EVENT_SWORD_FIRST = 1;
     #endregion
 
     public static float FADE_DURATION = 2f;

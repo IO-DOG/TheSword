@@ -2,7 +2,6 @@ using Data;
 using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -18,14 +17,12 @@ public class DecoJSJEditor : Editor
     private SerializedProperty _stageName;
 
     GameObject[] Tilemap = new GameObject[100];
-    GameObject VoidTile;
 
     private void OnEnable()
     {
         _stageName = serializedObject.FindProperty("_stageName");
         MapDic = LoadJson<Data.MapDataLoader, string, Data.MapData>(_path).MakeDict();
 
-        VoidTile = Resources.Load("DecoTiles/Tilemap_-1") as GameObject;
         Tilemap[0] = Resources.Load("DecoTiles/Tilemap_0") as GameObject;
         Tilemap[1] = Resources.Load("DecoTiles/Tilemap_1") as GameObject;
         Tilemap[3] = Resources.Load("DecoTiles/Tilemap_3") as GameObject;
@@ -273,11 +270,6 @@ public class DecoJSJEditor : Editor
                     else if (tile.PrefabID == (int)Define.TileType.SpawnPoint)
                     {
                         GameObject go = Instantiate(Tilemap[tile.PrefabID], tiles.transform);
-                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-                    }
-                    else if (tile.PrefabID == (int)Define.TileType.VoidTile)
-                    {
-                        GameObject go = Instantiate(VoidTile, tiles.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
                     }
                 }

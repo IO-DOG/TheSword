@@ -15,36 +15,43 @@ public class CameraController : MonoBehaviour
     Vector3 _goOriginScale;
     Vector3 _playerOriginScale;
 
-    private void Start()
+    float _angle;
+    public float Angle
     {
-        if(this.transform.parent.tag == "MainCamera")
-            Managers.Game.MainCamera = this.transform.parent.GetComponent<Camera>();
-        if (this.transform.parent.tag == "RenderCamera")
-            Managers.Game.RenderCamera = this.transform.parent.GetComponent<Camera>();
+        get { return _angle; }
+        set
+        {
+            _angle = value;
 
-        CinemachineTransposer transposer = GetComponent<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>();
-        transposer.m_FollowOffset = new Vector3(0f, 2f, 0f);
-        this.transform.parent.eulerAngles = new Vector3(Define.CAMERA_ANGLE, 0f, 0f);
+            AdjustCameraPitch(_angle, Managers.Game.Monsters);
+            AdjustCameraPitch(_angle, Managers.Game.Items);
+            //AdjustCameraPitch(_angle, Managers.Game.Lights);
+        }
     }
 
-    public static void SetCameraConfiner()
+    private void Start()
     {
-        GameObject curMap = GameObject.Find("Dungeon_" + Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonID);
-
-        Managers.Game.MainCamera.GetComponentInChildren<CinemachineConfiner>().m_BoundingVolume
-            = curMap.GetComponentInChildren<CameraConfiner>().gameObject.GetComponent<BoxCollider>();
-
-        Managers.Game.RenderCamera.GetComponentInChildren<CinemachineConfiner>().m_BoundingVolume
-            = curMap.GetComponentInChildren<CameraConfiner>().gameObject.GetComponent<BoxCollider>();
+        Managers.Game.MainCamera = this.transform.parent.GetComponent<Camera>();
     }
 
     public void SetCameraTarget(GameObject target)
     {
         GetComponent<CinemachineVirtualCamera>().Follow = target.transform;
-        GetComponent<CinemachineVirtualCamera>().LookAt = null;
+        GetComponent<CinemachineVirtualCamera>().LookAt = target.transform;
     }
 
-    public void ChangeView(float angle, GameObject go)
+    public void AdjustCameraPitch(float angle, GameObject go)
+    {
+        CinemachineTransposer transposer = GetComponent<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>();
+        Vector3 offset = transposer.m_FollowOffset;
+        offset.y = (-1) * Mathf.Tan(Mathf.Deg2Rad * angle) * offset.z;
+
+        transposer.m_FollowOffset = offset;
+
+        ChangeView(angle, go);
+    }
+
+    void ChangeView(float angle, GameObject go)
     {
         scaleMultiplier = 1 / Mathf.Cos(angle * Mathf.Deg2Rad);
         _playerOriginScale = Managers.Game.Player.transform.localScale;

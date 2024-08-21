@@ -1,4 +1,3 @@
-using Cinemachine;
 using Data;
 using System;
 using System.Collections;
@@ -13,26 +12,30 @@ public class PortalController : MonoBehaviour
 
     public void UsePortal()
     {
-        string nextStageName = "";
         if (_stairs == (int)Define.Stairs.Upstairs)
         {
-            nextStageName = Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].UpStage;
+            string nextStageName = Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].UpStage;
+            Managers.Game.CurPlayerData.CurStageid = Managers.Data.FindKeyByValue_StageInfoData(nextStageName);
+
+            Vector3 nextPos = GetNextPos(nextStageName);
+            Managers.Game.Player.transform.position = nextPos;
         }
         else if (_stairs == (int)Define.Stairs.Downstairs)
         {
-            nextStageName = Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DownStage;
+            string nextStageName = Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DownStage;
+            Managers.Game.CurPlayerData.CurStageid = Managers.Data.FindKeyByValue_StageInfoData(nextStageName);
+
+            Vector3 nextPos = GetNextPos(nextStageName);
+            Managers.Game.Player.transform.position = nextPos;
         }
         else if (_stairs == (int)Define.Stairs.BossRoom)
         {
-            nextStageName = Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].BossRoom;
+            string nextStageName = Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].BossRoom;
+            Managers.Game.CurPlayerData.CurStageid = Managers.Data.FindKeyByValue_StageInfoData(nextStageName);
+
+            Vector3 nextPos = GetNextPos(nextStageName);
+            Managers.Game.Player.transform.position = nextPos;
         }
-
-        Managers.Game.CurPlayerData.CurStageid = Managers.Data.FindKeyByValue_StageInfoData(nextStageName);
-
-        Vector3 nextPos = GetNextPos(nextStageName);
-        Managers.Game.Player.transform.position = nextPos;
-
-        CameraController.SetCameraConfiner();
     }
 
     Vector3 GetNextPos(string nextStageName)

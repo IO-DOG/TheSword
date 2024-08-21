@@ -35,9 +35,8 @@ public class ConsumableItem : MonoBehaviour
         Debug.Log(Managers.Game.ConsumableItemData.Name + "is Picked up!");
         Managers.Data.CItemActiveOff(_itemIndex_forActive);
         gameObject.SetActive(false);
-        PlayParticle();
 
-        if (id < NUM_OF_KEYS)
+        if(id < NUM_OF_KEYS)
         {
             Managers.Game.KeyInventory.AddItem(this);
         }
@@ -53,36 +52,5 @@ public class ConsumableItem : MonoBehaviour
         }
 
         Managers.Game.SaveGame();
-    }
-
-    private void PlayParticle()
-    {
-        switch (id)
-        {
-            case 3:
-            case 4:
-                {
-                    GameObject particle = Managers.Resource.Instantiate("FX_Potion_B");
-                    particle.transform.position = this.transform.position; ;
-                    particle.transform.localScale = Vector3.one * 0.33f;
-                }
-                break;
-            case 5:
-            case 6:
-                {
-                    GameObject particle = Managers.Resource.Instantiate("FX_Potion_C");
-                    particle.transform.position = this.transform.position;
-                    particle.transform.localScale = Vector3.one * 0.33f;
-                }
-                break;
-            case 7:
-            case 8:
-                {
-                    GameObject particle = Managers.Resource.Instantiate("FX_Potion_D");
-                    particle.transform.position = this.transform.position;
-                    particle.transform.localScale = Vector3.one * 0.33f;
-                }
-                break;
-        }
     }
 }
