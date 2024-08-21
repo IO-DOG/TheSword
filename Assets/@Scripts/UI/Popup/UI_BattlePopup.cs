@@ -32,7 +32,7 @@ public class UI_BattlePopup : UI_Popup
         BindObject(typeof(Objects));
         #endregion
 
-        //GetImage((int)Images.BGImage).sprite = Managers.Game._screenShot2;
+        GetImage((int)Images.BGImage).sprite = Managers.Game._screenShot2;
 
         GameObject go = GetObject((int)Objects.Contents).gameObject;
         // TODO

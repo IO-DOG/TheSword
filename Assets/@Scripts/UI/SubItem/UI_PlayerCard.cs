@@ -390,7 +390,7 @@ public class UI_PlayerCard : UI_Base
         GameObject player = GameObject.Find("PlayerImage");
         GameObject go = Managers.Resource.Instantiate(attackFX, GetImage((int)Images.PlayerImage).transform);
         var uiParticle = go.GetOrAddComponent<UIParticle>();
-        uiParticle.scale = 500;
+        uiParticle.scale = 300;
         uiParticle.Play();
         
         //Destroy(uiParticle, 0.3f);
@@ -403,7 +403,7 @@ public class UI_PlayerCard : UI_Base
         GameObject monster = GameObject.Find("CreatureImage");
         GameObject go = Managers.Resource.Instantiate(hitFX, monster.transform);
         var uiParticle = go.GetOrAddComponent<UIParticle>();
-        uiParticle.scale = 500;
+        uiParticle.scale = 300;
         uiParticle.Play();
 
         //Destroy(uiParticle, 0.3f);
