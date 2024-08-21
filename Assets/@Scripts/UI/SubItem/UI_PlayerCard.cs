@@ -403,7 +403,7 @@ public class UI_PlayerCard : UI_Base
         GameObject monster = GameObject.Find("CreatureImage");
         GameObject go = Managers.Resource.Instantiate(hitFX, monster.transform);
         var uiParticle = go.GetOrAddComponent<UIParticle>();
-        var childrenUIParticle = go.GetComponentsInChildren<UIParticle>()[1];
+        var childrenUIParticle = go.GetComponentsInChildren<UIParticle>()[1]; // 이거 좀 위험한 코드임.
         uiParticle.scale = 300;
         childrenUIParticle.scale = 300;
         Debug.Log($"childrenUIParticle.gameObject.name : {childrenUIParticle.gameObject.name}");
