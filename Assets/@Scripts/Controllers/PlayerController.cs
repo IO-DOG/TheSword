@@ -272,11 +272,11 @@ public class PlayerController : MonoBehaviour
     void CheckInteract()
     {
         RaycastHit hit;
-        Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset);
+        Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset, LayerMask.GetMask("InteractObjects"));
 
         InteractObjectController interactObejct = hit.collider.gameObject.GetComponent<InteractObjectController>();
 
-        if (interactObejct != null)
+         if (interactObejct != null)
         {
             interactObejct.Interact();
         }
