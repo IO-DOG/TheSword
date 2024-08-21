@@ -1,3 +1,4 @@
+using Cinemachine;
 using Data;
 using Newtonsoft.Json;
 using System;
@@ -11,6 +12,7 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Playables;
+using UnityEngine.Rendering;
 using static Define;
 using static UnityEditor.Progress;
 using static UnityEngine.EventSystems.EventTrigger;
@@ -40,6 +42,7 @@ public class GameManager
     public Sprite _screenShot2 = null;
 
     public Camera MainCamera;
+    public Camera RenderCamera;
     public GameObject Map;
     public GameObject Monsters;
     public GameObject Items;
@@ -289,6 +292,8 @@ public class GameManager
 
             GameObject map = Managers.Resource.Instantiate("Dungeon_" + chapter + count.ToString("D3"));
 
+            Door[] doors = map.GetComponentsInChildren<Door>();
+
             GameObject items = Util.FindChildByName(map.transform, "Items").gameObject;
             GameObject monsters = Util.FindChildByName(map.transform, "Monsters").gameObject;
             GameObject bossMonsters = Util.FindChildByName(map.transform, "BossMonsters").gameObject;
@@ -298,7 +303,18 @@ public class GameManager
 
             foreach (Data.TileData tile in mapData.Tiles)
             {
-                if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
+                if (tile is DoorData doorTile)
+                {
+                    if (doorTile.IsActive == false)
+                    {
+                        foreach(Door child in doors)
+                        {
+                            if (doorTile.TotalCount == child._doorIndex_forActive)
+                                child.gameObject.SetActive(false);
+                        }
+                    }
+                }
+                else if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
                 {
                     GameObject item = Managers.Resource.Instantiate("ConsumableItem", items.transform);
                     item.transform.localPosition = new Vector3 (citemTile.Position.X, citemTile.Position.Y, citemTile.Position.Z);
@@ -378,11 +394,13 @@ public class GameManager
             if (count == maxCount - 1)
                 break;
 
-            MainCamera.GetComponentInChildren<CameraController>().Angle = Define.CAMERA_ANGLE;
+            MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Monsters);
+            MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Items);
             //InstantiateLights(key, lights.transform);
         }
 
-        MainCamera.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, Managers.Game.Player.gameObject);
+        MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Player.gameObject);
+        CameraController.SetCameraConfiner();
     }
 
     void InstantiateLights(string DGName, Transform parent)
