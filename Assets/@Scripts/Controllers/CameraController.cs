@@ -27,13 +27,15 @@ public class CameraController : MonoBehaviour
         this.transform.parent.eulerAngles = new Vector3(Define.CAMERA_ANGLE, 0f, 0f);
     }
 
-    public void SetCameraConfiner()
+    public static void SetCameraConfiner()
     {
-        Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetComponent<CinemachineConfiner>().m_BoundingVolume
-            = GameObject.Find("Dungeon_" + Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonID).GetComponent<BoxCollider>();
+        GameObject curMap = GameObject.Find("Dungeon_" + Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonID);
 
-        Managers.Game.RenderCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetComponent<CinemachineConfiner>().m_BoundingVolume
-    = GameObject.Find("Dungeon_" + Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonID).GetComponent<BoxCollider>();
+        Managers.Game.MainCamera.GetComponentInChildren<CinemachineConfiner>().m_BoundingVolume
+            = curMap.GetComponentInChildren<CameraConfiner>().gameObject.GetComponent<BoxCollider>();
+
+        Managers.Game.RenderCamera.GetComponentInChildren<CinemachineConfiner>().m_BoundingVolume
+            = curMap.GetComponentInChildren<CameraConfiner>().gameObject.GetComponent<BoxCollider>();
     }
 
     public void SetCameraTarget(GameObject target)

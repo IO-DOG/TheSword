@@ -400,6 +400,7 @@ public class GameManager
         }
 
         MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Player.gameObject);
+        CameraController.SetCameraConfiner();
     }
 
     void InstantiateLights(string DGName, Transform parent)

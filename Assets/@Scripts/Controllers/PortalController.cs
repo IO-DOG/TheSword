@@ -28,10 +28,11 @@ public class PortalController : MonoBehaviour
         }
 
         Managers.Game.CurPlayerData.CurStageid = Managers.Data.FindKeyByValue_StageInfoData(nextStageName);
-        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetCameraConfiner();
 
         Vector3 nextPos = GetNextPos(nextStageName);
         Managers.Game.Player.transform.position = nextPos;
+
+        CameraController.SetCameraConfiner();
     }
 
     Vector3 GetNextPos(string nextStageName)
