@@ -196,6 +196,8 @@ public class UI_CreatureCard : UI_Base
         }
 
         _attackCount++;
+        CreateMonsterAttackParticle();
+        CreatePlayerHitParticle();
         Managers.Game.OnBattleDataRefreshAction.Invoke();
     }
 
@@ -365,5 +367,19 @@ public class UI_CreatureCard : UI_Base
         GameObject deathSoulPurple = Managers.Resource.Instantiate("BoneHeadBloodExplosion");
         deathSoulPurple.transform.position = particlePos.position;
         Destroy(deathSoulPurple, 10);
+    }
+
+    void CreateMonsterAttackParticle()
+    {
+        string battleParticleAttack = Managers.Game.MonsterData.BattleParticleAttack;
+        
+        GameObject go = Managers.Resource.Instantiate(battleParticleAttack, GetImage((int)Images.CreatureImage).gameObject.transform);    
+    }
+
+    void CreatePlayerHitParticle()
+    {
+        string battleParticleHit = Managers.Game.MonsterData.BattleParticleHit;
+        GameObject player = GameObject.Find("CreatureImage");
+        GameObject go = Managers.Resource.Instantiate(battleParticleHit, player.transform);
     }
 }

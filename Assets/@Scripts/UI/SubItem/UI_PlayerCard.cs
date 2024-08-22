@@ -1,3 +1,4 @@
+using Coffee.UIExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,7 +10,7 @@ public class UI_PlayerCard : UI_Base
 
     enum Images
     {
-        CreatureImage,
+        PlayerImage,
         HPHar,
         HPHarGauge,
         AttackDelayGauge,
@@ -94,7 +95,7 @@ public class UI_PlayerCard : UI_Base
                 Refresh();
             }
         }
-        GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play("UIPlayerAttackAnim");
+        GetImage((int)Images.PlayerImage).gameObject.GetComponent<Animator>().Play("UIPlayerAttackAnim");
         GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play("UISword1AttackAnim");
         GetImage((int)Images.CreatureShieldImage).gameObject.GetComponent<Animator>().Play("UIShield1AttackAnim");
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
@@ -191,6 +192,9 @@ public class UI_PlayerCard : UI_Base
             Managers.Game.OnBattle = false;
             return;
         }
+
+        CreatePlayerAttackParticle();
+        CreateMonsterHitParticle();
         Managers.Game.OnBattleDataRefreshAction.Invoke();
     }
 
@@ -280,8 +284,8 @@ public class UI_PlayerCard : UI_Base
         int width = 660;
         int height = 660;
         WaitForSeconds delay = new WaitForSeconds(0.1f);
-        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureImage).transform);
-        go.transform.position = GetImage((int)Images.CreatureImage).transform.position;
+        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.PlayerImage).transform);
+        go.transform.position = GetImage((int)Images.PlayerImage).transform.position;
         GameObject sword = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureSwordImage).transform);
         sword.transform.position = GetImage((int)Images.CreatureSwordImage).transform.position;
         GameObject shield = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureShieldImage).transform);
@@ -301,9 +305,9 @@ public class UI_PlayerCard : UI_Base
         animator.Play($"UIPlayerIdleAnim");
         swordanimator.Play($"UISword1IdleAnim");
         shieldanimator.Play($"UIShield1IdleAnim");
-        image.sprite = GetImage((int)Images.CreatureImage).sprite;
-        swordImage.sprite = GetImage((int)Images.CreatureImage).sprite;
-        shieldImage.sprite = GetImage((int)Images.CreatureImage).sprite;
+        image.sprite = GetImage((int)Images.PlayerImage).sprite;
+        swordImage.sprite = GetImage((int)Images.PlayerImage).sprite;
+        shieldImage.sprite = GetImage((int)Images.PlayerImage).sprite;
         image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         swordImage.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         shieldImage.material = Managers.Resource.Load<Material>("PaintWhiteMat");
@@ -339,13 +343,13 @@ public class UI_PlayerCard : UI_Base
         int height = 660;
 
         WaitForSeconds delay = new WaitForSeconds(0.1f);
-        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureImage).transform);
+        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.PlayerImage).transform);
         Image image = go.GetOrAddComponent<Image>();
-        image.rectTransform.sizeDelta = GetImage((int)Images.CreatureImage).rectTransform.sizeDelta;
+        image.rectTransform.sizeDelta = GetImage((int)Images.PlayerImage).rectTransform.sizeDelta;
         Animator animator = go.GetOrAddComponent<Animator>();
         animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIPlayerAnimController");
         animator.Play($"UIPlayerIdleAnim");
-        image.sprite = GetImage((int)Images.CreatureImage).sprite;
+        image.sprite = GetImage((int)Images.PlayerImage).sprite;
         image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         image.color = Util.DamagedColor();
         image.rectTransform.sizeDelta = new Vector2(width, height);
@@ -377,5 +381,34 @@ public class UI_PlayerCard : UI_Base
         //GetImage((int)Images.CreatureImage).color = Color.white;
         //GetImage((int)Images.CreatureSwordImage).color = Color.white;
         //GetImage((int)Images.CreatureShieldImage).color = Color.white;
+    }
+
+    void CreatePlayerAttackParticle()
+    {
+        int swordId = Managers.Game.CurPlayerData.CurSword;
+        string attackFX = Managers.Data.EquipDic[swordId].AttackFX;
+        GameObject player = GameObject.Find("PlayerImage");
+        GameObject go = Managers.Resource.Instantiate(attackFX, GetImage((int)Images.PlayerImage).transform);
+        var uiParticle = go.GetOrAddComponent<UIParticle>();
+        uiParticle.scale = 300;
+        uiParticle.Play();
+        
+        //Destroy(uiParticle, 0.3f);
+    }
+
+    void CreateMonsterHitParticle()
+    {
+        int swordId = Managers.Game.CurPlayerData.CurSword;
+        string hitFX = Managers.Data.EquipDic[swordId].HitFX;
+        GameObject monster = GameObject.Find("CreatureImage");
+        GameObject go = Managers.Resource.Instantiate(hitFX, monster.transform);
+        var uiParticle = go.GetOrAddComponent<UIParticle>();
+        var childrenUIParticle = go.GetComponentsInChildren<UIParticle>()[1]; // 이거 좀 위험한 코드임.
+        uiParticle.scale = 300;
+        childrenUIParticle.scale = 300;
+        Debug.Log($"childrenUIParticle.gameObject.name : {childrenUIParticle.gameObject.name}");
+        uiParticle.Play();
+        childrenUIParticle.Play();
+        //Destroy(uiParticle, 0.3f);
     }
 }

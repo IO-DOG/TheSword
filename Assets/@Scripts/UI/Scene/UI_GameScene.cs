@@ -129,7 +129,6 @@ public class UI_GameScene : UI_Scene
 
     private void Update()
     {
-
         if (Input.GetMouseButtonDown(0))
         {
             RaycastHit hit;
@@ -173,6 +172,22 @@ public class UI_GameScene : UI_Scene
         if (Input.GetKeyDown(KeyCode.F5))
         {
             Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(0);
+        }
+
+        if (Input.GetKeyDown(KeyCode.F8))
+        {
+            //Managers.Game.CurPlayerData.CurSword = 9;
+            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Clear();
+            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(9);
+            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(10);
+
+            for (int i = 0; i < Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Count; i++)
+            {
+                Debug.Log(Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword][i] + "Inventory");
+                Debug.Log(Managers.Game.CurPlayerData.CurSword + "CurPlayerSword");
+
+            }
+
         }
         #endregion
     }
