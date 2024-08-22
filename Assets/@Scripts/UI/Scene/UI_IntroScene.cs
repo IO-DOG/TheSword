@@ -39,7 +39,7 @@ public class UI_IntroScene : UI_Scene
         //GetImage((int)Images.SceneFrameImage).gameObject.SetActive(false);
 
         _scripts = Managers.Data.LoadScriptData(Define.INTRO_STORY);
-        totalCount = _scripts.Count;
+        totalCount = 6;
 
         GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx++].id);
         return true;

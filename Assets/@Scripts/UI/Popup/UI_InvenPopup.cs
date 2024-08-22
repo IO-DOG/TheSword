@@ -598,6 +598,44 @@ public class UI_InvenPopup : UI_Popup
         Managers.Game.GameScene.Refresh();
     }
 
+    public void SwapEquip(int curIdx, int idx)
+    {
+        if (curIdx == 0)
+        {
+            Managers.Game.CurPlayerData.Attack += Managers.Data.EquipDic[curIdx].ATK;
+            Managers.Game.CurPlayerData.Defence += Managers.Data.EquipDic[curIdx].DEF;
+            Managers.Game.CurPlayerData.MaxHP += Managers.Data.EquipDic[curIdx].HP;
+            Managers.Game.CurPlayerData.AttackSpeed += Managers.Data.EquipDic[curIdx].ASPD;
+            Managers.Game.CurPlayerData.DefenceSpeed += Managers.Data.EquipDic[curIdx].DSPD;
+            Managers.Game.CurPlayerData.Critical += Managers.Data.EquipDic[curIdx].CRI;
+            Managers.Game.CurPlayerData.CriticalAttack += Managers.Data.EquipDic[curIdx].CRIATK;
+            Managers.Game.CurPlayerData.MoveSpeed += Managers.Data.EquipDic[curIdx].MSPD;
+            return;
+        }
+        else
+        {
+            Managers.Game.CurPlayerData.Attack -= Managers.Data.EquipDic[curIdx].ATK;
+            Managers.Game.CurPlayerData.Defence -= Managers.Data.EquipDic[curIdx].DEF;
+            Managers.Game.CurPlayerData.MaxHP -= Managers.Data.EquipDic[curIdx].HP;
+            Managers.Game.CurPlayerData.AttackSpeed -= Managers.Data.EquipDic[curIdx].ASPD;
+            Managers.Game.CurPlayerData.DefenceSpeed -= Managers.Data.EquipDic[curIdx].DSPD;
+            Managers.Game.CurPlayerData.Critical -= Managers.Data.EquipDic[curIdx].CRI;
+            Managers.Game.CurPlayerData.CriticalAttack -= Managers.Data.EquipDic[curIdx].CRIATK;
+            Managers.Game.CurPlayerData.MoveSpeed -= Managers.Data.EquipDic[curIdx].MSPD;
+
+            Managers.Game.CurPlayerData.Attack += Managers.Data.EquipDic[idx].ATK;
+            Managers.Game.CurPlayerData.Defence += Managers.Data.EquipDic[idx].DEF;
+            Managers.Game.CurPlayerData.MaxHP += Managers.Data.EquipDic[idx].HP;
+            Managers.Game.CurPlayerData.AttackSpeed += Managers.Data.EquipDic[idx].ASPD;
+            Managers.Game.CurPlayerData.DefenceSpeed += Managers.Data.EquipDic[idx].DSPD;
+            Managers.Game.CurPlayerData.Critical += Managers.Data.EquipDic[idx].CRI;
+            Managers.Game.CurPlayerData.CriticalAttack += Managers.Data.EquipDic[idx].CRIATK;
+            Managers.Game.CurPlayerData.MoveSpeed += Managers.Data.EquipDic[idx].MSPD;
+        }
+
+        Managers.Game.GameScene.Refresh();
+    }
+
     /// <summary>
     /// 인덱스에 맞는 장비에 대한 능력치와 설명을 보여준다.
     ///         public float ATK { get; set; }
