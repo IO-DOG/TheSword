@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class DataTransformer : EditorWindow
 {
@@ -38,6 +39,7 @@ public class DataTransformer : EditorWindow
         ParseEquipData("Equip");
         ParseScriptData("Script");
         ParseStageInfoData("StageInfo");
+        ParseEventData("Event");
         Debug.Log("Complete DataTransformer");
     }
 
@@ -283,7 +285,23 @@ public class DataTransformer : EditorWindow
                             block = "0";
                         }
 
-                        if (block[0] == 'I')
+                        if(block[0] == '-')
+                        {
+                            Data.TileData tile = new Data.TileData
+                            {
+                                PrefabID = -1,
+                                Position = new Data.MyVector3
+                                {
+                                    X = xPos,
+                                    Y = 0,
+                                    Z = zPos,
+                                },
+                                TileType = -1,
+                            };
+                            tiles.Add(tile);
+
+                        }
+                        else if (block[0] == 'I')
                         {
                             Data.Occupied tile = new Data.Occupied
                             {
@@ -673,9 +691,6 @@ public class DataTransformer : EditorWindow
             sd.ScriptEn = ConvertValue<string>(row[i++]);
             sd.ScriptJp = ConvertValue<string>(row[i++]);
             sd.ScriptCn = ConvertValue<string>(row[i++]);
-            //sd.Speaker = ConvertValue<string>(row[i++]);
-            //sd.PlayerSprite = ConvertValue<string>(row[i++]);
-            //sd.OpponentSprite = ConvertValue<string>(row[i++]);
 
             loader.scripts.Add(sd);
         }
@@ -717,6 +732,40 @@ public class DataTransformer : EditorWindow
             sd.EXP = ConvertValue<int>(row[i++]);
             sd.BGM = ConvertValue<string>(row[i++]);
             loader.stageInfos.Add(sd);
+        }
+        #endregion
+
+        string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
+        AssetDatabase.Refresh();
+    }
+    static void ParseEventData(string filename)
+    {
+        EventDataLoader loader = new EventDataLoader();
+
+        #region ExcelData
+        string str = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv");
+        Debug.Log(str);
+        string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{filename}Data.csv").Split("\n");
+
+        for (int y = 1; y < lines.Length; y++)
+        {
+            string[] row = lines[y].Replace("\r", "").Split(',');
+
+            if (row.Length == 0)
+                continue;
+            if (string.IsNullOrEmpty(row[0]))
+                continue;
+
+            int i = 0;
+            EventData ed = new EventData();
+            ed.id = ConvertValue<int>(row[i++]);
+            ed.IllustLeft = ConvertValue<string>(row[i++]);
+            ed.IllustRight = ConvertValue<string>(row[i++]);
+            ed.ScriptID = ConvertValue<int>(row[i++]);
+            ed.Class = ConvertValue<int>(row[i++]);
+            ed.Delay = ConvertValue<float>(row[i++]);
+            loader.events.Add(ed);
         }
         #endregion
 

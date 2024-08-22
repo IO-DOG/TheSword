@@ -14,7 +14,7 @@ public class MonsterController : MonoBehaviour
     {
         if (other.gameObject.name == "Player")
         {
-            //ÀüÅõ ±¸Çö
+            //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             Managers.Game.MonsterData.id = Managers.Data.MonsterDic[id].id;
             Managers.Game.MonsterData.Chapter = Managers.Data.MonsterDic[id].Chapter;
             Managers.Game.MonsterData.Class = Managers.Data.MonsterDic[id].Class;

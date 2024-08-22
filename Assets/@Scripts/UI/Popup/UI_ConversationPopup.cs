@@ -7,9 +7,8 @@ using UnityEngine;
 
 public class UI_ConversationPopup : UI_Popup
 {
-    public int _scriptCode;
-    List<ScriptData> _scripts;
-    int _currentIndex = 0;
+    public int _eventID;
+    bool _endFlag = false;
 
     enum Texts
     {
@@ -19,8 +18,8 @@ public class UI_ConversationPopup : UI_Popup
 
     enum Images
     {
-        PlayerPortrait,
-        OpponentPortrait,
+        LeftPortrait,
+        RightPortrait,
         ConversationArrow,
     }
 
@@ -34,10 +33,10 @@ public class UI_ConversationPopup : UI_Popup
         BindText(typeof(Texts));
         #endregion
 
-        GetImage((int)Images.PlayerPortrait).gameObject.transform.localScale = new Vector3(-1, 1, 1);
+        GetImage((int)Images.RightPortrait).gameObject.transform.localScale = new Vector3(-1, 1, 1);
 
         Managers.Game.OnConversation = true;
-        InitScript(_scriptCode);
+        InitScript(Managers.Data.EventDic[_eventID].ScriptID);
 
         return true;
     }
@@ -61,69 +60,56 @@ public class UI_ConversationPopup : UI_Popup
 
     public void InitScript(int scriptCode)
     {
-        _scripts = Managers.Data.LoadScriptData(scriptCode);
-
-        GetImage((int)Images.PlayerPortrait).gameObject.SetActive(false);
-        GetImage((int)Images.OpponentPortrait).gameObject.SetActive(false);
-
-        _currentIndex = 0; // ´ëÈ­ ÀÎµ¦½º ÃÊ±âÈ­
+        GetImage((int)Images.LeftPortrait).gameObject.SetActive(false);
+        GetImage((int)Images.RightPortrait).gameObject.SetActive(false);
         ShowCurrentScript();
     }
 
     private void ShowCurrentScript()
     {
-        //if (_currentIndex < _scripts.Count)
-        //{
-        //    string text = Managers.GetString(_scripts[_currentIndex].id);
-        //    GetText((int)Texts.ConversationText).text = text;
+        if (!string.IsNullOrEmpty(Managers.Data.EventDic[_eventID].IllustLeft))
+        {
+            GetImage((int)Images.LeftPortrait).gameObject.SetActive(true);
+            GetImage((int)Images.LeftPortrait).sprite = Managers.Resource.Load<Sprite>(Managers.Data.EventDic[_eventID].IllustLeft);
+            GetImage((int)Images.RightPortrait).color = Color.gray;
+            GetImage((int)Images.LeftPortrait).color = Color.white;
 
-        //    if (!string.IsNullOrEmpty(_scripts[_currentIndex].PlayerSprite))
-        //    {
-        //        GetImage((int)Images.PlayerPortrait).gameObject.SetActive(true);
-        //        GetImage((int)Images.PlayerPortrait).sprite = Managers.Resource.Load<Sprite>(_scripts[_currentIndex].PlayerSprite);
-        //    }
-        //    else
-        //    {
-        //        GetImage((int)Images.PlayerPortrait).gameObject.SetActive(false);
-        //    }
+            GetText((int)Texts.SpeakerText).text = "ï¿½ï¿½ï¿½";
+        }
 
-        //    if (!string.IsNullOrEmpty(_scripts[_currentIndex].OpponentSprite))
-        //    {
-        //        GetImage((int)Images.OpponentPortrait).gameObject.SetActive(true);
-        //        GetImage((int)Images.OpponentPortrait).sprite = Managers.Resource.Load<Sprite>(_scripts[_currentIndex].OpponentSprite);
-        //    }
-        //    else
-        //    {
-        //        GetImage((int)Images.OpponentPortrait).gameObject.SetActive(false);
-        //    }
+        if (!string.IsNullOrEmpty(Managers.Data.EventDic[_eventID].IllustRight))
+        {
+            GetImage((int)Images.RightPortrait).gameObject.SetActive(true);
+            GetImage((int)Images.RightPortrait).sprite = Managers.Resource.Load<Sprite>(Managers.Data.EventDic[_eventID].IllustRight);
+            GetImage((int)Images.LeftPortrait).color = Color.gray;
+            GetImage((int)Images.RightPortrait).color = Color.white;
 
-        //    GetText((int)Texts.SpeakerText).text = _scripts[_currentIndex].Speaker;
+            GetText((int)Texts.SpeakerText).text = "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½";
+        }
 
-        //    if (_scripts[_currentIndex].Speaker == "P" && !string.IsNullOrEmpty(_scripts[_currentIndex].PlayerSprite))
-        //    {
-        //        GetImage((int)Images.OpponentPortrait).color = Color.gray;
-        //        GetImage((int)Images.PlayerPortrait).color = Color.white;
-        //    }
-        //    else if (_scripts[_currentIndex].Speaker == "O" && !string.IsNullOrEmpty(_scripts[_currentIndex].PlayerSprite))
-        //    {
-        //        GetImage((int)Images.PlayerPortrait).color = Color.gray;
-        //        GetImage((int)Images.OpponentPortrait).color = Color.white;
-        //    }
-        //}
+        string text = Managers.GetString(Managers.Data.ScriptDic[Managers.Data.EventDic[_eventID].ScriptID].id);
+        GetText((int)Texts.ConversationText).text = text;
+
+
+        if (Managers.Data.EventDic[_eventID].Class == (int)Define.EventClass.End)
+        {
+            _endFlag = true;
+            return;
+        }
+
+        _eventID++;
     }
 
     public void ShowNextScript()
     {
-        _currentIndex++;
-        if (_currentIndex < _scripts.Count)
-        {
-            ShowCurrentScript();
-        }
-        else
+        if (_endFlag == true)
         {
             Debug.Log("Conversation ended");
             Managers.Game.OnConversation = false;
             ClosePopupUI();
+            return;
         }
+
+        ShowCurrentScript();
     }
 }
