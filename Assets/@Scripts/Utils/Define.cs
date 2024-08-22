@@ -180,7 +180,7 @@ public class Define
 
     #region Script Data
     public static int TITLE_MENU = 0;
-    public static int INTRO_STORY = 100000;
+    public static int INTRO_STORY = 900000;
     public static int STAGE_NAME = 5000;
     public static int PLAYER_DEFAULT_NAME = 6;
     public static int TUTORIAL_SCRIPT = 100006;
