@@ -162,6 +162,109 @@ public class GameManager
         Managers.Game.CurPlayerData.CriticalAttack += Managers.Data.PlayerDic[Managers.Game.CurPlayerData.Level].CriticalAttack;
         Managers.Game.CurPlayerData.MoveSpeed += Managers.Data.PlayerDic[Managers.Game.CurPlayerData.Level].MoveSpeed;
     }
+
+    public void SwapEquip(int curIdx, int idx)
+    {
+        if (curIdx == 0)
+        {
+            Managers.Game.CurPlayerData.Attack += Managers.Data.EquipDic[curIdx].ATK;
+            Managers.Game.CurPlayerData.Defence += Managers.Data.EquipDic[curIdx].DEF;
+            Managers.Game.CurPlayerData.MaxHP += Managers.Data.EquipDic[curIdx].HP;
+            Managers.Game.CurPlayerData.AttackSpeed += Managers.Data.EquipDic[curIdx].ASPD;
+            Managers.Game.CurPlayerData.DefenceSpeed += Managers.Data.EquipDic[curIdx].DSPD;
+            Managers.Game.CurPlayerData.Critical += Managers.Data.EquipDic[curIdx].CRI;
+            Managers.Game.CurPlayerData.CriticalAttack += Managers.Data.EquipDic[curIdx].CRIATK;
+            Managers.Game.CurPlayerData.MoveSpeed += Managers.Data.EquipDic[curIdx].MSPD;
+            return;
+        }
+        else
+        {
+            Managers.Game.CurPlayerData.Attack -= Managers.Data.EquipDic[curIdx].ATK;
+            Managers.Game.CurPlayerData.Defence -= Managers.Data.EquipDic[curIdx].DEF;
+            Managers.Game.CurPlayerData.MaxHP -= Managers.Data.EquipDic[curIdx].HP;
+            Managers.Game.CurPlayerData.AttackSpeed -= Managers.Data.EquipDic[curIdx].ASPD;
+            Managers.Game.CurPlayerData.DefenceSpeed -= Managers.Data.EquipDic[curIdx].DSPD;
+            Managers.Game.CurPlayerData.Critical -= Managers.Data.EquipDic[curIdx].CRI;
+            Managers.Game.CurPlayerData.CriticalAttack -= Managers.Data.EquipDic[curIdx].CRIATK;
+            Managers.Game.CurPlayerData.MoveSpeed -= Managers.Data.EquipDic[curIdx].MSPD;
+
+            Managers.Game.CurPlayerData.Attack += Managers.Data.EquipDic[idx].ATK;
+            Managers.Game.CurPlayerData.Defence += Managers.Data.EquipDic[idx].DEF;
+            Managers.Game.CurPlayerData.MaxHP += Managers.Data.EquipDic[idx].HP;
+            Managers.Game.CurPlayerData.AttackSpeed += Managers.Data.EquipDic[idx].ASPD;
+            Managers.Game.CurPlayerData.DefenceSpeed += Managers.Data.EquipDic[idx].DSPD;
+            Managers.Game.CurPlayerData.Critical += Managers.Data.EquipDic[idx].CRI;
+            Managers.Game.CurPlayerData.CriticalAttack += Managers.Data.EquipDic[idx].CRIATK;
+            Managers.Game.CurPlayerData.MoveSpeed += Managers.Data.EquipDic[idx].MSPD;
+        }
+
+        Managers.Game.GameScene.Refresh();
+    }
+
+    public void SwapEquip(int idx)
+    {
+        int type = Managers.Data.EquipDic[idx].Type;
+        int curIdx = 1;
+        switch (type)
+        {
+            case 1:
+                curIdx = Managers.Game.CurPlayerData.CurSword;
+                break;
+            case 2:
+                curIdx = Managers.Game.CurPlayerData.CurShield;
+                break;
+            case 3:
+                curIdx = Managers.Game.CurPlayerData.CurRing;
+                break;
+            case 4:
+                //curIdx = Managers.Game.CurPlayerData.CurSword;
+                break;
+            case 5:
+                curIdx = Managers.Game.CurPlayerData.CurShoes;
+                break;
+            case 6:
+                //curIdx = Managers.Game.CurPlayerData.CurSword;
+                break;
+            default:
+                break;
+        }
+
+        if (curIdx == 0)
+        {
+            Managers.Game.CurPlayerData.Attack += Managers.Data.EquipDic[curIdx].ATK;
+            Managers.Game.CurPlayerData.Defence += Managers.Data.EquipDic[curIdx].DEF;
+            Managers.Game.CurPlayerData.MaxHP += Managers.Data.EquipDic[curIdx].HP;
+            Managers.Game.CurPlayerData.AttackSpeed += Managers.Data.EquipDic[curIdx].ASPD;
+            Managers.Game.CurPlayerData.DefenceSpeed += Managers.Data.EquipDic[curIdx].DSPD;
+            Managers.Game.CurPlayerData.Critical += Managers.Data.EquipDic[curIdx].CRI;
+            Managers.Game.CurPlayerData.CriticalAttack += Managers.Data.EquipDic[curIdx].CRIATK;
+            Managers.Game.CurPlayerData.MoveSpeed += Managers.Data.EquipDic[curIdx].MSPD;
+            return;
+        }
+        else
+        {
+            Managers.Game.CurPlayerData.Attack -= Managers.Data.EquipDic[curIdx].ATK;
+            Managers.Game.CurPlayerData.Defence -= Managers.Data.EquipDic[curIdx].DEF;
+            Managers.Game.CurPlayerData.MaxHP -= Managers.Data.EquipDic[curIdx].HP;
+            Managers.Game.CurPlayerData.AttackSpeed -= Managers.Data.EquipDic[curIdx].ASPD;
+            Managers.Game.CurPlayerData.DefenceSpeed -= Managers.Data.EquipDic[curIdx].DSPD;
+            Managers.Game.CurPlayerData.Critical -= Managers.Data.EquipDic[curIdx].CRI;
+            Managers.Game.CurPlayerData.CriticalAttack -= Managers.Data.EquipDic[curIdx].CRIATK;
+            Managers.Game.CurPlayerData.MoveSpeed -= Managers.Data.EquipDic[curIdx].MSPD;
+
+            Managers.Game.CurPlayerData.Attack += Managers.Data.EquipDic[idx].ATK;
+            Managers.Game.CurPlayerData.Defence += Managers.Data.EquipDic[idx].DEF;
+            Managers.Game.CurPlayerData.MaxHP += Managers.Data.EquipDic[idx].HP;
+            Managers.Game.CurPlayerData.AttackSpeed += Managers.Data.EquipDic[idx].ASPD;
+            Managers.Game.CurPlayerData.DefenceSpeed += Managers.Data.EquipDic[idx].DSPD;
+            Managers.Game.CurPlayerData.Critical += Managers.Data.EquipDic[idx].CRI;
+            Managers.Game.CurPlayerData.CriticalAttack += Managers.Data.EquipDic[idx].CRIATK;
+            Managers.Game.CurPlayerData.MoveSpeed += Managers.Data.EquipDic[idx].MSPD;
+        }
+
+        Managers.Game.GameScene.Refresh();
+    }
+
     #endregion
 
     #region Save&Load
