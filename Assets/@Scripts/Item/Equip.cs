@@ -46,6 +46,7 @@ public class Equip : MonoBehaviour
         gameObject.SetActive(false);
 
         Managers.Game.SaveGame();
+        Managers.Game.SwapEquip(Id);
         Managers.Game.GameScene.Refresh();
     }
 }
