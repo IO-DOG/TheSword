@@ -28,6 +28,8 @@ public class UI_SettingPopup : UI_Popup
         BindObject(typeof(GameObjects));
         #endregion
 
+        Managers.Game.playerControllLock = true;
+
         GetObject((int)GameObjects.SoundToggle).gameObject.BindEvent(OnClickSoundToggle);
         GetButton((int)Buttons.SelectLanguageButton).gameObject.BindEvent(OnClickSelectLanguageButton);
         GetObject((int)GameObjects.SoundSlider).GetComponent<Slider>().value = PlayerPrefs.GetFloat("CURSOUND", 1);

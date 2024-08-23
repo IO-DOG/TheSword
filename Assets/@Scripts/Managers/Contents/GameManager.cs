@@ -49,6 +49,8 @@ public class GameManager
     public GameObject Lights;
 
     #region CurPlayerData
+    public bool playerControllLock = false;
+
     public class ContinueData
     {
         public int Level { get; set; } // Lv
