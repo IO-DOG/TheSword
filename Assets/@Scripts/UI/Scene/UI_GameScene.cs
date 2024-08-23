@@ -87,7 +87,7 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false);
         GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false);
 
-        GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() => { Managers.UI.ShowPopupUI<UI_SettingPopup>(); });
+        GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() => { Managers.UI.ShowPopupUI<UI_MenuPopup>(); });
         GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(OnClickMainUIInventoryAImage);
 
         GetButton((int)Buttons.PlayConversation).gameObject.BindEvent(() => 

@@ -192,7 +192,7 @@ public class UI_TitleScene : UI_Scene
     void OnClickSettingButton()
     {
         Debug.Log("Cllck OnClickSettingButton");
-        Managers.UI.ShowPopupUI<UI_SettingPopup>();
+        Managers.UI.ShowPopupUI<UI_MenuPopup>();
     }
 
     void OnClickExitButton()
