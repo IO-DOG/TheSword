@@ -193,7 +193,7 @@ public class Define
     #endregion
 
     public static float FADE_DURATION = 2f;
-    public static float STAGE_NAME_DURATION = 3f;
+    public static float STAGE_NAME_DURATION = 1.5f;
 
     #region EquipDataForInven
     public static int EQUIP_SOWRD_FIRST = 9;

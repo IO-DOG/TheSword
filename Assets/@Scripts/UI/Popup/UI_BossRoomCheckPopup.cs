@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,6 +23,7 @@ public class UI_BossRoomCheckPopup : UI_Popup
     }
 
     #endregion
+
     public override bool Init()
     {
         if (base.Init() == false)
@@ -37,16 +39,40 @@ public class UI_BossRoomCheckPopup : UI_Popup
         GetButton((int)Buttons.YesBtn).gameObject.BindEvent(YesPointerEnter, type: Define.UIEvent.PointerEnter);
         GetButton((int)Buttons.NoBtn).gameObject.BindEvent(NoPointerEnter, type: Define.UIEvent.PointerEnter);
 
+        GetButton((int)Buttons.YesBtn).gameObject.BindEvent(YesClick, type: Define.UIEvent.Click);
+        GetButton((int)Buttons.NoBtn).gameObject.BindEvent(NoClick, type: Define.UIEvent.Click);
 
         GetButton((int)Buttons.YesBtn).gameObject.BindEvent(YesPointerExit, type: Define.UIEvent.PointerExit);
         GetButton((int)Buttons.NoBtn).gameObject.BindEvent(NoPointerExit, type: Define.UIEvent.PointerExit);
 
-        YesPointerExit();
-        NoPointerExit();
+        #region Popup init
+        GetImage((int)Images.BossRoomCheckBox).color = new Color(1f, 1f, 1f, 0f);
+        GetText((int)Texts.BossRoomCheckText).gameObject.SetActive(false);
+        GetButton((int)Buttons.YesBtn).gameObject.SetActive(false);
+        GetButton((int)Buttons.NoBtn).gameObject.SetActive(false);
+        #endregion
+
+        StartCoroutine(PopupAnimation());
 
         return true;
     }
 
+    IEnumerator PopupAnimation()
+    {
+        GetImage((int)Images.BossRoomCheckBox).DOFade(1f, 0.5f);
+        yield return new WaitForSeconds(0.5f);
+
+        GetText((int)Texts.BossRoomCheckText).gameObject.SetActive(true);
+        yield return new WaitForSeconds(3.5f);
+
+        GetButton((int)Buttons.YesBtn).gameObject.SetActive(true);
+        GetButton((int)Buttons.NoBtn).gameObject.SetActive(true);
+
+        YesPointerExit();
+        NoPointerExit();
+    }
+
+    #region Pointer interaction
     void YesPointerEnter()
     {
         GetButton((int)Buttons.YesBtn).gameObject.GetComponent<Animator>().Play("YesMouseOver");
@@ -56,6 +82,17 @@ public class UI_BossRoomCheckPopup : UI_Popup
     {
         GetButton((int)Buttons.NoBtn).gameObject.GetComponent<Animator>().Play("NoMouseOver");
     }
+
+    void YesClick()
+    {
+        ClosePopupUI();
+    }
+
+    void NoClick()
+    {
+        ClosePopupUI();
+    }
+
     void YesPointerExit()
     {
         GetButton((int)Buttons.YesBtn).gameObject.GetComponent<Animator>().Play("YesIdle");
@@ -65,4 +102,5 @@ public class UI_BossRoomCheckPopup : UI_Popup
     {
         GetButton((int)Buttons.NoBtn).gameObject.GetComponent<Animator>().Play("NoIdle");
     }
+    #endregion
 }
