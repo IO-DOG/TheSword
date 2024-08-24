@@ -109,6 +109,7 @@ public class Define
 
     public enum TileType
     {
+        ObjectTile = -2,
         VoidTile = -1,
         Void = 0,
         Floor,

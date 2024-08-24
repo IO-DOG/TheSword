@@ -55,7 +55,7 @@ public class TutorialScene : BaseScene
         yield return new WaitForSeconds(Define.STAGE_NAME_DURATION * 2.2f);
 
         Managers.UI.ShowPopupUI<UI_BossRoomCheckPopup>();
-        Managers.Game.OnDirect = true;
+        Managers.Game.OnDirect = false;
         //UI_ConversationPopup conversation = Managers.UI.ShowPopupUI<UI_ConversationPopup>();
         //conversation._eventID = Define.EVENT_TUTORIAL;
 

@@ -64,7 +64,7 @@ public class UI_BossRoomCheckPopup : UI_Popup
         yield return new WaitForSeconds(0.5f);
 
         GetText((int)Texts.BossRoomCheckText).gameObject.SetActive(true);
-        yield return new WaitForSeconds(3.5f);
+        yield return new WaitForSeconds(2.5f);
 
         GetButton((int)Buttons.YesBtn).gameObject.SetActive(true);
         GetButton((int)Buttons.NoBtn).gameObject.SetActive(true);
