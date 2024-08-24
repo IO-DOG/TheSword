@@ -32,7 +32,7 @@ public class PortalController : MonoBehaviour
         Vector3 nextPos = GetNextPos(nextStageName);
         Managers.Game.Player.transform.position = nextPos;
 
-        CameraController.SetCameraConfiner();
+        CameraController.SetConfinerBounds();
     }
 
     Vector3 GetNextPos(string nextStageName)
