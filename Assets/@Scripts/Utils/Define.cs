@@ -183,6 +183,8 @@ public class Define
     public static int INTRO_STORY = 900000;
     public static int STAGE_NAME = 5000;
     public static int PLAYER_DEFAULT_NAME = 6;
+    public static int BOSS_ALERT = 7;
+    public static int SWOARD_ALERT = 8;
     public static int TUTORIAL_SCRIPT = 100006;
     public static int STAT_INFO_SCRIPT = 100;
     #endregion

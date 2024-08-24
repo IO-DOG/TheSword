@@ -50,6 +50,7 @@ public class UI_BossRoomCheckPopup : UI_Popup
         GetText((int)Texts.BossRoomCheckText).gameObject.SetActive(false);
         GetButton((int)Buttons.YesBtn).gameObject.SetActive(false);
         GetButton((int)Buttons.NoBtn).gameObject.SetActive(false);
+        GetText((int)Texts.BossRoomCheckText).text = Managers.GetString(Managers.Data.ScriptDic[Define.BOSS_ALERT].id);
         #endregion
 
         StartCoroutine(PopupAnimation());

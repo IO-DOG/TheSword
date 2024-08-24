@@ -50,32 +50,34 @@ public class TutorialScene : BaseScene
         Managers.Game.Player.SetState(Define.PlayerState.IdleUp);
 
         // Show Stage Name
-        UI_StageNamePopup stageNamePopup = Managers.UI.ShowPopupUI<UI_StageNamePopup>();
+        Managers.UI.ShowPopupUI<UI_StageNamePopup>();
 
         yield return new WaitForSeconds(Define.STAGE_NAME_DURATION * 2.2f);
 
         Managers.UI.ShowPopupUI<UI_BossRoomCheckPopup>();
-
+        Managers.Game.OnDirect = true;
         //UI_ConversationPopup conversation = Managers.UI.ShowPopupUI<UI_ConversationPopup>();
         //conversation._eventID = Define.EVENT_TUTORIAL;
 
         // Reset Player Stat
         Managers.Game.Player.Speed = originalSpeed;
 
-        bool prevConvsersationState = Managers.Game.OnConversation;
+        #region 테스트 후 다시 활성화해야 함
+        //bool prevConvsersationState = Managers.Game.OnConversation;
 
-        while (true) 
-        {
-            bool currentConversationState = Managers.Game.OnConversation;
-            if (prevConvsersationState && !currentConversationState)
-            {
-                Managers.Game.OnDirect = false;
-                //Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetCameraTarget(Managers.Game.Player.gameObject);
-            }
+        //while (true) 
+        //{
+        //    bool currentConversationState = Managers.Game.OnConversation;
+        //    if (prevConvsersationState && !currentConversationState)
+        //    {
+        //        Managers.Game.OnDirect = false;
+        //        //Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetCameraTarget(Managers.Game.Player.gameObject);
+        //    }
 
-            prevConvsersationState = currentConversationState;
+        //    prevConvsersationState = currentConversationState;
 
-            yield return null;
-        }
+        //    yield return null;
+        //}
+        #endregion
     }
 }
