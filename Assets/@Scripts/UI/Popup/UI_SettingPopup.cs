@@ -48,7 +48,9 @@ public class UI_SettingPopup : UI_Popup
         BindImage(typeof(Images));
         #endregion
 
-        GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveY(540, 0.2f);
+        //GetImage((int)Images.BackgroundImage).gameObject.transform.localScale = new Vector3(0, 0, 0);
+        GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveX(1240, 0.2f);
+        //GetImage((int)Images.BackgroundImage).gameObject.transform.DOScale(2, 0.2f);
 
         //GetObject((int)GameObjects.SoundToggle).gameObject.BindEvent(OnClickSoundToggle);
         GetObject((int)GameObjects.TotalSoundSlider).GetComponent<Slider>().value = PlayerPrefs.GetFloat("CURSOUND", 1);
