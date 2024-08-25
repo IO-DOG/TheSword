@@ -556,6 +556,7 @@ public class GameManager
 
     #region ForData
     public Define.ScriptType ScriptType = Define.ScriptType.None;
+    public Define.ScreenType ScreenType = Define.ScreenType.None;
     #endregion
 
     public void Init()

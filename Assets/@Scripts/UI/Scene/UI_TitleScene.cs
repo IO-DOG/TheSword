@@ -93,6 +93,8 @@ public class UI_TitleScene : UI_Scene
                 Managers.Sound.Init();
                 Managers.Sound.Play(Define.Sound.Bgm, "MainTitle_BGM");
                 Managers.Sound.SetVolume(PlayerPrefs.GetFloat("CURSOUND", 1));
+                Managers.Sound.SetVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1));
+                Managers.Sound.SetVolume(PlayerPrefs.GetFloat("CUREFFECTSOUND", 1));
 
                 // continueData로 플레이어 적용시키기. TODO
             }

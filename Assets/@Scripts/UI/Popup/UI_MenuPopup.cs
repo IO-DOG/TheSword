@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,7 +7,12 @@ using UnityEngine.UI;
 public class UI_MenuPopup : UI_Popup
 {
     #region Enum
-    enum Buttons
+    enum GameObjects
+    {
+        Buttons,
+    }
+
+    enum Images
     {
         ContinueButton,
         ContinueButtonChoice,
@@ -37,13 +43,22 @@ public class UI_MenuPopup : UI_Popup
             return false;
 
         #region Bind
-        BindButton(typeof(Buttons));
+        BindObject(typeof(GameObjects));
+        BindImage(typeof(Images));
         BindText(typeof(Texts));
         #endregion
 
         Managers.Game.playerControllLock = true;
+        
+        GetImage((int)Images.ContinueButton).gameObject.BindEvent(OnClickContinueGameButton);
+        GetImage((int)Images.SettingButton).gameObject.BindEvent(OnClickSettingButton);
+        GetImage((int)Images.SelectLanguageButton).gameObject.BindEvent(OnClickSelectLanguageButton);
+        GetImage((int)Images.QuitGameButton).gameObject.BindEvent(() => { Application.Quit(); });
+        OnEnterExitImage();
 
-        GetButton((int)Buttons.SelectLanguageButton).gameObject.BindEvent(OnClickSelectLanguageButton);
+        Refresh();
+        GetImage((int)Images.ContinueButtonChoice).gameObject.SetActive(true);
+
         return true;
     }
 
@@ -51,14 +66,92 @@ public class UI_MenuPopup : UI_Popup
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            ClosePopupUI();
+            Managers.UI.ClosePopupUI();
         }
     }
 
+    void Refresh()
+    {
+        GetImage((int)Images.ContinueButtonChoice).gameObject.SetActive(false);
+        GetImage((int)Images.ContinueButtonSet).gameObject.SetActive(false);
+        GetImage((int)Images.SettingButtonChoice).gameObject.SetActive(false);
+        GetImage((int)Images.SettingButtonSet).gameObject.SetActive(false);
+        GetImage((int)Images.SelectLanguageButtonChoice).gameObject.SetActive(false);
+        GetImage((int)Images.SelectLanguageButtonSet).gameObject.SetActive(false);
+        GetImage((int)Images.QuitGameButtonChoice).gameObject.SetActive(false);
+        GetImage((int)Images.QuitGameButtonSet).gameObject.SetActive(false);
 
+    }
+
+    void OnEnterExitImage()
+    {
+        GetImage((int)Images.ContinueButton).gameObject.BindEvent(() => {
+            Refresh(); GetImage((int)Images.ContinueButtonChoice).gameObject.SetActive(true); 
+        }, null, Define.UIEvent.PointerEnter);
+
+        GetImage((int)Images.SettingButton).gameObject.BindEvent(() => {
+            Refresh(); GetImage((int)Images.SettingButtonChoice).gameObject.SetActive(true);
+        }, null, Define.UIEvent.PointerEnter);
+
+        GetImage((int)Images.SelectLanguageButton).gameObject.BindEvent(() => {
+            Refresh(); GetImage((int)Images.SelectLanguageButtonChoice).gameObject.SetActive(true);
+        }, null, Define.UIEvent.PointerEnter);
+
+        GetImage((int)Images.QuitGameButton).gameObject.BindEvent(() => {
+            Refresh(); GetImage((int)Images.QuitGameButtonChoice).gameObject.SetActive(true);
+        }, null, Define.UIEvent.PointerEnter);
+
+
+        GetImage((int)Images.ContinueButton).gameObject.BindEvent(() => {
+            GetImage((int)Images.ContinueButtonChoice).gameObject.SetActive(false);
+        }, null, Define.UIEvent.PointerExit);
+
+        GetImage((int)Images.SettingButton).gameObject.BindEvent(() => {
+            GetImage((int)Images.SettingButtonChoice).gameObject.SetActive(false);
+        }, null, Define.UIEvent.PointerExit);
+
+        GetImage((int)Images.SelectLanguageButton).gameObject.BindEvent(() => {
+            GetImage((int)Images.SelectLanguageButtonChoice).gameObject.SetActive(false);
+        }, null, Define.UIEvent.PointerExit);
+
+        GetImage((int)Images.QuitGameButton).gameObject.BindEvent(() => {
+            GetImage((int)Images.QuitGameButtonChoice).gameObject.SetActive(false);
+        }, null, Define.UIEvent.PointerExit);
+    }
+
+    void OnClickContinueGameButton()
+    {
+        Managers.UI.ClosePopupUI();
+    }
+
+    void OnClickSettingButton()
+    {
+        Refresh();
+        GetImage((int)Images.SettingButtonSet).gameObject.SetActive(true);
+
+        GameObject go = GameObject.Find("UI_SelectLanguagePopup");
+        if (go != null)
+            Managers.UI.ClosePopupUI();
+
+        ButtonsMoveToLeft();
+        Managers.UI.ShowPopupUI<UI_SettingPopup>();
+    }
 
     void OnClickSelectLanguageButton()
     {
+        Refresh();
+        GetImage((int)Images.SelectLanguageButtonSet).gameObject.SetActive(true);
+
+        GameObject go = GameObject.Find("UI_SettingPopup");
+        if (go != null)
+            Managers.UI.ClosePopupUI();
+
+        ButtonsMoveToLeft();
         Managers.UI.ShowPopupUI<UI_SelectLanguagePopup>();
+    }
+
+    void ButtonsMoveToLeft()
+    {
+        GetObject((int)GameObjects.Buttons).gameObject.transform.DOMoveX(700, 1f);
     }
 }
