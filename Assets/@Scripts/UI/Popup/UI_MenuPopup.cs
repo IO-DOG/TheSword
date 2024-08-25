@@ -129,9 +129,17 @@ public class UI_MenuPopup : UI_Popup
         Refresh();
         GetImage((int)Images.SettingButtonSet).gameObject.SetActive(true);
 
-        GameObject go = GameObject.Find("UI_SelectLanguagePopup");
-        if (go != null)
-            Managers.UI.ClosePopupUI();
+        {
+            GameObject go = GameObject.Find("UI_SelectLanguagePopup");
+            if (go != null)
+                Managers.UI.ClosePopupUI();
+        }
+
+        {
+            GameObject go = GameObject.Find("UI_SettingPopup");
+            if (go != null)
+                Managers.UI.ClosePopupUI();
+        }
 
         ButtonsMoveToLeft();
         Managers.UI.ShowPopupUI<UI_SettingPopup>();
@@ -142,9 +150,17 @@ public class UI_MenuPopup : UI_Popup
         Refresh();
         GetImage((int)Images.SelectLanguageButtonSet).gameObject.SetActive(true);
 
-        GameObject go = GameObject.Find("UI_SettingPopup");
-        if (go != null)
-            Managers.UI.ClosePopupUI();
+        {
+            GameObject go = GameObject.Find("UI_SelectLanguagePopup");
+            if (go != null)
+                Managers.UI.ClosePopupUI();
+        }
+
+        {
+            GameObject go = GameObject.Find("UI_SettingPopup");
+            if (go != null)
+                Managers.UI.ClosePopupUI();
+        }
 
         ButtonsMoveToLeft();
         Managers.UI.ShowPopupUI<UI_SelectLanguagePopup>();
