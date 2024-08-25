@@ -48,7 +48,7 @@ public class UI_SettingPopup : UI_Popup
         BindImage(typeof(Images));
         #endregion
 
-        GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveY(540, 0.5f);
+        GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveY(540, 0.2f);
 
         //GetObject((int)GameObjects.SoundToggle).gameObject.BindEvent(OnClickSoundToggle);
         GetObject((int)GameObjects.TotalSoundSlider).GetComponent<Slider>().value = PlayerPrefs.GetFloat("CURSOUND", 1);
@@ -164,6 +164,7 @@ public class UI_SettingPopup : UI_Popup
     {
         Managers.Game.ScreenType = Define.ScreenType.Full;
 
+        Screen.SetResolution(1920, 1080, FullScreenMode.FullScreenWindow);
 
         Refresh();
     }
@@ -172,6 +173,7 @@ public class UI_SettingPopup : UI_Popup
     {
         Managers.Game.ScreenType = Define.ScreenType.Window;
 
+        Screen.SetResolution(960, 540, FullScreenMode.Windowed);
 
         Refresh();
     }
@@ -180,6 +182,7 @@ public class UI_SettingPopup : UI_Popup
     {
         Managers.Game.ScreenType = Define.ScreenType.FullWindow;
 
+        Screen.SetResolution(1920, 1080, FullScreenMode.Windowed);
 
         Refresh();
     }

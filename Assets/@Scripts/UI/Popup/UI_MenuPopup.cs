@@ -152,6 +152,6 @@ public class UI_MenuPopup : UI_Popup
 
     void ButtonsMoveToLeft()
     {
-        GetObject((int)GameObjects.Buttons).gameObject.transform.DOMoveX(700, 1f);
+        GetObject((int)GameObjects.Buttons).gameObject.transform.DOMoveX(700, 0.3f);
     }
 }

@@ -37,7 +37,7 @@ public class UI_SelectLanguagePopup : UI_Popup
         BindButton(typeof(Buttons));
         BindImage(typeof(Images));
 
-        GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveY(540, 0.5f);
+        GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveY(540, 0.2f);
 
         GetButton((int)Buttons.Korean).gameObject.BindEvent(OnClickKorean);
         GetButton((int)Buttons.English).gameObject.BindEvent(OnClickEnglish);
