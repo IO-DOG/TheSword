@@ -30,7 +30,8 @@ public class CameraController : MonoBehaviour
         if (this.transform.parent.tag == "RenderCamera")
             Managers.Game.RenderCamera = this.transform.parent.GetComponent<Camera>();
 
-        vCam = GetComponent<CinemachineVirtualCamera>(); 
+        vCam = GetComponent<CinemachineVirtualCamera>();
+        vCam.Follow = Managers.Game.Player.transform;
 
         CinemachineTransposer transposer = vCam.GetCinemachineComponent<CinemachineTransposer>();
         transposer.m_FollowOffset = new Vector3(0f, 20f, -10f);

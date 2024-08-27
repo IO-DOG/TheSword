@@ -8,7 +8,6 @@ using Unity.Burst.CompilerServices;
 public class PlayerController : MonoBehaviour
 {
     const float adjustingDis = 0.025f;
-    public Grid _grid;
     public GameObject _keyInventory;
 
     float _speed = 5.0f;
@@ -17,11 +16,8 @@ public class PlayerController : MonoBehaviour
         get { return _speed; }
         set
         {
-            if (_speed != value)
-            {
-                _speed = value;
-                _duration = 1 / _speed;
-            }
+           _speed = value;
+           _duration = 1 / _speed;
         }
     }
 
@@ -35,7 +31,7 @@ public class PlayerController : MonoBehaviour
     string _shieldName = "Shield00";
 
     float _duration;
-    public bool _isMoving = false;
+    bool _isMoving = false;
 
     bool _isInteracted = false;
 
@@ -52,16 +48,20 @@ public class PlayerController : MonoBehaviour
         _state = state;
     }
 
+    private void Awake()
+    {
+        Managers.Game.Player = this;
+    }
+
     void Start()
     {
         Managers.Input.KeyAction -= OnKeyboard;
         Managers.Input.KeyAction += OnKeyboard;
 
+        _duration = 1 / _speed;
         _keyInventory = GameObject.Find("KeyInventory");
         _weapon = GameObject.Find("WeaponSlot");
         _shield = GameObject.Find("ShieldSlot");
-
-        Managers.Game.Player = this; // ���� �� �� ������ �����ϵ��� �ϱ� ����.
     }
 
     void OnKeyboard()
@@ -115,6 +115,8 @@ public class PlayerController : MonoBehaviour
         {
             SetIdleState(_moveDir);
         }
+
+        Debug.Log(Managers.Game.CurPlayerData.MoveSpeed);
     }
 
     void CheckWeapon()
