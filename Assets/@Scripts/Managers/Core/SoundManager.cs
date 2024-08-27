@@ -214,6 +214,16 @@ public class SoundManager
         _audioSources[(int)Define.Sound.Effect].volume = value;
     }
 
+    public void SetBGMVolume(float value)
+    {
+        _audioSources[(int)Define.Sound.Bgm].volume = value;
+    }
+
+    public void SetEffectVolume(float value)
+    {
+        _audioSources[(int)Define.Sound.Effect].volume = value;
+    }
+
     IEnumerator CoTotalEffectCountControl(float time)
     {
         WaitForSeconds delay = new WaitForSeconds(time);

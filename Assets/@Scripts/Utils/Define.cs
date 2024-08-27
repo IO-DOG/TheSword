@@ -14,6 +14,7 @@ public class Define
         GameScene,
         TutorialScene,
     }
+
     public enum StageName
     {
         None = -1,
@@ -23,6 +24,13 @@ public class Define
         Dungeon_00_003,
     }
 
+    public enum ScreenType
+    {
+        None = 0,
+        Full,
+        Window,
+        FullWindow,
+    }
 
     public enum Sound
     {
