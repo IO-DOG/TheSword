@@ -280,6 +280,16 @@ public class DecoJSJEditor : Editor
                         GameObject go = Instantiate(VoidTile, tiles.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
                     }
+                    else if (tile.TileType == (int)Define.TileType.ObjectTile)
+                    {
+                        GameObject go = Instantiate(Tilemap[tile.PrefabID], tiles.transform);
+                        go.transform.localScale = new Vector3(1f / 0.33f, 2f / 0.33f, 1f / 0.33f);
+                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+                        go.GetComponent<BoxCollider>().center = Vector3.zero;
+                        go.GetComponent<BoxCollider>().size = Vector3.one;
+                        go.AddComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("tmp/add");
+                        go.GetComponent<SpriteRenderer>().material = Resources.Load<Material>("tmp/SpriteShadows");
+                    }
                 }
             }
 

@@ -57,6 +57,7 @@ public class UI_MenuPopup : UI_Popup
         GetImage((int)Images.QuitGameButton).gameObject.BindEvent(() => { Application.Quit(); });
         OnEnterExitImage();
 
+        CloseOtherUI();
         Refresh();
         GetImage((int)Images.ContinueButtonChoice).gameObject.SetActive(true);
 
@@ -67,7 +68,8 @@ public class UI_MenuPopup : UI_Popup
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            Managers.UI.ClosePopupUI();
+            OpenOtherUI();
+            //Managers.UI.ClosePopupUI();
         }
     }
 
@@ -122,7 +124,8 @@ public class UI_MenuPopup : UI_Popup
 
     void OnClickContinueGameButton()
     {
-        Managers.UI.ClosePopupUI();
+        OpenOtherUI();
+        //Managers.UI.ClosePopupUI();
     }
 
     void OnClickSettingButton()
@@ -178,6 +181,73 @@ public class UI_MenuPopup : UI_Popup
         .Insert(0.14f, GetImage((int)Images.SelectLanguageButton).gameObject.transform.DOMoveX(700, 0.3f))
         .Insert(0.16f, GetImage((int)Images.QuitGameButton).gameObject.transform.DOMoveX(700, 0.3f));
 
+    }
 
+    public GameObject KeyInventory = null;
+    public GameObject PlayerInfo = null;
+    public GameObject UIImages = null;
+    public GameObject PlayConversation = null;
+
+    public void CloseOtherUI()
+    {
+        //UI_GameScene uI_GameScene = Managers.Game.GameScene;
+        //Transform[] child = uI_GameScene.gameObject.GetComponentsInChildren<Transform>();
+        //for (int i = 1; i < child.Length; i++)
+        //{
+        //    if (child[i].name == "MainUIOptionAImage" || child[i].name == "MainUIOptionBImage")
+        //        continue;
+
+        //    child[i].gameObject.SetActive(false);
+        //    Debug.Log($"child name : {child[i].name}");
+        //}
+        GameObject keyInventory = GameObject.Find("KeyInventory");
+        if (keyInventory != null)
+        {
+            KeyInventory = keyInventory;
+            keyInventory.SetActive(false);
+        }
+        GameObject playerInfo = GameObject.Find("PlayerInfo");
+        if (playerInfo != null)
+        {
+            PlayerInfo = playerInfo;
+            playerInfo.SetActive(false);
+        }
+        GameObject uIImages = GameObject.Find("UIImages");
+        if (uIImages != null)
+        {
+            UIImages = uIImages;
+            uIImages.SetActive(false);
+        }
+        GameObject playConversation = GameObject.Find("PlayConversation");
+        if (playConversation != null)
+        {
+            PlayConversation = playConversation;
+            playConversation.SetActive(false);
+        }
+    }
+
+    public void OpenOtherUI()
+    {
+        //UI_GameScene uI_GameScene = Managers.Game.GameScene;
+        //Transform[] child = uI_GameScene.gameObject.GetComponentsInChildren<Transform>();
+        //for (int i = 1; i < child.Length; i++)
+        //{
+        //    if (child[i].name == "MainUIOptionAImage" || child[i].name == "MainUIOptionBImage")
+        //        continue;
+
+        //    child[i].gameObject.SetActive(true);
+        //}
+
+        //Managers.Game.GameScene.Init();
+
+        if (KeyInventory != null)
+            KeyInventory.SetActive(true);
+        if (PlayerInfo != null)
+            PlayerInfo.SetActive(true);
+        if (UIImages != null)
+            UIImages.SetActive(true);
+        if (PlayConversation != null)
+            PlayConversation.SetActive(true);
+        Managers.UI.ClosePopupUI();
     }
 }

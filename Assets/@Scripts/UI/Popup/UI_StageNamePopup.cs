@@ -47,8 +47,8 @@ public class UI_StageNamePopup : UI_Popup
         GetImage((int)Images.StageNameStart).DOFade(0f, 1f);
         GetImage((int)Images.StageNameLine).DOFade(0f, 1f);
         GetImage((int)Images.StageNameEnd).DOFade(0f, 1f);
-
+        
         yield return new WaitForSeconds(_duration);
-        Managers.Resource.Destroy(this.gameObject);
+        ClosePopupUI();
     }
 }

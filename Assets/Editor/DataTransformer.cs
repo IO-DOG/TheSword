@@ -285,7 +285,7 @@ public class DataTransformer : EditorWindow
                             block = "0";
                         }
 
-                        if(block[0] == '-')
+                        if(block == "-1")
                         {
                             Data.TileData tile = new Data.TileData
                             {
@@ -300,6 +300,21 @@ public class DataTransformer : EditorWindow
                             };
                             tiles.Add(tile);
 
+                        }
+                        else if (block == "-2")
+                        {
+                            Data.TileData tile = new Data.TileData
+                            {
+                                PrefabID = 0,
+                                Position = new Data.MyVector3
+                                {
+                                    X = xPos,
+                                    Y = 0,
+                                    Z = zPos,
+                                },
+                                TileType = -2,
+                            };
+                            tiles.Add(tile);
                         }
                         else if (block[0] == 'I')
                         {
