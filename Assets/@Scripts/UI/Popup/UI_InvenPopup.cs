@@ -187,7 +187,10 @@ public class UI_InvenPopup : UI_Popup
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
+        {
+
             ClosePopupUI();
+        }
     }
 
     void SortInven()
@@ -888,4 +891,6 @@ public class UI_InvenPopup : UI_Popup
             // TODO ADD AbilityID
         }
     }
+
+
 }

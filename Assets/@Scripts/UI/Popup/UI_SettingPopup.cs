@@ -200,4 +200,5 @@ public class UI_SettingPopup : UI_Popup
     //        Managers.Sound.SetVolume(0);
     //    }
     //}
+
 }

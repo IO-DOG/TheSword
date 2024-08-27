@@ -87,12 +87,19 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false);
         GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false);
 
-        GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() => { Managers.UI.ShowPopupUI<UI_MenuPopup>(); });
+        GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
+        {
+            GameObject go = GameObject.Find("UI_MenuPopup");
+            if (go == null)
+                Managers.UI.ShowPopupUI<UI_MenuPopup>();
+            else
+                go.GetComponent<UI_MenuPopup>().OpenOtherUI();
+        });
         GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(OnClickMainUIInventoryAImage);
 
-        GetButton((int)Buttons.PlayConversation).gameObject.BindEvent(() => 
-        { 
-            if(!Managers.Game.OnBattle)
+        GetButton((int)Buttons.PlayConversation).gameObject.BindEvent(() =>
+        {
+            if (!Managers.Game.OnBattle)
             {
                 UI_ConversationPopup conversationPopup = Managers.UI.ShowPopupUI<UI_ConversationPopup>();
                 conversationPopup._eventID = Define.EVENT_SWORD_FIRST;
