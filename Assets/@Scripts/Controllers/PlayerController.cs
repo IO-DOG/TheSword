@@ -42,6 +42,7 @@ public class PlayerController : MonoBehaviour
     float _offset = Define.TILE_SIZE * 0.33f;
     Vector3 _interpolateRayPos = new Vector3(0f, -2f, 0f);
     public Vector3 _cellPos;
+
     Vector3 _nextCellPos;
 
     MoveDir _moveDir = MoveDir.None;
