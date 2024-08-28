@@ -19,6 +19,7 @@ public class DecoJSJEditor : Editor
 
     GameObject[] Tilemap = new GameObject[100];
     GameObject VoidTile;
+    GameObject ObjectTile;
 
     private void OnEnable()
     {
@@ -26,6 +27,7 @@ public class DecoJSJEditor : Editor
         MapDic = LoadJson<Data.MapDataLoader, string, Data.MapData>(_path).MakeDict();
 
         VoidTile = Resources.Load("DecoTiles/Tilemap_-1") as GameObject;
+        ObjectTile = Resources.Load("DecoTiles/Tilemap_-2") as GameObject;
         Tilemap[0] = Resources.Load("DecoTiles/Tilemap_0") as GameObject;
         Tilemap[1] = Resources.Load("DecoTiles/Tilemap_1") as GameObject;
         Tilemap[3] = Resources.Load("DecoTiles/Tilemap_3") as GameObject;
@@ -280,15 +282,11 @@ public class DecoJSJEditor : Editor
                         GameObject go = Instantiate(VoidTile, tiles.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
                     }
-                    else if (tile.TileType == (int)Define.TileType.ObjectTile)
+                    else if (tile.PrefabID == (int)Define.TileType.ObjectTile)
                     {
-                        GameObject go = Instantiate(Tilemap[tile.PrefabID], tiles.transform);
-                        go.transform.localScale = new Vector3(1f / 0.33f, 2f / 0.33f, 1f / 0.33f);
+                        GameObject go = Instantiate(ObjectTile, tiles.transform);
+                        go.name = "ObjectTile";
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-                        go.GetComponent<BoxCollider>().center = Vector3.zero;
-                        go.GetComponent<BoxCollider>().size = Vector3.one;
-                        go.AddComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("tmp/add");
-                        go.GetComponent<SpriteRenderer>().material = Resources.Load<Material>("tmp/SpriteShadows");
                     }
                 }
             }

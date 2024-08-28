@@ -27,8 +27,6 @@ public class CameraController : MonoBehaviour
     {
         if(this.transform.parent.tag == "MainCamera")
             Managers.Game.MainCamera = this.transform.parent.GetComponent<Camera>();
-        if (this.transform.parent.tag == "RenderCamera")
-            Managers.Game.RenderCamera = this.transform.parent.GetComponent<Camera>();
 
         vCam = GetComponent<CinemachineVirtualCamera>();
         vCam.Follow = Managers.Game.Player.transform;
@@ -50,10 +48,10 @@ public class CameraController : MonoBehaviour
         Vector3 pos = Managers.Game.Player.transform.position;
 
         if (pos.x != Mathf.Clamp(pos.x, _minBounds.x + horzExtent + Define.TILE_SIZE / 3, _maxBounds.x - horzExtent - Define.TILE_SIZE / 3) ||
-            pos.z != Mathf.Clamp(pos.z, _minBounds.z + verExtent + Define.TILE_SIZE / 1.5f, _maxBounds.z - verExtent - Define.TILE_SIZE / 1.5f))
+            pos.z != Mathf.Clamp(pos.z, _minBounds.z + verExtent + Define.TILE_SIZE / 1.5f, _maxBounds.z - verExtent - Define.TILE_SIZE))
         {
             float clampedX = Mathf.Clamp(pos.x, _minBounds.x + horzExtent + Define.TILE_SIZE / 3, _maxBounds.x - horzExtent - Define.TILE_SIZE / 3);
-            float clampedZ = Mathf.Clamp(pos.z, _minBounds.z + verExtent + Define.TILE_SIZE/ 1.5f, _maxBounds.z - verExtent - Define.TILE_SIZE / 1.5f);
+            float clampedZ = Mathf.Clamp(pos.z, _minBounds.z + verExtent + Define.TILE_SIZE / 1.5f, _maxBounds.z - verExtent - Define.TILE_SIZE);
 
             Vector3 curOffset = vCam.GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
             Vector3 targetOffset = new Vector3(clampedX - pos.x, 20, clampedZ - pos.z - 12);

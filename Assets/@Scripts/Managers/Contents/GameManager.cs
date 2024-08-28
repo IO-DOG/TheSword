@@ -42,7 +42,6 @@ public class GameManager
     public Sprite _screenShot2 = null;
 
     public Camera MainCamera;
-    public Camera RenderCamera;
     public GameObject Map;
     public GameObject Monsters;
     public GameObject Items;

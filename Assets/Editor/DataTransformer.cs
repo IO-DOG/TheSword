@@ -296,7 +296,7 @@ public class DataTransformer : EditorWindow
                                     Y = 0,
                                     Z = zPos,
                                 },
-                                TileType = -1,
+                                TileType = (int)Define.TileType.VoidTile,
                             };
                             tiles.Add(tile);
 
@@ -305,14 +305,14 @@ public class DataTransformer : EditorWindow
                         {
                             Data.TileData tile = new Data.TileData
                             {
-                                PrefabID = 0,
+                                PrefabID = (int)Define.TileType.ObjectTile,
                                 Position = new Data.MyVector3
                                 {
                                     X = xPos,
                                     Y = 0,
                                     Z = zPos,
                                 },
-                                TileType = -2,
+                                TileType = (int)Define.TileType.ObjectTile,
                             };
                             tiles.Add(tile);
                         }
@@ -588,6 +588,7 @@ public class DataTransformer : EditorWindow
             TypeNameHandling = TypeNameHandling.Auto
         });
         File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/MapData.json", mapDicJsonStr);
+        File.WriteAllText($"{Application.dataPath}/Resources/DecoJson/MapData.json", mapDicJsonStr);
         AssetDatabase.Refresh();
     }
 
