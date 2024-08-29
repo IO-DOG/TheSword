@@ -116,7 +116,7 @@ public class PlayerController : MonoBehaviour
             SetIdleState(_moveDir);
         }
 
-        Debug.Log(Managers.Game.CurPlayerData.MoveSpeed);
+        //Debug.Log(Managers.Game.CurPlayerData.MoveSpeed);
     }
 
     void CheckWeapon()
