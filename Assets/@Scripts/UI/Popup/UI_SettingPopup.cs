@@ -17,9 +17,17 @@ public class UI_SettingPopup : UI_Popup
 
     enum Texts
     {
+        SoundClassText,
         TotalSoundText,
         BGMSoundText,
         EffectSoundText,
+        TotalSoundClassText,
+        BGMSoundClassText,
+        EffectSoundClassText,
+        ScreenClassText,
+        FullScreenText,
+        WindowScreenText,
+        FullWindowScreenText,
     }
 
     enum Images
@@ -47,6 +55,15 @@ public class UI_SettingPopup : UI_Popup
         BindText(typeof(Texts));
         BindImage(typeof(Images));
         #endregion
+
+        GetText((int)Texts.SoundClassText).text = Managers.GetString(Define.SOUND);
+        GetText((int)Texts.TotalSoundClassText).text = Managers.GetString(Define.TOTAL_SOUND);
+        GetText((int)Texts.BGMSoundClassText).text = Managers.GetString(Define.BGM);
+        GetText((int)Texts.EffectSoundClassText).text = Managers.GetString(Define.EFFECT);
+        GetText((int)Texts.ScreenClassText).text = Managers.GetString(Define.SCREEN);
+        GetText((int)Texts.FullScreenText).text = Managers.GetString(Define.FULL_SCREEN);
+        GetText((int)Texts.WindowScreenText).text = Managers.GetString(Define.WINDOW_SCREEN);
+        GetText((int)Texts.FullWindowScreenText).text = Managers.GetString(Define.FULL_WINDOW_SCREEN);
 
         //GetImage((int)Images.BackgroundImage).gameObject.transform.localScale = new Vector3(0, 0, 0);
         GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveX(1240, 0.2f);

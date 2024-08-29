@@ -196,6 +196,18 @@ public class Define
     public static int SWOARD_ALERT = 8;
     public static int TUTORIAL_SCRIPT = 100006;
     public static int STAT_INFO_SCRIPT = 100;
+    public static int CONTINUE = 9;
+    public static int SETTING = 10;
+    public static int LANGUAGE = 11;
+    public static int QUIT_GAME = 12;
+    public static int SCREEN = 13;
+    public static int FULL_SCREEN = 14;
+    public static int WINDOW_SCREEN = 15;
+    public static int FULL_WINDOW_SCREEN = 16;
+    public static int SOUND = 17;
+    public static int TOTAL_SOUND = 18;
+    public static int BGM = 19;
+    public static int EFFECT = 20;
     #endregion
 
     #region Event ID

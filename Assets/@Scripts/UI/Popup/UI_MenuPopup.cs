@@ -50,6 +50,11 @@ public class UI_MenuPopup : UI_Popup
         #endregion
 
         Managers.Game.playerControllLock = true;
+
+        GetText((int)Texts.ContinueButtonText).text = Managers.GetString(Define.CONTINUE);
+        GetText((int)Texts.SettingButtonText).text = Managers.GetString(Define.SETTING);
+        GetText((int)Texts.SelectLanguageButtonText).text = Managers.GetString(Define.LANGUAGE);
+        GetText((int)Texts.QuitGameButtonText).text = Managers.GetString(Define.QUIT_GAME);
         
         GetImage((int)Images.ContinueButton).gameObject.BindEvent(OnClickContinueGameButton);
         GetImage((int)Images.SettingButton).gameObject.BindEvent(OnClickSettingButton);
@@ -124,6 +129,18 @@ public class UI_MenuPopup : UI_Popup
 
     void OnClickContinueGameButton()
     {
+        {
+            GameObject go = GameObject.Find("UI_SelectLanguagePopup");
+            if (go != null)
+                Managers.UI.ClosePopupUI();
+        }
+
+        {
+            GameObject go = GameObject.Find("UI_SettingPopup");
+            if (go != null)
+                Managers.UI.ClosePopupUI();
+        }
+
         OpenOtherUI();
         //Managers.UI.ClosePopupUI();
     }
