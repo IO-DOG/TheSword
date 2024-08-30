@@ -112,8 +112,9 @@ public class Define
     #endregion
 
     #region Map
-    public static float TILE_SIZE = 3.2f;
+    public static float TILE_SIZE = 0.32f;
     public static float CAMERA_ANGLE = 60;
+    public static int PPU = 100;
 
     public enum TileType
     {

@@ -32,7 +32,7 @@ public class CameraController : MonoBehaviour
         vCam.Follow = Managers.Game.Player.transform;
 
         CinemachineTransposer transposer = vCam.GetCinemachineComponent<CinemachineTransposer>();
-        transposer.m_FollowOffset = new Vector3(0f, 20f, -10f);
+        transposer.m_FollowOffset = new Vector3(0f, 15f, -9f);
         this.transform.parent.eulerAngles = new Vector3(Define.CAMERA_ANGLE, 0f, 0f);
 
         SetCameraExtent();
@@ -47,17 +47,14 @@ public class CameraController : MonoBehaviour
     {
         Vector3 pos = Managers.Game.Player.transform.position;
 
-        if (pos.x != Mathf.Clamp(pos.x, _minBounds.x + horzExtent + Define.TILE_SIZE / 3, _maxBounds.x - horzExtent - Define.TILE_SIZE / 3) ||
-            pos.z != Mathf.Clamp(pos.z, _minBounds.z + verExtent + Define.TILE_SIZE / 1.5f, _maxBounds.z - verExtent - Define.TILE_SIZE))
-        {
-            float clampedX = Mathf.Clamp(pos.x, _minBounds.x + horzExtent + Define.TILE_SIZE / 3, _maxBounds.x - horzExtent - Define.TILE_SIZE / 3);
-            float clampedZ = Mathf.Clamp(pos.z, _minBounds.z + verExtent + Define.TILE_SIZE / 1.5f, _maxBounds.z - verExtent - Define.TILE_SIZE);
+        float clampedX = Mathf.Clamp(pos.x, _minBounds.x + horzExtent + Define.TILE_SIZE, _maxBounds.x - horzExtent - Define.TILE_SIZE);
+        float clampedZ = Mathf.Clamp(pos.z, _minBounds.z + verExtent + Define.TILE_SIZE, _maxBounds.z - verExtent - Define.TILE_SIZE);
 
-            Vector3 curOffset = vCam.GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
-            Vector3 targetOffset = new Vector3(clampedX - pos.x, 20, clampedZ - pos.z - 12);
+        Vector3 curOffset = vCam.GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
+        Vector3 targetOffset = new Vector3(clampedX - pos.x, 15f, clampedZ - pos.z - 9f);
 
-            vCam.GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = targetOffset;
-        }
+        vCam.GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = targetOffset;
+        
     }
 
     public void SetCameraTarget(GameObject target)
@@ -108,11 +105,7 @@ public class CameraController : MonoBehaviour
                 }
             }
         }
-
         _minBounds = combineBounds.min;
         _maxBounds = combineBounds.max;
-
-        Debug.Log(_minBounds);
-        Debug.Log(_maxBounds);
     }
 }

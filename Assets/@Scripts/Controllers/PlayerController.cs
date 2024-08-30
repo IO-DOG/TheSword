@@ -35,7 +35,7 @@ public class PlayerController : MonoBehaviour
 
     bool _isInteracted = false;
 
-    float _offset = Define.TILE_SIZE * 0.33f;
+    float _offset = Define.TILE_SIZE;
     Vector3 _interpolateRayPos = new Vector3(0f, -2f, 0f);
     public Vector3 _cellPos;
 

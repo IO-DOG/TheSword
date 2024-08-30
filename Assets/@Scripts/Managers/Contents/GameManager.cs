@@ -480,7 +480,7 @@ public class GameManager
                 {
                     if (!isSpawned && tile.PrefabID == (int)Define.TileType.SpawnPoint && stageName != GetBossRoomName(chapter))
                     {
-                        Managers.Game.Player.transform.position = new Vector3(tile.Position.X * 0.33f + count * 100, 2.6f, tile.Position.Z * 0.33f);
+                        Managers.Game.Player.transform.position = new Vector3(tile.Position.X + count * 100, 0f, tile.Position.Z);
                         Managers.Game.Player._cellPos = Managers.Game.Player.transform.position;
 
                         isSpawned = true;
@@ -492,9 +492,9 @@ public class GameManager
             Monsters = monsters;
             //Lights = lights;
 
-            items.transform.localPosition = items.transform.localPosition + new Vector3(0f, 1.6f, -0.4f);
-            monsters.transform.localPosition = monsters.transform.localPosition + new Vector3(0f, 3f, -1.1f);
-            bossMonsters.transform.localPosition = bossMonsters.transform.localPosition + new Vector3(0f, 1.5f, -0.55f);
+            items.transform.localPosition = items.transform.localPosition + new Vector3(0f, 0f, 0f);
+            monsters.transform.localPosition = monsters.transform.localPosition + new Vector3(0f, 0f, 0f);
+            bossMonsters.transform.localPosition = bossMonsters.transform.localPosition + new Vector3(0f, 0f, 0f);
 
             count++;
 

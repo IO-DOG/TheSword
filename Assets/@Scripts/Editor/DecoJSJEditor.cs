@@ -118,6 +118,7 @@ public class DecoJSJEditor : Editor
 
             foreach (Data.TileData tile in mapData.Tiles)
             {
+                #region ¡÷ºÆ
                 //if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
                 //{
                 //    GameObject go = Managers.Resource.Instantiate($"Tilemap_{citemTile.PrefabID}", tiles.transform);
@@ -185,6 +186,8 @@ public class DecoJSJEditor : Editor
                 //    if (bossMonsterTile.IsActive == false)
                 //        boss.SetActive(false);
                 //}
+                #endregion
+
                 if (tile is DoorData doorTile)
                 {
                     GameObject go = Instantiate<GameObject>(Tilemap[1], tiles.transform);
@@ -290,8 +293,6 @@ public class DecoJSJEditor : Editor
                     }
                 }
             }
-
-            parent.transform.localScale = new Vector3(0.33f, 0.33f, 0.33f);
             //items.transform.localPosition = items.transform.localPosition + new Vector3(0f, 1.6f, -0.4f);
             //monsters.transform.localPosition = monsters.transform.localPosition + new Vector3(0f, 3f, -1.1f);
             //Camera.main.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, items);
