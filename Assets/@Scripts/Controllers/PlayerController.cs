@@ -36,7 +36,7 @@ public class PlayerController : MonoBehaviour
     bool _isInteracted = false;
 
     float _offset = Define.TILE_SIZE;
-    Vector3 _interpolateRayPos = new Vector3(0f, -2f, 0f);
+    Vector3 _interpolateRayPos = new Vector3(0f, Define.TILE_SIZE / 2f, 0f);
     public Vector3 _cellPos;
 
     Vector3 _nextCellPos;
@@ -116,7 +116,7 @@ public class PlayerController : MonoBehaviour
             SetIdleState(_moveDir);
         }
 
-        //Debug.Log(Managers.Game.CurPlayerData.MoveSpeed);
+        Debug.DrawRay(transform.position + _interpolateRayPos, _nextCellPos, Color.red, 1f);
     }
 
     void CheckWeapon()

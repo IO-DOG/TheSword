@@ -493,7 +493,7 @@ public class GameManager
             //Lights = lights;
 
             items.transform.localPosition = items.transform.localPosition + new Vector3(0f, 0f, 0f);
-            monsters.transform.localPosition = monsters.transform.localPosition + new Vector3(0f, 0f, 0f);
+            monsters.transform.localPosition = monsters.transform.localPosition + new Vector3(0f, 0f, -0.05f);
             bossMonsters.transform.localPosition = bossMonsters.transform.localPosition + new Vector3(0f, 0f, 0f);
 
             count++;
