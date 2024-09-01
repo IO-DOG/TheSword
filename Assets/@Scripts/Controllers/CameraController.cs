@@ -10,9 +10,11 @@ using static UnityEditor.Progress;
 
 public class CameraController : MonoBehaviour
 {
+    public static bool _isCombineMap = false;
+
     // 픽셀 퍼펙트 카메라 해상도
-    int[] _resolutionX = { 960, 640, 320 };
-    int[] _resolutionY = { 540, 360, 80 };
+    int[] _resolutionX = { 960, 640, 384, 320 };
+    int[] _resolutionY = { 540, 360, 256, 80 };
     int _resolutionIndex = 0;
 
     //// ToDo Object y position adjusting
@@ -48,19 +50,27 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-        float scroll = Input.GetAxis("Mouse ScrollWheel") * _scrollSpeed * Time.deltaTime;
-
-        if (scroll > 0 && _resolutionIndex < _resolutionX.Length - 1)
+        if(_isCombineMap)
         {
-            _resolutionIndex++;
-            Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[_resolutionIndex];
-            Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[_resolutionIndex];
+            Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[2];
+            Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[2];
         }
-        else if (scroll < 0 && 0 < _resolutionIndex)
+        else
         {
-            _resolutionIndex--;
-            Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[_resolutionIndex];
-            Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[_resolutionIndex];
+            float scroll = Input.GetAxis("Mouse ScrollWheel") * _scrollSpeed * Time.deltaTime;
+
+            if (scroll > 0 && _resolutionIndex < _resolutionX.Length - 1)
+            {
+                _resolutionIndex++;
+                Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[_resolutionIndex];
+                Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[_resolutionIndex];
+            }
+            else if (scroll < 0 && 0 < _resolutionIndex)
+            {
+                _resolutionIndex--;
+                Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[_resolutionIndex];
+                Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[_resolutionIndex];
+            }
         }
     }
 
