@@ -255,6 +255,9 @@ namespace Data
         public string ImageName { get; set; }
         public string AttackFX { get; set; }
         public string HitFX { get; set; }
+        public string IllustFX { get; set; }
+        public string Illust { get; set; }
+        public string IllustBG { get; set; }
         public int NameId { get; set; }
         public int DescId { get; set; }
     }

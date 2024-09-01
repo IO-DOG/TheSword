@@ -664,6 +664,9 @@ public class DataTransformer : EditorWindow
             ed.ImageName = ConvertValue<string>(row[i++]);
             ed.AttackFX = ConvertValue<string>(row[i++]);
             ed.HitFX = ConvertValue<string>(row[i++]);
+            ed.IllustFX = ConvertValue<string>(row[i++]);
+            ed.Illust = ConvertValue<string>(row[i++]);
+            ed.IllustBG = ConvertValue<string>(row[i++]);
             ed.NameId = ConvertValue<int>(row[i++]);
             ed.DescId = ConvertValue<int>(row[i++]);
             loader.equips.Add(ed);

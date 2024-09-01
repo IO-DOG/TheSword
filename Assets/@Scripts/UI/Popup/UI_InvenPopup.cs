@@ -81,6 +81,9 @@ public class UI_InvenPopup : UI_Popup
         ATKSPEEDInfoImage,
         DEFSPEEDInfoImage,
         MOVESPEEDInfoImage,
+        IllustBG,
+        Illust,
+        IllustFX,
     }
 
     enum Texts
@@ -129,6 +132,7 @@ public class UI_InvenPopup : UI_Popup
     {
         EquipInfo,
         StatusInfoList,
+        EquipIllust,
     }
 
     #endregion
@@ -322,6 +326,8 @@ public class UI_InvenPopup : UI_Popup
         GetImage((int)Images.ATKSPEEDInfoImage).gameObject.SetActive(false);
         GetImage((int)Images.DEFSPEEDInfoImage).gameObject.SetActive(false);
         GetImage((int)Images.MOVESPEEDInfoImage).gameObject.SetActive(false);
+
+        GetObject((int)GameObjects.EquipIllust).gameObject.SetActive(false);
     }
 
     void OnClickInventory_MyInfo_On()
@@ -355,6 +361,8 @@ public class UI_InvenPopup : UI_Popup
         GetImage((int)Images.Inventory_Sword_On).gameObject.SetActive(true);
 
         GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
+
+        ShowSwordIllust();
     }
 
     void SetSwordListImage()
@@ -378,6 +386,18 @@ public class UI_InvenPopup : UI_Popup
                 inventory_equipList_get[i - 1].gameObject.SetActive(true);
             }
         }
+    }
+
+    void ShowSwordIllust()
+    {
+        GetObject((int)GameObjects.EquipIllust).gameObject.SetActive(true);
+
+        int curSwordIdx = Managers.Game.CurPlayerData.CurSword;
+        int idx = curSwordIdx - 8;
+
+        GetImage((int)Images.IllustBG).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[curSwordIdx].IllustBG}");
+        GetImage((int)Images.Illust).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[curSwordIdx].Illust}");
+        GetImage((int)Images.IllustFX).GetComponent<Animator>().Play($"{Managers.Data.EquipDic[curSwordIdx].IllustFX}");
     }
 
     void OnClickShield()
