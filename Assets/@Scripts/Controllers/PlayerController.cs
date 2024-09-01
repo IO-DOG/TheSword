@@ -206,6 +206,18 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void ResetWeaponAndShieldAnimation()
+    {
+        if (_weapon.activeSelf)
+        {
+            _weapon.GetComponent<Animator>().Play($"{_weaponName}_Idle_F", 0, 0.0f);
+        }
+        if (_shield.activeSelf)
+        {
+            _shield.GetComponent<Animator>().Play($"{_shieldName}_Idle_F", 0, 0.0f);
+        }
+    }
+
     #region Moving
     public void Moving(Define.MoveDir moveDir)
     {
@@ -351,7 +363,7 @@ public class PlayerController : MonoBehaviour
                 somethingExist = true;
 
                 Vector3 originPos = _cellPos;
-                Vector3 movePos = new Vector3(hit.collider.transform.position.x, transform.position.y + 0.2f, hit.collider.transform.position.z);
+                Vector3 movePos = new Vector3(hit.collider.transform.position.x, transform.position.y, hit.collider.transform.position.z);
 
                 transform.DOMove(movePos, 0.2f).OnComplete(() =>
                 {
@@ -361,7 +373,7 @@ public class PlayerController : MonoBehaviour
                     hit.collider.gameObject.GetComponentInChildren<Lever>().Play(1.0f).OnComplete(() =>
                     {
                         _state = PlayerState.IdleDown;
-                        hit.collider.gameObject.GetComponentInChildren<Lever>().SetActiveLight();
+                        hit.collider.gameObject.GetComponentInChildren<Lever>().SetActive();
                         hit.collider.gameObject.GetComponentInChildren<Lever>().Open();
                         _isEquiptShield = true;
                         _isEquiptWeapon = true;

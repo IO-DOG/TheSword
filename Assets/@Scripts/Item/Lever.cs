@@ -9,23 +9,9 @@ public class Lever : MonoBehaviour
     public GameObject Off;
     public GameObject lever;
 
-    public bool _IsActive = false;
+    public int _leverIndex_forActive = 0;
+    public bool _IsActive;
 
-    void Start()
-    {
-        if(_IsActive == false)
-        {
-            On.SetActive(false);
-        }
-        else
-        {
-            transform.parent.gameObject.layer = (int)Define.Layer.Wall;
-            foreach (Transform component in transform.parent.gameObject.transform)
-            {
-                component.gameObject.layer = (int)Define.Layer.Wall;
-            }
-        }
-    }
 
     public Tween Play(float time)
     {
@@ -36,11 +22,16 @@ public class Lever : MonoBehaviour
         return tween;
     }
 
-    public void SetActiveLight()
+    public void SetActive()
     {
         On.SetActive(true);
         Off.SetActive(false);
         _IsActive = true;
+        transform.parent.gameObject.layer = (int)Define.Layer.Wall;
+        foreach (Transform component in transform.parent.gameObject.transform)
+        {
+            component.gameObject.layer = (int)Define.Layer.Wall;
+        }
     }
 
     public void Open()

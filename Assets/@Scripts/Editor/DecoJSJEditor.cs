@@ -228,17 +228,6 @@ public class DecoJSJEditor : Editor
                 {
                     GameObject go = Instantiate(Tilemap[1], tiles.transform);
                     go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-
-                    GameObject lever = Instantiate(Tilemap[leverTile.PrefabID], tiles.transform);
-                    lever.name = $"Lever";
-                    lever.transform.position = new Vector3(leverTile.Position.X, leverTile.Position.Y, leverTile.Position.Z);
-
-                    if (leverTile.IsActive == true)
-                    {
-                        lever.GetComponentInChildren<Lever>()._IsActive = true;
-                        lever.GetComponentInChildren<Lever>().SetActiveLight();
-                        lever.GetComponentInChildren<Lever>().Play(0.0f);
-                    }
                 }
                 else if (tile is PillarData pillarTile)
                 {

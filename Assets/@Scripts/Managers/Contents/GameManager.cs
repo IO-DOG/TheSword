@@ -477,6 +477,19 @@ public class GameManager
                     if (bossMonsterTile.IsActive == false)
                         boss.SetActive(false);
                 }
+                else if (tile is LeverData leverTile)
+                {
+                    GameObject lever = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", items.transform);
+                    lever.name = $"Lever";
+                    lever.transform.localPosition = new Vector3(leverTile.Position.X, lever.transform.position.y, leverTile.Position.Z);
+
+                    if (leverTile.IsActive == true)
+                    {
+                        lever.GetComponentInChildren<Lever>()._IsActive = true;
+                        lever.GetComponentInChildren<Lever>().SetActive();
+                        lever.GetComponentInChildren<Lever>().Play(0.0f);
+                    }
+                }
                 else
                 {
                     if (!isSpawned && tile.PrefabID == (int)Define.TileType.SpawnPoint && stageName != GetBossRoomName(chapter))
