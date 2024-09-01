@@ -218,4 +218,37 @@ public class UI_GameScene : UI_Scene
         else
             Managers.UI.ClosePopupUI();
     }
+
+    public void OffUIInventory()
+    {
+        GetImage((int)Images.MainUIInventoryAImage).gameObject.SetActive(false);
+        GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(false);
+    }
+
+    public void OffUISword()
+    {
+        GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(false);
+        GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false);
+    }
+
+    public void OffUIWarp()
+    {
+        GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(false);
+        GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false);
+    }
+
+    public void OffUI()
+    {
+        OffUIInventory();
+        OffUISword();
+        OffUIWarp();
+    }
+
+    public void OnUI()
+    {
+        GetImage((int)Images.MainUIOptionAImage).gameObject.SetActive(true);
+        GetImage((int)Images.MainUIInventoryAImage).gameObject.SetActive(true);
+        GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(true);
+        GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(true);
+    }
 }
