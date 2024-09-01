@@ -24,6 +24,7 @@ public class GameManager
     public bool OnLever = false;
     public bool OnFade = false;
     public bool OnDirect = false;
+    public bool OnInteract = false;
 
     public PlayerController Player; // ������ ������ ����
     public MonsterController Monster; // ������ ������ ����

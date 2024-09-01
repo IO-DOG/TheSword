@@ -33,8 +33,6 @@ public class PlayerController : MonoBehaviour
     float _duration;
     bool _isMoving = false;
 
-    bool _isInteracted = false;
-
     float _offset = Define.TILE_SIZE;
     Vector3 _interpolateRayPos = new Vector3(0f, Define.TILE_SIZE / 2f, 0f);
     public Vector3 _cellPos;
@@ -66,8 +64,8 @@ public class PlayerController : MonoBehaviour
 
     void OnKeyboard()
     {
-        if (Managers.Game.OnBattle || Managers.Game.OnConversation || Managers.Game.OnLever 
-            || Managers.Game.OnFade || Managers.Game.OnDirect)
+        if (Managers.Game.OnBattle || Managers.Game.OnConversation || Managers.Game.OnLever
+            || Managers.Game.OnFade || Managers.Game.OnDirect || Managers.Game.OnInteract)
         {
             return;
         }
@@ -257,9 +255,6 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (_isInteracted)
-            return;
-
         // Move
         _cellPos += _nextCellPos;
         transform.DOMove(_cellPos, _duration).SetEase(Ease.Linear).OnComplete(()=> 
@@ -344,11 +339,10 @@ public class PlayerController : MonoBehaviour
                 else
                 {
                     somethingExist = true;
-                    _isInteracted = true;
                     InteractAnim().OnComplete(() =>
                     {
                         SetIdleState(_moveDir);
-                        _isInteracted = false;
+                        Managers.Game.OnInteract = false;
                     });
                 }
             }
@@ -389,6 +383,7 @@ public class PlayerController : MonoBehaviour
 
     Sequence InteractAnim()
     {
+        Managers.Game.OnInteract = true;
         Vector3 interactPos = _cellPos;
         switch (_moveDir)
         {
