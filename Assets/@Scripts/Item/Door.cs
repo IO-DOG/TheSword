@@ -39,7 +39,7 @@ public class Door : MonoBehaviour
 
     IEnumerator OpenDoor(float time)
     {
-        Managers.Data.DoorActiveOff(_doorIndex_forActive);
+        Managers.Data.DoorActiveDic[_doorIndex_forActive] = false;
         Managers.Game.SaveGame();
         yield return new WaitForSeconds(1f);
         float elapsedTime = 0.0f;

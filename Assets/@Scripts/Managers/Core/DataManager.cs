@@ -25,8 +25,16 @@ public class DataManager
     public Dictionary<int, Data.StageInfoData> StageInfoDic { get; set; } = new Dictionary<int, StageInfoData>();
     public Dictionary<int, Data.EventData> EventDic { get; set; } = new Dictionary<int, EventData>();
 
+    public Dictionary<int, bool> MonsterActiveDic { get; set; } = new Dictionary<int, bool>();
+    public Dictionary<int, bool> BossMonsterActiveDic { get; set; } = new Dictionary<int, bool>();
+    public Dictionary<int, bool> CItemActiveDic { get; set; } = new Dictionary<int, bool>();
+    public Dictionary<int, bool> EItemActiveDic { get; set; } = new Dictionary<int, bool>();
+    public Dictionary<int, bool> PillarActiveDic { get; set; } = new Dictionary<int, bool>();
+    public Dictionary<int, bool> LeverActiveDic { get; set; } = new Dictionary<int, bool>();
+    public Dictionary<int, bool> DoorActiveDic { get; set; } = new Dictionary<int, bool>();
 
-    
+
+
     public void Init()
     {
         AssetDatabase.Refresh();
@@ -41,6 +49,25 @@ public class DataManager
         ScriptDic = LoadJson<Data.ScriptDataLoader, int, Data.ScriptData>("ScriptData").MakeDict();
         StageInfoDic = LoadJson<Data.StageInfoDataLoader, int, Data.StageInfoData>("StageInfoData").MakeDict();
         EventDic = LoadJson<Data.EventDataLoader, int, Data.EventData>("EventData").MakeDict();
+
+        #region Active Dic
+        TextAsset monsterActiveDataTextAsset = Managers.Resource.Load<TextAsset>("MonsterActiveData");
+        MonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(monsterActiveDataTextAsset.text);
+        TextAsset bossMonsterActiveDataTextAsset = Managers.Resource.Load<TextAsset>("BossMonsterActiveData");
+        BossMonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(bossMonsterActiveDataTextAsset.text);
+        TextAsset cItemActiveDataTextAsset = Managers.Resource.Load<TextAsset>("CItemActiveData");
+        CItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(cItemActiveDataTextAsset.text);
+        TextAsset eItemActiveDataTextAsset = Managers.Resource.Load<TextAsset>("EItemActiveData");
+        EItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(eItemActiveDataTextAsset.text);
+        TextAsset doorActiveDataTextAsset = Managers.Resource.Load<TextAsset>("DoorActiveData");
+        DoorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(doorActiveDataTextAsset.text);
+        TextAsset pillarActiveDataTextAsset = Managers.Resource.Load<TextAsset>("PillarActiveData");
+        PillarActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(pillarActiveDataTextAsset.text);
+        TextAsset leverActiveDataTextAsset = Managers.Resource.Load<TextAsset>("LeverActiveData");
+        LeverActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(leverActiveDataTextAsset.text);
+        #endregion
+
+        CheckSaveData();
     }
 
     Loader LoadJson<Loader, Key, Value>(string path) where Loader : ILoader<Key, Value>
@@ -57,6 +84,73 @@ public class DataManager
         else
         {
             return JsonConvert.DeserializeObject<Loader>(textAsset.text);
+        }
+    }
+
+    void CheckSaveData()
+    {
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json";
+            if (File.Exists(path))
+            {
+                string file = Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json";
+                string fileStr = File.ReadAllText(file);
+                MonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
+            }
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json";
+            if (File.Exists(path))
+            {
+                string file = Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json";
+                string fileStr = File.ReadAllText(file);
+                BossMonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
+            }
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveCItemActiveData.json";
+            if (File.Exists(path))
+            {
+                string file = Application.dataPath + "/@Resources/Data/SaveCItemActiveData.json";
+                string fileStr = File.ReadAllText(file);
+                CItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
+            }
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveEItemActiveData.json";
+            if (File.Exists(path))
+            {
+                string file = Application.dataPath + "/@Resources/Data/SaveEItemActiveData.json";
+                string fileStr = File.ReadAllText(file);
+                EItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
+            }
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json";
+            if (File.Exists(path))
+            {
+                string file = Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json";
+                string fileStr = File.ReadAllText(file);
+                DoorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
+            }
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SavePillarActiveData.json";
+            if (File.Exists(path))
+            {
+                string file = Application.dataPath + "/@Resources/Data/SavePillarActiveData.json";
+                string fileStr = File.ReadAllText(file);
+                PillarActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
+            }
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveLeverActiveData.json";
+            if (File.Exists(path))
+            {
+                string file = Application.dataPath + "/@Resources/Data/SaveLeverActiveData.json";
+                string fileStr = File.ReadAllText(file);
+                LeverActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
+            }
         }
     }
 
@@ -100,110 +194,4 @@ public class DataManager
 
         return count;
     }
-
-    #region Active Off
-    public void MonsterActiveOff(int index)
-    {
-        foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
-        {
-            string key = entry.Key;
-            Data.MapData mapData = entry.Value;
-
-            foreach (Data.TileData tile in mapData.Tiles)
-            {
-               if(tile is Occupied monsterTile && monsterTile.Type == (int)Define.OccupiedType.Monster && monsterTile.TotalCount == index)
-                {
-                    monsterTile.IsActive = false;
-                }
-            }
-        }
-    }
-
-    public void LeverActiveOff()
-    {
-        foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
-        {
-            string key = entry.Key;
-            Data.MapData mapData = entry.Value;
-
-            foreach (Data.TileData tile in mapData.Tiles)
-            {
-                if (tile is LeverData lever && lever.TileType == (int)Define.TileType.Lever)
-                {
-                    lever.IsActive = true;
-                }
-            }
-        }
-    }
-
-    public void PillarActiveOff(int index)
-    {
-        foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
-        {
-            string key = entry.Key;
-            Data.MapData mapData = entry.Value;
-
-            foreach (Data.TileData tile in mapData.Tiles)
-            {
-                if (tile is PillarData pillar && pillar.TileType == (int)Define.TileType.Pillar && pillar.TotalCount == index)
-                {
-                    pillar.IsActive = false;
-                }
-            }
-        }
-    }
-
-
-    public void CItemActiveOff(int index)
-    {
-        foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
-        {
-            string key = entry.Key;
-            Data.MapData mapData = entry.Value;
-
-            foreach (Data.TileData tile in mapData.Tiles)
-            {
-                if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem && citemTile.TotalCount == index)
-                {
-                    citemTile.IsActive = false;
-                }
-            }
-        }
-    }
-
-    public void DoorActiveOff(int index)
-    {
-        foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
-        {
-            string key = entry.Key;
-            Data.MapData mapData = entry.Value;
-
-            foreach (Data.TileData tile in mapData.Tiles)
-            {
-                if (tile is DoorData doorTile && doorTile.TileType == (int)Define.TileType.Door && doorTile.TotalCount == index)
-                {
-                    doorTile.IsActive = false;
-                }
-            }
-        }
-    }
-
-    public void EItemActiveOff(int index)
-    {
-        foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
-        {
-            string key = entry.Key;
-            Data.MapData mapData = entry.Value;
-
-            foreach (Data.TileData tile in mapData.Tiles)
-            {
-                if (tile is Occupied eItemTile && eItemTile.Type == (int)Define.OccupiedType.EItem && eItemTile.TotalCount == index)
-                {
-                    eItemTile.IsActive = false;
-                }
-            }
-        }
-    }
-    #endregion
-
 }

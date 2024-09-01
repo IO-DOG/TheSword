@@ -13,6 +13,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.PostProcessing;
 using static Define;
 using static UnityEditor.Progress;
 using static UnityEngine.EventSystems.EventTrigger;
@@ -297,13 +298,30 @@ public class GameManager
         string jsonStr = JsonConvert.SerializeObject(CurPlayerData, Formatting.Indented);
         File.WriteAllText(_path, jsonStr);
 
-        List<MapData> mapData = new List<MapData>(Managers.Data.MapDic.Values);
-        var mapContainer = new { Maps = mapData };
-        string MapDicJsonStr = JsonConvert.SerializeObject(mapContainer, new JsonSerializerSettings
-        {
-            TypeNameHandling = TypeNameHandling.Auto
-        });
-        File.WriteAllText(Application.dataPath + "/@Resources/Data/JsonData/MapData.json", MapDicJsonStr);
+        //List<MapData> mapData = new List<MapData>(Managers.Data.MapDic.Values);
+        //var mapContainer = new { Maps = mapData };
+        //string MapDicJsonStr = JsonConvert.SerializeObject(mapContainer, new JsonSerializerSettings
+        //{
+        //    TypeNameHandling = TypeNameHandling.Auto
+        //});
+        //File.WriteAllText(Application.dataPath + "/@Resources/Data/JsonData/MapData.json", MapDicJsonStr);
+
+        #region ActiveDic
+        string monsterActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.MonsterActiveDic, Formatting.Indented);
+        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json", monsterActiveDicJsonStr);
+        string bossMonsterActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.BossMonsterActiveDic, Formatting.Indented);
+        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json", bossMonsterActiveDicJsonStr);
+        string cItemActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.CItemActiveDic, Formatting.Indented);
+        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveCItemActiveData.json", cItemActiveDicJsonStr);
+        string eItemActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.EItemActiveDic, Formatting.Indented);
+        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveEItemActiveData.json", eItemActiveDicJsonStr);
+        string doorActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.DoorActiveDic, Formatting.Indented);
+        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json", doorActiveDicJsonStr);
+        string pillarActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.PillarActiveDic, Formatting.Indented);
+        File.WriteAllText(Application.dataPath + "/@Resources/Data/SavePillarActiveData.json", pillarActiveDicJsonStr);
+        string leverActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.LeverActiveDic, Formatting.Indented);
+        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveLeverActiveData.json", leverActiveDicJsonStr);
+        #endregion
     }
 
     public bool LoadGame()
@@ -329,6 +347,30 @@ public class GameManager
             Managers.Game.CurPlayerData.IsDefence = false;
 
             KeyInventory.InitKeyInventory();
+
+            #region Active Dic
+            string monsterActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/JsonData/SaveMonsterActiveData.json");
+            Dictionary<int, bool> monsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(monsterActiveDicFile);
+            Managers.Data.MonsterActiveDic = monsterActiveDic;
+            string bossMonsterActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/JsonData/SaveBossMonsterActiveData.json");
+            Dictionary<int, bool> bossMonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(bossMonsterActiveDicFile);
+            Managers.Data.BossMonsterActiveDic = bossMonsterActiveDic;
+            string cItemActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/JsonData/SaveCItemActiveData.json");
+            Dictionary<int, bool> cItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(cItemActiveDicFile);
+            Managers.Data.CItemActiveDic = cItemActiveDic;
+            string eItemActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/JsonData/SaveEItemActiveData.json");
+            Dictionary<int, bool> eItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(eItemActiveDicFile);
+            Managers.Data.EItemActiveDic = eItemActiveDic;
+            string doorActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/JsonData/SaveDoorActiveData.json");
+            Dictionary<int, bool> doorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(doorActiveDicFile);
+            Managers.Data.DoorActiveDic = doorActiveDic;
+            string pillarActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/JsonData/SavePillarActiveData.json");
+            Dictionary<int, bool> pillarActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(pillarActiveDicFile);
+            Managers.Data.PillarActiveDic = pillarActiveDic;
+            string leverActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/JsonData/SaveLeverActiveData.json");
+            Dictionary<int, bool> leverActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(leverActiveDicFile);
+            Managers.Data.LeverActiveDic = leverActiveDic;
+            #endregion
 
             for (int i = 0; i < 10; ++i)
             {
@@ -401,6 +443,7 @@ public class GameManager
             GameObject map = Managers.Resource.Instantiate("Dungeon_" + chapter + count.ToString("D3"));
 
             Door[] doors = map.GetComponentsInChildren<Door>();
+            Pillar[] pillars = map.GetComponentsInChildren<Pillar>();
 
             GameObject items = Util.FindChildByName(map.transform, "Items").gameObject;
             GameObject monsters = Util.FindChildByName(map.transform, "Monsters").gameObject;
@@ -415,8 +458,16 @@ public class GameManager
                 {
                     foreach(Door child in doors)
                     {
-                        if (doorTile.IsActive == false && doorTile.TotalCount == child._doorIndex_forActive)
+                        if (Managers.Data.DoorActiveDic[doorTile.TotalCount] == false)
                             child.transform.parent.gameObject.SetActive(false);
+                    }
+                }
+                if (tile is PillarData pillarTile)
+                {
+                    foreach (Pillar child in pillars)
+                    {
+                        if (Managers.Data.DoorActiveDic[pillarTile.TotalCount] == false)
+                            child._pillar.gameObject.SetActive(false);
                     }
                 }
                 else if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
@@ -427,7 +478,7 @@ public class GameManager
                     item.name = $"CItem{citemTile.TotalCount}";
                     item.GetComponent<ConsumableItem>()._itemIndex_forActive = citemTile.TotalCount;
 
-                    if (citemTile.IsActive == false)
+                    if (Managers.Data.CItemActiveDic[citemTile.TotalCount] == false)
                         item.SetActive(false);
                 }
                 else if (tile is Occupied eitemTile && eitemTile.Type == (int)Define.OccupiedType.EItem)
@@ -438,7 +489,7 @@ public class GameManager
                     item.name = $"EItem{eitemTile.TotalCount}";
                     item.GetComponent<Equip>()._itemIndex_forActive = eitemTile.TotalCount;
 
-                    if (eitemTile.IsActive == false)
+                    if (Managers.Data.EItemActiveDic[eitemTile.TotalCount] == false)
                         item.SetActive(false);
                 }
                 else if (tile is Occupied monsterTile && monsterTile.Type == (int)Define.OccupiedType.Monster)
@@ -450,7 +501,7 @@ public class GameManager
                     monster.name = $"monster{monsterTile.TotalCount}";
                     monster.GetComponent<MonsterController>()._monsterIndex_forActive = monsterTile.TotalCount;
 
-                    if (monsterTile.IsActive == false)
+                    if (Managers.Data.MonsterActiveDic[monsterTile.TotalCount] == false)
                         monster.SetActive(false);
                 }
                 else if (tile is Occupied bossMonsterTile && bossMonsterTile.Type == (int)Define.OccupiedType.Boss)
@@ -472,16 +523,17 @@ public class GameManager
                             break;
                     }
 
-                    if (bossMonsterTile.IsActive == false)
-                        boss.SetActive(false);
+                    if (Managers.Data.BossMonsterActiveDic[bossMonsterTile.TotalCount] == false)
+                        bossMonsters.SetActive(false);
                 }
                 else if (tile is LeverData leverTile)
                 {
                     GameObject lever = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", items.transform);
+                    lever.GetComponentInChildren<Lever>()._leverIndex_forActive = leverTile.TotalCount;
                     lever.name = $"Lever";
                     lever.transform.localPosition = new Vector3(leverTile.Position.X, lever.transform.position.y, leverTile.Position.Z);
 
-                    if (leverTile.IsActive == true)
+                    if (Managers.Data.LeverActiveDic[leverTile.TotalCount] == false)
                     {
                         lever.GetComponentInChildren<Lever>()._IsActive = true;
                         lever.GetComponentInChildren<Lever>().SetActive();

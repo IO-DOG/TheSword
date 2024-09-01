@@ -43,7 +43,7 @@ public class Lever : MonoBehaviour
             if(child.GetComponentInChildren<Pillar>() != null)
             {
                 child.GetComponentInChildren<Pillar>().Open();
-                Managers.Data.LeverActiveOff();
+                Managers.Data.LeverActiveDic[_leverIndex_forActive] = false ;
             }
         }
     }
