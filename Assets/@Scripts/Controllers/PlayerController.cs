@@ -115,8 +115,6 @@ public class PlayerController : MonoBehaviour
         {
             SetIdleState(_moveDir);
         }
-
-        Debug.DrawRay(transform.position + _interpolateRayPos, _nextCellPos, Color.red, 1f);
     }
 
     void CheckWeapon()

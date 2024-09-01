@@ -447,6 +447,7 @@ public class GameManager
                 {
                     GameObject monster = Managers.Resource.Instantiate("Monster", monsters.transform);
                     monster.transform.localPosition = new Vector3(monsterTile.Position.X, monsterTile.Position.Y, monsterTile.Position.Z);
+                    monster.transform.localScale = monsters.transform.localPosition + new Vector3(0.8f, 0.8f, 1f);
                     monster.GetComponent<MonsterController>().id = monsterTile.Index;
                     monster.name = $"monster{monsterTile.TotalCount}";
                     monster.GetComponent<MonsterController>()._monsterIndex_forActive = monsterTile.TotalCount;
