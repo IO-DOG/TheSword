@@ -505,7 +505,7 @@ public class GameManager
 
             items.transform.localPosition = items.transform.localPosition + new Vector3(0f, 1.6f, -0.4f);
             monsters.transform.localPosition = monsters.transform.localPosition + new Vector3(0f, 3f, -1.1f);
-            bossMonsters.transform.localPosition = bossMonsters.transform.localPosition + new Vector3(0f, 1.5f, -0.55f);
+            bossMonsters.transform.localPosition = bossMonsters.transform.localPosition + new Vector3(0f, 3f, -1.1f);
 
             count++;
 
