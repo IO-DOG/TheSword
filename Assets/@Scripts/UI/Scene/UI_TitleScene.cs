@@ -52,7 +52,8 @@ public class UI_TitleScene : UI_Scene
         BindObject(typeof(Objects));
         #endregion
 
-        GetObject((int)Objects.Slider).GetComponent<Slider>().value = 0;
+        //GetObject((int)Objects.Slider).GetComponent<Slider>().value = 0;
+        GetObject((int)Objects.Slider).GetComponent<Slider>().gameObject.SetActive(false);
         // 테스트용
         GetButton((int)Buttons.NewGameButton).gameObject.BindEvent(() =>
         {
