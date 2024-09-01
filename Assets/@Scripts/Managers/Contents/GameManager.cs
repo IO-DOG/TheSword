@@ -458,15 +458,25 @@ public class GameManager
                 {
                     GameObject boss = Managers.Resource.Instantiate("BossMonster", bossMonsters.transform);
                     boss.transform.localPosition = new Vector3(bossMonsterTile.Position.X, bossMonsterTile.Position.Y, bossMonsterTile.Position.Z);
-                    boss.GetComponent<BossMonsterController>().id = bossMonsterTile.Index;
+                    int tileIndex = bossMonsterTile.Index;
+                    switch (tileIndex)
+                    {
+                        case 0:
+                            boss.GetComponent<BossMonsterController>().id = Define.KingSlime;
+                            break;
+                        default:
+                            break;
+                    }
+                    Debug.Log($"bossMonsterTile.index : {bossMonsterTile.Index}");
                     boss.name = $"bossMonster{bossMonsterTile.TotalCount}";
                     boss.GetComponent<BossMonsterController>()._monsterIndex_forActive = bossMonsterTile.TotalCount;
 
                     int id = boss.GetComponent<BossMonsterController>().id;
+                    Debug.Log($"bossMonsterId : {id}");
                     string name = Managers.Data.MonsterDic[id].Name;
-                    switch (name)
+                    switch (id)
                     {
-                        case "블랙슬라임":
+                        case Define.KingSlime:
                             boss.AddComponent<BlackSlimeController>();
                             break;
                         default:
