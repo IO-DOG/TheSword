@@ -404,6 +404,7 @@ public class GameManager
             GameObject items = Util.FindChildByName(map.transform, "Items").gameObject;
             GameObject monsters = Util.FindChildByName(map.transform, "Monsters").gameObject;
             GameObject bossMonsters = Util.FindChildByName(map.transform, "BossMonsters").gameObject;
+            bossMonsters.transform.localScale = new Vector3(1, 2, 1);
 
             map.transform.localPosition += new Vector3(count * 100, 0, 0);
             map.transform.parent = parent.transform;
