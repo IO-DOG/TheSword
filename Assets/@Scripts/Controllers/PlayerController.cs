@@ -104,7 +104,7 @@ public class PlayerController : MonoBehaviour
         CheckShield();
 
         if (Managers.Game.OnBattle || Managers.Game.OnConversation || Managers.Game.OnLever
-            || Managers.Game.OnFade || Managers.Game.OnDirect)
+            || Managers.Game.OnFade || Managers.Game.OnDirect || Managers.Game.OnInteract)
         {
             return;
         }
@@ -336,8 +336,9 @@ public class PlayerController : MonoBehaviour
                         somethingExist = false;
                     });
                 }
-                else
+                else if(!Managers.Game.KeyInventory.TryUseKey(hit.collider.gameObject))
                 {
+                    Managers.Game.OnInteract = true;
                     somethingExist = true;
                     InteractAnim().OnComplete(() =>
                     {
@@ -383,21 +384,20 @@ public class PlayerController : MonoBehaviour
 
     Sequence InteractAnim()
     {
-        Managers.Game.OnInteract = true;
         Vector3 interactPos = _cellPos;
         switch (_moveDir)
         {
             case MoveDir.Up:
-                interactPos += Vector3.forward * _offset / 2;
+                interactPos += Vector3.forward * _offset / 3;
                 break;
             case MoveDir.Down:
-                interactPos += Vector3.back * _offset / 2;
+                interactPos += Vector3.back * _offset / 3;
                 break;
             case MoveDir.Left:
-                interactPos += Vector3.left * _offset / 2;
+                interactPos += Vector3.left * _offset / 3;
                 break;
             case MoveDir.Right:
-                interactPos += Vector3.right * _offset / 2;
+                interactPos += Vector3.right * _offset / 3;
                 break;
         }
 

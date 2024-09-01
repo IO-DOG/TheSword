@@ -413,13 +413,10 @@ public class GameManager
             {
                 if (tile is DoorData doorTile)
                 {
-                    if (doorTile.IsActive == false)
+                    foreach(Door child in doors)
                     {
-                        foreach(Door child in doors)
-                        {
-                            if (doorTile.TotalCount == child._doorIndex_forActive)
-                                child.gameObject.SetActive(false);
-                        }
+                        if (doorTile.IsActive == false && doorTile.TotalCount == child._doorIndex_forActive)
+                            child.transform.parent.gameObject.SetActive(false);
                     }
                 }
                 else if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
