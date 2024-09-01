@@ -54,6 +54,11 @@ public class DataTransformer : EditorWindow
             if (File.Exists(path))
                 File.Delete(path);
         }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveLeverActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
         ParseMapData();
         Debug.Log("Complete DeleteGameData");
     }

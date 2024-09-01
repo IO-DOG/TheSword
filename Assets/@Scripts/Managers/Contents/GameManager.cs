@@ -348,30 +348,6 @@ public class GameManager
 
             KeyInventory.InitKeyInventory();
 
-            #region Active Dic
-            string monsterActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/JsonData/SaveMonsterActiveData.json");
-            Dictionary<int, bool> monsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(monsterActiveDicFile);
-            Managers.Data.MonsterActiveDic = monsterActiveDic;
-            string bossMonsterActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/JsonData/SaveBossMonsterActiveData.json");
-            Dictionary<int, bool> bossMonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(bossMonsterActiveDicFile);
-            Managers.Data.BossMonsterActiveDic = bossMonsterActiveDic;
-            string cItemActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/JsonData/SaveCItemActiveData.json");
-            Dictionary<int, bool> cItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(cItemActiveDicFile);
-            Managers.Data.CItemActiveDic = cItemActiveDic;
-            string eItemActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/JsonData/SaveEItemActiveData.json");
-            Dictionary<int, bool> eItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(eItemActiveDicFile);
-            Managers.Data.EItemActiveDic = eItemActiveDic;
-            string doorActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/JsonData/SaveDoorActiveData.json");
-            Dictionary<int, bool> doorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(doorActiveDicFile);
-            Managers.Data.DoorActiveDic = doorActiveDic;
-            string pillarActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/JsonData/SavePillarActiveData.json");
-            Dictionary<int, bool> pillarActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(pillarActiveDicFile);
-            Managers.Data.PillarActiveDic = pillarActiveDic;
-            string leverActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/JsonData/SaveLeverActiveData.json");
-            Dictionary<int, bool> leverActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(leverActiveDicFile);
-            Managers.Data.LeverActiveDic = leverActiveDic;
-            #endregion
-
             for (int i = 0; i < 10; ++i)
             {
                 Managers.Game.CurPlayerData.Inventory.Add(new List<int>());
@@ -394,6 +370,30 @@ public class GameManager
         if (data != null)
         {
             CurPlayerData = data;
+
+            #region Active Dic
+            string monsterActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json");
+            Dictionary<int, bool> monsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(monsterActiveDicFile);
+            Managers.Data.MonsterActiveDic = monsterActiveDic;
+            string bossMonsterActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json");
+            Dictionary<int, bool> bossMonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(bossMonsterActiveDicFile);
+            Managers.Data.BossMonsterActiveDic = bossMonsterActiveDic;
+            string cItemActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveCItemActiveData.json");
+            Dictionary<int, bool> cItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(cItemActiveDicFile);
+            Managers.Data.CItemActiveDic = cItemActiveDic;
+            string eItemActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveEItemActiveData.json");
+            Dictionary<int, bool> eItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(eItemActiveDicFile);
+            Managers.Data.EItemActiveDic = eItemActiveDic;
+            string doorActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json");
+            Dictionary<int, bool> doorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(doorActiveDicFile);
+            Managers.Data.DoorActiveDic = doorActiveDic;
+            string pillarActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SavePillarActiveData.json");
+            Dictionary<int, bool> pillarActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(pillarActiveDicFile);
+            Managers.Data.PillarActiveDic = pillarActiveDic;
+            string leverActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveLeverActiveData.json");
+            Dictionary<int, bool> leverActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(leverActiveDicFile);
+            Managers.Data.LeverActiveDic = leverActiveDic;
+            #endregion
             Debug.Log("�÷��̾� ������ �ε� �Ϸ�");
         }
 
