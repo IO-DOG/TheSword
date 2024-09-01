@@ -52,6 +52,8 @@ public class UI_TitleScene : UI_Scene
         BindObject(typeof(Objects));
         #endregion
 
+        Loading();
+
         //GetObject((int)Objects.Slider).GetComponent<Slider>().value = 0;
         GetObject((int)Objects.Slider).GetComponent<Slider>().gameObject.SetActive(false);
         // 테스트용
@@ -80,6 +82,11 @@ public class UI_TitleScene : UI_Scene
     }
 
     private void Start()
+    {
+
+    }
+
+    void Loading()
     {
         Managers.Resource.LoadAllAsync<Object>("PreLoad", (key, count, totalCount) =>
         {
