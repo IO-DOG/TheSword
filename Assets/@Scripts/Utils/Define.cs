@@ -63,6 +63,7 @@ public class Define
 
     public enum Layer
     {
+        Default = 0,
         Wall = 6,
         CItem = 7,
         Player = 8,
@@ -72,6 +73,7 @@ public class Define
         EItem = 12,
         Lever = 14,
         InteractObjects = 15,
+        BossDoor = 16,
     }
 
     public enum MoveDir

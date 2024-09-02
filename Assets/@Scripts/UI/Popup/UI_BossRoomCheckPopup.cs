@@ -55,6 +55,8 @@ public class UI_BossRoomCheckPopup : UI_Popup
 
         StartCoroutine(PopupAnimation());
 
+        Managers.Game.OnDirect = true;
+
         return true;
     }
 
@@ -86,11 +88,14 @@ public class UI_BossRoomCheckPopup : UI_Popup
 
     void YesClick()
     {
+        Managers.Resource.Instantiate("FX_BossPortal_A", Managers.Game.BossRoom);
+
         ClosePopupUI();
     }
 
     void NoClick()
     {
+        Managers.Game.OnDirect = false;
         ClosePopupUI();
     }
 

@@ -10,6 +10,7 @@ using System.Threading;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Rendering;
@@ -27,12 +28,17 @@ public class GameManager
     public bool OnDirect = false;
     public bool OnInteract = false;
 
+    public Transform BossRoom;
+
     public PlayerController Player; // ������ ������ ����
     public MonsterController Monster; // ������ ������ ����
     public CurMonsterData MonsterData = new CurMonsterData(); // ���� ���� ���� ����
     public ContinueData CurPlayerData = new ContinueData(); // ���� ���� �÷��̾� ����
     public CurConsumableItemData ConsumableItemData = new CurConsumableItemData(); // Current Consumable Item Data
     public KeyInventory KeyInventory = new KeyInventory(); //Inventory
+
+    public Action OnEnterBossRoomAction;
+    public Action OnFadeAction;
 
     public Action OnBattleAction;
     public Action OnBattleDataRefreshAction;
@@ -459,6 +465,7 @@ public class GameManager
                 {
                     foreach(Door child in doors)
                     {
+                        child.GetComponentInChildren<Door>()._doorIndex_forActive = doorTile.TotalCount;
                         if (Managers.Data.DoorActiveDic[doorTile.TotalCount] == false)
                             child.transform.parent.gameObject.SetActive(false);
                     }
@@ -467,10 +474,18 @@ public class GameManager
                 {
                     foreach (Pillar child in pillars)
                     {
-                        if (Managers.Data.DoorActiveDic[pillarTile.TotalCount] == false)
+                        child.GetComponentInChildren<Pillar>()._pillarIndex_forActive = pillarTile.TotalCount;
+                        if (Managers.Data.PillarActiveDic[pillarTile.TotalCount] == false)
                             child._pillar.gameObject.SetActive(false);
                     }
                 }
+                //else if (tile is StairsData stairsTile)
+                //{
+                //    if(stairsTile.StairsType == (int)Define.Stairs.BossRoom)
+                //    {
+                //        BossRoom.position = new Vector3(stairsTile.Position.X + count * 100, 0.16f, stairsTile.Position.Z);
+                //    }
+                //}
                 else if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
                 {
                     GameObject item = Managers.Resource.Instantiate("ConsumableItem", items.transform);

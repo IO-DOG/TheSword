@@ -196,7 +196,6 @@ public class DecoJSJEditor : Editor
                     GameObject door = Instantiate<GameObject>(Tilemap[doorTile.PrefabID], tiles.transform);
                     door.transform.position = new Vector3(doorTile.Position.X, doorTile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
                     door.name = $"door{doorTile.TotalCount}";
-                    door.GetComponentInChildren<Door>()._doorIndex_forActive = doorTile.TotalCount;
 
                     if (doorTile.IsActive == false)
                         door.SetActive(false);
@@ -237,7 +236,6 @@ public class DecoJSJEditor : Editor
                     GameObject pillar = Instantiate(Tilemap[pillarTile.PrefabID], pillars.transform);
                     pillar.name = $"pillar{pillarTile.TotalCount}";
                     pillar.transform.position = new Vector3(pillarTile.Position.X, pillarTile.Position.Y - Define.TILE_SIZE / 2, pillarTile.Position.Z);
-                    pillar.GetComponentInChildren<Pillar>()._pillarIndex_forActive = pillarTile.TotalCount;
 
                     if (pillarTile.IsActive == false)
                     {
