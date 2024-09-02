@@ -33,7 +33,7 @@ public class ConsumableItem : MonoBehaviour
         #endregion
 
         Debug.Log(Managers.Game.ConsumableItemData.Name + "is Picked up!");
-        Managers.Data.CItemActiveOff(_itemIndex_forActive);
+        Managers.Data.CItemActiveDic[_itemIndex_forActive] = false;
         gameObject.SetActive(false);
         PlayParticle();
 

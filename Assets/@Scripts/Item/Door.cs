@@ -39,7 +39,7 @@ public class Door : MonoBehaviour
 
     IEnumerator OpenDoor(float time)
     {
-        Managers.Data.DoorActiveOff(_doorIndex_forActive);
+        Managers.Data.DoorActiveDic[_doorIndex_forActive] = false;
         Managers.Game.SaveGame();
         yield return new WaitForSeconds(1f);
         float elapsedTime = 0.0f;
@@ -63,7 +63,7 @@ public class Door : MonoBehaviour
     IEnumerator DoorLockAnim()
     {
         GameObject go = Managers.Resource.Instantiate("DoorLock", _doorLockPos);
-        go.transform.localScale = new Vector3(go.transform.localScale.x, go.transform.localScale.y * _camera.scaleMultiplier, go.transform.localScale.z * _camera.scaleMultiplier);
+        go.transform.localScale = new Vector3(go.transform.localScale.x, go.transform.localScale.y * _camera._scaleMultiplier, go.transform.localScale.z * _camera._scaleMultiplier);
         float time = go.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length;
         yield return new WaitForSeconds(time);
         Managers.Resource.Destroy(go);

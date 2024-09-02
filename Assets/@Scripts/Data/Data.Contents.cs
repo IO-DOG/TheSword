@@ -145,6 +145,7 @@ namespace Data
     [Serializable]
     public class LeverData : TileData
     {
+        public int TotalCount { get; set; }
         public bool IsActive { get; set; }
     }
 

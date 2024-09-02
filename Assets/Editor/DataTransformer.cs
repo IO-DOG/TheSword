@@ -24,6 +24,41 @@ public class DataTransformer : EditorWindow
             if (File.Exists(path))
                 File.Delete(path);
         }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveCItemActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveEItemActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SavePillarActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveLeverActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
         ParseMapData();
         Debug.Log("Complete DeleteGameData");
     }
@@ -246,19 +281,30 @@ public class DataTransformer : EditorWindow
         DirectoryInfo di = new DirectoryInfo($"{Application.dataPath}/@Resources/Data/Excel/");
         //int floorIndex = 1;
 
+        #region Active Dic
+        Dictionary<int, bool> monsterActiveDic = new Dictionary<int, bool>();
+        Dictionary<int, bool> bossMonsterActiveDic = new Dictionary<int, bool>();
+        Dictionary<int, bool> cItemActiveDic = new Dictionary<int, bool>();
+        Dictionary<int, bool> eItemActiveDic = new Dictionary<int, bool>();
+        Dictionary<int, bool> doorActiveDic = new Dictionary<int, bool>();
+        Dictionary<int, bool> pillarActiveDic = new Dictionary<int, bool>();
+        Dictionary<int, bool> leverActiveDic = new Dictionary<int, bool>();
+
+        int totalCItemCount = 0;
+        int totalEItemCount = 0;
+        int totalMonsterCount = 0;
+        int totalBossCount = 0;
+        int totalDoorCount = 0;
+        int totalPillarCount = 0;
+        int totalLeverCount = 0;
+
+        #endregion
+
         #region Excel
         foreach (FileInfo file in di.GetFiles())
         {
-            int totalCItemCount = 0;
-            int totalEItemCount = 0;
-            int totalMonsterCount = 0;
-            int totalBossCount = 0;
-            int totalDoorCount = 0;
-
             if (file.Name.Contains("Dungeon") && !file.Name.Contains("meta"))
             {
-                int totalPillarCount = 0;
-
                 List<Data.TileData> tiles = new List<Data.TileData>();
                 string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{file.Name}").Split("\n");
                 float zPos = 0;
@@ -318,6 +364,8 @@ public class DataTransformer : EditorWindow
                         }
                         else if (block[0] == 'I')
                         {
+                            cItemActiveDic.Add(totalCItemCount, true);
+
                             Data.Occupied tile = new Data.Occupied
                             {
                                 PrefabID = 1,
@@ -335,10 +383,11 @@ public class DataTransformer : EditorWindow
                                 IsActive = true,
                             };
                             tiles.Add(tile);
-
                         }
                         else if (block[0] == 'E')
                         {
+                            eItemActiveDic.Add(totalEItemCount, true);
+
                             Data.Occupied tile = new Data.Occupied
                             {
                                 PrefabID = 1,
@@ -359,6 +408,8 @@ public class DataTransformer : EditorWindow
                         }
                         else if (block[0] == 'M')
                         {
+                            monsterActiveDic.Add(totalMonsterCount, true);
+
                             Data.Occupied tile = new Data.Occupied
                             {
                                 PrefabID = 1,
@@ -379,6 +430,8 @@ public class DataTransformer : EditorWindow
                         }
                         else if (block[0] == 'B')
                         {
+                            bossMonsterActiveDic.Add(totalBossCount, true);
+
                             Data.Occupied tile = new Data.Occupied
                             {
                                 PrefabID = 1,
@@ -419,6 +472,8 @@ public class DataTransformer : EditorWindow
 
                             if (prefabID >= 3 && prefabID <= 8)
                             {
+                                doorActiveDic.Add(totalDoorCount, true);
+
                                 Data.DoorData tile = new Data.DoorData
                                 {
                                     PrefabID = prefabID,
@@ -473,6 +528,8 @@ public class DataTransformer : EditorWindow
                             }
                             else if (prefabID == 12)
                             {
+                                leverActiveDic.Add(totalLeverCount, true);
+
                                 Data.LeverData tile = new Data.LeverData
                                 {
                                     PrefabID = prefabID,
@@ -483,12 +540,16 @@ public class DataTransformer : EditorWindow
                                         Z = zPos,
                                     },
                                     TileType = (int)Define.TileType.Lever,
+
+                                    TotalCount = totalLeverCount++,
                                     IsActive = false,
                                 };
                                 tiles.Add(tile);
                             }
                             else if (prefabID == 13)
                             {
+                                pillarActiveDic.Add(totalPillarCount, true);
+
                                 Data.PillarData tile = new Data.PillarData
                                 {
                                     PrefabID = prefabID,
@@ -581,6 +642,25 @@ public class DataTransformer : EditorWindow
                 //floorIndex++;
             }
         }
+        #endregion
+
+        #region Active Dic
+        string monsterActiveDicJsonStr = JsonConvert.SerializeObject(monsterActiveDic, Formatting.Indented);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/MonsterActiveData.json", monsterActiveDicJsonStr);
+        string bossMonsterActiveDicJsonStr = JsonConvert.SerializeObject(bossMonsterActiveDic, Formatting.Indented);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/BossMonsterActiveData.json", bossMonsterActiveDicJsonStr);
+        string cItemActiveDicJsonStr = JsonConvert.SerializeObject(cItemActiveDic, Formatting.Indented);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/CItemActiveData.json", cItemActiveDicJsonStr);
+        string eItemActiveDicJsonStr = JsonConvert.SerializeObject(eItemActiveDic, Formatting.Indented);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/EItemActiveData.json", eItemActiveDicJsonStr);
+        string doorActiveDicJsonStr = JsonConvert.SerializeObject(doorActiveDic, Formatting.Indented);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/DoorActiveData.json", doorActiveDicJsonStr);
+        string pillarActiveDicJsonStr = JsonConvert.SerializeObject(pillarActiveDic, Formatting.Indented);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/PillarActiveData.json", pillarActiveDicJsonStr);
+        string leverActiveDicJsonStr = JsonConvert.SerializeObject(leverActiveDic, Formatting.Indented);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/LeverActiveData.json", leverActiveDicJsonStr);
+
+        AssetDatabase.Refresh();
         #endregion
 
         string mapDicJsonStr = JsonConvert.SerializeObject(loader, new JsonSerializerSettings

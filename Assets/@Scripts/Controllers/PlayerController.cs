@@ -33,10 +33,8 @@ public class PlayerController : MonoBehaviour
     float _duration;
     bool _isMoving = false;
 
-    bool _isInteracted = false;
-
-    float _offset = Define.TILE_SIZE * 0.33f;
-    Vector3 _interpolateRayPos = new Vector3(0f, -2f, 0f);
+    float _offset = Define.TILE_SIZE;
+    Vector3 _interpolateRayPos = new Vector3(0f, Define.TILE_SIZE / 2f, 0f);
     public Vector3 _cellPos;
 
     Vector3 _nextCellPos;
@@ -66,8 +64,8 @@ public class PlayerController : MonoBehaviour
 
     void OnKeyboard()
     {
-        if (Managers.Game.OnBattle || Managers.Game.OnConversation || Managers.Game.OnLever 
-            || Managers.Game.OnFade || Managers.Game.OnDirect)
+        if (Managers.Game.OnBattle || Managers.Game.OnConversation || Managers.Game.OnLever
+            || Managers.Game.OnFade || Managers.Game.OnDirect || Managers.Game.OnInteract)
         {
             return;
         }
@@ -106,7 +104,7 @@ public class PlayerController : MonoBehaviour
         CheckShield();
 
         if (Managers.Game.OnBattle || Managers.Game.OnConversation || Managers.Game.OnLever
-            || Managers.Game.OnFade || Managers.Game.OnDirect)
+            || Managers.Game.OnFade || Managers.Game.OnDirect || Managers.Game.OnInteract)
         {
             return;
         }
@@ -115,8 +113,6 @@ public class PlayerController : MonoBehaviour
         {
             SetIdleState(_moveDir);
         }
-
-        //Debug.Log(Managers.Game.CurPlayerData.MoveSpeed);
     }
 
     void CheckWeapon()
@@ -208,6 +204,18 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void ResetWeaponAndShieldAnimation()
+    {
+        if (_weapon.activeSelf)
+        {
+            _weapon.GetComponent<Animator>().Play($"{_weaponName}_Idle_F", 0, 0.0f);
+        }
+        if (_shield.activeSelf)
+        {
+            _shield.GetComponent<Animator>().Play($"{_shieldName}_Idle_F", 0, 0.0f);
+        }
+    }
+
     #region Moving
     public void Moving(Define.MoveDir moveDir)
     {
@@ -246,9 +254,6 @@ public class PlayerController : MonoBehaviour
             _isMoving = false;
             return;
         }
-
-        if (_isInteracted)
-            return;
 
         // Move
         _cellPos += _nextCellPos;
@@ -331,14 +336,14 @@ public class PlayerController : MonoBehaviour
                         somethingExist = false;
                     });
                 }
-                else
+                else if(!Managers.Game.KeyInventory.TryUseKey(hit.collider.gameObject))
                 {
+                    Managers.Game.OnInteract = true;
                     somethingExist = true;
-                    _isInteracted = true;
                     InteractAnim().OnComplete(() =>
                     {
                         SetIdleState(_moveDir);
-                        _isInteracted = false;
+                        Managers.Game.OnInteract = false;
                     });
                 }
             }
@@ -353,7 +358,7 @@ public class PlayerController : MonoBehaviour
                 somethingExist = true;
 
                 Vector3 originPos = _cellPos;
-                Vector3 movePos = new Vector3(hit.collider.transform.position.x, transform.position.y + 0.2f, hit.collider.transform.position.z);
+                Vector3 movePos = new Vector3(hit.collider.transform.position.x, transform.position.y, hit.collider.transform.position.z);
 
                 transform.DOMove(movePos, 0.2f).OnComplete(() =>
                 {
@@ -363,7 +368,7 @@ public class PlayerController : MonoBehaviour
                     hit.collider.gameObject.GetComponentInChildren<Lever>().Play(1.0f).OnComplete(() =>
                     {
                         _state = PlayerState.IdleDown;
-                        hit.collider.gameObject.GetComponentInChildren<Lever>().SetActiveLight();
+                        hit.collider.gameObject.GetComponentInChildren<Lever>().SetActive();
                         hit.collider.gameObject.GetComponentInChildren<Lever>().Open();
                         _isEquiptShield = true;
                         _isEquiptWeapon = true;
@@ -383,16 +388,16 @@ public class PlayerController : MonoBehaviour
         switch (_moveDir)
         {
             case MoveDir.Up:
-                interactPos += Vector3.forward * _offset / 2;
+                interactPos += Vector3.forward * _offset / 3;
                 break;
             case MoveDir.Down:
-                interactPos += Vector3.back * _offset / 2;
+                interactPos += Vector3.back * _offset / 3;
                 break;
             case MoveDir.Left:
-                interactPos += Vector3.left * _offset / 2;
+                interactPos += Vector3.left * _offset / 3;
                 break;
             case MoveDir.Right:
-                interactPos += Vector3.right * _offset / 2;
+                interactPos += Vector3.right * _offset / 3;
                 break;
         }
 

@@ -7,11 +7,11 @@ public class Pillar : MonoBehaviour
 {
     public int _pillarIndex_forActive = 0;
 
-    GameObject _pillar;
+    public GameObject _pillar;
 
     public void Open()
     {
-        Managers.Data.PillarActiveOff(_pillarIndex_forActive);
+        Managers.Data.PillarActiveDic[_pillarIndex_forActive] = false;
         Managers.Game.SaveGame();
         Debug.Log("Open");
 

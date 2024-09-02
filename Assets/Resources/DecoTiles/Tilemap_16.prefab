@@ -8,6 +8,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4257962837504152845}
     m_Modifications:
+    - target: {fileID: 1338996687208303570, guid: a24997571737ac043aa66bcb63d939cb, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1338996687208303570, guid: a24997571737ac043aa66bcb63d939cb, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1338996687208303570, guid: a24997571737ac043aa66bcb63d939cb, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3157163314058375691, guid: a24997571737ac043aa66bcb63d939cb, type: 3}
       propertyPath: m_Name
       value: SparkleVortexRainbow
@@ -15,6 +27,18 @@ PrefabInstance:
     - target: {fileID: 3157163314058375691, guid: a24997571737ac043aa66bcb63d939cb, type: 3}
       propertyPath: m_Layer
       value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 5827604720896885273, guid: a24997571737ac043aa66bcb63d939cb, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5827604720896885273, guid: a24997571737ac043aa66bcb63d939cb, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5827604720896885273, guid: a24997571737ac043aa66bcb63d939cb, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 5827604720896885273, guid: a24997571737ac043aa66bcb63d939cb, type: 3}
       propertyPath: m_LocalPosition.x
@@ -140,7 +164,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 594ea882c5a793440b60ff72d896021e, type: 2}
     - target: {fileID: 919132149155446097, guid: 03ef71c47008d1b4f9188944f79c2045, type: 3}
       propertyPath: m_Name
-      value: Tilemap_15
+      value: Tilemap_16
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 03ef71c47008d1b4f9188944f79c2045, type: 3}
       propertyPath: m_Layer
@@ -148,15 +172,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1151388028547126963, guid: 03ef71c47008d1b4f9188944f79c2045, type: 3}
       propertyPath: m_LocalScale.x
-      value: 3.2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1151388028547126963, guid: 03ef71c47008d1b4f9188944f79c2045, type: 3}
       propertyPath: m_LocalScale.y
-      value: 3.2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1151388028547126963, guid: 03ef71c47008d1b4f9188944f79c2045, type: 3}
       propertyPath: m_LocalScale.z
-      value: 3.2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1151388028547126963, guid: 03ef71c47008d1b4f9188944f79c2045, type: 3}
       propertyPath: m_LocalRotation.w
@@ -231,8 +255,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 3.2, y: 3.1999998, z: 3.2}
-  m_Center: {x: 0, y: 1.2, z: 0}
+  m_Size: {x: 0.32, y: 0.32, z: 0.32}
+  m_Center: {x: 0, y: 0.12, z: 0}
 --- !u!4 &4257962837504152845 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 03ef71c47008d1b4f9188944f79c2045, type: 3}
@@ -289,7 +313,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 0.1}
+  m_Size: {x: 0.32, y: 0.32, z: 0.01}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!212 &944450730213283954
 SpriteRenderer:

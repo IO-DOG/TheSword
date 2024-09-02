@@ -167,7 +167,7 @@ public class UI_PlayerCard : UI_Base
             // add exp
             Managers.Game.CurPlayerData.CurExp += Managers.Game.MonsterData.RewardExp;
 
-            Managers.Data.MonsterActiveOff(Managers.Game.MonsterData.IsActiveIndex);
+            Managers.Data.MonsterActiveDic[Managers.Game.MonsterData.IsActiveIndex] = false;
 
             int id = Managers.Game.Monster.id;
             Debug.Log($"Monster Id : {id}");

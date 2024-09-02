@@ -41,7 +41,7 @@ public class Equip : MonoBehaviour
     {
         Define.Types type = (Define.Types)Managers.Data.EquipDic[Id].Type;
         Managers.Game.CurPlayerData.Inventory[(int)type].Add(Id);
-        Managers.Data.EItemActiveOff(_itemIndex_forActive);
+        Managers.Data.EItemActiveDic[_itemIndex_forActive] = false;
 
         gameObject.SetActive(false);
 

@@ -48,6 +48,15 @@ public class PortalController : MonoBehaviour
         int offset = 0;
         int index = GetNextPortalTileIndex(nextStageName);
 
+        if(nextStageID == 2)
+        {
+            CameraController._isCombineMap = true;
+        }
+        else
+        {
+            CameraController._isCombineMap = false;
+        }
+
         if (endStageID == nextStageID)
         {
             return Managers.Game.Player.transform.position;
@@ -57,7 +66,7 @@ public class PortalController : MonoBehaviour
             offset = (nextStageID - startStageID) * 100;
         }
 
-        Vector3 nextPos = new Vector3(tiles[index].Position.X * 0.33f + offset, Managers.Game.Player.transform.position.y, tiles[index].Position.Z * 0.33f);
+        Vector3 nextPos = new Vector3(tiles[index].Position.X + offset, Managers.Game.Player.transform.position.y, tiles[index].Position.Z);
         return nextPos;
     }
 

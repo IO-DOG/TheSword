@@ -31,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.5, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8171378423483078663}
@@ -58,8 +58,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.29418802, y: 0.44422537, z: 0.11354454}
-  m_Center: {x: -0.013526201, y: -0.4238957, z: -0.009385847}
+  m_Size: {x: 0.32, y: 0.32, z: 0.16}
+  m_Center: {x: 0, y: 0.16, z: 0}
 --- !u!54 &6633968712981528801
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -151,11 +151,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1e464282f611804b89fd404e0266d4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _grid: {fileID: 0}
   _keyInventory: {fileID: 0}
   _isEquiptWeapon: 1
   _isEquiptShield: 1
-  _isMoving: 0
   _cellPos: {x: 0, y: 0, z: 0}
   _state: 5
 --- !u!95 &8201268480784186961
