@@ -332,7 +332,7 @@ public class PlayerController : MonoBehaviour
                 {
                     somethingExist = true;
 
-                    hit.collider.gameObject.GetComponentInChildren<Door>().CoDoorLockAnim();
+                    hit.collider.gameObject.GetComponentInChildren<Door>().CoDoorLockOpenAnim();
                     hit.collider.gameObject.GetComponentInChildren<Door>().CoOpenDoor(2.5f);
                     hit.collider.gameObject.GetComponentInChildren<Door>().FadeDoor().OnComplete(() =>
                     {
@@ -342,6 +342,7 @@ public class PlayerController : MonoBehaviour
                 }
                 else if(!Managers.Game.KeyInventory.TryUseKey(hit.collider.gameObject))
                 {
+                    hit.collider.gameObject.GetComponentInChildren<Door>().CoDoorLockLockedAnim();
                     Managers.Game.OnInteract = true;
                     somethingExist = true;
                     InteractAnim().OnComplete(() =>
