@@ -196,6 +196,7 @@ public class UI_CreatureCard : UI_Base
         }
 
         _attackCount++;
+        PlayMonsterAttackAnim();
         CreateMonsterAttackParticle();
         CreatePlayerHitParticle();
         Managers.Game.OnBattleDataRefreshAction.Invoke();
@@ -381,5 +382,11 @@ public class UI_CreatureCard : UI_Base
         string battleParticleHit = Managers.Game.MonsterData.BattleParticleHit;
         GameObject player = GameObject.Find("CreatureImage");
         GameObject go = Managers.Resource.Instantiate(battleParticleHit, player.transform);
+    }
+
+    void PlayMonsterAttackAnim()
+    {
+        string animStr = Managers.Game.MonsterData.AttackAnimStr;
+        GetImage((int)Images.CreatureImage).GetComponent<Animator>().Play(animStr);
     }
 }
