@@ -22,15 +22,15 @@ public class BlackSlimeController : MonoBehaviour
         Vector3 pos = transform.localPosition;
         float size = Define.TILE_SIZE;
 
-        int[] dx = { -1, 0, 1, 1, 1, 0, -1, -1 };
-        int[] dy = { 1, 1, 1, 0, -1, -1, -1, 0 };
+        int[] dx = { -1, 0, 1/*, 1, 1, 0, -1, -1*/ };
+        int[] dy = { 1, 2, 1/*, 0, -1, -1, -1, 0*/ };
         bool[] ch = { false, false, false, false, false, false, false, false };
         List<int> s = new List<int>();
         int cnt = 0;
 
         while (cnt < 3)
         {
-            int randValue = UnityEngine.Random.Range(0, 8);
+            int randValue = UnityEngine.Random.Range(0, dx.Length);
             if (ch[randValue] == false)
             {
                 cnt++;
@@ -42,7 +42,7 @@ public class BlackSlimeController : MonoBehaviour
         for (int i = 0; i < s.Count; i++)
         {
             int idx = s[i];
-            Vector3 vector = new Vector3(pos.x + dx[idx] * size, pos.y, pos.z + dy[idx] * size);
+            Vector3 vector = new Vector3(pos.x + dx[idx] * size * 4, 0.6f, pos.z + dy[idx] * size * 4);
             Debug.Log($"vector : {vector.x}, {vector.y}, {vector.z}");
             // todo
             // vector 위치에 분열된 슬라임 생성
