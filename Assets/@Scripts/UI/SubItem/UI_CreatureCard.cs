@@ -81,7 +81,7 @@ public class UI_CreatureCard : UI_Base
         if (_monsterClass != MonsterClass.Armor)
             StartCoroutine(CoDelayDefence());
 
-        GetImage((int)Images.CreatureImage).SetNativeSize();
+        //GetImage((int)Images.CreatureImage).SetNativeSize();
 
         if (_monsterClass == MonsterClass.Guard)
         {
@@ -131,7 +131,7 @@ public class UI_CreatureCard : UI_Base
             }
         }
 
-        GetImage((int)Images.CreatureImage).SetNativeSize();
+        //GetImage((int)Images.CreatureImage).SetNativeSize();
         GetText((int)Texts.HPBarText).text = Managers.Game.MonsterData.CurHP.ToString();
         GetImage((int)Images.HPHar).fillAmount = Managers.Game.MonsterData.CurHP / Managers.Game.MonsterData.MaxHP;
         yield return new WaitForSeconds(0.2f);
@@ -315,7 +315,7 @@ public class UI_CreatureCard : UI_Base
         float i = 0;
         while (i < 20)
         {
-            image.SetNativeSize();
+            //image.SetNativeSize();
             i += 1;
             image.color += new Color(0, 0, 0, -0.05f);
             yield return new WaitForSeconds(0.01f);
@@ -344,7 +344,7 @@ public class UI_CreatureCard : UI_Base
         float i = 0;
         while (i < 10)
         {
-            image.SetNativeSize();
+            //image.SetNativeSize();
             i += 1;
             image.color += new Color(0, 0, 0, -0.1f);
             yield return new WaitForSeconds(0.005f);

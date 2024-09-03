@@ -402,7 +402,7 @@ public class UI_PlayerCard : UI_Base
         string hitFX = Managers.Data.EquipDic[swordId].HitFX;
         GameObject monster = GameObject.Find("CreatureImage");
         GameObject go = Managers.Resource.Instantiate(hitFX, monster.transform);
-        go.transform.position += new Vector3(0, -100, 0);
+        go.transform.position += new Vector3(0, -0, 0);
         var uiParticle = go.GetOrAddComponent<UIParticle>();
 
         //var childrenUIParticle = go.GetComponentsInChildren<UIParticle>()[1]; // 이거 좀 위험한 코드임.
