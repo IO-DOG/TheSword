@@ -1,6 +1,7 @@
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
 using UnityEngine;
 
 public class UI_BossRoomCheckPopup : UI_Popup
@@ -89,6 +90,12 @@ public class UI_BossRoomCheckPopup : UI_Popup
     void YesClick()
     {
         Managers.Resource.Instantiate("FX_BossPortal_A", Managers.Game.BossRoom);
+
+        Managers.Game.BossRoom.gameObject.layer = (int)Define.Layer.Default;
+        foreach (Transform component in Managers.Game.BossRoom)
+        {
+            component.gameObject.layer = (int)Define.Layer.Default;
+        }
 
         ClosePopupUI();
     }

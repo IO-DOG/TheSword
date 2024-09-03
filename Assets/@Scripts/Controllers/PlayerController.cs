@@ -388,12 +388,6 @@ public class PlayerController : MonoBehaviour
 
                 Managers.Game.BossRoom = hit.collider.gameObject.GetComponentInChildren<PortalController>().transform;
                 Managers.UI.ShowPopupUI<UI_BossRoomCheckPopup>();
-
-                hit.collider.gameObject.layer = (int)Define.Layer.Default;
-                foreach (Transform component in hit.collider.transform)
-                {
-                    component.gameObject.layer = (int)Define.Layer.Default;
-                }
             }
         }
 
