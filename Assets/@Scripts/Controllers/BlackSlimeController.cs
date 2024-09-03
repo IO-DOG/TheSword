@@ -50,7 +50,7 @@ public class BlackSlimeController : MonoBehaviour
             // test
             //GameObject monsters = GameObject.Find("Monsters");
             GameObject monster = Managers.Resource.Instantiate("Monster", transform.parent);
-            monster.GetOrAddComponent<MonsterController>().id = 1;
+            monster.GetOrAddComponent<MonsterController>().id = 6 + i;
             monster.transform.localPosition = vector;
             monster.transform.localScale = new Vector3(2, 2, 2);
             monster.name = $"black slime split monster";

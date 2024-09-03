@@ -178,7 +178,7 @@ public class UI_GameScene : UI_Scene
         }
         if (Input.GetKeyDown(KeyCode.F5))
         {
-            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(0);
+            Managers.Game.CurPlayerData.Attack -= 10;
         }
 
         if (Input.GetKeyDown(KeyCode.F8))
