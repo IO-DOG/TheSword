@@ -384,6 +384,9 @@ public class PlayerController : MonoBehaviour
             }
             else if (hit.collider.gameObject.layer == (int)Define.Layer.BossDoor)
             {
+                if (Managers.Game.OnDirect)
+                    return false;
+
                 somethingExist = true;
 
                 Managers.Game.BossRoom = hit.collider.gameObject.GetComponentInChildren<PortalController>().transform;
