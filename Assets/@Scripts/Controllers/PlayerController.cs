@@ -40,7 +40,7 @@ public class PlayerController : MonoBehaviour
 
     Vector3 _nextCellPos;
 
-    MoveDir _moveDir = MoveDir.None;
+    public MoveDir _moveDir = MoveDir.None;
     public PlayerState _state = PlayerState.IdleDown;
     public void SetState(PlayerState state)
     {
@@ -121,7 +121,7 @@ public class PlayerController : MonoBehaviour
 
     void CheckWeapon()
     {
-        if(_isEquiptWeapon)
+        if (_isEquiptWeapon)
             _weapon.SetActive(true);
         else
             _weapon.SetActive(false);
@@ -129,7 +129,7 @@ public class PlayerController : MonoBehaviour
 
     void CheckShield()
     {
-        if(_isEquiptShield)
+        if (_isEquiptShield)
             _shield.SetActive(true);
         else
             _shield.SetActive(false);
@@ -141,9 +141,9 @@ public class PlayerController : MonoBehaviour
         {
             case PlayerState.IdleUp:
                 GetComponent<Animator>().Play("Player_Idle_B");
-                if (_weapon.activeSelf)
+                if (_isEquiptWeapon)
                     _weapon.GetComponent<Animator>().Play($"{_weaponName}_Idle_B");
-                if (_shield.activeSelf)
+                if (_isEquiptShield)
                     _shield.GetComponent<Animator>().Play($"{_shieldName}_Idle_B");
 
                 _weapon.transform.localPosition = Vector3.forward * adjustingDis;
@@ -152,9 +152,9 @@ public class PlayerController : MonoBehaviour
                 break;
             case PlayerState.IdleDown:
                 GetComponent<Animator>().Play("Player_Idle_F");
-                if (_weapon.activeSelf)
+                if (_isEquiptWeapon)
                     _weapon.GetComponent<Animator>().Play($"{_weaponName}_Idle_F");
-                if (_shield.activeSelf)
+                if (_isEquiptShield)
                     _shield.GetComponent<Animator>().Play($"{_shieldName}_Idle_F");
 
                 _weapon.transform.localPosition = Vector3.back * adjustingDis;
@@ -162,9 +162,9 @@ public class PlayerController : MonoBehaviour
                 break;
             case PlayerState.Left:
                 GetComponent<Animator>().Play("Player_Run_L");
-                if (_weapon.activeSelf)
+                if (_isEquiptWeapon)
                     _weapon.GetComponent<Animator>().Play($"{_weaponName}_Run_L");
-                if (_shield.activeSelf)
+                if (_isEquiptShield)
                     _shield.GetComponent<Animator>().Play($"{_shieldName}_Run_L");
 
                 _weapon.transform.localPosition = Vector3.forward * adjustingDis;
@@ -172,9 +172,9 @@ public class PlayerController : MonoBehaviour
                 break;
             case PlayerState.Right:
                 GetComponent<Animator>().Play("Player_Run_R");
-                if (_weapon.activeSelf)
+                if (_isEquiptWeapon)
                     _weapon.GetComponent<Animator>().Play($"{_weaponName}_Run_R");
-                if (_shield.activeSelf)
+                if (_isEquiptShield)
                     _shield.GetComponent<Animator>().Play($"{_shieldName}_Run_R");
 
                 _weapon.transform.localPosition = Vector3.back * adjustingDis;
@@ -182,9 +182,9 @@ public class PlayerController : MonoBehaviour
                 break;
             case PlayerState.Up:
                 GetComponent<Animator>().Play("Player_Run_B");
-                if (_weapon.activeSelf)
+                if (_isEquiptWeapon)
                     _weapon.GetComponent<Animator>().Play($"{_weaponName}_Run_B");
-                if (_shield.activeSelf)
+                if (_isEquiptShield)
                     _shield.GetComponent<Animator>().Play($"{_shieldName}_Run_B");
 
                 _weapon.transform.localPosition = Vector3.forward * adjustingDis;
@@ -192,9 +192,9 @@ public class PlayerController : MonoBehaviour
                 break;
             case PlayerState.Down:
                 GetComponent<Animator>().Play("Player_Run_F");
-                if (_weapon.activeSelf)
+                if (_isEquiptWeapon)
                     _weapon.GetComponent<Animator>().Play($"{_weaponName}_Run_F");
-                if (_shield.activeSelf)
+                if (_isEquiptShield)
                     _shield.GetComponent<Animator>().Play($"{_shieldName}_Run_F");
 
                 _weapon.transform.localPosition = Vector3.back * adjustingDis;
@@ -210,16 +210,21 @@ public class PlayerController : MonoBehaviour
                 _isEquiptShield = false;
                 _isEquiptWeapon = false;
                 break;
+            case PlayerState.ContractSword:
+                GetComponent<Animator>().Play("Player_ContractSword_F");
+                _isEquiptShield = false;
+                _isEquiptWeapon = false;
+                break;
         }
     }
 
     public void ResetWeaponAndShieldAnimation()
     {
-        if (_weapon.activeSelf)
+        if (_isEquiptWeapon)
         {
             _weapon.GetComponent<Animator>().Play($"{_weaponName}_Idle_F", 0, 0.0f);
         }
-        if (_shield.activeSelf)
+        if (_isEquiptShield)
         {
             _shield.GetComponent<Animator>().Play($"{_shieldName}_Idle_F", 0, 0.0f);
         }

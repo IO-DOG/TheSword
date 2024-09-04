@@ -168,6 +168,7 @@ public class Define
         IdleDown,
         OnLever,
         DrawSword,
+        ContractSword,
     }
 
     public enum EventClass
