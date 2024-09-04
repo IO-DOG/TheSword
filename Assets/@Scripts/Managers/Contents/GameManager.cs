@@ -28,6 +28,10 @@ public class GameManager
     public bool OnDirect = false;
     public bool OnInteract = false;
 
+    public int CurEventID;
+
+    public GameObject CurInteractObject;
+
     public Transform BossRoom;
 
     public PlayerController Player; // ������ ������ ����

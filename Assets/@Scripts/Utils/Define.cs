@@ -167,6 +167,7 @@ public class Define
         IdleUp,
         IdleDown,
         OnLever,
+        DrawSword,
     }
 
     public enum EventClass

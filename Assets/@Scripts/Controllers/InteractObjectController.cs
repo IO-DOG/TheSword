@@ -8,7 +8,8 @@ public class InteractObjectController : MonoBehaviour
 
     public void Interact()
     {
-        UI_ConversationPopup popup = Managers.UI.ShowPopupUI<UI_ConversationPopup>();
-        popup._eventID = _eventID;
+        Managers.Game.CurEventID = _eventID;
+
+        Managers.Directing.PlayDirecting(Managers.Game.CurEventID);
     }
 }

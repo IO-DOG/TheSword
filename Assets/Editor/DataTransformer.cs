@@ -861,6 +861,8 @@ public class DataTransformer : EditorWindow
             ed.id = ConvertValue<int>(row[i++]);
             ed.IllustLeft = ConvertValue<string>(row[i++]);
             ed.IllustRight = ConvertValue<string>(row[i++]);
+            ed.HeroEmoji = ConvertValue<string>(row[i++]);
+            ed.OtherEmoji = ConvertValue<string>(row[i++]);
             ed.ScriptID = ConvertValue<int>(row[i++]);
             ed.Class = ConvertValue<int>(row[i++]);
             ed.Delay = ConvertValue<float>(row[i++]);

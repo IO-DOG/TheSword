@@ -205,6 +205,11 @@ public class PlayerController : MonoBehaviour
                 _isEquiptShield = false;
                 _isEquiptWeapon = false;
                 break;
+            case PlayerState.DrawSword:
+                GetComponent<Animator>().Play("Player_SwordDraw_B");
+                _isEquiptShield = false;
+                _isEquiptWeapon = false;
+                break;
         }
     }
 
@@ -286,12 +291,12 @@ public class PlayerController : MonoBehaviour
         RaycastHit hit;
         Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset, LayerMask.GetMask("InteractObjects"));
 
-        InteractObjectController interactObejct = hit.collider.gameObject.GetComponent<InteractObjectController>();
-
-         if (interactObejct != null)
-        {
+         if (hit.collider != null)
+         {
+            InteractObjectController interactObejct = hit.collider.gameObject.GetComponent<InteractObjectController>();
+            Managers.Game.CurInteractObject = hit.collider.gameObject;
             interactObejct.Interact();
-        }
+         }
     }
 
     bool CheckSomething()

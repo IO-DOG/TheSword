@@ -339,6 +339,8 @@ namespace Data
         public int id;
         public string IllustLeft;
         public string IllustRight;
+        public string HeroEmoji;
+        public string OtherEmoji;
         public int ScriptID;
         public int Class;
         public float Delay;
