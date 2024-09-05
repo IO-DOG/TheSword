@@ -24,6 +24,7 @@ public class PlayerController : MonoBehaviour
     public bool _isEquiptWeapon = true;
     public bool _isEquiptShield = true;
 
+    PortalController _bossRoom;
 
     GameObject _weapon;
     GameObject _shield;
@@ -55,6 +56,9 @@ public class PlayerController : MonoBehaviour
     {
         Managers.Input.KeyAction -= OnKeyboard;
         Managers.Input.KeyAction += OnKeyboard;
+
+        Managers.Game.OnEnterBossRoomAction -= EnterBossRoom;
+        Managers.Game.OnEnterBossRoomAction += EnterBossRoom;
 
         _duration = 1 / _speed;
         _keyInventory = GameObject.Find("KeyInventory");
@@ -263,7 +267,7 @@ public class PlayerController : MonoBehaviour
         });
     }
 
-    void SetIdleState(MoveDir moveDir)
+    public void SetIdleState(MoveDir moveDir)
     {
         _isMoving = false;
 
@@ -293,11 +297,11 @@ public class PlayerController : MonoBehaviour
     bool CheckSomething()
     {
         bool somethingExist = false;
-        int layerMask = (1 << (int)Define.Layer.Wall) + (1 << (int)Define.Layer.CItem) + (1 << (int)Define.Layer.Door) + (1 << (int)Define.Layer.Portal)
-            + (1 << (int)Define.Layer.EItem) + (1 << (int)Define.Layer.Lever) + (1 << (int)Define.Layer.Monster) + (1 << (int)Define.Layer.InteractObjects); 
+        //int layerMask = (1 << (int)Define.Layer.Wall) + (1 << (int)Define.Layer.CItem) + (1 << (int)Define.Layer.Door) + (1 << (int)Define.Layer.Portal)
+            //+ (1 << (int)Define.Layer.EItem) + (1 << (int)Define.Layer.Lever) + (1 << (int)Define.Layer.Monster) + (1 << (int)Define.Layer.InteractObjects); 
 
         RaycastHit hit;
-        Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset, layerMask);
+        Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset);
 
         if (hit.collider != null)
         {
@@ -328,7 +332,7 @@ public class PlayerController : MonoBehaviour
                 {
                     somethingExist = true;
 
-                    hit.collider.gameObject.GetComponentInChildren<Door>().CoDoorLockAnim();
+                    hit.collider.gameObject.GetComponentInChildren<Door>().CoDoorLockOpenAnim();
                     hit.collider.gameObject.GetComponentInChildren<Door>().CoOpenDoor(2.5f);
                     hit.collider.gameObject.GetComponentInChildren<Door>().FadeDoor().OnComplete(() =>
                     {
@@ -338,6 +342,7 @@ public class PlayerController : MonoBehaviour
                 }
                 else if(!Managers.Game.KeyInventory.TryUseKey(hit.collider.gameObject))
                 {
+                    hit.collider.gameObject.GetComponentInChildren<Door>().CoDoorLockLockedAnim();
                     Managers.Game.OnInteract = true;
                     somethingExist = true;
                     InteractAnim().OnComplete(() =>
@@ -374,8 +379,19 @@ public class PlayerController : MonoBehaviour
                         _isEquiptWeapon = true;
                         transform.DOMove(originPos, 0.2f);
                         Managers.Game.OnLever = false;
+                        _cellPos = originPos;
                     });
                 });
+            }
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.BossDoor)
+            {
+                if (Managers.Game.OnDirect)
+                    return false;
+
+                somethingExist = true;
+
+                Managers.Game.BossRoom = hit.collider.gameObject.GetComponentInChildren<PortalController>().transform;
+                Managers.UI.ShowPopupUI<UI_BossRoomCheckPopup>();
             }
         }
 
@@ -407,5 +423,11 @@ public class PlayerController : MonoBehaviour
         seq.Append(gameObject.transform.DOMove(_cellPos, 0.2f));
 
         return seq;
+    }
+    
+    void EnterBossRoom()
+    {
+        Managers.Game.BossRoom.GetComponent<PortalController>().UsePortal();
+        _cellPos = transform.position;
     }
 }

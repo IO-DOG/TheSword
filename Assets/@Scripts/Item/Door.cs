@@ -54,13 +54,13 @@ public class Door : MonoBehaviour
         }
     }
 
-    Coroutine _doorLockAnimCoroutine;
-    public void CoDoorLockAnim()
+    Coroutine _doorLockOpenAnimCoroutine;
+    public void CoDoorLockOpenAnim()
     {
-        _doorLockAnimCoroutine = StartCoroutine(DoorLockAnim());
+        _doorLockOpenAnimCoroutine = StartCoroutine(DoorLockOpenAnim());
     }
 
-    IEnumerator DoorLockAnim()
+    IEnumerator DoorLockOpenAnim()
     {
         GameObject go = Managers.Resource.Instantiate("DoorLock", _doorLockPos);
         go.transform.localScale = new Vector3(go.transform.localScale.x, go.transform.localScale.y * _camera._scaleMultiplier, go.transform.localScale.z * _camera._scaleMultiplier);
@@ -68,6 +68,30 @@ public class Door : MonoBehaviour
         yield return new WaitForSeconds(time);
         Managers.Resource.Destroy(go);
     }
+
+
+    public void CoDoorLockLockedAnim()
+    {
+        _doorLockLockedAnimCoroutine = StartCoroutine(DoorLockLockedAnim());
+    }
+
+
+    Coroutine _doorLockLockedAnimCoroutine;
+    IEnumerator DoorLockLockedAnim()
+    {
+        GameObject go = Managers.Resource.Instantiate("DoorLock", _doorLockPos);
+        go.GetComponent<Animator>().Play("DoorLockIsLocked");
+        go.transform.localScale = new Vector3(go.transform.localScale.x, go.transform.localScale.y * _camera._scaleMultiplier, go.transform.localScale.z * _camera._scaleMultiplier);
+
+        GameObject cross = Managers.Resource.Instantiate("FX_Cross", _doorLockPos);
+
+        float time = go.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length;
+        yield return new WaitForSeconds(time);
+        Managers.Resource.Destroy(go);
+        Managers.Resource.Destroy(cross);
+    }
+
+
 
     public Sequence FadeDoor()
     {

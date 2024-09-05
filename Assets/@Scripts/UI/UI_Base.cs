@@ -25,6 +25,8 @@ public abstract class UI_Base : MonoBehaviour
     private void Start()
     {
         Init();
+        Managers.Game.OnFadeAction -= Fade;
+        Managers.Game.OnFadeAction += Fade;
     }
 
     protected void Bind<T>(Type type) where T : UnityEngine.Object
@@ -127,5 +129,11 @@ public abstract class UI_Base : MonoBehaviour
 
         UI_Fade fade = Managers.Resource.Instantiate("UI_Fade").GetComponent<UI_Fade>();
         fade.PlayFade(type, duration, scene);
+    }
+
+    public void Fade()
+    {
+        FadeEffect(Define.FadeEvent.FadnIn, Define.FADE_DURATION);
+        FadeEffect(Define.FadeEvent.CenterToRight, Define.FADE_DURATION);
     }
 }

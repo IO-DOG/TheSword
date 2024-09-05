@@ -42,7 +42,7 @@ public class CameraController : MonoBehaviour
         _vCam.Follow = Managers.Game.Player.transform;
 
         CinemachineTransposer transposer = _vCam.GetCinemachineComponent<CinemachineTransposer>();
-        transposer.m_FollowOffset = new Vector3(0f, 5f, -2.5f);
+        transposer.m_FollowOffset = new Vector3(0f, 10f, -5f);
         this.transform.parent.eulerAngles = new Vector3(Define.CAMERA_ANGLE, 0f, 0f);
 
         SetCameraExtent();
@@ -87,7 +87,7 @@ public class CameraController : MonoBehaviour
         float clampedZ = Mathf.Clamp(pos.z, _minBounds.z + _verExtent + Define.TILE_SIZE * 2.5f, _maxBounds.z - _verExtent - Define.TILE_SIZE * 3f);
 
         Vector3 curOffset = _vCam.GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
-        Vector3 targetOffset = new Vector3(curOffset.x, 5f, clampedZ - pos.z - (2.5f * (_resolutionIndex / 5 + 1)));
+        Vector3 targetOffset = new Vector3(curOffset.x, 10f, clampedZ - pos.z - (5.5f * (_resolutionIndex / 5 + 1)));
 
         _vCam.GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = targetOffset;   
     }

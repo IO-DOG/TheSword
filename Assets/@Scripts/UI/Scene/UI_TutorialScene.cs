@@ -17,8 +17,7 @@ public class UI_TutorialScene : UI_Scene
         Managers.Game.CurPlayerData.CurStageid = 0;
         Managers.Game.InstantiateMap(Managers.Game.CurPlayerData.CurStageid);
 
-        FadeEffect(Define.FadeEvent.FadnIn, Define.FADE_DURATION);
-        FadeEffect(Define.FadeEvent.CenterToRight, Define.FADE_DURATION);
+        Fade();
 
         return true;
     }
@@ -48,4 +47,5 @@ public class UI_TutorialScene : UI_Scene
         }
         #endregion
     }
+
 }
