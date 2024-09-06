@@ -1,4 +1,4 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -178,7 +178,7 @@ public class UI_GameScene : UI_Scene
         }
         if (Input.GetKeyDown(KeyCode.F5))
         {
-            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(0);
+            Managers.Game.CurPlayerData.Attack -= 10;
         }
 
         if (Input.GetKeyDown(KeyCode.F8))

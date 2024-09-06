@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -47,7 +47,7 @@ public class UI_StatusInfo : UI_Base
     ///         public float CRI { get; set; }
     ///         public float CRIATK { get; set; }
     ///         public float MSPD { get; set; }
-    ///         ÀÌ ¼ø¼­·Î seq °ªÀÌ ¾º¿öÁü. seq´Â 0ºÎÅÍ.
+    ///         ì´ ìˆœì„œë¡œ seq ê°’ì´ ì”Œì›Œì§. seqëŠ” 0ë¶€í„°.
     /// </summary>
     /// <param name="equipId"></param>
     /// <param name="seq"></param>

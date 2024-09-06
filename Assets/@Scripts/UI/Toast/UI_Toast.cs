@@ -1,4 +1,4 @@
-using DG.Tweening;
+ï»¿using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,7 +18,7 @@ public class UI_Toast : UI_Base
     }
     public void OnEnable()
     {
-        // Tm ¿ÀÇÂ ¿¬Ãâ
+        // Tm ì˜¤í”ˆ ì—°ì¶œ
         //OpenAnimation();
         PopupOpenAnimation(gameObject);
     }
@@ -44,7 +44,7 @@ public class UI_Toast : UI_Base
 
     public void SetInfo(string msg)
     {
-        // ¸Þ½ÃÁö º¯°æ
+        // ë©”ì‹œì§€ ë³€ê²½
         transform.localScale = Vector3.one;
         GetText((int)Texts.ToastMessageValueText).text = msg;
         Refresh();

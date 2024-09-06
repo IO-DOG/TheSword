@@ -1,4 +1,4 @@
-using DG.Tweening.Plugins.Core.PathCore;
+ï»¿using DG.Tweening.Plugins.Core.PathCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +9,10 @@ using Object = UnityEngine.Object;
 
 public class ResourceManager
 {
-    // ½ÇÁ¦ ·ÎµåÇÑ ¸®¼Ò½º.
+    // ì‹¤ì œ ë¡œë“œí•œ ë¦¬ì†ŒìŠ¤.
     Dictionary<string, UnityEngine.Object> _resources = new Dictionary<string, UnityEngine.Object>();
 
-    #region ¸®¼Ò½º ·Îµå
+    #region ë¦¬ì†ŒìŠ¤ ë¡œë“œ
     public T Load<T>(string key) where T : Object
     {
         if (_resources.TryGetValue(key, out Object resource))
@@ -20,8 +20,8 @@ public class ResourceManager
             return resource as T;
         }
 
-        //½ºÇÁ¶óÀÌÆ® ·ÎµåÇÒ¶§ Ç×»ó .sprite°¡ ºÙ¾î ÀÖ¾î¾ßÇÏ´Âµ¥ µ¥ÀÌÅÍ½ÃÆ®¿¡ .sprite°¡ ºÙ¾îÀÖÁö ¾ÊÀº µ¥ÀÌÅÍ°¡ ¸¹À½
-        //ÀÓ½Ã·Î ºÙÀÓ -µå·¡°ï
+        //ìŠ¤í”„ë¼ì´íŠ¸ ë¡œë“œí• ë•Œ í•­ìƒ .spriteê°€ ë¶™ì–´ ìˆì–´ì•¼í•˜ëŠ”ë° ë°ì´í„°ì‹œíŠ¸ì— .spriteê°€ ë¶™ì–´ìˆì§€ ì•Šì€ ë°ì´í„°ê°€ ë§ìŒ
+        //ì„ì‹œë¡œ ë¶™ì„ -ë“œë˜ê³¤
         if (typeof(T) == typeof(Sprite))
         {
             key = key + ".sprite";
@@ -64,11 +64,11 @@ public class ResourceManager
     }
 
     #endregion
-    #region ¾îµå·¹¼­ºí
+    #region ì–´ë“œë ˆì„œë¸”
 
     public void LoadAsync<T>(string key, Action<T> callback = null) where T : UnityEngine.Object
     {
-        //½ºÇÁ¶óÀÌÆ®ÀÎ °æ¿ì ÇÏÀ§°´Ã¼ÀÇ ÂğÀÌ¸§À¸·Î ·ÎµåÇÏ¸é ½ºÇÁ¶óÀÌÆ®·Î ·ÎµùÀÌ ‰Î
+        //ìŠ¤í”„ë¼ì´íŠ¸ì¸ ê²½ìš° í•˜ìœ„ê°ì²´ì˜ ì°ì´ë¦„ìœ¼ë¡œ ë¡œë“œí•˜ë©´ ìŠ¤í”„ë¼ì´íŠ¸ë¡œ ë¡œë”©ì´ ëŒ
         string loadKey = key;
         if (key.Contains(".sprite"))
             loadKey = $"{key}[{key.Replace(".sprite", "")}]";
@@ -76,7 +76,7 @@ public class ResourceManager
         var asyncOperation = Addressables.LoadAssetAsync<T>(loadKey);
         asyncOperation.Completed += (op) =>
         {
-            // Ä³½Ã È®ÀÎ.
+            // ìºì‹œ í™•ì¸.
             if (_resources.TryGetValue(key, out Object resource))
             {
                 callback?.Invoke(op.Result);

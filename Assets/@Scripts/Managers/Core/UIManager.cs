@@ -1,4 +1,4 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -213,7 +213,7 @@ public class UIManager
         //OnTimeScaleChanged?.Invoke((int)Time.timeScale);
     }
 
-    #region �ӽ�
+    #region 임시
     bool _isActiveSoulShop = false;
     public bool IsActiveSoulShop
     {

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -83,12 +83,12 @@ public class SoundManager
                 audioSource.pitch = Managers.Game.GameSpeed;
 
                 //audioSource.pitch = pitch;
-                audioSource.volume = 1 / (float)_totalEffectCount; // ¿Àµğ¿À ¼ö¿¡ µû¸¦ º¼·ı Á¶Àı
+                audioSource.volume = 1 / (float)_totalEffectCount; // ì˜¤ë””ì˜¤ ìˆ˜ì— ë”°ë¥¼ ë³¼ë¥¨ ì¡°ì ˆ
                 _totalEffectCount++;
                 //if (Managers.Game.EffectSoundOn)
                 float audioLength = audioClip.length;
 
-                CoroutineManager.StartCoroutine(CoTotalEffectCountControl(audioLength)); // ¿Àµğ¿À°¡ ³¡³ª¸é ¿Àµğ¿À¼ö Á¶Àı
+                CoroutineManager.StartCoroutine(CoTotalEffectCountControl(audioLength)); // ì˜¤ë””ì˜¤ê°€ ëë‚˜ë©´ ì˜¤ë””ì˜¤ìˆ˜ ì¡°ì ˆ
                 audioSource.PlayOneShot(audioClip);
                 
             });
@@ -126,7 +126,7 @@ public class SoundManager
     }
 
     /// <summary>
-    /// °ÔÀÓ ¹è¼Ó¿¡ µû¶ó¼­ pitch°¡ ´Ş¶óÁü
+    /// ê²Œì„ ë°°ì†ì— ë”°ë¼ì„œ pitchê°€ ë‹¬ë¼ì§
     /// </summary>
     /// <param name="type"></param>
     /// <param name="key"></param>

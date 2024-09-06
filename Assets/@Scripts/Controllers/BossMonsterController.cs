@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,7 +11,7 @@ public class BossMonsterController : MonsterController
     //{
     //    if (other.gameObject.name == "Player")
     //    {
-    //        //ÀüÅõ ±¸Çö
+    //        //ì „íˆ¬ êµ¬í˜„
     //        Managers.Game.MonsterData.id = Managers.Data.MonsterDic[id].id;
     //        Managers.Game.MonsterData.Chapter = Managers.Data.MonsterDic[id].Chapter;
     //        Managers.Game.MonsterData.Class = Managers.Data.MonsterDic[id].Class;

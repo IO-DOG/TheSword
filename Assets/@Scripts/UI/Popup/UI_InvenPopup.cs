@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
@@ -479,7 +479,7 @@ public class UI_InvenPopup : UI_Popup
 
     void OnClickEquipList(int idx)
     {
-        Debug.Log($"OnClickEquipList ½ÇÇà. idx : {idx}");
+        Debug.Log($"OnClickEquipList ì‹¤í–‰. idx : {idx}");
 
         UnityEngine.UI.Image[] equipList =
         {
@@ -502,7 +502,7 @@ public class UI_InvenPopup : UI_Popup
         //Refresh();
         GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
         int equipIdx = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword][idx - 1];
-        // °Ë ¸®½ºÆ®¸¦ º¸¿©Áà¾ß ÇÒ ¶§
+        // ê²€ ë¦¬ìŠ¤íŠ¸ë¥¼ ë³´ì—¬ì¤˜ì•¼ í•  ë•Œ
         if (equipIdx >= Define.EQUIP_SOWRD_FIRST && equipIdx <= Define.EQUIP_SOWRD_END)
         {
             //Refresh();
@@ -512,14 +512,14 @@ public class UI_InvenPopup : UI_Popup
                 inventory_equipList_on[i].gameObject.SetActive(false);
             }
 
-            Debug.Log($"°Ë ÀÎµ¦½º");
+            Debug.Log($"ê²€ ì¸ë±ìŠ¤");
             SetSwordListImage();
             if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Count >= idx)
             {
                 inventory_equipList_get[idx - 1].gameObject.SetActive(true);
                 inventory_equipList_on[idx - 1].gameObject.SetActive(true);
                 int temp = Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword][idx - 1];
-                Debug.Log($"°Ë ÀÎµ¦½º {temp}");
+                Debug.Log($"ê²€ ì¸ë±ìŠ¤ {temp}");
                 PrintEquipAbilityAndDesc(temp);
                 int curSwordIdx = Managers.Game.CurPlayerData.CurSword;
                 SwapSword(curSwordIdx, temp);
@@ -527,7 +527,7 @@ public class UI_InvenPopup : UI_Popup
                 GetImage((int)Images.sword).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[temp].ImageName}");
             }
         }
-        else // ¹æÆĞ ¸®½ºÆ®¸¦ º¸¿©Áà¾ß ÇÒ ¶§
+        else // ë°©íŒ¨ ë¦¬ìŠ¤íŠ¸ë¥¼ ë³´ì—¬ì¤˜ì•¼ í•  ë•Œ
         {
             //Refresh();
 
@@ -660,7 +660,7 @@ public class UI_InvenPopup : UI_Popup
     }
 
     /// <summary>
-    /// ÀÎµ¦½º¿¡ ¸Â´Â Àåºñ¿¡ ´ëÇÑ ´É·ÂÄ¡¿Í ¼³¸íÀ» º¸¿©ÁØ´Ù.
+    /// ì¸ë±ìŠ¤ì— ë§ëŠ” ì¥ë¹„ì— ëŒ€í•œ ëŠ¥ë ¥ì¹˜ì™€ ì„¤ëª…ì„ ë³´ì—¬ì¤€ë‹¤.
     ///         public float ATK { get; set; }
     ///         public float DEF { get; set; }
     ///         public float HP { get; set; }
@@ -669,10 +669,10 @@ public class UI_InvenPopup : UI_Popup
     ///         public float CRI { get; set; }
     ///         public float CRIATK { get; set; }
     ///         public float MSPD { get; set; }
-    ///         ÀÌ ¼ø¼­·Î seq °ªÀÌ ¾º¿öÁü. seq´Â 0ºÎÅÍ.
+    ///         ì´ ìˆœì„œë¡œ seq ê°’ì´ ì”Œì›Œì§. seqëŠ” 0ë¶€í„°.
     /// </summary>
     /// <param name="idx"> 
-    /// ÀåºñÀÇ ÀÎµ¦½º 
+    /// ì¥ë¹„ì˜ ì¸ë±ìŠ¤ 
     /// </param>
     void PrintEquipAbilityAndDesc(int equipId)
     {
@@ -701,7 +701,7 @@ public class UI_InvenPopup : UI_Popup
             Managers.Data.EquipDic[equipId].DSPD, Managers.Data.EquipDic[equipId].CRI, Managers.Data.EquipDic[equipId].CRIATK, Managers.Data.EquipDic[equipId].MSPD
         };
 
-        // Status InfoList Á¤¸®
+        // Status InfoList ì •ë¦¬
         Transform[] transforms = GetObject((int)GameObjects.StatusInfoList).GetComponentsInChildren<Transform>();
         if (transforms.Length > 1)
         {
