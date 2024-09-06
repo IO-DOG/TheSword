@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -62,7 +62,7 @@ public class TutorialScene : BaseScene
         // Reset Player Stat
         Managers.Game.Player.Speed = originalSpeed;
 
-        #region Å×½ºÆ® ÈÄ ´Ù½Ã È°¼ºÈ­ÇØ¾ß ÇÔ
+        #region í…ŒìŠ¤íŠ¸ í›„ ë‹¤ì‹œ í™œì„±í™”í•´ì•¼ í•¨
         //bool prevConvsersationState = Managers.Game.OnConversation;
 
         //while (true) 

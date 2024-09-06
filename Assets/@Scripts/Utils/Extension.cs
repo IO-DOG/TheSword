@@ -1,4 +1,4 @@
-using DG.Tweening.Core;
+ï»¿using DG.Tweening.Core;
 using DG.Tweening.Plugins.Options;
 using DG.Tweening;
 using System;
@@ -32,7 +32,7 @@ public static class Extension
             children[i] = go.transform.GetChild(i);
         }
 
-        // ¸ğµç ÀÚ½Ä ¿ÀºêÁ§Æ® »èÁ¦
+        // ëª¨ë“  ìì‹ ì˜¤ë¸Œì íŠ¸ ì‚­ì œ
         foreach (Transform child in children)
         {
             Managers.Resource.Destroy(child.gameObject);

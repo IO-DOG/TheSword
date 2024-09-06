@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -87,7 +87,7 @@ public static class Util
         return parsedColor;
     }
 
-    //string°ª À¸·Î Enum°ª Ã£±â
+    //stringê°’ ìœ¼ë¡œ Enumê°’ ì°¾ê¸°
     public static T ParseEnum<T>(string value)
     {
         return (T)Enum.Parse(typeof(T), value, true);
@@ -120,23 +120,23 @@ public static class Util
     }
 
     /// <summary>
-    /// ½ºÅ©¸°¼¦ ÀúÀå
+    /// ìŠ¤í¬ë¦°ìƒ· ì €ì¥
     /// </summary>
-    /// <param name="onFinished">ÅØ½ºÃÄ »ı¼º Äİ¹é</param>
+    /// <param name="onFinished">í…ìŠ¤ì³ ìƒì„± ì½œë°±</param>
     /// <returns></returns>
     public static IEnumerator Screenshot(Action<Texture2D> onFinished)
     {
         yield return new WaitForEndOfFrame();
-        // ÅØ½ºÃÄ »ı¼º
+        // í…ìŠ¤ì³ ìƒì„±
         Texture2D screenTex = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
 
-        // ½ºÅ©¸°¼¦ ¿µ¿ª ¼³Á¤
+        // ìŠ¤í¬ë¦°ìƒ· ì˜ì—­ ì„¤ì •
         Rect area = new Rect(0f, 0f, Screen.width, Screen.height);
 
-        // ÇöÀç È­¸éÀÇ ÇÈ¼¿À» ÀĞ¾î¿Â´Ù.
+        // í˜„ì¬ í™”ë©´ì˜ í”½ì…€ì„ ì½ì–´ì˜¨ë‹¤.
         screenTex.ReadPixels(area, 0, 0);
 
-        // byte[]·Î º¯È¯ µÚ, ÀÌ¹ÌÁö¸¦ ÀĞ¾î¿Â´Ù.
+        // byte[]ë¡œ ë³€í™˜ ë’¤, ì´ë¯¸ì§€ë¥¼ ì½ì–´ì˜¨ë‹¤.
         screenTex.LoadImage(screenTex.EncodeToPNG());
 
         onFinished?.Invoke(screenTex);

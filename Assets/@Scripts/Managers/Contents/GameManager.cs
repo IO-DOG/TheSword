@@ -1,4 +1,4 @@
-using Cinemachine;
+﻿using Cinemachine;
 using Data;
 using Newtonsoft.Json;
 using System;

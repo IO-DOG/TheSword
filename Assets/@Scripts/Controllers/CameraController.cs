@@ -1,4 +1,4 @@
-using Cinemachine;
+ï»¿using Cinemachine;
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,13 +12,13 @@ public class CameraController : MonoBehaviour
 {
     public static bool _isCombineMap = false;
 
-    // ÇÈ¼¿ ÆÛÆåÆ® Ä«¸Ş¶ó ÇØ»óµµ
+    // í”½ì…€ í¼í™íŠ¸ ì¹´ë©”ë¼ í•´ìƒë„
     int[] _resolutionX = { 960, 640, 384, 320 };
     int[] _resolutionY = { 540, 360, 256, 80 };
     int _resolutionIndex = 0;
 
     //// ToDo Object y position adjusting
-    //float _angle = 60f; // ¿øÇÏ´Â xÃà È¸Àü °¢µµ
+    //float _angle = 60f; // ì›í•˜ëŠ” xì¶• íšŒì „ ê°ë„
     public float _scaleMultiplier;
     float _scrollSpeed = 10f;
 
@@ -98,7 +98,7 @@ public class CameraController : MonoBehaviour
         GetComponent<CinemachineVirtualCamera>().LookAt = null;
     }
 
-    // ÇØ»óµµ º¯°æÇÒ¶§ ÀÌ°Å ÇÊ¿äÇÒ¼öµµ
+    // í•´ìƒë„ ë³€ê²½í• ë•Œ ì´ê±° í•„ìš”í• ìˆ˜ë„
     void SetCameraExtent()
     {
         _verExtent = Camera.main.orthographicSize;

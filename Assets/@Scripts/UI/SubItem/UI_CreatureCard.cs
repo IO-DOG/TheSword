@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -86,13 +86,13 @@ public class UI_CreatureCard : UI_Base
         if (_monsterClass == MonsterClass.Guard)
         {
             Defence();
-            Debug.Log("¼öÈ£ È¿°ú ¹ßµ¿");
+            Debug.Log("ìˆ˜í˜¸ íš¨ê³¼ ë°œë™");
         }
 
         if (_monsterClass == MonsterClass.Armor)
         {
             _forArmor = Managers.Game.MonsterData.Defence;
-            Debug.Log("°©¿Ê È¿°ú ¹ßµ¿");
+            Debug.Log("ê°‘ì˜· íš¨ê³¼ ë°œë™");
         }
 
         return true;
@@ -109,14 +109,14 @@ public class UI_CreatureCard : UI_Base
         {
             _forBeast = true;
             Managers.Game.MonsterData.CurHP += Managers.Game.MonsterData.MaxHP * 0.4f;
-            Debug.Log("ºñ½ºÆ® È¿°ú ¹ßµ¿");
+            Debug.Log("ë¹„ìŠ¤íŠ¸ íš¨ê³¼ ë°œë™");
         }
 
         if (_monsterClass == MonsterClass.Armor)
         {
             if (_forArmor > 0)
             {
-                Debug.Log("°©¿Ê È¿°ú ¹ßµ¿ ¹æ¾î¸·ºÎÅÍ °¨¼Ò");
+                Debug.Log("ê°‘ì˜· íš¨ê³¼ ë°œë™ ë°©ì–´ë§‰ë¶€í„° ê°ì†Œ");
                 float gap = Managers.Game.MonsterData.MaxHP - Managers.Game.MonsterData.CurHP;
                 if (_forArmor >= gap)
                 {
@@ -143,7 +143,7 @@ public class UI_CreatureCard : UI_Base
         if (_monsterClass == MonsterClass.Magic)
         {
             _isCri = true;
-            Debug.Log("¸¶¹ı È¿°ú ¹ßµ¿");
+            Debug.Log("ë§ˆë²• íš¨ê³¼ ë°œë™");
         }
 
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
@@ -226,7 +226,7 @@ public class UI_CreatureCard : UI_Base
                 if (_monsterClass == MonsterClass.Knight)
                 {
                     Attack();
-                    Debug.Log("°Ë»ç È¿°ú ¹ßµ¿");
+                    Debug.Log("ê²€ì‚¬ íš¨ê³¼ ë°œë™");
                 }
             }
             attackCoolTime += Time.deltaTime * Managers.Game.GameSpeed;

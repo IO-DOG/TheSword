@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -45,7 +45,7 @@ public class BlackSlimeController : MonoBehaviour
             Vector3 vector = new Vector3(pos.x + dx[idx] * size * 4, 0.6f, pos.z + dy[idx] * size * 4);
             Debug.Log($"vector : {vector.x}, {vector.y}, {vector.z}");
             // todo
-            // vector À§Ä¡¿¡ ºĞ¿­µÈ ½½¶óÀÓ »ı¼º
+            // vector ìœ„ì¹˜ì— ë¶„ì—´ëœ ìŠ¬ë¼ì„ ìƒì„±
 
             // test
             //GameObject monsters = GameObject.Find("Monsters");

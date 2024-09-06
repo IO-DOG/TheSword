@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -56,7 +56,7 @@ public class UI_TitleScene : UI_Scene
 
         //GetObject((int)Objects.Slider).GetComponent<Slider>().value = 0;
         GetObject((int)Objects.Slider).GetComponent<Slider>().gameObject.SetActive(false);
-        // Å×½ºÆ®¿ë
+        // í…ŒìŠ¤íŠ¸ìš©
         GetButton((int)Buttons.NewGameButton).gameObject.BindEvent(() =>
         {
             if (isPreload)
@@ -64,7 +64,7 @@ public class UI_TitleScene : UI_Scene
         });
         GetImage((int)Images.Buttons).gameObject.SetActive(false);
         GetButton((int)Buttons.NewGameButton).gameObject.SetActive(false);
-        //GetButton((int)Buttons.GameSpeedButton).gameObject.BindEvent(() => { // °ÔÀÓ ¼Óµµ Á¶Àı
+        //GetButton((int)Buttons.GameSpeedButton).gameObject.BindEvent(() => { // ê²Œì„ ì†ë„ ì¡°ì ˆ
         //    if (Managers.Game.GameSpeed == 1)
         //        Managers.Game.GameSpeed = 2;
         //    else if (Managers.Game.GameSpeed == 2)
@@ -104,7 +104,7 @@ public class UI_TitleScene : UI_Scene
                 Managers.Sound.SetVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1));
                 Managers.Sound.SetVolume(PlayerPrefs.GetFloat("CUREFFECTSOUND", 1));
 
-                // continueData·Î ÇÃ·¹ÀÌ¾î Àû¿ë½ÃÅ°±â. TODO
+                // continueDataë¡œ í”Œë ˆì´ì–´ ì ìš©ì‹œí‚¤ê¸°. TODO
             }
         });
     }
@@ -180,7 +180,7 @@ public class UI_TitleScene : UI_Scene
     void OnClickNewGameButton()
     {
         Debug.Log("Cllck OnClickNewGameButton");
-        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1) // ÁøÂ¥ Ã³À½ÀÏ ‹š
+        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1) // ì§„ì§œ ì²˜ìŒì¼ ë–„
         {
             // todo intro story scene
             Managers.Scene.LoadScene(Define.Scene.IntroScene);
@@ -213,7 +213,7 @@ public class UI_TitleScene : UI_Scene
 
     void CheckFirstGame()
     {
-        if (PlayerPrefs.GetInt("ISFIRST") == 1) // ÃÖÃÊ ½ÇÇà ½Ã
+        if (PlayerPrefs.GetInt("ISFIRST") == 1) // ìµœì´ˆ ì‹¤í–‰ ì‹œ
         {
             GetText((int)Texts.NewGameText).text = "Game Start";
             buttonsIdx = 0;
@@ -234,7 +234,7 @@ public class UI_TitleScene : UI_Scene
         GetText((int)Texts.SettingText).color = new Color(0.5f, 0.5f, 0.5f);
         GetText((int)Texts.ExitText).color = new Color(0.5f, 0.5f, 0.5f);
 
-        if (PlayerPrefs.GetInt("ISFIRST") == 1) // ÃÖÃÊ ½ÇÇà ½Ã
+        if (PlayerPrefs.GetInt("ISFIRST") == 1) // ìµœì´ˆ ì‹¤í–‰ ì‹œ
             GetText((int)Texts.NewGameText).text = "Game Start";
         else
             GetText((int)Texts.NewGameText).text = "New Game";

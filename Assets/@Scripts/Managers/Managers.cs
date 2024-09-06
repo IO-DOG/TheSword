@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -9,8 +9,8 @@ using UnityEngine.SceneManagement;
 
 public class Managers : MonoBehaviour
 {
-    static Managers s_instance; // À¯ÀÏ¼ºÀÌ º¸ÀåµÈ´Ù
-    static Managers Instance { get { Init(); return s_instance; } } // À¯ÀÏÇÑ ¸Å´ÏÀú¸¦ °®°í¿Â´Ù
+    static Managers s_instance; // ìœ ì¼ì„±ì´ ë³´ì¥ëœë‹¤
+    static Managers Instance { get { Init(); return s_instance; } } // ìœ ì¼í•œ ë§¤ë‹ˆì €ë¥¼ ê°–ê³ ì˜¨ë‹¤
 
     #region Contents
     GameManager _game = new GameManager();

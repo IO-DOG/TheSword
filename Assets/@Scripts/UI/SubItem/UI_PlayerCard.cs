@@ -1,4 +1,4 @@
-using Coffee.UIExtensions;
+ï»¿using Coffee.UIExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -90,7 +90,7 @@ public class UI_PlayerCard : UI_Base
             Managers.Game.MonsterData.DamagedCount++;
             if (Managers.Game.MonsterData.DamagedCount == 5)
             {
-                Debug.Log("°Å´ë È¿°ú ¹ßµ¿");
+                Debug.Log("ê±°ëŒ€ íš¨ê³¼ ë°œë™");
                 Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack - Managers.Game.CurPlayerData.Defence) * 0.2f;
                 Refresh();
             }
@@ -107,14 +107,14 @@ public class UI_PlayerCard : UI_Base
             Managers.Game.AttackCount = 0;
         }
 
-        // ¸ó½ºÅÍ°¡ ¾Ï»ìÀÏ °æ¿ì
+        // ëª¬ìŠ¤í„°ê°€ ì•”ì‚´ì¼ ê²½ìš°
         if (Managers.Game.MonsterData.Feature == 7 && _forAssassin == false)
         {
-            Debug.Log("¾Ï»ì È¿°ú ¹ßµ¿");
+            Debug.Log("ì•”ì‚´ íš¨ê³¼ ë°œë™");
             return;
         }
 
-        // ¸ó½ºÅÍ°¡ ¹æ¾î »óÅÂÀÏ °æ¿ì
+        // ëª¬ìŠ¤í„°ê°€ ë°©ì–´ ìƒíƒœì¼ ê²½ìš°
         if (Managers.Game.MonsterData.IsDefence == true)
         {
             Managers.Game.MonsterData.IsDefence = false;
@@ -126,16 +126,16 @@ public class UI_PlayerCard : UI_Base
                 _isCri = false;
             }
         }
-        else // ÀÏ¹İ °ø°İ
+        else // ì¼ë°˜ ê³µê²©
         {
             if (_isCri)
             {
-                // ¸ó½ºÅÍ°¡ ºÒ»ç È¿°úÀÏ °æ¿ì
+                // ëª¬ìŠ¤í„°ê°€ ë¶ˆì‚¬ íš¨ê³¼ì¼ ê²½ìš°
                 if (Managers.Game.MonsterData.Feature == 4)
                 {
                     Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence) * 20;
                     Managers.Game.OnBattleCreatureDamagedAction.Invoke();
-                    Debug.Log("ºÒ»ç È¿°ú ¹ßµ¿ Ä¡¸í µ¥¹ÌÁö 200ÆÛ");
+                    Debug.Log("ë¶ˆì‚¬ íš¨ê³¼ ë°œë™ ì¹˜ëª… ë°ë¯¸ì§€ 200í¼");
                 }
                 else
                 {
@@ -146,12 +146,12 @@ public class UI_PlayerCard : UI_Base
             }
             else
             {
-                // ¸ó½ºÅÍ°¡ ºÒ»ç È¿°úÀÏ °æ¿ì
+                // ëª¬ìŠ¤í„°ê°€ ë¶ˆì‚¬ íš¨ê³¼ì¼ ê²½ìš°
                 if (Managers.Game.MonsterData.Feature == 4)
                 {
                     Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence) * 0.2f;
                     Managers.Game.OnBattleCreatureDamagedAction.Invoke();
-                    Debug.Log("ºÒ»ç È¿°ú ¹ßµ¿ ÀÏ¹İ µ¥¹ÌÁö 20ÆÛ");
+                    Debug.Log("ë¶ˆì‚¬ íš¨ê³¼ ë°œë™ ì¼ë°˜ ë°ë¯¸ì§€ 20í¼");
                 }
                 else
                 {
@@ -182,7 +182,7 @@ public class UI_PlayerCard : UI_Base
                     break;
             }
 
-            // ¸ó½ºÅÍ Á×´Â ÆÄÆ¼Å¬ »ı¼º
+            // ëª¬ìŠ¤í„° ì£½ëŠ” íŒŒí‹°í´ ìƒì„±
             Transform particlePos = Managers.Game.Monster.gameObject.transform;
             GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
             deathSoulPurple.transform.position = particlePos.position;
@@ -405,7 +405,7 @@ public class UI_PlayerCard : UI_Base
         go.transform.position += new Vector3(0, -0, 0);
         var uiParticle = go.GetOrAddComponent<UIParticle>();
 
-        //var childrenUIParticle = go.GetComponentsInChildren<UIParticle>()[1]; // ÀÌ°Å Á» À§ÇèÇÑ ÄÚµåÀÓ.
+        //var childrenUIParticle = go.GetComponentsInChildren<UIParticle>()[1]; // ì´ê±° ì¢€ ìœ„í—˜í•œ ì½”ë“œì„.
         uiParticle.scale = 100;
         //childrenUIParticle.scale = 300;
         //Debug.Log($"childrenUIParticle.gameObject.name : {childrenUIParticle.gameObject.name}");
