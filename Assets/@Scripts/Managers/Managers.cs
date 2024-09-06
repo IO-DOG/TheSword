@@ -82,7 +82,7 @@ public class Managers : MonoBehaviour
         }
 
         ret = ret.Replace("\\n", "\n");
-        ret = ret.Replace(";", ",");
+        ret = ret.Replace("^", ",");
 
         return ret;
     }
