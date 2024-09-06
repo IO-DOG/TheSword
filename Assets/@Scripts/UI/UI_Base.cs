@@ -25,7 +25,7 @@ public abstract class UI_Base : MonoBehaviour
     private void Start()
     {
         Init();
-        Managers.Game.OnFadeAction -= Fade;
+        Managers.Game.OnFadeAction = null;
         Managers.Game.OnFadeAction += Fade;
     }
 

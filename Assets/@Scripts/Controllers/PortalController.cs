@@ -14,6 +14,7 @@ public class PortalController : MonoBehaviour
     public void UsePortal()
     {
         string nextStageName = "";
+
         if (_stairs == (int)Define.Stairs.Upstairs)
         {
             nextStageName = Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].UpStage;
@@ -30,9 +31,26 @@ public class PortalController : MonoBehaviour
         Managers.Game.CurPlayerData.CurStageid = Managers.Data.FindKeyByValue_StageInfoData(nextStageName);
 
         Vector3 nextPos = GetNextPos(nextStageName);
-        Managers.Game.Player.transform.position = nextPos;
+        CoStartWait(nextPos);
+    }
 
+    void CoStartWait(Vector3 nextPos)
+    {
+        StartCoroutine(WaitAndWarp(nextPos));
+    }
+    IEnumerator WaitAndWarp(Vector3 nextPos)
+    {
+        yield return new WaitForSeconds(0.2f);
+        Managers.Game.Player.SetIdleState(Managers.Game.Player._moveDir);
+        Managers.Game.OnDirect = true;
+        yield return new WaitForSeconds(1f);
+
+        Managers.Game.Player.transform.position = nextPos;
+        Managers.Game.Player._cellPos = nextPos;
         CameraController.SetConfinerBounds();
+
+        //Managers.Game.OnFadeAction.Invoke();
+        Managers.Game.OnDirect = false;
     }
 
     Vector3 GetNextPos(string nextStageName)
