@@ -43,13 +43,13 @@ public class PortalController : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
         Managers.Game.Player.SetIdleState(Managers.Game.Player._moveDir);
         Managers.Game.OnDirect = true;
-        yield return new WaitForSeconds(1f);
+        Managers.Game.OnFadeAction.Invoke(0.3f);
+        yield return new WaitForSeconds(0.03f);
 
         Managers.Game.Player.transform.position = nextPos;
         Managers.Game.Player._cellPos = nextPos;
         CameraController.SetConfinerBounds();
 
-        //Managers.Game.OnFadeAction.Invoke();
         Managers.Game.OnDirect = false;
     }
 

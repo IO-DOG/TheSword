@@ -33,7 +33,7 @@ public class BossDoor : MonoBehaviour
         Managers.Game.Player.gameObject.SetActive(true);
         Managers.Game.Player.SetIdleState(Define.MoveDir.Up);
         Managers.Game.Player.Speed = originalSpeed;
-        Managers.Game.OnFadeAction.Invoke();
+        Managers.Game.OnFadeAction.Invoke(Define.FADE_DURATION);
         Managers.Game.OnEnterBossRoomAction.Invoke();
         Managers.Game.OnDirect = false;
         Managers.Resource.Destroy(gameObject);

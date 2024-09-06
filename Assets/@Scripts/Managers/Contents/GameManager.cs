@@ -42,7 +42,7 @@ public class GameManager
     public KeyInventory KeyInventory = new KeyInventory(); //Inventory
 
     public Action OnEnterBossRoomAction;
-    public Action OnFadeAction;
+    public Action<float> OnFadeAction;
 
     public Action OnBattleAction;
     public Action OnBattleDataRefreshAction;

@@ -131,9 +131,9 @@ public abstract class UI_Base : MonoBehaviour
         fade.PlayFade(type, duration, scene);
     }
 
-    public void Fade()
+    public void Fade(float duration = 2f)
     {
-        FadeEffect(Define.FadeEvent.FadnIn, Define.FADE_DURATION);
-        FadeEffect(Define.FadeEvent.CenterToRight, Define.FADE_DURATION);
+        FadeEffect(Define.FadeEvent.FadnIn, duration);
+        FadeEffect(Define.FadeEvent.CenterToRight, duration);
     }
 }
