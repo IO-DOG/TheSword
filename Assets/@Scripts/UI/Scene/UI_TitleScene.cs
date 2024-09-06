@@ -161,18 +161,14 @@ public class UI_TitleScene : UI_Scene
 
         if (Input.GetKeyDown(KeyCode.F8))
         {
-            Managers.Game.CurPlayerData.CurSword = 9;
             Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Clear();
-            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(9);
+            //anagers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(9);
             Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(10);
-
-            for (int i = 0; i < Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Count; i++)
-            {
-                Debug.Log(Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword][i] + "Inventory");
-                Debug.Log(Managers.Game.CurPlayerData.CurSword + "CurPlayerSword");
-                
-            }
-
+            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(11);
+            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(12);
+            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(13);
+            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(14);
+            Managers.Game.CurPlayerData.CurSword = 10;
         }
         #endregion
     }
