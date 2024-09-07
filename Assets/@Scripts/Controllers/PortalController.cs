@@ -50,6 +50,18 @@ public class PortalController : MonoBehaviour
         Managers.Game.Player._cellPos = nextPos;
         CameraController.SetConfinerBounds();
 
+        int nextStageID = Managers.Game.CurPlayerData.CurStageid;
+
+        if (nextStageID == 2)
+        {
+            CameraController._isCombineMap = true;
+        }
+        else
+        {
+            CameraController._isCombineMap = false;
+        }
+
+
         Managers.Game.OnDirect = false;
     }
 
@@ -65,15 +77,6 @@ public class PortalController : MonoBehaviour
 
         int offset = 0;
         int index = GetNextPortalTileIndex(nextStageName);
-
-        if(nextStageID == 2)
-        {
-            CameraController._isCombineMap = true;
-        }
-        else
-        {
-            CameraController._isCombineMap = false;
-        }
 
         if (endStageID == nextStageID)
         {

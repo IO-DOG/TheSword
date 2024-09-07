@@ -83,6 +83,7 @@ public class Define
         Down,
         Left,
         Right,
+        Back,
     }
 
     public enum Types
@@ -169,6 +170,7 @@ public class Define
         OnLever,
         DrawSword,
         ContractSword,
+        BackStep,
     }
 
     public enum EventClass

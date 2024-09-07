@@ -200,6 +200,16 @@ public class PlayerController : MonoBehaviour
                 _weapon.transform.localPosition = Vector3.back * adjustingDis;
                 _shield.transform.localPosition = Vector3.back * adjustingDis;
                 break;
+            case PlayerState.BackStep:
+                GetComponent<Animator>().Play("Player_BackStep");
+                if (_isEquiptWeapon)
+                    _weapon.GetComponent<Animator>().Play($"{_weaponName}_Run_F");
+                if (_isEquiptShield)
+                    _shield.GetComponent<Animator>().Play($"{_shieldName}_Run_F");
+
+                _weapon.transform.localPosition = Vector3.back * adjustingDis;
+                _shield.transform.localPosition = Vector3.back * adjustingDis;
+                break;
             case PlayerState.OnLever:
                 GetComponent<Animator>().Play("Player_IronLever_B");
                 _isEquiptShield = false;
@@ -258,6 +268,10 @@ public class PlayerController : MonoBehaviour
             case MoveDir.Right:
                 _nextCellPos = Vector3.right * _offset;
                 _state = PlayerState.Right;
+                break;
+            case MoveDir.Back:
+                _nextCellPos = Vector3.back * _offset;
+                _state = PlayerState.BackStep;
                 break;
         }
 

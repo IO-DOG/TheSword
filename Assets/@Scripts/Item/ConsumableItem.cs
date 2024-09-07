@@ -64,7 +64,7 @@ public class ConsumableItem : MonoBehaviour
                 {
                     GameObject particle = Managers.Resource.Instantiate("FX_Potion_B");
                     particle.transform.position = this.transform.position; ;
-                    particle.transform.localScale = Vector3.one * 0.33f;
+                    particle.transform.localScale = Vector3.one * 0.1f;
                 }
                 break;
             case 5:
@@ -72,7 +72,7 @@ public class ConsumableItem : MonoBehaviour
                 {
                     GameObject particle = Managers.Resource.Instantiate("FX_Potion_C");
                     particle.transform.position = this.transform.position;
-                    particle.transform.localScale = Vector3.one * 0.33f;
+                    particle.transform.localScale = Vector3.one * 0.1f;
                 }
                 break;
             case 7:
@@ -80,7 +80,7 @@ public class ConsumableItem : MonoBehaviour
                 {
                     GameObject particle = Managers.Resource.Instantiate("FX_Potion_D");
                     particle.transform.position = this.transform.position;
-                    particle.transform.localScale = Vector3.one * 0.33f;
+                    particle.transform.localScale = Vector3.one * 0.1f;
                 }
                 break;
         }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -51,13 +51,13 @@ public class Events
             yield return new WaitForSeconds(1f);
             Managers.Game.Player.SetState(Define.PlayerState.DrawSword);
             yield return new WaitForSeconds(1f);
-            Managers.Game.Player.Moving(Define.MoveDir.Down);
+            Managers.Game.Player.Moving(Define.MoveDir.Back);
             yield return new WaitForSeconds(1f);
             Managers.Game.Player.SetState(Define.PlayerState.IdleUp);
             Managers.Game.Player.Speed = originalSpeed;
             yield return new WaitForSeconds(1f);
             GameObject go = Managers.Resource.Instantiate(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);
-            go.transform.localScale = new Vector3(0.2f, 0.2f, 0.1f);
+            go.transform.localScale = new Vector3(0.2f, 0.2f, 0.08f);
             yield return new WaitForSeconds(Managers.Data.EventDic[Managers.Game.CurEventID].Delay);
             Managers.Resource.Destroy(go);
             Managers.Game.CurEventID++;
