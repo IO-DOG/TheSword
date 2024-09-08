@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Coffee.UIEffects;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
@@ -397,7 +398,21 @@ public class UI_InvenPopup : UI_Popup
 
         GetImage((int)Images.IllustBG).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[curSwordIdx].IllustBG}");
         GetImage((int)Images.Illust).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[curSwordIdx].Illust}");
+        StartCoroutine(CoIllustUIEffect());
         GetImage((int)Images.IllustFX).GetComponent<Animator>().Play($"{Managers.Data.EquipDic[curSwordIdx].IllustFX}");
+    }
+
+    IEnumerator CoIllustUIEffect()
+    {
+        GetImage((int)Images.Illust).gameObject.GetOrAddComponent<UIShiny>().effectFactor = 0;
+        WaitForSeconds delay = new WaitForSeconds(0.02f);
+        while (true)
+        {
+            if (GetImage((int)Images.Illust).gameObject.GetOrAddComponent<UIShiny>().effectFactor >= 0.98f)
+                GetImage((int)Images.Illust).gameObject.GetOrAddComponent<UIShiny>().effectFactor = 0;
+            yield return delay;
+            GetImage((int)Images.Illust).gameObject.GetOrAddComponent<UIShiny>().effectFactor += 0.02f;
+        }
     }
 
     void OnClickShield()
