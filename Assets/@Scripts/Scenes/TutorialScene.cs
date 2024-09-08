@@ -12,6 +12,8 @@ public class TutorialScene : BaseScene
         SceneType = Define.Scene.TutorialScene;
         Managers.UI.ShowSceneUI<UI_TutorialScene>();
 
+        Managers.Game.DirectionalLight = GameObject.Find("Directional Light").GetComponent<Light>();
+
         foreach(Transform child in GameObject.Find("DirectingObjects").transform)
         {
             _directingObjects.Add(child.gameObject);

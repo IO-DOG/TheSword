@@ -133,7 +133,12 @@ public abstract class UI_Base : MonoBehaviour
 
     public void Fade(float duration = 2f)
     {
-        FadeEffect(Define.FadeEvent.FadnIn, duration);
+        //FadeEffect(Define.FadeEvent.LeftToCenter, duration);
         FadeEffect(Define.FadeEvent.CenterToRight, duration);
+    }
+
+    public void FadeIn(float duration = 2f)
+    {
+        FadeEffect(Define.FadeEvent.LeftToCenter, duration);
     }
 }

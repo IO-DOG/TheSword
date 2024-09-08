@@ -12,6 +12,7 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.Playables;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.PostProcessing;
@@ -31,6 +32,7 @@ public class GameManager
     public int CurEventID;
 
     public GameObject CurInteractObject;
+    public Light DirectionalLight;
 
     public Transform BossRoom;
 
@@ -41,7 +43,6 @@ public class GameManager
     public CurConsumableItemData ConsumableItemData = new CurConsumableItemData(); // Current Consumable Item Data
     public KeyInventory KeyInventory = new KeyInventory(); //Inventory
 
-    public Action OnEnterBossRoomAction;
     public Action<float> OnFadeAction;
 
     public Action OnBattleAction;
@@ -485,9 +486,10 @@ public class GameManager
                 }
                 //else if (tile is StairsData stairsTile)
                 //{
-                //    if(stairsTile.StairsType == (int)Define.Stairs.BossRoom)
+                //    if (stairsTile.StairsType == (int)Define.Stairs.BossRoom)
                 //    {
-                //        BossRoom.position = new Vector3(stairsTile.Position.X + count * 100, 0.16f, stairsTile.Position.Z);
+                //        GameObject go = Managers.Resource.Instantiate("BossPortal", items.transform);
+                //        go.transform.localPosition = new Vector3(stairsTile.Position.X, -0.32f, stairsTile.Position.Z);
                 //    }
                 //}
                 else if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
@@ -650,6 +652,26 @@ public class GameManager
     }
     #endregion
 
+    public void CostartChangeColor(Color targetColor, float duration)
+    {
+        CoroutineManager.StartCoroutine(ChangeLightColor(targetColor, duration));
+    }
+
+    IEnumerator ChangeLightColor(Color targetColor, float duration)
+    {
+        Color startColor = DirectionalLight.color;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            DirectionalLight.color = Color.Lerp(startColor, targetColor, elapsed / duration);
+            yield return null;
+        }
+
+        // 최종 Color 값 설정
+        DirectionalLight.color = targetColor;
+    }
 
     #region ForData
     public Define.ScriptType ScriptType = Define.ScriptType.None;

@@ -194,6 +194,8 @@ public class Define
     public static string MainUI_Warp_A = "MainUI_Warp_A.sprite";
     public static string MainUI_Warp_B = "MainUI_Warp_B.sprite";
 
+    public static Color BossLight = new Color(1f, 0, 0);
+
     #region Script Data
     public static int TITLE_MENU = 0;
     public static int INTRO_STORY = 900000;

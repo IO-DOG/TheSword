@@ -4,6 +4,7 @@ using UnityEngine;
 using DG.Tweening;
 using static Define;
 using Unity.Burst.CompilerServices;
+using static UnityEditor.ShaderData;
 
 public class PlayerController : MonoBehaviour
 {
@@ -56,9 +57,6 @@ public class PlayerController : MonoBehaviour
     {
         Managers.Input.KeyAction -= OnKeyboard;
         Managers.Input.KeyAction += OnKeyboard;
-
-        Managers.Game.OnEnterBossRoomAction -= EnterBossRoom;
-        Managers.Game.OnEnterBossRoomAction += EnterBossRoom;
 
         _duration = 1 / _speed;
         _keyInventory = GameObject.Find("KeyInventory");
@@ -446,11 +444,5 @@ public class PlayerController : MonoBehaviour
         seq.Append(gameObject.transform.DOMove(_cellPos, 0.2f));
 
         return seq;
-    }
-    
-    void EnterBossRoom()
-    {
-        Managers.Game.BossRoom.GetComponent<PortalController>().UsePortal();
-        _cellPos = transform.position;
     }
 }

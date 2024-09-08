@@ -61,7 +61,6 @@ public class PortalController : MonoBehaviour
             CameraController._isCombineMap = false;
         }
 
-
         Managers.Game.OnDirect = false;
     }
 
@@ -87,7 +86,7 @@ public class PortalController : MonoBehaviour
             offset = (nextStageID - startStageID) * 100;
         }
 
-        Vector3 nextPos = new Vector3(tiles[index].Position.X + offset, Managers.Game.Player.transform.position.y, tiles[index].Position.Z);
+        Vector3 nextPos = new Vector3(tiles[index].Position.X + offset, 0, tiles[index].Position.Z);
         return nextPos;
     }
 

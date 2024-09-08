@@ -89,8 +89,7 @@ public class UI_BossRoomCheckPopup : UI_Popup
 
     void YesClick()
     {
-        Managers.Resource.Instantiate("FX_BossPortal_A", Managers.Game.BossRoom);
-
+        Managers.Game.BossRoom.parent.GetComponentInChildren<BossDoor>().CoStartPlayEffect();
         ClosePopupUI();
     }
 
