@@ -43,14 +43,12 @@ public class BossDoor : MonoBehaviour
 
         yield return new WaitForSeconds(1.5f);
 
-        Managers.Game.Player.transform.localScale = originScale;
         Managers.Game.BossRoom.GetComponent<PortalController>().UsePortal();
 
+        //Managers.Game.DirectionalLight.color= originLightColor;
+        yield return new WaitForSeconds(0.2f);
+        Managers.Game.Player.transform.localScale = originScale;
         Managers.Game.Player.SetIdleState(Define.MoveDir.Up);
-
-        Managers.Game.DirectionalLight.color= originLightColor;
-
-        yield return new WaitForSeconds(0.01f);
         Managers.Game.Player.gameObject.SetActive(true);
         Managers.Game.OnDirect = false;
         Managers.Resource.Destroy(gameObject);

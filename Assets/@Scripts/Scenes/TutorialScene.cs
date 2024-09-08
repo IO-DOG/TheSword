@@ -18,6 +18,9 @@ public class TutorialScene : BaseScene
         {
             _directingObjects.Add(child.gameObject);
         }
+
+        Managers.Game.CurPlayerData.CurSword = Managers.Data.EquipDic[9].id;
+        Managers.Game.CurPlayerData.CurShield = -1;
     }
 
     private void Start()
