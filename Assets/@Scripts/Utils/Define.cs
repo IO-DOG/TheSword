@@ -224,7 +224,7 @@ public class Define
     public static float STAGE_NAME_DURATION = 1.5f;
 
     #region EquipDataForInven
-    public static int EQUIP_SOWRD_FIRST = 9;
+    public static int EQUIP_SOWRD_FIRST = 10;
     public static int EQUIP_SOWRD_END = 19;
 
     #endregion

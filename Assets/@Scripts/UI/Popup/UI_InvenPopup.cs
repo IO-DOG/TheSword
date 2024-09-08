@@ -524,6 +524,7 @@ public class UI_InvenPopup : UI_Popup
                 int curSwordIdx = Managers.Game.CurPlayerData.CurSword;
                 SwapSword(curSwordIdx, temp);
                 Managers.Game.CurPlayerData.CurSword = temp;
+                ShowSwordIllust();
                 GetImage((int)Images.sword).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[temp].ImageName}");
             }
         }
