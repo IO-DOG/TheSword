@@ -430,7 +430,7 @@ public class GameManager
     public void InstantiateMap(int key)
     {
         int count = 0;
-        string chapter = Managers.Data.StageInfoDic[key].DungeonID.Substring(0, 2) + "_";
+        string chapter = Managers.Data.StageInfoDic[key].DungeonID.Substring(0, 2) + "_"; // ex 00_
         int maxCount = Managers.Data.GetChapterCount(chapter);
         bool isSpawned = false;
 
@@ -514,6 +514,8 @@ public class GameManager
                     monster.transform.localPosition = new Vector3(monsterTile.Position.X, monsterTile.Position.Y, monsterTile.Position.Z);
                     monster.transform.localScale = monsters.transform.localPosition + new Vector3(0.8f, 0.8f, 1f);
                     monster.GetComponent<MonsterController>().id = monsterTile.Index;
+                    string idleStr = Managers.Data.MonsterDic[monster.GetComponent<MonsterController>().id].IdleAnimStr;
+                    monster.GetOrAddComponent<Animator>().Play(idleStr);
                     monster.name = $"monster{monsterTile.TotalCount}";
                     monster.GetComponent<MonsterController>()._monsterIndex_forActive = monsterTile.TotalCount;
 
