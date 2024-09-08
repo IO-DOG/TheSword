@@ -100,7 +100,7 @@ public class Events
 
         GameObject go1 = Managers.Resource.Instantiate("FX_ContractSwordEffect", Managers.Game.Player.transform);
         go1.transform.localPosition = Vector3.zero;
-        go1.transform.localScale = new Vector3(0.15f, 0.15f, 0.075f);
+        go1.transform.localScale = new Vector3(0.3f, 0.3f, 0.15f);
 
         GameObject go2 = Managers.Resource.Instantiate("FX_PowerWave", Managers.Game.Player.transform);
         go2.transform.localPosition = Vector3.zero;
@@ -114,10 +114,12 @@ public class Events
         Managers.Resource.Destroy(go2);
 
         Managers.Game.Player.SetState(Define.PlayerState.IdleDown);
+        Managers.Game.CurInteractObject.transform.parent.gameObject.SetActive(false);
 
         Managers.Game.OnDirect = false;
 
         Managers.Game.Player._moveDir = Define.MoveDir.Down;
+        Managers.Game.CurPlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
         Managers.Game.Player._isEquiptWeapon = true;
         Managers.Game.Player._isEquiptShield = true;
     }
