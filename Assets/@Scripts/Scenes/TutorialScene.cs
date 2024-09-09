@@ -12,10 +12,15 @@ public class TutorialScene : BaseScene
         SceneType = Define.Scene.TutorialScene;
         Managers.UI.ShowSceneUI<UI_TutorialScene>();
 
+        Managers.Game.DirectionalLight = GameObject.Find("Directional Light").GetComponent<Light>();
+
         foreach(Transform child in GameObject.Find("DirectingObjects").transform)
         {
             _directingObjects.Add(child.gameObject);
         }
+
+        Managers.Game.CurPlayerData.CurSword = Define.EQUIP_SOWRD_FIRST;
+        Managers.Game.CurPlayerData.CurShield = -1;
     }
 
     private void Start()

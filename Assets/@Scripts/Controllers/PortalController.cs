@@ -14,6 +14,7 @@ public class PortalController : MonoBehaviour
     public void UsePortal()
     {
         string nextStageName = "";
+
         if (_stairs == (int)Define.Stairs.Upstairs)
         {
             nextStageName = Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].UpStage;
@@ -30,9 +31,37 @@ public class PortalController : MonoBehaviour
         Managers.Game.CurPlayerData.CurStageid = Managers.Data.FindKeyByValue_StageInfoData(nextStageName);
 
         Vector3 nextPos = GetNextPos(nextStageName);
-        Managers.Game.Player.transform.position = nextPos;
+        CoStartWait(nextPos);
+    }
 
+    void CoStartWait(Vector3 nextPos)
+    {
+        StartCoroutine(WaitAndWarp(nextPos));
+    }
+    IEnumerator WaitAndWarp(Vector3 nextPos)
+    {
+        yield return new WaitForSeconds(0.2f);
+        Managers.Game.Player.SetIdleState(Managers.Game.Player._moveDir);
+        Managers.Game.OnDirect = true;
+        Managers.Game.OnFadeAction.Invoke(0.3f);
+        yield return new WaitForSeconds(0.03f);
+
+        Managers.Game.Player.transform.position = nextPos;
+        Managers.Game.Player._cellPos = nextPos;
         CameraController.SetConfinerBounds();
+
+        int nextStageID = Managers.Game.CurPlayerData.CurStageid;
+
+        if (nextStageID == 2)
+        {
+            CameraController._isCombineMap = true;
+        }
+        else
+        {
+            CameraController._isCombineMap = false;
+        }
+
+        Managers.Game.OnDirect = false;
     }
 
     Vector3 GetNextPos(string nextStageName)
@@ -48,15 +77,6 @@ public class PortalController : MonoBehaviour
         int offset = 0;
         int index = GetNextPortalTileIndex(nextStageName);
 
-        if(nextStageID == 2)
-        {
-            CameraController._isCombineMap = true;
-        }
-        else
-        {
-            CameraController._isCombineMap = false;
-        }
-
         if (endStageID == nextStageID)
         {
             return Managers.Game.Player.transform.position;
@@ -66,7 +86,7 @@ public class PortalController : MonoBehaviour
             offset = (nextStageID - startStageID) * 100;
         }
 
-        Vector3 nextPos = new Vector3(tiles[index].Position.X + offset, Managers.Game.Player.transform.position.y, tiles[index].Position.Z);
+        Vector3 nextPos = new Vector3(tiles[index].Position.X + offset, 0, tiles[index].Position.Z);
         return nextPos;
     }
 

@@ -1,4 +1,4 @@
-using Data;
+﻿using Data;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
@@ -59,7 +59,7 @@ public class DataTransformer : EditorWindow
             if (File.Exists(path))
                 File.Delete(path);
         }
-        ParseMapData();
+        //ParseMapData();
         Debug.Log("Complete DeleteGameData");
     }
 

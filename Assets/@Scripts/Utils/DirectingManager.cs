@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -51,13 +51,13 @@ public class Events
             yield return new WaitForSeconds(1f);
             Managers.Game.Player.SetState(Define.PlayerState.DrawSword);
             yield return new WaitForSeconds(1f);
-            Managers.Game.Player.Moving(Define.MoveDir.Down);
+            Managers.Game.Player.Moving(Define.MoveDir.Back);
             yield return new WaitForSeconds(1f);
             Managers.Game.Player.SetState(Define.PlayerState.IdleUp);
             Managers.Game.Player.Speed = originalSpeed;
             yield return new WaitForSeconds(1f);
             GameObject go = Managers.Resource.Instantiate(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);
-            go.transform.localScale = new Vector3(0.2f, 0.2f, 0.1f);
+            go.transform.localScale = new Vector3(0.2f, 0.2f, 0.08f);
             yield return new WaitForSeconds(Managers.Data.EventDic[Managers.Game.CurEventID].Delay);
             Managers.Resource.Destroy(go);
             Managers.Game.CurEventID++;
@@ -98,9 +98,12 @@ public class Events
     {
         Managers.Game.OnDirect = true;
 
+        Vector3 swordPos = Managers.Game.CurInteractObject.transform.parent.position;
+        Managers.Game.CurInteractObject.transform.parent.gameObject.SetActive(false);
+
         GameObject go1 = Managers.Resource.Instantiate("FX_ContractSwordEffect", Managers.Game.Player.transform);
         go1.transform.localPosition = Vector3.zero;
-        go1.transform.localScale = new Vector3(0.15f, 0.15f, 0.075f);
+        go1.transform.localScale = new Vector3(0.3f, 0.3f, 0.15f);
 
         GameObject go2 = Managers.Resource.Instantiate("FX_PowerWave", Managers.Game.Player.transform);
         go2.transform.localPosition = Vector3.zero;
@@ -114,12 +117,20 @@ public class Events
         Managers.Resource.Destroy(go2);
 
         Managers.Game.Player.SetState(Define.PlayerState.IdleDown);
+        GameObject key = Managers.Resource.Instantiate("ConsumableItem");
+        key.transform.position = swordPos;
+        key.transform.localScale = new Vector3(1f, 2f, 1f);
+        key.GetComponent<ConsumableItem>().id = 1;
 
         Managers.Game.OnDirect = false;
 
         Managers.Game.Player._moveDir = Define.MoveDir.Down;
+        Managers.Game.CurPlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
         Managers.Game.Player._isEquiptWeapon = true;
         Managers.Game.Player._isEquiptShield = true;
+
+        Managers.Game.CurPlayerData.IsContractedSword = true;
+        Managers.Game.SaveGame();
     }
 
     #endregion

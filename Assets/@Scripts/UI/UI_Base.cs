@@ -25,7 +25,7 @@ public abstract class UI_Base : MonoBehaviour
     private void Start()
     {
         Init();
-        Managers.Game.OnFadeAction -= Fade;
+        Managers.Game.OnFadeAction = null;
         Managers.Game.OnFadeAction += Fade;
     }
 
@@ -131,9 +131,14 @@ public abstract class UI_Base : MonoBehaviour
         fade.PlayFade(type, duration, scene);
     }
 
-    public void Fade()
+    public void Fade(float duration = 2f)
     {
-        FadeEffect(Define.FadeEvent.FadnIn, Define.FADE_DURATION);
-        FadeEffect(Define.FadeEvent.CenterToRight, Define.FADE_DURATION);
+        //FadeEffect(Define.FadeEvent.LeftToCenter, duration);
+        FadeEffect(Define.FadeEvent.CenterToRight, duration);
+    }
+
+    public void FadeIn(float duration = 2f)
+    {
+        FadeEffect(Define.FadeEvent.LeftToCenter, duration);
     }
 }
