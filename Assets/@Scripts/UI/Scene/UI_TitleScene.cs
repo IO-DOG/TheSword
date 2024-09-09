@@ -162,6 +162,7 @@ public class UI_TitleScene : UI_Scene
         if (Input.GetKeyDown(KeyCode.F8))
         {
             Managers.Game.CurPlayerData.CurSword = 9;
+            Managers.Game.CurPlayerData.CurShield = -1;
             Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Clear();
             Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(9);
             Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(10);
@@ -180,6 +181,9 @@ public class UI_TitleScene : UI_Scene
     void OnClickNewGameButton()
     {
         Debug.Log("Cllck OnClickNewGameButton");
+
+        Managers.Game.DeleteGameData();
+
         if (PlayerPrefs.GetInt("ISFIRST", 1) == 1) // 진짜 처음일 떄
         {
             // todo intro story scene

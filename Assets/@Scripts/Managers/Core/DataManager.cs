@@ -33,8 +33,6 @@ public class DataManager
     public Dictionary<int, bool> LeverActiveDic { get; set; } = new Dictionary<int, bool>();
     public Dictionary<int, bool> DoorActiveDic { get; set; } = new Dictionary<int, bool>();
 
-
-
     public void Init()
     {
         AssetDatabase.Refresh();

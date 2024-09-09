@@ -98,6 +98,9 @@ public class Events
     {
         Managers.Game.OnDirect = true;
 
+        Vector3 swordPos = Managers.Game.CurInteractObject.transform.parent.position;
+        Managers.Game.CurInteractObject.transform.parent.gameObject.SetActive(false);
+
         GameObject go1 = Managers.Resource.Instantiate("FX_ContractSwordEffect", Managers.Game.Player.transform);
         go1.transform.localPosition = Vector3.zero;
         go1.transform.localScale = new Vector3(0.3f, 0.3f, 0.15f);
@@ -114,7 +117,10 @@ public class Events
         Managers.Resource.Destroy(go2);
 
         Managers.Game.Player.SetState(Define.PlayerState.IdleDown);
-        Managers.Game.CurInteractObject.transform.parent.gameObject.SetActive(false);
+        GameObject key = Managers.Resource.Instantiate("ConsumableItem");
+        key.transform.position = swordPos;
+        key.transform.localScale = new Vector3(1f, 2f, 1f);
+        key.GetComponent<ConsumableItem>().id = 1;
 
         Managers.Game.OnDirect = false;
 
@@ -122,6 +128,9 @@ public class Events
         Managers.Game.CurPlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
         Managers.Game.Player._isEquiptWeapon = true;
         Managers.Game.Player._isEquiptShield = true;
+
+        Managers.Game.CurPlayerData.IsContractedSword = true;
+        Managers.Game.SaveGame();
     }
 
     #endregion

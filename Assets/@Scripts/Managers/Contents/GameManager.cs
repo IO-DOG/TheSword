@@ -111,6 +111,7 @@ public class GameManager
         public int CurBook { get; set; }
         public MyVector3 CurPosition { get; set; }
         public int CurStageid { get; set; }
+        public bool IsContractedSword { get; set; }
     }
     #endregion
 
@@ -438,7 +439,7 @@ public class GameManager
         string chapter = Managers.Data.StageInfoDic[key].DungeonID.Substring(0, 2) + "_";
         int maxCount = Managers.Data.GetChapterCount(chapter);
         bool isSpawned = false;
-
+        InteractObjectController interacts = null;
         foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
         {
             Data.MapData mapData = entry.Value;
@@ -455,6 +456,7 @@ public class GameManager
 
             Door[] doors = map.GetComponentsInChildren<Door>();
             Pillar[] pillars = map.GetComponentsInChildren<Pillar>();
+            interacts = map.GetComponentInChildren<InteractObjectController>();
 
             GameObject items = Util.FindChildByName(map.transform, "Items").gameObject;
             GameObject monsters = Util.FindChildByName(map.transform, "Monsters").gameObject;
@@ -475,7 +477,7 @@ public class GameManager
                             child.transform.parent.gameObject.SetActive(false);
                     }
                 }
-                if (tile is PillarData pillarTile)
+                else if (tile is PillarData pillarTile)
                 {
                     foreach (Pillar child in pillars)
                     {
@@ -580,12 +582,25 @@ public class GameManager
                 {
                     if (!isSpawned && tile.PrefabID == (int)Define.TileType.SpawnPoint && stageName != GetBossRoomName(chapter))
                     {
-                        Managers.Game.Player.transform.position = new Vector3(tile.Position.X + count * 100, 0f, tile.Position.Z);
-                        Managers.Game.Player._cellPos = Managers.Game.Player.transform.position;
+                        if(PlayerPrefs.GetInt("ISFIRST", 1) == 1)
+                        {
+                            Managers.Game.Player.transform.position = new Vector3(tile.Position.X + count * 100, 0f, tile.Position.Z);
+                            Managers.Game.Player._cellPos = Managers.Game.Player.transform.position;
 
-                        isSpawned = true;
+                            isSpawned = true;
+                        }
+                        else
+                        {
+                            Managers.Game.Player.transform.position = new Vector3(Managers.Game.CurPlayerData.CurPosition.X, 0, Managers.Game.CurPlayerData.CurPosition.Z);
+                            Managers.Game.Player._cellPos = Managers.Game.Player.transform.position;
+                        }
                     }
                 }
+            }
+
+            if (interacts != null && Managers.Game.CurPlayerData.IsContractedSword == true)
+            {
+                interacts.transform.parent.gameObject.SetActive(false);
             }
 
             Items = items;
@@ -605,7 +620,6 @@ public class GameManager
             MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Items);
             //InstantiateLights(key, lights.transform);
         }
-
         MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Player.gameObject);
         CameraController.SetConfinerBounds();
     }
@@ -652,30 +666,58 @@ public class GameManager
     }
     #endregion
 
-    public void CostartChangeColor(Color targetColor, float duration)
-    {
-        CoroutineManager.StartCoroutine(ChangeLightColor(targetColor, duration));
-    }
-
-    IEnumerator ChangeLightColor(Color targetColor, float duration)
-    {
-        Color startColor = DirectionalLight.color;
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            DirectionalLight.color = Color.Lerp(startColor, targetColor, elapsed / duration);
-            yield return null;
-        }
-
-        // 최종 Color 값 설정
-        DirectionalLight.color = targetColor;
-    }
-
     #region ForData
     public Define.ScriptType ScriptType = Define.ScriptType.None;
     public Define.ScreenType ScreenType = Define.ScreenType.None;
+
+    public void DeleteGameData()
+    {
+        PlayerPrefs.DeleteAll();
+        PlayerPrefs.DeleteKey("ISFIRST");
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveCItemActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveEItemActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SavePillarActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveLeverActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        //ParseMapData();
+        Debug.Log("Complete DeleteGameData");
+    }
+
     #endregion
 
     public void Init()
