@@ -7,7 +7,6 @@ using UnityEngine;
 
 public class UI_ConversationPopup : UI_Popup
 {
-    public int _eventID;
     bool _endFlag = false;
 
     enum Texts
@@ -36,7 +35,7 @@ public class UI_ConversationPopup : UI_Popup
         GetImage((int)Images.RightPortrait).gameObject.transform.localScale = new Vector3(-1, 1, 1);
 
         Managers.Game.OnConversation = true;
-        InitScript(Managers.Data.EventDic[_eventID].ScriptID);
+        InitScript();
 
         return true;
     }
@@ -58,7 +57,7 @@ public class UI_ConversationPopup : UI_Popup
             GetImage((int)Images.ConversationArrow).gameObject.SetActive(false);
     }
 
-    public void InitScript(int scriptCode)
+    public void InitScript()
     {
         GetImage((int)Images.LeftPortrait).gameObject.SetActive(false);
         GetImage((int)Images.RightPortrait).gameObject.SetActive(false);
@@ -67,37 +66,39 @@ public class UI_ConversationPopup : UI_Popup
 
     private void ShowCurrentScript()
     {
-        if (!string.IsNullOrEmpty(Managers.Data.EventDic[_eventID].IllustLeft))
+        if (!string.IsNullOrEmpty(Managers.Data.EventDic[Managers.Game.CurEventID].IllustLeft))
         {
             GetImage((int)Images.LeftPortrait).gameObject.SetActive(true);
-            GetImage((int)Images.LeftPortrait).sprite = Managers.Resource.Load<Sprite>(Managers.Data.EventDic[_eventID].IllustLeft);
+            GetImage((int)Images.LeftPortrait).sprite = Managers.Resource.Load<Sprite>(Managers.Data.EventDic[Managers.Game.CurEventID].IllustLeft);
             GetImage((int)Images.RightPortrait).color = Color.gray;
             GetImage((int)Images.LeftPortrait).color = Color.white;
 
             GetText((int)Texts.SpeakerText).text = "���";
         }
 
-        if (!string.IsNullOrEmpty(Managers.Data.EventDic[_eventID].IllustRight))
+        if (!string.IsNullOrEmpty(Managers.Data.EventDic[Managers.Game.CurEventID].IllustRight))
         {
             GetImage((int)Images.RightPortrait).gameObject.SetActive(true);
-            GetImage((int)Images.RightPortrait).sprite = Managers.Resource.Load<Sprite>(Managers.Data.EventDic[_eventID].IllustRight);
+            GetImage((int)Images.RightPortrait).sprite = Managers.Resource.Load<Sprite>(Managers.Data.EventDic[Managers.Game.CurEventID].IllustRight);
             GetImage((int)Images.LeftPortrait).color = Color.gray;
             GetImage((int)Images.RightPortrait).color = Color.white;
 
             GetText((int)Texts.SpeakerText).text = "������ ��";
         }
 
-        string text = Managers.GetString(Managers.Data.ScriptDic[Managers.Data.EventDic[_eventID].ScriptID].id);
+        string text = Managers.GetString(Managers.Data.ScriptDic[Managers.Data.EventDic[Managers.Game.CurEventID].ScriptID].id);
         GetText((int)Texts.ConversationText).text = text;
 
 
-        if (Managers.Data.EventDic[_eventID].Class == (int)Define.EventClass.End)
+        if (Managers.Data.EventDic[Managers.Game.CurEventID].Class == (int)Define.EventClass.End)
         {
             _endFlag = true;
             return;
         }
 
-        _eventID++;
+        Managers.Game.CurEventID++;
+        
+        
     }
 
     public void ShowNextScript()
@@ -107,6 +108,13 @@ public class UI_ConversationPopup : UI_Popup
             Debug.Log("Conversation ended");
             Managers.Game.OnConversation = false;
             ClosePopupUI();
+
+            if(Managers.Directing.PopupAction != null)
+            {
+                Managers.Directing.PopupAction.Invoke();
+                Managers.Directing.PopupAction = null;
+            }
+
             return;
         }
 

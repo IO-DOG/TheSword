@@ -83,6 +83,7 @@ public class Define
         Down,
         Left,
         Right,
+        Back,
     }
 
     public enum Types
@@ -167,6 +168,9 @@ public class Define
         IdleUp,
         IdleDown,
         OnLever,
+        DrawSword,
+        ContractSword,
+        BackStep,
     }
 
     public enum EventClass
@@ -189,6 +193,8 @@ public class Define
     public static string MainUI_Sword_B = "MainUI_Sword_B.sprite";
     public static string MainUI_Warp_A = "MainUI_Warp_A.sprite";
     public static string MainUI_Warp_B = "MainUI_Warp_B.sprite";
+
+    public static Color BossLight = new Color(1f, 0, 0);
 
     #region Script Data
     public static int TITLE_MENU = 0;

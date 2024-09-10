@@ -12,6 +12,7 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.Playables;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.PostProcessing;
@@ -28,6 +29,11 @@ public class GameManager
     public bool OnDirect = false;
     public bool OnInteract = false;
 
+    public int CurEventID;
+
+    public GameObject CurInteractObject;
+    public Light DirectionalLight;
+
     public Transform BossRoom;
 
     public PlayerController Player; // ������ ������ ����
@@ -37,8 +43,7 @@ public class GameManager
     public CurConsumableItemData ConsumableItemData = new CurConsumableItemData(); // Current Consumable Item Data
     public KeyInventory KeyInventory = new KeyInventory(); //Inventory
 
-    public Action OnEnterBossRoomAction;
-    public Action OnFadeAction;
+    public Action<float> OnFadeAction;
 
     public Action OnBattleAction;
     public Action OnBattleDataRefreshAction;
@@ -106,6 +111,7 @@ public class GameManager
         public int CurBook { get; set; }
         public MyVector3 CurPosition { get; set; }
         public int CurStageid { get; set; }
+        public bool IsContractedSword { get; set; }
     }
     #endregion
 
@@ -433,7 +439,7 @@ public class GameManager
         string chapter = Managers.Data.StageInfoDic[key].DungeonID.Substring(0, 2) + "_"; // ex 00_
         int maxCount = Managers.Data.GetChapterCount(chapter);
         bool isSpawned = false;
-
+        InteractObjectController interacts = null;
         foreach (KeyValuePair<string, Data.MapData> entry in Managers.Data.MapDic)
         {
             Data.MapData mapData = entry.Value;
@@ -450,6 +456,7 @@ public class GameManager
 
             Door[] doors = map.GetComponentsInChildren<Door>();
             Pillar[] pillars = map.GetComponentsInChildren<Pillar>();
+            interacts = map.GetComponentInChildren<InteractObjectController>();
 
             GameObject items = Util.FindChildByName(map.transform, "Items").gameObject;
             GameObject monsters = Util.FindChildByName(map.transform, "Monsters").gameObject;
@@ -470,7 +477,7 @@ public class GameManager
                             child.transform.parent.gameObject.SetActive(false);
                     }
                 }
-                if (tile is PillarData pillarTile)
+                else if (tile is PillarData pillarTile)
                 {
                     foreach (Pillar child in pillars)
                     {
@@ -481,9 +488,10 @@ public class GameManager
                 }
                 //else if (tile is StairsData stairsTile)
                 //{
-                //    if(stairsTile.StairsType == (int)Define.Stairs.BossRoom)
+                //    if (stairsTile.StairsType == (int)Define.Stairs.BossRoom)
                 //    {
-                //        BossRoom.position = new Vector3(stairsTile.Position.X + count * 100, 0.16f, stairsTile.Position.Z);
+                //        GameObject go = Managers.Resource.Instantiate("BossPortal", items.transform);
+                //        go.transform.localPosition = new Vector3(stairsTile.Position.X, -0.32f, stairsTile.Position.Z);
                 //    }
                 //}
                 else if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
@@ -576,12 +584,25 @@ public class GameManager
                 {
                     if (!isSpawned && tile.PrefabID == (int)Define.TileType.SpawnPoint && stageName != GetBossRoomName(chapter))
                     {
-                        Managers.Game.Player.transform.position = new Vector3(tile.Position.X + count * 100, 0f, tile.Position.Z);
-                        Managers.Game.Player._cellPos = Managers.Game.Player.transform.position;
+                        if(PlayerPrefs.GetInt("ISFIRST", 1) == 1)
+                        {
+                            Managers.Game.Player.transform.position = new Vector3(tile.Position.X + count * 100, 0f, tile.Position.Z);
+                            Managers.Game.Player._cellPos = Managers.Game.Player.transform.position;
 
-                        isSpawned = true;
+                            isSpawned = true;
+                        }
+                        else
+                        {
+                            Managers.Game.Player.transform.position = new Vector3(Managers.Game.CurPlayerData.CurPosition.X, 0, Managers.Game.CurPlayerData.CurPosition.Z);
+                            Managers.Game.Player._cellPos = Managers.Game.Player.transform.position;
+                        }
                     }
                 }
+            }
+
+            if (interacts != null && Managers.Game.CurPlayerData.IsContractedSword == true)
+            {
+                interacts.transform.parent.gameObject.SetActive(false);
             }
 
             Items = items;
@@ -601,7 +622,6 @@ public class GameManager
             MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Items);
             //InstantiateLights(key, lights.transform);
         }
-
         MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Player.gameObject);
         CameraController.SetConfinerBounds();
     }
@@ -648,10 +668,58 @@ public class GameManager
     }
     #endregion
 
-
     #region ForData
     public Define.ScriptType ScriptType = Define.ScriptType.None;
     public Define.ScreenType ScreenType = Define.ScreenType.None;
+
+    public void DeleteGameData()
+    {
+        PlayerPrefs.DeleteAll();
+        PlayerPrefs.DeleteKey("ISFIRST");
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveCItemActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveEItemActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SavePillarActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        {
+            string path = Application.dataPath + "/@Resources/Data/SaveLeverActiveData.json";
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        //ParseMapData();
+        Debug.Log("Complete DeleteGameData");
+    }
+
     #endregion
 
     public void Init()

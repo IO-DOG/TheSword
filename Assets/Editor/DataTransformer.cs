@@ -1,4 +1,4 @@
-using Data;
+﻿using Data;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
@@ -59,7 +59,7 @@ public class DataTransformer : EditorWindow
             if (File.Exists(path))
                 File.Delete(path);
         }
-        ParseMapData();
+        //ParseMapData();
         Debug.Log("Complete DeleteGameData");
     }
 
@@ -861,6 +861,8 @@ public class DataTransformer : EditorWindow
             ed.id = ConvertValue<int>(row[i++]);
             ed.IllustLeft = ConvertValue<string>(row[i++]);
             ed.IllustRight = ConvertValue<string>(row[i++]);
+            ed.HeroEmoji = ConvertValue<string>(row[i++]);
+            ed.OtherEmoji = ConvertValue<string>(row[i++]);
             ed.ScriptID = ConvertValue<int>(row[i++]);
             ed.Class = ConvertValue<int>(row[i++]);
             ed.Delay = ConvertValue<float>(row[i++]);
