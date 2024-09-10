@@ -20,7 +20,7 @@ public class TutorialScene : BaseScene
         }
 
         Managers.Game.CurPlayerData.CurSword = Define.EQUIP_SOWRD_FIRST;
-        Managers.Game.CurPlayerData.CurShield = -1;
+        Managers.Game.CurPlayerData.CurShield = 0;
     }
 
     private void Start()

@@ -162,7 +162,7 @@ public class UI_TitleScene : UI_Scene
         if (Input.GetKeyDown(KeyCode.F8))
         {
             Managers.Game.CurPlayerData.CurSword = 9;
-            Managers.Game.CurPlayerData.CurShield = -1;
+            Managers.Game.CurPlayerData.CurShield = 0;
             Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Clear();
             //anagers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(9);
             Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(10);
