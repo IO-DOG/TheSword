@@ -10,14 +10,12 @@ using System.Threading;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.Playables;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.PostProcessing;
 using static Define;
-using static UnityEditor.Progress;
 using static UnityEngine.EventSystems.EventTrigger;
 
 public class GameManager
@@ -320,19 +318,19 @@ public class GameManager
 
         #region ActiveDic
         string monsterActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.MonsterActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json", monsterActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/SaveMonsterActiveData.json", monsterActiveDicJsonStr);
         string bossMonsterActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.BossMonsterActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json", bossMonsterActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/SaveBossMonsterActiveData.json", bossMonsterActiveDicJsonStr);
         string cItemActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.CItemActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveCItemActiveData.json", cItemActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/SaveCItemActiveData.json", cItemActiveDicJsonStr);
         string eItemActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.EItemActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveEItemActiveData.json", eItemActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/SaveEItemActiveData.json", eItemActiveDicJsonStr);
         string doorActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.DoorActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json", doorActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/SaveDoorActiveData.json", doorActiveDicJsonStr);
         string pillarActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.PillarActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.dataPath + "/@Resources/Data/SavePillarActiveData.json", pillarActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/SavePillarActiveData.json", pillarActiveDicJsonStr);
         string leverActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.LeverActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.dataPath + "/@Resources/Data/SaveLeverActiveData.json", leverActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/ SaveLeverActiveData.json", leverActiveDicJsonStr);
         #endregion
     }
 
@@ -340,7 +338,7 @@ public class GameManager
     {
         if (PlayerPrefs.GetInt("ISFIRST", 1) == 1)
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveData.json";
+            string path = Application.persistentDataPath + "/SaveData.json";
             if (File.Exists(path))
                 File.Delete(path);
 
@@ -384,25 +382,25 @@ public class GameManager
             CurPlayerData = data;
 
             #region Active Dic
-            string monsterActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json");
+            string monsterActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SaveMonsterActiveData.json");
             Dictionary<int, bool> monsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(monsterActiveDicFile);
             Managers.Data.MonsterActiveDic = monsterActiveDic;
-            string bossMonsterActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json");
+            string bossMonsterActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SaveBossMonsterActiveData.json");
             Dictionary<int, bool> bossMonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(bossMonsterActiveDicFile);
             Managers.Data.BossMonsterActiveDic = bossMonsterActiveDic;
-            string cItemActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveCItemActiveData.json");
+            string cItemActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SaveCItemActiveData.json");
             Dictionary<int, bool> cItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(cItemActiveDicFile);
             Managers.Data.CItemActiveDic = cItemActiveDic;
-            string eItemActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveEItemActiveData.json");
+            string eItemActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SaveEItemActiveData.json");
             Dictionary<int, bool> eItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(eItemActiveDicFile);
             Managers.Data.EItemActiveDic = eItemActiveDic;
-            string doorActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json");
+            string doorActiveDicFile = File.ReadAllText(Application.persistentDataPath+ "/SaveDoorActiveData.json");
             Dictionary<int, bool> doorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(doorActiveDicFile);
             Managers.Data.DoorActiveDic = doorActiveDic;
-            string pillarActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SavePillarActiveData.json");
+            string pillarActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SavePillarActiveData.json");
             Dictionary<int, bool> pillarActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(pillarActiveDicFile);
             Managers.Data.PillarActiveDic = pillarActiveDic;
-            string leverActiveDicFile = File.ReadAllText(Application.dataPath + "/@Resources/Data/SaveLeverActiveData.json");
+            string leverActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SaveLeverActiveData.json");
             Dictionary<int, bool> leverActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(leverActiveDicFile);
             Managers.Data.LeverActiveDic = leverActiveDic;
             #endregion
@@ -724,7 +722,7 @@ public class GameManager
 
     public void Init()
     {
-        _path = Application.dataPath + "/@Resources/Data/SaveData.json";
+        _path = Application.persistentDataPath + "/SaveData.json";
 
         if (LoadGame())
             return;

@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering.Universal;
-using static UnityEditor.PlayerSettings;
-using static UnityEditor.Progress;
 
 public class CameraController : MonoBehaviour
 {

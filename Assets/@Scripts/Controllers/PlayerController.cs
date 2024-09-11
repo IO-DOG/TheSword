@@ -4,7 +4,6 @@ using UnityEngine;
 using DG.Tweening;
 using static Define;
 using Unity.Burst.CompilerServices;
-using static UnityEditor.ShaderData;
 
 public class PlayerController : MonoBehaviour
 {
