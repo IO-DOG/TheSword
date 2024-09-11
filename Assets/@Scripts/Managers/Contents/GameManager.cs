@@ -63,7 +63,7 @@ public class GameManager
 
     public class ContinueData
     {
-        public int Level { get; set; } // Lv
+        public int Level { get; set; } = 1; // Lv
         public float curExp;
         public float CurExp
         {
@@ -330,7 +330,7 @@ public class GameManager
         string pillarActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.PillarActiveDic, Formatting.Indented);
         File.WriteAllText(Application.persistentDataPath + "/SavePillarActiveData.json", pillarActiveDicJsonStr);
         string leverActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.LeverActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/ SaveLeverActiveData.json", leverActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/SaveLeverActiveData.json", leverActiveDicJsonStr);
         #endregion
     }
 
@@ -343,7 +343,7 @@ public class GameManager
                 File.Delete(path);
 
             int level = 1;
-            Managers.Game.CurPlayerData.Level = Managers.Data.PlayerDic[level].id + 1;
+            Managers.Game.CurPlayerData.Level = Managers.Data.PlayerDic[level].id;
             Managers.Game.CurPlayerData.CurExp = 0;
             Managers.Game.CurPlayerData.MaxHP = Managers.Data.PlayerDic[level].MaxHP;
             Managers.Game.CurPlayerData.CurHP = Managers.Data.PlayerDic[level].MaxHP;
@@ -582,7 +582,7 @@ public class GameManager
                 {
                     if (!isSpawned && tile.PrefabID == (int)Define.TileType.SpawnPoint && stageName != GetBossRoomName(chapter))
                     {
-                        if(PlayerPrefs.GetInt("ISFIRST", 1) == 1)
+                        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1)
                         {
                             Managers.Game.Player.transform.position = new Vector3(tile.Position.X + count * 100, 0f, tile.Position.Z);
                             Managers.Game.Player._cellPos = Managers.Game.Player.transform.position;
@@ -675,42 +675,42 @@ public class GameManager
         PlayerPrefs.DeleteAll();
         PlayerPrefs.DeleteKey("ISFIRST");
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveData.json";
+            string path = Application.persistentDataPath +"/SaveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json";
+            string path = Application.persistentDataPath + "/SaveMonsterActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json";
+            string path = Application.persistentDataPath + "/SaveBossMonsterActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveCItemActiveData.json";
+            string path = Application.persistentDataPath + "/SaveCItemActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveEItemActiveData.json";
+            string path = Application.persistentDataPath + "/SaveEItemActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json";
+            string path = Application.persistentDataPath + "/SaveDoorActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.dataPath + "/@Resources/Data/SavePillarActiveData.json";
+            string path = Application.persistentDataPath + "/SavePillarActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveLeverActiveData.json";
+            string path = Application.persistentDataPath + "/SaveLeverActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }

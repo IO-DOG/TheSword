@@ -178,8 +178,8 @@ public class UI_TitleScene : UI_Scene
     void OnClickNewGameButton()
     {
         Debug.Log("Cllck OnClickNewGameButton");
-
         Managers.Game.DeleteGameData();
+        Managers.Game.SaveGame();
 
         if (PlayerPrefs.GetInt("ISFIRST", 1) == 1) // 진짜 처음일 떄
         {

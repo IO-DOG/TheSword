@@ -31,11 +31,12 @@ public class CameraController : MonoBehaviour
     Vector3 _goOriginScale;
     Vector3 _playerOriginScale;
 
+    private void Awake()
+    {
+        Managers.Game.MainCamera = this.transform.parent.GetComponent<Camera>();
+    }
     private void Start()
     {
-        if(this.transform.parent.tag == "MainCamera")
-            Managers.Game.MainCamera = this.transform.parent.GetComponent<Camera>();
-
         _vCam = GetComponent<CinemachineVirtualCamera>();
         _vCam.Follow = Managers.Game.Player.transform;
 
