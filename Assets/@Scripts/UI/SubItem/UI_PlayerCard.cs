@@ -186,7 +186,8 @@ public class UI_PlayerCard : UI_Base
             Transform particlePos = Managers.Game.Monster.gameObject.transform;
             GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
             deathSoulPurple.transform.position = particlePos.position;
-            Destroy(deathSoulPurple, 10);
+            deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            Destroy(deathSoulPurple, 3);
             Destroy(Managers.Game.Monster.gameObject);
             Managers.Game.OnBattleAction.Invoke();
             Managers.Game.OnBattle = false;
@@ -406,7 +407,7 @@ public class UI_PlayerCard : UI_Base
         var uiParticle = go.GetOrAddComponent<UIParticle>();
 
         //var childrenUIParticle = go.GetComponentsInChildren<UIParticle>()[1]; // 이거 좀 위험한 코드임.
-        uiParticle.scale = 100;
+        uiParticle.scale = 30;
         //childrenUIParticle.scale = 300;
         //Debug.Log($"childrenUIParticle.gameObject.name : {childrenUIParticle.gameObject.name}");
         uiParticle.Play();
