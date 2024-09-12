@@ -111,7 +111,7 @@ public class UI_TitleScene : UI_Scene
 
     private void Update()
     {
-        if (!Input.GetKeyDown(KeyCode.Return) && !Input.GetKeyDown(KeyCode.UpArrow) && !Input.GetKeyDown(KeyCode.DownArrow) && Input.anyKeyDown && GetText((int)Texts.PessAnyKeyText).gameObject.activeSelf)
+        if (Input.anyKeyDown && GetText((int)Texts.PessAnyKeyText).gameObject.activeSelf && !Input.GetKeyDown(KeyCode.Return) && !Input.GetKeyDown(KeyCode.UpArrow) && !Input.GetKeyDown(KeyCode.DownArrow))
         {
             GetText((int)Texts.PessAnyKeyText).gameObject.SetActive(false);
             GetImage((int)Images.Buttons).gameObject.SetActive(true);
