@@ -35,10 +35,10 @@ public class TitleScene : BaseScene
         float delay = MainTitle_BGAnim.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length;
         yield return new WaitForSeconds(delay);
 
-        MainTitle_BG.SetActive(false);
-        MainTitle_Layer0.SetActive(false);
-        MainTitle_Layer1.SetActive(false);
-        MainTitle_Layer2.SetActive(false);
+        //MainTitle_BG.SetActive(false);
+        //MainTitle_Layer0.SetActive(false);
+        //MainTitle_Layer1.SetActive(false);
+        //MainTitle_Layer2.SetActive(false);
         ui_titleScene.SetActive(true);
     }
 
