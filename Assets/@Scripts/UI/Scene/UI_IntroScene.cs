@@ -39,7 +39,7 @@ public class UI_IntroScene : UI_Scene
         //GetImage((int)Images.SceneFrameImage).gameObject.SetActive(false);
 
         _scripts = Managers.Data.LoadScriptData(Define.INTRO_STORY);
-        totalCount = 6;
+        totalCount = 7;
 
         GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx++].id);
         return true;
@@ -69,6 +69,7 @@ public class UI_IntroScene : UI_Scene
             Managers.Resource.Load<Sprite>("Intro02"),
             Managers.Resource.Load<Sprite>("Intro03"),
             Managers.Resource.Load<Sprite>("Intro04"),
+            Managers.Resource.Load<Sprite>("Intro01"),
             Managers.Resource.Load<Sprite>("Intro05"),
         };
 
@@ -79,6 +80,7 @@ public class UI_IntroScene : UI_Scene
         }
 
         GetImage((int)Images.SceneImage).sprite = ImageList[idx - 1];
+        if (idx != totalCount - 1)
         GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx].id);
 
         if (idx == 1) // ó�� Ŭ����
@@ -86,7 +88,7 @@ public class UI_IntroScene : UI_Scene
             GetImage((int)Images.SceneImage).gameObject.SetActive(true);
             GetText((int)Texts.SceneText).gameObject.transform.position = Util.WorldToScreenCood(new Vector3(0, -400, 0));
         }
-        if (idx == totalCount - 2)
+        if (idx == totalCount - 3)
         {
             StartCoroutine(CoInvertedImage());
         }
@@ -132,6 +134,8 @@ public class UI_IntroScene : UI_Scene
             yield return new WaitForSeconds(0.1f);
         }
         yield return null;
+
+        Managers.Scene.LoadScene(Define.Scene.TutorialScene);
     }
 
     IEnumerator CoFadeOutImage(Image image)
@@ -176,6 +180,7 @@ public class UI_IntroScene : UI_Scene
 
 
         GetText((int)Texts.SceneText).gameObject.transform.position = Util.WorldToScreenCood(new Vector3(0, 0, 0));
-        GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[totalCount - 1].id);
+
+        //GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[totalCount - 1].id);
     }
 }
