@@ -11,6 +11,7 @@ public class UI_TitleScene : UI_Scene
     {
         Buttons,
         MainTitle_Text,
+        BlackBGImage
     }
 
     enum Buttons
@@ -53,6 +54,7 @@ public class UI_TitleScene : UI_Scene
         BindObject(typeof(Objects));
         #endregion
 
+        GetImage((int)Images.BlackBGImage).gameObject.SetActive(false);
         Loading();
 
         //GetObject((int)Objects.Slider).GetComponent<Slider>().value = 0;
@@ -147,7 +149,8 @@ public class UI_TitleScene : UI_Scene
             switch (buttonsIdx)
             {
                 case 0:
-                    OnClickNewGameButton();
+                    StartCoroutine(CoFadeOutImage());
+                    //OnClickNewGameButton();
                     break;
                 case 1:
                     OnClickLoadGameButton();
@@ -179,6 +182,24 @@ public class UI_TitleScene : UI_Scene
             Managers.Game.CurPlayerData.CurSword = 10;
         }
         #endregion
+    }
+
+    IEnumerator CoFadeOutImage()
+    {
+        GetImage((int)Images.BlackBGImage).gameObject.SetActive(true);
+
+        GetImage((int)Images.BlackBGImage).color = new Color(0, 0, 0, 0);
+
+        float tick = 0;
+        while (tick < 1)
+        {
+            GetImage((int)Images.BlackBGImage).color += new Color(0, 0, 0, +0.1f);
+            tick += 0.1f;
+            yield return new WaitForSeconds(0.1f);
+        }
+        yield return new WaitForSeconds(0.5f);
+
+        OnClickNewGameButton();
     }
 
     void OnClickNewGameButton()
