@@ -24,7 +24,7 @@ public class TitleScene : BaseScene
         MainTitle_Layer2 = GameObject.Find("MainTitle_Layer2");
         MainTitle_BGAnim = GameObject.Find("MainTitle_BGAnim");
 
-        ui_titleScene.SetActive(false);
+        //ui_titleScene.SetActive(false);
         StartCoroutine(CoCheckTitleOpenAnim(MainTitle_BGAnim));
 
         //TitleUI

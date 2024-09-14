@@ -10,6 +10,7 @@ public class UI_TitleScene : UI_Scene
     enum Images
     {
         Buttons,
+        MainTitle_Text,
     }
 
     enum Buttons
@@ -88,14 +89,15 @@ public class UI_TitleScene : UI_Scene
 
     void Loading()
     {
+        GameObject.Find("MainTitle_BGAnim").GetComponent<Animator>().Play("WaitForOpening");
+
         Managers.Resource.LoadAllAsync<Object>("PreLoad", (key, count, totalCount) =>
         {
             GetObject((int)Objects.Slider).GetComponent<Slider>().value = (float)count / totalCount;
             if (count == totalCount)
             {
                 isPreload = true;
-                GetObject((int)Objects.Slider).gameObject.SetActive(false);
-                GetButton((int)Buttons.NewGameButton).gameObject.SetActive(true);
+
                 Managers.Data.Init();
                 Managers.Game.Init();
                 Managers.Sound.Init();
@@ -103,6 +105,10 @@ public class UI_TitleScene : UI_Scene
                 Managers.Sound.SetVolume(PlayerPrefs.GetFloat("CURSOUND", 1));
                 Managers.Sound.SetVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1));
                 Managers.Sound.SetVolume(PlayerPrefs.GetFloat("CUREFFECTSOUND", 1));
+
+                GameObject.Find("MainTitle_BGAnim").GetComponent<Animator>().Play("TitleOpeningAnimation");
+                GetObject((int)Objects.Slider).gameObject.SetActive(false);
+                GetButton((int)Buttons.NewGameButton).gameObject.SetActive(true);
 
                 // continueData로 플레이어 적용시키기. TODO
             }
