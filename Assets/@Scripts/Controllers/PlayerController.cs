@@ -352,14 +352,19 @@ public class PlayerController : MonoBehaviour
             //Checking Door
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Door)
             {
+                if (Managers.Game.OnInteract)
+                    return true;
                 if (Managers.Game.KeyInventory.TryUseKey(hit.collider.gameObject))
                 {
+                    Managers.Game.OnInteract = true;
+                    SetIdleState(_moveDir);
                     somethingExist = true;
 
                     hit.collider.gameObject.GetComponentInChildren<Door>().CoDoorLockOpenAnim();
                     hit.collider.gameObject.GetComponentInChildren<Door>().CoOpenDoor(2.5f);
                     hit.collider.gameObject.GetComponentInChildren<Door>().FadeDoor().OnComplete(() =>
                     {
+                        Managers.Game.OnInteract = false;
                         hit.collider.gameObject.SetActive(false);
                         somethingExist = false;
                     });
