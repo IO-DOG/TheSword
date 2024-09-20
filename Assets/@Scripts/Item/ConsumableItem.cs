@@ -59,6 +59,27 @@ public class ConsumableItem : MonoBehaviour
     {
         switch (id)
         {
+            case 0:
+                {
+                    GameObject particle = Managers.Resource.Instantiate("FX_Key_Green");
+                    particle.transform.position = this.transform.position;
+                    particle.transform.localScale = Vector3.one * 0.3f;
+                    break;
+                }
+            case 1:
+                {
+                    GameObject particle = Managers.Resource.Instantiate("FX_Key_Red");
+                    particle.transform.position = this.transform.position;
+                    particle.transform.localScale = Vector3.one * 0.3f;
+                    break;
+                }
+            case 2:
+                {
+                    GameObject particle = Managers.Resource.Instantiate("FX_Key_Yellow");
+                    particle.transform.position = this.transform.position;
+                    particle.transform.localScale = Vector3.one * 0.3f;
+                    break;
+                }
             case 3:
             case 4:
                 {
