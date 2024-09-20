@@ -391,7 +391,7 @@ public class PlayerController : MonoBehaviour
                 somethingExist = true;
 
                 Vector3 originPos = _cellPos;
-                Vector3 movePos = new Vector3(hit.collider.transform.position.x, transform.position.y, hit.collider.transform.position.z);
+                Vector3 movePos = new Vector3(hit.collider.transform.position.x, transform.position.y + 0.2f, hit.collider.transform.position.z - 0.1f);
 
                 transform.DOMove(movePos, 0.2f).OnComplete(() =>
                 {
