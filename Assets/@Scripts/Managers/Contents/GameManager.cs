@@ -593,6 +593,8 @@ public class GameManager
                         {
                             Managers.Game.Player.transform.position = new Vector3(Managers.Game.CurPlayerData.CurPosition.X, 0, Managers.Game.CurPlayerData.CurPosition.Z);
                             Managers.Game.Player._cellPos = Managers.Game.Player.transform.position;
+
+                            isSpawned = true;
                         }
                     }
                 }
@@ -675,7 +677,7 @@ public class GameManager
         PlayerPrefs.DeleteAll();
         PlayerPrefs.DeleteKey("ISFIRST");
         {
-            string path = Application.persistentDataPath +"/SaveData.json";
+            string path = Application.persistentDataPath + "/SaveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
@@ -727,7 +729,6 @@ public class GameManager
         if (LoadGame())
             return;
 
-        PlayerPrefs.SetInt("ISFIRST", 0);
         SaveGame();
     }
 }

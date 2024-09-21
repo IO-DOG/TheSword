@@ -67,6 +67,7 @@ public class UI_TitleScene : UI_Scene
         });
         GetImage((int)Images.Buttons).gameObject.SetActive(false);
         GetButton((int)Buttons.NewGameButton).gameObject.SetActive(false);
+
         //GetButton((int)Buttons.GameSpeedButton).gameObject.BindEvent(() => { // 게임 속도 조절
         //    if (Managers.Game.GameSpeed == 1)
         //        Managers.Game.GameSpeed = 2;
@@ -111,7 +112,6 @@ public class UI_TitleScene : UI_Scene
                 GameObject.Find("MainTitle_BGAnim").GetComponent<Animator>().Play("TitleOpeningAnimation");
                 GetObject((int)Objects.Slider).gameObject.SetActive(false);
                 GetButton((int)Buttons.NewGameButton).gameObject.SetActive(true);
-
                 // continueData로 플레이어 적용시키기. TODO
             }
         });
@@ -222,9 +222,16 @@ public class UI_TitleScene : UI_Scene
 
     void OnClickLoadGameButton()
     {
-        Debug.Log("Cllck OnClickLoadGameButton");
-        Managers.Scene.LoadScene(Define.Scene.GameScene);
-
+        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1)
+        {
+            Debug.Log("Cllck OnClickLoadGameButton Nut Data is Null");
+            Managers.Scene.LoadScene(Define.Scene.IntroScene);
+        }
+        else
+        {
+            Debug.Log("Cllck OnClickLoadGameButton");
+            Managers.Scene.LoadScene(Define.Scene.TutorialScene);
+        }
     }
 
     void OnClickSettingButton()

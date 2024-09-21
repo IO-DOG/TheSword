@@ -192,7 +192,6 @@ public class UI_GameScene : UI_Scene
             {
                 Debug.Log(Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword][i] + "Inventory");
                 Debug.Log(Managers.Game.CurPlayerData.CurSword + "CurPlayerSword");
-
             }
 
         }

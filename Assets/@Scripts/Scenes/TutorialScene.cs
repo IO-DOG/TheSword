@@ -25,7 +25,8 @@ public class TutorialScene : BaseScene
 
     private void Start()
     {
-        StartCoroutine(PlayTutorial_1());
+        if(PlayerPrefs.GetInt("ISFIRST", 1) == 1)
+            StartCoroutine(PlayTutorial_1());
     }
 
     public override void Clear()
@@ -84,5 +85,8 @@ public class TutorialScene : BaseScene
         //    yield return null;
         //}
         #endregion
+
+        PlayerPrefs.SetInt("ISFIRST", 0);
+        Managers.Game.SaveGame();
     }
 }
