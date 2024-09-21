@@ -24,7 +24,7 @@ public class TitleScene : BaseScene
         MainTitle_Layer2 = GameObject.Find("MainTitle_Layer2");
         MainTitle_BGAnim = GameObject.Find("MainTitle_BGAnim");
 
-        ui_titleScene.SetActive(false);
+        //ui_titleScene.SetActive(false);
         StartCoroutine(CoCheckTitleOpenAnim(MainTitle_BGAnim));
 
         //TitleUI
@@ -35,10 +35,10 @@ public class TitleScene : BaseScene
         float delay = MainTitle_BGAnim.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length;
         yield return new WaitForSeconds(delay);
 
-        MainTitle_BG.SetActive(false);
-        MainTitle_Layer0.SetActive(false);
-        MainTitle_Layer1.SetActive(false);
-        MainTitle_Layer2.SetActive(false);
+        //MainTitle_BG.SetActive(false);
+        //MainTitle_Layer0.SetActive(false);
+        //MainTitle_Layer1.SetActive(false);
+        //MainTitle_Layer2.SetActive(false);
         ui_titleScene.SetActive(true);
     }
 

@@ -352,14 +352,19 @@ public class PlayerController : MonoBehaviour
             //Checking Door
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Door)
             {
+                if (Managers.Game.OnInteract)
+                    return true;
                 if (Managers.Game.KeyInventory.TryUseKey(hit.collider.gameObject))
                 {
+                    Managers.Game.OnInteract = true;
+                    SetIdleState(_moveDir);
                     somethingExist = true;
 
                     hit.collider.gameObject.GetComponentInChildren<Door>().CoDoorLockOpenAnim();
                     hit.collider.gameObject.GetComponentInChildren<Door>().CoOpenDoor(2.5f);
                     hit.collider.gameObject.GetComponentInChildren<Door>().FadeDoor().OnComplete(() =>
                     {
+                        Managers.Game.OnInteract = false;
                         hit.collider.gameObject.SetActive(false);
                         somethingExist = false;
                     });
@@ -386,7 +391,7 @@ public class PlayerController : MonoBehaviour
                 somethingExist = true;
 
                 Vector3 originPos = _cellPos;
-                Vector3 movePos = new Vector3(hit.collider.transform.position.x, transform.position.y, hit.collider.transform.position.z);
+                Vector3 movePos = new Vector3(hit.collider.transform.position.x, transform.position.y + 0.2f, hit.collider.transform.position.z - 0.1f);
 
                 transform.DOMove(movePos, 0.2f).OnComplete(() =>
                 {
