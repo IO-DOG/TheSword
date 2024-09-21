@@ -7,7 +7,7 @@ using Unity.Burst.CompilerServices;
 
 public class PlayerController : MonoBehaviour
 {
-    const float adjustingDis = 0.025f;
+    const float adjustingDis = 0.003f;
     public GameObject _keyInventory;
 
     float _speed = 5.0f;
