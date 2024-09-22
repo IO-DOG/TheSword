@@ -112,6 +112,9 @@ public class UI_TitleScene : UI_Scene
                 GameObject.Find("MainTitle_BGAnim").GetComponent<Animator>().Play("TitleOpeningAnimation");
                 GetObject((int)Objects.Slider).gameObject.SetActive(false);
                 GetButton((int)Buttons.NewGameButton).gameObject.SetActive(true);
+
+                // cursor 시작
+                GameObject.Find("@Cursor").GetComponent<CursorManager>().Init();
                 // continueData로 플레이어 적용시키기. TODO
             }
         });

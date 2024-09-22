@@ -6,9 +6,13 @@ public class CursorManager : MonoBehaviour
 {
     Define.Cursor _cursor = Define.Cursor.Normal;
 
+    Animator _animator;
+    SpriteRenderer _renderer;
+
     public void Init()
     {
-
+        _animator = GetComponent<Animator>();
+        _renderer = GetComponent<SpriteRenderer>();
     }
 
     void Update()
