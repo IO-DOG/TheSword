@@ -112,6 +112,13 @@ public class Define
         Special,
         Boss,
     }
+
+    public enum Cursor
+    {
+        Normal,
+        Search,
+        Grap,
+    }
     #endregion
 
     #region Map
