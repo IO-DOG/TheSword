@@ -405,9 +405,13 @@ public class PlayerController : MonoBehaviour
                         hit.collider.gameObject.GetComponentInChildren<Lever>().Open();
                         _isEquiptShield = true;
                         _isEquiptWeapon = true;
-                        transform.DOMove(originPos, 0.2f);
-                        Managers.Game.OnLever = false;
-                        _cellPos = originPos;
+                        transform.DOMove(originPos, 0.2f).OnComplete(()=>
+                        { 
+                            Managers.Game.OnLever = false;
+                            _cellPos = originPos;
+                            transform.position = _cellPos;
+                            Managers.Game.SaveGame();
+                        });
                     });
                 });
             }
