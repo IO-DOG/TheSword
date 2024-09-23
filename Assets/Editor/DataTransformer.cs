@@ -716,6 +716,7 @@ public class DataTransformer : EditorWindow
             TypeNameHandling = TypeNameHandling.Auto
         });
         File.WriteAllText($"{Application.persistentDataPath}/MapData.json", mapDicJsonStr);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/MapData.json", mapDicJsonStr);
         AssetDatabase.Refresh();
     }
 
