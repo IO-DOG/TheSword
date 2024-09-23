@@ -15,6 +15,9 @@ public class UI_TutorialScene : UI_Scene
     enum GameObjects
     {
         KeyInventory,
+        GreenKey,
+        YellowKey,
+        RedKey,
     }
 
     //enum Texts
@@ -58,7 +61,9 @@ public class UI_TutorialScene : UI_Scene
 
 
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
-        GetObject((int)GameObjects.KeyInventory).SetActive(false);
+        GetObject((int)GameObjects.GreenKey).SetActive(false);
+        GetObject((int)GameObjects.YellowKey).SetActive(false);
+        GetObject((int)GameObjects.RedKey).SetActive(false);
 
         Fade();
 
