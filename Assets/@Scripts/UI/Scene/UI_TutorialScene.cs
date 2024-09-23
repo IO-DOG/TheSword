@@ -5,22 +5,77 @@ using UnityEngine;
 
 public class UI_TutorialScene : UI_Scene
 {
+    #region Enum
+    //enum Buttons
+    //{
+    //    //ToTitleButton,
+    //    PlayConversation,
+    //}
+
+    enum GameObjects
+    {
+        KeyInventory,
+    }
+
+    //enum Texts
+    //{
+    //    //PlayerNameText,
+    //    PlayerHPText,
+    //    PlayerAttackText,
+    //    PlayerDefenseText,
+    //    PlayerLevelText,
+    //}
+
+    //enum Images
+    //{
+    //    MainUIEXPGaugeImage,
+    //    MainUIAuxiliaryHPGaugeImage,
+    //    MainUIOptionAImage,
+    //    MainUIOptionBImage,
+    //    MainUIInventoryAImage,
+    //    MainUIInventoryBImage,
+    //    MainUISwordAImage,
+    //    MainUISwordBImage,
+    //    MainUIWarpAImage,
+    //    MainUIWarpBImage,
+    //}
+
+    #endregion
     public override bool Init()
     {
         if (base.Init() == false)
             return false;
 
         #region Bind
-
+        //BindButton(typeof(Buttons));
+        BindObject(typeof(GameObjects));
+        //BindText(typeof(Texts));
+        //BindImage(typeof(Images));
         #endregion
 
         Managers.Game.CurPlayerData.CurStageid = 0;
         Managers.Game.InstantiateMap(Managers.Game.CurPlayerData.CurStageid);
 
+
+        Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
+        GetObject((int)GameObjects.KeyInventory).SetActive(false);
+
         Fade();
 
         return true;
     }
+
+    public void Refresh()
+    {
+        //GetText((int)Texts.PlayerLevelText).text = Managers.Game.CurPlayerData.Level.ToString();
+        int level = Managers.Game.CurPlayerData.Level;
+        Debug.Log($"{Managers.Game.CurPlayerData.CurExp} , {Managers.Data.PlayerDic[level].NeedExp}");
+        //GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurExp / Managers.Data.PlayerDic[level].NeedExp;
+        //GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurHP / Managers.Game.CurPlayerData.MaxHP;
+        Managers.Game.KeyInventory.ShowKeySlot(Managers.Game.Player._keyInventory);
+        //SetPlayerInfo();
+    }
+
 
     private void Update()
     {

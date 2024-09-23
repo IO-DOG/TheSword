@@ -39,6 +39,15 @@ public class KeyInventory
         {
             _keys[item.GetComponent<ConsumableItem>().id]++;
 
+            if (Managers.Game.Player._keyInventory.activeSelf == false)
+            {
+                Managers.Game.Player._keyInventory.transform.DOScale(0f, 0f);
+                Managers.Game.Player._keyInventory.SetActive(true);
+                Managers.Game.Player._keyInventory.transform.DOScale(1.2f, 0.5f).OnComplete(()=>
+                {
+                    Managers.Game.Player._keyInventory.transform.DOScale(1f, 0.1f);
+                });
+            }
             ShowKeySlot(Managers.Game.Player._keyInventory);
             Managers.Game.CurPlayerData.KeyInventory = _keys;
         }
