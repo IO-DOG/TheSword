@@ -569,7 +569,7 @@ public class GameManager
                     GameObject lever = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", items.transform);
                     lever.GetComponentInChildren<Lever>()._leverIndex_forActive = leverTile.TotalCount;
                     lever.name = $"Lever";
-                    lever.transform.localPosition = new Vector3(leverTile.Position.X, lever.transform.position.y, leverTile.Position.Z);
+                    lever.transform.localPosition = new Vector3(leverTile.Position.X, -0.16f, leverTile.Position.Z);
 
                     if (Managers.Data.LeverActiveDic[leverTile.TotalCount] == false)
                     {

@@ -153,6 +153,7 @@ public class UI_TitleScene : UI_Scene
                     //OnClickNewGameButton();
                     break;
                 case 1:
+                    StartCoroutine(CoFadeOutImage());
                     OnClickLoadGameButton();
                     break;
                 case 2:
