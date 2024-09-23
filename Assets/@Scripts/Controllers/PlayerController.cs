@@ -427,6 +427,8 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        Managers.Game.SaveGame();
+
         return somethingExist;
     }
 

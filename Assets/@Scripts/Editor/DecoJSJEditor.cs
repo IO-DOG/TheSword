@@ -286,7 +286,11 @@ public class DecoJSJEditor : Editor
             Sprite BGSprite = Resources.Load<Sprite>($"Sprites/{mapName.Substring(8, 2)}/FloorField_{mapName.Substring(8)}");
             GameObject BG = new GameObject() { name = "BG"};
             BG.transform.parent = decos.transform;
-            BG.transform.localPosition = new Vector3(0.16f, 0, 0.16f);
+            if(mapName.Substring(8) == "00_002")
+                BG.transform.localPosition = new Vector3(-0.16f, 0, -0.16f);
+            else
+                BG.transform.localPosition = new Vector3(-0.16f, 0, 0.16f);
+
             BG.transform.rotation = Quaternion.Euler(new Vector3(90f, 0f, 0f));
             BG.AddComponent<SpriteRenderer>().sprite = BGSprite;
             BG.GetComponent<SpriteRenderer>().material = Resources.Load<Material>("SpriteShadowsMaterial");
