@@ -13,6 +13,7 @@ public class CursorManager : MonoBehaviour
     {
         _animator = GetComponent<Animator>();
         _renderer = GetComponent<SpriteRenderer>();
+        
     }
 
     void Update()

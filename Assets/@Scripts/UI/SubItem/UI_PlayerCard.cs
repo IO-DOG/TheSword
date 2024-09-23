@@ -96,8 +96,9 @@ public class UI_PlayerCard : UI_Base
             }
         }
         GetImage((int)Images.PlayerImage).gameObject.GetComponent<Animator>().Play("UIPlayerAttackAnim");
-        GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play("UISword1AttackAnim");
-        GetImage((int)Images.CreatureShieldImage).gameObject.GetComponent<Animator>().Play("UIShield1AttackAnim");
+        GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play($"UISword{Managers.Game.CurPlayerData.CurSword - 9}AttackAnim");
+        if (Managers.Game.CurPlayerData.CurShield != 0)
+            GetImage((int)Images.CreatureShieldImage).gameObject.GetComponent<Animator>().Play($"UIShield{Managers.Game.CurPlayerData.CurShield - 20}AttackAnim");
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
 
         if (Managers.Game.AttackCount == Managers.Game.CurPlayerData.Critical)
@@ -182,6 +183,10 @@ public class UI_PlayerCard : UI_Base
                     break;
             }
 
+            //StartCoroutine(CoMonsterDead());
+            Managers.Game.OnBattleAction.Invoke();
+            Managers.Game.OnBattle = false;
+
             // 몬스터 죽는 파티클 생성
             Transform particlePos = Managers.Game.Monster.gameObject.transform;
             GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
@@ -189,8 +194,6 @@ public class UI_PlayerCard : UI_Base
             deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
             Destroy(deathSoulPurple, 3);
             Destroy(Managers.Game.Monster.gameObject);
-            Managers.Game.OnBattleAction.Invoke();
-            Managers.Game.OnBattle = false;
             return;
         }
 
@@ -198,6 +201,20 @@ public class UI_PlayerCard : UI_Base
         CreateMonsterHitParticle();
         Managers.Game.OnBattleDataRefreshAction.Invoke();
     }
+
+    //IEnumerator CoMonsterDead()
+    //{
+    //    // 몬스터 죽는 파티클 생성
+
+    //    yield return new WaitForSeconds(2f);
+
+    //    Transform particlePos = Managers.Game.Monster.gameObject.transform;
+    //    GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
+    //    deathSoulPurple.transform.position = particlePos.position;
+    //    deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+    //    Destroy(deathSoulPurple, 3);
+    //    Destroy(Managers.Game.Monster.gameObject);
+    //}
 
     public void Defence()
     {
@@ -304,8 +321,9 @@ public class UI_PlayerCard : UI_Base
         swordanimator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("CreatureSwordImage");
         shieldanimator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("CreatureShieldImage");
         animator.Play($"UIPlayerIdleAnim");
-        swordanimator.Play($"UISword1IdleAnim");
-        shieldanimator.Play($"UIShield1IdleAnim");
+        swordanimator.Play($"UISword{Managers.Game.CurPlayerData.CurSword - 9}IdleAnim");
+        if (Managers.Game.CurPlayerData.CurShield != 0)
+            shieldanimator.Play($"UIShield{Managers.Game.CurPlayerData.CurShield - 20}IdleAnim");
         image.sprite = GetImage((int)Images.PlayerImage).sprite;
         swordImage.sprite = GetImage((int)Images.PlayerImage).sprite;
         shieldImage.sprite = GetImage((int)Images.PlayerImage).sprite;
@@ -394,7 +412,7 @@ public class UI_PlayerCard : UI_Base
         var uiParticle = go.GetOrAddComponent<UIParticle>();
         uiParticle.scale = 300;
         uiParticle.Play();
-        
+
         //Destroy(uiParticle, 0.3f);
     }
 
