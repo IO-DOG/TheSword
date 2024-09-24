@@ -113,12 +113,6 @@ public class Define
         Boss,
     }
 
-    public enum Cursor
-    {
-        Normal,
-        Search,
-        Grap,
-    }
     #endregion
 
     #region Map

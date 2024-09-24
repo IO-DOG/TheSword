@@ -114,7 +114,7 @@ public class UI_TitleScene : UI_Scene
                 GetButton((int)Buttons.NewGameButton).gameObject.SetActive(true);
 
                 // cursor 시작
-                GameObject.Find("@Cursor").GetComponent<CursorManager>().Init();
+                GameObject.Find("@Cursor").GetOrAddComponent<CursorManager>().Init();
                 // continueData로 플레이어 적용시키기. TODO
             }
         });

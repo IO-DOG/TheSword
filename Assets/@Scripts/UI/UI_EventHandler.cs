@@ -17,11 +17,21 @@ public class UI_EventHandler : MonoBehaviour, IPointerClickHandler, IPointerDown
     public Action<BaseEventData> OnEndDragHandler = null;
 
     bool _pressed = false;
+    GameObject _cursorObject = null;
 
     private void Update()
     {
         if (_pressed)
+        {
             OnPressedHandler?.Invoke();
+
+            //_cursorObject = GameObject.Find("@Cursor");
+            if (_cursorObject != null)
+            {
+                if (_cursorObject.GetOrAddComponent<CursorManager>()._cursor != CursorType.Search && _cursorObject.GetOrAddComponent<CursorManager>()._cursor != CursorType.Grap)
+                    _cursorObject.GetOrAddComponent<CursorManager>()._cursor = CursorType.Press;
+            }
+        }
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -29,6 +39,13 @@ public class UI_EventHandler : MonoBehaviour, IPointerClickHandler, IPointerDown
         if (OnClickHandler != null)
         {
             OnClickHandler.Invoke();
+
+            _cursorObject = GameObject.Find("@Cursor");
+            if (_cursorObject != null)
+            {
+                if (_cursorObject.GetOrAddComponent<CursorManager>()._cursor != CursorType.Search && _cursorObject.GetOrAddComponent<CursorManager>()._cursor != CursorType.Grap)
+                    _cursorObject.GetOrAddComponent<CursorManager>()._cursor = CursorType.Click;
+            }
         }
     }
 
