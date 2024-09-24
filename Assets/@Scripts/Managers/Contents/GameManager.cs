@@ -318,19 +318,19 @@ public class GameManager
 
         #region ActiveDic
         string monsterActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.MonsterActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/SaveMonsterActiveData.json", monsterActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/MonsterActiveData.json", monsterActiveDicJsonStr);
         string bossMonsterActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.BossMonsterActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/SaveBossMonsterActiveData.json", bossMonsterActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/BossMonsterActiveData.json", bossMonsterActiveDicJsonStr);
         string cItemActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.CItemActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/SaveCItemActiveData.json", cItemActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/CItemActiveData.json", cItemActiveDicJsonStr);
         string eItemActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.EItemActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/SaveEItemActiveData.json", eItemActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/EItemActiveData.json", eItemActiveDicJsonStr);
         string doorActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.DoorActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/SaveDoorActiveData.json", doorActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/DoorActiveData.json", doorActiveDicJsonStr);
         string pillarActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.PillarActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/SavePillarActiveData.json", pillarActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/PillarActiveData.json", pillarActiveDicJsonStr);
         string leverActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.LeverActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/SaveLeverActiveData.json", leverActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/LeverActiveData.json", leverActiveDicJsonStr);
         #endregion
     }
 
@@ -382,25 +382,25 @@ public class GameManager
             CurPlayerData = data;
 
             #region Active Dic
-            string monsterActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SaveMonsterActiveData.json");
+            string monsterActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/MonsterActiveData.json");
             Dictionary<int, bool> monsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(monsterActiveDicFile);
             Managers.Data.MonsterActiveDic = monsterActiveDic;
-            string bossMonsterActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SaveBossMonsterActiveData.json");
+            string bossMonsterActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/BossMonsterActiveData.json");
             Dictionary<int, bool> bossMonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(bossMonsterActiveDicFile);
             Managers.Data.BossMonsterActiveDic = bossMonsterActiveDic;
-            string cItemActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SaveCItemActiveData.json");
+            string cItemActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/CItemActiveData.json");
             Dictionary<int, bool> cItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(cItemActiveDicFile);
             Managers.Data.CItemActiveDic = cItemActiveDic;
-            string eItemActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SaveEItemActiveData.json");
+            string eItemActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/EItemActiveData.json");
             Dictionary<int, bool> eItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(eItemActiveDicFile);
             Managers.Data.EItemActiveDic = eItemActiveDic;
-            string doorActiveDicFile = File.ReadAllText(Application.persistentDataPath+ "/SaveDoorActiveData.json");
+            string doorActiveDicFile = File.ReadAllText(Application.persistentDataPath+ "/DoorActiveData.json");
             Dictionary<int, bool> doorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(doorActiveDicFile);
             Managers.Data.DoorActiveDic = doorActiveDic;
-            string pillarActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SavePillarActiveData.json");
+            string pillarActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/PillarActiveData.json");
             Dictionary<int, bool> pillarActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(pillarActiveDicFile);
             Managers.Data.PillarActiveDic = pillarActiveDic;
-            string leverActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SaveLeverActiveData.json");
+            string leverActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/LeverActiveData.json");
             Dictionary<int, bool> leverActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(leverActiveDicFile);
             Managers.Data.LeverActiveDic = leverActiveDic;
             #endregion
@@ -682,37 +682,37 @@ public class GameManager
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveMonsterActiveData.json";
+            string path = Application.persistentDataPath + "/MonsterActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveBossMonsterActiveData.json";
+            string path = Application.persistentDataPath + "/BossMonsterActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveCItemActiveData.json";
+            string path = Application.persistentDataPath + "/CItemActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveEItemActiveData.json";
+            string path = Application.persistentDataPath + "/EItemActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveDoorActiveData.json";
+            string path = Application.persistentDataPath + "/DoorActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SavePillarActiveData.json";
+            string path = Application.persistentDataPath + "/PillarActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveLeverActiveData.json";
+            string path = Application.persistentDataPath + "/LeverActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
