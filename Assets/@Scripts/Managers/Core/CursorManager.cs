@@ -1,10 +1,13 @@
 ﻿using JetBrains.Annotations;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public enum CursorType
 {
+    None,
     Normal,
     Search,
     Grap,
@@ -16,11 +19,16 @@ public class CursorManager : MonoBehaviour
 {
     public CursorType _cursor = CursorType.Normal;
     bool _init = false;
+    bool _press = false;
 
     int _frameCount = 0;
     float _frameRate = 0f;
     int _currentFrame = 0;
     float _frameTimer = 0f;
+    int _mask = (1 << (int)Define.Layer.Monster) | (1 << (int)Define.Layer.EItem) | (1 << (int)Define.Layer.CItem) |
+        (1 << (int)Define.Layer.BossDoor) | (1 << (int)Define.Layer.Door) | (1 << (int)Define.Layer.Portal) | 
+        (1 << (int)Define.Layer.Lever) | (1 << (int)Define.Layer.InteractObjects) | (1 << (int)Define.Layer.Default) |
+        (1 << (int)Define.Layer.Wall) | (1 << (int)Define.Layer.Player);
 
     Texture2D _normalCursor0 = null;
     Texture2D _normalCursor1 = null;
@@ -69,6 +77,15 @@ public class CursorManager : MonoBehaviour
     {
         UpdateMousePosition();
         UpdateMouseCursor();
+        if (Input.GetMouseButton(0) && _cursor == CursorType.Normal)
+        {
+            _cursor = CursorType.Press;
+        }
+        else if (Input.GetMouseButtonUp(0) && _cursor == CursorType.Press)
+        {
+            _frameTimer = 0;
+            _cursor = CursorType.Normal;
+        }
     }
 
     void UpdateMousePosition()
@@ -83,51 +100,97 @@ public class CursorManager : MonoBehaviour
         if (!_init) return;
 
         _frameTimer += Time.deltaTime;
-        Debug.Log(_frameTimer);
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, 1000.0f, _mask))
+        {
+            // 몬스터, 장비, 물약
+            if (hit.collider.gameObject.layer == (int)Define.Layer.Monster || hit.collider.gameObject.layer == (int)Define.Layer.EItem || hit.collider.gameObject.layer == (int)Define.Layer.CItem)
+            {
+                if (_cursor != CursorType.Search)
+                {
+                    Debug.Log("Search");
+                    _cursor = CursorType.Search;
+                }
+            }
+            // 보스문, 문, 포탈, 레버, 상호작용 물체
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.BossDoor || hit.collider.gameObject.layer == (int)Define.Layer.Door || hit.collider.gameObject.layer == (int)Define.Layer.Portal || hit.collider.gameObject.layer == (int)Define.Layer.Lever || hit.collider.gameObject.layer == (int)Define.Layer.InteractObjects)
+            {
+                if (_cursor != CursorType.Grap)
+                {
+                    Debug.Log("Grap");
+                    _cursor = CursorType.Grap;
+                }
+            }
+            else
+            {
+                if (_cursor != CursorType.Normal && _cursor != CursorType.Press)
+                    _cursor = CursorType.Normal;
+            }
+        }
+        //Debug.Log(_frameTimer);
 
         switch (_cursor)
         {
             case CursorType.Normal:
-                _frameTimer = 0;
-                while (_cursor == CursorType.Normal)
-                {
-                    if (_frameTimer < 3500)
-                        Cursor.SetCursor(_normalCursor0, new Vector2(0, 0), CursorMode.Auto);
-                    else if (_frameTimer < 3550)
-                        Cursor.SetCursor(_normalCursor1, new Vector2(0, 0), CursorMode.Auto);
-                    else if (_frameTimer < 3600)
-                        Cursor.SetCursor(_normalCursor2, new Vector2(0, 0), CursorMode.Auto);
-                    else if (_frameTimer < 4300)
-                        Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.Auto);
-                    else if (_frameTimer < 4350)
-                        Cursor.SetCursor(_normalCursor4, new Vector2(0, 0), CursorMode.Auto);
-                    else if (_frameTimer < 4400)
-                        Cursor.SetCursor(_normalCursor5, new Vector2(0, 0), CursorMode.Auto);
-                    else
-                        _frameTimer = 0;
-                }
+                //_frameTimer = 0;
+                if (_frameTimer < 3.500f)
+                    Cursor.SetCursor(_normalCursor0, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 3.550f)
+                    Cursor.SetCursor(_normalCursor1, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 3.600f)
+                    Cursor.SetCursor(_normalCursor2, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 4.300f)
+                    Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 4.350f)
+                    Cursor.SetCursor(_normalCursor4, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 4.400f)
+                    Cursor.SetCursor(_normalCursor5, new Vector2(0, 0), CursorMode.Auto);
+                else
+                    _frameTimer = 0;
                 break;
             case CursorType.Search:
-                _frameTimer = 0;
-
+                if (_frameTimer < 3.500f)
+                    Cursor.SetCursor(_searchCursor0, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 3.550f)
+                    Cursor.SetCursor(_searchCursor1, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 3.600f)
+                    Cursor.SetCursor(_searchCursor2, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 4.300f)
+                    Cursor.SetCursor(_searchCursor3, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 4.350f)
+                    Cursor.SetCursor(_searchCursor4, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 4.400f)
+                    Cursor.SetCursor(_searchCursor5, new Vector2(0, 0), CursorMode.Auto);
+                else
+                    _frameTimer = 0;
                 break;
             case CursorType.Grap:
-                _frameTimer = 0;
-
+                if (_frameTimer < 3.500f)
+                    Cursor.SetCursor(_handleCursor0, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 3.550f)
+                    Cursor.SetCursor(_handleCursor1, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 3.600f)
+                    Cursor.SetCursor(_handleCursor2, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 4.300f)
+                    Cursor.SetCursor(_handleCursor3, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 4.350f)
+                    Cursor.SetCursor(_handleCursor4, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 4.400f)
+                    Cursor.SetCursor(_handleCursor5, new Vector2(0, 0), CursorMode.Auto);
+                else
+                    _frameTimer = 0;
                 break;
             case CursorType.Click:
-                _frameTimer = 0;
-                while (_frameTimer < 150)
-                {
-                    if (_frameTimer < 5)
-                        Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.Auto);
-                    else if (_frameTimer < 105)
-                        Cursor.SetCursor(_normalCursor4, new Vector2(0, 0), CursorMode.Auto);
-                    else
-                        Cursor.SetCursor(_normalCursor5, new Vector2(0, 0), CursorMode.Auto);
-                }
-
-                _cursor = CursorType.Normal;
+                if (_frameTimer < 0.005f)
+                    Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 0.105f)
+                    Cursor.SetCursor(_normalCursor4, new Vector2(0, 0), CursorMode.Auto);
+                else if (_frameTimer < 0.150f)
+                    Cursor.SetCursor(_normalCursor5, new Vector2(0, 0), CursorMode.Auto);
+                else
+                    _cursor = CursorType.Normal;
                 break;
             case CursorType.Press:
                 Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.Auto);
@@ -136,4 +199,5 @@ public class CursorManager : MonoBehaviour
                 break;
         }
     }
+
 }
