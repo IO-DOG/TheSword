@@ -20,28 +20,28 @@ public class UI_TutorialScene : UI_Scene
         RedKey,
     }
 
-    //enum Texts
-    //{
-    //    //PlayerNameText,
-    //    PlayerHPText,
-    //    PlayerAttackText,
-    //    PlayerDefenseText,
-    //    PlayerLevelText,
-    //}
+    enum Texts
+    {
+        //PlayerNameText,
+        PlayerHPText,
+        PlayerAttackText,
+        PlayerDefenseText,
+        PlayerLevelText,
+    }
 
-    //enum Images
-    //{
-    //    MainUIEXPGaugeImage,
-    //    MainUIAuxiliaryHPGaugeImage,
-    //    MainUIOptionAImage,
-    //    MainUIOptionBImage,
-    //    MainUIInventoryAImage,
-    //    MainUIInventoryBImage,
-    //    MainUISwordAImage,
-    //    MainUISwordBImage,
-    //    MainUIWarpAImage,
-    //    MainUIWarpBImage,
-    //}
+    enum Images
+    {
+        MainUIEXPGaugeImage,
+        MainUIAuxiliaryHPGaugeImage,
+        MainUIOptionAImage,
+        MainUIOptionBImage,
+        MainUIInventoryAImage,
+        MainUIInventoryBImage,
+        MainUISwordAImage,
+        MainUISwordBImage,
+        MainUIWarpAImage,
+        MainUIWarpBImage,
+    }
 
     #endregion
     public override bool Init()
@@ -52,8 +52,8 @@ public class UI_TutorialScene : UI_Scene
         #region Bind
         //BindButton(typeof(Buttons));
         BindObject(typeof(GameObjects));
-        //BindText(typeof(Texts));
-        //BindImage(typeof(Images));
+        BindText(typeof(Texts));
+        BindImage(typeof(Images));
         #endregion
 
         Managers.Game.CurPlayerData.CurStageid = 0;
@@ -72,15 +72,14 @@ public class UI_TutorialScene : UI_Scene
 
     public void Refresh()
     {
-        //GetText((int)Texts.PlayerLevelText).text = Managers.Game.CurPlayerData.Level.ToString();
+        GetText((int)Texts.PlayerLevelText).text = Managers.Game.CurPlayerData.Level.ToString();
         int level = Managers.Game.CurPlayerData.Level;
         Debug.Log($"{Managers.Game.CurPlayerData.CurExp} , {Managers.Data.PlayerDic[level].NeedExp}");
-        //GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurExp / Managers.Data.PlayerDic[level].NeedExp;
-        //GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurHP / Managers.Game.CurPlayerData.MaxHP;
+        GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurExp / Managers.Data.PlayerDic[level].NeedExp;
+        GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurHP / Managers.Game.CurPlayerData.MaxHP;
         Managers.Game.KeyInventory.ShowKeySlot(Managers.Game.Player._keyInventory);
-        //SetPlayerInfo();
+        SetPlayerInfo();
     }
-
 
     private void Update()
     {
@@ -108,4 +107,15 @@ public class UI_TutorialScene : UI_Scene
         #endregion
     }
 
+    /// <summary>
+    /// �������� �÷��̾� ������ �����ϴ� �Լ�
+    /// �÷��̾� ������ �߰��Ǹ� ���Լ� ���� �߰��Ǿ����.
+    /// </summary>
+    public void SetPlayerInfo()
+    {
+        //GetText((int)Texts.PlayerNameText).text = "PlayerName";
+        GetText((int)Texts.PlayerHPText).text = $"{Managers.Game.CurPlayerData.CurHP}";
+        GetText((int)Texts.PlayerAttackText).text = $"{Managers.Game.CurPlayerData.Attack}";
+        GetText((int)Texts.PlayerDefenseText).text = $"{Managers.Game.CurPlayerData.Defence}";
+    }
 }
