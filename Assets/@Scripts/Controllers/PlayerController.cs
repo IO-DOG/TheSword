@@ -393,7 +393,7 @@ public class PlayerController : MonoBehaviour
                 Vector3 originPos = _cellPos;
                 Vector3 movePos = new Vector3(hit.collider.transform.position.x, transform.position.y + 0.2f, hit.collider.transform.position.z - 0.1f);
 
-                transform.DOMove(movePos, 0.2f).OnComplete(() =>
+                transform.DOMove(movePos, 0.2f).OnPlay(() =>
                 {
                     _state = PlayerState.OnLever;
                     Managers.Game.OnLever = true;
@@ -405,9 +405,13 @@ public class PlayerController : MonoBehaviour
                         hit.collider.gameObject.GetComponentInChildren<Lever>().Open();
                         _isEquiptShield = true;
                         _isEquiptWeapon = true;
-                        transform.DOMove(originPos, 0.2f);
-                        Managers.Game.OnLever = false;
-                        _cellPos = originPos;
+                        transform.DOMove(originPos, 0.2f).OnComplete(()=>
+                        { 
+                            Managers.Game.OnLever = false;
+                            _cellPos = originPos;
+                            transform.position = _cellPos;
+                            Managers.Game.SaveGame();
+                        });
                     });
                 });
             }
@@ -422,6 +426,8 @@ public class PlayerController : MonoBehaviour
                 Managers.UI.ShowPopupUI<UI_BossRoomCheckPopup>();
             }
         }
+
+        Managers.Game.SaveGame();
 
         return somethingExist;
     }

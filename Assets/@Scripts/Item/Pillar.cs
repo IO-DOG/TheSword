@@ -11,7 +11,6 @@ public class Pillar : MonoBehaviour
     public void Open()
     {
         Managers.Data.PillarActiveDic[_pillarIndex_forActive] = false;
-        Managers.Game.SaveGame();
         Debug.Log("Open");
 
         _pillar = gameObject.GetComponentInChildren<Animator>().gameObject;

@@ -25,37 +25,37 @@ public class DataTransformer : EditorWindow
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveMonsterActiveData.json";
+            string path = Application.persistentDataPath + "/MonsterActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveBossMonsterActiveData.json";
+            string path = Application.persistentDataPath + "/BossMonsterActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveCItemActiveData.json";
+            string path = Application.persistentDataPath + "/CItemActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveEItemActiveData.json";
+            string path = Application.persistentDataPath + "/EItemActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveDoorActiveData.json";
+            string path = Application.persistentDataPath + "/DoorActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SavePillarActiveData.json";
+            string path = Application.persistentDataPath + "/PillarActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveLeverActiveData.json";
+            string path = Application.persistentDataPath + "/LeverActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
@@ -716,6 +716,7 @@ public class DataTransformer : EditorWindow
             TypeNameHandling = TypeNameHandling.Auto
         });
         File.WriteAllText($"{Application.persistentDataPath}/MapData.json", mapDicJsonStr);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/MapData.json", mapDicJsonStr);
         AssetDatabase.Refresh();
     }
 

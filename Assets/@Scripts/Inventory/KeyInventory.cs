@@ -14,7 +14,6 @@ public class KeyInventory
     const int NUM_OF_KEYS = ConsumableItem.NUM_OF_KEYS;
     List<ConsumableItem> _items = new List<ConsumableItem>();
     public List<int> _keys = new List<int>(NUM_OF_KEYS);
-
     public void InitKeyInventory()
     {
         for (int i = 0; i < ConsumableItem.NUM_OF_KEYS; ++i)
@@ -38,7 +37,10 @@ public class KeyInventory
         if (item.GetComponent<ConsumableItem>().id < NUM_OF_KEYS)
         {
             _keys[item.GetComponent<ConsumableItem>().id]++;
-
+            if (Managers.Game.Player._keyInventory.transform.GetChild(item.GetComponent<ConsumableItem>().id).gameObject.activeSelf == false)
+            {
+                Managers.Game.Player._keyInventory.transform.GetChild(item.GetComponent<ConsumableItem>().id).gameObject.SetActive(true);
+            }
             ShowKeySlot(Managers.Game.Player._keyInventory);
             Managers.Game.CurPlayerData.KeyInventory = _keys;
         }
@@ -64,8 +66,8 @@ public class KeyInventory
         if (keyInventory != null)
         {
             for (int i = 0; i < NUM_OF_KEYS; i++)
-            {
-               keyInventory.transform.GetChild(i).GetComponentInChildren<TMP_Text>().text = _keys[i].ToString();
+            { 
+                keyInventory.transform.GetChild(i).GetComponentInChildren<TMP_Text>().text = _keys[i].ToString();
             }
         }
     }

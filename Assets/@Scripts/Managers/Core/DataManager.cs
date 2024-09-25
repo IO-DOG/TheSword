@@ -69,7 +69,7 @@ public class DataManager
     }
 
     Loader LoadJson<Loader, Key, Value>(string path) where Loader : ILoader<Key, Value>
-    {
+    { 
         TextAsset textAsset = Managers.Resource.Load<TextAsset>($"{path}");
 
         if (path == "MapData")
@@ -88,64 +88,64 @@ public class DataManager
     void CheckSaveData()
     {
         {
-            string path = Application.persistentDataPath + "/Resources/Data/SaveMonsterActiveData.json";
+            string path = Application.persistentDataPath + "/Resources/Data/MonsterActiveData.json";
             if (File.Exists(path))
             {
-                string file = Application.persistentDataPath + "/Resources/Data/SaveMonsterActiveData.json";
+                string file = Application.persistentDataPath + "/Resources/Data/MonsterActiveData.json";
                 string fileStr = File.ReadAllText(file);
                 MonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
             }
         }
         {
-            string path = Application.persistentDataPath + "/Resources/Data/SaveBossMonsterActiveData.json";
+            string path = Application.persistentDataPath + "/Resources/Data/BossMonsterActiveData.json";
             if (File.Exists(path))
             {
-                string file = Application.persistentDataPath + "/Resources/Data/SaveBossMonsterActiveData.json";
+                string file = Application.persistentDataPath + "/Resources/Data/BossMonsterActiveData.json";
                 string fileStr = File.ReadAllText(file);
                 BossMonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
             }
         }
         {
-            string path = Application.persistentDataPath + "/Resources/Data/SaveCItemActiveData.json";
+            string path = Application.persistentDataPath + "/Resources/Data/CItemActiveData.json";
             if (File.Exists(path))
             {
-                string file = Application.persistentDataPath + "/Resources/Data/SaveCItemActiveData.json";
+                string file = Application.persistentDataPath + "/Resources/Data/CItemActiveData.json";
                 string fileStr = File.ReadAllText(file);
                 CItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
             }
         }
         {
-            string path = Application.persistentDataPath + "/Resources/Data/SaveEItemActiveData.json";
+            string path = Application.persistentDataPath + "/Resources/Data/EItemActiveData.json";
             if (File.Exists(path))
             {
-                string file = Application.persistentDataPath + "/Resources/Data/SaveEItemActiveData.json";
+                string file = Application.persistentDataPath + "/Resources/Data/EItemActiveData.json";
                 string fileStr = File.ReadAllText(file);
                 EItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
             }
         }
         {
-            string path = Application.persistentDataPath + "/Resources/Data/SaveDoorActiveData.json";
+            string path = Application.persistentDataPath + "/Resources/Data/DoorActiveData.json";
             if (File.Exists(path))
             {
-                string file = Application.persistentDataPath + "/Resources/Data/SaveDoorActiveData.json";
+                string file = Application.persistentDataPath + "/Resources/Data/DoorActiveData.json";
                 string fileStr = File.ReadAllText(file);
                 DoorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
             }
         }
         {
-            string path = Application.persistentDataPath + "/Resources/Data/SavePillarActiveData.json";
+            string path = Application.persistentDataPath + "/Resources/Data/PillarActiveData.json";
             if (File.Exists(path))
             {
-                string file = Application.persistentDataPath + "/Resources/Data/SavePillarActiveData.json";
+                string file = Application.persistentDataPath + "/Resources/Data/PillarActiveData.json";
                 string fileStr = File.ReadAllText(file);
                 PillarActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
             }
         }
         {
-            string path = Application.persistentDataPath + "/Resources/Data/SaveLeverActiveData.json";
+            string path = Application.persistentDataPath + "/Resources/Data/LeverActiveData.json";
             if (File.Exists(path))
             {
-                string file = Application.persistentDataPath + "/Resources/Data/SaveLeverActiveData.json";
+                string file = Application.persistentDataPath + "/Resources/Data/LeverActiveData.json";
                 string fileStr = File.ReadAllText(file);
                 LeverActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(fileStr);
             }

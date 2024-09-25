@@ -51,8 +51,6 @@ public class ConsumableItem : MonoBehaviour
             Managers.Game.CurPlayerData.Defence += Managers.Game.ConsumableItemData.DefenceUp;   
             Managers.Game.CurPlayerData.MaxHP += Managers.Game.ConsumableItemData.HPUp;   
         }
-
-        Managers.Game.SaveGame();
     }
 
     private void PlayParticle()
