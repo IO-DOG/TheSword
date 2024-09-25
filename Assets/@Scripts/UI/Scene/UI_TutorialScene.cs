@@ -44,6 +44,7 @@ public class UI_TutorialScene : UI_Scene
     }
 
     #endregion
+
     public override bool Init()
     {
         if (base.Init() == false)
@@ -58,7 +59,6 @@ public class UI_TutorialScene : UI_Scene
 
         Managers.Game.CurPlayerData.CurStageid = 0;
         Managers.Game.InstantiateMap(Managers.Game.CurPlayerData.CurStageid);
-
 
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
         GetObject((int)GameObjects.GreenKey).SetActive(false);
