@@ -192,6 +192,9 @@ public class UI_PlayerCard : UI_Base
             GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
             deathSoulPurple.transform.position = particlePos.position;
             deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[0].startDelay = 0.5f;
+            deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[1].startDelay = 0.5f;
+            deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[2].startDelay = 0.5f;
             Destroy(deathSoulPurple, 3);
             Destroy(Managers.Game.Monster.gameObject);
             return;
