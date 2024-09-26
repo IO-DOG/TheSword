@@ -35,12 +35,12 @@ public class UI_TutorialScene : UI_Scene
         MainUIAuxiliaryHPGaugeImage,
         MainUIOptionAImage,
         MainUIOptionBImage,
-        MainUIInventoryAImage,
-        MainUIInventoryBImage,
-        MainUISwordAImage,
-        MainUISwordBImage,
-        MainUIWarpAImage,
-        MainUIWarpBImage,
+        //MainUIInventoryAImage,
+        //MainUIInventoryBImage,
+        //MainUISwordAImage,
+        //MainUISwordBImage,
+        //MainUIWarpAImage,
+        //MainUIWarpBImage,
     }
 
     #endregion
