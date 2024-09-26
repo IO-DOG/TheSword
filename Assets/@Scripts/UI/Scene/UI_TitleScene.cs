@@ -213,6 +213,7 @@ public class UI_TitleScene : UI_Scene
         if (PlayerPrefs.GetInt("ISFIRST", 1) == 1) // 진짜 처음일 떄
         {
             // todo intro story scene
+            SetPlayerprefs();
             Managers.Scene.LoadScene(Define.Scene.IntroScene);
         }
         else
@@ -250,8 +251,10 @@ public class UI_TitleScene : UI_Scene
 
     void CheckFirstGame()
     {
-        if (PlayerPrefs.GetInt("ISFIRST") == 1) // 최초 실행 시
+        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1) // 최초 실행 시
         {
+            SetPlayerprefs();
+
             GetText((int)Texts.NewGameText).text = "Game Start";
             buttonsIdx = 0;
             SetButtonColorAndButtonsText(buttonsIdx);
@@ -271,8 +274,11 @@ public class UI_TitleScene : UI_Scene
         GetText((int)Texts.SettingText).color = new Color(0.5f, 0.5f, 0.5f);
         GetText((int)Texts.ExitText).color = new Color(0.5f, 0.5f, 0.5f);
 
-        if (PlayerPrefs.GetInt("ISFIRST") == 1) // 최초 실행 시
+        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1) // 최초 실행 시
+        {
             GetText((int)Texts.NewGameText).text = "Game Start";
+            SetPlayerprefs();
+        }
         else
             GetText((int)Texts.NewGameText).text = "New Game";
         GetText((int)Texts.LoadGameText).text = "Load Game";
@@ -292,5 +298,12 @@ public class UI_TitleScene : UI_Scene
         texts[index].color = new Color(1, 1, 1);
         string str = texts[index].text;
         texts[index].text = $"- {str} -";
+    }
+
+    void SetPlayerprefs()
+    {
+        PlayerPrefs.SetInt("ISOPENINVENUI", 0);
+        PlayerPrefs.SetInt("ISOPENWARPUI", 0);
+        PlayerPrefs.SetInt("ISOPENCLASSUI", 0);
     }
 }

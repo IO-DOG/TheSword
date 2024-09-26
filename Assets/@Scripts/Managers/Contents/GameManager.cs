@@ -110,6 +110,9 @@ public class GameManager
         public MyVector3 CurPosition { get; set; }
         public int CurStageid { get; set; }
         public bool IsContractedSword { get; set; }
+        //public bool HasGetEquip { get; set; } // 인벤 UI 개방용
+        //public bool HasGetWarp { get; set; } // 워프 UI 개방용
+        //public bool HasGetClass { get; set; } // 특성을 얻었는지 -> 특성 UI 개방용
     }
     #endregion
 
