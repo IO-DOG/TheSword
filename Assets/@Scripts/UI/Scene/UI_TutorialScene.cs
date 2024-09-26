@@ -102,7 +102,23 @@ public class UI_TutorialScene : UI_Scene
         }
         if (Input.GetKeyDown(KeyCode.F5))
         {
-            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(0);
+            switch (Managers.Game.CurPlayerData.MoveSpeed)
+            {
+                case 1f:
+                    Managers.Game.CurPlayerData.MoveSpeed = 1.5f;
+                    Managers.Game.Player.Speed = Managers.Game.CurPlayerData.MoveSpeed * 5;
+                    break;
+                case 1.5f:
+                    Managers.Game.CurPlayerData.MoveSpeed = 2f;
+                    Managers.Game.Player.Speed = Managers.Game.CurPlayerData.MoveSpeed * 5;
+                    break;
+                case 2f:
+                    Managers.Game.CurPlayerData.MoveSpeed = 1f;
+                    Managers.Game.Player.Speed = Managers.Game.CurPlayerData.MoveSpeed * 5;
+                    break;
+            }
+
+            Debug.Log($"Managers.Game.CurPlayerData.MoveSpeed : {Managers.Game.CurPlayerData.MoveSpeed}");
         }
         #endregion
     }

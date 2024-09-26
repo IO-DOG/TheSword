@@ -16,7 +16,7 @@ public class PlayerController : MonoBehaviour
         get { return _speed; }
         set
         {
-           _speed = value;
+           _speed = Managers.Game.CurPlayerData.MoveSpeed * 5;
            _duration = 1 / _speed;
         }
     }
@@ -140,6 +140,7 @@ public class PlayerController : MonoBehaviour
         switch (_state)
         {
             case PlayerState.IdleUp:
+                GetComponent<Animator>().speed = 1f;
                 GetComponent<Animator>().Play("Player_Idle_B");
                 if (_isEquiptWeapon)
                     _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurSword].ImageName}_Idle_B");
@@ -151,6 +152,7 @@ public class PlayerController : MonoBehaviour
 
                 break;
             case PlayerState.IdleDown:
+                GetComponent<Animator>().speed = 1f;
                 GetComponent<Animator>().Play("Player_Idle_F");
                 if (_isEquiptWeapon)
                     _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurSword].ImageName}_Idle_F");
@@ -161,6 +163,7 @@ public class PlayerController : MonoBehaviour
                 _shield.transform.localPosition = Vector3.back * adjustingDis;
                 break;
             case PlayerState.Left:
+                GetComponent<Animator>().speed = Managers.Game.CurPlayerData.MoveSpeed;
                 GetComponent<Animator>().Play("Player_Run_L");
                 if (_isEquiptWeapon)
                     _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurSword].ImageName}_Run_L");
@@ -171,6 +174,7 @@ public class PlayerController : MonoBehaviour
                 _shield.transform.localPosition = Vector3.back * adjustingDis;
                 break;
             case PlayerState.Right:
+                GetComponent<Animator>().speed = Managers.Game.CurPlayerData.MoveSpeed;
                 GetComponent<Animator>().Play("Player_Run_R");
                 if (_isEquiptWeapon)
                     _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurSword].ImageName}_Run_R");
@@ -181,6 +185,7 @@ public class PlayerController : MonoBehaviour
                 _shield.transform.localPosition = Vector3.forward * adjustingDis;
                 break;
             case PlayerState.Up:
+                GetComponent<Animator>().speed = Managers.Game.CurPlayerData.MoveSpeed;
                 GetComponent<Animator>().Play("Player_Run_B");
                 if (_isEquiptWeapon)
                     _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurSword].ImageName}_Run_B");
@@ -191,6 +196,7 @@ public class PlayerController : MonoBehaviour
                 _shield.transform.localPosition = Vector3.forward * adjustingDis;
                 break;
             case PlayerState.Down:
+                GetComponent<Animator>().speed = Managers.Game.CurPlayerData.MoveSpeed;
                 GetComponent<Animator>().Play("Player_Run_F");
                 if (_isEquiptWeapon)
                     _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurSword].ImageName}_Run_F");
@@ -201,6 +207,7 @@ public class PlayerController : MonoBehaviour
                 _shield.transform.localPosition = Vector3.back * adjustingDis;
                 break;
             case PlayerState.BackStep:
+                GetComponent<Animator>().speed = 1f;
                 GetComponent<Animator>().Play("Player_BackStep");
                 if (_isEquiptWeapon)
                     _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurSword].ImageName}_Run_F");
@@ -211,16 +218,19 @@ public class PlayerController : MonoBehaviour
                 _shield.transform.localPosition = Vector3.back * adjustingDis;
                 break;
             case PlayerState.OnLever:
+                GetComponent<Animator>().speed = 1f;
                 GetComponent<Animator>().Play("Player_IronLever_B");
                 _isEquiptShield = false;
                 _isEquiptWeapon = false;
                 break;
             case PlayerState.DrawSword:
+                GetComponent<Animator>().speed = 1f;
                 GetComponent<Animator>().Play("Player_SwordDraw_B");
                 _isEquiptShield = false;
                 _isEquiptWeapon = false;
                 break;
             case PlayerState.ContractSword:
+                GetComponent<Animator>().speed = 1f;
                 GetComponent<Animator>().Play("Player_ContractSword_F");
                 _isEquiptShield = false;
                 _isEquiptWeapon = false;
@@ -262,7 +272,7 @@ public class PlayerController : MonoBehaviour
                 _state = PlayerState.Down;
                 break;
             case MoveDir.Left:
-                _nextCellPos = Vector3.left  * _offset;
+                _nextCellPos = Vector3.left * _offset;
                 _state = PlayerState.Left;
                 break;
             case MoveDir.Right:
