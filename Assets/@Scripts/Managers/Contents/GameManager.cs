@@ -28,6 +28,7 @@ public class GameManager
     public bool OnInteract = false;
 
     public int CurEventID;
+    public int TotalKillSplitSlime = 0;
 
     public GameObject CurInteractObject;
     public Light DirectionalLight;
@@ -49,6 +50,8 @@ public class GameManager
     public Action OnBattleCreatureDamagedAction;
     public Action OnBattlePlayerDefeceAction;
     public Action OnBattlePlayerDamagedAction;
+    public Action OnKingSlimeDeadAction;
+
     public Texture2D _screenShot = null;
     public Sprite _screenShot2 = null;
 

@@ -183,6 +183,14 @@ public class UI_PlayerCard : UI_Base
                     break;
             }
 
+            // for king slime
+            if (Managers.Game.Monster.gameObject.name == "KingSlimeSplitMonster")
+            {
+                Managers.Game.TotalKillSplitSlime++;
+                if (Managers.Game.TotalKillSplitSlime == 3)
+                    Managers.Game.OnKingSlimeDeadAction.Invoke();
+            }
+
             //StartCoroutine(CoMonsterDead());
             Managers.Game.OnBattleAction.Invoke();
             Managers.Game.OnBattle = false;
