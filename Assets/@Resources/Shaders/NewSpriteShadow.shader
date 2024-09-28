@@ -1168,7 +1168,8 @@
         
             output.ObjectSpaceNormal =                          input.normalOS;
             output.ObjectSpaceTangent =                         input.tangentOS.xyz;
-            output.ObjectSpacePosition =                        input.positionOS * shadowScale;
+            output.ObjectSpacePosition.x =                        input.positionOS.x;
+            output.ObjectSpacePosition.yz =                        input.positionOS.yz * shadowScale;
         
             return output;
         }
