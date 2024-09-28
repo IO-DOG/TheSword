@@ -19,11 +19,7 @@ public class CursorManager : MonoBehaviour
 {
     public CursorType _cursor = CursorType.Normal;
     bool _init = false;
-    bool _press = false;
 
-    int _frameCount = 0;
-    float _frameRate = 0f;
-    int _currentFrame = 0;
     float _frameTimer = 0f;
     int _mask = (1 << (int)Define.Layer.Monster) | (1 << (int)Define.Layer.EItem) | (1 << (int)Define.Layer.CItem) |
         (1 << (int)Define.Layer.BossDoor) | (1 << (int)Define.Layer.Door) | (1 << (int)Define.Layer.Portal) | 

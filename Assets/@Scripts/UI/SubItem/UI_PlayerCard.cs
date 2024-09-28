@@ -183,6 +183,14 @@ public class UI_PlayerCard : UI_Base
                     break;
             }
 
+            // for king slime
+            if (Managers.Game.Monster.gameObject.name == "KingSlimeSplitMonster")
+            {
+                Managers.Game.TotalKillSplitSlime++;
+                if (Managers.Game.TotalKillSplitSlime == 3)
+                    Managers.Game.OnKingSlimeDeadAction.Invoke();
+            }
+
             //StartCoroutine(CoMonsterDead());
             Managers.Game.OnBattleAction.Invoke();
             Managers.Game.OnBattle = false;
@@ -192,6 +200,9 @@ public class UI_PlayerCard : UI_Base
             GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
             deathSoulPurple.transform.position = particlePos.position;
             deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[0].startDelay = 0.2f;
+            deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[1].startDelay = 0.2f;
+            deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[2].startDelay = 0.2f;
             Destroy(deathSoulPurple, 3);
             Destroy(Managers.Game.Monster.gameObject);
             return;

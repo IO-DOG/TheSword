@@ -87,6 +87,14 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false);
         GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false);
 
+        // UI 활성화 여부 체크
+        if (PlayerPrefs.GetInt("ISOPENINVENUI") == 0) // 인벤 활성화 x
+            OffUIInventory();
+        if (PlayerPrefs.GetInt("ISOPENWARPUI") == 0)
+            OffUIWarp();
+        if (PlayerPrefs.GetInt("ISOPENCLASSUI") == 0)
+            OffUISword();
+
         GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
         {
             GameObject go = GameObject.Find("UI_MenuPopup");
@@ -125,6 +133,13 @@ public class UI_GameScene : UI_Scene
 
     public void Refresh()
     {
+        if (PlayerPrefs.GetInt("ISOPENINVENUI") == 1) // 인벤 활성화 x
+            GetImage((int)Images.MainUIInventoryAImage).gameObject.SetActive(true);
+        if (PlayerPrefs.GetInt("ISOPENWARPUI") == 1)
+            GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(true);
+        if (PlayerPrefs.GetInt("ISOPENCLASSUI") == 1)
+            GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(true);
+
         GetText((int)Texts.PlayerLevelText).text = Managers.Game.CurPlayerData.Level.ToString();
         int level = Managers.Game.CurPlayerData.Level;
         Debug.Log($"{Managers.Game.CurPlayerData.CurExp} , {Managers.Data.PlayerDic[level].NeedExp}");
