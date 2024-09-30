@@ -59,6 +59,7 @@ public class UI_TutorialScene : UI_Scene
 
         Managers.Game.CurPlayerData.CurStageid = 0;
         Managers.Game.InstantiateMap(Managers.Game.CurPlayerData.CurStageid);
+        Managers.Game.CurPlayerData.MoveSpeed = 1f;
 
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
         GetObject((int)GameObjects.GreenKey).SetActive(false);
