@@ -46,15 +46,13 @@ public class Events
         {
             Managers.Game.CurInteractObject.layer = (int)Define.Layer.Default;
             float originalSpeed = Managers.Game.CurPlayerData.MoveSpeed;
-            Managers.Game.Player.Speed = 1f;
             Managers.Game.Player.Moving(Define.MoveDir.Up);
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.2f);
             Managers.Game.Player.SetState(Define.PlayerState.DrawSword);
             yield return new WaitForSeconds(1f);
             Managers.Game.Player.Moving(Define.MoveDir.Back);
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.2f);
             Managers.Game.Player.SetState(Define.PlayerState.IdleUp);
-            Managers.Game.Player.Speed = originalSpeed;
             yield return new WaitForSeconds(1f);
             GameObject go = Managers.Resource.Instantiate(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);
             go.transform.localScale = new Vector3(0.2f, 0.2f, 0.08f);

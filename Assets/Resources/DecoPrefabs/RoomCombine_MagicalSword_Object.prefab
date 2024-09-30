@@ -11,7 +11,8 @@ GameObject:
   - component: {fileID: 5646457578651182026}
   - component: {fileID: 1597255369602888012}
   - component: {fileID: 7478914562962817195}
-  m_Layer: 0
+  - component: {fileID: 7515974569671302163}
+  m_Layer: 15
   m_Name: RoomCombine_MagicalSword_Object
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -53,7 +54,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 6f377d6d4879d404d943a74e96bc8b92, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -106,3 +107,15 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.32, y: 0.64, z: 0.2}
   m_Center: {x: 0, y: 0.19199999, z: 0}
+--- !u!114 &7515974569671302163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963694082455755665}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a54f1724855a5a34cae6c5f9e247af34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
