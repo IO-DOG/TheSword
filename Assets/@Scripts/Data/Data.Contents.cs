@@ -59,6 +59,7 @@ namespace Data
         public string AttackAnimStr { get; set; }
         public string BattleParticleAttack { get; set; }
         public string BattleParticleHit { get; set; }
+        public string Shadow { get; set; }
         public int MonsterNameId { get; set; }
         public int MonsterDescId { get; set; }
     }
@@ -82,12 +83,15 @@ namespace Data
     public class ConsumableItemData
     {
         public int id { get; set; }
-        public string Name { get; set; }
         public float Heal { get; set; }
         public float AttackUp { get; set; }
         public float DefenceUp { get; set; }
         public float HPUp { get; set; }
-        public string Description { get; set; }
+        public string Img { get; set; }
+        public string PrefabName {get;set;}
+        public string Shadow {get;set;}
+        public int ScriptNameId {get;set;}
+        public int ScriptDescriptionId {get;set;}
     }
 
     [Serializable]
@@ -256,6 +260,7 @@ namespace Data
         public string ImageName { get; set; }
         public string AttackFX { get; set; }
         public string HitFX { get; set; }
+        public string Shadow { get; set; }
         public string IllustFX { get; set; }
         public string Illust { get; set; }
         public string IllustBG { get; set; }

@@ -1,4 +1,4 @@
-﻿Shader "Shader Graphs/NewSurfaceShader"
+﻿Shader "Shader Graphs/HalfSpriteShadow"
 {
     Properties
     {
@@ -1168,8 +1168,9 @@
         
             output.ObjectSpaceNormal =                          input.normalOS;
             output.ObjectSpaceTangent =                         input.tangentOS.xyz;
-            output.ObjectSpacePosition.x =                        input.positionOS.x;
-            output.ObjectSpacePosition.yz =                        input.positionOS.yz * shadowScale;
+            //output.ObjectSpacePosition =                        input.positionOS;
+            output.ObjectSpacePosition.xz =                        input.positionOS.xz;
+            output.ObjectSpacePosition.y =                        input.positionOS.y * shadowScale; 
         
             return output;
         }

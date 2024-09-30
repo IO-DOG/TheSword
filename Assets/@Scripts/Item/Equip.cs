@@ -35,6 +35,7 @@ public class Equip : MonoBehaviour
     private void Start()
     {
         GetComponent<Animator>().Play($"EquipItem_{Id}");
+        GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>(Managers.Data.EquipDic[Id].Shadow);
     }
 
     public void PickUp()
