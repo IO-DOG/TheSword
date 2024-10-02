@@ -610,7 +610,7 @@ public class GameManager
 
             if (interacts != null && Managers.Game.CurPlayerData.IsContractedSword == true)
             {
-                interacts.transform.parent.gameObject.SetActive(false);
+                interacts.transform.gameObject.SetActive(false);
             }
 
             Items = items;

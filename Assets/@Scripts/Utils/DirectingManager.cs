@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -23,6 +24,25 @@ public class DirectingManager
 
 public class Events
 {
+    bool _coroutineCompleted;
+    void StartCoPlayEmoji(string EmojiName, Transform transform)
+    {
+        _coroutineCompleted = false;
+        CoroutineManager.StartCoroutine(PlayEmoji(EmojiName, transform));
+    }
+    IEnumerator PlayEmoji(string EmojiName, Transform transform)
+    {
+        GameObject go = Managers.Resource.Instantiate("Emoji", transform);
+        go.transform.localScale = new Vector3(0.08f, 0.08f, 0.08f);
+        go.transform.localPosition = new Vector3(0.2f, 0.8f, -0.1f);
+        go.GetComponent<Animator>().Play(EmojiName);
+        float delay = go.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length;
+        yield return new WaitForSeconds(delay);
+        Managers.Resource.Destroy(go);
+        yield return new WaitForSeconds(1f);
+        _coroutineCompleted = true;
+    }
+
     #region EVENT_1
     public void CoStartEvent_1()
     {
@@ -35,10 +55,9 @@ public class Events
 
         #region #1
         {
-            GameObject go = Managers.Resource.Instantiate(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);
-            go.transform.localScale = new Vector3(0.2f, 0.2f, 0.1f);
-            yield return new WaitForSeconds(Managers.Data.EventDic[Managers.Game.CurEventID].Delay);
-            Managers.Resource.Destroy(go);
+            StartCoPlayEmoji(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);
+            yield return new WaitUntil(() => _coroutineCompleted);
+
             Managers.Game.CurEventID++;
         }
         #endregion
@@ -54,30 +73,28 @@ public class Events
             yield return new WaitForSeconds(0.2f);
             Managers.Game.Player.SetState(Define.PlayerState.IdleUp);
             yield return new WaitForSeconds(1f);
-            GameObject go = Managers.Resource.Instantiate(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);
-            go.transform.localScale = new Vector3(0.2f, 0.2f, 0.08f);
-            yield return new WaitForSeconds(Managers.Data.EventDic[Managers.Game.CurEventID].Delay);
-            Managers.Resource.Destroy(go);
+
+            StartCoPlayEmoji(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);
+            yield return new WaitUntil(() => _coroutineCompleted);
+
             Managers.Game.CurEventID++;
         }
         #endregion
         #region #3
         {
             Managers.Game.CurInteractObject.layer = (int)Define.Layer.InteractObjects;
-            GameObject go = Managers.Resource.Instantiate(Managers.Data.EventDic[Managers.Game.CurEventID].OtherEmoji, Managers.Game.CurInteractObject.transform);
-            go.transform.localPosition = new Vector3(0.15f, -0.4f, -1.7f);
-            go.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-            yield return new WaitForSeconds(Managers.Data.EventDic[Managers.Game.CurEventID].Delay);
-            Managers.Resource.Destroy(go);
+
+            StartCoPlayEmoji(Managers.Data.EventDic[Managers.Game.CurEventID].OtherEmoji, Managers.Game.CurInteractObject.transform);
+            yield return new WaitUntil(() => _coroutineCompleted);
+
             Managers.Game.CurEventID++;
         }
         #endregion
         #region #4
         {
-            GameObject go = Managers.Resource.Instantiate(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);
-            go.transform.localScale = new Vector3(0.2f, 0.2f, 0.1f);
-            yield return new WaitForSeconds(Managers.Data.EventDic[Managers.Game.CurEventID].Delay);
-            Managers.Resource.Destroy(go);
+            StartCoPlayEmoji(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);
+            yield return new WaitUntil(() => _coroutineCompleted);
+
             Managers.Game.CurEventID++;
         }
         #endregion
@@ -96,8 +113,14 @@ public class Events
     {
         Managers.Game.OnDirect = true;
 
-        Vector3 swordPos = Managers.Game.CurInteractObject.transform.parent.position;
-        Managers.Game.CurInteractObject.transform.parent.gameObject.SetActive(false);
+        Managers.Game.DirectionalLight.DOIntensity(0.05f, 0.5f);
+
+        Managers.Game.Player.SetState(Define.PlayerState.ContractSword);
+
+        Vector3 swordPos = Managers.Game.CurInteractObject.transform.position;
+        Managers.Game.CurInteractObject.transform.gameObject.SetActive(false);
+
+        yield return new WaitForSeconds(1f);
 
         GameObject go1 = Managers.Resource.Instantiate("FX_ContractSwordEffect", Managers.Game.Player.transform);
         go1.transform.localPosition = Vector3.zero;
@@ -107,27 +130,27 @@ public class Events
         go2.transform.localPosition = Vector3.zero;
         go2.transform.localScale = new Vector3(0.2f, 0.2f, 0.1f);
 
-        Managers.Game.Player.SetState(Define.PlayerState.ContractSword);
-
         yield return new WaitForSeconds(4f);
+
+        Managers.Game.DirectionalLight.DOIntensity(1f, 1f);
 
         Managers.Resource.Destroy(go1);
         Managers.Resource.Destroy(go2);
 
-        Managers.Game.Player.SetState(Define.PlayerState.IdleDown);
         GameObject key = Managers.Resource.Instantiate("ConsumableItem");
         key.transform.position = swordPos;
         key.transform.localScale = new Vector3(1f, 2f, 1f);
         key.GetComponent<ConsumableItem>().id = 1;
 
-        Managers.Game.OnDirect = false;
-
-        Managers.Game.Player._moveDir = Define.MoveDir.Down;
-        Managers.Game.CurPlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
-        Managers.Game.Player._isEquiptWeapon = true;
-        Managers.Game.Player._isEquiptShield = true;
+        yield return new WaitForSeconds(1.5f);
 
         Managers.Game.CurPlayerData.IsContractedSword = true;
+        Managers.Game.Player.SetState(Define.PlayerState.IdleDown);
+        Managers.Game.Player._moveDir = Define.MoveDir.Down;
+        Managers.Game.Player._isEquiptWeapon = true;
+        Managers.Game.Player._isEquiptShield = true;
+        Managers.Game.CurPlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
+        Managers.Game.OnDirect = false;
         Managers.Game.SaveGame();
     }
 
