@@ -154,14 +154,18 @@ public class GameManager
     public class CurConsumableItemData
     {
         public int id { get; set; }
-        public string Name { get; set; }
         public float Heal { get; set; }
         public float AttackUp { get; set; }
         public float DefenceUp { get; set; }
         public float HPUp { get; set; }
-        public string Description { get; set; }
+        public string Img { get; set; }
+        public string PrefabName { get; set; }
+        public string Shadow { get; set; }
+        public int ScriptNameId { get; set; }
+        public int ScriptDescriptionId { get; set; }
         public int IsActiveIndex { get; set; }
     }
+
     #endregion
 
     #region InGame
@@ -526,11 +530,9 @@ public class GameManager
                     monster.transform.localPosition = new Vector3(monsterTile.Position.X, monsterTile.Position.Y, monsterTile.Position.Z);
                     monster.transform.localScale = monsters.transform.localPosition + new Vector3(0.8f, 0.8f, 1f);
                     monster.GetComponent<MonsterController>().id = monsterTile.Index;
-                    string idleStr = Managers.Data.MonsterDic[monster.GetComponent<MonsterController>().id].IdleAnimStr;
-                    monster.GetOrAddComponent<Animator>().Play(idleStr);
                     monster.name = $"monster{monsterTile.TotalCount}";
                     monster.GetComponent<MonsterController>()._monsterIndex_forActive = monsterTile.TotalCount;
-
+                   
                     if (Managers.Data.MonsterActiveDic[monsterTile.TotalCount] == false)
                         monster.SetActive(false);
                 }
@@ -608,7 +610,7 @@ public class GameManager
 
             if (interacts != null && Managers.Game.CurPlayerData.IsContractedSword == true)
             {
-                interacts.transform.parent.gameObject.SetActive(false);
+                interacts.transform.gameObject.SetActive(false);
             }
 
             Items = items;

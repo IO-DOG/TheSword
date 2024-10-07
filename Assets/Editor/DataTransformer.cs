@@ -232,7 +232,7 @@ public class DataTransformer : EditorWindow
         #endregion
 
         string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
-        File.WriteAllText($"{Application.persistentDataPath}/{filename}Data.json", jsonStr);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
         AssetDatabase.Refresh();
     }
 
@@ -274,6 +274,7 @@ public class DataTransformer : EditorWindow
             cd.AttackAnimStr = ConvertValue<string>(row[i++]);
             cd.BattleParticleAttack = ConvertValue<string>(row[i++]);
             cd.BattleParticleHit = ConvertValue<string>(row[i++]);
+            cd.Shadow = ConvertValue<string>(row[i++]);
             cd.MonsterNameId = ConvertValue<int>(row[i++]);
             cd.MonsterDescId = ConvertValue<int>(row[i++]);
             loader.creatures.Add(cd);
@@ -282,7 +283,7 @@ public class DataTransformer : EditorWindow
         #endregion
 
         string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
-        File.WriteAllText($"{Application.persistentDataPath}/{filename}Data.json", jsonStr);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
         AssetDatabase.Refresh();
     }
 
@@ -307,19 +308,22 @@ public class DataTransformer : EditorWindow
             int i = 0;
             ConsumableItemData cd = new ConsumableItemData();
             cd.id = ConvertValue<int>(row[i++]);
-            cd.Name = ConvertValue<string>(row[i++]);
             cd.Heal = ConvertValue<float>(row[i++]);
             cd.AttackUp = ConvertValue<float>(row[i++]);
             cd.DefenceUp = ConvertValue<float>(row[i++]);
             cd.HPUp = ConvertValue<float>(row[i++]);
-            cd.Description = ConvertValue<string>(row[i++]);
+            cd.Img = ConvertValue<string>(row[i++]);
+            cd.PrefabName = ConvertValue<string>(row[i++]);
+            cd.Shadow = ConvertValue<string>(row[i++]);
+            cd.ScriptNameId = ConvertValue<int>(row[i++]);
+            cd.ScriptDescriptionId = ConvertValue<int>(row[i++]);
             loader.consumableItems.Add(cd);
         }
 
         #endregion
 
         string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
-        File.WriteAllText($"{Application.persistentDataPath}/{filename}Data.json", jsonStr);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
         AssetDatabase.Refresh();
     }
 
@@ -753,7 +757,7 @@ public class DataTransformer : EditorWindow
         #endregion
 
         string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
-        File.WriteAllText($"{Application.persistentDataPath}/{filename}Data.json", jsonStr);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
         AssetDatabase.Refresh();
     }
 
@@ -792,6 +796,7 @@ public class DataTransformer : EditorWindow
             ed.ImageName = ConvertValue<string>(row[i++]);
             ed.AttackFX = ConvertValue<string>(row[i++]);
             ed.HitFX = ConvertValue<string>(row[i++]);
+            ed.Shadow = ConvertValue<string>(row[i++]);
             ed.IllustFX = ConvertValue<string>(row[i++]);
             ed.Illust = ConvertValue<string>(row[i++]);
             ed.IllustBG = ConvertValue<string>(row[i++]);
@@ -802,7 +807,7 @@ public class DataTransformer : EditorWindow
         #endregion
 
         string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
-        File.WriteAllText($"{Application.persistentDataPath}/{filename}Data.json", jsonStr);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
         AssetDatabase.Refresh();
     }
 
@@ -844,7 +849,7 @@ public class DataTransformer : EditorWindow
         #endregion
 
         string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
-        File.WriteAllText($"{Application.persistentDataPath}/{filename}Data.json", jsonStr);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
         AssetDatabase.Refresh();
     }
 
@@ -883,7 +888,7 @@ public class DataTransformer : EditorWindow
         #endregion
 
         string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
-        File.WriteAllText($"{Application.persistentDataPath}/{filename}Data.json", jsonStr);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
         AssetDatabase.Refresh();
     }
     static void ParseEventData(string filename)
@@ -919,7 +924,7 @@ public class DataTransformer : EditorWindow
         #endregion
 
         string jsonStr = JsonConvert.SerializeObject(loader, Formatting.Indented);
-        File.WriteAllText($"{Application.persistentDataPath}/{filename}Data.json", jsonStr);
+        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
         AssetDatabase.Refresh();
     }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.UI;
 
 public class MonsterController : MonoBehaviour
@@ -52,6 +53,8 @@ public class MonsterController : MonoBehaviour
     private void Start()
     {
         GetComponent<Animator>().Play($"{Managers.Data.MonsterDic[id].IdleAnimStr}");
+        GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>(Managers.Data.MonsterDic[id].Shadow);
+
         //id = 1;
     }
 }
