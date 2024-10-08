@@ -54,6 +54,8 @@ public class PlayerController : MonoBehaviour
     {
         Managers.Input.KeyAction -= OnKeyboard;
         Managers.Input.KeyAction += OnKeyboard;
+        Managers.Input.KeyAction -= Managers.Directing.Events.MeetKingSlime;
+        Managers.Input.KeyAction += Managers.Directing.Events.MeetKingSlime;
 
         _duration = 1 / _speed;
         _keyInventory = GameObject.Find("KeyInventory");

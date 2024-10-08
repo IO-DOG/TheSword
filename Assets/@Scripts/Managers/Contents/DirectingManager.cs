@@ -1,9 +1,11 @@
-﻿using DG.Tweening;
+﻿using Cinemachine;
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DirectingManager
 {
@@ -152,6 +154,88 @@ public class Events
         Managers.Game.CurPlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
         Managers.Game.OnDirect = false;
         Managers.Game.SaveGame();
+    }
+
+    #endregion
+
+    #region KingSlimeDirecting
+
+    public void MeetKingSlime()
+    {
+        if (Managers.Game.OnMeetKingSlime)
+            return;
+        if (Managers.Game.Player.gameObject.transform.position.x < 303.5f || Managers.Game.Player.gameObject.transform.position.x > 304.2f ||
+            Managers.Game.Player.gameObject.transform.position.y > -7f) // 일단 하드코딩 특정 자리가 아니면 리턴함.
+            return;
+        // x : 303.52 ~ 304.16
+        // y : -7.04
+
+        Managers.Game.OnMeetKingSlime = true;
+        Managers.Game.OnDirect = true;
+
+        // 주인공을 길 중간 위치로 이동
+        // 주인공이 정면을 바라보도록
+        // 카메라 워킹 및 UI사라짐
+        // 카메라 흔들림 등의 연출 효과
+        // 연출이 끝나면 UI 활성화
+
+        GameObject tutorialSene = GameObject.Find("UI_TutorialScene");
+        if (tutorialSene != null)
+        {
+            // UI Off
+            RectTransform[] rectTransforms = tutorialSene.gameObject.GetComponentsInChildren<RectTransform>();
+            for (int i = 1; i < rectTransforms.Length; i++)
+            {
+                //rectTransforms[i].gameObject.SetActive(false);
+                Image image = rectTransforms[i].gameObject.GetComponent<Image>();
+                if (image != null)
+                {
+                    image.color = new Color(1, 1, 1, 0);
+                }
+            }
+
+            // maybe.. coroutine?
+            //CoroutineManager.StartCoroutine(CoDirectingKingSlime()); 
+            // or dotween?
+            // todo directing action
+            Vector3 cameraPos = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent< CinemachineTransposer>().m_FollowOffset;
+            
+            DG.Tweening.Sequence sequence = DOTween.Sequence();
+            sequence.Append(Camera.main.transform.DOMoveY(cameraPos.y + 100, 10f)).OnComplete(() => { AfterMeetKingSlime(); });
+        }
+    }
+
+    public void AfterMeetKingSlime()
+    {
+        Debug.Log("킹 슬라임이 울부짖었다!!!");
+        Debug.Log("이 함수가 실행되었다!!!!!!!!!!!!");
+
+        // todo camera position to player
+        Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 10f, -5f);
+
+        GameObject tutorialSene = GameObject.Find("UI_TutorialScene");
+        if (tutorialSene != null)
+        {
+            // UI On
+            RectTransform[] rectTransforms = tutorialSene.gameObject.GetComponentsInChildren<RectTransform>();
+            for (int i = 1; i < rectTransforms.Length; i++)
+            {
+                //rectTransforms[i].gameObject.SetActive(false);
+                Image image = rectTransforms[i].gameObject.GetComponent<Image>();
+                if (image != null)
+                {
+                    image.color = new Color(1, 1, 1, 1);
+                }
+            }
+        }
+
+        Managers.Game.OnDirect = false;
+    }
+
+    IEnumerator CoDirectingKingSlime()
+    {
+        yield return null;
+        Debug.Log("킹 슬라임이 울부짖었다!!!");
     }
 
     #endregion

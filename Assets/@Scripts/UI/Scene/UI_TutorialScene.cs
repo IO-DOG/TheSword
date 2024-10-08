@@ -121,6 +121,14 @@ public class UI_TutorialScene : UI_Scene
 
             Debug.Log($"Managers.Game.CurPlayerData.MoveSpeed : {Managers.Game.CurPlayerData.MoveSpeed}");
         }
+
+        if (Input.GetKeyDown(KeyCode.F6))
+        {
+            GameObject monsters = GameObject.Find("Monsters");
+            if (monsters != null ) monsters.gameObject.SetActive(false);
+            GameObject pillars = GameObject.Find("Pillars");
+            if (pillars != null) pillars.gameObject.SetActive(false);
+        }
         #endregion
     }
 
