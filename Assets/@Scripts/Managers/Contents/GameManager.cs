@@ -546,6 +546,7 @@ public class GameManager
                     {
                         case 0:
                             boss.GetComponent<BossMonsterController>().id = Define.KingSlime;
+                            boss.gameObject.name = "KingSlime";
                             break;
                         default:
                             break;

@@ -3,6 +3,7 @@ using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,7 +19,7 @@ public class DirectingManager
         {
             case 1:
                 Events.CoStartEvent_1();
-                PopupAction += (()=> Managers.UI.ShowPopupUI<UI_MagicalSwordCheckPopup>());
+                PopupAction += (() => Managers.UI.ShowPopupUI<UI_MagicalSwordCheckPopup>());
                 break;
         }
     }
@@ -164,11 +165,11 @@ public class Events
     {
         if (Managers.Game.OnMeetKingSlime)
             return;
-        if (Managers.Game.Player.gameObject.transform.position.x < 303.5f || Managers.Game.Player.gameObject.transform.position.x > 304.2f ||
-            Managers.Game.Player.gameObject.transform.position.y > -7f) // 일단 하드코딩 특정 자리가 아니면 리턴함.
+        if (Managers.Game.Player.gameObject.transform.position.x < 303.5f || Managers.Game.Player.gameObject.transform.position.x > 304.2f) // 일단 하드코딩 특정 자리가 아니면 리턴함.
             return;
         // x : 303.52 ~ 304.16
         // y : -7.04
+        Debug.Log("킹 슬라임을 만났다!!");
 
         Managers.Game.OnMeetKingSlime = true;
         Managers.Game.OnDirect = true;
@@ -192,16 +193,28 @@ public class Events
                 {
                     image.color = new Color(1, 1, 1, 0);
                 }
+                TMP_Text tMP_Text = rectTransforms[i].gameObject.GetComponent<TMP_Text>();
+                if (tMP_Text != null)
+                {
+                    tMP_Text.color = new Color(1, 1, 1, 0);
+                }
             }
+
 
             // maybe.. coroutine?
             //CoroutineManager.StartCoroutine(CoDirectingKingSlime()); 
             // or dotween?
             // todo directing action
-            Vector3 cameraPos = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent< CinemachineTransposer>().m_FollowOffset;
-            
+            Vector3 cameraPos = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
+
             DG.Tweening.Sequence sequence = DOTween.Sequence();
-            sequence.Append(Camera.main.transform.DOMoveY(cameraPos.y + 100, 10f)).OnComplete(() => { AfterMeetKingSlime(); });
+            //Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 20f, -5f);
+
+            Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 20f, -5f);
+                //Vector3.MoveTowards(new Vector3(0f, 10f, -5f), new Vector3(0f, 20f, -5f), 2f);
+            sequence.Append(Camera.main.transform.DOMove(Camera.main.transform.position, 2f))
+                //.Append(Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().transform.DOShakePosition(2f))
+                .OnComplete(() => { AfterMeetKingSlime(); });
         }
     }
 
@@ -212,6 +225,9 @@ public class Events
 
         // todo camera position to player
         Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 10f, -5f);
+            //Vector3.MoveTowards(new Vector3(0f, 20f, -5f), new Vector3(0f, 10f, -5f), 2f);
+
+        //Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 10f, -5f);
 
         GameObject tutorialSene = GameObject.Find("UI_TutorialScene");
         if (tutorialSene != null)
@@ -225,6 +241,11 @@ public class Events
                 if (image != null)
                 {
                     image.color = new Color(1, 1, 1, 1);
+                }
+                TMP_Text tMP_Text = rectTransforms[i].gameObject.GetComponent<TMP_Text>();
+                if (tMP_Text != null)
+                {
+                    tMP_Text.color = new Color(1, 1, 1, 1);
                 }
             }
         }

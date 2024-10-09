@@ -129,6 +129,14 @@ public class UI_TutorialScene : UI_Scene
             GameObject pillars = GameObject.Find("Pillars");
             if (pillars != null) pillars.gameObject.SetActive(false);
         }
+        if (Input.GetKeyDown(KeyCode.F7))
+        {
+            Managers.Game.OnMeetKingSlime = true;
+
+            Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset =
+                Vector3.Lerp(Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset, new Vector3(0f, 20f, -5f), 2f);
+        }
+        
         #endregion
     }
 
