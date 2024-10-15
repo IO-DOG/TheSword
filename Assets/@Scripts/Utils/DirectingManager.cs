@@ -51,7 +51,7 @@ public class Events
     IEnumerator EVENT_1()
     {
         Managers.Game.OnDirect = true;
-        Managers.Game.Player.SetState(Define.PlayerState.IdleUp);
+        Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
 
         #region #1
         {
@@ -71,7 +71,7 @@ public class Events
             yield return new WaitForSeconds(1f);
             Managers.Game.Player.Moving(Define.MoveDir.Back);
             yield return new WaitForSeconds(0.2f);
-            Managers.Game.Player.SetState(Define.PlayerState.IdleUp);
+            Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
             yield return new WaitForSeconds(1f);
 
             StartCoPlayEmoji(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);
@@ -145,7 +145,7 @@ public class Events
         yield return new WaitForSeconds(1.5f);
 
         Managers.Game.CurPlayerData.IsContractedSword = true;
-        Managers.Game.Player.SetState(Define.PlayerState.IdleDown);
+        Managers.Game.Player.SetState(Define.PlayerState.IdleFront);
         Managers.Game.Player._moveDir = Define.MoveDir.Down;
         Managers.Game.Player._isEquiptWeapon = true;
         Managers.Game.Player._isEquiptShield = true;

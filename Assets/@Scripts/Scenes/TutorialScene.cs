@@ -37,7 +37,7 @@ public class TutorialScene : BaseScene
     IEnumerator PlayTutorial_1()
     {
         // Set Player Dir
-        Managers.Game.Player.SetState(Define.PlayerState.IdleUp);
+        Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
 
         yield return new WaitForSeconds(0.5f);
 
@@ -53,7 +53,7 @@ public class TutorialScene : BaseScene
         Managers.Game.Player.Moving(Define.MoveDir.Up);
 
         yield return new WaitForSeconds(0.5f);
-        Managers.Game.Player.SetState(Define.PlayerState.IdleUp);
+        Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
 
         // Show Stage Name
         Managers.UI.ShowPopupUI<UI_StageNamePopup>();
