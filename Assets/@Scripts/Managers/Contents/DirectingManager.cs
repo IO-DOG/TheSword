@@ -165,7 +165,8 @@ public class Events
     {
         if (Managers.Game.OnMeetKingSlime)
             return;
-        if (Managers.Game.Player.gameObject.transform.position.x < 303.5f || Managers.Game.Player.gameObject.transform.position.x > 304.2f) // 일단 하드코딩 특정 자리가 아니면 리턴함.
+        if (Managers.Game.Player.gameObject.transform.position.x < 303.5f || Managers.Game.Player.gameObject.transform.position.x > 304.2f
+            || Managers.Game.Player.gameObject.transform.position.z < -7f) // 일단 하드코딩 특정 자리가 아니면 리턴함.
             return;
         // x : 303.52 ~ 304.16
         // y : -7.04
@@ -205,16 +206,35 @@ public class Events
             //CoroutineManager.StartCoroutine(CoDirectingKingSlime()); 
             // or dotween?
             // todo directing action
-            Vector3 cameraPos = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
 
             DG.Tweening.Sequence sequence = DOTween.Sequence();
-            //Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 20f, -5f);
+            Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
+            Vector3 target = new Vector3(0f, 13.5f, -5f); ;
+            float moveTime = 2f;
+            CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
 
-            Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 20f, -5f);
-                //Vector3.MoveTowards(new Vector3(0f, 10f, -5f), new Vector3(0f, 20f, -5f), 2f);
-            sequence.Append(Camera.main.transform.DOMove(Camera.main.transform.position, 2f))
-                //.Append(Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().transform.DOShakePosition(2f))
+            sequence.Append(Camera.main.transform.DOMove(Camera.main.transform.position, moveTime))
+                .Append(Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().transform.DOShakePosition(2f))
                 .OnComplete(() => { AfterMeetKingSlime(); });
+        }
+    }
+
+    IEnumerator CoVirtualCameraMove(Vector3 original, Vector3 target, float time)
+    {
+        yield return null;
+
+        float totalTime = 0f;
+
+        while (totalTime <= time)
+        {
+            float delta = totalTime / time;
+            float x = original.x + (target.x - original.x) * delta;
+            float y = original.y + (target.y - original.y) * delta;
+            float z = original.z + (target.z - original.z) * delta;
+            Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(x, y, z);
+            totalTime += Time.deltaTime;
+            Debug.Log(totalTime);
+            yield return null;
         }
     }
 
@@ -223,11 +243,10 @@ public class Events
         Debug.Log("킹 슬라임이 울부짖었다!!!");
         Debug.Log("이 함수가 실행되었다!!!!!!!!!!!!");
 
-        // todo camera position to player
-        Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 10f, -5f);
-            //Vector3.MoveTowards(new Vector3(0f, 20f, -5f), new Vector3(0f, 10f, -5f), 2f);
-
-        //Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 10f, -5f);
+        Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
+        Vector3 target = new Vector3(0f, 10f, -5f); ;
+        float moveTime = 2f;
+        CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
 
         GameObject tutorialSene = GameObject.Find("UI_TutorialScene");
         if (tutorialSene != null)
