@@ -25,8 +25,11 @@ public class DirectingManager
     }
 }
 
+
 public class Events
 {
+    GameObject _kingSlime;
+
     bool _coroutineCompleted;
     void StartCoPlayEmoji(string EmojiName, Transform transform)
     {
@@ -161,6 +164,8 @@ public class Events
 
     #region KingSlimeDirecting
 
+    public Action OnMeetKingSlime = null;
+
     public void MeetKingSlime()
     {
         if (Managers.Game.OnMeetKingSlime)
@@ -211,14 +216,57 @@ public class Events
             Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
             Vector3 target = new Vector3(0f, 13.5f, -5f); ;
             float moveTime = 2f;
-            CoroutineManager.StartCoroutine(Util.CoVirtualCameraMove(original, target, moveTime));
 
-            sequence.Append(Camera.main.transform.DOMove(Camera.main.transform.position, moveTime))
-                .Append(Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().transform.DOShakePosition(2f))
-                .OnComplete(() => { Debug.Log("슬라임이 채워진다..."); })
-                .OnComplete(() => { Debug.Log("슬라임이 한곳으로 모여 합쳐진다.."); })
-                .OnComplete(() => { AfterMeetKingSlime(); });
+            OnMeetKingSlime -= KingSlimeAction;
+            OnMeetKingSlime += KingSlimeAction;
+
+            CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
+
+            
+            //sequence.Append(() => { Debug.Log("슬라임이 채워진다..."); })
+            //    .OnComplete(() => { _kingSlime = GameObject.Find("bossMonster0"); _kingSlime.SetActive(false); })
+            //    .OnComplete(() => { Debug.Log("슬라임이 채워진다..."); })
+            //    .OnComplete(() => { Debug.Log("슬라임이 한곳으로 모여 합쳐진다.."); })
+            //    .OnComplete(() => { AfterMeetKingSlime(); });
         }
+    }
+
+    void KingSlimeAction()
+    {
+        OnMeetKingSlime = null;
+        CoroutineManager.StartCoroutine(CoKingSlimeAction());
+    }
+
+    IEnumerator CoKingSlimeAction()
+    {
+        WaitForSeconds waitForSeconds = new WaitForSeconds(1f);
+        _kingSlime = GameObject.Find("bossMonster0");
+        _kingSlime.SetActive(false);
+        Debug.Log("슬라임이 채워진다...");
+        Debug.Log("슬라임이 한곳으로 모여 합쳐진다..");
+        yield return waitForSeconds;
+        AfterMeetKingSlime();
+    }
+
+    public IEnumerator CoVirtualCameraMove(Vector3 original, Vector3 target, float time)
+    {
+        yield return null;
+
+        float totalTime = 0f;
+
+        while (totalTime <= time)
+        {
+            float delta = totalTime / time;
+            float x = original.x + (target.x - original.x) * delta;
+            float y = original.y + (target.y - original.y) * delta;
+            float z = original.z + (target.z - original.z) * delta;
+            Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(x, y, z);
+            totalTime += Time.deltaTime;
+            yield return null;
+        }
+
+        if (OnMeetKingSlime != null)
+            OnMeetKingSlime?.Invoke();
     }
 
     public void AfterMeetKingSlime()
@@ -229,8 +277,9 @@ public class Events
         Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
         Vector3 target = new Vector3(0f, 10f, -5f); ;
         float moveTime = 2f;
-        CoroutineManager.StartCoroutine(Util.CoVirtualCameraMove(original, target, moveTime));
+        CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
 
+        _kingSlime.SetActive(true);
         GameObject tutorialSene = GameObject.Find("UI_TutorialScene");
         if (tutorialSene != null)
         {
