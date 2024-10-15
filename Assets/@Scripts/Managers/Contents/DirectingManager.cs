@@ -211,30 +211,13 @@ public class Events
             Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
             Vector3 target = new Vector3(0f, 13.5f, -5f); ;
             float moveTime = 2f;
-            CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
+            CoroutineManager.StartCoroutine(Util.CoVirtualCameraMove(original, target, moveTime));
 
             sequence.Append(Camera.main.transform.DOMove(Camera.main.transform.position, moveTime))
                 .Append(Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().transform.DOShakePosition(2f))
+                .OnComplete(() => { Debug.Log("슬라임이 채워진다..."); })
+                .OnComplete(() => { Debug.Log("슬라임이 한곳으로 모여 합쳐진다.."); })
                 .OnComplete(() => { AfterMeetKingSlime(); });
-        }
-    }
-
-    IEnumerator CoVirtualCameraMove(Vector3 original, Vector3 target, float time)
-    {
-        yield return null;
-
-        float totalTime = 0f;
-
-        while (totalTime <= time)
-        {
-            float delta = totalTime / time;
-            float x = original.x + (target.x - original.x) * delta;
-            float y = original.y + (target.y - original.y) * delta;
-            float z = original.z + (target.z - original.z) * delta;
-            Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(x, y, z);
-            totalTime += Time.deltaTime;
-            Debug.Log(totalTime);
-            yield return null;
         }
     }
 
@@ -246,7 +229,7 @@ public class Events
         Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
         Vector3 target = new Vector3(0f, 10f, -5f); ;
         float moveTime = 2f;
-        CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
+        CoroutineManager.StartCoroutine(Util.CoVirtualCameraMove(original, target, moveTime));
 
         GameObject tutorialSene = GameObject.Find("UI_TutorialScene");
         if (tutorialSene != null)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cinemachine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -148,5 +149,24 @@ public static class Util
         Texture2D texture = ScreenCapture.CaptureScreenshotAsTexture();
         Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
         onFinished?.Invoke(sprite);
+    }
+
+    public static IEnumerator CoVirtualCameraMove(Vector3 original, Vector3 target, float time)
+    {
+        yield return null;
+
+        float totalTime = 0f;
+
+        while (totalTime <= time)
+        {
+            float delta = totalTime / time;
+            float x = original.x + (target.x - original.x) * delta;
+            float y = original.y + (target.y - original.y) * delta;
+            float z = original.z + (target.z - original.z) * delta;
+            Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(x, y, z);
+            totalTime += Time.deltaTime;
+            Debug.Log(totalTime);
+            yield return null;
+        }
     }
 }
