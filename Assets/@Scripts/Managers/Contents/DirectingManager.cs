@@ -28,8 +28,6 @@ public class DirectingManager
 
 public class Events
 {
-    GameObject _kingSlime;
-
     bool _coroutineCompleted;
     void StartCoPlayEmoji(string EmojiName, Transform transform)
     {
@@ -163,13 +161,23 @@ public class Events
     #endregion
 
     #region KingSlimeDirecting
+    public GameObject _kingSlime;
 
+    bool _clearKingSlime = false;
     public Action OnMeetKingSlime = null;
 
     public void MeetKingSlime()
     {
         if (Managers.Game.OnMeetKingSlime)
             return;
+        if (_clearKingSlime == false && Managers.Game.Player.gameObject.transform.position.x > 303.5f && Managers.Game.Player.gameObject.transform.position.x < 304.2f)
+        {
+            _clearKingSlime = true;
+            _kingSlime = GameObject.Find("bossMonster0");
+            _kingSlime.gameObject.SetActive(false);
+            //_kingSlime.GetOrAddComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
+        }
+
         if (Managers.Game.Player.gameObject.transform.position.x < 303.5f || Managers.Game.Player.gameObject.transform.position.x > 304.2f
             || Managers.Game.Player.gameObject.transform.position.z < -7f) // 일단 하드코딩 특정 자리가 아니면 리턴함.
             return;
@@ -222,7 +230,7 @@ public class Events
 
             CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
 
-            
+
             //sequence.Append(() => { Debug.Log("슬라임이 채워진다..."); })
             //    .OnComplete(() => { _kingSlime = GameObject.Find("bossMonster0"); _kingSlime.SetActive(false); })
             //    .OnComplete(() => { Debug.Log("슬라임이 채워진다..."); })
@@ -241,7 +249,7 @@ public class Events
     {
         WaitForSeconds waitForSeconds = new WaitForSeconds(1f);
         _kingSlime = GameObject.Find("bossMonster0");
-        _kingSlime.SetActive(false);
+        //_kingSlime.SetActive(false);
         Debug.Log("슬라임이 채워진다...");
         Debug.Log("슬라임이 한곳으로 모여 합쳐진다..");
         yield return waitForSeconds;
@@ -279,7 +287,13 @@ public class Events
         float moveTime = 2f;
         CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
 
-        _kingSlime.SetActive(true);
+        if (_kingSlime != null)
+        {
+            _kingSlime.SetActive(true);
+            _kingSlime.gameObject.GetOrAddComponent<Animator>().Play("Boss_C0_I000");
+        }
+        //_kingSlime.GetOrAddComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+
         GameObject tutorialSene = GameObject.Find("UI_TutorialScene");
         if (tutorialSene != null)
         {
