@@ -295,6 +295,8 @@ public class DecoJSJEditor : Editor
             BG.AddComponent<SpriteRenderer>().sprite = BGSprite;
             BG.GetComponent<SpriteRenderer>().material = Resources.Load<Material>("SpriteShadowsMaterial");
             #endregion
+
+            walls.transform.localPosition = new Vector3(0f, -0.04f, 0f);
             //items.transform.localPosition = items.transform.localPosition + new Vector3(0f, 1.6f, -0.4f);
             //monsters.transform.localPosition = monsters.transform.localPosition + new Vector3(0f, 3f, -1.1f);
             //Camera.main.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, items);

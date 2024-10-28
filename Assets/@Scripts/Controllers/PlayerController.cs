@@ -39,7 +39,7 @@ public class PlayerController : MonoBehaviour
     Vector3 _nextCellPos;
 
     public MoveDir _moveDir = MoveDir.None;
-    public PlayerState _state = PlayerState.IdleDown;
+    public PlayerState _state = PlayerState.IdleFront;
     public void SetState(PlayerState state)
     {
         _state = state;
@@ -71,24 +71,26 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (Input.GetKey(KeyCode.UpArrow))
+        if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             _moveDir = MoveDir.Up;
-            Moving(_moveDir);
         }
-        else if (Input.GetKey(KeyCode.DownArrow))
+        else if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             _moveDir = MoveDir.Down;
-            Moving(_moveDir);
         }
-        else if (Input.GetKey(KeyCode.LeftArrow))
+        else if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
             _moveDir = MoveDir.Left;
-            Moving(_moveDir);
         }
-        else if (Input.GetKey(KeyCode.RightArrow))
+        else if (Input.GetKeyDown(KeyCode.RightArrow))
         {
             _moveDir = MoveDir.Right;
+        }
+
+        if(_moveDir != MoveDir.None && (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.DownArrow)||
+            Input.GetKey(KeyCode.LeftArrow)|| Input.GetKey(KeyCode.RightArrow)))
+        {
             Moving(_moveDir);
         }
 
@@ -141,7 +143,7 @@ public class PlayerController : MonoBehaviour
 
         switch (_state)
         {
-            case PlayerState.IdleUp:
+            case PlayerState.IdleBack:
                 GetComponent<Animator>().speed = 1f;
                 GetComponent<Animator>().Play("Player_Idle_B");
                 if (_isEquiptWeapon)
@@ -153,7 +155,7 @@ public class PlayerController : MonoBehaviour
                 _shield.transform.localPosition = Vector3.forward * adjustingDis;
 
                 break;
-            case PlayerState.IdleDown:
+            case PlayerState.IdleFront:
                 GetComponent<Animator>().speed = 1f;
                 GetComponent<Animator>().Play("Player_Idle_F");
                 if (_isEquiptWeapon)
@@ -163,6 +165,28 @@ public class PlayerController : MonoBehaviour
 
                 _weapon.transform.localPosition = Vector3.back * adjustingDis;
                 _shield.transform.localPosition = Vector3.back * adjustingDis;
+                break;
+            case PlayerState.IdleLeft:
+                GetComponent<Animator>().speed = Managers.Game.CurPlayerData.MoveSpeed;
+                GetComponent<Animator>().Play("Player_Idle_L");
+                if (_isEquiptWeapon)
+                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurSword].ImageName}_Idle_L");
+                if (_isEquiptShield)
+                    _shield.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurShield].ImageName}_Idle_L");
+
+                _weapon.transform.localPosition = Vector3.forward * adjustingDis;
+                _shield.transform.localPosition = Vector3.back * adjustingDis;
+                break;
+            case PlayerState.IdleRight:
+                GetComponent<Animator>().speed = Managers.Game.CurPlayerData.MoveSpeed;
+                GetComponent<Animator>().Play("Player_Idle_R");
+                if (_isEquiptWeapon)
+                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurSword].ImageName}_Idle_R");
+                if (_isEquiptShield)
+                    _shield.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurShield].ImageName}_Idle_R");
+
+                _weapon.transform.localPosition = Vector3.back * adjustingDis;
+                _shield.transform.localPosition = Vector3.forward * adjustingDis;
                 break;
             case PlayerState.Left:
                 GetComponent<Animator>().speed = Managers.Game.CurPlayerData.MoveSpeed;
@@ -244,11 +268,35 @@ public class PlayerController : MonoBehaviour
     {
         if (_isEquiptWeapon)
         {
-            _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurSword].ImageName}_Idle_F", 0, 0.0f);
+            switch(_state)
+            {
+                case PlayerState.IdleFront:
+                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurSword].ImageName}_Idle_F", 0, 0.0f);
+                    break;
+                case PlayerState.IdleLeft:
+                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurSword].ImageName}_Idle_L", 0, 0.0f);
+                    break;
+                case PlayerState.IdleRight:
+                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurSword].ImageName}_Idle_R", 0, 0.0f);
+                    break;
+            }
+
         }
+            
         if (_isEquiptShield)
         {
-            _shield.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurShield].ImageName}_Idle_F", 0, 0.0f);
+            switch (_state)
+            {
+                case PlayerState.IdleFront:
+                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurShield].ImageName}_Idle_F", 0, 0.0f);
+                    break;
+                case PlayerState.IdleLeft:
+                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurShield].ImageName}_Idle_L", 0, 0.0f);
+                    break;
+                case PlayerState.IdleRight:
+                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.CurPlayerData.CurShield].ImageName}_Idle_R", 0, 0.0f);
+                    break;
+            }
         }
     }
 
@@ -311,9 +359,13 @@ public class PlayerController : MonoBehaviour
             return;
 
         if (moveDir == MoveDir.Up)
-            _state = PlayerState.IdleUp;
+            _state = PlayerState.IdleBack;
+        else if (moveDir == MoveDir.Left)
+            _state = PlayerState.IdleLeft;
+        else if (moveDir == MoveDir.Right)
+            _state = PlayerState.IdleRight;
         else
-            _state = PlayerState.IdleDown;
+            _state = PlayerState.IdleFront;
     }
     #endregion
 
@@ -412,7 +464,7 @@ public class PlayerController : MonoBehaviour
 
                     hit.collider.gameObject.GetComponentInChildren<Lever>().Play(1.0f).OnComplete(() =>
                     {
-                        _state = PlayerState.IdleDown;
+                        _state = PlayerState.IdleFront;
                         hit.collider.gameObject.GetComponentInChildren<Lever>().SetActive();
                         hit.collider.gameObject.GetComponentInChildren<Lever>().Open();
                         _isEquiptShield = true;
