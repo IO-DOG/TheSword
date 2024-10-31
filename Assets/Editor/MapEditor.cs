@@ -164,6 +164,10 @@ public class MapEditor : EditorWindow
     void GenerateMap(string mapName, string tileSet)
     {
         SelectedTileMap = AssetDatabase.LoadAssetAtPath<WallData>($"Assets/@Resources/Data/TileSet/{tileSet}.asset").wallPrefabs;
+        foreach(GameObject go in SelectedTileMap)
+        {
+            go.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+        }
 
         int count = 0;
 
