@@ -269,16 +269,22 @@ public class Events
         GameObject.Find("SlimeFall4").GetComponent<ParticleSystem>().Play();
         GameObject.Find("SlimeFall5").GetComponent<ParticleSystem>().Play();
         yield return new WaitForSeconds(1f);
-        GameObject slime1 = Managers.Resource.Instantiate("BossScene_C0_003", parent.transform);
-        slime1.transform.localPosition = new Vector3(3.942f, 0.7f, -3.045f);
-        GameObject slime2 = Managers.Resource.Instantiate("BossScene_C0_004", parent.transform);
-        slime2.transform.localPosition = new Vector3(3.563f, 0.7f, -3.045f);
-        GameObject slime3 = Managers.Resource.Instantiate("BossScene_C0_005", parent.transform);
-        slime3.transform.localPosition = new Vector3(4.359f, 0.7f, -3.045f);
+        for (int i = 0; i < 10; ++i)
+        {
+            GameObject slime1 = Managers.Resource.Instantiate("BossScene_C0_003", parent.transform);
+            slime1.transform.localPosition = new Vector3(UnityEngine.Random.Range(3.5f, 4), 0.7f, -3.045f);
+            GameObject slime2 = Managers.Resource.Instantiate("BossScene_C0_004", parent.transform);
+            slime2.transform.localPosition = new Vector3(UnityEngine.Random.Range(3.5f, 4), 0.7f, -3.045f);
+            GameObject slime3 = Managers.Resource.Instantiate("BossScene_C0_005", parent.transform);
+            slime3.transform.localPosition = new Vector3(UnityEngine.Random.Range(4f, 4.5f), 0.7f, -3.045f);
 
-        CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime1, midlePos.transform.localPosition, UnityEngine.Random.Range(1, 4)));
-        CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime2, midlePos.transform.localPosition, UnityEngine.Random.Range(1, 4)));
-        CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime3, midlePos.transform.localPosition, UnityEngine.Random.Range(1, 4)));
+            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime1, midlePos.transform.localPosition, UnityEngine.Random.Range(1, 4)));
+            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime2, midlePos.transform.localPosition, UnityEngine.Random.Range(1, 4)));
+            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime3, midlePos.transform.localPosition, UnityEngine.Random.Range(1, 4)));
+        }
+        
+
+        
 
         yield return new WaitForSeconds(4.2f);
 
