@@ -163,6 +163,11 @@ public class MapEditor : EditorWindow
 
     void GenerateMap(string mapName, string tileSet)
     {
+        if (tileSet == "Empty")
+        {
+            Debug.LogWarning("Tile set is empty!");
+            return;
+        }
         SelectedTileMap = AssetDatabase.LoadAssetAtPath<WallData>($"Assets/@Resources/Data/TileSet/{tileSet}.asset").wallPrefabs;
         foreach(GameObject go in SelectedTileMap)
         {
@@ -319,6 +324,7 @@ public class MapEditor : EditorWindow
             var guid = AssetDatabase.AssetPathToGUID(mapPrefabPath);
             var ent = settings.CreateOrMoveEntry(guid, group);
             ent.address = key;
+            ent.SetLabel("PreLoad", true);
 
             EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssets();
