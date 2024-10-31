@@ -20,48 +20,96 @@ public class DataTransformer : EditorWindow
         PlayerPrefs.DeleteAll();
         PlayerPrefs.DeleteKey("ISFIRST");
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveData.json";
+            string path = Application.persistentDataPath + "/SaveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json";
+            string path = Application.persistentDataPath + "/MonsterActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json";
+            string path = Application.persistentDataPath + "/BossMonsterActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveCItemActiveData.json";
+            string path = Application.persistentDataPath + "/CItemActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveEItemActiveData.json";
+            string path = Application.persistentDataPath + "/EItemActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json";
+            string path = Application.persistentDataPath + "/DoorActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.dataPath + "/@Resources/Data/SavePillarActiveData.json";
+            string path = Application.persistentDataPath + "/PillarActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.dataPath + "/@Resources/Data/SaveLeverActiveData.json";
+            string path = Application.persistentDataPath + "/LeverActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         //ParseMapData();
         Debug.Log("Complete DeleteGameData");
     }
+
+    //public static void DeleteGameData()
+    //{
+    //    PlayerPrefs.DeleteAll();
+    //    PlayerPrefs.DeleteKey("ISFIRST");
+    //    {
+    //        string path = Application.dataPath + "/@Resources/Data/SaveData.json";
+    //        if (File.Exists(path))
+    //            File.Delete(path);
+    //    }
+    //    {
+    //        string path = Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json";
+    //        if (File.Exists(path))
+    //            File.Delete(path);
+    //    }
+    //    {
+    //        string path = Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json";
+    //        if (File.Exists(path))
+    //            File.Delete(path);
+    //    }
+    //    {
+    //        string path = Application.dataPath + "/@Resources/Data/SaveCItemActiveData.json";
+    //        if (File.Exists(path))
+    //            File.Delete(path);
+    //    }
+    //    {
+    //        string path = Application.dataPath + "/@Resources/Data/SaveEItemActiveData.json";
+    //        if (File.Exists(path))
+    //            File.Delete(path);
+    //    }
+    //    {
+    //        string path = Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json";
+    //        if (File.Exists(path))
+    //            File.Delete(path);
+    //    }
+    //    {
+    //        string path = Application.dataPath + "/@Resources/Data/SavePillarActiveData.json";
+    //        if (File.Exists(path))
+    //            File.Delete(path);
+    //    }
+    //    {
+    //        string path = Application.dataPath + "/@Resources/Data/SaveLeverActiveData.json";
+    //        if (File.Exists(path))
+    //            File.Delete(path);
+    //    }
+    //    //ParseMapData();
+    //    Debug.Log("Complete DeleteGameData");
+    //}
 
     [MenuItem("Tools/ParseExcel %#K")]
     public static void ParseExcel()
@@ -78,74 +126,74 @@ public class DataTransformer : EditorWindow
         Debug.Log("Complete DataTransformer");
     }
 
-    [MenuItem("Tools/SaveDecoAsJson")]
-    public static void SaveLightAsJson()
-    {
-        string path = Application.dataPath + "/@Resources/Data/JsonData/DecoData.json";
-        DungeonDecoDataLoader loader = new DungeonDecoDataLoader();
+    //[MenuItem("Tools/SaveDecoAsJson")]
+    //public static void SaveLightAsJson()
+    //{
+    //    string path = Application.dataPath + "/@Resources/Data/JsonData/DecoData.json";
+    //    DungeonDecoDataLoader loader = new DungeonDecoDataLoader();
 
-        foreach(KeyValuePair<string, Data.MapData> data in Managers.Data.MapDic)
-        {
-            if (GameObject.Find(data.Key) == null)
-                return;
-            GameObject parent = GameObject.Find(data.Key).transform.Find("Deco").gameObject;
-            string dungeon = parent.transform.parent.name; // DG Name
-            if (parent == null)
-            {
-                Debug.Log("Parent is not exists!");
-                return;
-            }
+    //    foreach(KeyValuePair<string, Data.MapData> data in Managers.Data.MapDic)
+    //    {
+    //        if (GameObject.Find(data.Key) == null)
+    //            return;
+    //        GameObject parent = GameObject.Find(data.Key).transform.Find("Deco").gameObject;
+    //        string dungeon = parent.transform.parent.name; // DG Name
+    //        if (parent == null)
+    //        {
+    //            Debug.Log("Parent is not exists!");
+    //            return;
+    //        }
 
-            Transform[] lights = parent.GetComponentsInChildren<Transform>();
-            List<DecoData> lightDatas = new List<DecoData>();
+    //        Transform[] lights = parent.GetComponentsInChildren<Transform>();
+    //        List<DecoData> lightDatas = new List<DecoData>();
 
-            for (int i = 1; i < lights.Length; i++)
-            {
-                MyVector3 pos = new MyVector3 { X = lights[i].localPosition.x, Y = lights[i].localPosition.y, Z = lights[i].localPosition.z };
-                MyVector3 scale = new MyVector3 { X = lights[i].localScale.x, Y = lights[i].localScale.y, Z = lights[i].localScale.z };
-                MyVector3 rot = new MyVector3 { X = lights[i].localRotation.x, Y = lights[i].localRotation.y, Z = lights[i].localRotation.z };
+    //        for (int i = 1; i < lights.Length; i++)
+    //        {
+    //            MyVector3 pos = new MyVector3 { X = lights[i].localPosition.x, Y = lights[i].localPosition.y, Z = lights[i].localPosition.z };
+    //            MyVector3 scale = new MyVector3 { X = lights[i].localScale.x, Y = lights[i].localScale.y, Z = lights[i].localScale.z };
+    //            MyVector3 rot = new MyVector3 { X = lights[i].localRotation.x, Y = lights[i].localRotation.y, Z = lights[i].localRotation.z };
 
-                if (lights[i].name.Contains(Define.DecoType.Torch.ToString()))
-                {
-                    lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.Torch, Position = pos, Scale = scale, Rotation = rot });
-                }
-                else if (lights[i].name.Contains(Define.DecoType.FireBowl.ToString()))
-                {
-                    lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.FireBowl, Position = pos, Scale = scale, Rotation = rot });
-                }
-                else if (lights[i].name.Contains(Define.DecoType.PointLight.ToString()))
-                {
-                    lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.PointLight, Position = pos, Scale = scale, Rotation = rot });
-                }
-                else if (lights[i].name.Contains(Define.DecoType.Handcuff.ToString()))
-                {
-                    lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.Handcuff, Position = pos, Scale = scale, Rotation = rot });
-                }
-                else if (lights[i].name.Contains(Define.DecoType.GodRay.ToString()))
-                {
-                    lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.GodRay, Position = pos, Scale = scale, Rotation = rot });
-                }
-            }
+    //            if (lights[i].name.Contains(Define.DecoType.Torch.ToString()))
+    //            {
+    //                lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.Torch, Position = pos, Scale = scale, Rotation = rot });
+    //            }
+    //            else if (lights[i].name.Contains(Define.DecoType.FireBowl.ToString()))
+    //            {
+    //                lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.FireBowl, Position = pos, Scale = scale, Rotation = rot });
+    //            }
+    //            else if (lights[i].name.Contains(Define.DecoType.PointLight.ToString()))
+    //            {
+    //                lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.PointLight, Position = pos, Scale = scale, Rotation = rot });
+    //            }
+    //            else if (lights[i].name.Contains(Define.DecoType.Handcuff.ToString()))
+    //            {
+    //                lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.Handcuff, Position = pos, Scale = scale, Rotation = rot });
+    //            }
+    //            else if (lights[i].name.Contains(Define.DecoType.GodRay.ToString()))
+    //            {
+    //                lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.GodRay, Position = pos, Scale = scale, Rotation = rot });
+    //            }
+    //        }
 
-            loader.lights.Add(new DungeonDecoData
-            {
-                DGName = dungeon,
-                DecoData = lightDatas
-            });
+    //        loader.lights.Add(new DungeonDecoData
+    //        {
+    //            DGName = dungeon,
+    //            DecoData = lightDatas
+    //        });
 
-        }
+    //    }
 
-        string newJson = JsonConvert.SerializeObject(loader, Formatting.Indented);
-        File.WriteAllText(path, newJson);
+    //    string newJson = JsonConvert.SerializeObject(loader, Formatting.Indented);
+    //    File.WriteAllText(path, newJson);
 
-        Debug.Log("Complete SaveLightAsJson");
-    }
+    //    Debug.Log("Complete SaveLightAsJson");
+    //}
 
-    [MenuItem("Tools/SaveTileDataAsJson")]
-    public static void SaveTitleAsJson()
-    {
+    //[MenuItem("Tools/SaveTileDataAsJson")]
+    //public static void SaveTitleAsJson()
+    //{
 
-    }
+    //}
 
     static void ParsePlayerData(string filename)
     {
@@ -226,6 +274,7 @@ public class DataTransformer : EditorWindow
             cd.AttackAnimStr = ConvertValue<string>(row[i++]);
             cd.BattleParticleAttack = ConvertValue<string>(row[i++]);
             cd.BattleParticleHit = ConvertValue<string>(row[i++]);
+            cd.Shadow = ConvertValue<string>(row[i++]);
             cd.MonsterNameId = ConvertValue<int>(row[i++]);
             cd.MonsterDescId = ConvertValue<int>(row[i++]);
             loader.creatures.Add(cd);
@@ -259,12 +308,15 @@ public class DataTransformer : EditorWindow
             int i = 0;
             ConsumableItemData cd = new ConsumableItemData();
             cd.id = ConvertValue<int>(row[i++]);
-            cd.Name = ConvertValue<string>(row[i++]);
             cd.Heal = ConvertValue<float>(row[i++]);
             cd.AttackUp = ConvertValue<float>(row[i++]);
             cd.DefenceUp = ConvertValue<float>(row[i++]);
             cd.HPUp = ConvertValue<float>(row[i++]);
-            cd.Description = ConvertValue<string>(row[i++]);
+            cd.Img = ConvertValue<string>(row[i++]);
+            cd.PrefabName = ConvertValue<string>(row[i++]);
+            cd.Shadow = ConvertValue<string>(row[i++]);
+            cd.ScriptNameId = ConvertValue<int>(row[i++]);
+            cd.ScriptDescriptionId = ConvertValue<int>(row[i++]);
             loader.consumableItems.Add(cd);
         }
 
@@ -646,19 +698,19 @@ public class DataTransformer : EditorWindow
 
         #region Active Dic
         string monsterActiveDicJsonStr = JsonConvert.SerializeObject(monsterActiveDic, Formatting.Indented);
-        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/MonsterActiveData.json", monsterActiveDicJsonStr);
+        File.WriteAllText($"{Application.persistentDataPath}/MonsterActiveData.json", monsterActiveDicJsonStr);
         string bossMonsterActiveDicJsonStr = JsonConvert.SerializeObject(bossMonsterActiveDic, Formatting.Indented);
-        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/BossMonsterActiveData.json", bossMonsterActiveDicJsonStr);
+        File.WriteAllText($"{Application.persistentDataPath}/BossMonsterActiveData.json", bossMonsterActiveDicJsonStr);
         string cItemActiveDicJsonStr = JsonConvert.SerializeObject(cItemActiveDic, Formatting.Indented);
-        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/CItemActiveData.json", cItemActiveDicJsonStr);
+        File.WriteAllText($"{Application.persistentDataPath}/CItemActiveData.json", cItemActiveDicJsonStr);
         string eItemActiveDicJsonStr = JsonConvert.SerializeObject(eItemActiveDic, Formatting.Indented);
-        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/EItemActiveData.json", eItemActiveDicJsonStr);
+        File.WriteAllText($"{Application.persistentDataPath}/EItemActiveData.json", eItemActiveDicJsonStr);
         string doorActiveDicJsonStr = JsonConvert.SerializeObject(doorActiveDic, Formatting.Indented);
-        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/DoorActiveData.json", doorActiveDicJsonStr);
+        File.WriteAllText($"{Application.persistentDataPath}/DoorActiveData.json", doorActiveDicJsonStr);
         string pillarActiveDicJsonStr = JsonConvert.SerializeObject(pillarActiveDic, Formatting.Indented);
-        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/PillarActiveData.json", pillarActiveDicJsonStr);
+        File.WriteAllText($"{Application.persistentDataPath}/PillarActiveData.json", pillarActiveDicJsonStr);
         string leverActiveDicJsonStr = JsonConvert.SerializeObject(leverActiveDic, Formatting.Indented);
-        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/LeverActiveData.json", leverActiveDicJsonStr);
+        File.WriteAllText($"{Application.persistentDataPath}/LeverActiveData.json", leverActiveDicJsonStr);
 
         AssetDatabase.Refresh();
         #endregion
@@ -667,8 +719,8 @@ public class DataTransformer : EditorWindow
         {
             TypeNameHandling = TypeNameHandling.Auto
         });
+        File.WriteAllText($"{Application.persistentDataPath}/MapData.json", mapDicJsonStr);
         File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/MapData.json", mapDicJsonStr);
-        File.WriteAllText($"{Application.dataPath}/Resources/DecoJson/MapData.json", mapDicJsonStr);
         AssetDatabase.Refresh();
     }
 
@@ -744,6 +796,7 @@ public class DataTransformer : EditorWindow
             ed.ImageName = ConvertValue<string>(row[i++]);
             ed.AttackFX = ConvertValue<string>(row[i++]);
             ed.HitFX = ConvertValue<string>(row[i++]);
+            ed.Shadow = ConvertValue<string>(row[i++]);
             ed.IllustFX = ConvertValue<string>(row[i++]);
             ed.Illust = ConvertValue<string>(row[i++]);
             ed.IllustBG = ConvertValue<string>(row[i++]);

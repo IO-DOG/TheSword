@@ -241,7 +241,7 @@ public class UI_CreatureCard : UI_Base
     IEnumerator CoDelayDefence()
     {
 
-        _maxDefenceCoolTime = _maxDefenceCoolTime / Managers.Game.MonsterData.AttackSpeed;
+        _maxDefenceCoolTime = _maxDefenceCoolTime / Managers.Game.MonsterData.DefenceSpeed;
 
         while (true)
         {

@@ -54,7 +54,7 @@ public class CameraController : MonoBehaviour
             Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[2];
             Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[2];
         }
-        else
+        else if (Managers.UI.GetPopupCount() == 0)
         {
             float scroll = Input.GetAxis("Mouse ScrollWheel") * _scrollSpeed * Time.deltaTime;
 
@@ -80,6 +80,9 @@ public class CameraController : MonoBehaviour
 
     void CameraUpdate()
     {
+        if (Managers.Game.OnMeetKingSlime)
+            return;
+
         Vector3 pos = Managers.Game.Player.transform.position;
 
         SetCameraExtent();

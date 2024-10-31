@@ -67,6 +67,7 @@ public class UI_TitleScene : UI_Scene
         });
         GetImage((int)Images.Buttons).gameObject.SetActive(false);
         GetButton((int)Buttons.NewGameButton).gameObject.SetActive(false);
+
         //GetButton((int)Buttons.GameSpeedButton).gameObject.BindEvent(() => { // 게임 속도 조절
         //    if (Managers.Game.GameSpeed == 1)
         //        Managers.Game.GameSpeed = 2;
@@ -112,6 +113,8 @@ public class UI_TitleScene : UI_Scene
                 GetObject((int)Objects.Slider).gameObject.SetActive(false);
                 GetButton((int)Buttons.NewGameButton).gameObject.SetActive(true);
 
+                // cursor 시작
+                GameObject.Find("@Cursor").GetOrAddComponent<CursorManager>().Init();
                 // continueData로 플레이어 적용시키기. TODO
             }
         });
@@ -206,11 +209,12 @@ public class UI_TitleScene : UI_Scene
     {
         Debug.Log("Cllck OnClickNewGameButton");
         Managers.Game.DeleteGameData();
-        Managers.Game.SaveGame();
+        Managers.Data.Init();
 
         if (PlayerPrefs.GetInt("ISFIRST", 1) == 1) // 진짜 처음일 떄
         {
             // todo intro story scene
+            SetPlayerprefs();
             Managers.Scene.LoadScene(Define.Scene.IntroScene);
         }
         else
@@ -222,9 +226,16 @@ public class UI_TitleScene : UI_Scene
 
     void OnClickLoadGameButton()
     {
-        Debug.Log("Cllck OnClickLoadGameButton");
-        Managers.Scene.LoadScene(Define.Scene.GameScene);
-
+        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1)
+        {
+            Debug.Log("Cllck OnClickLoadGameButton Nut Data is Null");
+            Managers.Scene.LoadScene(Define.Scene.IntroScene);
+        }
+        else
+        {
+            Debug.Log("Cllck OnClickLoadGameButton");
+            Managers.Scene.LoadScene(Define.Scene.TutorialScene);
+        }
     }
 
     void OnClickSettingButton()
@@ -241,8 +252,10 @@ public class UI_TitleScene : UI_Scene
 
     void CheckFirstGame()
     {
-        if (PlayerPrefs.GetInt("ISFIRST") == 1) // 최초 실행 시
+        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1) // 최초 실행 시
         {
+            SetPlayerprefs();
+
             GetText((int)Texts.NewGameText).text = "Game Start";
             buttonsIdx = 0;
             SetButtonColorAndButtonsText(buttonsIdx);
@@ -262,8 +275,11 @@ public class UI_TitleScene : UI_Scene
         GetText((int)Texts.SettingText).color = new Color(0.5f, 0.5f, 0.5f);
         GetText((int)Texts.ExitText).color = new Color(0.5f, 0.5f, 0.5f);
 
-        if (PlayerPrefs.GetInt("ISFIRST") == 1) // 최초 실행 시
+        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1) // 최초 실행 시
+        {
             GetText((int)Texts.NewGameText).text = "Game Start";
+            SetPlayerprefs();
+        }
         else
             GetText((int)Texts.NewGameText).text = "New Game";
         GetText((int)Texts.LoadGameText).text = "Load Game";
@@ -283,5 +299,12 @@ public class UI_TitleScene : UI_Scene
         texts[index].color = new Color(1, 1, 1);
         string str = texts[index].text;
         texts[index].text = $"- {str} -";
+    }
+
+    void SetPlayerprefs()
+    {
+        PlayerPrefs.SetInt("ISOPENINVENUI", 0);
+        PlayerPrefs.SetInt("ISOPENWARPUI", 0);
+        PlayerPrefs.SetInt("ISOPENCLASSUI", 0);
     }
 }

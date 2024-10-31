@@ -25,7 +25,8 @@ public class TutorialScene : BaseScene
 
     private void Start()
     {
-        StartCoroutine(PlayTutorial_1());
+        if(PlayerPrefs.GetInt("ISFIRST", 1) == 1)
+            StartCoroutine(PlayTutorial_1());
     }
 
     public override void Clear()
@@ -36,7 +37,7 @@ public class TutorialScene : BaseScene
     IEnumerator PlayTutorial_1()
     {
         // Set Player Dir
-        Managers.Game.Player.SetState(Define.PlayerState.IdleUp);
+        Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
 
         yield return new WaitForSeconds(0.5f);
 
@@ -52,7 +53,7 @@ public class TutorialScene : BaseScene
         Managers.Game.Player.Moving(Define.MoveDir.Up);
 
         yield return new WaitForSeconds(0.5f);
-        Managers.Game.Player.SetState(Define.PlayerState.IdleUp);
+        Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
 
         // Show Stage Name
         Managers.UI.ShowPopupUI<UI_StageNamePopup>();
@@ -84,5 +85,8 @@ public class TutorialScene : BaseScene
         //    yield return null;
         //}
         #endregion
+
+        PlayerPrefs.SetInt("ISFIRST", 0);
+        Managers.Game.SaveGame();
     }
 }

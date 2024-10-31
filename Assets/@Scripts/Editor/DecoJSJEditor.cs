@@ -1,8 +1,10 @@
-using Data;
+Ôªøusing Data;
 using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -13,8 +15,7 @@ using UnityEngine.Tilemaps;
 public class DecoJSJEditor : Editor
 {
     public Dictionary<string, Data.MapData> MapDic { get; set; } = new Dictionary<string, Data.MapData>();
-    string _path = "DecoJson/MapData";
-    // Stage¿« «¡∑Œ∆€∆ºµÈø° ¥Î «— ¡˜∑ƒ»≠ ∞¥√ºµÈ ¡§¿«
+    // StageÏùò ÌîÑÎ°úÌçºÌã∞Îì§Ïóê ÎåÄ Ìïú ÏßÅÎ†¨Ìôî Í∞ùÏ≤¥Îì§ Ï†ïÏùò
     private SerializedProperty _stageName;
 
     GameObject[] Tilemap = new GameObject[100];
@@ -24,7 +25,7 @@ public class DecoJSJEditor : Editor
     private void OnEnable()
     {
         _stageName = serializedObject.FindProperty("_stageName");
-        MapDic = LoadJson<Data.MapDataLoader, string, Data.MapData>(_path).MakeDict();
+        MapDic = LoadJson<Data.MapDataLoader, string, Data.MapData>().MakeDict();
 
         VoidTile = Resources.Load("DecoTiles/Tilemap_-1") as GameObject;
         ObjectTile = Resources.Load("DecoTiles/Tilemap_-2") as GameObject;
@@ -70,11 +71,11 @@ public class DecoJSJEditor : Editor
         GUILayout.EndVertical();
     }
 
-    Loader LoadJson<Loader, Key, Value>(string path) where Loader : ILoader<Key, Value>
+    Loader LoadJson<Loader, Key, Value>() where Loader : ILoader<Key, Value>
     {
-        TextAsset textAsset = Resources.Load<TextAsset>($"{path}");
+        string textAsset = File.ReadAllText($"{Application.dataPath}/@Resources/Data/JsonData/MapData.json");
 
-        return JsonConvert.DeserializeObject<Loader>(textAsset.text, new JsonSerializerSettings
+        return JsonConvert.DeserializeObject<Loader>(textAsset, new JsonSerializerSettings
         {
             TypeNameHandling = TypeNameHandling.Auto
         });
@@ -103,7 +104,7 @@ public class DecoJSJEditor : Editor
             GameObject items = new GameObject() { name = "Items" };
             GameObject monsters = new GameObject() { name = "Monsters" };
             GameObject bossMonsters = new GameObject() { name = "BossMonsters" };
-            GameObject lights = new GameObject() { name = "Deco" };
+            GameObject decos = new GameObject() { name = "Deco" };
             GameObject pillars = new GameObject() { name = "Pillars" };
 
             parent.transform.localPosition += new Vector3(count * 100, 0, 0);
@@ -113,12 +114,12 @@ public class DecoJSJEditor : Editor
             items.transform.parent = parent.transform;
             monsters.transform.parent = parent.transform;
             bossMonsters.transform.parent = parent.transform;
-            lights.transform.parent = parent.transform;
+            decos.transform.parent = parent.transform;
             pillars.transform.parent = parent.transform;
 
             foreach (Data.TileData tile in mapData.Tiles)
             {
-                #region ¡÷ºÆ
+                #region Ï£ºÏÑù
                 //if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
                 //{
                 //    GameObject go = Managers.Resource.Instantiate($"Tilemap_{citemTile.PrefabID}", tiles.transform);
@@ -176,7 +177,7 @@ public class DecoJSJEditor : Editor
                 //    string name = Managers.Data.MonsterDic[id].Name;
                 //    switch (name)
                 //    {
-                //        case "∫Ì∑¢ΩΩ∂Û¿”":
+                //        case "Î∏îÎûôÏä¨ÎùºÏûÑ":
                 //            boss.AddComponent<BlackSlimeController>();
                 //            break;
                 //        default:
@@ -280,6 +281,22 @@ public class DecoJSJEditor : Editor
                     }
                 }
             }
+
+            #region BG
+            Sprite BGSprite = Resources.Load<Sprite>($"Sprites/{mapName.Substring(8, 2)}/FloorField_{mapName.Substring(8)}");
+            GameObject BG = new GameObject() { name = "BG"};
+            BG.transform.parent = decos.transform;
+            if(mapName.Substring(8) == "00_002")
+                BG.transform.localPosition = new Vector3(-0.16f, 0, -0.16f);
+            else
+                BG.transform.localPosition = new Vector3(-0.16f, 0, 0.16f);
+
+            BG.transform.rotation = Quaternion.Euler(new Vector3(90f, 0f, 0f));
+            BG.AddComponent<SpriteRenderer>().sprite = BGSprite;
+            BG.GetComponent<SpriteRenderer>().material = Resources.Load<Material>("SpriteShadowsMaterial");
+            #endregion
+
+            walls.transform.localPosition = new Vector3(0f, -0.04f, 0f);
             //items.transform.localPosition = items.transform.localPosition + new Vector3(0f, 1.6f, -0.4f);
             //monsters.transform.localPosition = monsters.transform.localPosition + new Vector3(0f, 3f, -1.1f);
             //Camera.main.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, items);

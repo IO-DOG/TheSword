@@ -47,7 +47,17 @@ public class Managers : MonoBehaviour
                 go.AddComponent<Managers>();
             }
 
+            GameObject cursor = GameObject.Find("@Cursor");
+            if (cursor == null)
+            {
+                cursor = new GameObject { name = "@Cursor" };
+                cursor.AddComponent<SpriteRenderer>();
+                cursor.AddComponent<Animator>();
+                cursor.AddComponent<CursorManager>();
+            }
+
             DontDestroyOnLoad(go);
+            DontDestroyOnLoad(cursor);
             s_instance = go.GetComponent<Managers>();
             //s_instance._sound.Init();
             //s_instance._time = go.AddComponent<TimeManager>();

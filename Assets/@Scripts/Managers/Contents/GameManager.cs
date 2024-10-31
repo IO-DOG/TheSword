@@ -26,8 +26,10 @@ public class GameManager
     public bool OnFade = false;
     public bool OnDirect = false;
     public bool OnInteract = false;
+    public bool OnMeetKingSlime = false;
 
     public int CurEventID;
+    public int TotalKillSplitSlime = 0;
 
     public GameObject CurInteractObject;
     public Light DirectionalLight;
@@ -49,6 +51,8 @@ public class GameManager
     public Action OnBattleCreatureDamagedAction;
     public Action OnBattlePlayerDefeceAction;
     public Action OnBattlePlayerDamagedAction;
+    public Action OnKingSlimeDeadAction;
+
     public Texture2D _screenShot = null;
     public Sprite _screenShot2 = null;
 
@@ -110,6 +114,9 @@ public class GameManager
         public MyVector3 CurPosition { get; set; }
         public int CurStageid { get; set; }
         public bool IsContractedSword { get; set; }
+        //public bool HasGetEquip { get; set; } // 인벤 UI 개방용
+        //public bool HasGetWarp { get; set; } // 워프 UI 개방용
+        //public bool HasGetClass { get; set; } // 특성을 얻었는지 -> 특성 UI 개방용
     }
     #endregion
 
@@ -148,14 +155,18 @@ public class GameManager
     public class CurConsumableItemData
     {
         public int id { get; set; }
-        public string Name { get; set; }
         public float Heal { get; set; }
         public float AttackUp { get; set; }
         public float DefenceUp { get; set; }
         public float HPUp { get; set; }
-        public string Description { get; set; }
+        public string Img { get; set; }
+        public string PrefabName { get; set; }
+        public string Shadow { get; set; }
+        public int ScriptNameId { get; set; }
+        public int ScriptDescriptionId { get; set; }
         public int IsActiveIndex { get; set; }
     }
+
     #endregion
 
     #region InGame
@@ -318,19 +329,19 @@ public class GameManager
 
         #region ActiveDic
         string monsterActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.MonsterActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/SaveMonsterActiveData.json", monsterActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/MonsterActiveData.json", monsterActiveDicJsonStr);
         string bossMonsterActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.BossMonsterActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/SaveBossMonsterActiveData.json", bossMonsterActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/BossMonsterActiveData.json", bossMonsterActiveDicJsonStr);
         string cItemActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.CItemActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/SaveCItemActiveData.json", cItemActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/CItemActiveData.json", cItemActiveDicJsonStr);
         string eItemActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.EItemActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/SaveEItemActiveData.json", eItemActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/EItemActiveData.json", eItemActiveDicJsonStr);
         string doorActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.DoorActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/SaveDoorActiveData.json", doorActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/DoorActiveData.json", doorActiveDicJsonStr);
         string pillarActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.PillarActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/SavePillarActiveData.json", pillarActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/PillarActiveData.json", pillarActiveDicJsonStr);
         string leverActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.LeverActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/SaveLeverActiveData.json", leverActiveDicJsonStr);
+        File.WriteAllText(Application.persistentDataPath + "/LeverActiveData.json", leverActiveDicJsonStr);
         #endregion
     }
 
@@ -382,25 +393,25 @@ public class GameManager
             CurPlayerData = data;
 
             #region Active Dic
-            string monsterActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SaveMonsterActiveData.json");
+            string monsterActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/MonsterActiveData.json");
             Dictionary<int, bool> monsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(monsterActiveDicFile);
             Managers.Data.MonsterActiveDic = monsterActiveDic;
-            string bossMonsterActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SaveBossMonsterActiveData.json");
+            string bossMonsterActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/BossMonsterActiveData.json");
             Dictionary<int, bool> bossMonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(bossMonsterActiveDicFile);
             Managers.Data.BossMonsterActiveDic = bossMonsterActiveDic;
-            string cItemActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SaveCItemActiveData.json");
+            string cItemActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/CItemActiveData.json");
             Dictionary<int, bool> cItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(cItemActiveDicFile);
             Managers.Data.CItemActiveDic = cItemActiveDic;
-            string eItemActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SaveEItemActiveData.json");
+            string eItemActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/EItemActiveData.json");
             Dictionary<int, bool> eItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(eItemActiveDicFile);
             Managers.Data.EItemActiveDic = eItemActiveDic;
-            string doorActiveDicFile = File.ReadAllText(Application.persistentDataPath+ "/SaveDoorActiveData.json");
+            string doorActiveDicFile = File.ReadAllText(Application.persistentDataPath+ "/DoorActiveData.json");
             Dictionary<int, bool> doorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(doorActiveDicFile);
             Managers.Data.DoorActiveDic = doorActiveDic;
-            string pillarActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SavePillarActiveData.json");
+            string pillarActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/PillarActiveData.json");
             Dictionary<int, bool> pillarActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(pillarActiveDicFile);
             Managers.Data.PillarActiveDic = pillarActiveDic;
-            string leverActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/SaveLeverActiveData.json");
+            string leverActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/LeverActiveData.json");
             Dictionary<int, bool> leverActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(leverActiveDicFile);
             Managers.Data.LeverActiveDic = leverActiveDic;
             #endregion
@@ -520,11 +531,9 @@ public class GameManager
                     monster.transform.localPosition = new Vector3(monsterTile.Position.X, monsterTile.Position.Y, monsterTile.Position.Z);
                     monster.transform.localScale = monsters.transform.localPosition + new Vector3(0.8f, 0.8f, 1f);
                     monster.GetComponent<MonsterController>().id = monsterTile.Index;
-                    string idleStr = Managers.Data.MonsterDic[monster.GetComponent<MonsterController>().id].IdleAnimStr;
-                    monster.GetOrAddComponent<Animator>().Play(idleStr);
                     monster.name = $"monster{monsterTile.TotalCount}";
                     monster.GetComponent<MonsterController>()._monsterIndex_forActive = monsterTile.TotalCount;
-
+                   
                     if (Managers.Data.MonsterActiveDic[monsterTile.TotalCount] == false)
                         monster.SetActive(false);
                 }
@@ -537,6 +546,7 @@ public class GameManager
                     {
                         case 0:
                             boss.GetComponent<BossMonsterController>().id = Define.KingSlime;
+                            boss.gameObject.name = "KingSlime";
                             break;
                         default:
                             break;
@@ -569,7 +579,7 @@ public class GameManager
                     GameObject lever = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", items.transform);
                     lever.GetComponentInChildren<Lever>()._leverIndex_forActive = leverTile.TotalCount;
                     lever.name = $"Lever";
-                    lever.transform.localPosition = new Vector3(leverTile.Position.X, lever.transform.position.y, leverTile.Position.Z);
+                    lever.transform.localPosition = new Vector3(leverTile.Position.X, -0.16f, leverTile.Position.Z);
 
                     if (Managers.Data.LeverActiveDic[leverTile.TotalCount] == false)
                     {
@@ -593,6 +603,8 @@ public class GameManager
                         {
                             Managers.Game.Player.transform.position = new Vector3(Managers.Game.CurPlayerData.CurPosition.X, 0, Managers.Game.CurPlayerData.CurPosition.Z);
                             Managers.Game.Player._cellPos = Managers.Game.Player.transform.position;
+
+                            isSpawned = true;
                         }
                     }
                 }
@@ -600,7 +612,7 @@ public class GameManager
 
             if (interacts != null && Managers.Game.CurPlayerData.IsContractedSword == true)
             {
-                interacts.transform.parent.gameObject.SetActive(false);
+                interacts.transform.gameObject.SetActive(false);
             }
 
             Items = items;
@@ -675,42 +687,42 @@ public class GameManager
         PlayerPrefs.DeleteAll();
         PlayerPrefs.DeleteKey("ISFIRST");
         {
-            string path = Application.persistentDataPath +"/SaveData.json";
+            string path = Application.persistentDataPath + "/SaveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveMonsterActiveData.json";
+            string path = Application.persistentDataPath + "/MonsterActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveBossMonsterActiveData.json";
+            string path = Application.persistentDataPath + "/BossMonsterActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveCItemActiveData.json";
+            string path = Application.persistentDataPath + "/CItemActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveEItemActiveData.json";
+            string path = Application.persistentDataPath + "/EItemActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveDoorActiveData.json";
+            string path = Application.persistentDataPath + "/DoorActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SavePillarActiveData.json";
+            string path = Application.persistentDataPath + "/PillarActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
         {
-            string path = Application.persistentDataPath + "/SaveLeverActiveData.json";
+            string path = Application.persistentDataPath + "/LeverActiveData.json";
             if (File.Exists(path))
                 File.Delete(path);
         }
@@ -727,7 +739,6 @@ public class GameManager
         if (LoadGame())
             return;
 
-        PlayerPrefs.SetInt("ISFIRST", 0);
         SaveGame();
     }
 }

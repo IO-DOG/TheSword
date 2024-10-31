@@ -22,6 +22,12 @@ public class UI_ConversationPopup : UI_Popup
         ConversationArrow,
     }
 
+    enum GameObjects
+    {
+        LeftEmoji,
+        RightEmoji,
+    }
+
     public override bool Init()
     {
         if (base.Init() == false)
@@ -30,6 +36,7 @@ public class UI_ConversationPopup : UI_Popup
         #region Bind
         BindImage(typeof(Images));
         BindText(typeof(Texts));
+        BindObject(typeof(GameObjects));
         #endregion
 
         GetImage((int)Images.RightPortrait).gameObject.transform.localScale = new Vector3(-1, 1, 1);
@@ -51,7 +58,7 @@ public class UI_ConversationPopup : UI_Popup
             ShowNextScript();
         }
 
-        if(GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().allLettersShown)
+         if(GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().allLettersShown)
             GetImage((int)Images.ConversationArrow).gameObject.SetActive(true);
         else
             GetImage((int)Images.ConversationArrow).gameObject.SetActive(false);
@@ -59,6 +66,8 @@ public class UI_ConversationPopup : UI_Popup
 
     public void InitScript()
     {
+        GetObject((int)GameObjects.LeftEmoji).SetActive(false);
+        GetObject((int)GameObjects.RightEmoji).SetActive(false);
         GetImage((int)Images.LeftPortrait).gameObject.SetActive(false);
         GetImage((int)Images.RightPortrait).gameObject.SetActive(false);
         ShowCurrentScript();
@@ -68,22 +77,43 @@ public class UI_ConversationPopup : UI_Popup
     {
         if (!string.IsNullOrEmpty(Managers.Data.EventDic[Managers.Game.CurEventID].IllustLeft))
         {
+            string[] speaker = Managers.Data.EventDic[Managers.Game.CurEventID].IllustLeft.Split('_');
+
+            GetObject((int)GameObjects.RightEmoji).SetActive(false);
+            if (speaker[2] == "Normal")
+                GetObject((int)GameObjects.LeftEmoji).SetActive(false);
+            else
+                GetObject((int)GameObjects.LeftEmoji).SetActive(true);
+
             GetImage((int)Images.LeftPortrait).gameObject.SetActive(true);
-            GetImage((int)Images.LeftPortrait).sprite = Managers.Resource.Load<Sprite>(Managers.Data.EventDic[Managers.Game.CurEventID].IllustLeft);
+            GetImage((int)Images.LeftPortrait).sprite = Managers.Resource.Load<Sprite>(speaker[1]);
             GetImage((int)Images.RightPortrait).color = Color.gray;
             GetImage((int)Images.LeftPortrait).color = Color.white;
 
-            GetText((int)Texts.SpeakerText).text = "���";
+            GetObject((int)GameObjects.LeftEmoji).GetComponent<Animator>().Play(Managers.Data.EventDic[Managers.Game.CurEventID].IllustLeft);
+
+            GetText((int)Texts.SpeakerText).text = Managers.GetString(Define.PLAYER_DEFAULT_NAME);
         }
 
         if (!string.IsNullOrEmpty(Managers.Data.EventDic[Managers.Game.CurEventID].IllustRight))
         {
+            string[] speaker = Managers.Data.EventDic[Managers.Game.CurEventID].IllustRight.Split('_');
+
+            GetObject((int)GameObjects.LeftEmoji).SetActive(false);
+            if (speaker[2] == "Normal")
+                GetObject((int)GameObjects.RightEmoji).SetActive(false);
+            else
+                GetObject((int)GameObjects.RightEmoji).SetActive(true);
+
             GetImage((int)Images.RightPortrait).gameObject.SetActive(true);
-            GetImage((int)Images.RightPortrait).sprite = Managers.Resource.Load<Sprite>(Managers.Data.EventDic[Managers.Game.CurEventID].IllustRight);
+            GetImage((int)Images.RightPortrait).sprite = Managers.Resource.Load<Sprite>(speaker[1]);
+            GetImage((int)Images.RightPortrait).SetNativeSize();
             GetImage((int)Images.LeftPortrait).color = Color.gray;
             GetImage((int)Images.RightPortrait).color = Color.white;
 
-            GetText((int)Texts.SpeakerText).text = "������ ��";
+            GetObject((int)GameObjects.RightEmoji).GetComponent<Animator>().Play(Managers.Data.EventDic[Managers.Game.CurEventID].IllustRight);
+
+            GetText((int)Texts.SpeakerText).text = Managers.GetString(Define.SWORD_DEFAULT_NAME);
         }
 
         string text = Managers.GetString(Managers.Data.ScriptDic[Managers.Data.EventDic[Managers.Game.CurEventID].ScriptID].id);

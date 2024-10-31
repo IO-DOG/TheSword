@@ -74,6 +74,7 @@ public class Define
         Lever = 14,
         InteractObjects = 15,
         BossDoor = 16,
+        SlimeWater = 17,
     }
 
     public enum MoveDir
@@ -112,6 +113,7 @@ public class Define
         Special,
         Boss,
     }
+
     #endregion
 
     #region Map
@@ -165,8 +167,10 @@ public class Define
         Right,
         Up,
         Down,
-        IdleUp,
-        IdleDown,
+        IdleBack,
+        IdleFront,
+        IdleLeft,
+        IdleRight,
         OnLever,
         DrawSword,
         ContractSword,
@@ -201,6 +205,7 @@ public class Define
     public static int INTRO_STORY = 900000;
     public static int STAGE_NAME = 5000;
     public static int PLAYER_DEFAULT_NAME = 6;
+    public static int SWORD_DEFAULT_NAME = 4018;
     public static int BOSS_ALERT = 7;
     public static int SWOARD_ALERT = 8;
     public static int TUTORIAL_SCRIPT = 100006;

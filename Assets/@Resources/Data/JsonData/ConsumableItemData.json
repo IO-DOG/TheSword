@@ -2,111 +2,147 @@
   "consumableItems": [
     {
       "id": 0,
-      "Name": "초록 열쇠",
       "Heal": 0.0,
       "AttackUp": 0.0,
       "DefenceUp": 0.0,
       "HPUp": 0.0,
-      "Description": "초록 문을 열 수 있는 열쇠"
+      "Img": "Item/Tilemap_DoorKey1",
+      "PrefabName": "FX_Key_Green",
+      "Shadow": "Item_Shadow_000",
+      "ScriptNameId": 109,
+      "ScriptDescriptionId": 121
     },
     {
       "id": 1,
-      "Name": "노랑 열쇠",
       "Heal": 0.0,
       "AttackUp": 0.0,
       "DefenceUp": 0.0,
       "HPUp": 0.0,
-      "Description": "노랑 문을 열 수 있는 열쇠"
+      "Img": "Item/Tilemap_DoorKey2",
+      "PrefabName": "FX_Key_Yellow",
+      "Shadow": "Item_Shadow_000",
+      "ScriptNameId": 110,
+      "ScriptDescriptionId": 122
     },
     {
       "id": 2,
-      "Name": "붉은 열쇠",
       "Heal": 0.0,
       "AttackUp": 0.0,
       "DefenceUp": 0.0,
       "HPUp": 0.0,
-      "Description": "붉은 문을 열 수 있는 열쇠"
+      "Img": "Item/Tilemap_DoorKey3",
+      "PrefabName": "FX_Key_Red",
+      "Shadow": "Item_Shadow_000",
+      "ScriptNameId": 111,
+      "ScriptDescriptionId": 123
     },
     {
       "id": 3,
-      "Name": "사과",
       "Heal": 20.0,
       "AttackUp": 0.0,
       "DefenceUp": 0.0,
       "HPUp": 0.0,
-      "Description": "20% 체력을 즉시 회복"
+      "Img": "Tilemap_Portion0",
+      "PrefabName": "FX_Potion_D",
+      "Shadow": "Item_Shadow_000",
+      "ScriptNameId": 112,
+      "ScriptDescriptionId": 124
     },
     {
       "id": 4,
-      "Name": "고기",
       "Heal": 30.0,
       "AttackUp": 0.0,
       "DefenceUp": 0.0,
       "HPUp": 0.0,
-      "Description": "30% 체력을 즉시 회복"
+      "Img": "Tilemap_Portion1",
+      "PrefabName": "FX_Potion_D",
+      "Shadow": "Item_Shadow_000",
+      "ScriptNameId": 113,
+      "ScriptDescriptionId": 125
     },
     {
       "id": 5,
-      "Name": "소형 물약",
       "Heal": 40.0,
       "AttackUp": 0.0,
       "DefenceUp": 0.0,
       "HPUp": 0.0,
-      "Description": "40% 체력을 즉시 회복"
+      "Img": "Tilemap_Portion2",
+      "PrefabName": "FX_Potion_C",
+      "Shadow": "Item_Shadow_000",
+      "ScriptNameId": 114,
+      "ScriptDescriptionId": 126
     },
     {
       "id": 6,
-      "Name": "중형 물약",
       "Heal": 50.0,
       "AttackUp": 0.0,
       "DefenceUp": 0.0,
       "HPUp": 0.0,
-      "Description": "50% 체력을 즉시 회복"
+      "Img": "Tilemap_Portion3",
+      "PrefabName": "FX_Potion_C",
+      "Shadow": "Item_Shadow_000",
+      "ScriptNameId": 115,
+      "ScriptDescriptionId": 127
     },
     {
       "id": 7,
-      "Name": "대형 물약",
       "Heal": 60.0,
       "AttackUp": 0.0,
       "DefenceUp": 0.0,
       "HPUp": 0.0,
-      "Description": "60% 체력을 즉시 회복"
+      "Img": "Tilemap_Portion4",
+      "PrefabName": "FX_Potion_C",
+      "Shadow": "Item_Shadow_000",
+      "ScriptNameId": 116,
+      "ScriptDescriptionId": 128
     },
     {
       "id": 8,
-      "Name": "축복 물약",
       "Heal": 1.0,
       "AttackUp": 0.0,
       "DefenceUp": 0.0,
       "HPUp": 0.0,
-      "Description": "100% 체력을 즉시 회복"
+      "Img": "Tilemap_Portion5",
+      "PrefabName": "FX_Potion_B",
+      "Shadow": "Item_Shadow_000",
+      "ScriptNameId": 117,
+      "ScriptDescriptionId": 129
     },
     {
       "id": 9,
-      "Name": "공격 룬",
       "Heal": 0.0,
       "AttackUp": 1.0,
       "DefenceUp": 0.0,
       "HPUp": 0.0,
-      "Description": "공격력 능력치 영구 증가"
+      "Img": "Tilemap_RuneATK",
+      "PrefabName": "FX_RunStone_Red",
+      "Shadow": "Item_Shadow_000",
+      "ScriptNameId": 118,
+      "ScriptDescriptionId": 130
     },
     {
       "id": 10,
-      "Name": "방어 룬",
       "Heal": 0.0,
       "AttackUp": 0.0,
       "DefenceUp": 1.0,
       "HPUp": 0.0,
-      "Description": "방어력 능력치 영구 증가"
+      "Img": "Tilemap_RuneDEF",
+      "PrefabName": "FX_RunStone_Blue",
+      "Shadow": "Item_Shadow_000",
+      "ScriptNameId": 119,
+      "ScriptDescriptionId": 131
     },
     {
       "id": 11,
-      "Name": "체력 룬",
       "Heal": 0.0,
       "AttackUp": 0.0,
       "DefenceUp": 0.0,
       "HPUp": 5.0,
-      "Description": "체력 능력치 영구 증가"
+      "Img": "Tilemap_RuneHP",
+      "PrefabName": "FX_RunStone_Green",
+      "Shadow": "Item_Shadow_000",
+      "ScriptNameId": 120,
+      "ScriptDescriptionId": 132
     }
   ]
 }
