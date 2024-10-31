@@ -80,6 +80,9 @@ public class CameraController : MonoBehaviour
 
     void CameraUpdate()
     {
+        if (Managers.Game.OnMeetKingSlime)
+            return;
+
         Vector3 pos = Managers.Game.Player.transform.position;
 
         SetCameraExtent();

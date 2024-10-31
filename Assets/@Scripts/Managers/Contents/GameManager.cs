@@ -26,6 +26,7 @@ public class GameManager
     public bool OnFade = false;
     public bool OnDirect = false;
     public bool OnInteract = false;
+    public bool OnMeetKingSlime = false;
 
     public int CurEventID;
     public int TotalKillSplitSlime = 0;
@@ -545,6 +546,7 @@ public class GameManager
                     {
                         case 0:
                             boss.GetComponent<BossMonsterController>().id = Define.KingSlime;
+                            boss.gameObject.name = "KingSlime";
                             break;
                         default:
                             break;
