@@ -7,6 +7,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.UI.Image;
 
 public class DirectingManager
 {
@@ -256,7 +257,11 @@ public class Events
         scoutSlime.GetComponent<Animator>().Play("bossScene_C0_000");
         DG.Tweening.Sequence sequence = DOTween.Sequence();
         yield return new WaitForSeconds(2f);
-        GameObject slimeSpawner = Managers.Resource.Instantiate("BossScene_C0_000", parent.transform);
+        GameObject slimeSpawner = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
+        slimeSpawner.transform.localPosition = new Vector3(4.056f, 0.474f, -2.79f);
+        slimeSpawner.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
+        CoroutineManager.StartCoroutine(CoBright(slimeSpawner, 2f));
+
 
         GameObject.Find("SlimeFall1").GetComponent<ParticleSystem>().Play();
         GameObject.Find("SlimeFall2").GetComponent<ParticleSystem>().Play();
@@ -265,20 +270,59 @@ public class Events
         GameObject.Find("SlimeFall5").GetComponent<ParticleSystem>().Play();
         yield return new WaitForSeconds(1f);
         GameObject slime1 = Managers.Resource.Instantiate("BossScene_C0_003", parent.transform);
+        slime1.transform.localPosition = new Vector3(3.942f, 0.7f, -3.045f);
         GameObject slime2 = Managers.Resource.Instantiate("BossScene_C0_004", parent.transform);
+        slime2.transform.localPosition = new Vector3(3.563f, 0.7f, -3.045f);
         GameObject slime3 = Managers.Resource.Instantiate("BossScene_C0_005", parent.transform);
+        slime3.transform.localPosition = new Vector3(4.359f, 0.7f, -3.045f);
 
-        CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime1, midlePos.transform.localPosition, UnityEngine.Random.Range(1, 2)));
-        CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime2, midlePos.transform.localPosition, UnityEngine.Random.Range(1, 2)));
-        CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime3, midlePos.transform.localPosition, UnityEngine.Random.Range(1, 2)));
+        CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime1, midlePos.transform.localPosition, UnityEngine.Random.Range(1, 4)));
+        CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime2, midlePos.transform.localPosition, UnityEngine.Random.Range(1, 4)));
+        CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime3, midlePos.transform.localPosition, UnityEngine.Random.Range(1, 4)));
 
-        yield return new WaitForSeconds(2.2f);
+        yield return new WaitForSeconds(4.2f);
+
+        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner, 2f));
+
+
         _kingSlime = GameObject.Find("bossMonster0");
         //_kingSlime.SetActive(false);
         Debug.Log("슬라임이 채워진다...");
         Debug.Log("슬라임이 한곳으로 모여 합쳐진다..");
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(2.2f);
         AfterMeetKingSlime();
+    }
+
+    public IEnumerator CoBright(GameObject go, float time)
+    {
+        yield return null;
+
+        float totalTime = 0f;
+        SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
+        while (totalTime <= time)
+        {
+            float delta = totalTime / time;
+            sr.color = new Color(1, 1, 1, delta);
+            totalTime += Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    public IEnumerator CoBlack(GameObject go, float time)
+    {
+        yield return null;
+
+        float totalTime = 0f;
+        SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
+        while (totalTime <= time)
+        {
+            float delta = totalTime / time;
+            sr.color = new Color(1, 1, 1, 1 - delta);
+            totalTime += Time.deltaTime;
+            yield return null;
+        }
+
+        sr.color = new Color(1, 1, 1, 0);
     }
 
     public IEnumerator CoMoveToKingSlimeMidlePos(GameObject original, Vector3 target, float time)
@@ -293,6 +337,7 @@ public class Events
             float x = original.transform.localPosition.x + (target.x - original.transform.localPosition.x) * delta;
             float y = original.transform.localPosition.y + (target.y - original.transform.localPosition.y) * delta;
             float z = original.transform.localPosition.z + (target.z - original.transform.localPosition.z) * delta;
+            original.transform.localPosition = new Vector3(x, y, z);
             totalTime += Time.deltaTime;
             yield return null;
         }
