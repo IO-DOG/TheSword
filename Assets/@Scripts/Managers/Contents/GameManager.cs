@@ -53,6 +53,8 @@ public class GameManager
     public Action OnBattlePlayerDamagedAction;
     public Action OnKingSlimeDeadAction;
 
+    public Action OnPortalAction;
+
     public Texture2D _screenShot = null;
     public Sprite _screenShot2 = null;
 
@@ -366,6 +368,7 @@ public class GameManager
             Managers.Game.CurPlayerData.CriticalAttack = Managers.Data.PlayerDic[level].CriticalAttack;
             Managers.Game.CurPlayerData.MoveSpeed = Managers.Data.PlayerDic[level].MoveSpeed;
             Managers.Game.CurPlayerData.IsDefence = false;
+            Managers.Game.CurPlayerData.CurStageid = 0;
 
             KeyInventory.InitKeyInventory();
 
@@ -470,6 +473,7 @@ public class GameManager
             GameObject items = Util.FindChildByName(map.transform, "Items").gameObject;
             GameObject monsters = Util.FindChildByName(map.transform, "Monsters").gameObject;
             GameObject bossMonsters = Util.FindChildByName(map.transform, "BossMonsters").gameObject;
+            GameObject deco = Util.FindChildByName(map.transform, "Deco").gameObject;
             bossMonsters.transform.localScale = new Vector3(1, 2, 1);
 
             map.transform.localPosition += new Vector3(count * 100, 0, 0);
@@ -633,6 +637,7 @@ public class GameManager
             //InstantiateLights(key, lights.transform);
         }
         MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Player.gameObject);
+        GameObject effects = Managers.Resource.Instantiate($"Effects_{chapter.Replace("_", "")}");
         CameraController.SetConfinerBounds();
     }
 

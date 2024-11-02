@@ -15,16 +15,16 @@ public class Door : MonoBehaviour
         _rotateAngle = new Vector3(0f, transform.rotation.eulerAngles.y + 90f, 0f);
         _doorLockPos = transform.parent.GetChild(1);
 
-        #region Fade Setting
-        GetComponent<MeshRenderer>().material.SetFloat("_Mode", 2);
-        GetComponent<MeshRenderer>().material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-        GetComponent<MeshRenderer>().material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-        GetComponent<MeshRenderer>().material.SetInt("_ZWrite", 0);
-        GetComponent<MeshRenderer>().material.DisableKeyword("_ALPHATEST_ON");
-        GetComponent<MeshRenderer>().material.EnableKeyword("_ALPHABLEND_ON");
-        GetComponent<MeshRenderer>().material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-        GetComponent<MeshRenderer>().material.renderQueue = 3000;
-        #endregion
+        //#region Fade Setting
+        //GetComponent<MeshRenderer>().material.SetFloat("_Mode", 2);
+        //GetComponent<MeshRenderer>().material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        //GetComponent<MeshRenderer>().material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        //GetComponent<MeshRenderer>().material.SetInt("_ZWrite", 0);
+        //GetComponent<MeshRenderer>().material.DisableKeyword("_ALPHATEST_ON");
+        //GetComponent<MeshRenderer>().material.EnableKeyword("_ALPHABLEND_ON");
+        //GetComponent<MeshRenderer>().material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        //GetComponent<MeshRenderer>().material.renderQueue = 3000;
+        //#endregion
     }
 
     #region Open Door Effect

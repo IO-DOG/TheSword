@@ -206,11 +206,11 @@ public class MapEditor : EditorWindow
             { 
                 if (tile is DoorData doorTile)
                 {
-                    GameObject go = Instantiate<GameObject>(defaulTileMap[1], tiles.transform);
+                    GameObject go = Instantiate(defaulTileMap[1], tiles.transform);
                     go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
 
-                    GameObject door = Instantiate<GameObject>(defaulTileMap[doorTile.PrefabID], tiles.transform);
-                    door.transform.position = new Vector3(doorTile.Position.X, doorTile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
+                    GameObject door = Instantiate(defaulTileMap[doorTile.PrefabID], tiles.transform);
+                    door.transform.position = new Vector3(doorTile.Position.X, doorTile.Position.Y - Define.TILE_SIZE / 4, tile.Position.Z);
                     door.name = $"door{doorTile.TotalCount}";
 
                     if (doorTile.IsActive == false)
