@@ -14,7 +14,6 @@ public class Effects_00 : MonoBehaviour
     void Start()
     {
         fog = Managers.Resource.Instantiate("Fog", transform);
-        fog.transform.localPosition = Managers.Game.Player.transform.position - Vector3.one * (-7.8f);
         for (int i = 0; i < leavesPoolSize; i++)
         {
             fallingLeavesPrefab = Managers.Resource.Instantiate("FallingLeaves", transform);
@@ -44,7 +43,7 @@ public class Effects_00 : MonoBehaviour
     {
         while(true)
         {
-            float spawnInterval = Random.Range(0, 5);
+            float spawnInterval = Random.Range(15, 40);
             yield return new WaitForSeconds(spawnInterval);
 
             GameObject obj = GetPooledObejct();
