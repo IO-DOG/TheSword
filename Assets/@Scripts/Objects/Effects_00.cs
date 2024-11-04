@@ -8,7 +8,7 @@ public class Effects_00 : MonoBehaviour
     GameObject fog;
     GameObject fallingLeavesPrefab;
     List<GameObject> fallingLeaves = new List<GameObject>();
-    int leavesPoolSize = 4;
+    int leavesPoolSize = 7;
 
 
     void Start()
@@ -20,7 +20,7 @@ public class Effects_00 : MonoBehaviour
             fallingLeavesPrefab.SetActive(false);
             fallingLeaves.Add(fallingLeavesPrefab);
         }
-
+        SetFogPosition();
         Managers.Game.OnPortalAction -= SetFogPosition;
         Managers.Game.OnPortalAction += SetFogPosition;
         
@@ -43,7 +43,7 @@ public class Effects_00 : MonoBehaviour
     {
         while(true)
         {
-            float spawnInterval = Random.Range(15, 40);
+            float spawnInterval = Random.Range(0, 5);
             yield return new WaitForSeconds(spawnInterval);
 
             GameObject obj = GetPooledObejct();
