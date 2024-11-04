@@ -251,7 +251,7 @@ public class Events
         yield return new WaitForSeconds(2.5f);
         GameObject parent = GameObject.Find("Dungeon_00_003");
         GameObject midlePos = GameObject.Find("SpawnKingSlime");
-        Vector3 pos = new Vector3(3.827f, 1.514f, -1.776f);
+        Vector3 pos = new Vector3(3.847f, 3.123f, -2f);
         GameObject scoutSlime = Managers.Resource.Instantiate("BossScene_C0_000", parent.transform);
         Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 16.5f, -5f);
 
@@ -261,6 +261,17 @@ public class Events
         yield return new WaitForSeconds(2f);
 
         Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 16.5f, -5f);
+
+        GameObject.Find("SlimeFall4").GetComponent<ParticleSystem>().Play();
+        yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 1.5f));
+        GameObject.Find("SlimeFall2").GetComponent<ParticleSystem>().Play();
+        yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 1.5f));
+        GameObject.Find("SlimeFall3").GetComponent<ParticleSystem>().Play();
+        yield return new WaitForSeconds(UnityEngine.Random.Range(0.5f, 1f));
+        GameObject.Find("SlimeFall1").GetComponent<ParticleSystem>().Play();
+        yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.2f));
+        GameObject.Find("SlimeFall5").GetComponent<ParticleSystem>().Play();
+        yield return new WaitForSeconds(2f);
 
         GameObject slimeSpawner = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
         slimeSpawner.transform.localPosition = new Vector3(4.056f, 0.474f, -2.79f);
@@ -289,44 +300,54 @@ public class Events
 
         // create fog
 
-        GameObject.Find("SlimeFall1").GetComponent<ParticleSystem>().Play();
-        yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.2f));
-        GameObject.Find("SlimeFall2").GetComponent<ParticleSystem>().Play();
-        yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.2f));
-        GameObject.Find("SlimeFall3").GetComponent<ParticleSystem>().Play();
-        yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.2f));
-        GameObject.Find("SlimeFall4").GetComponent<ParticleSystem>().Play();
-        yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.2f));
-        GameObject.Find("SlimeFall5").GetComponent<ParticleSystem>().Play();
-        yield return new WaitForSeconds(1f);
 
         for (int i = 0; i < 10; ++i)
         {
             GameObject slime1 = Managers.Resource.Instantiate("BossScene_C0_003", parent.transform);
             slime1.transform.localPosition = new Vector3(UnityEngine.Random.Range(3.5f, 4), 0.7f, -3.045f);
             GameObject slime2 = Managers.Resource.Instantiate("BossScene_C0_004", parent.transform);
-            slime2.transform.localPosition = new Vector3(UnityEngine.Random.Range(3.5f, 4), 0.7f, -3.045f);
+            slime2.transform.localPosition = new Vector3(UnityEngine.Random.Range(4.3f, 5.5f), 0.7f, UnityEngine.Random.Range(-3f, -3.6f));
             GameObject slime3 = Managers.Resource.Instantiate("BossScene_C0_005", parent.transform);
-            slime3.transform.localPosition = new Vector3(UnityEngine.Random.Range(4f, 4.5f), 0.7f, -3.045f);
+            slime3.transform.localPosition = new Vector3(UnityEngine.Random.Range(2.7f, 3.4f), 0.7f, UnityEngine.Random.Range(-3f, -4f));
+            GameObject slime4 = Managers.Resource.Instantiate("BossScene_C0_005", parent.transform);
+            slime3.transform.localPosition = new Vector3(2.5f, 0.7f, UnityEngine.Random.Range(-4f, -5f));
+            GameObject slime5 = Managers.Resource.Instantiate("BossScene_C0_005", parent.transform);
+            slime3.transform.localPosition = new Vector3(5.47f, 0.7f, UnityEngine.Random.Range(-4f, -5f));
 
-            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime1, midlePos.transform.localPosition, UnityEngine.Random.Range(1, 4)));
-            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime2, midlePos.transform.localPosition, UnityEngine.Random.Range(1, 4)));
-            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime3, midlePos.transform.localPosition, UnityEngine.Random.Range(1, 4)));
+            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime1, midlePos.transform.localPosition, 5));
+            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime2, midlePos.transform.localPosition, 5));
+            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime3, midlePos.transform.localPosition, 5));
+            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime4, midlePos.transform.localPosition, 5));
+            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime5, midlePos.transform.localPosition, 5));
         }
         
-        
-        
+
         
         yield return new WaitForSeconds(4.2f);
         
         CoroutineManager.StartCoroutine(CoBlack(slimeSpawner, 2f));
+        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner2, 2f));
+        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner3, 2f));
+        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner4, 2f));
+        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner5, 2f));
         
         
         _kingSlime = GameObject.Find("bossMonster0");
+        GameObject kingSlimeAction = GameObject.Find("KingSlimeAction");
+        //GameObject kingSlimeAction = Managers.Resource.Instantiate("KingSlimeAction", parent.transform);
+        kingSlimeAction.GetComponent<Animator>().Play("KingSlimeAction");
+
         //_kingSlime.SetActive(false);
         Debug.Log("슬라임이 채워진다...");
         Debug.Log("슬라임이 한곳으로 모여 합쳐진다..");
-        yield return new WaitForSeconds(2.2f);
+
+        //kingSlimeAction.transform.localPosition = new Vector3(4.25f, 3f, -4.25f);
+        yield return new WaitForSeconds(4.5f);
+        // todo
+        // white bang
+
+        // create boss
+
         AfterMeetKingSlime();
     }
 
@@ -374,7 +395,7 @@ public class Events
             float x = original.transform.localPosition.x + (target.x - original.transform.localPosition.x) * delta;
             float y = original.transform.localPosition.y + (target.y - original.transform.localPosition.y) * delta;
             float z = original.transform.localPosition.z + (target.z - original.transform.localPosition.z) * delta;
-            original.transform.localPosition = new Vector3(x, y, z);
+            original.transform.localPosition = new Vector3(x, original.transform.position.y, z);
             totalTime += Time.deltaTime;
             yield return null;
         }
