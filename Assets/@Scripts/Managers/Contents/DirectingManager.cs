@@ -251,24 +251,55 @@ public class Events
         yield return new WaitForSeconds(2.5f);
         GameObject parent = GameObject.Find("Dungeon_00_003");
         GameObject midlePos = GameObject.Find("SpawnKingSlime");
-        Vector3 pos = new Vector3(4.056f, 1.514f, -1.776f);
+        Vector3 pos = new Vector3(3.827f, 1.514f, -1.776f);
         GameObject scoutSlime = Managers.Resource.Instantiate("BossScene_C0_000", parent.transform);
+        Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 16.5f, -5f);
+
         scoutSlime.transform.localPosition = pos;
         scoutSlime.GetComponent<Animator>().Play("bossScene_C0_000");
         DG.Tweening.Sequence sequence = DOTween.Sequence();
         yield return new WaitForSeconds(2f);
+
+        Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 16.5f, -5f);
+
         GameObject slimeSpawner = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
         slimeSpawner.transform.localPosition = new Vector3(4.056f, 0.474f, -2.79f);
         slimeSpawner.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
+        GameObject slimeSpawner2 = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
+        slimeSpawner2.transform.localPosition = new Vector3(5.16f, 0.474f, -2.95f);
+        slimeSpawner2.transform.localRotation = new Quaternion(0, 45, 0, 0);
+        slimeSpawner2.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
+        GameObject slimeSpawner3 = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
+        slimeSpawner3.transform.localPosition = new Vector3(3.07f, 0.474f, -2.78f);
+        slimeSpawner2.transform.localRotation = new Quaternion(0, -45, 0, 0);
+        slimeSpawner3.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
+        GameObject slimeSpawner4 = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
+        slimeSpawner4.transform.localPosition = new Vector3(2.51f, 0.474f, -4.29f);
+        slimeSpawner2.transform.localRotation = new Quaternion(0, -90, 0, 0);
+        slimeSpawner4.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
+        GameObject slimeSpawner5 = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
+        slimeSpawner5.transform.localPosition = new Vector3(6.02f, 0.474f, -4.29f);
+        slimeSpawner2.transform.localRotation = new Quaternion(0, 90, 0, 0);
+        slimeSpawner5.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
         CoroutineManager.StartCoroutine(CoBright(slimeSpawner, 2f));
+        CoroutineManager.StartCoroutine(CoBright(slimeSpawner2, 2f));
+        CoroutineManager.StartCoroutine(CoBright(slimeSpawner3, 2f));
+        CoroutineManager.StartCoroutine(CoBright(slimeSpawner4, 2f));
+        CoroutineManager.StartCoroutine(CoBright(slimeSpawner5, 2f));
 
+        // create fog
 
         GameObject.Find("SlimeFall1").GetComponent<ParticleSystem>().Play();
+        yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.2f));
         GameObject.Find("SlimeFall2").GetComponent<ParticleSystem>().Play();
+        yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.2f));
         GameObject.Find("SlimeFall3").GetComponent<ParticleSystem>().Play();
+        yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.2f));
         GameObject.Find("SlimeFall4").GetComponent<ParticleSystem>().Play();
+        yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.2f));
         GameObject.Find("SlimeFall5").GetComponent<ParticleSystem>().Play();
         yield return new WaitForSeconds(1f);
+
         for (int i = 0; i < 10; ++i)
         {
             GameObject slime1 = Managers.Resource.Instantiate("BossScene_C0_003", parent.transform);
@@ -283,14 +314,14 @@ public class Events
             CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime3, midlePos.transform.localPosition, UnityEngine.Random.Range(1, 4)));
         }
         
-
         
-
+        
+        
         yield return new WaitForSeconds(4.2f);
-
+        
         CoroutineManager.StartCoroutine(CoBlack(slimeSpawner, 2f));
-
-
+        
+        
         _kingSlime = GameObject.Find("bossMonster0");
         //_kingSlime.SetActive(false);
         Debug.Log("슬라임이 채워진다...");
