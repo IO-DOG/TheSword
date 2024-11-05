@@ -222,13 +222,13 @@ public class Events
 
             DG.Tweening.Sequence sequence = DOTween.Sequence();
             Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
-            Vector3 target = new Vector3(0f, 16.5f, -5f); ;
+            Vector3 target = new Vector3(0f, 17.5f, -5f); ;
             float moveTime = 2f;
+
+            CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
 
             OnMeetKingSlime -= KingSlimeAction;
             OnMeetKingSlime += KingSlimeAction;
-
-            CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
 
 
             //sequence.Append(() => { Debug.Log("슬라임이 채워진다..."); })
@@ -253,14 +253,20 @@ public class Events
         GameObject midlePos = GameObject.Find("SpawnKingSlime");
         Vector3 pos = new Vector3(3.847f, 3.123f, -2f);
         GameObject scoutSlime = Managers.Resource.Instantiate("BossScene_C0_000", parent.transform);
-        Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 16.5f, -5f);
+        Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 17.5f, -5f);
 
         scoutSlime.transform.localPosition = pos;
         scoutSlime.GetComponent<Animator>().Play("bossScene_C0_000");
         DG.Tweening.Sequence sequence = DOTween.Sequence();
         yield return new WaitForSeconds(2f);
 
-        Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 16.5f, -5f);
+        // camera slow down
+        Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
+        Vector3 target = new Vector3(0f, 14.5f, -5f); ;
+        float moveTime = 10f;
+        CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
+
+        //Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 16.5f, -5f);
 
         GameObject.Find("SlimeFall4").GetComponent<ParticleSystem>().Play();
         yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 1.5f));
@@ -269,28 +275,34 @@ public class Events
         GameObject.Find("SlimeFall3").GetComponent<ParticleSystem>().Play();
         yield return new WaitForSeconds(UnityEngine.Random.Range(0.5f, 1f));
         GameObject.Find("SlimeFall1").GetComponent<ParticleSystem>().Play();
-        yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.2f));
+        yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.5f));
         GameObject.Find("SlimeFall5").GetComponent<ParticleSystem>().Play();
         yield return new WaitForSeconds(2f);
 
+        GameObject.Find("SlimeFall1").GetComponent<ParticleSystem>().Stop();
+        GameObject.Find("SlimeFall2").GetComponent<ParticleSystem>().Stop();
+        GameObject.Find("SlimeFall3").GetComponent<ParticleSystem>().Stop();
+        GameObject.Find("SlimeFall4").GetComponent<ParticleSystem>().Stop();
+        GameObject.Find("SlimeFall5").GetComponent<ParticleSystem>().Stop();
+
         GameObject slimeSpawner = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
-        slimeSpawner.transform.localPosition = new Vector3(4.056f, 0.474f, -2.79f);
+        slimeSpawner.transform.localPosition = new Vector3(3.94f, 0.474f, -2.43f);
         slimeSpawner.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
         GameObject slimeSpawner2 = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
-        slimeSpawner2.transform.localPosition = new Vector3(5.16f, 0.474f, -2.95f);
-        slimeSpawner2.transform.localRotation = new Quaternion(0, 45, 0, 0);
+        slimeSpawner2.transform.localPosition = new Vector3(5.26f, 0.41f, -3f);
+        slimeSpawner2.transform.rotation = Quaternion.Euler(6.73f, 39.188f, 0.649f);
         slimeSpawner2.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
         GameObject slimeSpawner3 = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
-        slimeSpawner3.transform.localPosition = new Vector3(3.07f, 0.474f, -2.78f);
-        slimeSpawner2.transform.localRotation = new Quaternion(0, -45, 0, 0);
+        slimeSpawner3.transform.localPosition = new Vector3(2.5f, 0.48f, -3f);
+        slimeSpawner3.transform.rotation = Quaternion.Euler(14.75f, -53.521f, -7.414f);
         slimeSpawner3.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
         GameObject slimeSpawner4 = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
-        slimeSpawner4.transform.localPosition = new Vector3(2.51f, 0.474f, -4.29f);
-        slimeSpawner2.transform.localRotation = new Quaternion(0, -90, 0, 0);
+        slimeSpawner4.transform.localPosition = new Vector3(2f, 0.7f, -4.6f);
+        slimeSpawner4.transform.rotation = Quaternion.Euler(34.123f, -90, 0);
         slimeSpawner4.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
         GameObject slimeSpawner5 = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
-        slimeSpawner5.transform.localPosition = new Vector3(6.02f, 0.474f, -4.29f);
-        slimeSpawner2.transform.localRotation = new Quaternion(0, 90, 0, 0);
+        slimeSpawner5.transform.localPosition = new Vector3(5.8f, 0.6f, -4.5f);
+        slimeSpawner5.transform.rotation = Quaternion.Euler(35.874f, 90, 0);
         slimeSpawner5.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
         CoroutineManager.StartCoroutine(CoBright(slimeSpawner, 2f));
         CoroutineManager.StartCoroutine(CoBright(slimeSpawner2, 2f));
@@ -303,16 +315,26 @@ public class Events
 
         for (int i = 0; i < 10; ++i)
         {
+            float randValue = UnityEngine.Random.Range(0f, 1f);
             GameObject slime1 = Managers.Resource.Instantiate("BossScene_C0_003", parent.transform);
-            slime1.transform.localPosition = new Vector3(UnityEngine.Random.Range(3.5f, 4), 0.7f, -3.045f);
+            slime1.transform.localPosition = new Vector3(UnityEngine.Random.Range(3f, 4.5f), 0.7f, -2.5f);
+            yield return UnityEngine.Random.Range(0f, 2f);
+
             GameObject slime2 = Managers.Resource.Instantiate("BossScene_C0_004", parent.transform);
-            slime2.transform.localPosition = new Vector3(UnityEngine.Random.Range(4.3f, 5.5f), 0.7f, UnityEngine.Random.Range(-3f, -3.6f));
+            slime2.transform.localPosition = new Vector3(UnityEngine.Random.Range(4.6f, 5.5f), 0.7f, UnityEngine.Random.Range(-2.7f, -3.3f));
+            yield return UnityEngine.Random.Range(0f, 2f);
+
             GameObject slime3 = Managers.Resource.Instantiate("BossScene_C0_005", parent.transform);
-            slime3.transform.localPosition = new Vector3(UnityEngine.Random.Range(2.7f, 3.4f), 0.7f, UnityEngine.Random.Range(-3f, -4f));
-            GameObject slime4 = Managers.Resource.Instantiate("BossScene_C0_005", parent.transform);
-            slime3.transform.localPosition = new Vector3(2.5f, 0.7f, UnityEngine.Random.Range(-4f, -5f));
-            GameObject slime5 = Managers.Resource.Instantiate("BossScene_C0_005", parent.transform);
-            slime3.transform.localPosition = new Vector3(5.47f, 0.7f, UnityEngine.Random.Range(-4f, -5f));
+            slime3.transform.localPosition = new Vector3(UnityEngine.Random.Range(2.2f, 3.0f), 0.7f, UnityEngine.Random.Range(-3.6f, -2.6f));
+            yield return UnityEngine.Random.Range(0f, 2f);
+
+            GameObject slime4 = Managers.Resource.Instantiate("BossScene_C0_004", parent.transform);
+            slime4.transform.localPosition = new Vector3(2.1f, 0.7f, UnityEngine.Random.Range(-3.6f, -5f));
+            yield return UnityEngine.Random.Range(0f, 2f);
+
+            GameObject slime5 = Managers.Resource.Instantiate("BossScene_C0_003", parent.transform);
+            slime5.transform.localPosition = new Vector3(5.5f, 0.7f, UnityEngine.Random.Range(-3.6f, -5f));
+            yield return UnityEngine.Random.Range(0f, 2f);
 
             CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime1, midlePos.transform.localPosition, 5));
             CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime2, midlePos.transform.localPosition, 5));
@@ -323,7 +345,7 @@ public class Events
         
 
         
-        yield return new WaitForSeconds(4.2f);
+        yield return new WaitForSeconds(3.2f);
         
         CoroutineManager.StartCoroutine(CoBlack(slimeSpawner, 2f));
         CoroutineManager.StartCoroutine(CoBlack(slimeSpawner2, 2f));
@@ -389,12 +411,16 @@ public class Events
 
         float totalTime = 0f;
 
+        float originalX = original.transform.localPosition.x;
+        float originalY = original.transform.localPosition.y;
+        float originalZ = original.transform.localPosition.z;
+
         while (totalTime <= time)
         {
             float delta = totalTime / time;
-            float x = original.transform.localPosition.x + (target.x - original.transform.localPosition.x) * delta;
-            float y = original.transform.localPosition.y + (target.y - original.transform.localPosition.y) * delta;
-            float z = original.transform.localPosition.z + (target.z - original.transform.localPosition.z) * delta;
+            float x = originalX + (target.x - originalX) * delta;
+            float y = originalY + (target.y - originalY) * delta;
+            float z = originalZ + (target.z - originalZ) * delta;
             original.transform.localPosition = new Vector3(x, original.transform.position.y, z);
             totalTime += Time.deltaTime;
             yield return null;
