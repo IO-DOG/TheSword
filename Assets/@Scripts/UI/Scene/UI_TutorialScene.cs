@@ -57,7 +57,6 @@ public class UI_TutorialScene : UI_Scene
         BindImage(typeof(Images));
         #endregion
 
-        Managers.Game.CurPlayerData.CurStageid = 0;
         Managers.Game.InstantiateMap(Managers.Game.CurPlayerData.CurStageid);
         Managers.Game.CurPlayerData.MoveSpeed = 1f;
 
