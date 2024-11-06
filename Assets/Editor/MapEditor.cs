@@ -75,7 +75,7 @@ public class MapEditor : EditorWindow
         };
 
         leftPane.bindItem = (menu, index) =>
-        { 
+        {
             (menu as Label).text = enumValues[index].ToString();
         };
 
@@ -86,9 +86,9 @@ public class MapEditor : EditorWindow
     {
         foreach (var item in selectedItems)
         {
-            if(item is EditMenu menuItem)
+            if (item is EditMenu menuItem)
             {
-                switch(menuItem)
+                switch (menuItem)
                 {
                     case EditMenu.CreateMap:
                         ShowCreateMapWindow();
@@ -117,12 +117,13 @@ public class MapEditor : EditorWindow
         TilesetDropdown.RegisterValueChangedCallback(evt => Debug.Log("Selected: " + evt.newValue));
         m_RightPane.Add(TilesetDropdown);
 
-        var generateBtn = new Button(()=>
+        var generateBtn = new Button(() =>
         {
             string selectedTileSet = TilesetDropdown.value;
             string selectedMapName = mapNameDropdown.value;
             GenerateMap(selectedMapName, selectedTileSet);
-        }) { text = "Generate Map" };
+        })
+        { text = "Generate Map" };
         generateBtn.style.marginTop = 50;
         m_RightPane.Add(generateBtn);
     }
@@ -169,7 +170,7 @@ public class MapEditor : EditorWindow
             return;
         }
         SelectedTileMap = AssetDatabase.LoadAssetAtPath<WallData>($"Assets/@Resources/Data/TileSet/{tileSet}.asset").wallPrefabs;
-        foreach(GameObject go in SelectedTileMap)
+        foreach (GameObject go in SelectedTileMap)
         {
             go.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
         }
@@ -192,6 +193,7 @@ public class MapEditor : EditorWindow
             GameObject bossMonsters = new GameObject() { name = "BossMonsters" };
             GameObject decos = new GameObject() { name = "Deco" };
             GameObject pillars = new GameObject() { name = "Pillars" };
+            GameObject voids = new GameObject() { name = "Voids" };
 
             parent.transform.localPosition += new Vector3(count * 100, 0, 0);
             tiles.transform.parent = parent.transform;
@@ -201,12 +203,16 @@ public class MapEditor : EditorWindow
             bossMonsters.transform.parent = parent.transform;
             decos.transform.parent = parent.transform;
             pillars.transform.parent = parent.transform;
+            voids.transform.parent = tiles.transform; voids.AddComponent<MeshCombiner>();
 
             foreach (Data.TileData tile in mapData.Tiles)
-            { 
+            {
                 if (tile is DoorData doorTile)
                 {
-                    GameObject go = Instantiate(defaulTileMap[1], tiles.transform);
+                    GameObject defaulTileMap1 = GameObject.Find(defaulTileMap[1].name);
+                    if (defaulTileMap1 == null) defaulTileMap1 = new GameObject() { name = defaulTileMap[1].name };
+                    defaulTileMap1.transform.parent = tiles.transform;
+                    GameObject go = Instantiate(defaulTileMap[1], defaulTileMap1.transform);
                     go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
 
                     GameObject door = Instantiate(defaulTileMap[doorTile.PrefabID], tiles.transform);
@@ -232,7 +238,10 @@ public class MapEditor : EditorWindow
                     }
                     else
                     {
-                        GameObject go = Instantiate(defaulTileMap[1], tiles.transform);
+                        GameObject defaulTileMap1 = GameObject.Find(defaulTileMap[1].name);
+                        if (defaulTileMap1 == null) defaulTileMap1 = new GameObject() { name = defaulTileMap[1].name };
+                        defaulTileMap1.transform.parent = tiles.transform;
+                        GameObject go = Instantiate(defaulTileMap[1], defaulTileMap1.transform);
                         go.transform.position = new Vector3(stairsTile.Position.X, stairsTile.Position.Y, stairsTile.Position.Z);
 
                         stairs.transform.position = new Vector3(stairsTile.Position.X, stairsTile.Position.Y - Define.TILE_SIZE / 2, stairsTile.Position.Z);
@@ -241,12 +250,18 @@ public class MapEditor : EditorWindow
                 }
                 else if (tile is LeverData leverTile)
                 {
-                    GameObject go = Instantiate(defaulTileMap[1], tiles.transform);
+                    GameObject defaulTileMap1 = GameObject.Find(defaulTileMap[1].name);
+                    if (defaulTileMap1 == null) defaulTileMap1 = new GameObject() { name = defaulTileMap[1].name };
+                    defaulTileMap1.transform.parent = tiles.transform;
+                    GameObject go = Instantiate(defaulTileMap[1], defaulTileMap1.transform);
                     go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
                 }
                 else if (tile is PillarData pillarTile)
                 {
-                    GameObject go = Instantiate(defaulTileMap[1], tiles.transform);
+                    GameObject defaulTileMap1 = GameObject.Find(defaulTileMap[1].name);
+                    if (defaulTileMap1 == null) defaulTileMap1 = new GameObject() { name = defaulTileMap[1].name };
+                    defaulTileMap1.transform.parent = tiles.transform;
+                    GameObject go = Instantiate(defaulTileMap[1], defaulTileMap1.transform);
                     go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
 
                     GameObject pillar = Instantiate(defaulTileMap[pillarTile.PrefabID], pillars.transform);
@@ -262,20 +277,34 @@ public class MapEditor : EditorWindow
                 {
                     if (tile.TileType == (int)Define.TileType.Wall)
                     {
-                        GameObject go = Instantiate(defaulTileMap[1], tiles.transform);
+                        GameObject defaulTileMap1 = GameObject.Find(defaulTileMap[1].name);
+                        if (defaulTileMap1 == null) defaulTileMap1 = new GameObject() { name = defaulTileMap[1].name };
+                        defaulTileMap1.transform.parent = tiles.transform;
+                        GameObject go = Instantiate(defaulTileMap[1], defaulTileMap1.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
 
-                        GameObject wall = Instantiate(SelectedTileMap[tile.PrefabID], walls.transform);
+                        GameObject selectedTileMap = GameObject.Find(SelectedTileMap[tile.PrefabID].name);
+                        if (selectedTileMap == null) selectedTileMap = new GameObject() { name = SelectedTileMap[tile.PrefabID].name };
+                        selectedTileMap.transform.parent = walls.transform;
+                        GameObject wall = Instantiate(SelectedTileMap[tile.PrefabID], selectedTileMap.transform);
+
+                        MeshCombiner meshCombiner = selectedTileMap.GetOrAddComponent<MeshCombiner>();
+                        meshCombiner.Parent = selectedTileMap;
+                        meshCombiner.Material = wall.GetComponentsInChildren<MeshRenderer>()[0].sharedMaterial;
+
                         wall.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
                     }
                     else if (tile.TileType == (int)Define.TileType.Void)
                     {
-                        GameObject go = Instantiate(defaulTileMap[tile.PrefabID], tiles.transform);
+                        GameObject go = Instantiate(defaulTileMap[tile.PrefabID], voids.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
                     }
                     else if (tile.PrefabID == (int)Define.TileType.Floor)
                     {
-                        GameObject go = Instantiate(defaulTileMap[tile.PrefabID], tiles.transform);
+                        GameObject defaulTileMap1 = GameObject.Find(defaulTileMap[tile.PrefabID].name);
+                        if (defaulTileMap1 == null) defaulTileMap1 = new GameObject() { name = defaulTileMap[tile.PrefabID].name };
+                        defaulTileMap1.transform.parent = tiles.transform;
+                        GameObject go = Instantiate(defaulTileMap[tile.PrefabID], defaulTileMap1.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
                     }
                     else if (tile.PrefabID == (int)Define.TileType.SpawnPoint)
@@ -285,11 +314,25 @@ public class MapEditor : EditorWindow
                     }
                     else if (tile.PrefabID == (int)Define.TileType.VoidTile)
                     {
-                        GameObject go = Instantiate(VoidTile, tiles.transform);
+                        GameObject go = Instantiate(VoidTile, voids.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
                     }
                 }
             }
+
+            #region BachingOpimization
+            //voids.GetOrAddComponent<MeshCombiner>().MergeMeshes();
+
+            {
+                MeshCombiner[] meshCombiners = walls.GetComponentsInChildren<MeshCombiner>();
+
+                for (int i = 0; i < meshCombiners.Length; ++i)
+                {
+                    MergeMeshes(meshCombiners[i].Parent, meshCombiners[i].Material);
+                }
+            }
+
+            #endregion
 
             #region BG
             Sprite BGSprite = Resources.Load<Sprite>($"Sprites/{mapName.Substring(8, 2)}/FloorField_{mapName.Substring(8)}");
@@ -333,6 +376,45 @@ public class MapEditor : EditorWindow
         AssetDatabase.SaveAssets();
     }
 
+    public void MergeMeshes(GameObject Parent, Material Material)
+    {
+        MeshFilter[] meshFilters = Parent.GetComponentsInChildren<MeshFilter>();
+        List<CombineInstance> combineList = new List<CombineInstance>();
+
+        for (int i = 0; i < meshFilters.Length; i++)
+        {
+            if (meshFilters[i].sharedMesh != null)
+            {
+                CombineInstance combineInstance = new CombineInstance
+                {
+                    mesh = meshFilters[i].sharedMesh,
+                    transform = meshFilters[i].transform.localToWorldMatrix
+                };
+                combineList.Add(combineInstance);
+            }
+        }
+
+        GameObject combinedObject = new GameObject() { name = Parent.name };
+        combinedObject.transform.parent = Parent.transform.parent;
+        combinedObject.AddComponent<MeshFilter>();
+        combinedObject.AddComponent<MeshRenderer>();
+        combinedObject.GetComponent<MeshFilter>().sharedMesh = new Mesh();
+        combinedObject.GetComponent<MeshFilter>().sharedMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        combinedObject.GetComponent<MeshFilter>().sharedMesh.name = combinedObject.name;
+        combinedObject.GetComponent<MeshFilter>().sharedMesh.CombineMeshes(combineList.ToArray());
+        saveMesh(combinedObject.GetComponent<MeshFilter>().sharedMesh);
+        combinedObject.GetComponent<MeshRenderer>().material = Material;
+
+        Parent.SetActive(false);
+    }
+
+    void saveMesh(Mesh mesh)
+    {
+        string path = $"Assets/@Resources/Meshes/{mesh.name}.asset";
+        AssetDatabase.CreateAsset(mesh, AssetDatabase.GenerateUniqueAssetPath(path));
+        AssetDatabase.SaveAssets();
+    }
+
     void SaveTileData()
     {
         wallData = CreateInstance<WallData>();
@@ -347,7 +429,7 @@ public class MapEditor : EditorWindow
 
         foreach (var objectField in objectFields)
         {
-            if(objectField.value is GameObject selectedPrefab)
+            if (objectField.value is GameObject selectedPrefab)
             {
                 wallData.wallPrefabs.Add(selectedPrefab);
             }
@@ -369,7 +451,7 @@ public class MapEditor : EditorWindow
         {
             var jObject = JObject.Parse(jsonData); // JSON 파싱
 
-            if(jObject["maps"] is JArray mapsArray)
+            if (jObject["maps"] is JArray mapsArray)
             {
                 var keys = mapsArray.OfType<JObject>()
                                     .Select(mapObj => mapObj["Key"]?.ToString())
@@ -404,11 +486,11 @@ public class MapEditor : EditorWindow
         string[] guids = AssetDatabase.FindAssets("", new[] { "Assets/@Resources/Data/TileSet" });
         List<string> names = new List<string>();
 
-        if(guids.Length == 0)
+        if (guids.Length == 0)
             names.Add("Empty");
         else
         {
-            foreach(string guid in guids)
+            foreach (string guid in guids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 string assetName = System.IO.Path.GetFileNameWithoutExtension(path);
