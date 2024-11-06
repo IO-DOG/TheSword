@@ -296,7 +296,7 @@ public class MapEditor : EditorWindow
                     }
                     else if (tile.TileType == (int)Define.TileType.Void)
                     {
-                        GameObject go = Instantiate(defaulTileMap[tile.PrefabID], voids.transform);
+                        GameObject go = Instantiate(defaulTileMap[tile.PrefabID], tiles.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
                     }
                     else if (tile.PrefabID == (int)Define.TileType.Floor)
@@ -314,7 +314,7 @@ public class MapEditor : EditorWindow
                     }
                     else if (tile.PrefabID == (int)Define.TileType.VoidTile)
                     {
-                        GameObject go = Instantiate(VoidTile, voids.transform);
+                        GameObject go = Instantiate(VoidTile, tiles.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
                     }
                 }
@@ -322,16 +322,13 @@ public class MapEditor : EditorWindow
 
             #region BachingOpimization
             //voids.GetOrAddComponent<MeshCombiner>().MergeMeshes();
-
-            {
-                MeshCombiner[] meshCombiners = walls.GetComponentsInChildren<MeshCombiner>();
-
-                for (int i = 0; i < meshCombiners.Length; ++i)
-                {
-                    MergeMeshes(meshCombiners[i].Parent, meshCombiners[i].Material);
-                }
-            }
-
+            //{
+            //    MeshCombiner[] meshCombiners = walls.GetComponentsInChildren<MeshCombiner>();
+            //    for (int i = 0; i < meshCombiners.Length; ++i)
+            //    {
+            //        MergeMeshes(meshCombiners[i].Parent, meshCombiners[i].Material);
+            //    }
+            //}
             #endregion
 
             #region BG
