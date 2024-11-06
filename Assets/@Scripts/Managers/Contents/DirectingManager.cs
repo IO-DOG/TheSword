@@ -169,19 +169,16 @@ public class Events
     {
         if (Managers.Game.OnMeetKingSlime)
             return;
-        if (_clearKingSlime == false && Managers.Game.Player.gameObject.transform.position.x > 303.5f && Managers.Game.Player.gameObject.transform.position.x < 304.2f)
+        if (_clearKingSlime == false)
         {
             _clearKingSlime = true;
             _kingSlime = GameObject.Find("bossMonster0");
-            //_kingSlime.gameObject.SetActive(false);
             _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = false;
         }
 
         if (Managers.Game.Player.gameObject.transform.position.x < 303.5f || Managers.Game.Player.gameObject.transform.position.x > 304.2f
-            || Managers.Game.Player.gameObject.transform.position.z < -7f) // 일단 하드코딩 특정 자리가 아니면 리턴함.
+            || Managers.Game.Player.gameObject.transform.position.z < -7f) // 하드코딩. 일단 놔두자.
             return;
-        // x : 303.52 ~ 304.16
-        // y : -7.04
         Debug.Log("킹 슬라임을 만났다!!");
 
         Managers.Game.OnMeetKingSlime = true;
@@ -200,7 +197,6 @@ public class Events
             RectTransform[] rectTransforms = tutorialSene.gameObject.GetComponentsInChildren<RectTransform>();
             for (int i = 1; i < rectTransforms.Length; i++)
             {
-                //rectTransforms[i].gameObject.SetActive(false);
                 Image image = rectTransforms[i].gameObject.GetComponent<Image>();
                 if (image != null)
                 {
@@ -212,12 +208,6 @@ public class Events
                     tMP_Text.color = new Color(1, 1, 1, 0);
                 }
             }
-
-
-            // maybe.. coroutine?
-            //CoroutineManager.StartCoroutine(CoDirectingKingSlime()); 
-            // or dotween?
-            // todo directing action
 
             DG.Tweening.Sequence sequence = DOTween.Sequence();
             Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
@@ -233,12 +223,6 @@ public class Events
             OnMeetKingSlime += KingSlimeAction;
 
             CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
-
-            //sequence.Append(() => { Debug.Log("슬라임이 채워진다..."); })
-            //    .OnComplete(() => { _kingSlime = GameObject.Find("bossMonster0"); _kingSlime.SetActive(false); })
-            //    .OnComplete(() => { Debug.Log("슬라임이 채워진다..."); })
-            //    .OnComplete(() => { Debug.Log("슬라임이 한곳으로 모여 합쳐진다.."); })
-            //    .OnComplete(() => { AfterMeetKingSlime(); });
         }
     }
 
@@ -308,11 +292,11 @@ public class Events
         slimeSpawner5.transform.localPosition = new Vector3(5.8f, 0.6f, -4.5f);
         slimeSpawner5.transform.rotation = Quaternion.Euler(35.874f, 90, 0);
         slimeSpawner5.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
-        CoroutineManager.StartCoroutine(CoBright(slimeSpawner, 2f));
-        CoroutineManager.StartCoroutine(CoBright(slimeSpawner2, 2f));
-        CoroutineManager.StartCoroutine(CoBright(slimeSpawner3, 2f));
-        CoroutineManager.StartCoroutine(CoBright(slimeSpawner4, 2f));
-        CoroutineManager.StartCoroutine(CoBright(slimeSpawner5, 2f));
+        CoroutineManager.StartCoroutine(CoBright(slimeSpawner, 3f));
+        CoroutineManager.StartCoroutine(CoBright(slimeSpawner2, 3f));
+        CoroutineManager.StartCoroutine(CoBright(slimeSpawner3, 3f));
+        CoroutineManager.StartCoroutine(CoBright(slimeSpawner4, 3f));
+        CoroutineManager.StartCoroutine(CoBright(slimeSpawner5, 3f));
 
         // create fog
 
@@ -346,15 +330,14 @@ public class Events
             CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime5, midlePos.transform.localPosition, 5));
         }
 
-        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner, 2f));
-        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner2, 2f));
-        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner3, 2f));
-        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner4, 2f));
-        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner5, 2f));
+        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner, 3f));
+        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner2, 3f));
+        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner3, 3f));
+        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner4, 3f));
+        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner5, 3f));
 
         _kingSlime = GameObject.Find("bossMonster0");
         GameObject kingSlimeAction = GameObject.Find("KingSlimeAction");
-        //GameObject kingSlimeAction = Managers.Resource.Instantiate("KingSlimeAction", parent.transform);
         kingSlimeAction.GetComponent<Animator>().Play("KingSlimeAction");
 
         {
@@ -371,13 +354,9 @@ public class Events
             GameObject.Find("SlimeFall5").GetComponent<ParticleSystem>().Stop();
         }
 
-        Debug.Log("슬라임이 채워진다...");
-        Debug.Log("슬라임이 한곳으로 모여 합쳐진다..");
-
-        //kingSlimeAction.transform.localPosition = new Vector3(4.25f, 3f, -4.25f);
         yield return new WaitForSeconds(2.2f);
         _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
-        //_kingSlime.SetActive(true);
+        GameObject.Find("Effects_00")?.SetActive(false);
         // todo
         // white bang
 
