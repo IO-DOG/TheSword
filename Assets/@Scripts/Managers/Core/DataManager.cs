@@ -35,7 +35,7 @@ public class DataManager
 
     public void Init()
     {
-        AssetDatabase.Refresh();
+        //AssetDatabase.Refresh();
 
         PlayerDic = LoadJson<Data.PlayerDataLoader, int, Data.PlayerData>("PlayerData").MakeDict();
         MonsterDic = LoadJson<Data.MonsterDataLoader, int, Data.MonsterData>("MonsterData").MakeDict();
