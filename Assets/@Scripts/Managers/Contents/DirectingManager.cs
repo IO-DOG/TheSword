@@ -355,6 +355,9 @@ public class Events
         }
 
         yield return new WaitForSeconds(2.2f);
+        _kingSlime.transform.localScale = Vector3.one;
+        _kingSlime.transform.localPosition = new Vector3(3.84f, 1.5f, -6f);
+        kingSlimeAction.SetActive(false);
         _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
         GameObject.Find("Effects_00")?.SetActive(false);
         // todo
