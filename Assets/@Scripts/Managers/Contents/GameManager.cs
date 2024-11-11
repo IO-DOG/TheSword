@@ -119,6 +119,24 @@ public class GameManager
         //public bool HasGetEquip { get; set; } // 인벤 UI 개방용
         //public bool HasGetWarp { get; set; } // 워프 UI 개방용
         //public bool HasGetClass { get; set; } // 특성을 얻었는지 -> 특성 UI 개방용
+
+        public void Clear()
+        {
+            int level = 1;
+            Managers.Game.CurPlayerData.Level = Managers.Data.PlayerDic[level].id;
+            Managers.Game.CurPlayerData.CurExp = 0;
+            Managers.Game.CurPlayerData.MaxHP = Managers.Data.PlayerDic[level].MaxHP;
+            Managers.Game.CurPlayerData.CurHP = Managers.Data.PlayerDic[level].MaxHP;
+            Managers.Game.CurPlayerData.Attack = Managers.Data.PlayerDic[level].Attack;
+            Managers.Game.CurPlayerData.Defence = Managers.Data.PlayerDic[level].Defence;
+            Managers.Game.CurPlayerData.AttackSpeed = Managers.Data.PlayerDic[level].AttackSpeed;
+            Managers.Game.CurPlayerData.DefenceSpeed = Managers.Data.PlayerDic[level].DefenceSpeed;
+            Managers.Game.CurPlayerData.Critical = Managers.Data.PlayerDic[level].Critical;
+            Managers.Game.CurPlayerData.CriticalAttack = Managers.Data.PlayerDic[level].CriticalAttack;
+            Managers.Game.CurPlayerData.MoveSpeed = Managers.Data.PlayerDic[level].MoveSpeed;
+            Managers.Game.CurPlayerData.IsDefence = false;
+            Managers.Game.CurPlayerData.CurStageid = 0;
+        }
     }
     #endregion
 
@@ -355,20 +373,7 @@ public class GameManager
             if (File.Exists(path))
                 File.Delete(path);
 
-            int level = 1;
-            Managers.Game.CurPlayerData.Level = Managers.Data.PlayerDic[level].id;
-            Managers.Game.CurPlayerData.CurExp = 0;
-            Managers.Game.CurPlayerData.MaxHP = Managers.Data.PlayerDic[level].MaxHP;
-            Managers.Game.CurPlayerData.CurHP = Managers.Data.PlayerDic[level].MaxHP;
-            Managers.Game.CurPlayerData.Attack = Managers.Data.PlayerDic[level].Attack;
-            Managers.Game.CurPlayerData.Defence = Managers.Data.PlayerDic[level].Defence;
-            Managers.Game.CurPlayerData.AttackSpeed = Managers.Data.PlayerDic[level].AttackSpeed;
-            Managers.Game.CurPlayerData.DefenceSpeed = Managers.Data.PlayerDic[level].DefenceSpeed;
-            Managers.Game.CurPlayerData.Critical = Managers.Data.PlayerDic[level].Critical;
-            Managers.Game.CurPlayerData.CriticalAttack = Managers.Data.PlayerDic[level].CriticalAttack;
-            Managers.Game.CurPlayerData.MoveSpeed = Managers.Data.PlayerDic[level].MoveSpeed;
-            Managers.Game.CurPlayerData.IsDefence = false;
-            Managers.Game.CurPlayerData.CurStageid = 0;
+            Managers.Game.CurPlayerData.Clear();
 
             KeyInventory.InitKeyInventory();
 
@@ -732,6 +737,7 @@ public class GameManager
                 File.Delete(path);
         }
         //ParseMapData();
+        Managers.Game.CurPlayerData.Clear();
         Debug.Log("Complete DeleteGameData");
     }
 
