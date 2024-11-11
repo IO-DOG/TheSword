@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 using static Define;
 using static UnityEngine.RuleTile.TilingRuleOutput;
 using Random = UnityEngine.Random;
@@ -165,5 +166,59 @@ public static class Util
             totalTime += Time.deltaTime;
             yield return null;
         }
+    }
+
+    /// <summary>
+    /// 화이트 플래시를 실행합니다.
+    /// </summary>
+    public static void TriggerFlash(Image image, float maxAlpha, float duration)
+    {
+        Debug.Log("start flash bang");
+
+        CoroutineManager.StartCoroutine(FlashCoroutine(image, maxAlpha, duration));
+    }
+
+    public static IEnumerator FlashCoroutine(Image image, float maxAlpha, float duration)
+    {
+        // 처음에 흰색을 최대 알파로 설정
+        CoroutineManager.StartCoroutine(FadeTo(image, maxAlpha, duration / 2));
+        yield return new WaitForSeconds(duration / 2);
+
+        // 다시 투명하게 페이드 아웃
+        CoroutineManager.StartCoroutine(FadeTo(image, 0f, duration / 2));
+        yield return new WaitForSeconds(duration / 2);
+    }
+
+    /// <summary>
+    /// 알파값을 부드럽게 변경하는 코루틴
+    /// </summary>
+    /// <param name="targetAlpha">목표 알파값</param>
+    /// <param name="duration">지속 시간</param>
+    /// <returns></returns>
+    public static IEnumerator FadeTo(Image image, float targetAlpha, float duration)
+    {
+        float startAlpha = image.color.a;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float newAlpha = Mathf.Lerp(startAlpha, targetAlpha, elapsed / duration);
+            SetAlpha(image, newAlpha);
+            yield return null;
+        }
+
+        SetAlpha(image, targetAlpha);
+    }
+
+    /// <summary>
+    /// Image의 알파값을 설정합니다.
+    /// </summary>
+    /// <param name="alpha">설정할 알파값</param>
+    public static void SetAlpha(Image image, float alpha)
+    {
+        Color color = image.color;
+        color.a = alpha;
+        image.color = color;
     }
 }
