@@ -642,8 +642,8 @@ public class GameManager
             //InstantiateLights(key, lights.transform);
         }
         MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Player.gameObject);
-        GameObject effects = Managers.Resource.Instantiate($"Effects_{chapter.Replace("_", "")}");
         CameraController.SetConfinerBounds();
+        GameObject effects = Managers.Resource.Instantiate($"Effects_{chapter.Replace("_", "")}");
     }
 
     void InstantiateLights(string DGName, Transform parent)
@@ -737,7 +737,7 @@ public class GameManager
                 File.Delete(path);
         }
         //ParseMapData();
-        Managers.Game.CurPlayerData.Clear();
+                    Managers.Game.CurPlayerData.Clear();
         Debug.Log("Complete DeleteGameData");
     }
 
