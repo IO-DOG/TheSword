@@ -10,7 +10,7 @@ public class TutorialScene : BaseScene
         base.Init();
 
         SceneType = Define.Scene.TutorialScene;
-        Managers.UI.ShowSceneUI<UI_TutorialScene>();
+        Managers.Game.TutorialScene = Managers.UI.ShowSceneUI<UI_TutorialScene>();
 
         Managers.Game.DirectionalLight = GameObject.Find("Directional Light").GetComponent<Light>();
 

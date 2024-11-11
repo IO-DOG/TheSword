@@ -27,6 +27,7 @@ public class UI_TutorialScene : UI_Scene
         PlayerAttackText,
         PlayerDefenseText,
         PlayerLevelText,
+        MainUIMapNameText,
     }
 
     enum Images
@@ -65,6 +66,7 @@ public class UI_TutorialScene : UI_Scene
         GetObject((int)GameObjects.YellowKey).SetActive(false);
         GetObject((int)GameObjects.RedKey).SetActive(false);
 
+        Refresh();
         Fade();
 
         return true;
@@ -72,10 +74,11 @@ public class UI_TutorialScene : UI_Scene
 
     public void Refresh()
     {
+        GetText((int)Texts.MainUIMapNameText).text = Managers.GetString(Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonNameID);
         GetText((int)Texts.PlayerLevelText).text = Managers.Game.CurPlayerData.Level.ToString();
         int level = Managers.Game.CurPlayerData.Level;
         Debug.Log($"{Managers.Game.CurPlayerData.CurExp} , {Managers.Data.PlayerDic[level].NeedExp}");
-        GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurExp / Managers.Data.PlayerDic[level].NeedExp;
+        //GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurExp / Managers.Data.PlayerDic[level].NeedExp;
         GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurHP / Managers.Game.CurPlayerData.MaxHP;
         Managers.Game.KeyInventory.ShowKeySlot(Managers.Game.Player._keyInventory);
         SetPlayerInfo();
