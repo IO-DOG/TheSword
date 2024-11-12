@@ -9,27 +9,6 @@ public class UI_PlayerCard : UI_BaseCard
 {
     #region Enum
 
-    enum Images
-    {
-        PlayerImage,
-        HPHar,
-        HPHarGauge,
-        AttackDelayGauge,
-        DefenceDelayGauge,
-        AttackIcon,
-        DefenceIcon,
-        CreatureSwordImage,
-        CreatureShieldImage,
-    }
-
-    enum Texts
-    {
-        CreatureName,
-        HPBarText,
-        AttackStatusText,
-        DefenceStatusText,
-    }
-
     #endregion
 
     public bool _isCri = false;
@@ -42,21 +21,15 @@ public class UI_PlayerCard : UI_BaseCard
         if (base.Init() == false)
             return false;
 
-        #region Bind
-        BindImage(typeof(Images));
-        BindText(typeof(Texts));
-        #endregion
+        //#region Bind
+        //BindImage(typeof(Images));
+        //#endregion
 
-        // todo change to nickname
-        GetText((int)Texts.CreatureName).text = "Player!";
-        GetText((int)Texts.HPBarText).text = Managers.Game.PlayerData.CurHP.ToString();
-        GetText((int)Texts.AttackStatusText).text = Managers.Game.PlayerData.Attack.ToString();
-        GetText((int)Texts.DefenceStatusText).text = Managers.Game.PlayerData.Defence.ToString();
-
-        Managers.Game.OnBattleDataRefreshAction -= Refresh;
-        Managers.Game.OnBattleDataRefreshAction += Refresh;
-        Managers.Game.OnBattlePlayerDefeceAction += ClearDefence;
         Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
+        Managers.Game.OnHitPlayerAction -= Refresh;
+        Managers.Game.OnHitPlayerAction += Refresh;
+        Managers.Game.OnDeadPlayerAction -= Dead;
+        Managers.Game.OnDeadPlayerAction += Dead;
 
         StartCoroutine(CoDelayAttack());
         StartCoroutine(CoDelayDefence());
@@ -74,14 +47,6 @@ public class UI_PlayerCard : UI_BaseCard
         base.Refresh();
     }
 
-    IEnumerator CoRefresh()
-    {
-        GetText((int)Texts.HPBarText).text = Managers.Game.PlayerData.CurHP.ToString();
-        GetImage((int)Images.HPHar).fillAmount = Managers.Game.PlayerData.CurHP / Managers.Game.PlayerData.MaxHP;
-        yield return new WaitForSeconds(0.2f);
-        GetImage((int)Images.HPHarGauge).fillAmount = Managers.Game.PlayerData.CurHP / Managers.Game.PlayerData.MaxHP;
-    }
-
     public override int Attack(CreatureData attacker, CreatureData target)
     {
         Managers.Game.AttackCount++;
@@ -93,7 +58,7 @@ public class UI_PlayerCard : UI_BaseCard
 
         int damage = base.Attack(attacker, target);
 
-        GetImage((int)Images.PlayerImage).gameObject.GetComponent<Animator>().Play("UIPlayerAttackAnim");
+        GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play("UIPlayerAttackAnim");
         GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play($"UISword{Managers.Game.PlayerData.CurSword - 9}AttackAnim");
         if (Managers.Game.PlayerData.CurShield != 0)
             GetImage((int)Images.CreatureShieldImage).gameObject.GetComponent<Animator>().Play($"UIShield{Managers.Game.PlayerData.CurShield - 20}AttackAnim");
@@ -108,7 +73,15 @@ public class UI_PlayerCard : UI_BaseCard
 
         // todo
         // 특성 고려
+        target.CurHP -= damage;
 
+        if (target.CurHP <= 0)
+        {
+            target.CurHP = 0;
+            Managers.Game.OnDeadMonsterAction[0].Invoke();
+        }
+
+        Managers.Game.OnHitMonsterAction[0].Invoke();
         return 1;
     }
 
@@ -274,7 +247,7 @@ public class UI_PlayerCard : UI_BaseCard
             if (attackCoolTime >= maxAttackCoolTime)
             {
                 attackCoolTime = 0f;
-                Attack(_creature, Managers.Game.MonsterData[0]) ;
+                Attack(_creature, Managers.Game.MonsterData[0]);
             }
             attackCoolTime += Time.deltaTime * Managers.Game.GameSpeed;
 
@@ -340,8 +313,8 @@ public class UI_PlayerCard : UI_BaseCard
         int width = 660;
         int height = 660;
         WaitForSeconds delay = new WaitForSeconds(0.1f);
-        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.PlayerImage).transform);
-        go.transform.position = GetImage((int)Images.PlayerImage).transform.position;
+        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureImage).transform);
+        go.transform.position = GetImage((int)Images.CreatureImage).transform.position;
         GameObject sword = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureSwordImage).transform);
         sword.transform.position = GetImage((int)Images.CreatureSwordImage).transform.position;
         GameObject shield = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureShieldImage).transform);
@@ -362,9 +335,9 @@ public class UI_PlayerCard : UI_BaseCard
         swordanimator.Play($"UISword{Managers.Game.PlayerData.CurSword - 9}IdleAnim");
         if (Managers.Game.PlayerData.CurShield != 0)
             shieldanimator.Play($"UIShield{Managers.Game.PlayerData.CurShield - 20}IdleAnim");
-        image.sprite = GetImage((int)Images.PlayerImage).sprite;
-        swordImage.sprite = GetImage((int)Images.PlayerImage).sprite;
-        shieldImage.sprite = GetImage((int)Images.PlayerImage).sprite;
+        image.sprite = GetImage((int)Images.CreatureImage).sprite;
+        swordImage.sprite = GetImage((int)Images.CreatureImage).sprite;
+        shieldImage.sprite = GetImage((int)Images.CreatureImage).sprite;
         image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         swordImage.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         shieldImage.material = Managers.Resource.Load<Material>("PaintWhiteMat");
@@ -400,13 +373,13 @@ public class UI_PlayerCard : UI_BaseCard
         int height = 660;
 
         WaitForSeconds delay = new WaitForSeconds(0.1f);
-        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.PlayerImage).transform);
+        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureImage).transform);
         Image image = go.GetOrAddComponent<Image>();
-        image.rectTransform.sizeDelta = GetImage((int)Images.PlayerImage).rectTransform.sizeDelta;
+        image.rectTransform.sizeDelta = GetImage((int)Images.CreatureImage).rectTransform.sizeDelta;
         Animator animator = go.GetOrAddComponent<Animator>();
         animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIPlayerAnimController");
         animator.Play($"UIPlayerIdleAnim");
-        image.sprite = GetImage((int)Images.PlayerImage).sprite;
+        image.sprite = GetImage((int)Images.CreatureImage).sprite;
         image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         image.color = Util.DamagedColor();
         image.rectTransform.sizeDelta = new Vector2(width, height);
@@ -445,7 +418,7 @@ public class UI_PlayerCard : UI_BaseCard
         int swordId = Managers.Game.PlayerData.CurSword;
         string attackFX = Managers.Data.EquipDic[swordId].AttackFX;
         GameObject player = GameObject.Find("PlayerImage");
-        GameObject go = Managers.Resource.Instantiate(attackFX, GetImage((int)Images.PlayerImage).transform);
+        GameObject go = Managers.Resource.Instantiate(attackFX, GetImage((int)Images.CreatureImage).transform);
         go.transform.localPosition += new Vector3(0, -150, 0);
         var uiParticle = go.GetOrAddComponent<UIParticle>();
         uiParticle.scale = 300;
@@ -470,5 +443,22 @@ public class UI_PlayerCard : UI_BaseCard
         uiParticle.Play();
         //childrenUIParticle.Play();
         //Destroy(uiParticle, 0.3f);
+    }
+
+    public override void Dead()
+    {
+        base.Dead();
+
+        // Game Over Popup TODO
+        //CreatePlayerDeathParticle();
+        Managers.Game.OnBattleAction.Invoke();
+        Managers.Game.OnBattle = false;
+        return;
+    }
+
+    private void OnDestroy()
+    {
+        Managers.Game.OnDeadPlayerAction -= Dead;
+        Managers.Game.OnHitPlayerAction -= Refresh;
     }
 }

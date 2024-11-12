@@ -54,6 +54,10 @@ public class GameManager
     public Action OnBattlePlayerDefeceAction;
     public Action OnBattlePlayerDamagedAction;
     public Action OnKingSlimeDeadAction;
+    public List<Action> OnHitMonsterAction = new List<Action>();
+    public List<Action> OnDeadMonsterAction = new List<Action>();
+    public Action OnHitPlayerAction;
+    public Action OnDeadPlayerAction;
 
     public Action OnPortalAction;
 

@@ -9,7 +9,7 @@ using static GameManager;
 
 public class UI_BaseCard : UI_Base
 {
-    enum Images
+    protected enum Images
     {
         CreatureImage,
         HPHar,
@@ -22,7 +22,7 @@ public class UI_BaseCard : UI_Base
         CreatureShieldImage,
     }
 
-    enum Texts
+    protected enum Texts
     {
         CreatureName,
         HPBarText,
@@ -40,18 +40,15 @@ public class UI_BaseCard : UI_Base
         if (base.Init() == false)
             return false;
 
-        #region Bind
-        BindImage(typeof(Images));
-        BindText(typeof(Texts));
-        #endregion
-
-
+        //#region Bind
+        //BindImage(typeof(Images));
+        //BindText(typeof(Texts));
+        //#endregion
 
         Managers.Game.OnBattleDataRefreshAction -= Refresh;
         Managers.Game.OnBattleDataRefreshAction += Refresh;
         Managers.Game.OnBattlePlayerDefeceAction += ClearDefence;
         //Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
-
 
         return true;
     }
@@ -64,6 +61,11 @@ public class UI_BaseCard : UI_Base
 
     void SetUI()
     {
+        #region Bind
+        BindImage(typeof(Images));
+        BindText(typeof(Texts));
+        #endregion
+
         GetText((int)Texts.CreatureName).text = "Player!";
         GetText((int)Texts.HPBarText).text = _creature.CurHP.ToString();
         GetText((int)Texts.AttackStatusText).text = _creature.Attack.ToString();

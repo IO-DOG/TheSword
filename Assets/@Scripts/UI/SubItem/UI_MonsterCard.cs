@@ -5,29 +5,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using static GameManager;
 
-public class UI_CreatureCard : UI_BaseCard
+public class UI_MonsterCard : UI_BaseCard
 {
     #region Enum
-
-    enum Images
-    {
-        CreatureImage,
-        HPHar,
-        HPHarGauge,
-        AttackDelayGauge,
-        DefenceDelayGauge,
-        AttackIcon,
-        DefenceIcon,
-    }
-
-    enum Texts
-    {
-        CreatureName,
-        HPBarText,
-        AttackStatusText,
-        DefenceStatusText,
-    }
-
     public enum MonsterClass
     {
         None = 0,
@@ -60,10 +40,10 @@ public class UI_CreatureCard : UI_BaseCard
         if (base.Init() == false)
             return false;
 
-        #region Bind
-        BindImage(typeof(Images));
-        BindText(typeof(Texts));
-        #endregion
+        //#region Bind
+        //BindImage(typeof(Images));
+        //BindText(typeof(Texts));
+        //#endregion
 
         _monsterClass = (MonsterClass)Managers.Game.MonsterData[0].Feature;
 
@@ -73,6 +53,10 @@ public class UI_CreatureCard : UI_BaseCard
         Managers.Game.OnBattleDataRefreshAction += Refresh;
         Managers.Game.OnBattleCreatureDefeceAction += ClearDefence;
         Managers.Game.OnBattleCreatureDamagedAction += StartDamagedMat;
+        Managers.Game.OnHitMonsterAction[0] -= Refresh;
+        Managers.Game.OnHitMonsterAction[0] += Refresh;
+        Managers.Game.OnDeadMonsterAction[0] -= Dead;
+        Managers.Game.OnDeadMonsterAction[0] += Dead;
 
         StartCoroutine(CoDelayAttack());
         if (_monsterClass != MonsterClass.Armor)
@@ -186,14 +170,14 @@ public class UI_CreatureCard : UI_BaseCard
         }
         Managers.Game.PlayerData.CurHP = Mathf.RoundToInt(Managers.Game.PlayerData.CurHP);
 
-        if (Managers.Game.PlayerData.CurHP <= 0)
-        {
-            // Game Over Popup TODO
-            CreatePlayerDeathParticle();
-            Managers.Game.OnBattleAction.Invoke();
-            Managers.Game.OnBattle = false;
-            return 0;
-        }
+        //if (Managers.Game.PlayerData.CurHP <= 0)
+        //{
+        //    // Game Over Popup TODO
+        //    CreatePlayerDeathParticle();
+        //    Managers.Game.OnBattleAction.Invoke();
+        //    Managers.Game.OnBattle = false;
+        //    return 0;
+        //}
 
         _attackCount++;
         PlayMonsterAttackAnim();
@@ -369,8 +353,8 @@ public class UI_CreatureCard : UI_BaseCard
     void CreateMonsterAttackParticle()
     {
         string battleParticleAttack = _creature.BattleParticleAttack;
-        
-        GameObject go = Managers.Resource.Instantiate(battleParticleAttack, GetImage((int)Images.CreatureImage).gameObject.transform);    
+
+        GameObject go = Managers.Resource.Instantiate(battleParticleAttack, GetImage((int)Images.CreatureImage).gameObject.transform);
     }
 
     void CreatePlayerHitParticle()
@@ -384,5 +368,59 @@ public class UI_CreatureCard : UI_BaseCard
     {
         string animStr = _creature.AttackAnimStr;
         GetImage((int)Images.CreatureImage).GetComponent<Animator>().Play(animStr);
+    }
+
+    public override void Dead()
+    {
+        base.Dead();
+
+        // add exp
+        Managers.Game.PlayerData.CurExp += Managers.Game.MonsterData[0].RewardExp;
+
+        Managers.Data.MonsterActiveDic[Managers.Game.MonsterData[0].IsActiveIndex] = false;
+
+        int id = Managers.Game.Monster.id;
+        Debug.Log($"Monster Id : {id}");
+        string name = Managers.Data.MonsterDic[id].Name;
+        switch (id)
+        {
+            case Define.KingSlime:
+                BlackSlimeController blackSlimeController = Managers.Game.Monster.gameObject.GetOrAddComponent<BlackSlimeController>();
+                blackSlimeController.Dead();
+                break;
+            default:
+                break;
+        }
+
+        // for king slime
+        if (Managers.Game.Monster.gameObject.name == "KingSlimeSplitMonster")
+        {
+            Managers.Game.TotalKillSplitSlime++;
+            if (Managers.Game.TotalKillSplitSlime == 3)
+                Managers.Game.OnKingSlimeDeadAction.Invoke();
+        }
+
+        //StartCoroutine(CoMonsterDead());
+        Managers.Game.OnBattleAction.Invoke();
+        Managers.Game.OnBattle = false;
+
+        // 몬스터 죽는 파티클 생성
+        Transform particlePos = Managers.Game.Monster.gameObject.transform;
+        GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
+        deathSoulPurple.transform.position = particlePos.position;
+        deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[0].startDelay = 0.2f;
+        deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[1].startDelay = 0.2f;
+        deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[2].startDelay = 0.2f;
+        Destroy(deathSoulPurple, 3);
+        Destroy(Managers.Game.Monster.gameObject);
+        return;
+
+    }
+
+    private void OnDestroy()
+    {
+        Managers.Game.OnDeadMonsterAction[0] -= Dead;
+        Managers.Game.OnHitMonsterAction[0] -= Refresh;
     }
 }

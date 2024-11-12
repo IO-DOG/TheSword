@@ -19,8 +19,8 @@ public class UI_BattlePopup : UI_Popup
 
     #endregion
 
-    UI_BaseCard playerCard = null;
-    UI_BaseCard monsterCard = null;
+    UI_PlayerCard playerCard = null;
+    UI_MonsterCard monsterCard = null;
     UI_KingSlimeCard kingSlimeCard = null;
 
     public override bool Init()
@@ -37,13 +37,17 @@ public class UI_BattlePopup : UI_Popup
 
         // TODO
         // show Creature Card
-        playerCard = Managers.UI.SetBattleCard(gameObject.transform, Managers.Game.PlayerData);
+        playerCard = Managers.UI.SetBattleCard<UI_PlayerCard>(gameObject.transform, Managers.Game.PlayerData);
+
         playerCard.transform.position = new Vector3(580, 540, 0);
         //playerCard.Data = Managers.Game.Player.Data;
 
         for (int i = 0; i < Managers.Game.MonsterData.Count; i++)
         {
-            monsterCard = Managers.UI.SetBattleCard(gameObject.transform, Managers.Game.MonsterData[i]);
+            monsterCard = Managers.UI.SetBattleCard<UI_MonsterCard>(gameObject.transform, Managers.Game.MonsterData[i]);
+            Managers.Game.OnHitMonsterAction.Add(new Action(() => { }));
+            Managers.Game.OnDeadMonsterAction.Add(new Action(() => { }));
+
             monsterCard.transform.position = new Vector3(1340, 540, 0);
 
             //switch (Managers.Game.MonsterData[0].id)

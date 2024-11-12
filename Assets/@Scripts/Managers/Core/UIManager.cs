@@ -214,9 +214,9 @@ public class UIManager
         //OnTimeScaleChanged?.Invoke((int)Time.timeScale);
     }
 
-    public UI_BaseCard SetBattleCard(Transform parent, CreatureData creature)
+    public T SetBattleCard<T> (Transform parent, CreatureData creature) where T : UI_BaseCard
     {
-        var card = MakeSubItem<UI_BaseCard>(parent);
+        var card = MakeSubItem<T>(parent);
         card.SetData(creature);
         return card;
     }

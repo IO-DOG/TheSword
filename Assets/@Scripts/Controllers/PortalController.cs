@@ -62,7 +62,7 @@ public class PortalController : MonoBehaviour
         }
         Managers.Game.OnPortalAction.Invoke();
         Managers.Game.TutorialScene.Refresh();
-        Managers.Game.GameScene.Refresh();
+        //Managers.Game.GameScene.Refresh();
 
         Managers.Game.OnDirect = false;
     }
