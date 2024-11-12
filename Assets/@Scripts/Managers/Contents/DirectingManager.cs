@@ -7,6 +7,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class DirectingManager
 {
@@ -28,12 +29,12 @@ public class DirectingManager
 public class Events
 {
     bool _coroutineCompleted;
-    void StartCoPlayEmoji(string EmojiName, Transform transform)
+    void StartCoPlayEmoji(string EmojiName, UnityEngine.Transform transform)
     {
         _coroutineCompleted = false;
         CoroutineManager.StartCoroutine(PlayEmoji(EmojiName, transform));
     }
-    IEnumerator PlayEmoji(string EmojiName, Transform transform)
+    IEnumerator PlayEmoji(string EmojiName, UnityEngine.Transform transform)
     {
         GameObject go = Managers.Resource.Instantiate("Emoji", transform);
         go.transform.localScale = new Vector3(0.08f, 0.08f, 0.08f);
@@ -189,7 +190,6 @@ public class Events
         // 카메라 워킹 및 UI사라짐
         // 카메라 흔들림 등의 연출 효과
         // 연출이 끝나면 UI 활성화
-
         GameObject tutorialSene = GameObject.Find("UI_TutorialScene");
         if (tutorialSene != null)
         {
@@ -354,13 +354,33 @@ public class Events
             GameObject.Find("SlimeFall5").GetComponent<ParticleSystem>().Stop();
         }
 
-        yield return new WaitForSeconds(2.2f);
-        _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
-        GameObject.Find("Effects_00")?.SetActive(false);
-        // todo
-        // white bang
+        // flash bang
+        yield return new WaitForSeconds(0.6f);
+        GameObject image = new GameObject();
+        image.AddComponent<Image>();
+        GameObject tutorialSene = GameObject.Find("UI_TutorialScene");
+        image.transform.parent = tutorialSene.transform;
+        RectTransform parentRect = image.transform.parent.GetComponent<RectTransform>();
+        // 앵커를 부모의 전체 크기에 맞게 설정
+        RectTransform rectTransform = image.GetComponent<RectTransform>();
+        rectTransform.anchorMin = Vector2.zero;
+        rectTransform.anchorMax = Vector2.one;
+        // 오프셋을 0으로 설정하여 부모에 맞게 확장
+        rectTransform.anchoredPosition = Vector2.zero;
+        rectTransform.sizeDelta = Vector2.zero;
+        image.GetComponent<Image>().color = new Color(1, 1, 1, 0);
+        Util.TriggerFlash(image.GetComponent<Image>(), 1, 1.2f);
 
+        yield return new WaitForSeconds(1.6f);
+
+        image.SetActive(false);
         // create boss
+        _kingSlime.transform.localScale = Vector3.one;
+        _kingSlime.transform.localPosition = new Vector3(3.84f, 1.5f, -6f);
+        kingSlimeAction.SetActive(false);
+        _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
+        image.GetComponent<Image>().color = new Color(1, 1, 1, 0);
+        GameObject.Find("Effects_00")?.SetActive(false);
 
         AfterMeetKingSlime();
     }
@@ -466,9 +486,6 @@ public class Events
 
     public void AfterMeetKingSlime()
     {
-        Debug.Log("킹 슬라임이 울부짖었다!!!");
-        Debug.Log("이 함수가 실행되었다!!!!!!!!!!!!");
-
         Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
         Vector3 target = new Vector3(0f, 10f, -5f); ;
         float moveTime = 2f;
@@ -479,7 +496,6 @@ public class Events
             _kingSlime.SetActive(true);
             _kingSlime.gameObject.GetOrAddComponent<Animator>().Play("Boss_C0_I000");
         }
-        //_kingSlime.GetOrAddComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
 
         GameObject tutorialSene = GameObject.Find("UI_TutorialScene");
         if (tutorialSene != null)
@@ -503,12 +519,6 @@ public class Events
         }
 
         Managers.Game.OnDirect = false;
-    }
-
-    IEnumerator CoDirectingKingSlime()
-    {
-        yield return null;
-        Debug.Log("킹 슬라임이 울부짖었다!!!");
     }
 
     #endregion
