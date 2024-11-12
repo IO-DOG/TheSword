@@ -114,6 +114,11 @@ public class Define
         Boss,
     }
 
+    public enum GameEvent
+    {
+
+    }
+
     #endregion
 
     #region Map

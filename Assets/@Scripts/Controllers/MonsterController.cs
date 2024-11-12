@@ -15,28 +15,30 @@ public class MonsterController : MonoBehaviour
     {
         if (other.gameObject.name == "Player")
         {
-            //���� ����
-            Managers.Game.MonsterData.id = Managers.Data.MonsterDic[id].id;
-            Managers.Game.MonsterData.Chapter = Managers.Data.MonsterDic[id].Chapter;
-            Managers.Game.MonsterData.Class = Managers.Data.MonsterDic[id].Class;
-            Managers.Game.MonsterData.Name = Managers.Data.MonsterDic[id].Name;
-            Managers.Game.MonsterData.Feature = Managers.Data.MonsterDic[id].Feature;
-            Managers.Game.MonsterData.MaxHP = Managers.Data.MonsterDic[id].MaxHP;
-            Managers.Game.MonsterData.CurHP = Managers.Data.MonsterDic[id].MaxHP;
-            Managers.Game.MonsterData.Attack = Managers.Data.MonsterDic[id].Attack;
-            Managers.Game.MonsterData.Defence = Managers.Data.MonsterDic[id].Defence;
-            Managers.Game.MonsterData.AttackSpeed = Managers.Data.MonsterDic[id].AttackSpeed;
-            Managers.Game.MonsterData.DefenceSpeed = Managers.Data.MonsterDic[id].DefenceSpeed;
-            Managers.Game.MonsterData.RewardExp = Managers.Data.MonsterDic[id].RewardExp;
-            Managers.Game.MonsterData.RewardItem = Managers.Data.MonsterDic[id].RewardItem;
-            Managers.Game.MonsterData.IdleAnimStr = Managers.Data.MonsterDic[id].IdleAnimStr;
-            Managers.Game.MonsterData.AttackAnimStr = Managers.Data.MonsterDic[id].AttackAnimStr;
-            Managers.Game.MonsterData.BattleParticleAttack = Managers.Data.MonsterDic[id].BattleParticleAttack;
-            Managers.Game.MonsterData.BattleParticleHit = Managers.Data.MonsterDic[id].BattleParticleHit;
-            Managers.Game.MonsterData.MonsterNameId = Managers.Data.MonsterDic[id].MonsterNameId;
-            Managers.Game.MonsterData.MonsterDescId = Managers.Data.MonsterDic[id].MonsterDescId;
-            Managers.Game.MonsterData.IsDefence = false;
-            Managers.Game.MonsterData.IsActiveIndex = _monsterIndex_forActive;
+            Managers.Game.MonsterData.Add(new GameManager.CurMonsterData());
+
+
+            Managers.Game.MonsterData[0].id = Managers.Data.MonsterDic[id].id;
+            Managers.Game.MonsterData[0].Chapter = Managers.Data.MonsterDic[id].Chapter;
+            Managers.Game.MonsterData[0].Class = Managers.Data.MonsterDic[id].Class;
+            Managers.Game.MonsterData[0].Name = Managers.Data.MonsterDic[id].Name;
+            Managers.Game.MonsterData[0].Feature = Managers.Data.MonsterDic[id].Feature;
+            Managers.Game.MonsterData[0].MaxHP = Managers.Data.MonsterDic[id].MaxHP;
+            Managers.Game.MonsterData[0].CurHP = Managers.Data.MonsterDic[id].MaxHP;
+            Managers.Game.MonsterData[0].Attack = Managers.Data.MonsterDic[id].Attack;
+            Managers.Game.MonsterData[0].Defence = Managers.Data.MonsterDic[id].Defence;
+            Managers.Game.MonsterData[0].AttackSpeed = Managers.Data.MonsterDic[id].AttackSpeed;
+            Managers.Game.MonsterData[0].DefenceSpeed = Managers.Data.MonsterDic[id].DefenceSpeed;
+            Managers.Game.MonsterData[0].RewardExp = Managers.Data.MonsterDic[id].RewardExp;
+            Managers.Game.MonsterData[0].RewardItem = Managers.Data.MonsterDic[id].RewardItem;
+            Managers.Game.MonsterData[0].IdleAnimStr = Managers.Data.MonsterDic[id].IdleAnimStr;
+            Managers.Game.MonsterData[0].AttackAnimStr = Managers.Data.MonsterDic[id].AttackAnimStr;
+            Managers.Game.MonsterData[0].BattleParticleAttack = Managers.Data.MonsterDic[id].BattleParticleAttack;
+            Managers.Game.MonsterData[0].BattleParticleHit = Managers.Data.MonsterDic[id].BattleParticleHit;
+            Managers.Game.MonsterData[0].MonsterNameId = Managers.Data.MonsterDic[id].MonsterNameId;
+            Managers.Game.MonsterData[0].MonsterDescId = Managers.Data.MonsterDic[id].MonsterDescId;
+            Managers.Game.MonsterData[0].IsDefence = false;
+            Managers.Game.MonsterData[0].IsActiveIndex = _monsterIndex_forActive;
             //Managers.Game.MonsterData.Image = Managers.Data.MonsterDic[id].Image;
 
             Managers.Game.Monster = this;
@@ -56,5 +58,10 @@ public class MonsterController : MonoBehaviour
         GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>(Managers.Data.MonsterDic[id].Shadow);
 
         //id = 1;
+    }
+
+    private void OnDestroy()
+    {
+        Managers.Game.MonsterData.Clear();
     }
 }

@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static GameManager;
 
-public class UI_CreatureCard : UI_Base
+public class UI_CreatureCard : UI_BaseCard
 {
     #region Enum
 
@@ -46,8 +47,7 @@ public class UI_CreatureCard : UI_Base
     public bool _isCri = false;
     public int _attackCount = 0;
     public int _totalAttackCount = 0;
-    public float _maxDefenceCoolTime = 3f;
-    public float _defenceCoolTime = 0f;
+    //public float _defenceCoolTime = 0f;
     public MonsterClass _monsterClass = MonsterClass.None;
     public bool _forBeast = false;
     public bool _forGuard = false;
@@ -65,12 +65,9 @@ public class UI_CreatureCard : UI_Base
         BindText(typeof(Texts));
         #endregion
 
-        _monsterClass = (MonsterClass)Managers.Game.MonsterData.Feature;
-        GetText((int)Texts.CreatureName).text = Managers.Game.MonsterData.Name;
-        GetText((int)Texts.HPBarText).text = Managers.Game.MonsterData.MaxHP.ToString();
-        GetText((int)Texts.AttackStatusText).text = Managers.Game.MonsterData.Attack.ToString();
-        GetText((int)Texts.DefenceStatusText).text = Managers.Game.MonsterData.Defence.ToString();
-        GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play($"{Managers.Game.MonsterData.IdleAnimStr}");
+        _monsterClass = (MonsterClass)Managers.Game.MonsterData[0].Feature;
+
+        GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play($"{_creature.IdleAnimStr}");
 
         Managers.Game.OnBattleDataRefreshAction -= Refresh;
         Managers.Game.OnBattleDataRefreshAction += Refresh;
@@ -91,24 +88,24 @@ public class UI_CreatureCard : UI_Base
 
         if (_monsterClass == MonsterClass.Armor)
         {
-            _forArmor = Managers.Game.MonsterData.Defence;
+            _forArmor = _creature.Defence;
             Debug.Log("갑옷 효과 발동");
         }
 
         return true;
     }
 
-    public void Refresh()
+    public override void Refresh()
     {
-        StartCoroutine(CoRefresh());
+        base.Refresh();
     }
 
     IEnumerator CoRefresh()
     {
-        if (_monsterClass == MonsterClass.Beast && _forBeast == false && Managers.Game.MonsterData.CurHP <= Managers.Game.MonsterData.MaxHP * 0.1)
+        if (_monsterClass == MonsterClass.Beast && _forBeast == false && _creature.CurHP <= _creature.MaxHP * 0.1)
         {
             _forBeast = true;
-            Managers.Game.MonsterData.CurHP += Managers.Game.MonsterData.MaxHP * 0.4f;
+            _creature.CurHP += _creature.MaxHP * 0.4f;
             Debug.Log("비스트 효과 발동");
         }
 
@@ -117,34 +114,37 @@ public class UI_CreatureCard : UI_Base
             if (_forArmor > 0)
             {
                 Debug.Log("갑옷 효과 발동 방어막부터 감소");
-                float gap = Managers.Game.MonsterData.MaxHP - Managers.Game.MonsterData.CurHP;
+                float gap = _creature.MaxHP - _creature.CurHP;
                 if (_forArmor >= gap)
                 {
-                    Managers.Game.MonsterData.CurHP = Managers.Game.MonsterData.MaxHP;
+                    _creature.CurHP = _creature.MaxHP;
                     _forArmor -= gap;
                 }
                 else
                 {
-                    Managers.Game.MonsterData.CurHP += (gap - _forArmor);
+                    _creature.CurHP += (gap - _forArmor);
                     _forArmor = 0;
                 }
             }
         }
 
         //GetImage((int)Images.CreatureImage).SetNativeSize();
-        GetText((int)Texts.HPBarText).text = Managers.Game.MonsterData.CurHP.ToString();
-        GetImage((int)Images.HPHar).fillAmount = Managers.Game.MonsterData.CurHP / Managers.Game.MonsterData.MaxHP;
+        GetText((int)Texts.HPBarText).text = _creature.CurHP.ToString();
+        GetImage((int)Images.HPHar).fillAmount = _creature.CurHP / _creature.MaxHP;
         yield return new WaitForSeconds(0.2f);
-        GetImage((int)Images.HPHarGauge).fillAmount = Managers.Game.MonsterData.CurHP / Managers.Game.MonsterData.MaxHP;
+        GetImage((int)Images.HPHarGauge).fillAmount = _creature.CurHP / _creature.MaxHP;
     }
 
-    public void Attack()
+    public override int Attack(CreatureData attacker, CreatureData target)
     {
         if (_monsterClass == MonsterClass.Magic)
         {
-            _isCri = true;
+            attacker.ISCritical = true;
             Debug.Log("마법 효과 발동");
         }
+
+        int damage = base.Attack(attacker, target);
+
 
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
 
@@ -153,20 +153,20 @@ public class UI_CreatureCard : UI_Base
             Berserk();
         }
 
-        if (_attackCount == Managers.Game.MonsterData.Critical)
+        if (_attackCount == _creature.Critical)
         {
             _isCri = true;
             _attackCount = 0;
         }
 
-        if (Managers.Game.CurPlayerData.IsDefence == true)
+        if (Managers.Game.PlayerData.IsDefence == true)
         {
-            Managers.Game.CurPlayerData.IsDefence = false;
+            Managers.Game.PlayerData.IsDefence = false;
             Managers.Game.OnBattlePlayerDefeceAction.Invoke();
 
             if (_isCri == true)
             {
-                Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack * (Managers.Game.MonsterData.CriticalAttack / 100) - Managers.Game.CurPlayerData.Defence) * 0.2f;
+                Managers.Game.PlayerData.CurHP -= Mathf.Max(0, _creature.Attack * (_creature.CriticalAttack / 100) - Managers.Game.PlayerData.Defence) * 0.2f;
                 _isCri = false;
             }
         }
@@ -174,25 +174,25 @@ public class UI_CreatureCard : UI_Base
         {
             if (_isCri)
             {
-                Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack * (Managers.Game.MonsterData.CriticalAttack / 100) - Managers.Game.CurPlayerData.Defence);
+                Managers.Game.PlayerData.CurHP -= Mathf.Max(0, _creature.Attack * (_creature.CriticalAttack / 100) - Managers.Game.PlayerData.Defence);
                 Managers.Game.OnBattlePlayerDamagedAction.Invoke();
                 _isCri = false;
             }
             else
             {
-                Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack - Managers.Game.CurPlayerData.Defence);
+                Managers.Game.PlayerData.CurHP -= Mathf.Max(0, _creature.Attack - Managers.Game.PlayerData.Defence);
                 Managers.Game.OnBattlePlayerDamagedAction.Invoke();
             }
         }
-        Managers.Game.CurPlayerData.CurHP = Mathf.RoundToInt(Managers.Game.CurPlayerData.CurHP);
+        Managers.Game.PlayerData.CurHP = Mathf.RoundToInt(Managers.Game.PlayerData.CurHP);
 
-        if (Managers.Game.CurPlayerData.CurHP <= 0)
+        if (Managers.Game.PlayerData.CurHP <= 0)
         {
             // Game Over Popup TODO
             CreatePlayerDeathParticle();
             Managers.Game.OnBattleAction.Invoke();
             Managers.Game.OnBattle = false;
-            return;
+            return 0;
         }
 
         _attackCount++;
@@ -200,32 +200,31 @@ public class UI_CreatureCard : UI_Base
         CreateMonsterAttackParticle();
         CreatePlayerHitParticle();
         Managers.Game.OnBattleDataRefreshAction.Invoke();
+        return 0;
     }
 
-    public void Defence()
+    public override void Defence()
     {
-        _defenceCoolTime = _maxDefenceCoolTime;
-        GetImage((int)Images.DefenceDelayGauge).fillAmount = _defenceCoolTime / _maxDefenceCoolTime;
 
-        GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIDefenceIcon");
-        Managers.Game.MonsterData.IsDefence = true;
+
+        base.Defence();
     }
 
     IEnumerator CoDelayAttack()
     {
         float maxAttackCoolTime = 3f;
         float attackCoolTime = 0f;
-        maxAttackCoolTime = maxAttackCoolTime / Managers.Game.MonsterData.AttackSpeed;
+        maxAttackCoolTime = maxAttackCoolTime / _creature.AttackSpeed;
 
         while (true)
         {
             if (attackCoolTime >= maxAttackCoolTime)
             {
                 attackCoolTime = 0f;
-                Attack();
+                Attack(_creature, Managers.Game.PlayerData);
                 if (_monsterClass == MonsterClass.Knight)
                 {
-                    Attack();
+                    Attack(_creature, Managers.Game.PlayerData);
                     Debug.Log("검사 효과 발동");
                 }
             }
@@ -237,11 +236,11 @@ public class UI_CreatureCard : UI_Base
         }
     }
 
-    public bool _defenseFlag = false;
+    //public bool _defenseFlag = false;
     IEnumerator CoDelayDefence()
     {
 
-        _maxDefenceCoolTime = _maxDefenceCoolTime / Managers.Game.MonsterData.DefenceSpeed;
+        _maxDefenceCoolTime = _maxDefenceCoolTime / _creature.DefenceSpeed;
 
         while (true)
         {
@@ -265,23 +264,20 @@ public class UI_CreatureCard : UI_Base
 
     public void Berserk()
     {
-        Managers.Game.MonsterData.Attack *= 1.2f;
-        Managers.Game.MonsterData.AttackSpeed *= 1.2f;
-        Managers.Game.MonsterData.Defence *= 1.2f;
-        Managers.Game.MonsterData.DefenceSpeed *= 1.2f;
+        _creature.Attack *= 1.2f;
+        _creature.AttackSpeed *= 1.2f;
+        _creature.Defence *= 1.2f;
+        _creature.DefenceSpeed *= 1.2f;
     }
 
-    public void ClearDefence()
+    public override void ClearDefence()
     {
-        // TODO play damaged anim
+        //// TODO play damaged anim
         //if (GetImage((int)Images.DefenceIcon) != null)
         //    GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIShieldFX");
         StartCoroutine(CoStartShieldFX());
         StartCoroutine(CoDefenceMat());
-        _defenceCoolTime = 0f;
-        _defenseFlag = false;
-        if (GetImage((int)Images.DefenceIcon) != null)
-            GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
+        base.ClearDefence();
     }
 
     IEnumerator CoStartShieldFX()
@@ -308,7 +304,7 @@ public class UI_CreatureCard : UI_Base
         image.rectTransform.sizeDelta = GetImage((int)Images.CreatureImage).rectTransform.sizeDelta;
         Animator animator = go.GetOrAddComponent<Animator>();
         animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIMonsterAnimController");
-        animator.Play($"{Managers.Game.MonsterData.IdleAnimStr}");
+        animator.Play($"{_creature.IdleAnimStr}");
         image.sprite = GetImage((int)Images.CreatureImage).sprite;
         image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         image.color = Util.DefenceColor();
@@ -337,7 +333,7 @@ public class UI_CreatureCard : UI_Base
         image.rectTransform.sizeDelta = GetImage((int)Images.CreatureImage).rectTransform.sizeDelta;
         Animator animator = go.GetOrAddComponent<Animator>();
         animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIMonsterAnimController");
-        animator.Play($"{Managers.Game.MonsterData.IdleAnimStr}");
+        animator.Play($"{_creature.IdleAnimStr}");
         image.sprite = GetImage((int)Images.CreatureImage).sprite;
         image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         image.color = Util.DamagedColor();
@@ -372,21 +368,21 @@ public class UI_CreatureCard : UI_Base
 
     void CreateMonsterAttackParticle()
     {
-        string battleParticleAttack = Managers.Game.MonsterData.BattleParticleAttack;
+        string battleParticleAttack = _creature.BattleParticleAttack;
         
         GameObject go = Managers.Resource.Instantiate(battleParticleAttack, GetImage((int)Images.CreatureImage).gameObject.transform);    
     }
 
     void CreatePlayerHitParticle()
     {
-        string battleParticleHit = Managers.Game.MonsterData.BattleParticleHit;
+        string battleParticleHit = _creature.BattleParticleHit;
         GameObject player = GameObject.Find("CreatureImage");
         GameObject go = Managers.Resource.Instantiate(battleParticleHit, player.transform);
     }
 
     void PlayMonsterAttackAnim()
     {
-        string animStr = Managers.Game.MonsterData.AttackAnimStr;
+        string animStr = _creature.AttackAnimStr;
         GetImage((int)Images.CreatureImage).GetComponent<Animator>().Play(animStr);
     }
 }

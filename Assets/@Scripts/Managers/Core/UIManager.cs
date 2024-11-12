@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.SocialPlatforms;
 using UnityEngine.UI;
+using static GameManager;
 
 public class UIManager
 {
@@ -211,6 +212,13 @@ public class UIManager
 
         //DOTween.timeScale = 1;
         //OnTimeScaleChanged?.Invoke((int)Time.timeScale);
+    }
+
+    public UI_BaseCard SetBattleCard(Transform parent, CreatureData creature)
+    {
+        var card = MakeSubItem<UI_BaseCard>(parent);
+        card.SetData(creature);
+        return card;
     }
 
     #region 임시

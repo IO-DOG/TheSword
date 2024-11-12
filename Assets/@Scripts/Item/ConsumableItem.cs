@@ -46,13 +46,13 @@ public class ConsumableItem : MonoBehaviour
         }
         else if(id < NUM_OF_POTIONS)
         {
-            Managers.Game.CurPlayerData.CurHP += Managers.Game.ConsumableItemData.Heal;
+            Managers.Game.PlayerData.CurHP += Managers.Game.ConsumableItemData.Heal;
         }
         else if(id < NUM_OF_RUNES)
         {
-            Managers.Game.CurPlayerData.Attack += Managers.Game.ConsumableItemData.AttackUp;
-            Managers.Game.CurPlayerData.Defence += Managers.Game.ConsumableItemData.DefenceUp;   
-            Managers.Game.CurPlayerData.MaxHP += Managers.Game.ConsumableItemData.HPUp;   
+            Managers.Game.PlayerData.Attack += Managers.Game.ConsumableItemData.AttackUp;
+            Managers.Game.PlayerData.Defence += Managers.Game.ConsumableItemData.DefenceUp;   
+            Managers.Game.PlayerData.MaxHP += Managers.Game.ConsumableItemData.HPUp;   
         }
 
         Managers.Game.SaveGame();

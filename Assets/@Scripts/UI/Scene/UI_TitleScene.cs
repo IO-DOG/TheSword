@@ -173,16 +173,16 @@ public class UI_TitleScene : UI_Scene
 
         if (Input.GetKeyDown(KeyCode.F8))
         {
-            Managers.Game.CurPlayerData.CurSword = 9;
-            Managers.Game.CurPlayerData.CurShield = 0;
-            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Clear();
-            //anagers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(9);
-            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(10);
-            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(11);
-            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(12);
-            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(13);
-            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(14);
-            Managers.Game.CurPlayerData.CurSword = 10;
+            Managers.Game.PlayerData.CurSword = 9;
+            Managers.Game.PlayerData.CurShield = 0;
+            Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Clear();
+            //anagers.GamerPlayerData.Inventory[(int)Define.Types.Sword].Add(9);
+            Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Add(10);
+            Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Add(11);
+            Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Add(12);
+            Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Add(13);
+            Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Add(14);
+            Managers.Game.PlayerData.CurSword = 10;
         }
         #endregion
     }

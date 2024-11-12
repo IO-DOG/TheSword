@@ -58,8 +58,8 @@ public class UI_TutorialScene : UI_Scene
         BindImage(typeof(Images));
         #endregion
 
-        Managers.Game.InstantiateMap(Managers.Game.CurPlayerData.CurStageid);
-        Managers.Game.CurPlayerData.MoveSpeed = 1f;
+        Managers.Game.InstantiateMap(Managers.Game.PlayerData.CurStageid);
+        Managers.Game.PlayerData.MoveSpeed = 1f;
 
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
         GetObject((int)GameObjects.GreenKey).SetActive(false);
@@ -74,12 +74,12 @@ public class UI_TutorialScene : UI_Scene
 
     public void Refresh()
     {
-        GetText((int)Texts.MainUIMapNameText).text = Managers.GetString(Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonNameID);
-        GetText((int)Texts.PlayerLevelText).text = Managers.Game.CurPlayerData.Level.ToString();
-        int level = Managers.Game.CurPlayerData.Level;
-        Debug.Log($"{Managers.Game.CurPlayerData.CurExp} , {Managers.Data.PlayerDic[level].NeedExp}");
+        GetText((int)Texts.MainUIMapNameText).text = Managers.GetString(Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].DungeonNameID);
+        GetText((int)Texts.PlayerLevelText).text = Managers.Game.PlayerData.Level.ToString();
+        int level = Managers.Game.PlayerData.Level;
+        Debug.Log($"{Managers.Game.PlayerData.CurExp} , {Managers.Data.PlayerDic[level].NeedExp}");
         //GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurExp / Managers.Data.PlayerDic[level].NeedExp;
-        GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurHP / Managers.Game.CurPlayerData.MaxHP;
+        GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.PlayerData.CurHP / Managers.Game.PlayerData.MaxHP;
         Managers.Game.KeyInventory.ShowKeySlot(Managers.Game.Player._keyInventory);
         SetPlayerInfo();
     }
@@ -89,11 +89,11 @@ public class UI_TutorialScene : UI_Scene
         #region for_test
         if (Input.GetKeyDown(KeyCode.F1))
         {
-            Managers.Game.CurPlayerData.CurExp += 10;
+            Managers.Game.PlayerData.CurExp += 10;
         }
         if (Input.GetKeyDown(KeyCode.F2))
         {
-            Managers.Game.CurPlayerData.Attack += 10;
+            Managers.Game.PlayerData.Attack += 10;
         }
         if (Input.GetKeyDown(KeyCode.F3))
         {
@@ -105,23 +105,23 @@ public class UI_TutorialScene : UI_Scene
         }
         if (Input.GetKeyDown(KeyCode.F5))
         {
-            switch (Managers.Game.CurPlayerData.MoveSpeed)
+            switch (Managers.Game.PlayerData.MoveSpeed)
             {
                 case 1f:
-                    Managers.Game.CurPlayerData.MoveSpeed = 1.5f;
-                    Managers.Game.Player.Speed = Managers.Game.CurPlayerData.MoveSpeed * 5;
+                    Managers.Game.PlayerData.MoveSpeed = 1.5f;
+                    Managers.Game.Player.Speed = Managers.Game.PlayerData.MoveSpeed * 5;
                     break;
                 case 1.5f:
-                    Managers.Game.CurPlayerData.MoveSpeed = 2f;
-                    Managers.Game.Player.Speed = Managers.Game.CurPlayerData.MoveSpeed * 5;
+                    Managers.Game.PlayerData.MoveSpeed = 2f;
+                    Managers.Game.Player.Speed = Managers.Game.PlayerData.MoveSpeed * 5;
                     break;
                 case 2f:
-                    Managers.Game.CurPlayerData.MoveSpeed = 1f;
-                    Managers.Game.Player.Speed = Managers.Game.CurPlayerData.MoveSpeed * 5;
+                    Managers.Game.PlayerData.MoveSpeed = 1f;
+                    Managers.Game.Player.Speed = Managers.Game.PlayerData.MoveSpeed * 5;
                     break;
             }
 
-            Debug.Log($"Managers.Game.CurPlayerData.MoveSpeed : {Managers.Game.CurPlayerData.MoveSpeed}");
+            Debug.Log($"Managers.Game.CurPlayerData.MoveSpeed : {Managers.Game.PlayerData.MoveSpeed}");
         }
 
         if (Input.GetKeyDown(KeyCode.F6))
@@ -149,8 +149,8 @@ public class UI_TutorialScene : UI_Scene
     public void SetPlayerInfo()
     {
         //GetText((int)Texts.PlayerNameText).text = "PlayerName";
-        GetText((int)Texts.PlayerHPText).text = $"{Managers.Game.CurPlayerData.CurHP}";
-        GetText((int)Texts.PlayerAttackText).text = $"{Managers.Game.CurPlayerData.Attack}";
-        GetText((int)Texts.PlayerDefenseText).text = $"{Managers.Game.CurPlayerData.Defence}";
+        GetText((int)Texts.PlayerHPText).text = $"{Managers.Game.PlayerData.CurHP}";
+        GetText((int)Texts.PlayerAttackText).text = $"{Managers.Game.PlayerData.Attack}";
+        GetText((int)Texts.PlayerDefenseText).text = $"{Managers.Game.PlayerData.Defence}";
     }
 }

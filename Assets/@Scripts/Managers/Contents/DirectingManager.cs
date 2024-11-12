@@ -68,7 +68,7 @@ public class Events
         #region #2
         {
             Managers.Game.CurInteractObject.layer = (int)Define.Layer.Default;
-            float originalSpeed = Managers.Game.CurPlayerData.MoveSpeed;
+            float originalSpeed = Managers.Game.PlayerData.MoveSpeed;
             Managers.Game.Player.Moving(Define.MoveDir.Up);
             yield return new WaitForSeconds(0.2f);
             Managers.Game.Player.SetState(Define.PlayerState.DrawSword);
@@ -148,12 +148,12 @@ public class Events
 
         yield return new WaitForSeconds(1.5f);
 
-        Managers.Game.CurPlayerData.IsContractedSword = true;
+        Managers.Game.PlayerData.IsContractedSword = true;
         Managers.Game.Player.SetState(Define.PlayerState.IdleFront);
         Managers.Game.Player._moveDir = Define.MoveDir.Down;
         Managers.Game.Player._isEquiptWeapon = true;
         Managers.Game.Player._isEquiptShield = true;
-        Managers.Game.CurPlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
+        Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
         Managers.Game.OnDirect = false;
         Managers.Game.SaveGame();
     }

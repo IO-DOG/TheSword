@@ -18,7 +18,7 @@ public class KeyInventory
     {
         for (int i = 0; i < ConsumableItem.NUM_OF_KEYS; ++i)
         {
-            Managers.Game.CurPlayerData.KeyInventory.Add(0);
+            Managers.Game.PlayerData.KeyInventory.Add(0);
         }
 
         for (int i = 0; i < NUM_OF_KEYS; i++)
@@ -26,7 +26,7 @@ public class KeyInventory
             _keys.Add(0);
         }
 
-        _keys = Managers.Game.CurPlayerData.KeyInventory;
+        _keys = Managers.Game.PlayerData.KeyInventory;
     }
 
     public void AddItem(ConsumableItem item)
@@ -42,7 +42,7 @@ public class KeyInventory
                 Managers.Game.Player._keyInventory.transform.GetChild(item.GetComponent<ConsumableItem>().id).gameObject.SetActive(true);
             }
             ShowKeySlot(Managers.Game.Player._keyInventory);
-            Managers.Game.CurPlayerData.KeyInventory = _keys;
+            Managers.Game.PlayerData.KeyInventory = _keys;
         }
     }
 

@@ -19,8 +19,8 @@ public class UI_BattlePopup : UI_Popup
 
     #endregion
 
-    UI_PlayerCard playerCard = null;
-    UI_CreatureCard monsterCard = null;
+    UI_BaseCard playerCard = null;
+    UI_BaseCard monsterCard = null;
     UI_KingSlimeCard kingSlimeCard = null;
 
     public override bool Init()
@@ -37,22 +37,32 @@ public class UI_BattlePopup : UI_Popup
 
         // TODO
         // show Creature Card
-        playerCard = Managers.UI.MakeSubItem<UI_PlayerCard>(gameObject.transform);
+        playerCard = Managers.UI.SetBattleCard(gameObject.transform, Managers.Game.PlayerData);
+        playerCard.transform.position = new Vector3(580, 540, 0);
         //playerCard.Data = Managers.Game.Player.Data;
 
-        switch (Managers.Game.MonsterData.id)
+        for (int i = 0; i < Managers.Game.MonsterData.Count; i++)
         {
-            case Define.KingSlime:
-                kingSlimeCard = Managers.UI.MakeSubItem<UI_KingSlimeCard>(gameObject.transform);
-                playerCard.transform.position = new Vector3(480, 440, 0);
-                kingSlimeCard.transform.position = new Vector3(1440, 640, 0);
-                break;
-            default:
-                monsterCard = Managers.UI.MakeSubItem<UI_CreatureCard>(gameObject.transform);
-                playerCard.transform.position = new Vector3(580, 540, 0);
-                monsterCard.transform.position = new Vector3(1340, 540, 0);
-                break;
+            monsterCard = Managers.UI.SetBattleCard(gameObject.transform, Managers.Game.MonsterData[i]);
+            monsterCard.transform.position = new Vector3(1340, 540, 0);
+
+            //switch (Managers.Game.MonsterData[0].id)
+            //{
+            //    case Define.KingSlime:
+            //        kingSlimeCard = Managers.UI.MakeSubItem<UI_KingSlimeCard>(gameObject.transform);
+            //        playerCard.transform.position = new Vector3(480, 440, 0);
+            //        kingSlimeCard.transform.position = new Vector3(1440, 640, 0);
+
+            //        break;
+            //    default:
+            //        monsterCard = Managers.UI.MakeSubItem<UI_CreatureCard>(gameObject.transform);
+            //        playerCard.transform.position = new Vector3(580, 540, 0);
+            //        monsterCard.transform.position = new Vector3(1340, 540, 0);
+            //        break;
+            //}
         }
+
+
 
         //monsterCard.Data = Managers.Game.MonsterData;
 
@@ -67,7 +77,7 @@ public class UI_BattlePopup : UI_Popup
     {
         Destroy(playerCard.gameObject);
 
-        switch (Managers.Game.MonsterData.id)
+        switch (Managers.Game.MonsterData[0].id)
         {
             case Define.KingSlime:
                 Destroy(kingSlimeCard.gameObject);

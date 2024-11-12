@@ -14,9 +14,11 @@ public class Managers : MonoBehaviour
     #region Contents
     GameManager _game = new GameManager();
     DirectingManager _directing = new DirectingManager();
+    EventManager _event = new EventManager();
 
     public static GameManager Game { get { return Instance?._game; } }
     public static DirectingManager Directing { get { return Instance?._directing; } }
+    public static EventManager Event { get { return Instance?._event; } }
 
     #endregion
 
@@ -61,9 +63,6 @@ public class Managers : MonoBehaviour
             DontDestroyOnLoad(go);
             DontDestroyOnLoad(cursor);
             s_instance = go.GetComponent<Managers>();
-            //s_instance._sound.Init();
-            //s_instance._time = go.AddComponent<TimeManager>();
-
         }
     }
 
