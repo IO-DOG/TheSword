@@ -76,6 +76,7 @@ public class GameManager
 
     public class CreatureData
     {
+        public CreatureClass.IEffect effect { get; set; }
         public string Class { get; set; }
         public string Name { get; set; }
         public float MaxHP { get; set; }

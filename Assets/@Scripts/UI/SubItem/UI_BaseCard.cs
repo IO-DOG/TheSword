@@ -48,6 +48,7 @@ public class UI_BaseCard : UI_Base
         Managers.Game.OnBattleDataRefreshAction += Refresh;
         Managers.Game.OnBattlePlayerDefeceAction += ClearDefence;
 
+        var cretureClass = AttackEffectFactory.GetAttackEffect(_creature);
         //Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
 
         return true;
@@ -95,13 +96,7 @@ public class UI_BaseCard : UI_Base
 
     public virtual int Attack(CreatureData attacker, CreatureData target)
     {
-        int damage = (int)Mathf.Max(0, attacker.Attack);
-        if (attacker.ISCritical) damage *= (int)(attacker.CriticalAttack / 100);
-        damage -= (int)target.Defence;
-        if (target.IsDefence && attacker.ISCritical) damage = (int)(damage * 0.25f);
-        else if (target.IsDefence) damage = 0;
-
-        return damage;
+        _creature.atta
     }
 
     //public virtual int SAttack(CreatureData target, ref bool isCri)
@@ -142,7 +137,7 @@ public class UI_BaseCard : UI_Base
 
     public virtual void Dead()
     {
-
+        
     }
 
 }

@@ -5,9 +5,9 @@ using UnityEngine;
 using static CreatureClass;
 using static GameManager;
 
-public static class AttackEffectFactory
+public static class EffectFactory
 {
-    public static IAttackEffect GetAttackEffect(CreatureData creatureData)
+    public static IEffect GetEffect(CreatureData creatureData)
     {
         if (creatureData.Class == Define.Class.Beast.ToString())
         {
@@ -52,17 +52,13 @@ public static class AttackEffectFactory
 
 public class CreatureClass : MonoBehaviour
 {
-    public interface IAttackEffect
+    public interface IEffect
     {
         int ExecuteAttack(CreatureData attacker, CreatureData target);
-    }
-
-    public interface IOnHitEffect
-    {
         void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage);
     }
 
-    public class BeastEffect : IAttackEffect, IOnHitEffect
+    public class BeastEffect : IEffect
     {
         bool flag = false;
 
@@ -98,7 +94,7 @@ public class CreatureClass : MonoBehaviour
         }
     }
 
-    public class MagicEffect : IAttackEffect, IOnHitEffect
+    public class MagicEffect : IEffect
     {
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
         {
@@ -126,7 +122,7 @@ public class CreatureClass : MonoBehaviour
         }
     }
 
-    public class GuardianEffect : IAttackEffect, IOnHitEffect
+    public class GuardianEffect : IEffect
     {
         GuardianEffect(UI_BaseCard uI_BaseCard)
         {
@@ -163,7 +159,7 @@ public class CreatureClass : MonoBehaviour
         }
     }
 
-    public class ImmortalEffect : IAttackEffect, IOnHitEffect
+    public class ImmortalEffect : IEffect
     {
         public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
         {
@@ -191,7 +187,7 @@ public class CreatureClass : MonoBehaviour
         }
     }
 
-    public class KnightEffect : IAttackEffect, IOnHitEffect
+    public class KnightEffect : IEffect
     {
         public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
         {
@@ -220,7 +216,7 @@ public class CreatureClass : MonoBehaviour
         }
     }
 
-    public class TitanEffect : IAttackEffect, IOnHitEffect
+    public class TitanEffect : IEffect
     {
         int hitCount = 0;
 
@@ -238,7 +234,7 @@ public class CreatureClass : MonoBehaviour
             if (hitCount == 5)
             {
                 hitCount = 0;
-                Roar(creature, attacker);
+                attacker.effect.ExcuteOnHit(creature, attacker, Roar(creature, attacker));
             }
 
             Managers.Game.OnHitMonsterAction[0].Invoke();
@@ -267,7 +263,7 @@ public class CreatureClass : MonoBehaviour
         }
     }
 
-    public class AssassinEffect : IAttackEffect, IOnHitEffect
+    public class AssassinEffect : IEffect
     {
         public void ExecuteAttack(CreatureData attacker, CreatureData target)
         {
@@ -290,7 +286,7 @@ public class CreatureClass : MonoBehaviour
     }
 
     // 기본 공격 효과 (특정 클래스가 아닐 경우)
-    public class DefaultAttackEffect : IAttackEffect, IOnHitEffect
+    public class DefaultAttackEffect : IEffect
     {
         public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
         {
