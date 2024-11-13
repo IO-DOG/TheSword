@@ -42,10 +42,6 @@ public class UI_BaseCard : UI_Base
 
         Managers.Game.OnBattleDataRefreshAction -= Refresh;
         Managers.Game.OnBattleDataRefreshAction += Refresh;
-        Managers.Game.OnBattlePlayerDefenceAction += ClearDefence;
-        Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
-        Managers.Game.OnBattleCreatureDefenceAction += ClearDefence;
-        Managers.Game.OnBattleCreatureDamagedAction += StartDamagedMat;
 
         _creature.Trait = EffectFactory.GetTrait(_creature, this);
         Debug.Log(_creature.Trait.ToString());
@@ -100,7 +96,7 @@ public class UI_BaseCard : UI_Base
 
     public virtual void Attack(CreatureData attacker, CreatureData target)
     {
-        target.Trait.ExcuteOnHit(attacker, target, _creature.Trait.ExecuteAttack(attacker, target));
+        target.Trait.ExcuteOnHit(attacker, target, attacker.Trait.ExecuteAttack(attacker, target));
     }
 
     public virtual void Defence()

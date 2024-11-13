@@ -15,6 +15,10 @@ public class UI_PlayerCard : UI_BaseCard
         //Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
         Managers.Game.OnHitPlayerAction -= Refresh;
         Managers.Game.OnHitPlayerAction += Refresh;
+        Managers.Game.OnBattlePlayerDefenceAction -= ClearDefence;
+        Managers.Game.OnBattlePlayerDefenceAction += ClearDefence;
+        Managers.Game.OnBattlePlayerDamagedAction -= StartDamagedMat;
+        Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
         Managers.Game.OnDeadPlayerAction -= Dead;
         Managers.Game.OnDeadPlayerAction += Dead;
 
@@ -39,7 +43,7 @@ public class UI_PlayerCard : UI_BaseCard
         base.Attack(attacker, target);
         Managers.Game.AttackCount++;
 
-        if (Managers.Game.MonsterData[0].IsDefence)
+        if (target.IsDefence)
         {
             Managers.Game.OnBattleCreatureDefenceAction.Invoke();
         }
@@ -54,7 +58,7 @@ public class UI_PlayerCard : UI_BaseCard
 
         if (Managers.Game.AttackCount == Managers.Game.PlayerData.Critical)
         {
-            _creature.ISCritical = true;
+            _creature.IsCritical = true;
             Managers.Game.AttackCount = 0;
         }
     }

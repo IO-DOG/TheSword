@@ -29,6 +29,8 @@ public class MonsterController : MonoBehaviour
             Managers.Game.MonsterData[0].Defence = Managers.Data.MonsterDic[id].Defence;
             Managers.Game.MonsterData[0].AttackSpeed = Managers.Data.MonsterDic[id].AttackSpeed;
             Managers.Game.MonsterData[0].DefenceSpeed = Managers.Data.MonsterDic[id].DefenceSpeed;
+            Managers.Game.MonsterData[0].Critical = Managers.Data.MonsterDic[id].Critical;
+            Managers.Game.MonsterData[0].CriticalAttack = Managers.Data.MonsterDic[id].CriticalAttack;
             Managers.Game.MonsterData[0].RewardExp = Managers.Data.MonsterDic[id].RewardExp;
             Managers.Game.MonsterData[0].RewardItem = Managers.Data.MonsterDic[id].RewardItem;
             Managers.Game.MonsterData[0].IdleAnimStr = Managers.Data.MonsterDic[id].IdleAnimStr;

@@ -88,7 +88,7 @@ public class GameManager
         public float Critical { get; set; }
         public float CriticalAttack { get; set; }
         public bool IsDefence { get; set; }
-        public bool ISCritical { get; set; }
+        public bool IsCritical { get; set; }
         public string IdleAnimStr { get; set; }
         public string AttackAnimStr { get; set; }
         public string BattleParticleAttack { get; set; }

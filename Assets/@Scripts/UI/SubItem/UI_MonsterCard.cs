@@ -23,6 +23,10 @@ public class UI_MonsterCard : UI_BaseCard
         Managers.Game.OnBattleDataRefreshAction += Refresh;
         Managers.Game.OnHitMonsterAction[0] -= Refresh;
         Managers.Game.OnHitMonsterAction[0] += Refresh;
+        Managers.Game.OnBattleCreatureDefenceAction -= ClearDefence;
+        Managers.Game.OnBattleCreatureDefenceAction += ClearDefence;
+        Managers.Game.OnBattleCreatureDamagedAction -= StartDamagedMat;
+        Managers.Game.OnBattleCreatureDamagedAction += StartDamagedMat;
         Managers.Game.OnDeadMonsterAction[0] -= Dead;
         Managers.Game.OnDeadMonsterAction[0] += Dead;
 
@@ -40,7 +44,6 @@ public class UI_MonsterCard : UI_BaseCard
     public override void Attack(CreatureData attacker, CreatureData target)
     {
         base.Attack(attacker, target);
-
         if (Managers.Game.PlayerData.IsDefence)
         {
             Managers.Game.OnBattlePlayerDefenceAction.Invoke();
@@ -55,7 +58,7 @@ public class UI_MonsterCard : UI_BaseCard
 
         if (_attackCount == _creature.Critical)
         {
-            _creature.ISCritical = true;
+            _creature.IsCritical = true;
             _attackCount = 0;
         }
 
@@ -63,7 +66,7 @@ public class UI_MonsterCard : UI_BaseCard
         PlayMonsterAttackAnim();
         CreateMonsterAttackParticle();
         CreatePlayerHitParticle();
-        Managers.Game.OnBattleDataRefreshAction.Invoke();
+        //Managers.Game.OnBattleDataRefreshAction.Invoke();
     }
 
     public override void Defence()
