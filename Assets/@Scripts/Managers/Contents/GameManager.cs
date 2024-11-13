@@ -95,22 +95,6 @@ public class GameManager
         public string BattleParticleHit { get; set; }
     }
 
-    public class AttackData
-    {
-        public CreatureData Attacker;
-        public CreatureData Target;
-        public int Damage;
-        public bool IsCritical;
-
-        public AttackData(CreatureData attacker, CreatureData target, int damage, bool isCritical)
-        {
-            Attacker = attacker;
-            Target = target;
-            Damage = damage;
-            IsCritical = isCritical;
-        }
-    }
-
     public class CurPlayerData : CreatureData
     {
         public int Level { get; set; } = 1; // Lv
@@ -379,7 +363,11 @@ public class GameManager
             };
         }
 
-        string jsonStr = JsonConvert.SerializeObject(PlayerData, Formatting.Indented);
+        string jsonStr = JsonConvert.SerializeObject(PlayerData, Formatting.Indented, new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Objects,
+            TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple
+        });
         File.WriteAllText(_path, jsonStr);
 
         //List<MapData> mapData = new List<MapData>(Managers.Data.MapDic.Values);
@@ -438,7 +426,10 @@ public class GameManager
         }
 
         string fileStr = File.ReadAllText(_path);
-        CurPlayerData data = JsonConvert.DeserializeObject<CurPlayerData>(fileStr);
+        CurPlayerData data = JsonConvert.DeserializeObject<CurPlayerData>(fileStr, new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Objects
+        });
         if (data != null)
         {
             PlayerData = data;
