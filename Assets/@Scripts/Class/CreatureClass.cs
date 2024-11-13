@@ -7,39 +7,39 @@ using static GameManager;
 
 public static class EffectFactory
 {
-    public static IEffect GetEffect(CreatureData creatureData)
+    public static IEffect GetEffect(CreatureData creatureData, UI_BaseCard baseCard = null)
     {
         if (creatureData.Class == Define.Class.Beast.ToString())
         {
-
+            return new BeastEffect();
         }
         else if (creatureData.Class == Define.Class.Magic.ToString())
         {
-
+            return new MagicEffect();
         }
         else if (creatureData.Class == Define.Class.Shield.ToString())
         {
-
+            return new GuardianEffect(baseCard);
         }
         else if (creatureData.Class == Define.Class.Immortal.ToString())
         {
-
+            return new ImmortalEffect();
         }
         else if (creatureData.Class == Define.Class.Knight.ToString())
         {
-            return new KnightAttackEffect();
+            return new KnightEffect();
         }
         else if (creatureData.Class == Define.Class.Titan.ToString())
         {
-
+            return new TitanEffect();
         }
         else if (creatureData.Class == Define.Class.Assassin.ToString())
         {
-            return new AssassinAttackEffect();
+            return new AssassinEffect();
         }
         else if (creatureData.Class == Define.Class.Armor.ToString())
         {
-
+            return new KnightEffect();
         }
         else
         {
@@ -47,8 +47,6 @@ public static class EffectFactory
         }
     }
 }
-
-
 
 public class CreatureClass : MonoBehaviour
 {
@@ -124,7 +122,7 @@ public class CreatureClass : MonoBehaviour
 
     public class GuardianEffect : IEffect
     {
-        GuardianEffect(UI_BaseCard uI_BaseCard)
+        public GuardianEffect(UI_BaseCard uI_BaseCard)
         {
             Managers.Event.Unsubscribe(Define.GameEvent.FillDefenceGague, uI_BaseCard.FillDefenceGague);
             Managers.Event.Subscribe(Define.GameEvent.FillDefenceGague, uI_BaseCard.FillDefenceGague);
@@ -265,23 +263,71 @@ public class CreatureClass : MonoBehaviour
 
     public class AssassinEffect : IEffect
     {
-        public void ExecuteAttack(CreatureData attacker, CreatureData target)
+        bool flag = true;
+
+        public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
         {
+            if (!attacker.ISCritical) damage = 0;
+            else flag = false;
 
-            // 추가적인 치명타 효과
-            damage *= 2; // 예: 데미지 2배
-            attacker._forAssassin = false;
-            Debug.Log("암살 효과 발동! 데미지가 2배로 증가했습니다.");
-
-
-            target.CurHP -= damage;
-            if (target.CurHP <= 0)
+            creature.CurHP -= damage;
+            if (creature.CurHP <= 0)
             {
-                target.CurHP = 0;
+                creature.CurHP = 0;
                 Managers.Game.OnDeadMonsterAction[0].Invoke();
             }
 
             Managers.Game.OnHitMonsterAction[0].Invoke();
+        }
+
+        int IEffect.ExecuteAttack(CreatureData attacker, CreatureData target)
+        {
+            int damage = (int)Mathf.Max(0, attacker.Attack);
+            if (attacker.ISCritical) damage *= (int)(attacker.CriticalAttack / 100);
+            damage -= (int)target.Defence;
+            if (target.IsDefence && attacker.ISCritical) damage = (int)(damage * 0.25f);
+            else if (target.IsDefence) damage = 0;
+
+            return damage;
+        }
+    }
+
+    public class ArmorEffect : IEffect
+    {
+        int shield = 10;
+
+        public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
+        {
+            shield -= damage;
+            if (shield <= 0)
+            {
+                damage = -shield;
+                shield = 0;
+            }
+            else
+            {
+                damage = 0;
+            }
+
+            creature.CurHP -= damage;
+            if (creature.CurHP <= 0)
+            {
+                creature.CurHP = 0;
+                Managers.Game.OnDeadMonsterAction[0].Invoke();
+            }
+
+            Managers.Game.OnHitMonsterAction[0].Invoke();
+        }
+
+        public int ExecuteAttack(CreatureData attacker, CreatureData target)
+        {
+            int damage = (int)Mathf.Max(0, attacker.Attack);
+            if (attacker.ISCritical) damage *= (int)(attacker.CriticalAttack / 100);
+            damage -= (int)target.Defence;
+            if (target.IsDefence && attacker.ISCritical) damage = (int)(damage * 0.25f);
+            else if (target.IsDefence) damage = 0;
+
+            return damage;
         }
     }
 

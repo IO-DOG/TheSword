@@ -47,7 +47,7 @@ public class UI_PlayerCard : UI_BaseCard
         base.Refresh();
     }
 
-    public override int Attack(CreatureData attacker, CreatureData target)
+    public override void Attack(CreatureData attacker, CreatureData target)
     {
         Managers.Game.AttackCount++;
 
@@ -55,8 +55,6 @@ public class UI_PlayerCard : UI_BaseCard
         {
             Managers.Game.OnBattleCreatureDefeceAction.Invoke();
         }
-
-        int damage = base.Attack(attacker, target);
 
         GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play("UIPlayerAttackAnim");
         GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play($"UISword{Managers.Game.PlayerData.CurSword - 9}AttackAnim");
@@ -70,166 +68,8 @@ public class UI_PlayerCard : UI_BaseCard
             _forAssassin = true;
             Managers.Game.AttackCount = 0;
         }
-
-        // todo
-        // 특성 고려
-        target.CurHP -= damage;
-
-        if (target.CurHP <= 0)
-        {
-            target.CurHP = 0;
-            Managers.Game.OnDeadMonsterAction[0].Invoke();
-        }
-
-        Managers.Game.OnHitMonsterAction[0].Invoke();
-        return 1;
     }
 
-    //public override void Attack()
-    //{
-    //    Managers.Game.AttackCount++;
-
-    //    //if (Managers.Game.MonsterData.Feature == 6)
-    //    //{
-    //    //    Managers.Game.MonsterData.DamagedCount++;
-    //    //    if (Managers.Game.MonsterData.DamagedCount == 5)
-    //    //    {
-    //    //        Debug.Log("거대 효과 발동");
-    //    //        Managers.Game.PlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack - Managers.Game.PlayerData.Defence) * 0.2f;
-    //    //        Refresh();
-    //    //    }
-    //    //}
-    //    GetImage((int)Images.PlayerImage).gameObject.GetComponent<Animator>().Play("UIPlayerAttackAnim");
-    //    GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play($"UISword{Managers.Game.PlayerData.CurSword - 9}AttackAnim");
-    //    if (Managers.Game.PlayerData.CurShield != 0)
-    //        GetImage((int)Images.CreatureShieldImage).gameObject.GetComponent<Animator>().Play($"UIShield{Managers.Game.PlayerData.CurShield - 20}AttackAnim");
-    //    GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
-
-    //    if (Managers.Game.AttackCount == Managers.Game.PlayerData.Critical)
-    //    {
-    //        _isCri = true;
-    //        _forAssassin = true;
-    //        Managers.Game.AttackCount = 0;
-    //    }
-
-    //    // 몬스터가 암살일 경우
-    //    //if (Managers.Game.MonsterData.Feature == 7 && _forAssassin == false)
-    //    //{
-    //    //    Debug.Log("암살 효과 발동");
-    //    //    return;
-    //    //}
-
-    //    // 몬스터가 방어 상태일 경우
-    //    if (Managers.Game.MonsterData[0].IsDefence == true)
-    //    {
-    //        Managers.Game.MonsterData[0].IsDefence = false;
-    //        Managers.Game.OnBattleCreatureDefeceAction.Invoke();
-
-    //        if (_isCri == true)
-    //        {
-    //            Managers.Game.MonsterData[0].CurHP -= Mathf.Max(0, Managers.Game.PlayerData.Attack * (Managers.Game.PlayerData.CriticalAttack / 100) - Managers.Game.MonsterData[0].Defence) * 0.2f;
-    //            _isCri = false;
-    //        }
-    //    }
-    //    else // 일반 공격
-    //    {
-    //        if (_isCri)
-    //        {
-    //            // 몬스터가 불사 효과일 경우
-    //            if (Managers.Game.MonsterData[0].Feature == 4)
-    //            {
-    //                Managers.Game.MonsterData[0].CurHP -= Mathf.Max(0, Managers.Game.PlayerData.Attack * (Managers.Game.PlayerData.CriticalAttack / 100) - Managers.Game.MonsterData[0].Defence) * 20;
-    //                Managers.Game.OnBattleCreatureDamagedAction.Invoke();
-    //                Debug.Log("불사 효과 발동 치명 데미지 200퍼");
-    //            }
-    //            else
-    //            {
-    //                Managers.Game.MonsterData[0].CurHP -= Mathf.Max(0, Managers.Game.PlayerData.Attack * (Managers.Game.PlayerData.CriticalAttack / 100) - Managers.Game.MonsterData[0].Defence);
-    //                Managers.Game.OnBattleCreatureDamagedAction.Invoke();
-    //            }
-    //            _isCri = false;
-    //        }
-    //        else
-    //        {
-    //            // 몬스터가 불사 효과일 경우
-    //            if (Managers.Game.MonsterData[0].Feature == 4)
-    //            {
-    //                Managers.Game.MonsterData[0].CurHP -= Mathf.Max(0, Managers.Game.PlayerData.Attack * (Managers.Game.PlayerData.CriticalAttack / 100) - Managers.Game.MonsterData[0].Defence) * 0.2f;
-    //                Managers.Game.OnBattleCreatureDamagedAction.Invoke();
-    //                Debug.Log("불사 효과 발동 일반 데미지 20퍼");
-    //            }
-    //            else
-    //            {
-    //                Managers.Game.MonsterData[0].CurHP -= Mathf.Max(0, Managers.Game.PlayerData.Attack - Managers.Game.MonsterData[0].Defence);
-    //                Managers.Game.OnBattleCreatureDamagedAction.Invoke();
-    //            }
-    //        }
-    //    }
-    //    Managers.Game.MonsterData[0].CurHP = Mathf.RoundToInt(Managers.Game.MonsterData[0].CurHP);
-
-    //    if (Managers.Game.MonsterData[0].CurHP <= 0)
-    //    {
-    //        // add exp
-    //        Managers.Game.PlayerData.CurExp += Managers.Game.MonsterData[0].RewardExp;
-
-    //        Managers.Data.MonsterActiveDic[Managers.Game.MonsterData[0].IsActiveIndex] = false;
-
-    //        int id = Managers.Game.Monster.id;
-    //        Debug.Log($"Monster Id : {id}");
-    //        string name = Managers.Data.MonsterDic[id].Name;
-    //        switch (id)
-    //        {
-    //            case Define.KingSlime:
-    //                BlackSlimeController blackSlimeController = Managers.Game.Monster.gameObject.GetOrAddComponent<BlackSlimeController>();
-    //                blackSlimeController.Dead();
-    //                break;
-    //            default:
-    //                break;
-    //        }
-
-    //        // for king slime
-    //        if (Managers.Game.Monster.gameObject.name == "KingSlimeSplitMonster")
-    //        {
-    //            Managers.Game.TotalKillSplitSlime++;
-    //            if (Managers.Game.TotalKillSplitSlime == 3)
-    //                Managers.Game.OnKingSlimeDeadAction.Invoke();
-    //        }
-
-    //        //StartCoroutine(CoMonsterDead());
-    //        Managers.Game.OnBattleAction.Invoke();
-    //        Managers.Game.OnBattle = false;
-
-    //        // 몬스터 죽는 파티클 생성
-    //        Transform particlePos = Managers.Game.Monster.gameObject.transform;
-    //        GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
-    //        deathSoulPurple.transform.position = particlePos.position;
-    //        deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-    //        deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[0].startDelay = 0.2f;
-    //        deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[1].startDelay = 0.2f;
-    //        deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[2].startDelay = 0.2f;
-    //        Destroy(deathSoulPurple, 3);
-    //        Destroy(Managers.Game.Monster.gameObject);
-    //        return;
-    //    }
-
-    //    CreatePlayerAttackParticle();
-    //    CreateMonsterHitParticle();
-    //    Managers.Game.OnBattleDataRefreshAction.Invoke();
-    //}
-
-    //IEnumerator CoMonsterDead()
-    //{
-    //    // 몬스터 죽는 파티클 생성
-
-    //    yield return new WaitForSeconds(2f);
-
-    //    Transform particlePos = Managers.Game.Monster.gameObject.transform;
-    //    GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
-    //    deathSoulPurple.transform.position = particlePos.position;
-    //    deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-    //    Destroy(deathSoulPurple, 3);
-    //    Destroy(Managers.Game.Monster.gameObject);
-    //}
 
     public override void Defence()
     {

@@ -30,6 +30,7 @@ public class UI_BaseCard : UI_Base
         DefenceStatusText,
     }
 
+    protected CreatureClass.IEffect effect;
     protected CreatureData _creature;
     protected float _defenceCoolTime = 0f;
     protected float _maxDefenceCoolTime = 3f;
@@ -48,7 +49,7 @@ public class UI_BaseCard : UI_Base
         Managers.Game.OnBattleDataRefreshAction += Refresh;
         Managers.Game.OnBattlePlayerDefeceAction += ClearDefence;
 
-        var cretureClass = AttackEffectFactory.GetAttackEffect(_creature);
+        effect = EffectFactory.GetEffect(_creature, this);
         //Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
 
         return true;
@@ -94,29 +95,10 @@ public class UI_BaseCard : UI_Base
             GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
     }
 
-    public virtual int Attack(CreatureData attacker, CreatureData target)
+    public virtual void Attack(CreatureData attacker, CreatureData target)
     {
-        _creature.atta
+        target.effect.ExcuteOnHit(attacker, target, effect.ExecuteAttack(attacker, target));
     }
-
-    //public virtual int SAttack(CreatureData target, ref bool isCri)
-    //{
-    //    int damage = (int)Mathf.Max(0, _creature.Attack);
-    //    if (isCri) damage *= (int)(_creature.CriticalAttack / 100);
-
-    //    target.STakeDamage(damage);
-    //}
-
-    //public virtual void STakeDamage(CreatureData attacker)
-    //{
-    //    damage -= (int)_creature.Defence;
-    //    if (_creture.isDefence && attacker.isCri) damage = (int)(damage * 0.25f);
-    //    else if (_creture.isDefence) damage = 0;
-
-    //    _creature.HP -= damege;
-    //    if(_creature.HP < 0)
-    //        _creature.Dead();
-    //}
 
     public virtual void Defence()
     {
@@ -137,7 +119,7 @@ public class UI_BaseCard : UI_Base
 
     public virtual void Dead()
     {
-        
+
     }
 
 }

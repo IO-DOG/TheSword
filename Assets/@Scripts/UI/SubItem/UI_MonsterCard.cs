@@ -119,17 +119,8 @@ public class UI_MonsterCard : UI_BaseCard
         GetImage((int)Images.HPHarGauge).fillAmount = _creature.CurHP / _creature.MaxHP;
     }
 
-    public override int Attack(CreatureData attacker, CreatureData target)
+    public override void Attack(CreatureData attacker, CreatureData target)
     {
-        if (_monsterClass == MonsterClass.Magic)
-        {
-            attacker.ISCritical = true;
-            Debug.Log("마법 효과 발동");
-        }
-
-        int damage = base.Attack(attacker, target);
-
-
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
 
         if (_totalAttackCount > 0 && _totalAttackCount % 20 == 0)
@@ -143,54 +134,15 @@ public class UI_MonsterCard : UI_BaseCard
             _attackCount = 0;
         }
 
-        if (Managers.Game.PlayerData.IsDefence == true)
-        {
-            Managers.Game.PlayerData.IsDefence = false;
-            Managers.Game.OnBattlePlayerDefeceAction.Invoke();
-
-            if (_isCri == true)
-            {
-                Managers.Game.PlayerData.CurHP -= Mathf.Max(0, _creature.Attack * (_creature.CriticalAttack / 100) - Managers.Game.PlayerData.Defence) * 0.2f;
-                _isCri = false;
-            }
-        }
-        else
-        {
-            if (_isCri)
-            {
-                Managers.Game.PlayerData.CurHP -= Mathf.Max(0, _creature.Attack * (_creature.CriticalAttack / 100) - Managers.Game.PlayerData.Defence);
-                Managers.Game.OnBattlePlayerDamagedAction.Invoke();
-                _isCri = false;
-            }
-            else
-            {
-                Managers.Game.PlayerData.CurHP -= Mathf.Max(0, _creature.Attack - Managers.Game.PlayerData.Defence);
-                Managers.Game.OnBattlePlayerDamagedAction.Invoke();
-            }
-        }
-        Managers.Game.PlayerData.CurHP = Mathf.RoundToInt(Managers.Game.PlayerData.CurHP);
-
-        //if (Managers.Game.PlayerData.CurHP <= 0)
-        //{
-        //    // Game Over Popup TODO
-        //    CreatePlayerDeathParticle();
-        //    Managers.Game.OnBattleAction.Invoke();
-        //    Managers.Game.OnBattle = false;
-        //    return 0;
-        //}
-
         _attackCount++;
         PlayMonsterAttackAnim();
         CreateMonsterAttackParticle();
         CreatePlayerHitParticle();
         Managers.Game.OnBattleDataRefreshAction.Invoke();
-        return 0;
     }
 
     public override void Defence()
     {
-
-
         base.Defence();
     }
 
@@ -230,9 +182,9 @@ public class UI_MonsterCard : UI_BaseCard
         {
             if (_defenceCoolTime >= _maxDefenceCoolTime)
             {
-                if (_defenseFlag == false)
+                if (_creature.IsDefence == false)
                 {
-                    _defenseFlag = true;
+                    _creature.IsDefence = true;
                     Defence();
                 }
                 _defenceCoolTime = _maxDefenceCoolTime;
