@@ -58,6 +58,7 @@ public class GameManager
     public List<Action> OnDeadMonsterAction = new List<Action>();
     public Action OnHitPlayerAction;
     public Action OnDeadPlayerAction;
+    public Action OnGuardianEffectAction;
 
     public Action OnPortalAction;
 

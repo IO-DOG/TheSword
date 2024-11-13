@@ -33,6 +33,14 @@ public class EventManager : MonoBehaviour
         }
     }
 
+    public void DeleteEvent(GameEvent eventKey)
+    {
+        if (eventDictionary.TryGetValue(eventKey, out var thisEvent))
+        {
+            eventDictionary.Remove(eventKey);
+        }
+    }
+
     // Trigger an event
     public void TriggerEvent(GameEvent eventKey)
     {

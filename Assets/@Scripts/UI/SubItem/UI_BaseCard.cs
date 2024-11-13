@@ -32,7 +32,6 @@ public class UI_BaseCard : UI_Base
 
     protected CreatureData _creature;
     protected float _defenceCoolTime = 0f;
-    protected bool _defenseFlag = false;
     protected float _maxDefenceCoolTime = 3f;
 
     public override bool Init()
@@ -48,6 +47,7 @@ public class UI_BaseCard : UI_Base
         Managers.Game.OnBattleDataRefreshAction -= Refresh;
         Managers.Game.OnBattleDataRefreshAction += Refresh;
         Managers.Game.OnBattlePlayerDefeceAction += ClearDefence;
+
         //Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
 
         return true;
@@ -70,7 +70,6 @@ public class UI_BaseCard : UI_Base
         GetText((int)Texts.HPBarText).text = _creature.CurHP.ToString();
         GetText((int)Texts.AttackStatusText).text = _creature.Attack.ToString();
         GetText((int)Texts.DefenceStatusText).text = _creature.Defence.ToString();
-
     }
 
     public virtual void Refresh()
@@ -89,7 +88,7 @@ public class UI_BaseCard : UI_Base
     public virtual void ClearDefence()
     {
         _defenceCoolTime = 0f;
-        _defenseFlag = false;
+        _creature.IsDefence = false;
         if (GetImage((int)Images.DefenceIcon) != null)
             GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
     }
@@ -132,6 +131,13 @@ public class UI_BaseCard : UI_Base
         GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIDefenceIcon");
         _creature.IsDefence = true;
 
+    }
+
+    public void FillDefenceGague()
+    {
+        _defenceCoolTime = _maxDefenceCoolTime;
+        _creature.IsDefence = true;
+        GetImage((int)Images.DefenceDelayGauge).fillAmount = 1f;
     }
 
     public virtual void Dead()

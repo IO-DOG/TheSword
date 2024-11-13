@@ -116,7 +116,20 @@ public class Define
 
     public enum GameEvent
     {
+        FillDefenceGague,
+    }
 
+    public enum Class
+    {
+        None,
+        Beast,
+        Magic,
+        Shield,
+        Immortal,
+        Knight,
+        Titan,
+        Assassin,
+        Armor,
     }
 
     #endregion
