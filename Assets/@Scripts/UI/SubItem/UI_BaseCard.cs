@@ -49,7 +49,7 @@ public class UI_BaseCard : UI_Base
         Managers.Game.OnBattleDataRefreshAction += Refresh;
         Managers.Game.OnBattlePlayerDefeceAction += ClearDefence;
 
-        _creature.effect = EffectFactory.GetEffect(_creature, this);
+        _creature.effect = EffectFactory.GetTrait(_creature, this);
         //Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
 
         return true;
@@ -97,7 +97,7 @@ public class UI_BaseCard : UI_Base
 
     public virtual void Attack(CreatureData attacker, CreatureData target)
     {
-        target.effect.ExcuteOnHit(attacker, target, effect.ExecuteAttack(attacker, target));
+        target.effect.ExcuteOnHit(attacker, target, _creature.effect.ExecuteAttack(attacker, target));
     }
 
     public virtual void Defence()

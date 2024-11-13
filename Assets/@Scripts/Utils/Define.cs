@@ -119,12 +119,12 @@ public class Define
         FillDefenceGague,
     }
 
-    public enum Class
+    public enum Trait
     {
         None,
         Beast,
         Magic,
-        Shield,
+        Guardian,
         Immortal,
         Knight,
         Titan,

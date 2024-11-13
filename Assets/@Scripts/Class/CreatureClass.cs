@@ -7,56 +7,56 @@ using static GameManager;
 
 public static class EffectFactory
 {
-    public static IEffect GetEffect(CreatureData creatureData, UI_BaseCard baseCard = null)
+    public static ITrait GetTrait(CreatureData creatureData, UI_BaseCard baseCard = null)
     {
-        if (creatureData.Class == Define.Class.Beast.ToString())
+        if (creatureData.Class == Define.Trait.Beast.ToString())
         {
-            return new BeastEffect();
+            return new BeastTrait();
         }
-        else if (creatureData.Class == Define.Class.Magic.ToString())
+        else if (creatureData.Class == Define.Trait.Magic.ToString())
         {
-            return new MagicEffect();
+            return new MagicTrait();
         }
-        else if (creatureData.Class == Define.Class.Shield.ToString())
+        else if (creatureData.Class == Define.Trait.Guardian.ToString())
         {
-            return new GuardianEffect(baseCard);
+            return new GuardianTrait(baseCard);
         }
-        else if (creatureData.Class == Define.Class.Immortal.ToString())
+        else if (creatureData.Class == Define.Trait.Immortal.ToString())
         {
-            return new ImmortalEffect();
+            return new ImmortalTrait();
         }
-        else if (creatureData.Class == Define.Class.Knight.ToString())
+        else if (creatureData.Class == Define.Trait.Knight.ToString())
         {
-            return new KnightEffect();
+            return new KnightTrait();
         }
-        else if (creatureData.Class == Define.Class.Titan.ToString())
+        else if (creatureData.Class == Define.Trait.Titan.ToString())
         {
-            return new TitanEffect();
+            return new TitanTrait();
         }
-        else if (creatureData.Class == Define.Class.Assassin.ToString())
+        else if (creatureData.Class == Define.Trait.Assassin.ToString())
         {
-            return new AssassinEffect();
+            return new AssassinTrait();
         }
-        else if (creatureData.Class == Define.Class.Armor.ToString())
+        else if (creatureData.Class == Define.Trait.Armor.ToString())
         {
-            return new KnightEffect();
+            return new ArmorTrait();
         }
         else
         {
-            return new DefaultAttackEffect();
+            return new DefaultTrait();
         }
     }
 }
 
 public class CreatureClass : MonoBehaviour
 {
-    public interface IEffect
+    public interface ITrait
     {
         int ExecuteAttack(CreatureData attacker, CreatureData target);
         void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage);
     }
 
-    public class BeastEffect : IEffect
+    public class BeastTrait : ITrait
     {
         bool flag = false;
 
@@ -92,7 +92,7 @@ public class CreatureClass : MonoBehaviour
         }
     }
 
-    public class MagicEffect : IEffect
+    public class MagicTrait : ITrait
     {
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
         {
@@ -120,15 +120,15 @@ public class CreatureClass : MonoBehaviour
         }
     }
 
-    public class GuardianEffect : IEffect
+    public class GuardianTrait : ITrait
     {
-        public GuardianEffect(UI_BaseCard uI_BaseCard)
+        public GuardianTrait(UI_BaseCard uI_BaseCard)
         {
             Managers.Event.Unsubscribe(Define.GameEvent.FillDefenceGague, uI_BaseCard.FillDefenceGague);
             Managers.Event.Subscribe(Define.GameEvent.FillDefenceGague, uI_BaseCard.FillDefenceGague);
         }
 
-        ~GuardianEffect()
+        ~GuardianTrait()
         {
             Managers.Event.DeleteEvent(Define.GameEvent.FillDefenceGague);
         }
@@ -157,7 +157,7 @@ public class CreatureClass : MonoBehaviour
         }
     }
 
-    public class ImmortalEffect : IEffect
+    public class ImmortalTrait : ITrait
     {
         public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
         {
@@ -185,7 +185,7 @@ public class CreatureClass : MonoBehaviour
         }
     }
 
-    public class KnightEffect : IEffect
+    public class KnightTrait : ITrait
     {
         public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
         {
@@ -214,7 +214,7 @@ public class CreatureClass : MonoBehaviour
         }
     }
 
-    public class TitanEffect : IEffect
+    public class TitanTrait : ITrait
     {
         int hitCount = 0;
 
@@ -261,7 +261,7 @@ public class CreatureClass : MonoBehaviour
         }
     }
 
-    public class AssassinEffect : IEffect
+    public class AssassinTrait : ITrait
     {
         bool flag = true;
 
@@ -280,7 +280,7 @@ public class CreatureClass : MonoBehaviour
             Managers.Game.OnHitMonsterAction[0].Invoke();
         }
 
-        int IEffect.ExecuteAttack(CreatureData attacker, CreatureData target)
+        int ITrait.ExecuteAttack(CreatureData attacker, CreatureData target)
         {
             int damage = (int)Mathf.Max(0, attacker.Attack);
             if (attacker.ISCritical) damage *= (int)(attacker.CriticalAttack / 100);
@@ -292,7 +292,7 @@ public class CreatureClass : MonoBehaviour
         }
     }
 
-    public class ArmorEffect : IEffect
+    public class ArmorTrait : ITrait
     {
         int shield = 10;
 
@@ -332,7 +332,7 @@ public class CreatureClass : MonoBehaviour
     }
 
     // 기본 공격 효과 (특정 클래스가 아닐 경우)
-    public class DefaultAttackEffect : IEffect
+    public class DefaultTrait : ITrait
     {
         public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
         {
