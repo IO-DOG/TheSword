@@ -73,7 +73,7 @@ public class UI_KingSlimeCard : UI_Base
 
         Managers.Game.OnBattleDataRefreshAction -= Refresh;
         Managers.Game.OnBattleDataRefreshAction += Refresh;
-        Managers.Game.OnBattleCreatureDefeceAction += ClearDefence;
+        Managers.Game.OnBattleCreatureDefenceAction += ClearDefence;
         Managers.Game.OnBattleCreatureDamagedAction += StartDamagedMat;
 
         StartCoroutine(CoDelayAttack());
@@ -161,7 +161,7 @@ public class UI_KingSlimeCard : UI_Base
         if (Managers.Game.PlayerData.IsDefence == true)
         {
             Managers.Game.PlayerData.IsDefence = false;
-            Managers.Game.OnBattlePlayerDefeceAction.Invoke();
+            Managers.Game.OnBattlePlayerDefenceAction.Invoke();
 
             if (_isCri == true)
             {

@@ -21,31 +21,13 @@ public class UI_MonsterCard : UI_BaseCard
 
         Managers.Game.OnBattleDataRefreshAction -= Refresh;
         Managers.Game.OnBattleDataRefreshAction += Refresh;
-        Managers.Game.OnBattleCreatureDefeceAction += ClearDefence;
-        Managers.Game.OnBattleCreatureDamagedAction += StartDamagedMat;
         Managers.Game.OnHitMonsterAction[0] -= Refresh;
         Managers.Game.OnHitMonsterAction[0] += Refresh;
         Managers.Game.OnDeadMonsterAction[0] -= Dead;
         Managers.Game.OnDeadMonsterAction[0] += Dead;
 
         StartCoroutine(CoDelayAttack());
-
-        //if (_monsterClass != MonsterClass.Armor)
-        //    StartCoroutine(CoDelayDefence());
-
-        //GetImage((int)Images.CreatureImage).SetNativeSize();
-
-        //if (_monsterClass == MonsterClass.Guard)
-        //{
-        //    Defence();
-        //    Debug.Log("수호 효과 발동");
-        //}
-
-        //if (_monsterClass == MonsterClass.Armor)
-        //{
-        //    _forArmor = _creature.Defence;
-        //    Debug.Log("갑옷 효과 발동");
-        //}
+        StartCoroutine(CoDelayDefence());
 
         return true;
     }
@@ -55,18 +37,14 @@ public class UI_MonsterCard : UI_BaseCard
         base.Refresh();
     }
 
-    IEnumerator CoRefresh()
-    {
-        //GetImage((int)Images.CreatureImage).SetNativeSize();
-        GetText((int)Texts.HPBarText).text = _creature.CurHP.ToString();
-        GetImage((int)Images.HPHar).fillAmount = _creature.CurHP / _creature.MaxHP;
-        yield return new WaitForSeconds(0.2f);
-        GetImage((int)Images.HPHarGauge).fillAmount = _creature.CurHP / _creature.MaxHP;
-    }
-
     public override void Attack(CreatureData attacker, CreatureData target)
     {
         base.Attack(attacker, target);
+
+        if (Managers.Game.PlayerData.IsDefence)
+        {
+            Managers.Game.OnBattlePlayerDefenceAction.Invoke();
+        }
 
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
 
@@ -105,11 +83,6 @@ public class UI_MonsterCard : UI_BaseCard
             {
                 attackCoolTime = 0f;
                 Attack(_creature, Managers.Game.PlayerData);
-                //if (_monsterClass == MonsterClass.Knight)
-                {
-                    Attack(_creature, Managers.Game.PlayerData);
-                    Debug.Log("검사 효과 발동");
-                }
             }
             attackCoolTime += Time.deltaTime * Managers.Game.GameSpeed;
 
@@ -119,10 +92,8 @@ public class UI_MonsterCard : UI_BaseCard
         }
     }
 
-    //public bool _defenseFlag = false;
     IEnumerator CoDelayDefence()
     {
-
         _maxDefenceCoolTime = _maxDefenceCoolTime / _creature.DefenceSpeed;
 
         while (true)
@@ -155,9 +126,6 @@ public class UI_MonsterCard : UI_BaseCard
 
     public override void ClearDefence()
     {
-        //// TODO play damaged anim
-        //if (GetImage((int)Images.DefenceIcon) != null)
-        //    GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIShieldFX");
         StartCoroutine(CoStartShieldFX());
         StartCoroutine(CoDefenceMat());
         base.ClearDefence();
@@ -203,7 +171,7 @@ public class UI_MonsterCard : UI_BaseCard
         Destroy(go);
     }
 
-    public void StartDamagedMat()
+    public override void StartDamagedMat()
     {
         StartCoroutine(CoDamagedMat());
     }

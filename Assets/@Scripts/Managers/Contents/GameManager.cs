@@ -49,9 +49,9 @@ public class GameManager
 
     public Action OnBattleAction;
     public Action OnBattleDataRefreshAction;
-    public Action OnBattleCreatureDefeceAction;
+    public Action OnBattleCreatureDefenceAction;
     public Action OnBattleCreatureDamagedAction;
-    public Action OnBattlePlayerDefeceAction;
+    public Action OnBattlePlayerDefenceAction;
     public Action OnBattlePlayerDamagedAction;
     public Action OnKingSlimeDeadAction;
     public List<Action> OnHitMonsterAction = new List<Action>();
@@ -76,7 +76,7 @@ public class GameManager
 
     public class CreatureData
     {
-        public CreatureClass.ITrait effect { get; set; }
+        public CreatureClass.ITrait Trait { get; set; }
         public string Class { get; set; }
         public string Name { get; set; }
         public float MaxHP { get; set; }

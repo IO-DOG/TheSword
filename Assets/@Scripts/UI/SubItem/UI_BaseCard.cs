@@ -40,17 +40,15 @@ public class UI_BaseCard : UI_Base
         if (base.Init() == false)
             return false;
 
-        //#region Bind
-        //BindImage(typeof(Images));
-        //BindText(typeof(Texts));
-        //#endregion
-
         Managers.Game.OnBattleDataRefreshAction -= Refresh;
         Managers.Game.OnBattleDataRefreshAction += Refresh;
-        Managers.Game.OnBattlePlayerDefeceAction += ClearDefence;
+        Managers.Game.OnBattlePlayerDefenceAction += ClearDefence;
+        Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
+        Managers.Game.OnBattleCreatureDefenceAction += ClearDefence;
+        Managers.Game.OnBattleCreatureDamagedAction += StartDamagedMat;
 
-        _creature.effect = EffectFactory.GetTrait(_creature, this);
-        //Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
+        _creature.Trait = EffectFactory.GetTrait(_creature, this);
+        Debug.Log(_creature.Trait.ToString());
 
         return true;
     }
@@ -95,9 +93,14 @@ public class UI_BaseCard : UI_Base
             GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
     }
 
+    public virtual void StartDamagedMat()
+    {
+
+    }
+
     public virtual void Attack(CreatureData attacker, CreatureData target)
     {
-        target.effect.ExcuteOnHit(attacker, target, _creature.effect.ExecuteAttack(attacker, target));
+        target.Trait.ExcuteOnHit(attacker, target, _creature.Trait.ExecuteAttack(attacker, target));
     }
 
     public virtual void Defence()
@@ -107,7 +110,6 @@ public class UI_BaseCard : UI_Base
 
         GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIDefenceIcon");
         _creature.IsDefence = true;
-
     }
 
     public void FillDefenceGague()
@@ -122,4 +124,12 @@ public class UI_BaseCard : UI_Base
 
     }
 
+    private void OnDestroy()
+    {
+        Managers.Game.OnBattleDataRefreshAction -= Refresh;
+        Managers.Game.OnBattlePlayerDefenceAction -= ClearDefence;
+        Managers.Game.OnBattlePlayerDamagedAction -= StartDamagedMat;
+        Managers.Game.OnBattleCreatureDefenceAction -= ClearDefence;
+        Managers.Game.OnBattleCreatureDamagedAction -= StartDamagedMat;
+    }
 }

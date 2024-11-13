@@ -232,7 +232,7 @@ public class CreatureClass : MonoBehaviour
             if (hitCount == 5)
             {
                 hitCount = 0;
-                attacker.effect.ExcuteOnHit(creature, attacker, Roar(creature, attacker));
+                attacker.Trait.ExcuteOnHit(creature, attacker, Roar(creature, attacker));
             }
 
             Managers.Game.OnHitMonsterAction[0].Invoke();
@@ -336,6 +336,7 @@ public class CreatureClass : MonoBehaviour
     {
         public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
         {
+            damage = Mathf.Max(0, damage);
             creature.CurHP -= damage;
             if (creature.CurHP <= 0)
             {

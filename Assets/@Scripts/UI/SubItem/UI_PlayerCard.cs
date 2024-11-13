@@ -12,7 +12,7 @@ public class UI_PlayerCard : UI_BaseCard
         if (base.Init() == false)
             return false;
 
-        Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
+        //Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
         Managers.Game.OnHitPlayerAction -= Refresh;
         Managers.Game.OnHitPlayerAction += Refresh;
         Managers.Game.OnDeadPlayerAction -= Dead;
@@ -41,7 +41,7 @@ public class UI_PlayerCard : UI_BaseCard
 
         if (Managers.Game.MonsterData[0].IsDefence)
         {
-            Managers.Game.OnBattleCreatureDefeceAction.Invoke();
+            Managers.Game.OnBattleCreatureDefenceAction.Invoke();
         }
 
         GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play("UIPlayerAttackAnim");
@@ -49,6 +49,8 @@ public class UI_PlayerCard : UI_BaseCard
         if (Managers.Game.PlayerData.CurShield != 0)
             GetImage((int)Images.CreatureShieldImage).gameObject.GetComponent<Animator>().Play($"UIShield{Managers.Game.PlayerData.CurShield - 20}AttackAnim");
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
+        CreatePlayerAttackParticle();
+        CreateMonsterHitParticle();
 
         if (Managers.Game.AttackCount == Managers.Game.PlayerData.Critical)
         {
@@ -109,9 +111,6 @@ public class UI_PlayerCard : UI_BaseCard
 
     public override void ClearDefence()
     {
-        //// TODO play damaged anim
-        //if (GetImage((int)Images.DefenceIcon) != null)
-        //    GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIShieldFX");
         StartCoroutine(CoStartShieldFX());
         StartCoroutine(CoDefenceMat());
         base.ClearDefence();
@@ -187,7 +186,7 @@ public class UI_PlayerCard : UI_BaseCard
         Destroy(shield);
     }
 
-    public void StartDamagedMat()
+    public override void StartDamagedMat()
     {
         StartCoroutine(CoDamagedMat());
     }
@@ -242,7 +241,7 @@ public class UI_PlayerCard : UI_BaseCard
     {
         int swordId = Managers.Game.PlayerData.CurSword;
         string attackFX = Managers.Data.EquipDic[swordId].AttackFX;
-        GameObject player = GameObject.Find("PlayerImage");
+        GameObject player = GameObject.Find("CreatureImage");
         GameObject go = Managers.Resource.Instantiate(attackFX, GetImage((int)Images.CreatureImage).transform);
         go.transform.localPosition += new Vector3(0, -150, 0);
         var uiParticle = go.GetOrAddComponent<UIParticle>();
@@ -256,13 +255,13 @@ public class UI_PlayerCard : UI_BaseCard
     {
         int swordId = Managers.Game.PlayerData.CurSword;
         string hitFX = Managers.Data.EquipDic[swordId].HitFX;
-        GameObject monster = GameObject.Find("CreatureImage");
+        GameObject monster = GameObject.Find("UI_MonsterCard");
         GameObject go = Managers.Resource.Instantiate(hitFX, monster.transform);
-        go.transform.position += new Vector3(0, -0, 0);
+        go.transform.position += new Vector3(0, 70, 0);
         var uiParticle = go.GetOrAddComponent<UIParticle>();
 
         //var childrenUIParticle = go.GetComponentsInChildren<UIParticle>()[1]; // 이거 좀 위험한 코드임.
-        uiParticle.scale = 30;
+        uiParticle.scale = 50;
         //childrenUIParticle.scale = 300;
         //Debug.Log($"childrenUIParticle.gameObject.name : {childrenUIParticle.gameObject.name}");
         uiParticle.Play();
