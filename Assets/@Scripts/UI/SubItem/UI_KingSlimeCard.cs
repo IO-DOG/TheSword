@@ -71,10 +71,10 @@ public class UI_KingSlimeCard : UI_Base
         GetText((int)Texts.DefenceStatusText).text = Managers.Game.MonsterData[0].Defence.ToString();
         GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play($"{Managers.Game.MonsterData[0].IdleAnimStr}");
 
-        Managers.Game.OnBattleDataRefreshAction -= Refresh;
-        Managers.Game.OnBattleDataRefreshAction += Refresh;
-        Managers.Game.OnBattleCreatureDefenceAction += ClearDefence;
-        Managers.Game.OnBattleCreatureDamagedAction += StartDamagedMat;
+        //Managers.Game.OnBattleDataRefreshAction -= Refresh;
+        //Managers.Game.OnBattleDataRefreshAction += Refresh;
+        //Managers.Game.OnBattleCreatureDefenceAction += ClearDefence;
+        //Managers.Game.OnBattleCreatureDamagedAction += StartDamagedMat;
 
         StartCoroutine(CoDelayAttack());
         if (_monsterClass != MonsterClass.Armor)
@@ -137,69 +137,69 @@ public class UI_KingSlimeCard : UI_Base
         GetImage((int)Images.HPHarGauge).fillAmount = Managers.Game.MonsterData[0].CurHP / Managers.Game.MonsterData[0].MaxHP;
     }
 
-    public void Attack()
-    {
-        if (_monsterClass == MonsterClass.Magic)
-        {
-            _isCri = true;
-            Debug.Log("마법 효과 발동");
-        }
+    //public void Attack()
+    //{
+    //    if (_monsterClass == MonsterClass.Magic)
+    //    {
+    //        _isCri = true;
+    //        Debug.Log("마법 효과 발동");
+    //    }
 
-        GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
+    //    GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
 
-        if (_totalAttackCount > 0 && _totalAttackCount % 20 == 0)
-        {
-            Berserk();
-        }
+    //    if (_totalAttackCount > 0 && _totalAttackCount % 20 == 0)
+    //    {
+    //        Berserk();
+    //    }
 
-        if (_attackCount == Managers.Game.MonsterData[0].Critical)
-        {
-            _isCri = true;
-            _attackCount = 0;
-        }
+    //    if (_attackCount == Managers.Game.MonsterData[0].Critical)
+    //    {
+    //        _isCri = true;
+    //        _attackCount = 0;
+    //    }
 
-        if (Managers.Game.PlayerData.IsDefence == true)
-        {
-            Managers.Game.PlayerData.IsDefence = false;
-            Managers.Game.OnBattlePlayerDefenceAction.Invoke();
+    //    if (Managers.Game.PlayerData.IsDefence == true)
+    //    {
+    //        Managers.Game.PlayerData.IsDefence = false;
+    //        Managers.Game.OnBattlePlayerDefenceAction.Invoke();
 
-            if (_isCri == true)
-            {
-                Managers.Game.PlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData[0].Attack * (Managers.Game.MonsterData[0].CriticalAttack / 100) - Managers.Game.PlayerData.Defence) * 0.2f;
-                _isCri = false;
-            }
-        }
-        else
-        {
-            if (_isCri)
-            {
-                Managers.Game.PlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData[0].Attack * (Managers.Game.MonsterData[0].CriticalAttack / 100) - Managers.Game.PlayerData.Defence);
-                Managers.Game.OnBattlePlayerDamagedAction.Invoke();
-                _isCri = false;
-            }
-            else
-            {
-                Managers.Game.PlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData[0].Attack - Managers.Game.PlayerData.Defence);
-                Managers.Game.OnBattlePlayerDamagedAction.Invoke();
-            }
-        }
-        Managers.Game.PlayerData.CurHP = Mathf.RoundToInt(Managers.Game.PlayerData.CurHP);
+    //        if (_isCri == true)
+    //        {
+    //            Managers.Game.PlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData[0].Attack * (Managers.Game.MonsterData[0].CriticalAttack / 100) - Managers.Game.PlayerData.Defence) * 0.2f;
+    //            _isCri = false;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        if (_isCri)
+    //        {
+    //            Managers.Game.PlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData[0].Attack * (Managers.Game.MonsterData[0].CriticalAttack / 100) - Managers.Game.PlayerData.Defence);
+    //            Managers.Game.OnBattlePlayerDamagedAction.Invoke();
+    //            _isCri = false;
+    //        }
+    //        else
+    //        {
+    //            Managers.Game.PlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData[0].Attack - Managers.Game.PlayerData.Defence);
+    //            Managers.Game.OnBattlePlayerDamagedAction.Invoke();
+    //        }
+    //    }
+    //    Managers.Game.PlayerData.CurHP = Mathf.RoundToInt(Managers.Game.PlayerData.CurHP);
 
-        if (Managers.Game.PlayerData.CurHP <= 0)
-        {
-            // Game Over Popup TODO
-            CreatePlayerDeathParticle();
-            Managers.Game.OnBattleAction.Invoke();
-            Managers.Game.OnBattle = false;
-            return;
-        }
+    //    if (Managers.Game.PlayerData.CurHP <= 0)
+    //    {
+    //        // Game Over Popup TODO
+    //        CreatePlayerDeathParticle();
+    //        Managers.Game.OnBattleAction.Invoke();
+    //        Managers.Game.OnBattle = false;
+    //        return;
+    //    }
 
-        _attackCount++;
-        PlayMonsterAttackAnim();
-        CreateMonsterAttackParticle();
-        CreatePlayerHitParticle();
-        Managers.Game.OnBattleDataRefreshAction.Invoke();
-    }
+    //    _attackCount++;
+    //    PlayMonsterAttackAnim();
+    //    CreateMonsterAttackParticle();
+    //    CreatePlayerHitParticle();
+    //    Managers.Game.OnBattleDataRefreshAction.Invoke();
+    //}
 
     public void Defence()
     {
@@ -221,10 +221,10 @@ public class UI_KingSlimeCard : UI_Base
             if (attackCoolTime >= maxAttackCoolTime)
             {
                 attackCoolTime = 0f;
-                Attack();
+                //Attack();
                 if (_monsterClass == MonsterClass.Knight)
                 {
-                    Attack();
+                    //Attack();
                     Debug.Log("검사 효과 발동");
                 }
             }

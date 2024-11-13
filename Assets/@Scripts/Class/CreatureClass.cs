@@ -60,26 +60,25 @@ public class CreatureClass : MonoBehaviour
     {
         bool flag = false;
 
-        public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
+        public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
             damage = Mathf.Max(0, damage);
-            creature.CurHP -= damage;
-            if (creature.CurHP <= 0)
+            target.CurHP -= damage;
+            if (target.CurHP <= 0)
             {
-                creature.CurHP = 0;
-                Managers.Game.OnDeadMonsterAction[0].Invoke();
+                target.CurHP = 0;
+                target.OnDeadAction.Invoke();
             }
 
-            float ratio = creature.CurHP / creature.MaxHP;
+            float ratio = target.CurHP / target.MaxHP;
             if (flag == false && ratio <= 0.1f)
             {
                 flag = true;
-                float heal = creature.MaxHP * 0.4f;
-                creature.CurHP += heal;
+                float heal = target.MaxHP * 0.4f;
+                target.CurHP += heal;
             }
 
-            Managers.Game.OnHitMonsterAction[0].Invoke();
-            Managers.Game.OnHitPlayerAction.Invoke();
+            target.OnHitAction.Invoke();
         }
 
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
@@ -111,16 +110,16 @@ public class CreatureClass : MonoBehaviour
             return damage;
         }
 
-        public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
+        public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
-            creature.CurHP -= damage;
-            if (creature.CurHP <= 0)
+            target.CurHP -= damage;
+            if (target.CurHP <= 0)
             {
-                creature.CurHP = 0;
-                Managers.Game.OnDeadMonsterAction[0].Invoke();
+                target.CurHP = 0;
+                target.OnDeadAction.Invoke();
             }
 
-            Managers.Game.OnHitMonsterAction[0].Invoke();
+            target.OnHitAction.Invoke();
         }
     }
 
@@ -137,16 +136,16 @@ public class CreatureClass : MonoBehaviour
             Managers.Event.DeleteEvent(Define.GameEvent.FillDefenceGague);
         }
 
-        public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
+        public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
-            creature.CurHP -= damage;
-            if (creature.CurHP <= 0)
+            target.CurHP -= damage;
+            if (target.CurHP <= 0)
             {
-                creature.CurHP = 0;
-                Managers.Game.OnDeadMonsterAction[0].Invoke();
+                target.CurHP = 0;
+                target.OnDeadAction.Invoke();
             }
 
-            Managers.Game.OnHitMonsterAction[0].Invoke();
+            target.OnHitAction.Invoke();
         }
 
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
@@ -163,18 +162,18 @@ public class CreatureClass : MonoBehaviour
 
     public class ImmortalTrait : ITrait
     {
-        public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
+        public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
             if (!attacker.IsCritical) damage = (int)(damage * 0.2f);
 
-            creature.CurHP -= damage;
-            if (creature.CurHP <= 0)
+            target.CurHP -= damage;
+            if (target.CurHP <= 0)
             {
-                creature.CurHP = 0;
-                Managers.Game.OnDeadMonsterAction[0].Invoke();
+                target.CurHP = 0;
+                target.OnDeadAction.Invoke();
             }
 
-            Managers.Game.OnHitMonsterAction[0].Invoke();
+            target.OnHitAction.Invoke();
         }
 
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
@@ -191,16 +190,16 @@ public class CreatureClass : MonoBehaviour
 
     public class KnightTrait : ITrait
     {
-        public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
+        public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
-            creature.CurHP -= damage;
-            if (creature.CurHP <= 0)
+            target.CurHP -= damage;
+            if (target.CurHP <= 0)
             {
-                creature.CurHP = 0;
-                Managers.Game.OnDeadMonsterAction[0].Invoke();
+                target.CurHP = 0;
+                target.OnDeadAction.Invoke();
             }
 
-            Managers.Game.OnHitMonsterAction[0].Invoke();
+            target.OnHitAction.Invoke();
         }
 
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
@@ -222,24 +221,24 @@ public class CreatureClass : MonoBehaviour
     {
         int hitCount = 0;
 
-        public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
+        public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
             hitCount++;
 
-            creature.CurHP -= damage;
-            if (creature.CurHP <= 0)
+            target.CurHP -= damage;
+            if (target.CurHP <= 0)
             {
-                creature.CurHP = 0;
-                Managers.Game.OnDeadMonsterAction[0].Invoke();
+                target.CurHP = 0;
+                target.OnDeadAction.Invoke();
             }
 
             if (hitCount == 5)
             {
                 hitCount = 0;
-                attacker.Trait.ExcuteOnHit(creature, attacker, Roar(creature, attacker));
+                attacker.Trait.ExcuteOnHit(target, attacker, Roar(target, attacker));
             }
 
-            Managers.Game.OnHitMonsterAction[0].Invoke();
+            target.OnHitAction.Invoke();
         }
 
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
@@ -269,19 +268,19 @@ public class CreatureClass : MonoBehaviour
     {
         bool flag = true;
 
-        public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
+        public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
             if (!attacker.IsCritical) damage = 0;
             else flag = false;
 
-            creature.CurHP -= damage;
-            if (creature.CurHP <= 0)
+            target.CurHP -= damage;
+            if (target.CurHP <= 0)
             {
-                creature.CurHP = 0;
-                Managers.Game.OnDeadMonsterAction[0].Invoke();
+                target.CurHP = 0;
+                target.OnDeadAction.Invoke();
             }
 
-            Managers.Game.OnHitMonsterAction[0].Invoke();
+            target.OnHitAction.Invoke();
         }
 
         int ITrait.ExecuteAttack(CreatureData attacker, CreatureData target)
@@ -300,7 +299,7 @@ public class CreatureClass : MonoBehaviour
     {
         int shield = 10;
 
-        public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
+        public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
             shield -= damage;
             if (shield <= 0)
@@ -313,14 +312,14 @@ public class CreatureClass : MonoBehaviour
                 damage = 0;
             }
 
-            creature.CurHP -= damage;
-            if (creature.CurHP <= 0)
+            target.CurHP -= damage;
+            if (target.CurHP <= 0)
             {
-                creature.CurHP = 0;
-                Managers.Game.OnDeadMonsterAction[0].Invoke();
+                target.CurHP = 0;
+                target.OnDeadAction.Invoke();
             }
 
-            Managers.Game.OnHitMonsterAction[0].Invoke();
+            target.OnHitAction.Invoke();
         }
 
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
@@ -338,18 +337,17 @@ public class CreatureClass : MonoBehaviour
     // 기본 공격 효과 (특정 클래스가 아닐 경우)
     public class DefaultTrait : ITrait
     {
-        public void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage)
+        public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
             damage = Mathf.Max(0, damage);
-            creature.CurHP -= damage;
-            if (creature.CurHP <= 0)
+            target.CurHP -= damage;
+            if (target.CurHP <= 0)
             {
-                creature.CurHP = 0;
-                Managers.Game.OnDeadMonsterAction[0].Invoke();
+                target.CurHP = 0;
+                target.OnDeadAction.Invoke();
             }
 
-            Managers.Game.OnHitMonsterAction[0].Invoke();
-            Managers.Game.OnHitPlayerAction.Invoke();
+            target.OnHitAction.Invoke();
         }
 
         public int ExecuteAttack(CreatureData attacker, CreatureData target)

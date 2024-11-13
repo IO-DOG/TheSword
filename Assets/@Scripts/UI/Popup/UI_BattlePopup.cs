@@ -45,8 +45,6 @@ public class UI_BattlePopup : UI_Popup
         for (int i = 0; i < Managers.Game.MonsterData.Count; i++)
         {
             monsterCard = Managers.UI.SetBattleCard<UI_MonsterCard>(gameObject.transform, Managers.Game.MonsterData[i]);
-            Managers.Game.OnHitMonsterAction.Add(new Action(() => { }));
-            Managers.Game.OnDeadMonsterAction.Add(new Action(() => { }));
 
             monsterCard.transform.position = new Vector3(1340, 540, 0);
 
@@ -91,11 +89,6 @@ public class UI_BattlePopup : UI_Popup
                 break;
         }
 
-        Managers.Game.OnBattleDataRefreshAction = null;
-        Managers.Game.OnBattleCreatureDefenceAction = null;
-        Managers.Game.OnBattleCreatureDamagedAction = null;
-        Managers.Game.OnBattlePlayerDefenceAction = null;
-        Managers.Game.OnBattlePlayerDamagedAction = null;
         Managers.Game.OnBattleAction = null;
         if (Managers.Game.GameScene != null)
             Managers.Game.GameScene.SetPlayerInfo();

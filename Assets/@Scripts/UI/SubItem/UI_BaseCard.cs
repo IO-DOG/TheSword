@@ -40,9 +40,6 @@ public class UI_BaseCard : UI_Base
         if (base.Init() == false)
             return false;
 
-        Managers.Game.OnBattleDataRefreshAction -= Refresh;
-        Managers.Game.OnBattleDataRefreshAction += Refresh;
-
         _creature.Trait = EffectFactory.GetTrait(_creature, this);
         Debug.Log(_creature.Trait.ToString());
 
@@ -118,14 +115,5 @@ public class UI_BaseCard : UI_Base
     public virtual void Dead()
     {
 
-    }
-
-    private void OnDestroy()
-    {
-        Managers.Game.OnBattleDataRefreshAction -= Refresh;
-        Managers.Game.OnBattlePlayerDefenceAction -= ClearDefence;
-        Managers.Game.OnBattlePlayerDamagedAction -= StartDamagedMat;
-        Managers.Game.OnBattleCreatureDefenceAction -= ClearDefence;
-        Managers.Game.OnBattleCreatureDamagedAction -= StartDamagedMat;
     }
 }

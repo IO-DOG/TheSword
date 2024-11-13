@@ -13,14 +13,11 @@ public class UI_PlayerCard : UI_BaseCard
             return false;
 
         //Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
-        Managers.Game.OnHitPlayerAction -= Refresh;
-        Managers.Game.OnHitPlayerAction += Refresh;
-        Managers.Game.OnBattlePlayerDefenceAction -= ClearDefence;
-        Managers.Game.OnBattlePlayerDefenceAction += ClearDefence;
-        Managers.Game.OnBattlePlayerDamagedAction -= StartDamagedMat;
-        Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
-        Managers.Game.OnDeadPlayerAction -= Dead;
-        Managers.Game.OnDeadPlayerAction += Dead;
+        _creature.OnDefenceAction += ClearDefence;
+        _creature.OnHitAction += Refresh;
+        _creature.OnHitAction += StartDamagedMat;
+        _creature.OnDeadAction += Dead;
+        _creature.OnDataRefreshAction += Refresh;
 
         StartCoroutine(CoDelayAttack());
         StartCoroutine(CoDelayDefence());
@@ -45,7 +42,7 @@ public class UI_PlayerCard : UI_BaseCard
 
         if (target.IsDefence)
         {
-            Managers.Game.OnBattleCreatureDefenceAction.Invoke();
+            target.OnDefenceAction.Invoke();
         }
 
         GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play("UIPlayerAttackAnim");
@@ -286,7 +283,10 @@ public class UI_PlayerCard : UI_BaseCard
 
     private void OnDestroy()
     {
-        Managers.Game.OnDeadPlayerAction -= Dead;
-        Managers.Game.OnHitPlayerAction -= Refresh;
+        _creature.OnDefenceAction -= ClearDefence;
+        _creature.OnHitAction -= Refresh;
+        _creature.OnHitAction -= StartDamagedMat;
+        _creature.OnDeadAction -= Dead;
+        _creature.OnDataRefreshAction -= Refresh;
     }
 }

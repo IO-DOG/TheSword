@@ -48,16 +48,8 @@ public class GameManager
     public Action<float> OnFadeAction;
 
     public Action OnBattleAction;
-    public Action OnBattleDataRefreshAction;
-    public Action OnBattleCreatureDefenceAction;
-    public Action OnBattleCreatureDamagedAction;
-    public Action OnBattlePlayerDefenceAction;
-    public Action OnBattlePlayerDamagedAction;
+
     public Action OnKingSlimeDeadAction;
-    public List<Action> OnHitMonsterAction = new List<Action>();
-    public List<Action> OnDeadMonsterAction = new List<Action>();
-    public Action OnHitPlayerAction;
-    public Action OnDeadPlayerAction;
     public Action OnGuardianEffectAction;
 
     public Action OnPortalAction;
@@ -76,6 +68,15 @@ public class GameManager
 
     public class CreatureData
     {
+        [JsonIgnore]
+        public Action OnDataRefreshAction;
+        [JsonIgnore]
+        public Action OnDefenceAction;
+        [JsonIgnore]
+        public Action OnHitAction;
+        [JsonIgnore]
+        public Action OnDeadAction;
+
         public CreatureClass.ITrait Trait { get; set; }
         public string Class { get; set; }
         public string Name { get; set; }
@@ -366,7 +367,7 @@ public class GameManager
         string jsonStr = JsonConvert.SerializeObject(PlayerData, Formatting.Indented, new JsonSerializerSettings
         {
             TypeNameHandling = TypeNameHandling.Objects,
-            TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple
+            TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
         });
         File.WriteAllText(_path, jsonStr);
 

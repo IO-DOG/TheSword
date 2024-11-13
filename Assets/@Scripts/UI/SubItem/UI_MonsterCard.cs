@@ -19,16 +19,11 @@ public class UI_MonsterCard : UI_BaseCard
 
         GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play($"{_creature.IdleAnimStr}");
 
-        Managers.Game.OnBattleDataRefreshAction -= Refresh;
-        Managers.Game.OnBattleDataRefreshAction += Refresh;
-        Managers.Game.OnHitMonsterAction[0] -= Refresh;
-        Managers.Game.OnHitMonsterAction[0] += Refresh;
-        Managers.Game.OnBattleCreatureDefenceAction -= ClearDefence;
-        Managers.Game.OnBattleCreatureDefenceAction += ClearDefence;
-        Managers.Game.OnBattleCreatureDamagedAction -= StartDamagedMat;
-        Managers.Game.OnBattleCreatureDamagedAction += StartDamagedMat;
-        Managers.Game.OnDeadMonsterAction[0] -= Dead;
-        Managers.Game.OnDeadMonsterAction[0] += Dead;
+        _creature.OnDefenceAction += ClearDefence;
+        _creature.OnHitAction += Refresh;
+        _creature.OnHitAction += StartDamagedMat;
+        _creature.OnDeadAction += Dead;
+        _creature.OnDataRefreshAction += Refresh;
 
         StartCoroutine(CoDelayAttack());
         StartCoroutine(CoDelayDefence());
@@ -44,9 +39,9 @@ public class UI_MonsterCard : UI_BaseCard
     public override void Attack(CreatureData attacker, CreatureData target)
     {
         base.Attack(attacker, target);
-        if (Managers.Game.PlayerData.IsDefence)
+        if (target.IsDefence)
         {
-            Managers.Game.OnBattlePlayerDefenceAction.Invoke();
+            target.OnDefenceAction.Invoke();
         }
 
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
@@ -290,7 +285,10 @@ public class UI_MonsterCard : UI_BaseCard
 
     private void OnDestroy()
     {
-        Managers.Game.OnDeadMonsterAction[0] -= Dead;
-        Managers.Game.OnHitMonsterAction[0] -= Refresh;
+        _creature.OnDefenceAction -= ClearDefence;
+        _creature.OnHitAction -= Refresh;
+        _creature.OnHitAction -= StartDamagedMat;
+        _creature.OnDeadAction -= Dead;
+        _creature.OnDataRefreshAction -= Refresh;
     }
 }
