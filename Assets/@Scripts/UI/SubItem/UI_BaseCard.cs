@@ -30,10 +30,10 @@ public class UI_BaseCard : UI_Base
         DefenceStatusText,
     }
 
-    protected CreatureClass.IEffect effect;
-    protected CreatureData _creature;
-    protected float _defenceCoolTime = 0f;
-    protected float _maxDefenceCoolTime = 3f;
+    //public CreatureClass.IEffect effect;
+    public CreatureData _creature;
+    public float _defenceCoolTime = 0f;
+    public float _maxDefenceCoolTime = 3f;
 
     public override bool Init()
     {
@@ -49,7 +49,7 @@ public class UI_BaseCard : UI_Base
         Managers.Game.OnBattleDataRefreshAction += Refresh;
         Managers.Game.OnBattlePlayerDefeceAction += ClearDefence;
 
-        effect = EffectFactory.GetEffect(_creature, this);
+        _creature.effect = EffectFactory.GetEffect(_creature, this);
         //Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
 
         return true;

@@ -7,45 +7,15 @@ using static GameManager;
 
 public class UI_MonsterCard : UI_BaseCard
 {
-    #region Enum
-    public enum MonsterClass
-    {
-        None = 0,
-        Beast = 1,
-        Magic = 2,
-        Guard = 3,
-        Immort = 4,
-        Knight = 5,
-        Giant = 6,
-        Assassin = 7,
-        Armor = 8,
-    }
-
-    #endregion
-
     #region Member
-    public bool _isCri = false;
     public int _attackCount = 0;
     public int _totalAttackCount = 0;
-    //public float _defenceCoolTime = 0f;
-    public MonsterClass _monsterClass = MonsterClass.None;
-    public bool _forBeast = false;
-    public bool _forGuard = false;
-    public int _forGiant = 0;
-    public float _forArmor = 0;
     #endregion
 
     public override bool Init()
     {
         if (base.Init() == false)
             return false;
-
-        //#region Bind
-        //BindImage(typeof(Images));
-        //BindText(typeof(Texts));
-        //#endregion
-
-        _monsterClass = (MonsterClass)Managers.Game.MonsterData[0].Feature;
 
         GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play($"{_creature.IdleAnimStr}");
 
@@ -59,22 +29,23 @@ public class UI_MonsterCard : UI_BaseCard
         Managers.Game.OnDeadMonsterAction[0] += Dead;
 
         StartCoroutine(CoDelayAttack());
-        if (_monsterClass != MonsterClass.Armor)
-            StartCoroutine(CoDelayDefence());
+
+        //if (_monsterClass != MonsterClass.Armor)
+        //    StartCoroutine(CoDelayDefence());
 
         //GetImage((int)Images.CreatureImage).SetNativeSize();
 
-        if (_monsterClass == MonsterClass.Guard)
-        {
-            Defence();
-            Debug.Log("수호 효과 발동");
-        }
+        //if (_monsterClass == MonsterClass.Guard)
+        //{
+        //    Defence();
+        //    Debug.Log("수호 효과 발동");
+        //}
 
-        if (_monsterClass == MonsterClass.Armor)
-        {
-            _forArmor = _creature.Defence;
-            Debug.Log("갑옷 효과 발동");
-        }
+        //if (_monsterClass == MonsterClass.Armor)
+        //{
+        //    _forArmor = _creature.Defence;
+        //    Debug.Log("갑옷 효과 발동");
+        //}
 
         return true;
     }
@@ -86,32 +57,6 @@ public class UI_MonsterCard : UI_BaseCard
 
     IEnumerator CoRefresh()
     {
-        if (_monsterClass == MonsterClass.Beast && _forBeast == false && _creature.CurHP <= _creature.MaxHP * 0.1)
-        {
-            _forBeast = true;
-            _creature.CurHP += _creature.MaxHP * 0.4f;
-            Debug.Log("비스트 효과 발동");
-        }
-
-        if (_monsterClass == MonsterClass.Armor)
-        {
-            if (_forArmor > 0)
-            {
-                Debug.Log("갑옷 효과 발동 방어막부터 감소");
-                float gap = _creature.MaxHP - _creature.CurHP;
-                if (_forArmor >= gap)
-                {
-                    _creature.CurHP = _creature.MaxHP;
-                    _forArmor -= gap;
-                }
-                else
-                {
-                    _creature.CurHP += (gap - _forArmor);
-                    _forArmor = 0;
-                }
-            }
-        }
-
         //GetImage((int)Images.CreatureImage).SetNativeSize();
         GetText((int)Texts.HPBarText).text = _creature.CurHP.ToString();
         GetImage((int)Images.HPHar).fillAmount = _creature.CurHP / _creature.MaxHP;
@@ -121,6 +66,8 @@ public class UI_MonsterCard : UI_BaseCard
 
     public override void Attack(CreatureData attacker, CreatureData target)
     {
+        base.Attack(attacker, target);
+
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
 
         if (_totalAttackCount > 0 && _totalAttackCount % 20 == 0)
@@ -130,7 +77,7 @@ public class UI_MonsterCard : UI_BaseCard
 
         if (_attackCount == _creature.Critical)
         {
-            _isCri = true;
+            _creature.ISCritical = true;
             _attackCount = 0;
         }
 
@@ -158,7 +105,7 @@ public class UI_MonsterCard : UI_BaseCard
             {
                 attackCoolTime = 0f;
                 Attack(_creature, Managers.Game.PlayerData);
-                if (_monsterClass == MonsterClass.Knight)
+                //if (_monsterClass == MonsterClass.Knight)
                 {
                     Attack(_creature, Managers.Game.PlayerData);
                     Debug.Log("검사 효과 발동");

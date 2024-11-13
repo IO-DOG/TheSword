@@ -207,6 +207,8 @@ public class UI_TitleScene : UI_Scene
 
     void OnClickNewGameButton()
     {
+        //test
+        Managers.Game.PlayerData.Class = "일반";
         Debug.Log("Cllck OnClickNewGameButton");
         Managers.Game.DeleteGameData();
         Managers.Data.Init();

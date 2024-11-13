@@ -187,7 +187,7 @@ public class GameManager
     {
         public int id { get; set; }
         public int Chapter { get; set; }
-        public string Class { get; set; }
+        //public string Class { get; set; }
         //public string Name { get; set; }
         public int Feature { get; set; }
         public string Image { get; set; }

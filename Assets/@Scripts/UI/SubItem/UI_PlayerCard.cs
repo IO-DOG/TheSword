@@ -7,23 +7,10 @@ using static GameManager;
 
 public class UI_PlayerCard : UI_BaseCard
 {
-    #region Enum
-
-    #endregion
-
-    public bool _isCri = false;
-    public float _maxDefenceCoolTime = 3f;
-    public float _defenceCoolTime = 0f;
-    public bool _forAssassin = false;
-
     public override bool Init()
     {
         if (base.Init() == false)
             return false;
-
-        //#region Bind
-        //BindImage(typeof(Images));
-        //#endregion
 
         Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
         Managers.Game.OnHitPlayerAction -= Refresh;
@@ -49,6 +36,7 @@ public class UI_PlayerCard : UI_BaseCard
 
     public override void Attack(CreatureData attacker, CreatureData target)
     {
+        base.Attack(attacker, target);
         Managers.Game.AttackCount++;
 
         if (Managers.Game.MonsterData[0].IsDefence)
@@ -64,12 +52,10 @@ public class UI_PlayerCard : UI_BaseCard
 
         if (Managers.Game.AttackCount == Managers.Game.PlayerData.Critical)
         {
-            _isCri = true;
-            _forAssassin = true;
+            _creature.ISCritical = true;
             Managers.Game.AttackCount = 0;
         }
     }
-
 
     public override void Defence()
     {
