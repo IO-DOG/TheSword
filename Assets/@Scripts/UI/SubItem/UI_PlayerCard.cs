@@ -91,7 +91,7 @@ public class UI_PlayerCard : UI_BaseCard
 
     IEnumerator CoDelayDefence()
     {
-        _maxDefenceCoolTime = _maxDefenceCoolTime / Managers.Game.PlayerData.AttackSpeed;
+        _maxDefenceCoolTime = _maxDefenceCoolTime / Managers.Game.PlayerData.DefenceSpeed;
 
         while (true)
         {
