@@ -8,19 +8,19 @@ public class Pillar : MonoBehaviour
 
     public GameObject _pillar;
 
-    public void Open()
+    public void Open(float time)
     {
         Managers.Data.PillarActiveDic[_pillarIndex_forActive] = false;
         Debug.Log("Open");
 
         _pillar = gameObject.GetComponentInChildren<Animator>().gameObject;
         _pillar.GetComponent<Animator>().Play("Pillar");
-        StartCoroutine(SetActiveFalse());
+        StartCoroutine(SetActiveFalse(time));
     }
 
-    IEnumerator SetActiveFalse()
+    IEnumerator SetActiveFalse(float time)
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(time);
         _pillar.SetActive(false);
     }
 }

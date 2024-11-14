@@ -58,7 +58,7 @@ public class UI_TutorialScene : UI_Scene
         BindImage(typeof(Images));
         #endregion
 
-        Managers.Game.InstantiateMap(Managers.Game.PlayerData.CurStageid);
+        Managers.Game.GenerateMap(Managers.Game.PlayerData.CurStageid);
         Managers.Game.PlayerData.MoveSpeed = 1f;
 
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);

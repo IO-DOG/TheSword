@@ -18,13 +18,11 @@ public class DataManager
     public Dictionary<int, Data.MonsterData> MonsterDic { get; private set; } = new Dictionary<int, Data.MonsterData>();
     public Dictionary<int, Data.ConsumableItemData> ConsumableItemDic { get; private set; } = new Dictionary<int, Data.ConsumableItemData>();
     public Dictionary<int, Data.MonsterClassData> MonsterClassDic { get; set; } = new Dictionary<int, Data.MonsterClassData>();
-    public Dictionary<string, Data.MapData> MapDic { get; set; } = new Dictionary<string, Data.MapData>();
-    public Dictionary<string, Data.DungeonDecoData> DecoDic { get; set; } = new Dictionary<string, Data.DungeonDecoData>();
+    public Dictionary<int, Data.MapData> MapDic { get; set; } = new Dictionary<int, Data.MapData>();
     public Dictionary<int, Data.EquipData> EquipDic { get; set; } = new Dictionary<int, Data.EquipData>();
     public Dictionary<int, Data.ScriptData> ScriptDic { get; set; } = new Dictionary<int, Data.ScriptData>();
     public Dictionary<int, Data.StageInfoData> StageInfoDic { get; set; } = new Dictionary<int, StageInfoData>();
     public Dictionary<int, Data.EventData> EventDic { get; set; } = new Dictionary<int, EventData>();
-
     public Dictionary<int, bool> MonsterActiveDic { get; set; } = new Dictionary<int, bool>();
     public Dictionary<int, bool> BossMonsterActiveDic { get; set; } = new Dictionary<int, bool>();
     public Dictionary<int, bool> CItemActiveDic { get; set; } = new Dictionary<int, bool>();
@@ -41,8 +39,7 @@ public class DataManager
         MonsterDic = LoadJson<Data.MonsterDataLoader, int, Data.MonsterData>("MonsterData").MakeDict();
         ConsumableItemDic = LoadJson<Data.ConsumableItemDataLoader, int, Data.ConsumableItemData>("ConsumableItemData").MakeDict();
         MonsterClassDic = LoadJson<Data.MonsterClassDataLoader, int, Data.MonsterClassData>("MonsterClassData").MakeDict();
-        MapDic = LoadJson<Data.MapDataLoader, string, Data.MapData>("MapData").MakeDict();
-        DecoDic = LoadJson<Data.DungeonDecoDataLoader, string, Data.DungeonDecoData>("DecoData").MakeDict();
+        MapDic = LoadJson<Data.MapDataLoader, int, Data.MapData>("MapData").MakeDict();
         EquipDic = LoadJson<Data.EquipDataLoader, int, Data.EquipData>("EquipData").MakeDict();
         ScriptDic = LoadJson<Data.ScriptDataLoader, int, Data.ScriptData>("ScriptData").MakeDict();
         StageInfoDic = LoadJson<Data.StageInfoDataLoader, int, Data.StageInfoData>("StageInfoData").MakeDict();
@@ -163,33 +160,5 @@ public class DataManager
         }
 
         return scripts;
-    }
-
-    public int FindKeyByValue_StageInfoData(string targetValue)
-    {
-        foreach(KeyValuePair<int, Data.StageInfoData> kvp in Managers.Data.StageInfoDic)
-        {
-            if (kvp.Value.DungeonID == targetValue)
-            {
-                return kvp.Key;
-            }
-        }
-
-        return -1;
-    }
-
-    public int GetChapterCount(string chpater)
-    {
-        int count = 0;
-
-        foreach (KeyValuePair<int, Data.StageInfoData> kvp in Managers.Data.StageInfoDic)
-        {
-            if (kvp.Value.DungeonID.StartsWith(chpater))
-            {
-                count++;
-            }
-        }
-
-        return count;
     }
 }

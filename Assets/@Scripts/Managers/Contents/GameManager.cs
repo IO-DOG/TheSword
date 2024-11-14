@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Unity.Mathematics;
@@ -34,13 +35,16 @@ public class GameManager
     public GameObject CurInteractObject;
     public Light DirectionalLight;
 
-    public Transform BossRoom;
+    public int BossRoomId;
 
     public PlayerController Player; // ������ ������ ����
     public MonsterController Monster; // ������ ������ ����
 
     public CurPlayerData PlayerData = new CurPlayerData();
     public List<CurMonsterData> MonsterData = new List<CurMonsterData>(10);
+
+    public PortalController[] Portals;
+    public Transform[] SpawnPoints;
 
     public CurConsumableItemData ConsumableItemData = new CurConsumableItemData(); // Current Consumable Item Data
     public KeyInventory KeyInventory = new KeyInventory(); //Inventory
@@ -58,7 +62,8 @@ public class GameManager
     public Sprite _screenShot2 = null;
 
     public Camera MainCamera;
-    public GameObject Map;
+    public GameObject ParentMap;
+    public Dictionary<int, GameObject> Maps = new Dictionary<int, GameObject>();
     public GameObject Monsters;
     public GameObject Items;
     public GameObject Lights;
@@ -273,6 +278,95 @@ public class GameManager
         Managers.Game.GameScene.Refresh();
     }
 
+    #region Map 생성
+    public KeyValuePair<int, int> GetChapterCount(int mapId)
+    {
+        string curChapter = Managers.Data.StageInfoDic[mapId].DungeonID.Substring(0, 2);
+
+        var chapterMaps = Managers.Data.StageInfoDic
+            .Where(entry => entry.Value.DungeonID.Substring(0, 2) == curChapter) // 챕터 필터링
+            .Select(entry => entry.Key);                 // 맵 ID 추출
+
+        int startMapId = chapterMaps.Min();
+        int endMapId = chapterMaps.Max();
+
+        KeyValuePair<int, int> entireChapter = new KeyValuePair<int, int>(startMapId, endMapId);
+        return entireChapter;
+    }
+
+    public void GenerateMap(int mapId)
+    {
+        Maps.Clear();
+
+        int count = 0;
+        KeyValuePair<int, int> mapStartAndEnd = GetChapterCount(mapId);
+
+        ParentMap = new GameObject(name : "Maps");
+
+        for (int i = mapStartAndEnd.Key; i <= mapStartAndEnd.Value; i++)
+        {
+            GameObject map = Managers.Resource.Instantiate($"{Managers.Data.StageInfoDic[i]}", ParentMap.transform);
+            map.transform.position = new Vector3(count * 100, 0f, 0f);
+            RefreshMap(i);
+            Maps.Add(i, map);
+            count++;
+        }
+
+        Portals = ParentMap.GetComponentsInChildren<PortalController>();
+        SpawnPoints = ParentMap.GetComponentsInChildren<Transform>().Where(child => child.CompareTag("SpawnPoint")).ToArray();
+        BossRoomId = Managers.Data.StageInfoDic.Where(pair => pair.Value.Type == Define.DungeonType.Boss)
+                    .Select(pair => pair.Key).FirstOrDefault();
+    }
+
+    public void RefreshMap(int mapId)
+    {
+        foreach(Transform child in Maps[mapId].transform)
+        {
+            if (child.TryGetComponent(out MonsterController monster) 
+                && Managers.Data.MonsterActiveDic[monster._monsterIndex_forActive] == false)
+            {
+                monster.gameObject.SetActive(false);
+                continue;
+            }
+
+            if (child.TryGetComponent(out ConsumableItem cItem)
+                && Managers.Data.CItemActiveDic[cItem._itemIndex_forActive] == false)
+            {
+                cItem.gameObject.SetActive(false);
+                continue;
+            }
+
+            if(child.TryGetComponent(out Equip eItem) 
+                && Managers.Data.EItemActiveDic[eItem._itemIndex_forActive] == false)
+            {
+                eItem.gameObject.SetActive(false);
+                continue;
+            }
+
+            if(child.TryGetComponent(out Door door) &&
+                Managers.Data.DoorActiveDic[door._doorIndex_forActive] == false)
+            {
+                door.gameObject.SetActive(false);
+                continue;
+            }
+
+            if(child.TryGetComponent(out Pillar pillar) 
+                && Managers.Data.PillarActiveDic[pillar._pillarIndex_forActive] == false)
+            {
+                pillar.Open(0f);
+                continue;   
+            }
+
+            if(child.TryGetComponent(out Lever lever)
+                && Managers.Data.LeverActiveDic[lever._leverIndex_forActive] == false)
+            {
+                lever.Play(0f);
+                continue;   
+            }
+        }
+    }
+
+    #endregion
     public void SwapEquip(int idx)
     {
         int type = Managers.Data.EquipDic[idx].Type;
@@ -370,14 +464,6 @@ public class GameManager
             TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
         });
         File.WriteAllText(_path, jsonStr);
-
-        //List<MapData> mapData = new List<MapData>(Managers.Data.MapDic.Values);
-        //var mapContainer = new { Maps = mapData };
-        //string MapDicJsonStr = JsonConvert.SerializeObject(mapContainer, new JsonSerializerSettings
-        //{
-        //    TypeNameHandling = TypeNameHandling.Auto
-        //});
-        //File.WriteAllText(Application.dataPath + "/@Resources/Data/JsonData/MapData.json", MapDicJsonStr);
 
         #region ActiveDic
         string monsterActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.MonsterActiveDic, Formatting.Indented);

@@ -59,6 +59,7 @@ public class DataTransformer : EditorWindow
             if (File.Exists(path))
                 File.Delete(path);
         }
+
         //ParseMapData();
         Debug.Log("Complete DeleteGameData");
     }
@@ -223,15 +224,18 @@ public class DataTransformer : EditorWindow
         Dictionary<int, bool> doorActiveDic = new Dictionary<int, bool>();
         Dictionary<int, bool> pillarActiveDic = new Dictionary<int, bool>();
         Dictionary<int, bool> leverActiveDic = new Dictionary<int, bool>();
+        #endregion
 
-        int totalCItemCount = 0;
-        int totalEItemCount = 0;
-        int totalMonsterCount = 0;
-        int totalBossCount = 0;
-        int totalDoorCount = 0;
-        int totalPillarCount = 0;
-        int totalLeverCount = 0;
+        int mapId = 0;
 
+        #region count
+        int citemCount = 0;
+        int eitemCount = 0;
+        int monsterCount = 0;
+        int bossMonsterCount = 0;
+        int doorCount = 0;
+        int pillarCount = 0;
+        int leverCount = 0;
         #endregion
 
         #region Excel
@@ -255,6 +259,7 @@ public class DataTransformer : EditorWindow
                     for (int x = 0; x < row.Length; x++)
                     {
                         string block = row[x];
+                        int id = int.Parse(Regex.Replace(block, "[^0-9]", ""));
 
                         xPos = x * Define.TILE_SIZE;
 
@@ -265,10 +270,11 @@ public class DataTransformer : EditorWindow
 
                         if (block[0] == 'C')
                         {
-                            cItemActiveDic.Add(totalCItemCount, true);
-
+                            cItemActiveDic.Add(citemCount, true);
                             Data.ObjectData tile = new Data.ObjectData
                             {
+                                Id = id,
+                                Count = citemCount++,
                                 ObjectType = (int)Define.ObjectType.CItem,
                                 Position = new Data.MyVector3
                                 {
@@ -279,12 +285,13 @@ public class DataTransformer : EditorWindow
                             };
                             tiles.Add(tile);
                         }
-                        if (block[0] == 'E')
+                        else if (block[0] == 'E')
                         {
-                            cItemActiveDic.Add(totalEItemCount, true);
-
+                            cItemActiveDic.Add(eitemCount, true);
                             Data.ObjectData tile = new Data.ObjectData
                             {
+                                Id = id,
+                                Count = citemCount++,
                                 ObjectType = (int)Define.ObjectType.Eitem,
                                 Position = new Data.MyVector3
                                 {
@@ -294,14 +301,14 @@ public class DataTransformer : EditorWindow
                                 }
                             };
                             tiles.Add(tile);
-                        }
-                        
+                        }                    
                         else if (block[0] == 'M')
                         {
-                            monsterActiveDic.Add(totalMonsterCount, true);
-
+                            monsterActiveDic.Add(monsterCount, true);
                             Data.ObjectData tile = new Data.ObjectData
                             {
+                                Id = id,
+                                Count = monsterCount++,
                                 ObjectType = (int)Define.ObjectType.Monster,
                                 Position = new Data.MyVector3
                                 {
@@ -314,10 +321,11 @@ public class DataTransformer : EditorWindow
                         }
                         else if (block[0] == 'B')
                         {
-                            bossMonsterActiveDic.Add(totalBossCount, true);
-
+                            bossMonsterActiveDic.Add(bossMonsterCount, true);
                             Data.ObjectData tile = new Data.ObjectData
                             {
+                                Id = id,
+                                Count = bossMonsterCount++,
                                 ObjectType = (int)Define.ObjectType.BossMonster,
                                 Position = new Data.MyVector3
                                 {
@@ -330,10 +338,9 @@ public class DataTransformer : EditorWindow
                         }
                         else if (block[0] == 'W')
                         {
-                            int prefabID = int.Parse(Regex.Replace(block, "[^0-9]", ""));
                             Data.ObjectData tile = new Data.ObjectData
                             {
-                                PrefabID = prefabID,
+                                Id = id,
                                 Position = new Data.MyVector3
                                 {
                                     X = xPos,
@@ -344,151 +351,104 @@ public class DataTransformer : EditorWindow
                             };
                             tiles.Add(tile);
                         }
+                        else if (block[0] == 'P')
+                        {
+                            Data.ObjectData tile = new Data.ObjectData
+                            {
+                                Id = id,
+                                Position = new Data.MyVector3
+                                {
+                                    X = xPos,
+                                    Y = 0,
+                                    Z = zPos,
+                                },
+                                ObjectType = (int)Define.ObjectType.Portal,
+                            };
+                            tiles.Add(tile);
+                        }
                         else
                         {
-                            int prefabID = int.Parse(Regex.Replace(block, "[^0-9]", ""));
-
-                            if (prefabID >= 3 && prefabID <= 8)
+                            if (id >= 3 && id <= 8)
                             {
-                                doorActiveDic.Add(totalDoorCount, true);
-
-                                Data.DoorData tile = new Data.DoorData
+                                doorActiveDic.Add(doorCount, true);
+                                Data.ObjectData tile = new Data.ObjectData
                                 {
-                                    PrefabID = prefabID,
+                                    Id = id,
+                                    Count = doorCount++,
                                     Position = new Data.MyVector3
                                     {
                                         X = xPos,
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = (int)Define.ObjectType.Door,
-
-                                    TotalCount = totalDoorCount++,
-                                    IsActive = true,
+                                    ObjectType = (int)Define.ObjectType.Door,
                                 };
                                 tiles.Add(tile);
                             }
-                            else if (prefabID == 9)
+                            else if (id == 11)
                             {
-                                Data.StairsData tile = new Data.StairsData
+                                Data.ObjectData tile = new Data.ObjectData
                                 {
-                                    PrefabID = prefabID,
+                                    Id = id,
                                     Position = new Data.MyVector3
                                     {
                                         X = xPos,
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = (int)Define.ObjectType.Portal,
-
-                                    //Floor = floorIndex,
-                                    StairsType = (int)Define.Stairs.Upstairs,
+                                    ObjectType = (int)Define.ObjectType.SpawnPoint,
                                 };
                                 tiles.Add(tile);
                             }
-                            else if (prefabID == 10)
+                            else if (id == 12)
                             {
-                                Data.StairsData tile = new Data.StairsData
+                                leverActiveDic.Add(leverCount, true);
+
+                                Data.ObjectData tile = new Data.ObjectData
                                 {
-                                    PrefabID = prefabID,
+                                    Id = id,
+                                    Count = leverCount++,
                                     Position = new Data.MyVector3
                                     {
                                         X = xPos,
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = (int)Define.ObjectType.Portal,
-
-                                    //Floor = floorIndex,
-                                    StairsType = (int)Define.Stairs.Downstairs,
+                                    ObjectType = (int)Define.ObjectType.Lever,
                                 };
                                 tiles.Add(tile);
                             }
-                            else if (prefabID == 12)
+                            else if (id == 13)
                             {
-                                leverActiveDic.Add(totalLeverCount, true);
+                                pillarActiveDic.Add(pillarCount, true);
 
-                                Data.LeverData tile = new Data.LeverData
+                                Data.ObjectData tile = new Data.ObjectData
                                 {
-                                    PrefabID = prefabID,
+                                    Id = id,
+                                    Count = pillarCount++,
                                     Position = new Data.MyVector3
                                     {
                                         X = xPos,
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = (int)Define.ObjectType.Lever,
-
-                                    TotalCount = totalLeverCount++,
-                                    IsActive = false,
+                                    ObjectType = (int)Define.ObjectType.Pillar,
                                 };
                                 tiles.Add(tile);
                             }
-                            else if (prefabID == 13)
+                            else if (id == 16)
                             {
-                                pillarActiveDic.Add(totalPillarCount, true);
+                                pillarActiveDic.Add(pillarCount, true);
 
-                                Data.PillarData tile = new Data.PillarData
+                                Data.ObjectData tile = new Data.ObjectData
                                 {
-                                    PrefabID = prefabID,
                                     Position = new Data.MyVector3
                                     {
                                         X = xPos,
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = (int)Define.ObjectType.Pillar,
-
-                                    TotalCount = totalPillarCount++,
-                                    IsActive = true,
-                                };
-                                tiles.Add(tile);
-                            }
-                            else if (prefabID == 14)
-                            {
-                                Data.StairsData tile = new Data.StairsData
-                                {
-                                    PrefabID = prefabID,
-                                    Position = new Data.MyVector3
-                                    {
-                                        X = xPos,
-                                        Y = 0,
-                                        Z = zPos,
-                                    },
-                                    TileType = (int)Define.ObjectType.Portal,
-                                    StairsType = (int)Define.Stairs.Upstairs,
-                                };
-                                tiles.Add(tile);
-                            }
-                            else if (prefabID == 15)
-                            {
-                                Data.StairsData tile = new Data.StairsData
-                                {
-                                    PrefabID = prefabID,
-                                    Position = new Data.MyVector3
-                                    {
-                                        X = xPos,
-                                        Y = 0,
-                                        Z = zPos,
-                                    },
-                                    TileType = (int)Define.ObjectType.Portal,
-                                    StairsType = (int)Define.Stairs.Downstairs,
-                                };
-                                tiles.Add(tile);
-                            }
-                            else if (prefabID == 16)
-                            {
-                                Data.StairsData tile = new Data.StairsData
-                                {
-                                    PrefabID = prefabID,
-                                    Position = new Data.MyVector3
-                                    {
-                                        X = xPos,
-                                        Y = 0,
-                                        Z = zPos,
-                                    },
-                                    TileType = (int)Define.ObjectType.Portal,
-                                    StairsType = (int)Define.Stairs.BossRoom,
+                                    ObjectType = (int)Define.ObjectType.Portal,
                                 };
                                 tiles.Add(tile);
                             }
@@ -496,14 +456,14 @@ public class DataTransformer : EditorWindow
                             {
                                 Data.ObjectData tile = new Data.ObjectData
                                 {
-                                    PrefabID = prefabID,
+                                    Id = id,
                                     Position = new Data.MyVector3
                                     {
                                         X = xPos,
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    ObjectType = prefabID,
+                                    ObjectType = (int)Define.ObjectType.Void,
                                 };
                                 tiles.Add(tile);
                             }
@@ -513,11 +473,10 @@ public class DataTransformer : EditorWindow
 
                 MapData mapData = new MapData
                 {
-                    Key = file.Name.Replace(".csv", ""),
+                    Key = mapId++,
                     Objects = tiles,
                 };
                 loader.maps.Add(mapData);
-                //floorIndex++;
             }
         }
         #endregion
@@ -541,10 +500,7 @@ public class DataTransformer : EditorWindow
         AssetDatabase.Refresh();
         #endregion
 
-        string mapDicJsonStr = JsonConvert.SerializeObject(loader, new JsonSerializerSettings
-        {
-            TypeNameHandling = TypeNameHandling.Auto
-        });
+        string mapDicJsonStr = JsonConvert.SerializeObject(loader);
         File.WriteAllText($"{Application.persistentDataPath}/MapData.json", mapDicJsonStr);
         File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/MapData.json", mapDicJsonStr);
         AssetDatabase.Refresh();
@@ -636,7 +592,6 @@ public class DataTransformer : EditorWindow
         File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/{filename}Data.json", jsonStr);
         AssetDatabase.Refresh();
     }
-
     static void ParseScriptData(string filename)
     {
         ScriptDataLoader loader = new ScriptDataLoader();

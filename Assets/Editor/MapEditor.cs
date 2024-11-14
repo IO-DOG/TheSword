@@ -11,13 +11,16 @@ using System.Threading;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
+using UnityEditor.U2D.Aseprite;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class MapEditor : EditorWindow
 {
-    public Dictionary<string, Data.MapData> MapDic { get; set; } = new Dictionary<string, Data.MapData>();
+    public Dictionary<int, Data.MapData> MapDic { get; set; } = new Dictionary<int, Data.MapData>();
+    public Dictionary<int, Data.StageInfoData> StageInfoDic { get; set; } = new Dictionary<int, Data.StageInfoData>();
     private List<ObjectField> objectFields = new List<ObjectField>();
     private List<GameObject> defaulTileMap = new List<GameObject>();
     private List<GameObject> SelectedTileMap = new List<GameObject>();
@@ -48,9 +51,9 @@ public class MapEditor : EditorWindow
 
     private void OnEnable()
     {
-        MapDic = LoadJson<Data.MapDataLoader, string, Data.MapData>().MakeDict();
+        MapDic = LoadJson<Data.MapDataLoader, int, Data.MapData>().MakeDict();
+        StageInfoDic = LoadJson<Data.StageInfoDataLoader, int, StageInfoData>().MakeDict();
 
-        VoidTile = Resources.Load("DecoTiles/Tilemap_-1") as GameObject;
         for (int i = 0; i < numOfdefaultTileMap; i++)
         {
             defaulTileMap.Add(Resources.Load($"DecoTiles/Tilemap_{i}") as GameObject);
@@ -129,7 +132,8 @@ public class MapEditor : EditorWindow
         {
             string selectedTileSet = TilesetDropdown.value;
             string selectedMapName = mapNameDropdown.value;
-            GenerateMap(selectedMapName, selectedTileSet);
+            int key = StageInfoDic.FirstOrDefault(kvp => kvp.Value.DungeonID == selectedMapName).Key;
+            GenerateMap(key, selectedTileSet);
         })
         { text = "Generate Map" };
         generateBtn.style.marginTop = 50;
@@ -170,100 +174,88 @@ public class MapEditor : EditorWindow
         m_RightPane.Add(saveButton);
     }
 
-    void GenerateMap(string mapName, string tileSet)
+    void GenerateMap(int mapId, string tileSet)
     {
         if (tileSet == "Empty")
         {
             Debug.LogWarning("Tile set is empty!");
             return;
         }
+
         SelectedTileMap = AssetDatabase.LoadAssetAtPath<WallData>($"Assets/@Resources/Data/TileSet/{tileSet}.asset").wallPrefabs;
+
         foreach (GameObject go in SelectedTileMap)
         {
             go.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
         }
 
-        int count = 0;
-
-        foreach (KeyValuePair<string, Data.MapData> entry in MapDic)
+        if (MapDic.ContainsKey(mapId))
         {
-            string key = entry.Key;
-            Data.MapData mapData = entry.Value;
-
-            if (!key.Contains(mapName))
-                continue;
-
-            GameObject parent = new GameObject() { name = key };
-            GameObject tiles = new GameObject() { name = "Tiles" };
+            #region 하이어라키
+            GameObject parent = new GameObject() { name = StageInfoDic[mapId].DungeonID };
+            GameObject portals = new GameObject() { name = "Portals" };
             GameObject walls = new GameObject() { name = "Walls" };
             GameObject items = new GameObject() { name = "Items" };
             GameObject monsters = new GameObject() { name = "Monsters" };
             GameObject bossMonsters = new GameObject() { name = "BossMonsters" };
             GameObject decos = new GameObject() { name = "Deco" };
             GameObject pillars = new GameObject() { name = "Pillars" };
+            GameObject levers = new GameObject() { name = "Levers" };
+            GameObject doors = new GameObject() { name = "Doors" };
+            GameObject etcs = new GameObject() { name = "Etcs" };
 
-            parent.transform.localPosition += new Vector3(count * 100, 0, 0);
-            tiles.transform.parent = parent.transform;
+            portals.transform.parent = parent.transform;
             walls.transform.parent = parent.transform;
             items.transform.parent = parent.transform;
             monsters.transform.parent = parent.transform;
             bossMonsters.transform.parent = parent.transform;
             decos.transform.parent = parent.transform;
             pillars.transform.parent = parent.transform;
+            levers.transform.parent = parent.transform;
+            doors.transform.parent = parent.transform;
+            etcs.transform.parent = parent.transform;
+            #endregion
 
-            foreach (Data.TileData tile in mapData.Tiles)
+            MapData mapData = MapDic[mapId];
+
+            #region 데이터 돌면서 맵 생성
+            foreach (Data.ObjectData objectData in mapData.Objects)
             {
-                if (tile is DoorData doorTile)
+                if (objectData.ObjectType == (int)Define.ObjectType.Door)
                 {
-                    GameObject go = Instantiate(defaulTileMap[1], tiles.transform);
-                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-
-                    GameObject door = Instantiate(defaulTileMap[doorTile.PrefabID], tiles.transform);
-                    door.transform.position = new Vector3(doorTile.Position.X, doorTile.Position.Y - Define.TILE_SIZE / 4, tile.Position.Z);
-                    door.name = $"door{doorTile.TotalCount}";
-
-                    //if (doorTile.IsActive == false)
-                    //    door.SetActive(false);
+                    GameObject door = Instantiate(defaulTileMap[objectData.Id], doors.transform);
+                    door.transform.position = new Vector3(objectData.Position.X, objectData.Position.Y - Define.TILE_SIZE / 4, objectData.Position.Z);
+                    door.name = $"door{objectData.Count}";
                 }
-                else if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
+                else if (objectData.ObjectType == (int)Define.ObjectType.CItem)
                 {
                     GameObject item = Instantiate(ConsumableItem, items.transform);
-                    item.transform.localPosition = new Vector3(citemTile.Position.X, citemTile.Position.Y, citemTile.Position.Z);
-                    item.GetComponent<ConsumableItem>().id = citemTile.Index;
-                    item.name = $"CItem{citemTile.TotalCount}";
-                    item.GetComponent<ConsumableItem>()._itemIndex_forActive = citemTile.TotalCount;
-
-                    //if (Managers.Data.CItemActiveDic[citemTile.TotalCount] == false)
-                    //    item.SetActive(false);
+                    item.transform.localPosition = new Vector3(objectData.Position.X, objectData.Position.Y, objectData.Position.Z);
+                    item.GetComponent<ConsumableItem>().id = objectData.Id;
+                    item.name = $"CItem{objectData.Count}";
+                    item.GetComponent<ConsumableItem>()._itemIndex_forActive = objectData.Count;
                 }
-                else if (tile is Occupied eitemTile && eitemTile.Type == (int)Define.OccupiedType.EItem)
+                else if (objectData.ObjectType == (int)Define.ObjectType.Eitem)
                 {
                     GameObject item = Instantiate(EquipItem, items.transform);
-                    item.transform.localPosition = new Vector3(eitemTile.Position.X, eitemTile.Position.Y, eitemTile.Position.Z);
-                    item.GetComponent<Equip>().Id = eitemTile.Index;
-                    item.name = $"EItem{eitemTile.TotalCount}";
-                    item.GetComponent<Equip>()._itemIndex_forActive = eitemTile.TotalCount;
-
-                    //if (Managers.Data.EItemActiveDic[eitemTile.TotalCount] == false)
-                    //    item.SetActive(false);
+                    item.transform.localPosition = new Vector3(objectData.Position.X, objectData.Position.Y, objectData.Position.Z);
+                    item.GetComponent<Equip>().Id = objectData.Id;
+                    item.name = $"EItem{objectData.Count}";
+                    item.GetComponent<Equip>()._itemIndex_forActive = objectData.Count;
                 }
-                else if (tile is Occupied monsterTile && monsterTile.Type == (int)Define.OccupiedType.Monster)
+                else if (objectData.ObjectType == (int)Define.ObjectType.Monster)
                 {
                     GameObject monster = Instantiate(Monster, monsters.transform);
-                    monster.transform.localPosition = new Vector3(monsterTile.Position.X, monsterTile.Position.Y, monsterTile.Position.Z);
-                    //monster.transform.localScale = monsters.transform.localPosition + new Vector3(0.8f, 0.8f, 1f);
-                    monster.GetComponent<MonsterController>().id = monsterTile.Index;
-                    monster.name = $"monster{monsterTile.TotalCount}";
-                    monster.GetComponent<MonsterController>()._monsterIndex_forActive = monsterTile.TotalCount;
-
-                    //if (Managers.Data.MonsterActiveDic[monsterTile.TotalCount] == false)
-                    //    monster.SetActive(false);
+                    monster.transform.localPosition = new Vector3(objectData.Position.X, objectData.Position.Y, objectData.Position.Z);
+                    monster.GetComponent<MonsterController>().id = objectData.Id;
+                    monster.name = $"monster{objectData.Count}";
+                    monster.GetComponent<MonsterController>()._monsterIndex_forActive = objectData.Count;
                 }
-                else if (tile is Occupied bossMonsterTile && bossMonsterTile.Type == (int)Define.OccupiedType.Boss)
+                else if (objectData.ObjectType == (int)Define.ObjectType.BossMonster)
                 {
                     GameObject boss = Instantiate(BossMonster, bossMonsters.transform);
-                    boss.transform.localPosition = new Vector3(bossMonsterTile.Position.X, bossMonsterTile.Position.Y, bossMonsterTile.Position.Z);
-                    int tileIndex = bossMonsterTile.Index;
+                    boss.transform.localPosition = new Vector3(objectData.Position.X, objectData.Position.Y, objectData.Position.Z);
+                    int tileIndex = objectData.Id;
                     switch (tileIndex)
                     {
                         case 0:
@@ -273,11 +265,10 @@ public class MapEditor : EditorWindow
                         default:
                             break;
                     }
-                    boss.name = $"bossMonster{bossMonsterTile.TotalCount}";
-                    boss.GetComponent<BossMonsterController>()._monsterIndex_forActive = bossMonsterTile.TotalCount;
+                    boss.name = $"bossMonster{objectData.Count}";
+                    boss.GetComponent<BossMonsterController>()._monsterIndex_forActive = objectData.Count;
 
                     int id = boss.GetComponent<BossMonsterController>().id;
-                    //string name = Managers.Data.MonsterDic[id].Name;
                     switch (id)
                     {
                         case Define.KingSlime:
@@ -290,91 +281,57 @@ public class MapEditor : EditorWindow
                         default:
                             break;
                     }
-
-                    //if (Managers.Data.BossMonsterActiveDic[bossMonsterTile.TotalCount] == false)
-                    //    bossMonsters.SetActive(false);
                 }
-                else if (tile is StairsData stairsTile)
+                else if (objectData.ObjectType == (int)Define.ObjectType.Portal)
                 {
-                    GameObject stairs = Instantiate(defaulTileMap[stairsTile.PrefabID], tiles.transform);
-                    stairs.name = "portal";
-                    stairs.GetComponentInChildren<PortalController>()._stairs = stairsTile.StairsType;
-
-                    if (stairsTile.PrefabID == 14 || stairsTile.PrefabID == 15 || stairsTile.PrefabID == 16)
-                    {
-                        stairs.transform.position = new Vector3(stairsTile.Position.X, stairsTile.Position.Y, stairsTile.Position.Z);
-                    }
-                    else if (stairsTile.StairsType == (int)Define.Stairs.Downstairs)
-                    {
-                        stairs.transform.position = new Vector3(stairsTile.Position.X, stairsTile.Position.Y - Define.TILE_SIZE * 1.5f, stairsTile.Position.Z);
-                    }
-                    else
-                    {
-                        GameObject go = Instantiate(defaulTileMap[1], tiles.transform);
-                        go.transform.position = new Vector3(stairsTile.Position.X, stairsTile.Position.Y, stairsTile.Position.Z);
-
-                        stairs.transform.position = new Vector3(stairsTile.Position.X, stairsTile.Position.Y - Define.TILE_SIZE / 2, stairsTile.Position.Z);
-                    }
+                    GameObject portal = Instantiate(defaulTileMap[objectData.Id], portals.transform);
+                    portal.name = $"portal{objectData.Count}";
+                    portal.GetComponentInChildren<PortalController>()._id = objectData.Id;
+                    portal.GetComponentInChildren<PortalController>()._mapId = mapId;
+                    portal.transform.position = new Vector3(objectData.Position.X, objectData.Position.Y, objectData.Position.Z);
 
                 }
-                else if (tile is LeverData leverTile)
+                else if (objectData.ObjectType == (int)Define.ObjectType.Lever)
                 {
-                    GameObject go = Instantiate(defaulTileMap[1], tiles.transform);
-                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+                    GameObject lever = Instantiate(defaulTileMap[(int)Define.ObjectType.Lever], levers.transform);
+                    lever.name = $"portal{objectData.Count}";
+                    lever.transform.position = new Vector3(objectData.Position.X, objectData.Position.Y, objectData.Position.Z);
                 }
-                else if (tile is PillarData pillarTile)
+                else if (objectData.ObjectType == (int)Define.ObjectType.Pillar)
                 {
-                    GameObject go = Instantiate(defaulTileMap[1], tiles.transform);
-                    go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-
-                    GameObject pillar = Instantiate(defaulTileMap[pillarTile.PrefabID], pillars.transform);
-                    pillar.name = $"pillar{pillarTile.TotalCount}";
-                    pillar.transform.position = new Vector3(pillarTile.Position.X, pillarTile.Position.Y - Define.TILE_SIZE / 2, pillarTile.Position.Z);
-
-                    //if (pillarTile.IsActive == false)
-                    //{
-                    //    pillar.transform.GetChild(1).gameObject.SetActive(false);
-                    //}
+                    GameObject pillar = Instantiate(defaulTileMap[(int)Define.ObjectType.Lever], pillars.transform);
+                    pillar.name = $"pillar{objectData.Count}";
+                    pillar.transform.position = new Vector3(objectData.Position.X, objectData.Position.Y - Define.TILE_SIZE / 2, objectData.Position.Z);
                 }
                 else
                 {
-                    if (tile.TileType == (int)Define.TileType.Wall)
+                    if (objectData.ObjectType == (int)Define.ObjectType.Wall)
                     {
-                        GameObject go = Instantiate(defaulTileMap[1], tiles.transform);
-                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-
-                        GameObject wall = Instantiate(SelectedTileMap[tile.PrefabID], walls.transform);
-                        wall.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
+                        GameObject wall = Instantiate(SelectedTileMap[objectData.Id], walls.transform);
+                        wall.transform.position = new Vector3(objectData.Position.X, objectData.Position.Y - Define.TILE_SIZE / 2, objectData.Position.Z);
                     }
-                    else if (tile.TileType == (int)Define.TileType.Void)
+                    else if (objectData.ObjectType == (int)Define.ObjectType.Void)
                     {
-                        GameObject go = Instantiate(defaulTileMap[tile.PrefabID], tiles.transform);
-                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
+                        GameObject go = Instantiate(defaulTileMap[objectData.Id], etcs.transform);
+                        go.transform.position = new Vector3(objectData.Position.X, objectData.Position.Y - Define.TILE_SIZE / 2, objectData.Position.Z);
                     }
-                    else if (tile.PrefabID == (int)Define.TileType.Floor)
+                    else if (objectData.ObjectType == (int)Define.ObjectType.SpawnPoint)
                     {
-                        GameObject go = Instantiate(defaulTileMap[tile.PrefabID], tiles.transform);
-                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-                    }
-                    else if (tile.PrefabID == (int)Define.TileType.SpawnPoint)
-                    {
-                        GameObject go = Instantiate(defaulTileMap[tile.PrefabID], tiles.transform);
-                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
-                    }
-                    else if (tile.PrefabID == (int)Define.TileType.VoidTile)
-                    {
-                        GameObject go = Instantiate(VoidTile, tiles.transform);
-                        go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
+                        GameObject go = Instantiate(defaulTileMap[objectData.Id], etcs.transform);
+                        go.transform.position = new Vector3(objectData.Position.X, objectData.Position.Y, objectData.Position.Z);
+                        go.tag = "SpawnPoint";
                     }
                 }
 
             }
+            #endregion
 
             #region BG
-            Sprite BGSprite = Resources.Load<Sprite>($"Sprites/{mapName.Substring(8, 2)}/FloorField_{mapName.Substring(8)}");
+            string mapName = StageInfoDic[mapId].DungeonID;
+            Sprite BGSprite = Resources.Load<Sprite>($"Sprites/{mapName.Substring(2)}/FloorField_{mapName}");
             GameObject BG = new GameObject() { name = "BG" };
             BG.transform.parent = decos.transform;
-            if (mapName.Substring(8) == "00_002")
+            if (mapName == "00_002")
                 BG.transform.localPosition = new Vector3(-0.16f, 0, -0.16f);
             else
                 BG.transform.localPosition = new Vector3(-0.16f, 0, 0.16f);
@@ -387,13 +344,8 @@ public class MapEditor : EditorWindow
             walls.transform.localPosition = new Vector3(0f, -0.04f, 0f);
             items.transform.localPosition = new Vector3(0f, 0f, -0.1f);
             monsters.transform.localPosition = new Vector3(0f, 0f, -0.1f);
-            //Camera.main.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, items);
-            //Camera.main.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, monsters);
-            //Camera.main.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, lights);
-            count++;
 
-
-            string mapPrefabPath = $"Assets/@Resources/Maps/{key}.prefab";
+            string mapPrefabPath = $"Assets/@Resources/Maps/{mapName}.prefab";
             PrefabUtility.SaveAsPrefabAsset(parent, mapPrefabPath);
             DestroyImmediate(GameObject.Find(parent.name));
 
@@ -402,14 +354,13 @@ public class MapEditor : EditorWindow
             var group = settings.FindGroup("Maps");
             var guid = AssetDatabase.AssetPathToGUID(mapPrefabPath);
             var ent = settings.CreateOrMoveEntry(guid, group);
-            ent.address = key;
+            ent.address = mapName;
             ent.SetLabel("PreLoad", true);
 
             EditorUtility.SetDirty(settings);
-            AssetDatabase.SaveAssets();
 
+            AssetDatabase.SaveAssets();
         }
-        AssetDatabase.SaveAssets();
     }
 
     void SaveTileData()
@@ -476,7 +427,6 @@ public class MapEditor : EditorWindow
         });
 
     }
-
 
     List<string> ExtractTilesetNames()
     {

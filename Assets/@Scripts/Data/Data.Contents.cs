@@ -120,7 +120,8 @@ namespace Data
     [Serializable]
     public class ObjectData
     {
-
+        public int Id { get; set; }
+        public int Count { get; set; }
         public int ObjectType { get; set; }
         public MyVector3 Position { get; set; }
     }

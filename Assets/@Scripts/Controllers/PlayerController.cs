@@ -485,8 +485,6 @@ public class PlayerController : MonoBehaviour
                     return false;
 
                 somethingExist = true;
-
-                Managers.Game.BossRoom = hit.collider.gameObject.GetComponentInChildren<PortalController>().transform;
                 Managers.UI.ShowPopupUI<UI_BossRoomCheckPopup>();
             }
         }

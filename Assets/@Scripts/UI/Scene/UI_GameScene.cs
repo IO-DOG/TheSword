@@ -115,7 +115,7 @@ public class UI_GameScene : UI_Scene
         });
 
         Managers.Game.PlayerData.CurStageid = 0;
-        Managers.Game.InstantiateMap(Managers.Game.PlayerData.CurStageid);
+        Managers.Game.GenerateMap(Managers.Game.PlayerData.CurStageid);
 
         SetPlayerInfo();
         Refresh();

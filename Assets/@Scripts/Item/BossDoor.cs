@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
 
-public class BossDoor : MonoBehaviour
+public class BossDoor : PortalController
 {
    public void CoStartPlayEffect()
     {
@@ -43,7 +43,7 @@ public class BossDoor : MonoBehaviour
 
         yield return new WaitForSeconds(1.5f);
 
-        Managers.Game.BossRoom.GetComponent<PortalController>().UsePortal();
+        UsePortal();
 
         //Managers.Game.DirectionalLight.color= originLightColor;
         yield return new WaitForSeconds(0.2f);

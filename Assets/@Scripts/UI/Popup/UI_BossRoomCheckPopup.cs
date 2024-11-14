@@ -89,7 +89,7 @@ public class UI_BossRoomCheckPopup : UI_Popup
 
     void YesClick()
     {
-        Managers.Game.BossRoom.parent.GetComponentInChildren<BossDoor>().CoStartPlayEffect();
+        Managers.Game.ParentMap.GetComponentInChildren<BossDoor>().CoStartPlayEffect();
         ClosePopupUI();
     }
 
