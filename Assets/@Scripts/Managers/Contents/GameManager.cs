@@ -547,77 +547,75 @@ public class GameManager
                 //        go.transform.localPosition = new Vector3(stairsTile.Position.X, -0.32f, stairsTile.Position.Z);
                 //    }
                 //}
-                else if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
-                {
-                    GameObject item = Managers.Resource.Instantiate("ConsumableItem", items.transform);
-                    item.transform.localPosition = new Vector3 (citemTile.Position.X, citemTile.Position.Y, citemTile.Position.Z);
-                    item.GetComponent<ConsumableItem>().id = citemTile.Index;
-                    item.name = $"CItem{citemTile.TotalCount}";
-                    item.GetComponent<ConsumableItem>()._itemIndex_forActive = citemTile.TotalCount;
+                //else if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
+                //{
+                //    GameObject item = Managers.Resource.Instantiate("ConsumableItem", items.transform);
+                //    item.transform.localPosition = new Vector3 (citemTile.Position.X, citemTile.Position.Y, citemTile.Position.Z);
+                //    item.GetComponent<ConsumableItem>().id = citemTile.Index;
+                //    item.name = $"CItem{citemTile.TotalCount}";
+                //    item.GetComponent<ConsumableItem>()._itemIndex_forActive = citemTile.TotalCount;
 
-                    if (Managers.Data.CItemActiveDic[citemTile.TotalCount] == false)
-                        item.SetActive(false);
-                }
-                else if (tile is Occupied eitemTile && eitemTile.Type == (int)Define.OccupiedType.EItem)
-                {
-                    GameObject item = Managers.Resource.Instantiate("EquipItem", items.transform);
-                    item.transform.localPosition = new Vector3(eitemTile.Position.X, eitemTile.Position.Y, eitemTile.Position.Z);
-                    item.GetComponent<Equip>().Id = eitemTile.Index;
-                    item.name = $"EItem{eitemTile.TotalCount}";
-                    item.GetComponent<Equip>()._itemIndex_forActive = eitemTile.TotalCount;
+                //    if (Managers.Data.CItemActiveDic[citemTile.TotalCount] == false)
+                //        item.SetActive(false);
+                //}
+                //else if (tile is Occupied eitemTile && eitemTile.Type == (int)Define.OccupiedType.EItem)
+                //{
+                //    GameObject item = Managers.Resource.Instantiate("EquipItem", items.transform);
+                //    item.transform.localPosition = new Vector3(eitemTile.Position.X, eitemTile.Position.Y, eitemTile.Position.Z);
+                //    item.GetComponent<Equip>().Id = eitemTile.Index;
+                //    item.name = $"EItem{eitemTile.TotalCount}";
+                //    item.GetComponent<Equip>()._itemIndex_forActive = eitemTile.TotalCount;
 
-                    if (Managers.Data.EItemActiveDic[eitemTile.TotalCount] == false)
-                        item.SetActive(false);
-                }
-                else if (tile is Occupied monsterTile && monsterTile.Type == (int)Define.OccupiedType.Monster)
-                {
-                    GameObject monster = Managers.Resource.Instantiate("Monster", monsters.transform);
-                    monster.transform.localPosition = new Vector3(monsterTile.Position.X, monsterTile.Position.Y, monsterTile.Position.Z);
-                    monster.transform.localScale = monsters.transform.localPosition + new Vector3(0.8f, 0.8f, 1f);
-                    monster.GetComponent<MonsterController>().id = monsterTile.Index;
-                    monster.name = $"monster{monsterTile.TotalCount}";
-                    monster.GetComponent<MonsterController>()._monsterIndex_forActive = monsterTile.TotalCount;
+                //    if (Managers.Data.EItemActiveDic[eitemTile.TotalCount] == false)
+                //        item.SetActive(false);
+                //}
+                //else if (tile is Occupied monsterTile && monsterTile.Type == (int)Define.OccupiedType.Monster)
+                //{
+                //    GameObject monster = Managers.Resource.Instantiate("Monster", monsters.transform);
+                //    monster.transform.localPosition = new Vector3(monsterTile.Position.X, monsterTile.Position.Y, monsterTile.Position.Z);
+                //    monster.transform.localScale = monsters.transform.localPosition + new Vector3(0.8f, 0.8f, 1f);
+                //    monster.GetComponent<MonsterController>().id = monsterTile.Index;
+                //    monster.name = $"monster{monsterTile.TotalCount}";
+                //    monster.GetComponent<MonsterController>()._monsterIndex_forActive = monsterTile.TotalCount;
                    
-                    if (Managers.Data.MonsterActiveDic[monsterTile.TotalCount] == false)
-                        monster.SetActive(false);
-                }
-                else if (tile is Occupied bossMonsterTile && bossMonsterTile.Type == (int)Define.OccupiedType.Boss)
-                {
-                    GameObject boss = Managers.Resource.Instantiate("BossMonster", bossMonsters.transform);
-                    boss.transform.localPosition = new Vector3(bossMonsterTile.Position.X, bossMonsterTile.Position.Y, bossMonsterTile.Position.Z);
-                    int tileIndex = bossMonsterTile.Index;
-                    switch (tileIndex)
-                    {
-                        case 0:
-                            boss.GetComponent<BossMonsterController>().id = Define.KingSlime;
-                            boss.gameObject.name = "KingSlime";
-                            break;
-                        default:
-                            break;
-                    }
-                    Debug.Log($"bossMonsterTile.index : {bossMonsterTile.Index}");
-                    boss.name = $"bossMonster{bossMonsterTile.TotalCount}";
-                    boss.GetComponent<BossMonsterController>()._monsterIndex_forActive = bossMonsterTile.TotalCount;
+                //    if (Managers.Data.MonsterActiveDic[monsterTile.TotalCount] == false)
+                //        monster.SetActive(false);
+                //}
+                //else if (tile is Occupied bossMonsterTile && bossMonsterTile.Type == (int)Define.OccupiedType.Boss)
+                //{
+                //    GameObject boss = Managers.Resource.Instantiate("BossMonster", bossMonsters.transform);
+                //    boss.transform.localPosition = new Vector3(bossMonsterTile.Position.X, bossMonsterTile.Position.Y, bossMonsterTile.Position.Z);
+                //    int tileIndex = bossMonsterTile.Index;
+                //    switch (tileIndex)
+                //    {
+                //        case 0:
+                //            boss.GetComponent<BossMonsterController>().id = Define.KingSlime;
+                //            boss.gameObject.name = "KingSlime";
+                //            break;
+                //        default:
+                //            break;
+                //    }
+                //    boss.name = $"bossMonster{bossMonsterTile.TotalCount}";
+                //    boss.GetComponent<BossMonsterController>()._monsterIndex_forActive = bossMonsterTile.TotalCount;
 
-                    int id = boss.GetComponent<BossMonsterController>().id;
-                    Debug.Log($"bossMonsterId : {id}");
-                    string name = Managers.Data.MonsterDic[id].Name;
-                    switch (id)
-                    {
-                        case Define.KingSlime:
-                            boss.AddComponent<BlackSlimeController>();
-                            boss.transform.localScale = new Vector3(1.7f, 1.7f, 1.7f);
-                            boss.transform.localPosition += new Vector3(0, 1.7f, -1.84f);
-                            boss.GetOrAddComponent<BoxCollider>().center = new Vector3(0, -0.4f, 0);
-                            boss.GetOrAddComponent<BoxCollider>().size = new Vector3(1.2f, 1.1f, -0.32f);
-                            break;
-                        default:
-                            break;
-                    }
+                //    int id = boss.GetComponent<BossMonsterController>().id;
+                //    string name = Managers.Data.MonsterDic[id].Name;
+                //    switch (id)
+                //    {
+                //        case Define.KingSlime:
+                //            boss.AddComponent<BlackSlimeController>();
+                //            boss.transform.localScale = new Vector3(1.7f, 1.7f, 1.7f);
+                //            boss.transform.localPosition += new Vector3(0, 1.7f, -1.84f);
+                //            boss.GetOrAddComponent<BoxCollider>().center = new Vector3(0, -0.4f, 0);
+                //            boss.GetOrAddComponent<BoxCollider>().size = new Vector3(1.2f, 1.1f, -0.32f);
+                //            break;
+                //        default:
+                //            break;
+                //    }
 
-                    if (Managers.Data.BossMonsterActiveDic[bossMonsterTile.TotalCount] == false)
-                        bossMonsters.SetActive(false);
-                }
+                //    if (Managers.Data.BossMonsterActiveDic[bossMonsterTile.TotalCount] == false)
+                //        bossMonsters.SetActive(false);
+                //}
                 else if (tile is LeverData leverTile)
                 {
                     GameObject lever = Managers.Resource.Instantiate($"Tilemap_{tile.PrefabID}", items.transform);
@@ -664,7 +662,7 @@ public class GameManager
             //Lights = lights;
 
             items.transform.localPosition = items.transform.localPosition + new Vector3(0f, 0f, 0f);
-            monsters.transform.localPosition = monsters.transform.localPosition + new Vector3(0f, 0f, -0.05f);
+            //monsters.transform.localPosition = monsters.transform.localPosition + new Vector3(0f, 0f, -0.05f);
             bossMonsters.transform.localPosition = bossMonsters.transform.localPosition + new Vector3(0f, 0f, 0f);
 
             count++;
@@ -672,8 +670,8 @@ public class GameManager
             if (count == maxCount - 1)
                 break;
 
-            MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Monsters);
-            MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Items);
+            //MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Monsters);
+            //MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Items);
             //InstantiateLights(key, lights.transform);
         }
         MainCamera.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, Managers.Game.Player.gameObject);

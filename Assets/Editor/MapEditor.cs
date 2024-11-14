@@ -21,6 +21,10 @@ public class MapEditor : EditorWindow
     private List<ObjectField> objectFields = new List<ObjectField>();
     private List<GameObject> defaulTileMap = new List<GameObject>();
     private List<GameObject> SelectedTileMap = new List<GameObject>();
+    GameObject ConsumableItem;
+    GameObject EquipItem;
+    GameObject Monster;
+    GameObject BossMonster;
     private GameObject VoidTile;
     private VisualElement m_RightPane;
     private WallData wallData;
@@ -51,6 +55,10 @@ public class MapEditor : EditorWindow
         {
             defaulTileMap.Add(Resources.Load($"DecoTiles/Tilemap_{i}") as GameObject);
         }
+        ConsumableItem = Resources.Load("ConsumableItem") as GameObject;
+        EquipItem = Resources.Load("EquipItem") as GameObject;
+        Monster = Resources.Load("Monster") as GameObject;
+        BossMonster = Resources.Load("BossMonster") as GameObject;
     }
 
     public void CreateGUI()
@@ -75,7 +83,7 @@ public class MapEditor : EditorWindow
         };
 
         leftPane.bindItem = (menu, index) =>
-        { 
+        {
             (menu as Label).text = enumValues[index].ToString();
         };
 
@@ -86,9 +94,9 @@ public class MapEditor : EditorWindow
     {
         foreach (var item in selectedItems)
         {
-            if(item is EditMenu menuItem)
+            if (item is EditMenu menuItem)
             {
-                switch(menuItem)
+                switch (menuItem)
                 {
                     case EditMenu.CreateMap:
                         ShowCreateMapWindow();
@@ -117,12 +125,13 @@ public class MapEditor : EditorWindow
         TilesetDropdown.RegisterValueChangedCallback(evt => Debug.Log("Selected: " + evt.newValue));
         m_RightPane.Add(TilesetDropdown);
 
-        var generateBtn = new Button(()=>
+        var generateBtn = new Button(() =>
         {
             string selectedTileSet = TilesetDropdown.value;
             string selectedMapName = mapNameDropdown.value;
             GenerateMap(selectedMapName, selectedTileSet);
-        }) { text = "Generate Map" };
+        })
+        { text = "Generate Map" };
         generateBtn.style.marginTop = 50;
         m_RightPane.Add(generateBtn);
     }
@@ -169,7 +178,7 @@ public class MapEditor : EditorWindow
             return;
         }
         SelectedTileMap = AssetDatabase.LoadAssetAtPath<WallData>($"Assets/@Resources/Data/TileSet/{tileSet}.asset").wallPrefabs;
-        foreach(GameObject go in SelectedTileMap)
+        foreach (GameObject go in SelectedTileMap)
         {
             go.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
         }
@@ -203,7 +212,7 @@ public class MapEditor : EditorWindow
             pillars.transform.parent = parent.transform;
 
             foreach (Data.TileData tile in mapData.Tiles)
-            { 
+            {
                 if (tile is DoorData doorTile)
                 {
                     GameObject go = Instantiate(defaulTileMap[1], tiles.transform);
@@ -213,8 +222,77 @@ public class MapEditor : EditorWindow
                     door.transform.position = new Vector3(doorTile.Position.X, doorTile.Position.Y - Define.TILE_SIZE / 4, tile.Position.Z);
                     door.name = $"door{doorTile.TotalCount}";
 
-                    if (doorTile.IsActive == false)
-                        door.SetActive(false);
+                    //if (doorTile.IsActive == false)
+                    //    door.SetActive(false);
+                }
+                else if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
+                {
+                    GameObject item = Instantiate(ConsumableItem, items.transform);
+                    item.transform.localPosition = new Vector3(citemTile.Position.X, citemTile.Position.Y, citemTile.Position.Z);
+                    item.GetComponent<ConsumableItem>().id = citemTile.Index;
+                    item.name = $"CItem{citemTile.TotalCount}";
+                    item.GetComponent<ConsumableItem>()._itemIndex_forActive = citemTile.TotalCount;
+
+                    //if (Managers.Data.CItemActiveDic[citemTile.TotalCount] == false)
+                    //    item.SetActive(false);
+                }
+                else if (tile is Occupied eitemTile && eitemTile.Type == (int)Define.OccupiedType.EItem)
+                {
+                    GameObject item = Instantiate(EquipItem, items.transform);
+                    item.transform.localPosition = new Vector3(eitemTile.Position.X, eitemTile.Position.Y, eitemTile.Position.Z);
+                    item.GetComponent<Equip>().Id = eitemTile.Index;
+                    item.name = $"EItem{eitemTile.TotalCount}";
+                    item.GetComponent<Equip>()._itemIndex_forActive = eitemTile.TotalCount;
+
+                    //if (Managers.Data.EItemActiveDic[eitemTile.TotalCount] == false)
+                    //    item.SetActive(false);
+                }
+                else if (tile is Occupied monsterTile && monsterTile.Type == (int)Define.OccupiedType.Monster)
+                {
+                    GameObject monster = Instantiate(Monster, monsters.transform);
+                    monster.transform.localPosition = new Vector3(monsterTile.Position.X, monsterTile.Position.Y, monsterTile.Position.Z);
+                    //monster.transform.localScale = monsters.transform.localPosition + new Vector3(0.8f, 0.8f, 1f);
+                    monster.GetComponent<MonsterController>().id = monsterTile.Index;
+                    monster.name = $"monster{monsterTile.TotalCount}";
+                    monster.GetComponent<MonsterController>()._monsterIndex_forActive = monsterTile.TotalCount;
+
+                    //if (Managers.Data.MonsterActiveDic[monsterTile.TotalCount] == false)
+                    //    monster.SetActive(false);
+                }
+                else if (tile is Occupied bossMonsterTile && bossMonsterTile.Type == (int)Define.OccupiedType.Boss)
+                {
+                    GameObject boss = Instantiate(BossMonster, bossMonsters.transform);
+                    boss.transform.localPosition = new Vector3(bossMonsterTile.Position.X, bossMonsterTile.Position.Y, bossMonsterTile.Position.Z);
+                    int tileIndex = bossMonsterTile.Index;
+                    switch (tileIndex)
+                    {
+                        case 0:
+                            boss.GetComponent<BossMonsterController>().id = Define.KingSlime;
+                            boss.gameObject.name = "KingSlime";
+                            break;
+                        default:
+                            break;
+                    }
+                    boss.name = $"bossMonster{bossMonsterTile.TotalCount}";
+                    boss.GetComponent<BossMonsterController>()._monsterIndex_forActive = bossMonsterTile.TotalCount;
+
+                    int id = boss.GetComponent<BossMonsterController>().id;
+                    //string name = Managers.Data.MonsterDic[id].Name;
+                    switch (id)
+                    {
+                        case Define.KingSlime:
+                            boss.AddComponent<BlackSlimeController>();
+                            boss.transform.localScale = new Vector3(1.7f, 1.7f, 1.7f);
+                            boss.transform.localPosition += new Vector3(0, 1.7f, -1.84f);
+                            boss.GetOrAddComponent<BoxCollider>().center = new Vector3(0, -0.4f, 0);
+                            boss.GetOrAddComponent<BoxCollider>().size = new Vector3(1.2f, 1.1f, -0.32f);
+                            break;
+                        default:
+                            break;
+                    }
+
+                    //if (Managers.Data.BossMonsterActiveDic[bossMonsterTile.TotalCount] == false)
+                    //    bossMonsters.SetActive(false);
                 }
                 else if (tile is StairsData stairsTile)
                 {
@@ -253,10 +331,10 @@ public class MapEditor : EditorWindow
                     pillar.name = $"pillar{pillarTile.TotalCount}";
                     pillar.transform.position = new Vector3(pillarTile.Position.X, pillarTile.Position.Y - Define.TILE_SIZE / 2, pillarTile.Position.Z);
 
-                    if (pillarTile.IsActive == false)
-                    {
-                        pillar.transform.GetChild(1).gameObject.SetActive(false);
-                    }
+                    //if (pillarTile.IsActive == false)
+                    //{
+                    //    pillar.transform.GetChild(1).gameObject.SetActive(false);
+                    //}
                 }
                 else
                 {
@@ -289,6 +367,7 @@ public class MapEditor : EditorWindow
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
                     }
                 }
+
             }
 
             #region BG
@@ -306,11 +385,11 @@ public class MapEditor : EditorWindow
             #endregion
 
             walls.transform.localPosition = new Vector3(0f, -0.04f, 0f);
-            //items.transform.localPosition = items.transform.localPosition + new Vector3(0f, 1.6f, -0.4f);
-            //monsters.transform.localPosition = monsters.transform.localPosition + new Vector3(0f, 3f, -1.1f);
-            //Camera.main.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, items);
-            //Camera.main.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, monsters);
-            //Camera.main.GetComponentInChildren<CameraController>().AdjustCameraPitch(Define.CAMERA_ANGLE, lights);
+            items.transform.localPosition = new Vector3(0f, 0f, -0.1f);
+            monsters.transform.localPosition = new Vector3(0f, 0f, -0.1f);
+            //Camera.main.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, items);
+            //Camera.main.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, monsters);
+            //Camera.main.GetComponentInChildren<CameraController>().ChangeView(Define.CAMERA_ANGLE, lights);
             count++;
 
 
@@ -347,7 +426,7 @@ public class MapEditor : EditorWindow
 
         foreach (var objectField in objectFields)
         {
-            if(objectField.value is GameObject selectedPrefab)
+            if (objectField.value is GameObject selectedPrefab)
             {
                 wallData.wallPrefabs.Add(selectedPrefab);
             }
@@ -369,7 +448,7 @@ public class MapEditor : EditorWindow
         {
             var jObject = JObject.Parse(jsonData); // JSON 파싱
 
-            if(jObject["maps"] is JArray mapsArray)
+            if (jObject["maps"] is JArray mapsArray)
             {
                 var keys = mapsArray.OfType<JObject>()
                                     .Select(mapObj => mapObj["Key"]?.ToString())
@@ -404,11 +483,11 @@ public class MapEditor : EditorWindow
         string[] guids = AssetDatabase.FindAssets("", new[] { "Assets/@Resources/Data/TileSet" });
         List<string> names = new List<string>();
 
-        if(guids.Length == 0)
+        if (guids.Length == 0)
             names.Add("Empty");
         else
         {
-            foreach(string guid in guids)
+            foreach (string guid in guids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 string assetName = System.IO.Path.GetFileNameWithoutExtension(path);
