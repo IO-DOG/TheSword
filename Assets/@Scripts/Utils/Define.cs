@@ -139,35 +139,20 @@ public class Define
     public static float CAMERA_ANGLE = 60;
     public static int PPU = 100;
 
-    public enum TileType
+    public enum ObjectType
     {
-        ObjectTile = -2,
-        VoidTile = -1,
-        Void = 0,
+        Void,
         Floor,
         Wall,
+        CItem,
+        Eitem,
         Door,
         Portal,
-        SpawnPoint = 11,
-        Lever = 12,
-        Pillar = 13,
-    }
-
-    public enum OccupiedType
-    {
-        None = 0,
         Monster,
-        CItem,
-        EItem,
-        Boss,
-    }
-
-    public enum Stairs
-    {
-        None = -1,
-        Upstairs = 0,
-        Downstairs = 1,
-        BossRoom = 2,
+        BossMonster,
+        SpawnPoint,
+        Lever,
+        Pillar,
     }
 
     public enum DecoType

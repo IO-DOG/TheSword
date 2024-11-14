@@ -113,56 +113,18 @@ namespace Data
     [Serializable]
     public class MapData
     {
-        public string Key { get; set; }
-        public List<Data.TileData> Tiles { get; set; }
+        public int Key { get; set; }
+        public List<Data.ObjectData> Objects { get; set; }
     }
 
     [Serializable]
-    public class TileData
+    public class ObjectData
     {
-        public int PrefabID { get; set; }
+
+        public int ObjectType { get; set; }
         public MyVector3 Position { get; set; }
-        public int TileType { get; set; }
     }
-
-    [Serializable]
-    public class StairsData : TileData
-    {
-        public int Floor { get; set; }
-        public int StairsType { get; set; }
-    }
-
-    [Serializable]
-    public class DoorData : TileData
-    {
-        public int TotalCount { get; set; }
-        public bool IsActive { get; set; }
-    }
-
-    [Serializable]
-    public class PillarData : TileData
-    {
-        public int TotalCount { get; set; }
-        public bool IsActive { get; set; }
-    }
-
-    [Serializable]
-    public class LeverData : TileData
-    {
-        public int TotalCount { get; set; }
-        public bool IsActive { get; set; }
-    }
-
-
-    [Serializable]
-    public class Occupied : TileData
-    {
-        public int Type { get; set; }
-        public int Index { get; set; }
-        public int TotalCount { get; set; }
-        public bool IsActive { get; set; }
-    }
-
+   
     [Serializable]
     public class MyVector3
     {
@@ -171,44 +133,15 @@ namespace Data
         public float Z { get; set; }
     }
 
-
     [Serializable]
-    public class MapDataLoader : ILoader<string, MapData>
+    public class MapDataLoader : ILoader<int, MapData>
     {
         public List<MapData> maps = new List<MapData>();
-        public Dictionary<string, MapData> MakeDict()
+        public Dictionary<int, MapData> MakeDict()
         {
-            Dictionary<string, MapData> dict = new Dictionary<string, MapData>();
+            Dictionary<int, MapData> dict = new Dictionary<int, MapData>();
             foreach (MapData map in maps)
                 dict.Add(map.Key, map);
-            return dict;
-        }
-    }
-
-    [Serializable]
-    public class DungeonDecoData
-    {
-        public string DGName { get; set; }
-        public List<DecoData> DecoData { get; set; }
-    }
-
-    public class DecoData
-    {
-        public int LightType { get; set; }
-        public MyVector3 Position { get; set; }
-        public MyVector3 Scale { get; set; }
-        public MyVector3 Rotation { get; set;}
-    }
-
-    [Serializable]
-    public class DungeonDecoDataLoader : ILoader<string, DungeonDecoData>
-    {
-        public List<DungeonDecoData> lights = new List<DungeonDecoData>();
-        public Dictionary<string, DungeonDecoData> MakeDict()
-        {
-            Dictionary<string, DungeonDecoData> dict = new Dictionary<string, DungeonDecoData>();
-            foreach (DungeonDecoData light in lights)
-                dict.Add(light.DGName, light);
             return dict;
         }
     }

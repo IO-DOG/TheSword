@@ -117,7 +117,7 @@ public class DecoJSJEditor : Editor
             decos.transform.parent = parent.transform;
             pillars.transform.parent = parent.transform;
 
-            foreach (Data.TileData tile in mapData.Tiles)
+            foreach (Data.ObjectData tile in mapData.Objects)
             {
                 #region 주석
                 //if (tile is Occupied citemTile && citemTile.Type == (int)Define.OccupiedType.CItem)
@@ -245,7 +245,7 @@ public class DecoJSJEditor : Editor
                 }
                 else
                 {
-                    if (tile.TileType == (int)Define.TileType.Wall)
+                    if (tile.ObjectType == (int)Define.ObjectType.Wall)
                     {
                         GameObject go = Instantiate(Tilemap[1], tiles.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
@@ -253,27 +253,27 @@ public class DecoJSJEditor : Editor
                         GameObject wall = Instantiate(Tilemap[tile.PrefabID + 20], walls.transform);
                         wall.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
                     }
-                    else if (tile.TileType == (int)Define.TileType.Void)
+                    else if (tile.ObjectType == (int)Define.ObjectType.Void)
                     {
                         GameObject go = Instantiate(Tilemap[tile.PrefabID], tiles.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y - Define.TILE_SIZE / 2, tile.Position.Z);
                     }
-                    else if (tile.PrefabID == (int)Define.TileType.Floor)
+                    else if (tile.PrefabID == (int)Define.ObjectType.Floor)
                     {
                         GameObject go = Instantiate(Tilemap[tile.PrefabID], tiles.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
                     }
-                    else if (tile.PrefabID == (int)Define.TileType.SpawnPoint)
+                    else if (tile.PrefabID == (int)Define.ObjectType.SpawnPoint)
                     {
                         GameObject go = Instantiate(Tilemap[tile.PrefabID], tiles.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
                     }
-                    else if (tile.PrefabID == (int)Define.TileType.VoidTile)
+                    else if (tile.PrefabID == (int)Define.ObjectType.VoidTile)
                     {
                         GameObject go = Instantiate(VoidTile, tiles.transform);
                         go.transform.position = new Vector3(tile.Position.X, tile.Position.Y, tile.Position.Z);
                     }
-                    else if (tile.PrefabID == (int)Define.TileType.ObjectTile)
+                    else if (tile.PrefabID == (int)Define.ObjectType.ObjectTile)
                     {
                         GameObject go = Instantiate(ObjectTile, tiles.transform);
                         go.name = "ObjectTile";

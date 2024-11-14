@@ -63,54 +63,6 @@ public class DataTransformer : EditorWindow
         Debug.Log("Complete DeleteGameData");
     }
 
-    //public static void DeleteGameData()
-    //{
-    //    PlayerPrefs.DeleteAll();
-    //    PlayerPrefs.DeleteKey("ISFIRST");
-    //    {
-    //        string path = Application.dataPath + "/@Resources/Data/SaveData.json";
-    //        if (File.Exists(path))
-    //            File.Delete(path);
-    //    }
-    //    {
-    //        string path = Application.dataPath + "/@Resources/Data/SaveMonsterActiveData.json";
-    //        if (File.Exists(path))
-    //            File.Delete(path);
-    //    }
-    //    {
-    //        string path = Application.dataPath + "/@Resources/Data/SaveBossMonsterActiveData.json";
-    //        if (File.Exists(path))
-    //            File.Delete(path);
-    //    }
-    //    {
-    //        string path = Application.dataPath + "/@Resources/Data/SaveCItemActiveData.json";
-    //        if (File.Exists(path))
-    //            File.Delete(path);
-    //    }
-    //    {
-    //        string path = Application.dataPath + "/@Resources/Data/SaveEItemActiveData.json";
-    //        if (File.Exists(path))
-    //            File.Delete(path);
-    //    }
-    //    {
-    //        string path = Application.dataPath + "/@Resources/Data/SaveDoorActiveData.json";
-    //        if (File.Exists(path))
-    //            File.Delete(path);
-    //    }
-    //    {
-    //        string path = Application.dataPath + "/@Resources/Data/SavePillarActiveData.json";
-    //        if (File.Exists(path))
-    //            File.Delete(path);
-    //    }
-    //    {
-    //        string path = Application.dataPath + "/@Resources/Data/SaveLeverActiveData.json";
-    //        if (File.Exists(path))
-    //            File.Delete(path);
-    //    }
-    //    //ParseMapData();
-    //    Debug.Log("Complete DeleteGameData");
-    //}
-
     [MenuItem("Tools/ParseExcel %#K")]
     public static void ParseExcel()
     {
@@ -125,75 +77,6 @@ public class DataTransformer : EditorWindow
         ParseEventData("Event");
         Debug.Log("Complete DataTransformer");
     }
-
-    //[MenuItem("Tools/SaveDecoAsJson")]
-    //public static void SaveLightAsJson()
-    //{
-    //    string path = Application.dataPath + "/@Resources/Data/JsonData/DecoData.json";
-    //    DungeonDecoDataLoader loader = new DungeonDecoDataLoader();
-
-    //    foreach(KeyValuePair<string, Data.MapData> data in Managers.Data.MapDic)
-    //    {
-    //        if (GameObject.Find(data.Key) == null)
-    //            return;
-    //        GameObject parent = GameObject.Find(data.Key).transform.Find("Deco").gameObject;
-    //        string dungeon = parent.transform.parent.name; // DG Name
-    //        if (parent == null)
-    //        {
-    //            Debug.Log("Parent is not exists!");
-    //            return;
-    //        }
-
-    //        Transform[] lights = parent.GetComponentsInChildren<Transform>();
-    //        List<DecoData> lightDatas = new List<DecoData>();
-
-    //        for (int i = 1; i < lights.Length; i++)
-    //        {
-    //            MyVector3 pos = new MyVector3 { X = lights[i].localPosition.x, Y = lights[i].localPosition.y, Z = lights[i].localPosition.z };
-    //            MyVector3 scale = new MyVector3 { X = lights[i].localScale.x, Y = lights[i].localScale.y, Z = lights[i].localScale.z };
-    //            MyVector3 rot = new MyVector3 { X = lights[i].localRotation.x, Y = lights[i].localRotation.y, Z = lights[i].localRotation.z };
-
-    //            if (lights[i].name.Contains(Define.DecoType.Torch.ToString()))
-    //            {
-    //                lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.Torch, Position = pos, Scale = scale, Rotation = rot });
-    //            }
-    //            else if (lights[i].name.Contains(Define.DecoType.FireBowl.ToString()))
-    //            {
-    //                lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.FireBowl, Position = pos, Scale = scale, Rotation = rot });
-    //            }
-    //            else if (lights[i].name.Contains(Define.DecoType.PointLight.ToString()))
-    //            {
-    //                lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.PointLight, Position = pos, Scale = scale, Rotation = rot });
-    //            }
-    //            else if (lights[i].name.Contains(Define.DecoType.Handcuff.ToString()))
-    //            {
-    //                lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.Handcuff, Position = pos, Scale = scale, Rotation = rot });
-    //            }
-    //            else if (lights[i].name.Contains(Define.DecoType.GodRay.ToString()))
-    //            {
-    //                lightDatas.Add(new DecoData { LightType = (int)Define.DecoType.GodRay, Position = pos, Scale = scale, Rotation = rot });
-    //            }
-    //        }
-
-    //        loader.lights.Add(new DungeonDecoData
-    //        {
-    //            DGName = dungeon,
-    //            DecoData = lightDatas
-    //        });
-
-    //    }
-
-    //    string newJson = JsonConvert.SerializeObject(loader, Formatting.Indented);
-    //    File.WriteAllText(path, newJson);
-
-    //    Debug.Log("Complete SaveLightAsJson");
-    //}
-
-    //[MenuItem("Tools/SaveTileDataAsJson")]
-    //public static void SaveTitleAsJson()
-    //{
-
-    //}
 
     static void ParsePlayerData(string filename)
     {
@@ -331,7 +214,6 @@ public class DataTransformer : EditorWindow
     {
         MapDataLoader loader = new MapDataLoader();
         DirectoryInfo di = new DirectoryInfo($"{Application.dataPath}/@Resources/Data/Excel/");
-        //int floorIndex = 1;
 
         #region Active Dic
         Dictionary<int, bool> monsterActiveDic = new Dictionary<int, bool>();
@@ -357,7 +239,7 @@ public class DataTransformer : EditorWindow
         {
             if (file.Name.Contains("Dungeon") && !file.Name.Contains("meta"))
             {
-                List<Data.TileData> tiles = new List<Data.TileData>();
+                List<Data.ObjectData> tiles = new List<Data.ObjectData>();
                 string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{file.Name}").Split("\n");
                 float zPos = 0;
 
@@ -369,8 +251,6 @@ public class DataTransformer : EditorWindow
 
                     if (row.Length == 0)
                         continue;
-                    //if (string.IsNullOrEmpty(row[0]))
-                    //    continue;
 
                     for (int x = 0; x < row.Length; x++)
                     {
@@ -383,100 +263,52 @@ public class DataTransformer : EditorWindow
                             block = "0";
                         }
 
-                        if(block == "-1")
-                        {
-                            Data.TileData tile = new Data.TileData
-                            {
-                                PrefabID = -1,
-                                Position = new Data.MyVector3
-                                {
-                                    X = xPos,
-                                    Y = 0,
-                                    Z = zPos,
-                                },
-                                TileType = (int)Define.TileType.VoidTile,
-                            };
-                            tiles.Add(tile);
-
-                        }
-                        else if (block == "-2")
-                        {
-                            Data.TileData tile = new Data.TileData
-                            {
-                                PrefabID = (int)Define.TileType.ObjectTile,
-                                Position = new Data.MyVector3
-                                {
-                                    X = xPos,
-                                    Y = 0,
-                                    Z = zPos,
-                                },
-                                TileType = (int)Define.TileType.ObjectTile,
-                            };
-                            tiles.Add(tile);
-                        }
-                        else if (block[0] == 'I')
+                        if (block[0] == 'C')
                         {
                             cItemActiveDic.Add(totalCItemCount, true);
 
-                            Data.Occupied tile = new Data.Occupied
+                            Data.ObjectData tile = new Data.ObjectData
                             {
-                                PrefabID = 1,
+                                ObjectType = (int)Define.ObjectType.CItem,
                                 Position = new Data.MyVector3
                                 {
                                     X = xPos,
                                     Y = 0,
                                     Z = zPos,
-                                },
-                                TileType = (int)Define.TileType.Floor,
-
-                                Type = (int)Define.OccupiedType.CItem,
-                                Index = int.Parse(Regex.Replace(block, "[^0-9]", "")),
-                                TotalCount = totalCItemCount++,
-                                IsActive = true,
+                                }
                             };
                             tiles.Add(tile);
                         }
-                        else if (block[0] == 'E')
+                        if (block[0] == 'E')
                         {
-                            eItemActiveDic.Add(totalEItemCount, true);
+                            cItemActiveDic.Add(totalEItemCount, true);
 
-                            Data.Occupied tile = new Data.Occupied
+                            Data.ObjectData tile = new Data.ObjectData
                             {
-                                PrefabID = 1,
+                                ObjectType = (int)Define.ObjectType.Eitem,
                                 Position = new Data.MyVector3
                                 {
                                     X = xPos,
                                     Y = 0,
                                     Z = zPos,
-                                },
-                                TileType = (int)Define.TileType.Floor,
-
-                                Type = (int)Define.OccupiedType.EItem,
-                                Index = int.Parse(Regex.Replace(block, "[^0-9]", "")),
-                                TotalCount = totalEItemCount++,
-                                IsActive = true,
+                                }
                             };
                             tiles.Add(tile);
                         }
+                        
                         else if (block[0] == 'M')
                         {
                             monsterActiveDic.Add(totalMonsterCount, true);
 
-                            Data.Occupied tile = new Data.Occupied
+                            Data.ObjectData tile = new Data.ObjectData
                             {
-                                PrefabID = 1,
+                                ObjectType = (int)Define.ObjectType.Monster,
                                 Position = new Data.MyVector3
                                 {
                                     X = xPos,
                                     Y = 0,
                                     Z = zPos,
-                                },
-                                TileType = (int)Define.TileType.Floor,
-
-                                Type = (int)Define.OccupiedType.Monster,
-                                Index = int.Parse(Regex.Replace(block, "[^0-9]", "")),
-                                TotalCount = totalMonsterCount++,
-                                IsActive = true,
+                                }
                             };
                             tiles.Add(tile);
                         }
@@ -484,28 +316,22 @@ public class DataTransformer : EditorWindow
                         {
                             bossMonsterActiveDic.Add(totalBossCount, true);
 
-                            Data.Occupied tile = new Data.Occupied
+                            Data.ObjectData tile = new Data.ObjectData
                             {
-                                PrefabID = 1,
+                                ObjectType = (int)Define.ObjectType.BossMonster,
                                 Position = new Data.MyVector3
                                 {
                                     X = xPos,
                                     Y = 0,
                                     Z = zPos,
-                                },
-                                TileType = (int)Define.TileType.Floor,
-
-                                Type = (int)Define.OccupiedType.Boss,
-                                Index = int.Parse(Regex.Replace(block, "[^0-9]", "")),
-                                TotalCount = totalBossCount++,
-                                IsActive = true,
+                                }
                             };
                             tiles.Add(tile);
                         }
                         else if (block[0] == 'W')
                         {
                             int prefabID = int.Parse(Regex.Replace(block, "[^0-9]", ""));
-                            Data.TileData tile = new Data.TileData
+                            Data.ObjectData tile = new Data.ObjectData
                             {
                                 PrefabID = prefabID,
                                 Position = new Data.MyVector3
@@ -514,7 +340,7 @@ public class DataTransformer : EditorWindow
                                     Y = 0,
                                     Z = zPos,
                                 },
-                                TileType = (int)Define.TileType.Wall,
+                                ObjectType = (int)Define.ObjectType.Wall,
                             };
                             tiles.Add(tile);
                         }
@@ -535,7 +361,7 @@ public class DataTransformer : EditorWindow
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = (int)Define.TileType.Door,
+                                    TileType = (int)Define.ObjectType.Door,
 
                                     TotalCount = totalDoorCount++,
                                     IsActive = true,
@@ -553,7 +379,7 @@ public class DataTransformer : EditorWindow
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = (int)Define.TileType.Portal,
+                                    TileType = (int)Define.ObjectType.Portal,
 
                                     //Floor = floorIndex,
                                     StairsType = (int)Define.Stairs.Upstairs,
@@ -571,7 +397,7 @@ public class DataTransformer : EditorWindow
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = (int)Define.TileType.Portal,
+                                    TileType = (int)Define.ObjectType.Portal,
 
                                     //Floor = floorIndex,
                                     StairsType = (int)Define.Stairs.Downstairs,
@@ -591,7 +417,7 @@ public class DataTransformer : EditorWindow
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = (int)Define.TileType.Lever,
+                                    TileType = (int)Define.ObjectType.Lever,
 
                                     TotalCount = totalLeverCount++,
                                     IsActive = false,
@@ -611,7 +437,7 @@ public class DataTransformer : EditorWindow
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = (int)Define.TileType.Pillar,
+                                    TileType = (int)Define.ObjectType.Pillar,
 
                                     TotalCount = totalPillarCount++,
                                     IsActive = true,
@@ -629,7 +455,7 @@ public class DataTransformer : EditorWindow
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = (int)Define.TileType.Portal,
+                                    TileType = (int)Define.ObjectType.Portal,
                                     StairsType = (int)Define.Stairs.Upstairs,
                                 };
                                 tiles.Add(tile);
@@ -645,7 +471,7 @@ public class DataTransformer : EditorWindow
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = (int)Define.TileType.Portal,
+                                    TileType = (int)Define.ObjectType.Portal,
                                     StairsType = (int)Define.Stairs.Downstairs,
                                 };
                                 tiles.Add(tile);
@@ -661,14 +487,14 @@ public class DataTransformer : EditorWindow
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = (int)Define.TileType.Portal,
+                                    TileType = (int)Define.ObjectType.Portal,
                                     StairsType = (int)Define.Stairs.BossRoom,
                                 };
                                 tiles.Add(tile);
                             }
                             else
                             {
-                                Data.TileData tile = new Data.TileData
+                                Data.ObjectData tile = new Data.ObjectData
                                 {
                                     PrefabID = prefabID,
                                     Position = new Data.MyVector3
@@ -677,7 +503,7 @@ public class DataTransformer : EditorWindow
                                         Y = 0,
                                         Z = zPos,
                                     },
-                                    TileType = prefabID,
+                                    ObjectType = prefabID,
                                 };
                                 tiles.Add(tile);
                             }
@@ -688,7 +514,7 @@ public class DataTransformer : EditorWindow
                 MapData mapData = new MapData
                 {
                     Key = file.Name.Replace(".csv", ""),
-                    Tiles = tiles,
+                    Objects = tiles,
                 };
                 loader.maps.Add(mapData);
                 //floorIndex++;
