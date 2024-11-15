@@ -4,35 +4,77 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
 public class PortalController : MonoBehaviour
 {
-    public int _id;
+    public enum Type
+    {
+        None,
+        UpStairs,
+        DownStairs,
+        Boss,
+    }
+
+    public Type _portalType = Type.None;
     public int _mapId;
 
     public void UsePortal()
     {
         Vector3 nextPos = Vector3.zero;
 
-        for(int i = 0; i < Managers.Game.Portals.Length; i++)
+        if(_portalType == Type.UpStairs)
+        {
+            PortalController tartgetPortal = SearchPortal(_mapId + 1, Type.DownStairs);
+            if (tartgetPortal == null)
+                return;
+
+            // 다음 챕터 처리
+            // 플레이어의 스테이지 아이디가 해당 챕터의 마지막 아이디라면 
+            if(Managers.Game.PlayerData.CurStageid + 1 > Managers.Game.GetChapterCount(Managers.Game.PlayerData.CurStageid).Value)
+            {
+                Managers.Game.GenerateMap(++Managers.Game.PlayerData.CurStageid);
+                nextPos = Managers.Game.SpawnPoints[0].transform.position;
+            }
+            else
+            {
+                Managers.Game.PlayerData.CurStageid++;
+                nextPos = tartgetPortal.transform.position;
+            }
+        }
+        else if(_portalType == Type.DownStairs)
+        {
+            PortalController tartgetPortal = SearchPortal(_mapId - 1, Type.UpStairs);
+            if (tartgetPortal == null)
+                return;
+
+            nextPos = tartgetPortal.transform.position;
+            Managers.Game.PlayerData.CurStageid--;
+        }
+        else
+        {
+            nextPos = Managers.Game.SpawnPoints[1].transform.position;
+        }
+
+        CoStartWait(nextPos);
+    }
+
+    PortalController SearchPortal(int targetmapId, Type targetType)
+    {
+        for (int i = 0; i < Managers.Game.Portals.Length; i++)
         {
             PortalController targetPortal = Managers.Game.Portals[i].GetComponent<PortalController>();
-            if (_id == targetPortal._id && _mapId != targetPortal._mapId)
+            if (targetPortal._mapId == targetmapId && targetPortal._portalType == targetType)
             {
-                nextPos = targetPortal.gameObject.transform.position;
-                CoStartWait(nextPos);
-
-                return;
+                return targetPortal;
             }
         }
 
-        if (_mapId == Managers.Game.BossRoomId)
-            nextPos = Managers.Game.SpawnPoints[1].transform.position;
-        else
-            nextPos = Managers.Game.SpawnPoints[0].transform.position;
+        Debug.Log("포탈 없음");
+        return null;
     }
 
     void CoStartWait(Vector3 nextPos)

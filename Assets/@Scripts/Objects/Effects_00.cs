@@ -65,9 +65,9 @@ public class Effects_00 : MonoBehaviour
     {
         return new Vector3
             (
-                Random.Range(CameraController._minBounds.x,CameraController._maxBounds.x),
+                Random.Range(CameraController._spriteLeft,CameraController._spriteRight),
                 0.5f,
-                Random.Range(CameraController._minBounds.z, CameraController._maxBounds.z)
+                Random.Range(CameraController._spriteBottom, CameraController._spriteTop)
             );
     }
 }

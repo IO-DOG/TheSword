@@ -265,8 +265,8 @@ namespace Data
         public Dictionary<int, StageInfoData> MakeDict()
         {
             Dictionary<int, StageInfoData> dict = new Dictionary<int, StageInfoData>();
-            foreach (StageInfoData script in stageInfos)
-                dict.Add(script.id, script);
+            foreach (StageInfoData stageInfo in stageInfos)
+                dict.Add(stageInfo.id, stageInfo);
             return dict;
         }
     }

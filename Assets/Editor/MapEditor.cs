@@ -51,8 +51,8 @@ public class MapEditor : EditorWindow
 
     private void OnEnable()
     {
-        MapDic = LoadJson<Data.MapDataLoader, int, Data.MapData>().MakeDict();
-        StageInfoDic = LoadJson<Data.StageInfoDataLoader, int, StageInfoData>().MakeDict();
+        MapDic = LoadJson<Data.MapDataLoader, int, Data.MapData>("MapData").MakeDict();
+        StageInfoDic = LoadJson<Data.StageInfoDataLoader, int, Data.StageInfoData>("StageInfoData").MakeDict();
 
         for (int i = 0; i < numOfdefaultTileMap; i++)
         {
@@ -285,21 +285,26 @@ public class MapEditor : EditorWindow
                 else if (objectData.ObjectType == (int)Define.ObjectType.Portal)
                 {
                     GameObject portal = Instantiate(defaulTileMap[objectData.Id], portals.transform);
-                    portal.name = $"portal{objectData.Count}";
-                    portal.GetComponentInChildren<PortalController>()._id = objectData.Id;
+                    portal.gameObject.name = $"portal{objectData.Count}";
+                    portal.gameObject.transform.position = new Vector3(objectData.Position.X, objectData.Position.Y, objectData.Position.Z);
                     portal.GetComponentInChildren<PortalController>()._mapId = mapId;
-                    portal.transform.position = new Vector3(objectData.Position.X, objectData.Position.Y, objectData.Position.Z);
 
+                    if (objectData.Id == 14)
+                        portal.GetComponentInChildren<PortalController>()._portalType = PortalController.Type.UpStairs;
+                    else if (objectData.Id == 15)
+                        portal.GetComponentInChildren<PortalController>()._portalType = PortalController.Type.DownStairs;
+                    else
+                        portal.GetComponentInChildren<PortalController>()._portalType = PortalController.Type.Boss;    
                 }
                 else if (objectData.ObjectType == (int)Define.ObjectType.Lever)
                 {
-                    GameObject lever = Instantiate(defaulTileMap[(int)Define.ObjectType.Lever], levers.transform);
+                    GameObject lever = Instantiate(defaulTileMap[objectData.Id], levers.transform);
                     lever.name = $"portal{objectData.Count}";
                     lever.transform.position = new Vector3(objectData.Position.X, objectData.Position.Y, objectData.Position.Z);
                 }
                 else if (objectData.ObjectType == (int)Define.ObjectType.Pillar)
                 {
-                    GameObject pillar = Instantiate(defaulTileMap[(int)Define.ObjectType.Lever], pillars.transform);
+                    GameObject pillar = Instantiate(defaulTileMap[objectData.Id], pillars.transform);
                     pillar.name = $"pillar{objectData.Count}";
                     pillar.transform.position = new Vector3(objectData.Position.X, objectData.Position.Y - Define.TILE_SIZE / 2, objectData.Position.Z);
                 }
@@ -328,24 +333,21 @@ public class MapEditor : EditorWindow
 
             #region BG
             string mapName = StageInfoDic[mapId].DungeonID;
-            Sprite BGSprite = Resources.Load<Sprite>($"Sprites/{mapName.Substring(2)}/FloorField_{mapName}");
+            Sprite BGSprite = Resources.Load<Sprite>($"Sprites/{mapName.Substring(0, 2)}/FloorField_{mapName}");
             GameObject BG = new GameObject() { name = "BG" };
             BG.transform.parent = decos.transform;
-            if (mapName == "00_002")
-                BG.transform.localPosition = new Vector3(-0.16f, 0, -0.16f);
-            else
-                BG.transform.localPosition = new Vector3(-0.16f, 0, 0.16f);
-
+            BG.transform.localPosition = new Vector3(-0.16f, 0, 0.16f);
             BG.transform.rotation = Quaternion.Euler(new Vector3(90f, 0f, 0f));
             BG.AddComponent<SpriteRenderer>().sprite = BGSprite;
             BG.GetComponent<SpriteRenderer>().material = Resources.Load<Material>("SpriteShadowsMaterial");
+            BG.tag = "BG";
             #endregion
 
             walls.transform.localPosition = new Vector3(0f, -0.04f, 0f);
             items.transform.localPosition = new Vector3(0f, 0f, -0.1f);
             monsters.transform.localPosition = new Vector3(0f, 0f, -0.1f);
 
-            string mapPrefabPath = $"Assets/@Resources/Maps/{mapName}.prefab";
+            string mapPrefabPath = $"Assets/@Resources/Maps/Dungeon_{mapName}.prefab";
             PrefabUtility.SaveAsPrefabAsset(parent, mapPrefabPath);
             DestroyImmediate(GameObject.Find(parent.name));
 
@@ -354,7 +356,7 @@ public class MapEditor : EditorWindow
             var group = settings.FindGroup("Maps");
             var guid = AssetDatabase.AssetPathToGUID(mapPrefabPath);
             var ent = settings.CreateOrMoveEntry(guid, group);
-            ent.address = mapName;
+            ent.address = "Dungeon_" + mapName;
             ent.SetLabel("PreLoad", true);
 
             EditorUtility.SetDirty(settings);
@@ -402,11 +404,17 @@ public class MapEditor : EditorWindow
             if (jObject["maps"] is JArray mapsArray)
             {
                 var keys = mapsArray.OfType<JObject>()
-                                    .Select(mapObj => mapObj["Key"]?.ToString())
-                                    .Where(name => !string.IsNullOrEmpty(name)) // null 또는 빈 값 필터링
+                                    .Select(mapObj => int.Parse(mapObj["Key"].ToString()))
                                     .ToList();
 
-                return keys;
+                List<string> dungeonName = new List<string>();
+
+                for(int i =0; i < keys.Count; i++)
+                {
+                    dungeonName.Add(StageInfoDic[keys[i]].DungeonID);
+                }
+
+                return dungeonName;
             }
         }
         catch (System.Exception ex)
@@ -417,9 +425,9 @@ public class MapEditor : EditorWindow
         return null;
     }
 
-    Loader LoadJson<Loader, Key, Value>() where Loader : ILoader<Key, Value>
+    Loader LoadJson<Loader, Key, Value>(string fileName) where Loader : ILoader<Key, Value>
     {
-        string textAsset = File.ReadAllText($"{Application.dataPath}/@Resources/Data/JsonData/MapData.json");
+        string textAsset = File.ReadAllText($"{Application.dataPath}/@Resources/Data/JsonData/{fileName}.json");
 
         return JsonConvert.DeserializeObject<Loader>(textAsset, new JsonSerializerSettings
         {

@@ -259,16 +259,15 @@ public class DataTransformer : EditorWindow
                     for (int x = 0; x < row.Length; x++)
                     {
                         string block = row[x];
-                        int id = int.Parse(Regex.Replace(block, "[^0-9]", ""));
-
-                        xPos = x * Define.TILE_SIZE;
-
                         if (block.Length == 0)
                         {
                             block = "0";
                         }
 
-                        if (block[0] == 'C')
+                        int id = int.Parse(Regex.Replace(block, "[^0-9]", ""));
+                        xPos = x * Define.TILE_SIZE;
+
+                        if (block[0] == 'I')
                         {
                             cItemActiveDic.Add(citemCount, true);
                             Data.ObjectData tile = new Data.ObjectData
@@ -287,11 +286,11 @@ public class DataTransformer : EditorWindow
                         }
                         else if (block[0] == 'E')
                         {
-                            cItemActiveDic.Add(eitemCount, true);
+                            eItemActiveDic.Add(eitemCount, true);
                             Data.ObjectData tile = new Data.ObjectData
                             {
                                 Id = id,
-                                Count = citemCount++,
+                                Count = eitemCount++,
                                 ObjectType = (int)Define.ObjectType.Eitem,
                                 Position = new Data.MyVector3
                                 {
@@ -348,21 +347,6 @@ public class DataTransformer : EditorWindow
                                     Z = zPos,
                                 },
                                 ObjectType = (int)Define.ObjectType.Wall,
-                            };
-                            tiles.Add(tile);
-                        }
-                        else if (block[0] == 'P')
-                        {
-                            Data.ObjectData tile = new Data.ObjectData
-                            {
-                                Id = id,
-                                Position = new Data.MyVector3
-                                {
-                                    X = xPos,
-                                    Y = 0,
-                                    Z = zPos,
-                                },
-                                ObjectType = (int)Define.ObjectType.Portal,
                             };
                             tiles.Add(tile);
                         }
@@ -436,12 +420,11 @@ public class DataTransformer : EditorWindow
                                 };
                                 tiles.Add(tile);
                             }
-                            else if (id == 16)
+                            else if (id == 14 || id == 15)
                             {
-                                pillarActiveDic.Add(pillarCount, true);
-
                                 Data.ObjectData tile = new Data.ObjectData
                                 {
+                                    Id = id,
                                     Position = new Data.MyVector3
                                     {
                                         X = xPos,
@@ -452,11 +435,25 @@ public class DataTransformer : EditorWindow
                                 };
                                 tiles.Add(tile);
                             }
-                            else
-                            {
+                            else if (id == 16)
+                            { 
                                 Data.ObjectData tile = new Data.ObjectData
                                 {
                                     Id = id,
+                                    Position = new Data.MyVector3
+                                    {
+                                        X = xPos,
+                                        Y = 0,
+                                        Z = zPos,
+                                    },
+                                    ObjectType = (int)Define.ObjectType.Portal,
+                                };
+                                tiles.Add(tile);
+                            }
+                            else if (id == 0)
+                            {
+                                Data.ObjectData tile = new Data.ObjectData
+                                {
                                     Position = new Data.MyVector3
                                     {
                                         X = xPos,

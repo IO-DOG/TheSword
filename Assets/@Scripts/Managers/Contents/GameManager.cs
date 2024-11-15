@@ -30,9 +30,11 @@ public class GameManager
     public bool OnMeetKingSlime = false;
 
     public int CurEventID;
+    public string CurChapter;
     public int TotalKillSplitSlime = 0;
 
     public GameObject CurInteractObject;
+    public SpriteRenderer BG;
     public Light DirectionalLight;
 
     public int BossRoomId;
@@ -281,10 +283,10 @@ public class GameManager
     #region Map 생성
     public KeyValuePair<int, int> GetChapterCount(int mapId)
     {
-        string curChapter = Managers.Data.StageInfoDic[mapId].DungeonID.Substring(0, 2);
+        CurChapter = Managers.Data.StageInfoDic[mapId].DungeonID.Substring(0, 2);
 
         var chapterMaps = Managers.Data.StageInfoDic
-            .Where(entry => entry.Value.DungeonID.Substring(0, 2) == curChapter) // 챕터 필터링
+            .Where(entry => entry.Value.DungeonID.Substring(0, 2) == CurChapter) // 챕터 필터링
             .Select(entry => entry.Key);                 // 맵 ID 추출
 
         int startMapId = chapterMaps.Min();
@@ -305,17 +307,24 @@ public class GameManager
 
         for (int i = mapStartAndEnd.Key; i <= mapStartAndEnd.Value; i++)
         {
-            GameObject map = Managers.Resource.Instantiate($"{Managers.Data.StageInfoDic[i]}", ParentMap.transform);
+            GameObject map = Managers.Resource.Instantiate($"Dungeon_{Managers.Data.StageInfoDic[i].DungeonID}", ParentMap.transform);
             map.transform.position = new Vector3(count * 100, 0f, 0f);
-            RefreshMap(i);
             Maps.Add(i, map);
+            RefreshMap(i);
             count++;
         }
 
+
+        string curDungeonName = $"Dungeon_{Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].DungeonID}";
+        BG = GameObject.Find(curDungeonName).transform.Find("Deco/BG").GetComponent<SpriteRenderer>();
         Portals = ParentMap.GetComponentsInChildren<PortalController>();
         SpawnPoints = ParentMap.GetComponentsInChildren<Transform>().Where(child => child.CompareTag("SpawnPoint")).ToArray();
         BossRoomId = Managers.Data.StageInfoDic.Where(pair => pair.Value.Type == Define.DungeonType.Boss)
                     .Select(pair => pair.Key).FirstOrDefault();
+        MainCamera.GetComponentInChildren<CustomCameraLimiter>().SetBG();
+
+        Managers.Resource.Instantiate($"Effects_{CurChapter}", ParentMap.transform);
+        //CameraController.SetupCameraConfiner();
     }
 
     public void RefreshMap(int mapId)

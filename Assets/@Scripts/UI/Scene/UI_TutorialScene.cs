@@ -69,6 +69,12 @@ public class UI_TutorialScene : UI_Scene
         Refresh();
         Fade();
 
+        // 최초 실행 시 스폰 포인트 못 찾는 문제 예외 처리
+        if (Managers.Game.Player.transform.position == new Vector3(0, Managers.Game.Player.transform.position.y, 0))
+        {
+            Managers.Game.Player.transform.position = Managers.Game.SpawnPoints[0].position;
+            Managers.Game.Player._cellPos = Managers.Game.Player.transform.position;
+        }
         return true;
     }
 
