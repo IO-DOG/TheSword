@@ -207,7 +207,7 @@ public class CameraController : MonoBehaviour
         collider.center = new Vector3(0, collider.size.y, 0);
         confinerCollider.transform.position = new Vector3(BG.bounds.min.x + BG.bounds.size.x / 2 + Define.TILE_SIZE / 2, 0, BG.bounds.min.z + BG.bounds.center.z + -Define.TILE_SIZE / 2);
         // Cinemachine Confiner 설정
-        CinemachineConfiner confiner = vCam.GetComponent<CinemachineConfiner>();
+        CinemachineConfiner confiner = _vCam.GetComponent<CinemachineConfiner>();
         confiner.m_BoundingVolume = collider;
         confiner.m_Damping = 0; // 필요에 따라 댐핑 설정
         confiner.InvalidatePathCache();
