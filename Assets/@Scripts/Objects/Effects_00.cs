@@ -41,7 +41,6 @@ public class Effects_00 : MonoBehaviour
 
     IEnumerator FallingLeaves()
     {
-        CameraController.SetConfinerBounds();
         while (true)
         {
             float spawnInterval = Random.Range(2, 5);
@@ -51,7 +50,7 @@ public class Effects_00 : MonoBehaviour
             if(obj != null)
             {
                 obj.SetActive(true);
-                obj.transform.localPosition = GetSpawnPosition();
+                obj.transform.position = GetSpawnPosition();
             }
         }
     }
@@ -63,11 +62,13 @@ public class Effects_00 : MonoBehaviour
 
     Vector3 GetSpawnPosition()
     {
+        Bounds bounds = Managers.Game.MainCamera.GetComponentInChildren<CameraController>()._bg.bounds;
+        Debug.Log(bounds.min + " : " + bounds.max);
         return new Vector3
             (
-                Random.Range(CameraController._spriteLeft,CameraController._spriteRight),
+                Random.Range(bounds.min.x, bounds.max.x),
                 0.5f,
-                Random.Range(CameraController._spriteBottom, CameraController._spriteTop)
+                Random.Range(bounds.min.y, bounds.max.y)
             );
     }
 }

@@ -297,6 +297,8 @@ public class GameManager
 
     public void GenerateMap(int mapId)
     {
+        if (ParentMap != null)
+            Managers.Resource.Destroy(ParentMap);
         Maps.Clear();
 
         int count = 0;
