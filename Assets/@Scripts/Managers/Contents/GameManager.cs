@@ -34,7 +34,6 @@ public class GameManager
     public int TotalKillSplitSlime = 0;
 
     public GameObject CurInteractObject;
-    public SpriteRenderer BG;
     public Light DirectionalLight;
 
     public int BossRoomId;
@@ -314,9 +313,6 @@ public class GameManager
             count++;
         }
 
-
-        string curDungeonName = $"Dungeon_{Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].DungeonID}";
-        BG = GameObject.Find(curDungeonName).transform.Find("Deco/BG").GetComponent<SpriteRenderer>();
         Portals = ParentMap.GetComponentsInChildren<PortalController>();
         SpawnPoints = ParentMap.GetComponentsInChildren<Transform>().Where(child => child.CompareTag("SpawnPoint")).ToArray();
         BossRoomId = Managers.Data.StageInfoDic.Where(pair => pair.Value.Type == Define.DungeonType.Boss)
@@ -324,7 +320,6 @@ public class GameManager
         //MainCamera.GetComponentInChildren<CustomCameraLimiter>().SetBG();
 
         Managers.Resource.Instantiate($"Effects_{CurChapter}", ParentMap.transform);
-        CameraController.SetupCameraConfiner();
     }
 
     public void RefreshMap(int mapId)

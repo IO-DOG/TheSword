@@ -52,7 +52,6 @@ public class CameraController : MonoBehaviour
 
         transposer = _vCam.GetCinemachineComponent<CinemachineTransposer>();
         transposer.m_FollowOffset = new Vector3(0f, 10f, -5f);
-        //SetCameraExtent();
     }
 
     private void Update()
@@ -194,11 +193,11 @@ public class CameraController : MonoBehaviour
         _spriteRight = BG.bounds.min.y * Mathf.Cos(Define.CAMERA_ANGLE * Mathf.Deg2Rad);
     }
 
-    public static void SetupCameraConfiner()
+    public void SetupCameraConfiner()
     {
         string curDungeonName = $"Dungeon_{Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].DungeonID}";
-        BG = GameObject.Find(curDungeonName).transform.Find("Deco/BG").GetComponent<SpriteRenderer>();
-        // BG의 Bounds 가져오기
+        BG = GameObject.Find(curDungeonName).transform.Find("Deco/BG").gameObject.GetComponent<SpriteRenderer>();
+        Debug.Log(BG.name);
         GameObject confinerCollider = new GameObject { name = "Confiner" };
         confinerCollider.transform.Rotate(Define.CAMERA_ANGLE, 0, 0);
         BoxCollider collider = confinerCollider.AddComponent<BoxCollider>();
@@ -206,20 +205,14 @@ public class CameraController : MonoBehaviour
         collider.size = new Vector3(BG.bounds.size.x, BG.bounds.size.z * Mathf.Sqrt(3) / 2, Define.CONFINER_HEIGHT);
         float offsetY = Mathf.Sin(Mathf.Deg2Rad * Define.CAMERA_ANGLE) * (collider.size.z / 2);
         collider.center = new Vector3(0, collider.size.y, 0);
-        confinerCollider.transform.position = new Vector3(BG.bounds.min.x + BG.bounds.center.x + Define.TILE_SIZE / 2, 0, BG.bounds.min.z + BG.bounds.center.z + -Define.TILE_SIZE / 2);
+        confinerCollider.transform.position = new Vector3(BG.bounds.min.x + BG.bounds.size.x / 2 + Define.TILE_SIZE / 2, 0, BG.bounds.min.z + BG.bounds.center.z + -Define.TILE_SIZE / 2);
+        // Cinemachine Confiner 설정
+        CinemachineConfiner confiner = vCam.GetComponent<CinemachineConfiner>();
+        confiner.m_BoundingVolume = collider;
+        confiner.m_Damping = 0; // 필요에 따라 댐핑 설정
+        confiner.InvalidatePathCache();
 
-        //    // Cinemachine Confiner 설정
-        //    CinemachineConfiner confiner = vCam.GetComponent<CinemachineConfiner>();
-        //    if (confiner == null)
-        //    {
-        //        confiner = vCam.gameObject.AddComponent<CinemachineConfiner>();
-        //    }
-        //    confiner.m_BoundingShape2D = confinerCollider;
-        //    confiner.m_Damping = 0; // 필요에 따라 댐핑 설정
-        //    confiner.InvalidatePathCache();
-
-        //    Debug.Log("Camera Confiner setup complete.");
-        //}
+        Debug.Log("Camera Confiner setup complete.");
     }
 
 }

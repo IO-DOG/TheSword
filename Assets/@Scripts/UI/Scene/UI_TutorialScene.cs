@@ -60,6 +60,7 @@ public class UI_TutorialScene : UI_Scene
 
         Managers.Game.GenerateMap(Managers.Game.PlayerData.CurStageid);
         Managers.Game.PlayerData.MoveSpeed = 1f;
+        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
 
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
         GetObject((int)GameObjects.GreenKey).SetActive(false);
