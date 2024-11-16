@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Cinemachine;
 using System.Drawing;
 
@@ -21,46 +21,44 @@ public class CustomCameraLimiter : CinemachineExtension
         ref CameraState state,
         float deltaTime)
     {
-        if (stage == CinemachineCore.Stage.Body)
-        {
-            // Cinemachine Transposer 가져오기
-            var transposer = vcam.GetComponent<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>();
-            if (transposer == null)
-                return;
+        if (stage != CinemachineCore.Stage.Body)
+            return;
 
-            // 제한된 Offset 적용
-            ConstrainCameraPosition(ref transposer);
-        }
-    }
-
-    private void ConstrainCameraPosition(ref CinemachineTransposer transposer)
-    {
         // 카메라의 Virtual Camera 가져오기
-        CinemachineVirtualCamera virtualCamera = transposer.GetComponentInParent<CinemachineVirtualCamera>();
         float orthographicSize = Camera.main.orthographicSize;
         float aspectRatio = Camera.main.aspect;
-
+        float projectedHeight = orthographicSize * Mathf.Cos(Define.CAMERA_ANGLE * Mathf.Deg2Rad);
         // 카메라의 투영된 뷰 크기 계산
         float viewHeight = orthographicSize * 2f;             // 세로 크기
         float viewWidth = viewHeight * aspectRatio;           // 가로 크기
 
-        // BG 스프라이트의 크기와 위치 가져오기
-        Vector3 bgSize = bgBounds.size;
-        Vector3 bgCenter = bgBounds.center;
+        Vector3 bgMin = bgBounds.min;
+        Vector3 bgMax = bgBounds.max;
 
-        // Z축 제한값 계산 (스프라이트 크기를 기준으로)
-        float minZ = bgCenter.z - (bgSize.y / 2f) + (viewHeight / 2f) - 2f; // 하단 경계
-        float maxZ = bgCenter.z + (bgSize.y / 2f) - (viewHeight / 2f); // 상단 경계
-        float dynamicOffsetZ = orthographicSize / Mathf.Tan(Define.CAMERA_ANGLE * Mathf.Deg2Rad);
-        // Follow Offset 제한
-        transposer.m_FollowOffset.z = minZ;
-        transposer.m_FollowOffset.y = 10f;
+        Vector3 cameraPosition = state.RawPosition;
+
+        // 카메라가 비추는 상단/하단 경계값 계산
+        float cameraTop = cameraPosition.z + projectedHeight;
+        float cameraBottom = cameraPosition.z - projectedHeight;
+
+        // Y축 경계 제한
+        if (cameraTop > bgMax.z) // 카메라가 BG 상단 바깥을 비출 경우
+        {
+            cameraPosition.z = bgMax.z - projectedHeight; // 상단 경계 내로 제한
+        }
+        else if (cameraBottom < bgMin.z) // 카메라가 BG 하단 바깥을 비출 경우
+        {
+            cameraPosition.z = bgMin.z + projectedHeight; // 하단 경계 내로 제한
+        }
+        state.RawPosition = cameraPosition;
 
 
-        // 디버깅
-        Debug.Log($"minZ Size: {minZ}");
-        Debug.Log($"maxZ Size: {maxZ}");
+        Debug.Log($"Camera Top: {cameraTop}, Camera Bottom: {cameraBottom}");
+        Debug.Log($"BG Min Y: {bgMin.z}, BG Max Y: {bgMax.z}");
+        Debug.Log($"cameraPosition: {cameraPosition.z}");
+        Debug.Log($"projectedHeight: {projectedHeight}");
     }
+
 
 
     public void SetBG()

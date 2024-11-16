@@ -138,6 +138,7 @@ public class Define
     public static float TILE_SIZE = 0.32f;
     public static float CAMERA_ANGLE = 60;
     public static int PPU = 100;
+    public static int CONFINER_HEIGHT = 10;
 
     public enum ObjectType
     {

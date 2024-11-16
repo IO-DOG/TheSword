@@ -32,7 +32,7 @@ public class CameraController : MonoBehaviour
     public static float _spriteLeft;
     public static float _spriteRight;
     public static float _projectedHeight;
-
+    CinemachineTransposer transposer;
     CinemachineVirtualCamera _vCam;
 
     float _verExtent;
@@ -50,8 +50,8 @@ public class CameraController : MonoBehaviour
         _vCam = GetComponent<CinemachineVirtualCamera>();
         _vCam.Follow = Managers.Game.Player.transform;
 
-        CinemachineTransposer transposer = _vCam.GetCinemachineComponent<CinemachineTransposer>();
-        //transposer.m_FollowOffset = new Vector3(0f, 10f, -5f);
+        transposer = _vCam.GetCinemachineComponent<CinemachineTransposer>();
+        transposer.m_FollowOffset = new Vector3(0f, 10f, -5f);
         //SetCameraExtent();
     }
 
@@ -81,31 +81,75 @@ public class CameraController : MonoBehaviour
         }
     }
 
-    //private void LateUpdate()
-    //{
-    //   CameraUpdate();
-    //}
+    private void LateUpdate()
+    {
+        CameraUpdate();
+    }
 
     void CameraUpdate()
     {
         if (Managers.Game.OnMeetKingSlime)
             return;
 
-        Vector3 pos = Managers.Game.Player.transform.position;
+        //ConstrainFollowOffset(_vCam, Managers.Game.BG.bounds);
+    }
 
-        SetCameraExtent();
+    private void ConstrainFollowOffset(CinemachineVirtualCamera virtualCamera, Bounds bgBounds)
+    {
+        // CinemachineTransposer 가져오기
+        var transposer = virtualCamera.GetCinemachineComponent<CinemachineTransposer>();
+        Vector3 followOffset = transposer.m_FollowOffset;
 
-        float clampedZ = Mathf.Clamp
-            (
-                pos.z,
-                _spriteBottom + _projectedHeight,
-                _spriteTop - _projectedHeight
-            );
+        // 카메라의 오쏘그래픽 사이즈 및 각도
+        float orthographicSize = Camera.main.orthographicSize;
+        float cameraAngle = 60f; // 카메라 기울기
+        float projectedHeight = orthographicSize * Mathf.Cos(cameraAngle * Mathf.Deg2Rad);
 
-        Vector3 curOffset = _vCam.GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
-        Vector3 targetOffset = new Vector3(curOffset.x, 10f, clampedZ - 5f);
+        // 배경 경계
+        float bgMinY = bgBounds.min.z;
+        float bgMaxY = bgBounds.max.z;
 
-        _vCam.GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = targetOffset;   
+        // 카메라 경계 계산
+        float cameraTop = followOffset.z + projectedHeight;
+        float cameraBottom = followOffset.z - projectedHeight;
+
+        // Follow Offset 제한
+        if (cameraTop > bgMaxY)
+        {
+            followOffset.z = bgMaxY - projectedHeight;
+        }
+        else if (cameraBottom < bgMinY)
+        {
+            followOffset.z = bgMinY + projectedHeight;
+        }
+
+        // Follow Offset 업데이트
+        transposer.m_FollowOffset = followOffset;
+
+        // 디버깅
+        Debug.Log($"Follow Offset Z: {followOffset.z}");
+        Debug.Log($"Projected Height: {projectedHeight}");
+        Debug.Log($"BG Min Y: {bgMinY}, BG Max Y: {bgMaxY}");
+    }
+    private void AdjustFollowOffsetBasedOnResolution()
+    {
+        // 현재 카메라의 Orthographic Size 가져오기
+        float orthographicSize = Camera.main.orthographicSize;
+
+        // 기본 FollowOffset.z 값 (기준값)
+        float baseOffsetZ = -5f;
+
+        // 해상도 또는 Orthographic Size에 따라 Z 오프셋 계산
+        // orthographicSize가 작아질수록 Z축 오프셋을 줄임
+        float dynamicOffsetZ = baseOffsetZ * 1.8f / orthographicSize;
+
+        // FollowOffset 업데이트
+        Vector3 followOffset = transposer.m_FollowOffset;
+        followOffset.z = dynamicOffsetZ;
+        transposer.m_FollowOffset = followOffset;
+
+        // 디버깅
+        Debug.Log($"Adjusted FollowOffset Z: {followOffset.z}");
     }
 
     public void SetCameraTarget(GameObject target)
@@ -154,50 +198,28 @@ public class CameraController : MonoBehaviour
     {
         string curDungeonName = $"Dungeon_{Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].DungeonID}";
         BG = GameObject.Find(curDungeonName).transform.Find("Deco/BG").GetComponent<SpriteRenderer>();
-
         // BG의 Bounds 가져오기
-        Bounds spriteBounds = BG.bounds;
+        GameObject confinerCollider = new GameObject { name = "Confiner" };
+        confinerCollider.transform.Rotate(Define.CAMERA_ANGLE, 0, 0);
+        BoxCollider collider = confinerCollider.AddComponent<BoxCollider>();
+        //collider.center = new Vector3(BG.bounds.center.x, -5f, BG.bounds.center.z);
+        collider.size = new Vector3(BG.bounds.size.x, BG.bounds.size.z * Mathf.Sqrt(3) / 2, Define.CONFINER_HEIGHT);
+        float offsetY = Mathf.Sin(Mathf.Deg2Rad * Define.CAMERA_ANGLE) * (collider.size.z / 2);
+        collider.center = new Vector3(0, collider.size.y, 0);
+        confinerCollider.transform.position = new Vector3(BG.bounds.min.x + BG.bounds.center.x + Define.TILE_SIZE / 2, 0, BG.bounds.min.z + BG.bounds.center.z + -Define.TILE_SIZE / 2);
 
-        // 카메라 각도 (60도) -> 라디안으로 변환
-        float cameraAngle = 60f * Mathf.Deg2Rad;
+        //    // Cinemachine Confiner 설정
+        //    CinemachineConfiner confiner = vCam.GetComponent<CinemachineConfiner>();
+        //    if (confiner == null)
+        //    {
+        //        confiner = vCam.gameObject.AddComponent<CinemachineConfiner>();
+        //    }
+        //    confiner.m_BoundingShape2D = confinerCollider;
+        //    confiner.m_Damping = 0; // 필요에 따라 댐핑 설정
+        //    confiner.InvalidatePathCache();
 
-        // 투영된 상단/하단/좌측/우측 좌표 계산
-        Vector3[] projectedPoints = new Vector3[4];
-        projectedPoints[0] = ProjectPoint(spriteBounds.min.x, spriteBounds.min.y, cameraAngle); // Bottom-left
-        projectedPoints[1] = ProjectPoint(spriteBounds.max.x, spriteBounds.min.y, cameraAngle); // Bottom-right
-        projectedPoints[2] = ProjectPoint(spriteBounds.max.x, spriteBounds.max.y, cameraAngle); // Top-right
-        projectedPoints[3] = ProjectPoint(spriteBounds.min.x, spriteBounds.max.y, cameraAngle); // Top-left
-
-        // Polygon Collider 2D 생성 및 설정
-        GameObject confinerObject = new GameObject("CameraConfiner");
-        PolygonCollider2D confinerCollider = confinerObject.AddComponent<PolygonCollider2D>();
-
-        // Polygon Collider에 투영된 좌표 적용
-        Vector2[] colliderPoints = new Vector2[4];
-        for (int i = 0; i < 4; i++)
-        {
-            colliderPoints[i] = new Vector2(projectedPoints[i].x, projectedPoints[i].z); // XZ 평면에 맞춤
-        }
-        confinerCollider.points = colliderPoints;
-
-        // Cinemachine Confiner 설정
-        CinemachineConfiner confiner = vCam.GetComponent<CinemachineConfiner>();
-        if (confiner == null)
-        {
-            confiner = vCam.gameObject.AddComponent<CinemachineConfiner>();
-        }
-        confiner.m_BoundingShape2D = confinerCollider;
-        confiner.m_Damping = 0; // 필요에 따라 댐핑 설정
-        confiner.InvalidatePathCache();
-
-        Debug.Log("Camera Confiner setup complete.");
+        //    Debug.Log("Camera Confiner setup complete.");
+        //}
     }
 
-
-    public static Vector3 ProjectPoint(float x, float y, float angle)
-    {
-        // X, Y 좌표를 투영하여 XZ 평면으로 변환
-        float projectedZ = y * Mathf.Cos(angle);
-        return new Vector3(x, 0, projectedZ); // Z축에 투영된 값
-    }
 }
