@@ -68,7 +68,7 @@ public class Effects_00 : MonoBehaviour
             (
                 Random.Range(bounds.min.x, bounds.max.x),
                 0.5f,
-                Random.Range(bounds.min.y, bounds.max.y)
+                Random.Range(bounds.min.z, bounds.max.z)
             );
     }
 }
