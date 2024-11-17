@@ -101,6 +101,7 @@ public class Managers : MonoBehaviour
 
     private void Update()
     {
+        Debug.Log("d");
         _input.OnUpdate();
     }
 

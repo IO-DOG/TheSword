@@ -302,6 +302,12 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void SetPlayerPosition(Vector3 pos)
+    {
+        transform.position = pos;
+        _cellPos = pos;
+    }
+
     #region Moving
     public void Moving(Define.MoveDir moveDir)
     {

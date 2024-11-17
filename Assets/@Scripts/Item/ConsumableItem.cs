@@ -78,7 +78,7 @@ public class ConsumableItem : MonoBehaviour
             case 8:
                 {
                     GameObject particle = Managers.Resource.Instantiate(Managers.Data.ConsumableItemDic[id].PrefabName, Managers.Game.Player.transform);
-                    particle.transform.position = this.transform.position; ;
+                    particle.transform.position = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z); ;
                     particle.transform.localScale = new Vector3(0.25f, 0.25f/3f, 0.25f);
                     break;
                 }

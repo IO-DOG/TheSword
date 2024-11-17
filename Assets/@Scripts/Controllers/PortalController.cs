@@ -91,7 +91,7 @@ public class PortalController : MonoBehaviour
 
         Managers.Game.Player.transform.position = nextPos;
         Managers.Game.Player._cellPos = nextPos;
-        Managers.Game.MainCamera.GetComponent<CameraController>().SetupCameraConfiner();
+        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
 
         int nextStageID = Managers.Game.PlayerData.CurStageid;
 

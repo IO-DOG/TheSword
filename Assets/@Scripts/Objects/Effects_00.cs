@@ -63,7 +63,6 @@ public class Effects_00 : MonoBehaviour
     Vector3 GetSpawnPosition()
     {
         Bounds bounds = Managers.Game.MainCamera.GetComponentInChildren<CameraController>()._bg.bounds;
-        Debug.Log(bounds.min + " : " + bounds.max);
         return new Vector3
             (
                 Random.Range(bounds.min.x, bounds.max.x),

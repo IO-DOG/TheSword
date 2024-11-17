@@ -20,13 +20,13 @@ public abstract class UI_Base : MonoBehaviour
             return false;
 
         _init = true;
+        Managers.Game.OnFadeAction = null;
+        Managers.Game.OnFadeAction += Fade;
         return true;
     }
     private void Start()
     {
         Init();
-        Managers.Game.OnFadeAction = null;
-        Managers.Game.OnFadeAction += Fade;
     }
 
     protected void Bind<T>(Type type) where T : UnityEngine.Object

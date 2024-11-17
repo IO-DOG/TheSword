@@ -326,48 +326,55 @@ public class GameManager
 
     public void RefreshMap(int mapId)
     {
-        foreach(Transform child in Maps[mapId].transform)
+        foreach (Transform child in Maps[mapId].transform.Find("Monsters"))
         {
-            if (child.TryGetComponent(out MonsterController monster) 
+            if (child.TryGetComponent(out MonsterController monster)
                 && Managers.Data.MonsterActiveDic[monster._monsterIndex_forActive] == false)
             {
                 monster.gameObject.SetActive(false);
-                continue;
             }
+        }
 
+        foreach (Transform child in Maps[mapId].transform.Find("Items"))
+        {
             if (child.TryGetComponent(out ConsumableItem cItem)
                 && Managers.Data.CItemActiveDic[cItem._itemIndex_forActive] == false)
             {
                 cItem.gameObject.SetActive(false);
-                continue;
             }
 
-            if(child.TryGetComponent(out Equip eItem) 
+            if (child.TryGetComponent(out Equip eItem)
                 && Managers.Data.EItemActiveDic[eItem._itemIndex_forActive] == false)
             {
                 eItem.gameObject.SetActive(false);
-                continue;
             }
+        }
 
-            if(child.TryGetComponent(out Door door) &&
+        foreach (Transform child in Maps[mapId].transform.Find("Doors"))
+        {
+            if (child.TryGetComponent(out Door door) &&
                 Managers.Data.DoorActiveDic[door._doorIndex_forActive] == false)
             {
                 door.gameObject.SetActive(false);
-                continue;
             }
 
-            if(child.TryGetComponent(out Pillar pillar) 
+        }
+
+        foreach (Transform child in Maps[mapId].transform.Find("Pillars"))
+        {
+            if (child.TryGetComponent(out Pillar pillar)
                 && Managers.Data.PillarActiveDic[pillar._pillarIndex_forActive] == false)
             {
                 pillar.Open(0f);
-                continue;   
             }
+        }
 
-            if(child.TryGetComponent(out Lever lever)
+        foreach (Transform child in Maps[mapId].transform.Find("Levers"))
+        {
+            if (child.TryGetComponent(out Lever lever)
                 && Managers.Data.LeverActiveDic[lever._leverIndex_forActive] == false)
             {
                 lever.Play(0f);
-                continue;   
             }
         }
     }
@@ -523,6 +530,7 @@ public class GameManager
         {
             TypeNameHandling = TypeNameHandling.Objects
         });
+
         if (data != null)
         {
             PlayerData = data;
@@ -550,7 +558,7 @@ public class GameManager
             Dictionary<int, bool> leverActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(leverActiveDicFile);
             Managers.Data.LeverActiveDic = leverActiveDic;
             #endregion
-            Debug.Log("�÷��̾� ������ �ε� �Ϸ�");
+            Debug.Log("Complete Loading Data.");
         }
 
         KeyInventory.InitKeyInventory();
