@@ -51,6 +51,8 @@ public class BossDoor : PortalController
         Managers.Game.Player.SetIdleState(Define.MoveDir.Up);
         Managers.Game.Player.gameObject.SetActive(true);
         Managers.Game.OnDirect = false;
+
+        yield return new WaitForSeconds(5f);
         Managers.Resource.Destroy(gameObject);
     }
 }

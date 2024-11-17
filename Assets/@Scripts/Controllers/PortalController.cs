@@ -57,7 +57,9 @@ public class PortalController : MonoBehaviour
         else
         {
             nextPos = Managers.Game.SpawnPoints[1].transform.position;
+            Managers.Game.PlayerData.CurStageid = Managers.Game.BossRoomId;
         }
+        Debug.Log($"Setting player position to: {nextPos}");
 
         CoStartWait(nextPos);
     }
@@ -89,6 +91,8 @@ public class PortalController : MonoBehaviour
         Managers.Game.OnFadeAction.Invoke(0.3f);
         yield return new WaitForSeconds(0.03f);
 
+        Debug.Log($"Setting player position to2: {nextPos}");
+        
         Managers.Game.Player.transform.position = nextPos;
         Managers.Game.Player._cellPos = nextPos;
         Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();

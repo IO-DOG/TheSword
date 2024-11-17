@@ -13,8 +13,6 @@ public class InputManager
         if (Input.anyKey == false)
             return;
 
-        Debug.Log("d");
-
         if (KeyAction != null)
             KeyAction.Invoke();
     }
