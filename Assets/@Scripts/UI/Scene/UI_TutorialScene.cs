@@ -87,14 +87,14 @@ public class UI_TutorialScene : UI_Scene
 
     public void Refresh()
     {
-        GetText((int)Texts.MainUIMapNameText).text = Managers.GetString(Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonNameID);
-        GetText((int)Texts.PlayerLevelText).text = Managers.Game.CurPlayerData.Level.ToString();
-        int level = Managers.Game.CurPlayerData.Level;
-        Managers.Game.CurPlayerData.Level = Mathf.Max(level, 1);
+        GetText((int)Texts.MainUIMapNameText).text = Managers.GetString(Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].DungeonNameID);
+        GetText((int)Texts.PlayerLevelText).text = Managers.Game.PlayerData.Level.ToString();
+        int level = Managers.Game.PlayerData.Level;
+        Managers.Game.PlayerData.Level = Mathf.Max(level, 1);
         level = Mathf.Max(level, 1);
-        Debug.Log($"{Managers.Game.CurPlayerData.CurExp} , {Managers.Data.PlayerDic[level + 1].NeedExp}");
-        GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurExp / Managers.Data.PlayerDic[level + 1].NeedExp;
-        GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurHP / Managers.Game.CurPlayerData.MaxHP;
+        Debug.Log($"{Managers.Game.PlayerData.CurExp} , {Managers.Data.PlayerDic[level + 1].NeedExp}");
+        GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.PlayerData.CurExp / Managers.Data.PlayerDic[level + 1].NeedExp;
+        GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.PlayerData.CurHP / Managers.Game.PlayerData.MaxHP;
         Managers.Game.KeyInventory.ShowKeySlot(Managers.Game.Player._keyInventory);
         SetPlayerInfo();
     }
