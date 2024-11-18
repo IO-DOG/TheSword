@@ -302,7 +302,7 @@ public class Events
         // create fog
 
 
-        for (int i = 0; i < 10; ++i)
+        for (int i = 0; i < 7; ++i)
         {
             float randValue = UnityEngine.Random.Range(0f, 0.5f);
             WaitForSeconds delay = new WaitForSeconds(randValue);
@@ -324,11 +324,11 @@ public class Events
             slime5.transform.localPosition = new Vector3(5.5f, 0.7f, UnityEngine.Random.Range(-3.6f, -5f));
             yield return delay;
 
-            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime1, midlePos.transform.localPosition, 5));
-            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime2, midlePos.transform.localPosition, 5));
-            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime3, midlePos.transform.localPosition, 5));
-            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime4, midlePos.transform.localPosition, 5));
-            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime5, midlePos.transform.localPosition, 5));
+            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime1, midlePos.transform.localPosition, 4));
+            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime2, midlePos.transform.localPosition, 4));
+            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime3, midlePos.transform.localPosition, 4));
+            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime4, midlePos.transform.localPosition, 4));
+            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime5, midlePos.transform.localPosition, 4));
         }
 
         CoroutineManager.StartCoroutine(CoBlack(slimeSpawner, 3f));
