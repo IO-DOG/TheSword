@@ -56,7 +56,6 @@ public class UI_TitleScene : UI_Scene
         #endregion
 
         GetImage((int)Images.BlackBGImage).gameObject.SetActive(false);
-        Loading();
 
         //GetObject((int)Objects.Slider).GetComponent<Slider>().value = 0;
         GetObject((int)Objects.Slider).GetComponent<Slider>().gameObject.SetActive(false);
@@ -68,6 +67,8 @@ public class UI_TitleScene : UI_Scene
         });
         GetImage((int)Images.Buttons).gameObject.SetActive(false);
         GetButton((int)Buttons.NewGameButton).gameObject.SetActive(false);
+
+        Loading();
 
         //GetButton((int)Buttons.GameSpeedButton).gameObject.BindEvent(() => { // 게임 속도 조절
         //    if (Managers.Game.GameSpeed == 1)
@@ -123,7 +124,7 @@ public class UI_TitleScene : UI_Scene
 
     private void Update()
     {
-        if (Input.anyKeyDown && GetText((int)Texts.PessAnyKeyText).gameObject.activeSelf && !Input.GetKeyDown(KeyCode.Return) && !Input.GetKeyDown(KeyCode.UpArrow) && !Input.GetKeyDown(KeyCode.DownArrow))
+        if (isPreload && Input.anyKeyDown && GetText((int)Texts.PessAnyKeyText).gameObject.activeSelf && !Input.GetKeyDown(KeyCode.Return) && !Input.GetKeyDown(KeyCode.UpArrow) && !Input.GetKeyDown(KeyCode.DownArrow))
         {
             GetText((int)Texts.PessAnyKeyText).gameObject.SetActive(false);
             GetImage((int)Images.Buttons).gameObject.SetActive(true);
