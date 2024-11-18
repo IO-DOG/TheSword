@@ -77,8 +77,10 @@ public class UI_TutorialScene : UI_Scene
         GetText((int)Texts.MainUIMapNameText).text = Managers.GetString(Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonNameID);
         GetText((int)Texts.PlayerLevelText).text = Managers.Game.CurPlayerData.Level.ToString();
         int level = Managers.Game.CurPlayerData.Level;
-        Debug.Log($"{Managers.Game.CurPlayerData.CurExp} , {Managers.Data.PlayerDic[level].NeedExp}");
-        //GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurExp / Managers.Data.PlayerDic[level].NeedExp;
+        Managers.Game.CurPlayerData.Level = Mathf.Max(level, 1);
+        level = Mathf.Max(level, 1);
+        Debug.Log($"{Managers.Game.CurPlayerData.CurExp} , {Managers.Data.PlayerDic[level + 1].NeedExp}");
+        GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurExp / Managers.Data.PlayerDic[level + 1].NeedExp;
         GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurHP / Managers.Game.CurPlayerData.MaxHP;
         Managers.Game.KeyInventory.ShowKeySlot(Managers.Game.Player._keyInventory);
         SetPlayerInfo();

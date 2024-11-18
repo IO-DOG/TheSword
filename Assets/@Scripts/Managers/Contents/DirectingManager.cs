@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.UI;
 using static UnityEngine.RuleTile.TilingRuleOutput;
 
@@ -355,6 +356,7 @@ public class Events
         }
 
         // flash bang
+        CoroutineManager.StartCoroutine(CoFlashBang(1f));
         yield return new WaitForSeconds(0.6f);
         GameObject image = new GameObject();
         image.AddComponent<Image>();
@@ -383,6 +385,22 @@ public class Events
         GameObject.Find("Effects_00")?.SetActive(false);
 
         AfterMeetKingSlime();
+    }
+
+    public IEnumerator CoFlashBang(float time)
+    {
+        GameObject go = GameObject.Find("Directional Light");
+        Light light = go.GetComponent<Light>();
+        float start = light.intensity;
+        float totalTime = 0;
+        while (totalTime <= time)
+        {
+            float delta = totalTime / time;
+            light.intensity = 100 * delta;
+            totalTime += Time.deltaTime;
+            yield return null;
+        }
+        light.intensity = start;
     }
 
     public IEnumerator CoBright(GameObject go, float time)
