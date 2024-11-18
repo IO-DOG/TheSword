@@ -274,7 +274,7 @@ public class MapEditor : EditorWindow
                         case Define.KingSlime:
                             boss.AddComponent<BlackSlimeController>();
                             //boss.transform.localScale = new Vector3(1.7f, 1.7f, 1.7f);
-                            //boss.transform.localPosition += new Vector3(0, 1.7f, -1.84f);
+                            boss.transform.localPosition += new Vector3(0, 1.7f, -1.84f);
                             boss.GetOrAddComponent<BoxCollider>().center = new Vector3(0, -0.4f, 0);
                             boss.GetOrAddComponent<BoxCollider>().size = new Vector3(1.5f, 2f, 0.32f);
                             break;

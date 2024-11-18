@@ -7,7 +7,7 @@ using static GameManager;
 
 public static class EffectFactory
 {
-    public static ITrait GetTrait(CreatureData creatureData, UI_BaseCard baseCard = null, Transform transform = null)
+    public static ITrait GetTrait(CreatureData creatureData, UI_BaseCard baseCard = null)
     {
         if (creatureData.Class == Define.Trait.Beast.ToString())
         {
@@ -43,7 +43,7 @@ public static class EffectFactory
         }
         else if (creatureData.Class == Define.Trait.KingSlime.ToString())
         {
-            return new KingSlimeTrait(transform);
+            return new KingSlimeTrait();
         }
         else
         {
@@ -381,12 +381,6 @@ public class CreatureClass : MonoBehaviour
 
     public class KingSlimeTrait : ITrait
     {
-        Transform Transform = null;
-        public KingSlimeTrait(Transform transform)
-        {
-            Transform = transform;
-        }
-
         public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
             damage = Mathf.Max(0, damage);
@@ -413,8 +407,9 @@ public class CreatureClass : MonoBehaviour
 
         public void ExcuteOnDead(CreatureData creature)
         {
+            Transform boss = Managers.Game.GetBoss().gameObject.transform;
             creature.CurHP = 0;
-            Vector3 pos = Transform.localPosition;
+            Vector3 pos = boss.localPosition;
             float size = Define.TILE_SIZE;
 
             int[] dx = { -1, 0, 1/*, 1, 1, 0, -1, -1*/ };
@@ -440,7 +435,7 @@ public class CreatureClass : MonoBehaviour
                 Vector3 vector = new Vector3(pos.x + dx[idx] * size * 4, 0.6f, pos.z + dy[idx] * size * 4);
                 Debug.Log($"vector : {vector.x}, {vector.y}, {vector.z}");
 
-                GameObject monster = Managers.Resource.Instantiate("Monster", Transform.parent);
+                GameObject monster = Managers.Resource.Instantiate("Monster", boss.parent);
                 monster.GetOrAddComponent<MonsterController>().id = 6 + i;
                 monster.transform.localPosition += vector;
                 monster.transform.localScale = new Vector3(1, 2, 1);

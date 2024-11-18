@@ -325,6 +325,16 @@ public class GameManager
         Managers.Resource.Instantiate($"Effects_{CurChapter}", ParentMap.transform);
     }
 
+    public MonsterController GetBoss()
+    {
+        int bossRoomIdx = BossRoomId - GetChapterCount(PlayerData.CurStageid).Key;
+        MonsterController[] monsters = Maps[bossRoomIdx].GetComponentsInChildren<MonsterController>();
+        for (int i = 0; i < monsters.Length; i++)
+            if (monsters[i].gameObject.tag == "Boss")
+                return monsters[i];
+        return null;
+    }
+
     public void RefreshMap(int mapId)
     {
         foreach (Transform child in Maps[mapId].transform.Find("Monsters"))
