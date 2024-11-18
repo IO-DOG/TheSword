@@ -259,16 +259,16 @@ public class MapEditor : EditorWindow
                     switch (tileIndex)
                     {
                         case 0:
-                            boss.GetComponent<BossMonsterController>().id = Define.KingSlime;
+                            boss.GetComponent<MonsterController>().id = Define.KingSlime;
                             boss.gameObject.name = "KingSlime";
                             break;
                         default:
                             break;
                     }
                     boss.name = $"bossMonster{objectData.Count}";
-                    boss.GetComponent<BossMonsterController>()._monsterIndex_forActive = objectData.Count;
+                    boss.GetComponent<MonsterController>()._monsterIndex_forActive = objectData.Count;
 
-                    int id = boss.GetComponent<BossMonsterController>().id;
+                    int id = boss.GetComponent<MonsterController>().id;
                     switch (id)
                     {
                         case Define.KingSlime:

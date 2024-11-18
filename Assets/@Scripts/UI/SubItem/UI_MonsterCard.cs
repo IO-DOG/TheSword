@@ -244,19 +244,6 @@ public class UI_MonsterCard : UI_BaseCard
 
         Managers.Data.MonsterActiveDic[Managers.Game.MonsterData[0].IsActiveIndex] = false;
 
-        int id = Managers.Game.Monster.id;
-        Debug.Log($"Monster Id : {id}");
-        string name = Managers.Data.MonsterDic[id].Name;
-        switch (id)
-        {
-            case Define.KingSlime:
-                BlackSlimeController blackSlimeController = Managers.Game.Monster.gameObject.GetOrAddComponent<BlackSlimeController>();
-                blackSlimeController.Dead();
-                break;
-            default:
-                break;
-        }
-
         // for king slime
         if (Managers.Game.Monster.gameObject.name == "KingSlimeSplitMonster")
         {
@@ -265,7 +252,6 @@ public class UI_MonsterCard : UI_BaseCard
                 Managers.Game.OnKingSlimeDeadAction.Invoke();
         }
 
-        //StartCoroutine(CoMonsterDead());
         Managers.Game.OnBattleAction.Invoke();
         Managers.Game.OnBattle = false;
 
@@ -274,13 +260,9 @@ public class UI_MonsterCard : UI_BaseCard
         GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
         deathSoulPurple.transform.position = particlePos.position;
         deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-        deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[0].startDelay = 0.2f;
-        deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[1].startDelay = 0.2f;
-        deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[2].startDelay = 0.2f;
         Destroy(deathSoulPurple, 3);
         Destroy(Managers.Game.Monster.gameObject);
         return;
-
     }
 
     private void OnDestroy()

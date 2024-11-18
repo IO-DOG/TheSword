@@ -21,7 +21,6 @@ public class UI_BattlePopup : UI_Popup
 
     UI_PlayerCard playerCard = null;
     UI_MonsterCard monsterCard = null;
-    UI_KingSlimeCard kingSlimeCard = null;
 
     public override bool Init()
     {
@@ -48,23 +47,7 @@ public class UI_BattlePopup : UI_Popup
 
             monsterCard.transform.position = new Vector3(1340, 540, 0);
 
-            //switch (Managers.Game.MonsterData[0].id)
-            //{
-            //    case Define.KingSlime:
-            //        kingSlimeCard = Managers.UI.MakeSubItem<UI_KingSlimeCard>(gameObject.transform);
-            //        playerCard.transform.position = new Vector3(480, 440, 0);
-            //        kingSlimeCard.transform.position = new Vector3(1440, 640, 0);
-
-            //        break;
-            //    default:
-            //        monsterCard = Managers.UI.MakeSubItem<UI_CreatureCard>(gameObject.transform);
-            //        playerCard.transform.position = new Vector3(580, 540, 0);
-            //        monsterCard.transform.position = new Vector3(1340, 540, 0);
-            //        break;
-            //}
         }
-
-
 
         //monsterCard.Data = Managers.Game.MonsterData;
 
@@ -78,16 +61,7 @@ public class UI_BattlePopup : UI_Popup
     public void BattleEnd()
     {
         Destroy(playerCard.gameObject);
-
-        switch (Managers.Game.MonsterData[0].id)
-        {
-            case Define.KingSlime:
-                Destroy(kingSlimeCard.gameObject);
-                break;
-            default:
-                Destroy(monsterCard.gameObject);
-                break;
-        }
+        Destroy(monsterCard.gameObject);
 
         Managers.Game.OnBattleAction = null;
         if (Managers.Game.GameScene != null)

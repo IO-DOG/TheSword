@@ -130,6 +130,7 @@ public class Define
         Titan,
         Assassin,
         Armor,
+        KingSlime,
     }
 
     #endregion

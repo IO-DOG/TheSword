@@ -7,7 +7,7 @@ using static GameManager;
 
 public static class EffectFactory
 {
-    public static ITrait GetTrait(CreatureData creatureData, UI_BaseCard baseCard = null)
+    public static ITrait GetTrait(CreatureData creatureData, UI_BaseCard baseCard = null, Transform transform = null)
     {
         if (creatureData.Class == Define.Trait.Beast.ToString())
         {
@@ -41,6 +41,10 @@ public static class EffectFactory
         {
             return new ArmorTrait();
         }
+        else if (creatureData.Class == Define.Trait.KingSlime.ToString())
+        {
+            return new KingSlimeTrait(transform);
+        }
         else
         {
             return new DefaultTrait();
@@ -53,12 +57,19 @@ public class CreatureClass : MonoBehaviour
     public interface ITrait
     {
         int ExecuteAttack(CreatureData attacker, CreatureData target);
-        void ExcuteOnHit(CreatureData attacker, CreatureData creature, int damage);
+        void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage);
+        void ExcuteOnDead(CreatureData creature);
     }
 
     public class BeastTrait : ITrait
     {
         bool flag = false;
+
+        public void ExcuteOnDead(CreatureData creature)
+        {
+            creature.CurHP = 0;
+            creature.OnDeadAction.Invoke();
+        }
 
         public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
@@ -66,8 +77,7 @@ public class CreatureClass : MonoBehaviour
             target.CurHP -= damage;
             if (target.CurHP <= 0)
             {
-                target.CurHP = 0;
-                target.OnDeadAction.Invoke();
+                ExcuteOnDead(target);
             }
 
             float ratio = target.CurHP / target.MaxHP;
@@ -115,11 +125,16 @@ public class CreatureClass : MonoBehaviour
             target.CurHP -= damage;
             if (target.CurHP <= 0)
             {
-                target.CurHP = 0;
-                target.OnDeadAction.Invoke();
+                ExcuteOnDead(target);
             }
 
             target.OnHitAction.Invoke();
+        }
+
+        public void ExcuteOnDead(CreatureData creature)
+        {
+            creature.CurHP = 0;
+            creature.OnDeadAction.Invoke();
         }
     }
 
@@ -136,13 +151,18 @@ public class CreatureClass : MonoBehaviour
             Managers.Event.DeleteEvent(Define.GameEvent.FillDefenceGague);
         }
 
+        public void ExcuteOnDead(CreatureData creature)
+        {
+            creature.CurHP = 0;
+            creature.OnDeadAction.Invoke();
+        }
+
         public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
             target.CurHP -= damage;
             if (target.CurHP <= 0)
             {
-                target.CurHP = 0;
-                target.OnDeadAction.Invoke();
+                ExcuteOnDead(target);
             }
 
             target.OnHitAction.Invoke();
@@ -162,6 +182,12 @@ public class CreatureClass : MonoBehaviour
 
     public class ImmortalTrait : ITrait
     {
+        public void ExcuteOnDead(CreatureData creature)
+        {
+            creature.CurHP = 0;
+            creature.OnDeadAction.Invoke();
+        }
+
         public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
             if (!attacker.IsCritical) damage = (int)(damage * 0.2f);
@@ -169,8 +195,7 @@ public class CreatureClass : MonoBehaviour
             target.CurHP -= damage;
             if (target.CurHP <= 0)
             {
-                target.CurHP = 0;
-                target.OnDeadAction.Invoke();
+                ExcuteOnDead(target);
             }
 
             target.OnHitAction.Invoke();
@@ -190,13 +215,18 @@ public class CreatureClass : MonoBehaviour
 
     public class KnightTrait : ITrait
     {
+        public void ExcuteOnDead(CreatureData creature)
+        {
+            creature.CurHP = 0;
+            creature.OnDeadAction.Invoke();
+        }
+
         public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
             target.CurHP -= damage;
             if (target.CurHP <= 0)
             {
-                target.CurHP = 0;
-                target.OnDeadAction.Invoke();
+                ExcuteOnDead(target);
             }
 
             target.OnHitAction.Invoke();
@@ -221,6 +251,12 @@ public class CreatureClass : MonoBehaviour
     {
         int hitCount = 0;
 
+        public void ExcuteOnDead(CreatureData creature)
+        {
+            creature.CurHP = 0;
+            creature.OnDeadAction.Invoke();
+        }
+
         public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
             hitCount++;
@@ -228,8 +264,7 @@ public class CreatureClass : MonoBehaviour
             target.CurHP -= damage;
             if (target.CurHP <= 0)
             {
-                target.CurHP = 0;
-                target.OnDeadAction.Invoke();
+                ExcuteOnDead(target);
             }
 
             if (hitCount == 5)
@@ -268,6 +303,12 @@ public class CreatureClass : MonoBehaviour
     {
         bool flag = true;
 
+        public void ExcuteOnDead(CreatureData creature)
+        {
+            creature.CurHP = 0;
+            creature.OnDeadAction.Invoke();
+        }
+
         public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
             if (!attacker.IsCritical) damage = 0;
@@ -276,8 +317,7 @@ public class CreatureClass : MonoBehaviour
             target.CurHP -= damage;
             if (target.CurHP <= 0)
             {
-                target.CurHP = 0;
-                target.OnDeadAction.Invoke();
+                ExcuteOnDead(target);
             }
 
             target.OnHitAction.Invoke();
@@ -299,6 +339,12 @@ public class CreatureClass : MonoBehaviour
     {
         int shield = 10;
 
+        public void ExcuteOnDead(CreatureData creature)
+        {
+            creature.CurHP = 0;
+            creature.OnDeadAction.Invoke();
+        }
+
         public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
             shield -= damage;
@@ -315,8 +361,7 @@ public class CreatureClass : MonoBehaviour
             target.CurHP -= damage;
             if (target.CurHP <= 0)
             {
-                target.CurHP = 0;
-                target.OnDeadAction.Invoke();
+                ExcuteOnDead(target);
             }
 
             target.OnHitAction.Invoke();
@@ -334,17 +379,93 @@ public class CreatureClass : MonoBehaviour
         }
     }
 
-    // 기본 공격 효과 (특정 클래스가 아닐 경우)
-    public class DefaultTrait : ITrait
+    public class KingSlimeTrait : ITrait
     {
+        Transform Transform = null;
+        public KingSlimeTrait(Transform transform)
+        {
+            Transform = transform;
+        }
+
         public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
             damage = Mathf.Max(0, damage);
             target.CurHP -= damage;
             if (target.CurHP <= 0)
             {
-                target.CurHP = 0;
-                target.OnDeadAction.Invoke();
+                ExcuteOnDead(target);
+            }
+
+            target.OnHitAction.Invoke();
+        }
+
+        public int ExecuteAttack(CreatureData attacker, CreatureData target)
+        {
+            int damage = (int)Mathf.Max(0, attacker.Attack);
+            if (attacker.IsCritical) damage = damage * (int)(attacker.CriticalAttack / 100);
+            damage -= (int)target.Defence;
+            damage = (int)Mathf.Max(0, damage);
+            if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);
+            else if (target.IsDefence) damage = 0;
+
+            return damage;
+        }
+
+        public void ExcuteOnDead(CreatureData creature)
+        {
+            creature.CurHP = 0;
+            Vector3 pos = Transform.localPosition;
+            float size = Define.TILE_SIZE;
+
+            int[] dx = { -1, 0, 1/*, 1, 1, 0, -1, -1*/ };
+            int[] dy = { 1, 2, 1/*, 0, -1, -1, -1, 0*/ };
+            bool[] ch = { false, false, false, false, false, false, false, false };
+            List<int> s = new List<int>();
+            int cnt = 0;
+
+            while (cnt < 3)
+            {
+                int randValue = UnityEngine.Random.Range(0, dx.Length);
+                if (ch[randValue] == false)
+                {
+                    cnt++;
+                    ch[randValue] = true;
+                    s.Add(randValue);
+                }
+            }
+
+            for (int i = 0; i < s.Count; i++)
+            {
+                int idx = s[i];
+                Vector3 vector = new Vector3(pos.x + dx[idx] * size * 4, 0.6f, pos.z + dy[idx] * size * 4);
+                Debug.Log($"vector : {vector.x}, {vector.y}, {vector.z}");
+
+                GameObject monster = Managers.Resource.Instantiate("Monster", Transform.parent);
+                monster.GetOrAddComponent<MonsterController>().id = 6 + i;
+                monster.transform.localPosition += vector;
+                monster.transform.localScale = new Vector3(1, 2, 1);
+                monster.name = $"KingSlimeSplitMonster";
+            }
+            creature.OnDeadAction.Invoke();
+        }
+    }
+
+    // 기본 공격 효과 (특정 클래스가 아닐 경우)
+    public class DefaultTrait : ITrait
+    {
+        public void ExcuteOnDead(CreatureData creature)
+        {
+            creature.CurHP = 0;
+            creature.OnDeadAction.Invoke();
+        }
+
+        public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
+        {
+            damage = Mathf.Max(0, damage);
+            target.CurHP -= damage;
+            if (target.CurHP <= 0)
+            {
+                ExcuteOnDead(target);
             }
 
             target.OnHitAction.Invoke();
