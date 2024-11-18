@@ -1,4 +1,4 @@
-﻿using DG.Tweening;
+﻿using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,15 +6,18 @@ using UnityEngine;
 public class UI_GameScene : UI_Scene
 {
     #region Enum
-    enum Buttons
-    {
-        //ToTitleButton,
-        PlayConversation,
-    }
+    //enum Buttons
+    //{
+    //    //ToTitleButton,
+    //    PlayConversation,
+    //}
 
     enum GameObjects
     {
         KeyInventory,
+        GreenKey,
+        YellowKey,
+        RedKey,
     }
 
     enum Texts
@@ -24,6 +27,7 @@ public class UI_GameScene : UI_Scene
         PlayerAttackText,
         PlayerDefenseText,
         PlayerLevelText,
+        MainUIMapNameText,
     }
 
     enum Images
@@ -32,17 +36,15 @@ public class UI_GameScene : UI_Scene
         MainUIAuxiliaryHPGaugeImage,
         MainUIOptionAImage,
         MainUIOptionBImage,
-        MainUIInventoryAImage,
-        MainUIInventoryBImage,
-        MainUISwordAImage,
-        MainUISwordBImage,
-        MainUIWarpAImage,
-        MainUIWarpBImage,
+        //MainUIInventoryAImage,
+        //MainUIInventoryBImage,
+        //MainUISwordAImage,
+        //MainUISwordBImage,
+        //MainUIWarpAImage,
+        //MainUIWarpBImage,
     }
 
     #endregion
-
-    int _mask = (1 << (int)Define.Layer.Monster);
 
     public override bool Init()
     {
@@ -50,100 +52,48 @@ public class UI_GameScene : UI_Scene
             return false;
 
         #region Bind
-        BindButton(typeof(Buttons));
+        //BindButton(typeof(Buttons));
         BindObject(typeof(GameObjects));
         BindText(typeof(Texts));
         BindImage(typeof(Images));
         #endregion
 
-        Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
-
-        //GetButton((int)Buttons.ToTitleButton).gameObject.BindEvent(() => Managers.Scene.LoadScene(Define.Scene.TitleScene));
-
-        #region PointerEnter&PointerExit
-        GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
-        { GetImage((int)Images.MainUIOptionBImage).gameObject.SetActive(true); }, null, Define.UIEvent.PointerEnter);
-        GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
-        { GetImage((int)Images.MainUIOptionBImage).gameObject.SetActive(false); ; }, null, Define.UIEvent.PointerExit);
-
-        GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(() =>
-        { GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(true); }, null, Define.UIEvent.PointerEnter);
-        GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(() =>
-        { GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(false); }, null, Define.UIEvent.PointerExit);
-
-        GetImage((int)Images.MainUISwordAImage).gameObject.BindEvent(() =>
-        { GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(true); }, null, Define.UIEvent.PointerEnter);
-        GetImage((int)Images.MainUISwordAImage).gameObject.BindEvent(() =>
-        { GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false); ; }, null, Define.UIEvent.PointerExit);
-
-        GetImage((int)Images.MainUIWarpAImage).gameObject.BindEvent(() =>
-        { GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(true); }, null, Define.UIEvent.PointerEnter);
-        GetImage((int)Images.MainUIWarpAImage).gameObject.BindEvent(() =>
-        { GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false); ; }, null, Define.UIEvent.PointerExit);
-        #endregion
-
-        GetImage((int)Images.MainUIOptionBImage).gameObject.SetActive(false);
-        GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(false);
-        GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false);
-        GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false);
-
-        // UI 활성화 여부 체크
-        if (PlayerPrefs.GetInt("ISOPENINVENUI") == 0) // 인벤 활성화 x
-            OffUIInventory();
-        if (PlayerPrefs.GetInt("ISOPENWARPUI") == 0)
-            OffUIWarp();
-        if (PlayerPrefs.GetInt("ISOPENCLASSUI") == 0)
-            OffUISword();
-
-        GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
-        {
-            GameObject go = GameObject.Find("UI_MenuPopup");
-            if (go == null)
-                Managers.UI.ShowPopupUI<UI_MenuPopup>();
-            else
-                go.GetComponent<UI_MenuPopup>().OpenOtherUI();
-        });
-        GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(OnClickMainUIInventoryAImage);
-
-        GetButton((int)Buttons.PlayConversation).gameObject.BindEvent(() =>
-        {
-            if (!Managers.Game.OnBattle)
-            {
-                Managers.UI.ShowPopupUI<UI_ConversationPopup>();
-                Managers.Game.CurEventID= Define.EVENT_SWORD_FIRST;
-            }
-        });
-
-        Managers.Game.PlayerData.CurStageid = 0;
         Managers.Game.GenerateMap(Managers.Game.PlayerData.CurStageid);
+        Managers.Game.PlayerData.MoveSpeed = 1f;
+        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
 
-        SetPlayerInfo();
+        Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
+        GetObject((int)GameObjects.GreenKey).SetActive(false);
+        GetObject((int)GameObjects.YellowKey).SetActive(false);
+        GetObject((int)GameObjects.RedKey).SetActive(false);
+
         Refresh();
+        Data.MyVector3 loadPos = Managers.Game.PlayerData.CurPosition;
 
-        if (PlayerPrefs.GetInt("ISOPENSWORD") == 0)
-            GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(false);
-        if (PlayerPrefs.GetInt("ISOPENPORTAL") == 0)
-            GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(false);
+        // 최초 실행 시 스폰 포인트 못 찾는 문제 예외 처리
+        if (loadPos.X == 0 && loadPos.Z == 0)
+            Managers.Game.Player.SetPlayerPosition(Managers.Game.SpawnPoints[0].position);
+        else
+        {
+            Vector3 playerPos = new Vector3(loadPos.X, loadPos.Y, loadPos.Z);
+            Managers.Game.Player.SetPlayerPosition(playerPos);
+        }
 
-        FadeEffect(Define.FadeEvent.FadnIn, Define.FADE_DURATION);
-        FadeEffect(Define.FadeEvent.CenterToRight, Define.FADE_DURATION);
+
+        Managers.Game.OnFadeAction.Invoke(1f);
 
         return true;
     }
 
     public void Refresh()
     {
-        if (PlayerPrefs.GetInt("ISOPENINVENUI") == 1) // 인벤 활성화 x
-            GetImage((int)Images.MainUIInventoryAImage).gameObject.SetActive(true);
-        if (PlayerPrefs.GetInt("ISOPENWARPUI") == 1)
-            GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(true);
-        if (PlayerPrefs.GetInt("ISOPENCLASSUI") == 1)
-            GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(true);
-
+        GetText((int)Texts.MainUIMapNameText).text = Managers.GetString(Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].DungeonNameID);
         GetText((int)Texts.PlayerLevelText).text = Managers.Game.PlayerData.Level.ToString();
         int level = Managers.Game.PlayerData.Level;
-        Debug.Log($"{Managers.Game.PlayerData.CurExp} , {Managers.Data.PlayerDic[level].NeedExp}");
-        GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.PlayerData.CurExp / Managers.Data.PlayerDic[level].NeedExp;
+        Managers.Game.PlayerData.Level = Mathf.Max(level, 1);
+        level = Mathf.Max(level, 1);
+        Debug.Log($"{Managers.Game.PlayerData.CurExp} , {Managers.Data.PlayerDic[level + 1].NeedExp}");
+        GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.PlayerData.CurExp / Managers.Data.PlayerDic[level + 1].NeedExp;
         GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.PlayerData.CurHP / Managers.Game.PlayerData.MaxHP;
         Managers.Game.KeyInventory.ShowKeySlot(Managers.Game.Player._keyInventory);
         SetPlayerInfo();
@@ -151,29 +101,6 @@ public class UI_GameScene : UI_Scene
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            bool raycastHit = Physics.Raycast(ray, out hit, 100.0f, _mask);
-            Debug.DrawRay(Camera.main.transform.position, ray.direction * 100.0f, Color.red, 1.0f);
-
-            if (raycastHit)
-            {
-                if (hit.collider.gameObject.layer == (int)Define.Layer.Monster)
-                {
-                    MonsterController monster = hit.collider.gameObject.GetComponent<MonsterController>();
-                    int id = monster.id;
-                    Debug.Log($"MonsterName : {Managers.Data.MonsterDic[id].Name}");
-                    Debug.Log($"MonsterImage : {Managers.Data.MonsterDic[id].IdleAnimStr}");
-                    Debug.Log($"MonsterImage : {Managers.Data.MonsterDic[id].IdleAnimStr}");
-
-                    UI_MonsterInfo monsterInfo = Managers.UI.MakeSubItem<UI_MonsterInfo>(monster.transform);
-                    monsterInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
-                }
-            }
-        }
-
         #region for_test
         if (Input.GetKeyDown(KeyCode.F1))
         {
@@ -193,23 +120,40 @@ public class UI_GameScene : UI_Scene
         }
         if (Input.GetKeyDown(KeyCode.F5))
         {
-            Managers.Game.PlayerData.Attack -= 10;
-        }
-
-        if (Input.GetKeyDown(KeyCode.F8))
-        {
-            //Managers.Game.PlayerData.CurSword = 9;
-            Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Clear();
-            Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Add(9);
-            Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Add(10);
-
-            for (int i = 0; i < Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Count; i++)
+            switch (Managers.Game.PlayerData.MoveSpeed)
             {
-                Debug.Log(Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword][i] + "Inventory");
-                Debug.Log(Managers.Game.PlayerData.CurSword + "CurPlayerSword");
+                case 1f:
+                    Managers.Game.PlayerData.MoveSpeed = 1.5f;
+                    Managers.Game.Player.Speed = Managers.Game.PlayerData.MoveSpeed * 5;
+                    break;
+                case 1.5f:
+                    Managers.Game.PlayerData.MoveSpeed = 2f;
+                    Managers.Game.Player.Speed = Managers.Game.PlayerData.MoveSpeed * 5;
+                    break;
+                case 2f:
+                    Managers.Game.PlayerData.MoveSpeed = 1f;
+                    Managers.Game.Player.Speed = Managers.Game.PlayerData.MoveSpeed * 5;
+                    break;
             }
 
+            Debug.Log($"Managers.Game.CurPlayerData.MoveSpeed : {Managers.Game.PlayerData.MoveSpeed}");
         }
+
+        if (Input.GetKeyDown(KeyCode.F6))
+        {
+            GameObject monsters = GameObject.Find("Monsters");
+            if (monsters != null ) monsters.gameObject.SetActive(false);
+            GameObject pillars = GameObject.Find("Pillars");
+            if (pillars != null) pillars.gameObject.SetActive(false);
+        }
+        if (Input.GetKeyDown(KeyCode.F7))
+        {
+            Managers.Game.OnMeetKingSlime = true;
+
+            Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset =
+                Vector3.Lerp(Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset, new Vector3(0f, 20f, -5f), 2f);
+        }
+        
         #endregion
     }
 
@@ -223,46 +167,5 @@ public class UI_GameScene : UI_Scene
         GetText((int)Texts.PlayerHPText).text = $"{Managers.Game.PlayerData.CurHP}";
         GetText((int)Texts.PlayerAttackText).text = $"{Managers.Game.PlayerData.Attack}";
         GetText((int)Texts.PlayerDefenseText).text = $"{Managers.Game.PlayerData.Defence}";
-    }
-
-    public void OnClickMainUIInventoryAImage()
-    {
-        if (GameObject.Find("UI_InvenPopup") == null)
-            Managers.UI.ShowPopupUI<UI_InvenPopup>();
-        else
-            Managers.UI.ClosePopupUI();
-    }
-
-    public void OffUIInventory()
-    {
-        GetImage((int)Images.MainUIInventoryAImage).gameObject.SetActive(false);
-        GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(false);
-    }
-
-    public void OffUISword()
-    {
-        GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(false);
-        GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false);
-    }
-
-    public void OffUIWarp()
-    {
-        GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(false);
-        GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false);
-    }
-
-    public void OffUI()
-    {
-        OffUIInventory();
-        OffUISword();
-        OffUIWarp();
-    }
-
-    public void OnUI()
-    {
-        GetImage((int)Images.MainUIOptionAImage).gameObject.SetActive(true);
-        GetImage((int)Images.MainUIInventoryAImage).gameObject.SetActive(true);
-        GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(true);
-        GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(true);
     }
 }

@@ -58,7 +58,7 @@ public class UI_IntroScene : UI_Scene
 
         //test
         if (Input.GetKeyDown(KeyCode.Escape))
-            Managers.Scene.LoadScene(Define.Scene.TutorialScene);
+            Managers.Scene.LoadScene(Define.Scene.GameScene);
     }
 
     void NextScene()
@@ -75,7 +75,7 @@ public class UI_IntroScene : UI_Scene
 
         if (idx == totalCount)
         {
-            Managers.Scene.LoadScene(Define.Scene.TutorialScene);
+            Managers.Scene.LoadScene(Define.Scene.GameScene);
             return;
         }
 

@@ -226,7 +226,6 @@ public class GameManager
     #region InGame
     public int GameSpeed = 1;
     public UI_GameScene GameScene = null;
-    public UI_TutorialScene TutorialScene = null;
     public int AttackCount { get; set; }
 
     public static void LevelUp()
