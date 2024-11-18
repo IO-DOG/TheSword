@@ -78,7 +78,7 @@ public class UI_TutorialScene : UI_Scene
             Vector3 playerPos = new Vector3(loadPos.X, loadPos.Y, loadPos.Z);
             Managers.Game.Player.SetPlayerPosition(playerPos);
         }
-
+        
 
         Managers.Game.OnFadeAction.Invoke(1f);
 

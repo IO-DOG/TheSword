@@ -377,8 +377,6 @@ public class Events
 
         image.SetActive(false);
         // create boss
-        _kingSlime.transform.localScale = Vector3.one;
-        _kingSlime.transform.localPosition = new Vector3(3.84f, 1.5f, -6f);
         kingSlimeAction.SetActive(false);
         _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
         image.GetComponent<Image>().color = new Color(1, 1, 1, 0);
@@ -400,6 +398,8 @@ public class Events
             totalTime += Time.deltaTime;
             yield return null;
         }
+        light.intensity = 0f;
+        yield return new WaitForSeconds(1f);
         light.intensity = start;
     }
 
@@ -511,6 +511,7 @@ public class Events
 
         if (_kingSlime != null)
         {
+            _kingSlime.transform.localScale = new Vector3(1f, 2f, 1f);
             _kingSlime.SetActive(true);
             _kingSlime.gameObject.GetOrAddComponent<Animator>().Play("Boss_C0_I000");
         }
