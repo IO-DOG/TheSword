@@ -15,7 +15,6 @@ public class CameraController : MonoBehaviour
     // 픽셀 퍼펙트 카메라 해상도
     int[] _resolutionX = { 960, 640, 384, 320 };
     int[] _resolutionY = { 540, 360, 256, 80 };
-    int _resolutionIndex = 0;
 
     //float _angle = 60f; // 원하는 x축 회전 각도
     public float _scaleMultiplier;
@@ -57,17 +56,20 @@ public class CameraController : MonoBehaviour
         {
             float scroll = Input.GetAxis("Mouse ScrollWheel") * _scrollSpeed * Time.deltaTime;
 
-            if (scroll > 0 && _resolutionIndex < _resolutionX.Length - 1)
+            Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[Managers.Game.ResolutionIdx];
+            Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[Managers.Game.ResolutionIdx];
+
+            if (scroll > 0 && Managers.Game.ResolutionIdx < _resolutionX.Length - 1)
             {
-                _resolutionIndex++;
-                Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[_resolutionIndex];
-                Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[_resolutionIndex];
+                Managers.Game.ResolutionIdx++;
+                Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[Managers.Game.ResolutionIdx];
+                Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[Managers.Game.ResolutionIdx];
             }
-            else if (scroll < 0 && 0 < _resolutionIndex)
+            else if (scroll < 0 && 0 < Managers.Game.ResolutionIdx)
             {
-                _resolutionIndex--;
-                Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[_resolutionIndex];
-                Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[_resolutionIndex];
+                Managers.Game.ResolutionIdx--;
+                Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[Managers.Game.ResolutionIdx];
+                Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[Managers.Game.ResolutionIdx];
             }
         }
     }
