@@ -113,6 +113,4 @@ public class Managers : MonoBehaviour
         Pool.Clear();
         //Object.Clear();
     }
-
-
 }

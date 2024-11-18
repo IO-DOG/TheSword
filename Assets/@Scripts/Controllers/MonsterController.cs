@@ -15,6 +15,8 @@ public class MonsterController : MonoBehaviour
     {
         if (other.gameObject.name == "Player")
         {
+            Managers.Game.MonsterData.Clear();
+
             Managers.Game.MonsterData.Add(new GameManager.CurMonsterData());
 
 
@@ -60,10 +62,5 @@ public class MonsterController : MonoBehaviour
         GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>(Managers.Data.MonsterDic[id].Shadow);
 
         //id = 1;
-    }
-
-    private void OnDestroy()
-    {
-        Managers.Game.MonsterData.Clear();
     }
 }

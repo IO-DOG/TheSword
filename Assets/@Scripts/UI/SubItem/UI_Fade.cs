@@ -24,7 +24,7 @@ public class UI_Fade : UI_Base
                 //Managers.UI.ShowPopupUI<UI_StageNamePopup>();
                 return;
             }
-
+            Managers.Game.OnFade = false;
             Managers.Resource.Destroy(this.gameObject);
         });
     }
@@ -91,10 +91,5 @@ public class UI_Fade : UI_Base
         }
 
         return null;
-    }
-
-    private void OnDestroy()
-    {
-        Managers.Game.OnFade = false;
     }
 }
