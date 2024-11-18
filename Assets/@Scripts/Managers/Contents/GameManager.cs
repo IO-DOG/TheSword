@@ -171,7 +171,7 @@ public class GameManager
             Managers.Game.PlayerData.MoveSpeed = Managers.Data.PlayerDic[level].MoveSpeed;
             Managers.Game.PlayerData.IsDefence = false;
             Managers.Game.PlayerData.CurStageid = 0;
-            Managers.Game.PlayerData.CurPosition = new MyVector3() { X = 0, Y = 0, Z = 0 };
+            Managers.Game.PlayerData.CurPosition = new MyVector3() { X = 0, Y = 1.5f, Z = 0 };
         }
     }
 
