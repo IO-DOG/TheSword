@@ -401,6 +401,7 @@ public class Events
         light.intensity = 0f;
         yield return new WaitForSeconds(1f);
         light.intensity = start;
+        light.color = new Color(1, 244 / 255f, 214 / 255f, 1);
     }
 
     public IEnumerator CoBright(GameObject go, float time)
@@ -512,6 +513,7 @@ public class Events
         if (_kingSlime != null)
         {
             _kingSlime.transform.localScale = new Vector3(1f, 2f, 1f);
+            _kingSlime.transform.localPosition = new Vector3(3.84f, 3f, -6f);
             _kingSlime.SetActive(true);
             _kingSlime.gameObject.GetOrAddComponent<Animator>().Play("Boss_C0_I000");
         }

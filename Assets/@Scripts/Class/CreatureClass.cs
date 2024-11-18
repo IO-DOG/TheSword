@@ -432,11 +432,12 @@ public class CreatureClass : MonoBehaviour
             for (int i = 0; i < s.Count; i++)
             {
                 int idx = s[i];
-                Vector3 vector = new Vector3(pos.x + dx[idx] * size * 4, 0.6f, pos.z + dy[idx] * size * 4);
+                Vector3 vector = new Vector3(pos.x + dx[idx] * size * 4, 2f, pos.z + dy[idx] * size * 4);
                 Debug.Log($"vector : {vector.x}, {vector.y}, {vector.z}");
 
                 GameObject monster = Managers.Resource.Instantiate("Monster", boss.parent);
                 monster.GetOrAddComponent<MonsterController>().id = 6 + i;
+                monster.GetComponent<BoxCollider>().size = new Vector3(1.5f, 2f, 0.2f);
                 monster.transform.localPosition += vector;
                 monster.transform.localScale = new Vector3(1, 2, 1);
                 monster.name = $"KingSlimeSplitMonster";
