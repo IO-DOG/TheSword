@@ -10,7 +10,9 @@ using UnityEngine.UI;
 
 public class MonsterController : MonoBehaviour
 {
+    [HideInInspector]
     public int id = 0;
+    [HideInInspector]
     public int _monsterIndex_forActive = 0;
 
     private void OnTriggerEnter(Collider other)
