@@ -191,11 +191,11 @@ public class Events
         // 카메라 워킹 및 UI사라짐
         // 카메라 흔들림 등의 연출 효과
         // 연출이 끝나면 UI 활성화
-        GameObject tutorialSene = GameObject.Find("UI_TutorialScene");
-        if (tutorialSene != null)
+        GameObject gameScene = Managers.Game.GameScene.gameObject;
+        if (gameScene != null)
         {
             // UI Off
-            RectTransform[] rectTransforms = tutorialSene.gameObject.GetComponentsInChildren<RectTransform>();
+            RectTransform[] rectTransforms = gameScene.gameObject.GetComponentsInChildren<RectTransform>();
             for (int i = 1; i < rectTransforms.Length; i++)
             {
                 Image image = rectTransforms[i].gameObject.GetComponent<Image>();
@@ -360,8 +360,8 @@ public class Events
         yield return new WaitForSeconds(0.6f);
         GameObject image = new GameObject();
         image.AddComponent<Image>();
-        GameObject tutorialSene = GameObject.Find("UI_TutorialScene");
-        image.transform.parent = tutorialSene.transform;
+        GameObject gameScene = Managers.Game.GameScene.gameObject;
+        image.transform.parent = gameScene.transform;
         RectTransform parentRect = image.transform.parent.GetComponent<RectTransform>();
         // 앵커를 부모의 전체 크기에 맞게 설정
         RectTransform rectTransform = image.GetComponent<RectTransform>();

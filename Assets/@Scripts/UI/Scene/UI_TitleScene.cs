@@ -228,7 +228,7 @@ public class UI_TitleScene : UI_Scene
         else
         {
             Debug.Log("Cllck OnClickLoadGameButton");
-            Managers.Scene.LoadScene(Define.Scene.TutorialScene);
+            Managers.Scene.LoadScene(Define.Scene.GameScene);
         }
     }
 

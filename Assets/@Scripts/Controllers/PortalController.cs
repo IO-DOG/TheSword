@@ -108,8 +108,7 @@ public class PortalController : MonoBehaviour
             CameraController._isCombineMap = false;
         }
         Managers.Game.OnPortalAction.Invoke();
-        Managers.Game.TutorialScene.Refresh();
-        //Managers.Game.GameScene.Refresh();
+        Managers.Game.GameScene.Refresh();
 
         Managers.Game.OnDirect = false;
     }
