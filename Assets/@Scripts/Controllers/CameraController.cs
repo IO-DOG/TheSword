@@ -124,7 +124,7 @@ public class CameraController : MonoBehaviour
         Bounds combineBounds = new Bounds(Vector3.zero, Vector3.zero);
         bool boundsInitialized = false;
 
-        Transform curMapTiles = GameObject.Find("Dungeon_" + Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DungeonID).transform.Find("Tiles");
+        Transform curMapTiles = GameObject.Find("Dungeon_" + Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].DungeonID).transform.Find("Tiles");
 
         foreach (Transform child in curMapTiles)
         {

@@ -3,64 +3,26 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static GameManager;
 
-public class UI_PlayerCard : UI_Base
+public class UI_PlayerCard : UI_BaseCard
 {
-    #region Enum
-
-    enum Images
-    {
-        PlayerImage,
-        HPHar,
-        HPHarGauge,
-        AttackDelayGauge,
-        DefenceDelayGauge,
-        AttackIcon,
-        DefenceIcon,
-        CreatureSwordImage,
-        CreatureShieldImage,
-    }
-
-    enum Texts
-    {
-        CreatureName,
-        HPBarText,
-        AttackStatusText,
-        DefenceStatusText,
-    }
-
-    #endregion
-
-    public bool _isCri = false;
-    public float _maxDefenceCoolTime = 3f;
-    public float _defenceCoolTime = 0f;
-    public bool _forAssassin = false;
-
     public override bool Init()
     {
         if (base.Init() == false)
             return false;
 
-        #region Bind
-        BindImage(typeof(Images));
-        BindText(typeof(Texts));
-        #endregion
-
-        // todo change to nickname
-        GetText((int)Texts.CreatureName).text = "Player!";
-        GetText((int)Texts.HPBarText).text = Managers.Game.CurPlayerData.CurHP.ToString();
-        GetText((int)Texts.AttackStatusText).text = Managers.Game.CurPlayerData.Attack.ToString();
-        GetText((int)Texts.DefenceStatusText).text = Managers.Game.CurPlayerData.Defence.ToString();
-
-        Managers.Game.OnBattleDataRefreshAction -= Refresh;
-        Managers.Game.OnBattleDataRefreshAction += Refresh;
-        Managers.Game.OnBattlePlayerDefeceAction += ClearDefence;
-        Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
+        //Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
+        _creature.OnDefenceAction += ClearDefence;
+        _creature.OnHitAction += Refresh;
+        _creature.OnHitAction += StartDamagedMat;
+        _creature.OnDeadAction += Dead;
+        _creature.OnDataRefreshAction += Refresh;
 
         StartCoroutine(CoDelayAttack());
         StartCoroutine(CoDelayDefence());
 
-        if (Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Shield].Count == 0)
+        if (Managers.Game.PlayerData.Inventory[(int)Define.Types.Shield].Count == 0)
         {
             GetImage((int)Images.CreatureShieldImage).gameObject.SetActive(false);
         }
@@ -68,183 +30,53 @@ public class UI_PlayerCard : UI_Base
         return true;
     }
 
-    public void Refresh()
+    public override void Refresh()
     {
-        StartCoroutine(CoRefresh());
+        base.Refresh();
     }
 
-    IEnumerator CoRefresh()
+    public override void Attack(CreatureData attacker, CreatureData target)
     {
-        GetText((int)Texts.HPBarText).text = Managers.Game.CurPlayerData.CurHP.ToString();
-        GetImage((int)Images.HPHar).fillAmount = Managers.Game.CurPlayerData.CurHP / Managers.Game.CurPlayerData.MaxHP;
-        yield return new WaitForSeconds(0.2f);
-        GetImage((int)Images.HPHarGauge).fillAmount = Managers.Game.CurPlayerData.CurHP / Managers.Game.CurPlayerData.MaxHP;
-    }
-
-    public void Attack()
-    {
+        base.Attack(attacker, target);
         Managers.Game.AttackCount++;
 
-        if (Managers.Game.MonsterData.Feature == 6)
+        if (target.IsDefence)
         {
-            Managers.Game.MonsterData.DamagedCount++;
-            if (Managers.Game.MonsterData.DamagedCount == 5)
-            {
-                Debug.Log("거대 효과 발동");
-                Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack - Managers.Game.CurPlayerData.Defence) * 0.2f;
-                Refresh();
-            }
+            target.OnDefenceAction.Invoke();
         }
-        GetImage((int)Images.PlayerImage).gameObject.GetComponent<Animator>().Play("UIPlayerAttackAnim");
-        GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play($"UISword{Managers.Game.CurPlayerData.CurSword - 9}AttackAnim");
-        if (Managers.Game.CurPlayerData.CurShield != 0)
-            GetImage((int)Images.CreatureShieldImage).gameObject.GetComponent<Animator>().Play($"UIShield{Managers.Game.CurPlayerData.CurShield - 20}AttackAnim");
+
+        GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play("UIPlayerAttackAnim");
+        GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play($"UISword{Managers.Game.PlayerData.CurSword - 9}AttackAnim");
+        if (Managers.Game.PlayerData.CurShield != 0)
+            GetImage((int)Images.CreatureShieldImage).gameObject.GetComponent<Animator>().Play($"UIShield{Managers.Game.PlayerData.CurShield - 20}AttackAnim");
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
-
-        if (Managers.Game.AttackCount == Managers.Game.CurPlayerData.Critical)
-        {
-            _isCri = true;
-            _forAssassin = true;
-            Managers.Game.AttackCount = 0;
-        }
-
-        // 몬스터가 암살일 경우
-        if (Managers.Game.MonsterData.Feature == 7 && _forAssassin == false)
-        {
-            Debug.Log("암살 효과 발동");
-            return;
-        }
-
-        // 몬스터가 방어 상태일 경우
-        if (Managers.Game.MonsterData.IsDefence == true)
-        {
-            Managers.Game.MonsterData.IsDefence = false;
-            Managers.Game.OnBattleCreatureDefeceAction.Invoke();
-
-            if (_isCri == true)
-            {
-                Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence) * 0.2f;
-                _isCri = false;
-            }
-        }
-        else // 일반 공격
-        {
-            if (_isCri)
-            {
-                // 몬스터가 불사 효과일 경우
-                if (Managers.Game.MonsterData.Feature == 4)
-                {
-                    Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence) * 20;
-                    Managers.Game.OnBattleCreatureDamagedAction.Invoke();
-                    Debug.Log("불사 효과 발동 치명 데미지 200퍼");
-                }
-                else
-                {
-                    Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence);
-                    Managers.Game.OnBattleCreatureDamagedAction.Invoke();
-                }
-                _isCri = false;
-            }
-            else
-            {
-                // 몬스터가 불사 효과일 경우
-                if (Managers.Game.MonsterData.Feature == 4)
-                {
-                    Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack * (Managers.Game.CurPlayerData.CriticalAttack / 100) - Managers.Game.MonsterData.Defence) * 0.2f;
-                    Managers.Game.OnBattleCreatureDamagedAction.Invoke();
-                    Debug.Log("불사 효과 발동 일반 데미지 20퍼");
-                }
-                else
-                {
-                    Managers.Game.MonsterData.CurHP -= Mathf.Max(0, Managers.Game.CurPlayerData.Attack - Managers.Game.MonsterData.Defence);
-                    Managers.Game.OnBattleCreatureDamagedAction.Invoke();
-                }
-            }
-        }
-        Managers.Game.MonsterData.CurHP = Mathf.RoundToInt(Managers.Game.MonsterData.CurHP);
-
-        if (Managers.Game.MonsterData.CurHP <= 0)
-        {
-            // add exp
-            Managers.Game.CurPlayerData.CurExp += Managers.Game.MonsterData.RewardExp;
-
-            Managers.Data.MonsterActiveDic[Managers.Game.MonsterData.IsActiveIndex] = false;
-
-            int id = Managers.Game.Monster.id;
-            Debug.Log($"Monster Id : {id}");
-            string name = Managers.Data.MonsterDic[id].Name;
-            switch (id)
-            {
-                case Define.KingSlime:
-                    BlackSlimeController blackSlimeController = Managers.Game.Monster.gameObject.GetOrAddComponent<BlackSlimeController>();
-                    blackSlimeController.Dead();
-                    break;
-                default:
-                    break;
-            }
-
-            // for king slime
-            if (Managers.Game.Monster.gameObject.name == "KingSlimeSplitMonster")
-            {
-                Managers.Game.TotalKillSplitSlime++;
-                if (Managers.Game.TotalKillSplitSlime == 3)
-                    Managers.Game.OnKingSlimeDeadAction.Invoke();
-            }
-
-            //StartCoroutine(CoMonsterDead());
-            Managers.Game.OnBattleAction.Invoke();
-            Managers.Game.OnBattle = false;
-
-            // 몬스터 죽는 파티클 생성
-            Transform particlePos = Managers.Game.Monster.gameObject.transform;
-            GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
-            deathSoulPurple.transform.position = particlePos.position;
-            deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-            deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[0].startDelay = 0.2f;
-            deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[1].startDelay = 0.2f;
-            deathSoulPurple.GetComponentsInChildren<ParticleSystem>()[2].startDelay = 0.2f;
-            Destroy(deathSoulPurple, 3);
-            Destroy(Managers.Game.Monster.gameObject);
-            return;
-        }
-
         CreatePlayerAttackParticle();
         CreateMonsterHitParticle();
-        Managers.Game.OnBattleDataRefreshAction.Invoke();
+
+        if (Managers.Game.AttackCount == Managers.Game.PlayerData.Critical)
+        {
+            _creature.IsCritical = true;
+            Managers.Game.AttackCount = 0;
+        }
     }
 
-    //IEnumerator CoMonsterDead()
-    //{
-    //    // 몬스터 죽는 파티클 생성
-
-    //    yield return new WaitForSeconds(2f);
-
-    //    Transform particlePos = Managers.Game.Monster.gameObject.transform;
-    //    GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
-    //    deathSoulPurple.transform.position = particlePos.position;
-    //    deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-    //    Destroy(deathSoulPurple, 3);
-    //    Destroy(Managers.Game.Monster.gameObject);
-    //}
-
-    public void Defence()
+    public override void Defence()
     {
-        GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIDefenceIcon");
-        Managers.Game.CurPlayerData.IsDefence = true;
+        base.Defence();
     }
 
     IEnumerator CoDelayAttack()
     {
         float maxAttackCoolTime = 3f;
         float attackCoolTime = 0f;
-        maxAttackCoolTime = maxAttackCoolTime / Managers.Game.CurPlayerData.AttackSpeed;
+        maxAttackCoolTime = maxAttackCoolTime / Managers.Game.PlayerData.AttackSpeed;
 
         while (true)
         {
             if (attackCoolTime >= maxAttackCoolTime)
             {
                 attackCoolTime = 0f;
-                Attack();
+                Attack(_creature, Managers.Game.MonsterData[0]);
             }
             attackCoolTime += Time.deltaTime * Managers.Game.GameSpeed;
 
@@ -254,18 +86,17 @@ public class UI_PlayerCard : UI_Base
         }
     }
 
-    public bool _defenseFlag = false;
     IEnumerator CoDelayDefence()
     {
-        _maxDefenceCoolTime = _maxDefenceCoolTime / Managers.Game.CurPlayerData.AttackSpeed;
+        _maxDefenceCoolTime = _maxDefenceCoolTime / Managers.Game.PlayerData.DefenceSpeed;
 
         while (true)
         {
             if (_defenceCoolTime >= _maxDefenceCoolTime)
             {
-                if (_defenseFlag == false)
+                if (_creature.IsDefence == false)
                 {
-                    _defenseFlag = true;
+                    _creature.IsDefence = true;
                     Defence();
                 }
                 _defenceCoolTime = _maxDefenceCoolTime;
@@ -279,17 +110,11 @@ public class UI_PlayerCard : UI_Base
         }
     }
 
-    public void ClearDefence()
+    public override void ClearDefence()
     {
-        //// TODO play damaged anim
-        //if (GetImage((int)Images.DefenceIcon) != null)
-        //    GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIShieldFX");
         StartCoroutine(CoStartShieldFX());
         StartCoroutine(CoDefenceMat());
-        _defenceCoolTime = 0f;
-        _defenseFlag = false;
-        if (GetImage((int)Images.DefenceIcon) != null)
-            GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
+        base.ClearDefence();
     }
 
     IEnumerator CoStartShieldFX()
@@ -313,8 +138,8 @@ public class UI_PlayerCard : UI_Base
         int width = 660;
         int height = 660;
         WaitForSeconds delay = new WaitForSeconds(0.1f);
-        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.PlayerImage).transform);
-        go.transform.position = GetImage((int)Images.PlayerImage).transform.position;
+        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureImage).transform);
+        go.transform.position = GetImage((int)Images.CreatureImage).transform.position;
         GameObject sword = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureSwordImage).transform);
         sword.transform.position = GetImage((int)Images.CreatureSwordImage).transform.position;
         GameObject shield = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureShieldImage).transform);
@@ -332,12 +157,12 @@ public class UI_PlayerCard : UI_Base
         swordanimator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("CreatureSwordImage");
         shieldanimator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("CreatureShieldImage");
         animator.Play($"UIPlayerIdleAnim");
-        swordanimator.Play($"UISword{Managers.Game.CurPlayerData.CurSword - 9}IdleAnim");
-        if (Managers.Game.CurPlayerData.CurShield != 0)
-            shieldanimator.Play($"UIShield{Managers.Game.CurPlayerData.CurShield - 20}IdleAnim");
-        image.sprite = GetImage((int)Images.PlayerImage).sprite;
-        swordImage.sprite = GetImage((int)Images.PlayerImage).sprite;
-        shieldImage.sprite = GetImage((int)Images.PlayerImage).sprite;
+        swordanimator.Play($"UISword{Managers.Game.PlayerData.CurSword - 9}IdleAnim");
+        if (Managers.Game.PlayerData.CurShield != 0)
+            shieldanimator.Play($"UIShield{Managers.Game.PlayerData.CurShield - 20}IdleAnim");
+        image.sprite = GetImage((int)Images.CreatureImage).sprite;
+        swordImage.sprite = GetImage((int)Images.CreatureImage).sprite;
+        shieldImage.sprite = GetImage((int)Images.CreatureImage).sprite;
         image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         swordImage.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         shieldImage.material = Managers.Resource.Load<Material>("PaintWhiteMat");
@@ -362,7 +187,7 @@ public class UI_PlayerCard : UI_Base
         Destroy(shield);
     }
 
-    public void StartDamagedMat()
+    public override void StartDamagedMat()
     {
         StartCoroutine(CoDamagedMat());
     }
@@ -373,13 +198,13 @@ public class UI_PlayerCard : UI_Base
         int height = 660;
 
         WaitForSeconds delay = new WaitForSeconds(0.1f);
-        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.PlayerImage).transform);
+        GameObject go = Managers.Resource.Instantiate("UI_PlayerCardCopyImage", GetImage((int)Images.CreatureImage).transform);
         Image image = go.GetOrAddComponent<Image>();
-        image.rectTransform.sizeDelta = GetImage((int)Images.PlayerImage).rectTransform.sizeDelta;
+        image.rectTransform.sizeDelta = GetImage((int)Images.CreatureImage).rectTransform.sizeDelta;
         Animator animator = go.GetOrAddComponent<Animator>();
         animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIPlayerAnimController");
         animator.Play($"UIPlayerIdleAnim");
-        image.sprite = GetImage((int)Images.PlayerImage).sprite;
+        image.sprite = GetImage((int)Images.CreatureImage).sprite;
         image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         image.color = Util.DamagedColor();
         image.rectTransform.sizeDelta = new Vector2(width, height);
@@ -415,10 +240,10 @@ public class UI_PlayerCard : UI_Base
 
     void CreatePlayerAttackParticle()
     {
-        int swordId = Managers.Game.CurPlayerData.CurSword;
+        int swordId = Managers.Game.PlayerData.CurSword;
         string attackFX = Managers.Data.EquipDic[swordId].AttackFX;
-        GameObject player = GameObject.Find("PlayerImage");
-        GameObject go = Managers.Resource.Instantiate(attackFX, GetImage((int)Images.PlayerImage).transform);
+        GameObject player = GameObject.Find("CreatureImage");
+        GameObject go = Managers.Resource.Instantiate(attackFX, GetImage((int)Images.CreatureImage).transform);
         go.transform.localPosition += new Vector3(0, -150, 0);
         var uiParticle = go.GetOrAddComponent<UIParticle>();
         uiParticle.scale = 300;
@@ -429,19 +254,39 @@ public class UI_PlayerCard : UI_Base
 
     void CreateMonsterHitParticle()
     {
-        int swordId = Managers.Game.CurPlayerData.CurSword;
+        int swordId = Managers.Game.PlayerData.CurSword;
         string hitFX = Managers.Data.EquipDic[swordId].HitFX;
-        GameObject monster = GameObject.Find("CreatureImage");
+        GameObject monster = GameObject.Find("UI_MonsterCard");
         GameObject go = Managers.Resource.Instantiate(hitFX, monster.transform);
-        go.transform.position += new Vector3(0, -0, 0);
+        go.transform.position += new Vector3(0, 70, 0);
         var uiParticle = go.GetOrAddComponent<UIParticle>();
 
         //var childrenUIParticle = go.GetComponentsInChildren<UIParticle>()[1]; // 이거 좀 위험한 코드임.
-        uiParticle.scale = 30;
+        uiParticle.scale = 50;
         //childrenUIParticle.scale = 300;
         //Debug.Log($"childrenUIParticle.gameObject.name : {childrenUIParticle.gameObject.name}");
         uiParticle.Play();
         //childrenUIParticle.Play();
         //Destroy(uiParticle, 0.3f);
+    }
+
+    public override void Dead()
+    {
+        base.Dead();
+
+        // Game Over Popup TODO
+        //CreatePlayerDeathParticle();
+        Managers.Game.OnBattleAction.Invoke();
+        Managers.Game.OnBattle = false;
+        return;
+    }
+
+    private void OnDestroy()
+    {
+        _creature.OnDefenceAction -= ClearDefence;
+        _creature.OnHitAction -= Refresh;
+        _creature.OnHitAction -= StartDamagedMat;
+        _creature.OnDeadAction -= Dead;
+        _creature.OnDataRefreshAction -= Refresh;
     }
 }

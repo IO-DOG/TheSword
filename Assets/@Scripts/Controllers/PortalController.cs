@@ -17,18 +17,18 @@ public class PortalController : MonoBehaviour
 
         if (_stairs == (int)Define.Stairs.Upstairs)
         {
-            nextStageName = Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].UpStage;
+            nextStageName = Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].UpStage;
         }
         else if (_stairs == (int)Define.Stairs.Downstairs)
         {
-            nextStageName = Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].DownStage;
+            nextStageName = Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].DownStage;
         }
         else if (_stairs == (int)Define.Stairs.BossRoom)
         {
-            nextStageName = Managers.Data.StageInfoDic[Managers.Game.CurPlayerData.CurStageid].BossRoom;
+            nextStageName = Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].BossRoom;
         }
 
-        Managers.Game.CurPlayerData.CurStageid = Managers.Data.FindKeyByValue_StageInfoData(nextStageName);
+        Managers.Game.PlayerData.CurStageid = Managers.Data.FindKeyByValue_StageInfoData(nextStageName);
 
         Vector3 nextPos = GetNextPos(nextStageName);
         CoStartWait(nextPos);
@@ -50,7 +50,7 @@ public class PortalController : MonoBehaviour
         Managers.Game.Player._cellPos = nextPos;
         CameraController.SetConfinerBounds();
 
-        int nextStageID = Managers.Game.CurPlayerData.CurStageid;
+        int nextStageID = Managers.Game.PlayerData.CurStageid;
 
         if (nextStageID == 2)
         {
@@ -62,7 +62,7 @@ public class PortalController : MonoBehaviour
         }
         Managers.Game.OnPortalAction.Invoke();
         Managers.Game.TutorialScene.Refresh();
-        Managers.Game.GameScene.Refresh();
+        //Managers.Game.GameScene.Refresh();
 
         Managers.Game.OnDirect = false;
     }
@@ -74,7 +74,7 @@ public class PortalController : MonoBehaviour
         string chapterName = nextStageName.Substring(0, 2);
         int totalCurrentStageCount = Managers.Data.GetChapterCount(chapterName);
         int startStageID = Managers.Data.FindKeyByValue_StageInfoData(chapterName + "_000");
-        int nextStageID = Managers.Game.CurPlayerData.CurStageid;
+        int nextStageID = Managers.Game.PlayerData.CurStageid;
         int endStageID = startStageID + totalCurrentStageCount - 1;
 
         int offset = 0;

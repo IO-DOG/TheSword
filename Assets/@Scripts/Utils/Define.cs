@@ -114,6 +114,24 @@ public class Define
         Boss,
     }
 
+    public enum GameEvent
+    {
+        FillDefenceGague,
+    }
+
+    public enum Trait
+    {
+        None,
+        Beast,
+        Magic,
+        Guardian,
+        Immortal,
+        Knight,
+        Titan,
+        Assassin,
+        Armor,
+    }
+
     #endregion
 
     #region Map

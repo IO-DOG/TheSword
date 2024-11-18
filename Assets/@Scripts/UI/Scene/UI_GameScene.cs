@@ -114,8 +114,8 @@ public class UI_GameScene : UI_Scene
             }
         });
 
-        Managers.Game.CurPlayerData.CurStageid = 0;
-        Managers.Game.InstantiateMap(Managers.Game.CurPlayerData.CurStageid);
+        Managers.Game.PlayerData.CurStageid = 0;
+        Managers.Game.InstantiateMap(Managers.Game.PlayerData.CurStageid);
 
         SetPlayerInfo();
         Refresh();
@@ -140,11 +140,11 @@ public class UI_GameScene : UI_Scene
         if (PlayerPrefs.GetInt("ISOPENCLASSUI") == 1)
             GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(true);
 
-        GetText((int)Texts.PlayerLevelText).text = Managers.Game.CurPlayerData.Level.ToString();
-        int level = Managers.Game.CurPlayerData.Level;
-        Debug.Log($"{Managers.Game.CurPlayerData.CurExp} , {Managers.Data.PlayerDic[level].NeedExp}");
-        GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurExp / Managers.Data.PlayerDic[level].NeedExp;
-        GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.CurPlayerData.CurHP / Managers.Game.CurPlayerData.MaxHP;
+        GetText((int)Texts.PlayerLevelText).text = Managers.Game.PlayerData.Level.ToString();
+        int level = Managers.Game.PlayerData.Level;
+        Debug.Log($"{Managers.Game.PlayerData.CurExp} , {Managers.Data.PlayerDic[level].NeedExp}");
+        GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.PlayerData.CurExp / Managers.Data.PlayerDic[level].NeedExp;
+        GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.PlayerData.CurHP / Managers.Game.PlayerData.MaxHP;
         Managers.Game.KeyInventory.ShowKeySlot(Managers.Game.Player._keyInventory);
         SetPlayerInfo();
     }
@@ -177,11 +177,11 @@ public class UI_GameScene : UI_Scene
         #region for_test
         if (Input.GetKeyDown(KeyCode.F1))
         {
-            Managers.Game.CurPlayerData.CurExp += 10;
+            Managers.Game.PlayerData.CurExp += 10;
         }
         if (Input.GetKeyDown(KeyCode.F2))
         {
-            Managers.Game.CurPlayerData.Attack += 10;
+            Managers.Game.PlayerData.Attack += 10;
         }
         if (Input.GetKeyDown(KeyCode.F3))
         {
@@ -193,20 +193,20 @@ public class UI_GameScene : UI_Scene
         }
         if (Input.GetKeyDown(KeyCode.F5))
         {
-            Managers.Game.CurPlayerData.Attack -= 10;
+            Managers.Game.PlayerData.Attack -= 10;
         }
 
         if (Input.GetKeyDown(KeyCode.F8))
         {
-            //Managers.Game.CurPlayerData.CurSword = 9;
-            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Clear();
-            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(9);
-            Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Add(10);
+            //Managers.Game.PlayerData.CurSword = 9;
+            Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Clear();
+            Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Add(9);
+            Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Add(10);
 
-            for (int i = 0; i < Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword].Count; i++)
+            for (int i = 0; i < Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Count; i++)
             {
-                Debug.Log(Managers.Game.CurPlayerData.Inventory[(int)Define.Types.Sword][i] + "Inventory");
-                Debug.Log(Managers.Game.CurPlayerData.CurSword + "CurPlayerSword");
+                Debug.Log(Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword][i] + "Inventory");
+                Debug.Log(Managers.Game.PlayerData.CurSword + "CurPlayerSword");
             }
 
         }
@@ -220,9 +220,9 @@ public class UI_GameScene : UI_Scene
     public void SetPlayerInfo()
     {
         //GetText((int)Texts.PlayerNameText).text = "PlayerName";
-        GetText((int)Texts.PlayerHPText).text = $"{Managers.Game.CurPlayerData.CurHP}";
-        GetText((int)Texts.PlayerAttackText).text = $"{Managers.Game.CurPlayerData.Attack}";
-        GetText((int)Texts.PlayerDefenseText).text = $"{Managers.Game.CurPlayerData.Defence}";
+        GetText((int)Texts.PlayerHPText).text = $"{Managers.Game.PlayerData.CurHP}";
+        GetText((int)Texts.PlayerAttackText).text = $"{Managers.Game.PlayerData.Attack}";
+        GetText((int)Texts.PlayerDefenseText).text = $"{Managers.Game.PlayerData.Defence}";
     }
 
     public void OnClickMainUIInventoryAImage()

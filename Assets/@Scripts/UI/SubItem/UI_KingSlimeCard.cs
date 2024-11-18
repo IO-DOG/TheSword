@@ -64,17 +64,17 @@ public class UI_KingSlimeCard : UI_Base
         BindText(typeof(Texts));
         #endregion
 
-        _monsterClass = (MonsterClass)Managers.Game.MonsterData.Feature;
-        GetText((int)Texts.CreatureName).text = Managers.Game.MonsterData.Name;
-        GetText((int)Texts.HPBarText).text = Managers.Game.MonsterData.MaxHP.ToString();
-        GetText((int)Texts.AttackStatusText).text = Managers.Game.MonsterData.Attack.ToString();
-        GetText((int)Texts.DefenceStatusText).text = Managers.Game.MonsterData.Defence.ToString();
-        GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play($"{Managers.Game.MonsterData.IdleAnimStr}");
+        _monsterClass = (MonsterClass)Managers.Game.MonsterData[0].Feature;
+        GetText((int)Texts.CreatureName).text = Managers.Game.MonsterData[0].Name;
+        GetText((int)Texts.HPBarText).text = Managers.Game.MonsterData[0].MaxHP.ToString();
+        GetText((int)Texts.AttackStatusText).text = Managers.Game.MonsterData[0].Attack.ToString();
+        GetText((int)Texts.DefenceStatusText).text = Managers.Game.MonsterData[0].Defence.ToString();
+        GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play($"{Managers.Game.MonsterData[0].IdleAnimStr}");
 
-        Managers.Game.OnBattleDataRefreshAction -= Refresh;
-        Managers.Game.OnBattleDataRefreshAction += Refresh;
-        Managers.Game.OnBattleCreatureDefeceAction += ClearDefence;
-        Managers.Game.OnBattleCreatureDamagedAction += StartDamagedMat;
+        //Managers.Game.OnBattleDataRefreshAction -= Refresh;
+        //Managers.Game.OnBattleDataRefreshAction += Refresh;
+        //Managers.Game.OnBattleCreatureDefenceAction += ClearDefence;
+        //Managers.Game.OnBattleCreatureDamagedAction += StartDamagedMat;
 
         StartCoroutine(CoDelayAttack());
         if (_monsterClass != MonsterClass.Armor)
@@ -90,7 +90,7 @@ public class UI_KingSlimeCard : UI_Base
 
         if (_monsterClass == MonsterClass.Armor)
         {
-            _forArmor = Managers.Game.MonsterData.Defence;
+            _forArmor = Managers.Game.MonsterData[0].Defence;
             Debug.Log("갑옷 효과 발동");
         }
 
@@ -104,10 +104,10 @@ public class UI_KingSlimeCard : UI_Base
 
     IEnumerator CoRefresh()
     {
-        if (_monsterClass == MonsterClass.Beast && _forBeast == false && Managers.Game.MonsterData.CurHP <= Managers.Game.MonsterData.MaxHP * 0.1)
+        if (_monsterClass == MonsterClass.Beast && _forBeast == false && Managers.Game.MonsterData[0].CurHP <= Managers.Game.MonsterData[0].MaxHP * 0.1)
         {
             _forBeast = true;
-            Managers.Game.MonsterData.CurHP += Managers.Game.MonsterData.MaxHP * 0.4f;
+            Managers.Game.MonsterData[0].CurHP += Managers.Game.MonsterData[0].MaxHP * 0.4f;
             Debug.Log("비스트 효과 발동");
         }
 
@@ -116,90 +116,90 @@ public class UI_KingSlimeCard : UI_Base
             if (_forArmor > 0)
             {
                 Debug.Log("갑옷 효과 발동 방어막부터 감소");
-                float gap = Managers.Game.MonsterData.MaxHP - Managers.Game.MonsterData.CurHP;
+                float gap = Managers.Game.MonsterData[0].MaxHP - Managers.Game.MonsterData[0].CurHP;
                 if (_forArmor >= gap)
                 {
-                    Managers.Game.MonsterData.CurHP = Managers.Game.MonsterData.MaxHP;
+                    Managers.Game.MonsterData[0].CurHP = Managers.Game.MonsterData[0].MaxHP;
                     _forArmor -= gap;
                 }
                 else
                 {
-                    Managers.Game.MonsterData.CurHP += (gap - _forArmor);
+                    Managers.Game.MonsterData[0].CurHP += (gap - _forArmor);
                     _forArmor = 0;
                 }
             }
         }
 
         //GetImage((int)Images.CreatureImage).SetNativeSize();
-        GetText((int)Texts.HPBarText).text = Managers.Game.MonsterData.CurHP.ToString();
-        GetImage((int)Images.HPHar).fillAmount = Managers.Game.MonsterData.CurHP / Managers.Game.MonsterData.MaxHP;
+        GetText((int)Texts.HPBarText).text = Managers.Game.MonsterData[0].CurHP.ToString();
+        GetImage((int)Images.HPHar).fillAmount = Managers.Game.MonsterData[0].CurHP / Managers.Game.MonsterData[0].MaxHP;
         yield return new WaitForSeconds(0.2f);
-        GetImage((int)Images.HPHarGauge).fillAmount = Managers.Game.MonsterData.CurHP / Managers.Game.MonsterData.MaxHP;
+        GetImage((int)Images.HPHarGauge).fillAmount = Managers.Game.MonsterData[0].CurHP / Managers.Game.MonsterData[0].MaxHP;
     }
 
-    public void Attack()
-    {
-        if (_monsterClass == MonsterClass.Magic)
-        {
-            _isCri = true;
-            Debug.Log("마법 효과 발동");
-        }
+    //public void Attack()
+    //{
+    //    if (_monsterClass == MonsterClass.Magic)
+    //    {
+    //        _isCri = true;
+    //        Debug.Log("마법 효과 발동");
+    //    }
 
-        GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
+    //    GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
 
-        if (_totalAttackCount > 0 && _totalAttackCount % 20 == 0)
-        {
-            Berserk();
-        }
+    //    if (_totalAttackCount > 0 && _totalAttackCount % 20 == 0)
+    //    {
+    //        Berserk();
+    //    }
 
-        if (_attackCount == Managers.Game.MonsterData.Critical)
-        {
-            _isCri = true;
-            _attackCount = 0;
-        }
+    //    if (_attackCount == Managers.Game.MonsterData[0].Critical)
+    //    {
+    //        _isCri = true;
+    //        _attackCount = 0;
+    //    }
 
-        if (Managers.Game.CurPlayerData.IsDefence == true)
-        {
-            Managers.Game.CurPlayerData.IsDefence = false;
-            Managers.Game.OnBattlePlayerDefeceAction.Invoke();
+    //    if (Managers.Game.PlayerData.IsDefence == true)
+    //    {
+    //        Managers.Game.PlayerData.IsDefence = false;
+    //        Managers.Game.OnBattlePlayerDefenceAction.Invoke();
 
-            if (_isCri == true)
-            {
-                Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack * (Managers.Game.MonsterData.CriticalAttack / 100) - Managers.Game.CurPlayerData.Defence) * 0.2f;
-                _isCri = false;
-            }
-        }
-        else
-        {
-            if (_isCri)
-            {
-                Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack * (Managers.Game.MonsterData.CriticalAttack / 100) - Managers.Game.CurPlayerData.Defence);
-                Managers.Game.OnBattlePlayerDamagedAction.Invoke();
-                _isCri = false;
-            }
-            else
-            {
-                Managers.Game.CurPlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData.Attack - Managers.Game.CurPlayerData.Defence);
-                Managers.Game.OnBattlePlayerDamagedAction.Invoke();
-            }
-        }
-        Managers.Game.CurPlayerData.CurHP = Mathf.RoundToInt(Managers.Game.CurPlayerData.CurHP);
+    //        if (_isCri == true)
+    //        {
+    //            Managers.Game.PlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData[0].Attack * (Managers.Game.MonsterData[0].CriticalAttack / 100) - Managers.Game.PlayerData.Defence) * 0.2f;
+    //            _isCri = false;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        if (_isCri)
+    //        {
+    //            Managers.Game.PlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData[0].Attack * (Managers.Game.MonsterData[0].CriticalAttack / 100) - Managers.Game.PlayerData.Defence);
+    //            Managers.Game.OnBattlePlayerDamagedAction.Invoke();
+    //            _isCri = false;
+    //        }
+    //        else
+    //        {
+    //            Managers.Game.PlayerData.CurHP -= Mathf.Max(0, Managers.Game.MonsterData[0].Attack - Managers.Game.PlayerData.Defence);
+    //            Managers.Game.OnBattlePlayerDamagedAction.Invoke();
+    //        }
+    //    }
+    //    Managers.Game.PlayerData.CurHP = Mathf.RoundToInt(Managers.Game.PlayerData.CurHP);
 
-        if (Managers.Game.CurPlayerData.CurHP <= 0)
-        {
-            // Game Over Popup TODO
-            CreatePlayerDeathParticle();
-            Managers.Game.OnBattleAction.Invoke();
-            Managers.Game.OnBattle = false;
-            return;
-        }
+    //    if (Managers.Game.PlayerData.CurHP <= 0)
+    //    {
+    //        // Game Over Popup TODO
+    //        CreatePlayerDeathParticle();
+    //        Managers.Game.OnBattleAction.Invoke();
+    //        Managers.Game.OnBattle = false;
+    //        return;
+    //    }
 
-        _attackCount++;
-        PlayMonsterAttackAnim();
-        CreateMonsterAttackParticle();
-        CreatePlayerHitParticle();
-        Managers.Game.OnBattleDataRefreshAction.Invoke();
-    }
+    //    _attackCount++;
+    //    PlayMonsterAttackAnim();
+    //    CreateMonsterAttackParticle();
+    //    CreatePlayerHitParticle();
+    //    Managers.Game.OnBattleDataRefreshAction.Invoke();
+    //}
 
     public void Defence()
     {
@@ -207,24 +207,24 @@ public class UI_KingSlimeCard : UI_Base
         GetImage((int)Images.DefenceDelayGauge).fillAmount = _defenceCoolTime / _maxDefenceCoolTime;
 
         GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIDefenceIcon");
-        Managers.Game.MonsterData.IsDefence = true;
+        Managers.Game.MonsterData[0].IsDefence = true;
     }
 
     IEnumerator CoDelayAttack()
     {
         float maxAttackCoolTime = 3f;
         float attackCoolTime = 0f;
-        maxAttackCoolTime = maxAttackCoolTime / Managers.Game.MonsterData.AttackSpeed;
+        maxAttackCoolTime = maxAttackCoolTime / Managers.Game.MonsterData[0].AttackSpeed;
 
         while (true)
         {
             if (attackCoolTime >= maxAttackCoolTime)
             {
                 attackCoolTime = 0f;
-                Attack();
+                //Attack();
                 if (_monsterClass == MonsterClass.Knight)
                 {
-                    Attack();
+                    //Attack();
                     Debug.Log("검사 효과 발동");
                 }
             }
@@ -240,7 +240,7 @@ public class UI_KingSlimeCard : UI_Base
     IEnumerator CoDelayDefence()
     {
 
-        _maxDefenceCoolTime = _maxDefenceCoolTime / Managers.Game.MonsterData.DefenceSpeed;
+        _maxDefenceCoolTime = _maxDefenceCoolTime / Managers.Game.MonsterData[0].DefenceSpeed;
 
         while (true)
         {
@@ -264,10 +264,10 @@ public class UI_KingSlimeCard : UI_Base
 
     public void Berserk()
     {
-        Managers.Game.MonsterData.Attack *= 1.2f;
-        Managers.Game.MonsterData.AttackSpeed *= 1.2f;
-        Managers.Game.MonsterData.Defence *= 1.2f;
-        Managers.Game.MonsterData.DefenceSpeed *= 1.2f;
+        Managers.Game.MonsterData[0].Attack *= 1.2f;
+        Managers.Game.MonsterData[0].AttackSpeed *= 1.2f;
+        Managers.Game.MonsterData[0].Defence *= 1.2f;
+        Managers.Game.MonsterData[0].DefenceSpeed *= 1.2f;
     }
 
     public void ClearDefence()
@@ -307,7 +307,7 @@ public class UI_KingSlimeCard : UI_Base
         image.rectTransform.sizeDelta = GetImage((int)Images.CreatureImage).rectTransform.sizeDelta;
         Animator animator = go.GetOrAddComponent<Animator>();
         animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIMonsterAnimController");
-        animator.Play($"{Managers.Game.MonsterData.IdleAnimStr}");
+        animator.Play($"{Managers.Game.MonsterData[0].IdleAnimStr}");
         image.sprite = GetImage((int)Images.CreatureImage).sprite;
         image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         image.color = Util.DefenceColor();
@@ -336,7 +336,7 @@ public class UI_KingSlimeCard : UI_Base
         image.rectTransform.sizeDelta = GetImage((int)Images.CreatureImage).rectTransform.sizeDelta;
         Animator animator = go.GetOrAddComponent<Animator>();
         animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIMonsterAnimController");
-        animator.Play($"{Managers.Game.MonsterData.IdleAnimStr}");
+        animator.Play($"{Managers.Game.MonsterData[0].IdleAnimStr}");
         image.sprite = GetImage((int)Images.CreatureImage).sprite;
         image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         image.color = Util.DamagedColor();
@@ -371,21 +371,21 @@ public class UI_KingSlimeCard : UI_Base
 
     void CreateMonsterAttackParticle()
     {
-        string battleParticleAttack = Managers.Game.MonsterData.BattleParticleAttack;
+        string battleParticleAttack = Managers.Game.MonsterData[0].BattleParticleAttack;
 
         GameObject go = Managers.Resource.Instantiate(battleParticleAttack, GetImage((int)Images.CreatureImage).gameObject.transform);
     }
 
     void CreatePlayerHitParticle()
     {
-        string battleParticleHit = Managers.Game.MonsterData.BattleParticleHit;
+        string battleParticleHit = Managers.Game.MonsterData[0].BattleParticleHit;
         GameObject player = GameObject.Find("CreatureImage");
         GameObject go = Managers.Resource.Instantiate(battleParticleHit, player.transform);
     }
 
     void PlayMonsterAttackAnim()
     {
-        string animStr = Managers.Game.MonsterData.AttackAnimStr;
+        string animStr = Managers.Game.MonsterData[0].AttackAnimStr;
         GetImage((int)Images.CreatureImage).GetComponent<Animator>().Play(animStr);
 
     }

@@ -31,7 +31,7 @@ public class UI_StageNamePopup : UI_Popup
         #endregion
 
         StartCoroutine(PlayAndDestory());
-        GetText((int)Texts.StageNameText).text = Managers.GetString(Managers.Data.ScriptDic[(int)Define.STAGE_NAME + Managers.Game.CurPlayerData.CurStageid].id);
+        GetText((int)Texts.StageNameText).text = Managers.GetString(Managers.Data.ScriptDic[(int)Define.STAGE_NAME + Managers.Game.PlayerData.CurStageid].id);
 
         return true;
     }

@@ -14,9 +14,11 @@ public class Managers : MonoBehaviour
     #region Contents
     GameManager _game = new GameManager();
     DirectingManager _directing = new DirectingManager();
+    EventManager _event = new EventManager();
 
     public static GameManager Game { get { return Instance?._game; } }
     public static DirectingManager Directing { get { return Instance?._directing; } }
+    public static EventManager Event { get { return Instance?._event; } }
 
     #endregion
 
@@ -27,6 +29,7 @@ public class Managers : MonoBehaviour
     SceneManagerEx _scene = new SceneManagerEx();
     SoundManager _sound = new SoundManager();
     UIManager _ui = new UIManager();
+    PoolManager _pool = new PoolManager();
 
     public static DataManager Data { get { return Instance?._data; } }
     public static InputManager Input { get { return Instance._input; } }
@@ -34,6 +37,7 @@ public class Managers : MonoBehaviour
     public static SceneManagerEx Scene { get { return Instance?._scene; } }
     public static SoundManager Sound { get { return Instance?._sound; } }
     public static UIManager UI { get { return Instance?._ui; } }
+    public static PoolManager Pool { get { return Instance?._pool; } }
     #endregion
 
     public static void Init()
@@ -59,9 +63,6 @@ public class Managers : MonoBehaviour
             DontDestroyOnLoad(go);
             DontDestroyOnLoad(cursor);
             s_instance = go.GetComponent<Managers>();
-            //s_instance._sound.Init();
-            //s_instance._time = go.AddComponent<TimeManager>();
-
         }
     }
 
@@ -108,7 +109,7 @@ public class Managers : MonoBehaviour
         Sound.Clear();
         Scene.Clear();
         UI.Clear();
-        //Pool.Clear();
+        Pool.Clear();
         //Object.Clear();
     }
 
