@@ -49,7 +49,7 @@ public class UI_PlayerCard : UI_BaseCard
         GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play($"UISword{Managers.Game.PlayerData.CurSword - 9}AttackAnim");
         if (Managers.Game.PlayerData.CurShield != 0)
             GetImage((int)Images.CreatureShieldImage).gameObject.GetComponent<Animator>().Play($"UIShield{Managers.Game.PlayerData.CurShield - 20}AttackAnim");
-        GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
+        GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Weapon);
         CreatePlayerAttackParticle();
         CreateMonsterHitParticle();
 

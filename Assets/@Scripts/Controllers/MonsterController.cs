@@ -7,6 +7,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.UI;
+using static GameManager;
 
 public class MonsterController : MonoBehaviour
 {
@@ -23,21 +24,22 @@ public class MonsterController : MonoBehaviour
 
             Managers.Game.MonsterData.Add(new GameManager.CurMonsterData());
 
+            int stageId = Managers.Game.PlayerData.CurStageid;
 
             Managers.Game.MonsterData[0].id = Managers.Data.MonsterDic[id].id;
             Managers.Game.MonsterData[0].Chapter = Managers.Data.MonsterDic[id].Chapter;
-            Managers.Game.MonsterData[0].Class = Managers.Data.MonsterDic[id].Class;
+            Managers.Game.MonsterData[0].Ability = Managers.Data.MonsterDic[id].Ability;
             Managers.Game.MonsterData[0].Name = Managers.Data.MonsterDic[id].Name;
-            Managers.Game.MonsterData[0].Feature = Managers.Data.MonsterDic[id].Feature;
             Managers.Game.MonsterData[0].MaxHP = Managers.Data.MonsterDic[id].MaxHP;
             Managers.Game.MonsterData[0].CurHP = Managers.Data.MonsterDic[id].MaxHP;
-            Managers.Game.MonsterData[0].Attack = Managers.Data.MonsterDic[id].Attack;
-            Managers.Game.MonsterData[0].Defence = Managers.Data.MonsterDic[id].Defence;
+
+            Managers.Game.MonsterData[0].Attack = Managers.Data.MonsterDic[id].Attack + Managers.Data.StageInfoDic[stageId].ATK * Managers.Data.MonsterDic[id].Attack;
+            Managers.Game.MonsterData[0].Defence = Managers.Data.MonsterDic[id].Defence + Managers.Data.StageInfoDic[stageId].DEF * Managers.Data.MonsterDic[id].Defence;
             Managers.Game.MonsterData[0].AttackSpeed = Managers.Data.MonsterDic[id].AttackSpeed;
             Managers.Game.MonsterData[0].DefenceSpeed = Managers.Data.MonsterDic[id].DefenceSpeed;
             Managers.Game.MonsterData[0].Critical = Managers.Data.MonsterDic[id].Critical;
             Managers.Game.MonsterData[0].CriticalAttack = Managers.Data.MonsterDic[id].CriticalAttack;
-            Managers.Game.MonsterData[0].RewardExp = Managers.Data.MonsterDic[id].RewardExp;
+            Managers.Game.MonsterData[0].RewardExp = Managers.Data.MonsterDic[id].RewardExp + Managers.Data.StageInfoDic[stageId].EXP * Managers.Data.MonsterDic[id].RewardExp;
             Managers.Game.MonsterData[0].RewardItem = Managers.Data.MonsterDic[id].RewardItem;
             Managers.Game.MonsterData[0].IdleAnimStr = Managers.Data.MonsterDic[id].IdleAnimStr;
             Managers.Game.MonsterData[0].AttackAnimStr = Managers.Data.MonsterDic[id].AttackAnimStr;

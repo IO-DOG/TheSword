@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro.EditorUtilities;
 using UnityEngine;
 using UnityEngine.UI;
 using static GameManager;
@@ -44,7 +45,8 @@ public class UI_MonsterCard : UI_BaseCard
             target.OnDefenceAction.Invoke();
         }
 
-        GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play("UIAttackIcon");
+        GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Weapon);
+        Debug.Log($"Managers.Data.MonsterClassDic[_creature.Ability].Weapon : {Managers.Data.MonsterClassDic[_creature.Ability].Weapon}");
 
         if (_totalAttackCount > 0 && _totalAttackCount % 20 == 0)
         {
