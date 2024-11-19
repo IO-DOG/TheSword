@@ -198,7 +198,7 @@ public class MapEditor : EditorWindow
             GameObject items = new GameObject() { name = "Items" };
             GameObject monsters = new GameObject() { name = "Monsters" };
             GameObject bossMonsters = new GameObject() { name = "BossMonsters" };
-            GameObject decos = new GameObject() { name = "Deco" };
+            GameObject decos = new GameObject() { name = "Decos" };
             GameObject pillars = new GameObject() { name = "Pillars" };
             GameObject levers = new GameObject() { name = "Levers" };
             GameObject doors = new GameObject() { name = "Doors" };
@@ -341,6 +341,16 @@ public class MapEditor : EditorWindow
             BG.AddComponent<SpriteRenderer>().sprite = BGSprite;
             BG.GetComponent<SpriteRenderer>().material = Resources.Load<Material>("SpriteShadowsMaterial");
             BG.tag = "BG";
+            #endregion
+
+            #region DECO
+            GameObject deco = Resources.Load<GameObject>($"DecoPrefabs/Deco_{mapName}");
+            if(deco != null)
+            {
+                GameObject go = Instantiate<GameObject>(deco, decos.transform);
+                go.name = "Deco";
+            }
+
             #endregion
 
             walls.transform.localPosition = new Vector3(0f, -0.04f, 0f);
