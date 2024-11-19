@@ -66,7 +66,7 @@ public class GameManager
     public GameObject ParentMap;
     public Dictionary<int, GameObject> Maps = new Dictionary<int, GameObject>();
     public GameObject Monsters;
-    public GameObject Items;
+    public GameObject DropItems;
     public GameObject Lights;
 
     #region CurCreatureData
@@ -310,12 +310,12 @@ public class GameManager
         {
             GameObject map = Managers.Resource.Instantiate($"Dungeon_{Managers.Data.StageInfoDic[i].DungeonID}", ParentMap.transform);
             map.transform.position = new Vector3(count * 100, 0f, 0f);
-            Items = map.transform.Find("Items").gameObject;
             Maps.Add(i, map);
             RefreshMap(i);
             count++;
         }
-
+        DropItems = new GameObject(name: "DropItems");
+        DropItems.transform.parent = ParentMap.transform;
         Portals = ParentMap.GetComponentsInChildren<PortalController>();
         SpawnPoints = ParentMap.GetComponentsInChildren<Transform>().Where(child => child.CompareTag("SpawnPoint")).ToArray();
         BossRoomId = Managers.Data.StageInfoDic.Where(pair => pair.Value.Type == Define.DungeonType.Boss)
