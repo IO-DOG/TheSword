@@ -20,6 +20,7 @@ public class UI_MonsterCard : UI_BaseCard
 
         GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play($"{_creature.IdleAnimStr}");
 
+        Refresh();
         _creature.OnDefenceAction += ClearDefence;
         _creature.OnHitAction += Refresh;
         _creature.OnHitAction += StartDamagedMat;
@@ -46,7 +47,6 @@ public class UI_MonsterCard : UI_BaseCard
         }
 
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Weapon);
-        Debug.Log($"Managers.Data.MonsterClassDic[_creature.Ability].Weapon : {Managers.Data.MonsterClassDic[_creature.Ability].Weapon}");
 
         if (_totalAttackCount > 0 && _totalAttackCount % 20 == 0)
         {
@@ -69,6 +69,8 @@ public class UI_MonsterCard : UI_BaseCard
     public override void Defence()
     {
         base.Defence();
+        GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Shield);
+
     }
 
     IEnumerator CoDelayAttack()

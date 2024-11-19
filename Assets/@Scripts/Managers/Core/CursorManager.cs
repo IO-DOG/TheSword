@@ -106,7 +106,6 @@ public class CursorManager : MonoBehaviour
             {
                 if (_cursor != CursorType.Search)
                 {
-                    Debug.Log("Search");
                     _cursor = CursorType.Search;
                 }
             }
@@ -115,7 +114,6 @@ public class CursorManager : MonoBehaviour
             {
                 if (_cursor != CursorType.Grap)
                 {
-                    Debug.Log("Grap");
                     _cursor = CursorType.Grap;
                 }
             }

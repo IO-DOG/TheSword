@@ -13,6 +13,8 @@ public class UI_PlayerCard : UI_BaseCard
             return false;
 
         //Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
+
+        Refresh();
         _creature.OnDefenceAction += ClearDefence;
         _creature.OnHitAction += Refresh;
         _creature.OnHitAction += StartDamagedMat;
@@ -63,6 +65,8 @@ public class UI_PlayerCard : UI_BaseCard
     public override void Defence()
     {
         base.Defence();
+        GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Shield);
+        Debug.Log(Managers.Data.MonsterClassDic[_creature.Ability].Shield);
     }
 
     IEnumerator CoDelayAttack()
