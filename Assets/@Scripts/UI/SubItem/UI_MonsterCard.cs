@@ -257,6 +257,14 @@ public class UI_MonsterCard : UI_BaseCard
         Managers.Game.OnBattleAction.Invoke();
         Managers.Game.OnBattle = false;
 
+        if (Managers.Data.MonsterDic[Managers.Game.Monster.id].RewardItem != -1)
+        {
+            Debug.Log("Item Drop!");
+            GameObject item = Managers.Resource.Instantiate("EquipItem", Managers.Game.Items.transform);
+            item.transform.position = Managers.Game.Monster.transform.localPosition;
+            item.GetComponent<Equip>()._id = Managers.Data.MonsterDic[Managers.Game.Monster.id].RewardItem;
+        }
+
         // 몬스터 죽는 파티클 생성
         Transform particlePos = Managers.Game.Monster.gameObject.transform;
         GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");

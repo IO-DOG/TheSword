@@ -125,6 +125,7 @@ public class CreatureClass : MonoBehaviour
     {
         public GuardianTrait(UI_BaseCard uI_BaseCard)
         {
+            Debug.Log(uI_BaseCard);
             Managers.Event.Unsubscribe(Define.GameEvent.FillDefenceGague, uI_BaseCard.FillDefenceGague);
             Managers.Event.Subscribe(Define.GameEvent.FillDefenceGague, uI_BaseCard.FillDefenceGague);
         }

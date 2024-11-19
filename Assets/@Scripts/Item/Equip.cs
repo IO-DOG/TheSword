@@ -40,6 +40,7 @@ public class Equip : MonoBehaviour
 
     public void PickUp()
     {
+        Debug.Log("Pickup");
         Define.Types type = (Define.Types)Managers.Data.EquipDic[Id].Type;
         Managers.Game.PlayerData.Inventory[(int)type].Add(Id);
         Managers.Data.EItemActiveDic[_itemIndex_forActive] = false;

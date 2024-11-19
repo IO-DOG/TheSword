@@ -311,6 +311,7 @@ public class GameManager
         {
             GameObject map = Managers.Resource.Instantiate($"Dungeon_{Managers.Data.StageInfoDic[i].DungeonID}", ParentMap.transform);
             map.transform.position = new Vector3(count * 100, 0f, 0f);
+            Items = map.transform.Find("Items").gameObject;
             Maps.Add(i, map);
             RefreshMap(i);
             count++;
