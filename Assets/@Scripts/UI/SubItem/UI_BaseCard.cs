@@ -113,6 +113,7 @@ public class UI_BaseCard : UI_Base
         GetImage((int)Images.DefenceDelayGauge).fillAmount = _defenceCoolTime / _maxDefenceCoolTime;
 
         GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Shield);
+        Debug.Log($"Managers.Data.MonsterClassDic[_creature.Ability].Shield : {Managers.Data.MonsterClassDic[_creature.Ability].Shield}");
         //GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIDefenceIcon");
         _creature.IsDefence = true;
     }

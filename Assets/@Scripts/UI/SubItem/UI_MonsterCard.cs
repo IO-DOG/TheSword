@@ -46,6 +46,7 @@ public class UI_MonsterCard : UI_BaseCard
         }
 
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Weapon);
+        Debug.Log($"Managers.Data.MonsterClassDic[_creature.Ability].Weapon : {Managers.Data.MonsterClassDic[_creature.Ability].Weapon}");
 
         if (_totalAttackCount > 0 && _totalAttackCount % 20 == 0)
         {
