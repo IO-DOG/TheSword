@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UI_GameScene : UI_Scene
 {
@@ -33,7 +34,7 @@ public class UI_GameScene : UI_Scene
     enum Images
     {
         MainUIEXPGaugeImage,
-        MainUIAuxiliaryHPGaugeImage,
+        //MainUIAuxiliaryHPGaugeImage,
         MainUIOptionAImage,
         MainUIOptionBImage,
         //MainUIInventoryAImage,
@@ -94,7 +95,9 @@ public class UI_GameScene : UI_Scene
         level = Mathf.Max(level, 1);
         Debug.Log($"{Managers.Game.PlayerData.CurExp} , {Managers.Data.PlayerDic[level + 1].NeedExp}");
         GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.PlayerData.CurExp / Managers.Data.PlayerDic[level + 1].NeedExp;
-        GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = Managers.Game.PlayerData.CurHP / Managers.Game.PlayerData.MaxHP;
+        float hpRatio = Managers.Game.PlayerData.CurHP / Managers.Game.PlayerData.MaxHP;
+        //GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = hpRatio;
+        GameObject.Find("PlayerHPBarGauge").GetComponent<Image>().fillAmount = hpRatio;
         Managers.Game.KeyInventory.ShowKeySlot(Managers.Game.Player._keyInventory);
         SetPlayerInfo();
     }
