@@ -43,7 +43,7 @@ public class PortalController : MonoBehaviour
             }
             else
             {
-                Managers.Game.PlayerData.CurStageid++;
+                //Managers.Game.PlayerData.CurStageid++;
                 nextPos = tartgetPortal.transform.position;
             }
         }
@@ -54,15 +54,15 @@ public class PortalController : MonoBehaviour
                 return;
 
             nextPos = tartgetPortal.transform.position;
-            Managers.Game.PlayerData.CurStageid--;
+            //Managers.Game.PlayerData.CurStageid--;
         }
         else
         {
             nextPos = Managers.Game.SpawnPoints[1].transform.position;
-            Managers.Game.PlayerData.CurStageid = Managers.Game.BossRoomId;
+            //Managers.Game.PlayerData.CurStageid = Managers.Game.BossRoomId;
         }
         Debug.Log($"Setting player position to: {nextPos}");
-
+        Managers.Game.SaveGame();
         CoStartWait(nextPos);
     }
 
@@ -81,6 +81,23 @@ public class PortalController : MonoBehaviour
         return null;
     }
 
+    int SetStageID()
+    {
+        if (_portalType == Type.UpStairs)
+        {
+            return ++Managers.Game.PlayerData.CurStageid;
+        }
+        else if (_portalType == Type.DownStairs)
+        {
+            return --Managers.Game.PlayerData.CurStageid; ;
+        }
+        else
+        {
+            Managers.Game.PlayerData.CurStageid = Managers.Game.BossRoomId;
+            return Managers.Game.PlayerData.CurStageid;
+        }
+    }
+
     void CoStartWait(Vector3 nextPos)
     {
         StartCoroutine(WaitAndWarp(nextPos));
@@ -91,8 +108,7 @@ public class PortalController : MonoBehaviour
         Managers.Game.Player.SetIdleState(Managers.Game.Player._moveDir);
         Managers.Game.OnDirect = true;
         Managers.Game.OnFadeAction.Invoke(0.3f);
-        int nextStageID = Managers.Game.PlayerData.CurStageid;
-
+        int nextStageID = SetStageID();
         if (nextStageID == 2)
         {
             CameraController._isCombineMap = true;
@@ -102,16 +118,15 @@ public class PortalController : MonoBehaviour
             CameraController._isCombineMap = false;
         }
         yield return new WaitForSeconds(0.03f);
-
+        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
         Debug.Log($"Setting player position to2: {nextPos}");
         
         Managers.Game.Player.transform.position = nextPos;
         Managers.Game.Player._cellPos = nextPos;
-        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
+        Managers.Game.SaveGame();
 
         Managers.Game.OnPortalAction.Invoke();
         Managers.Game.GameScene.Refresh();
-        Managers.Game.SaveGame();
         Managers.Game.OnDirect = false;
     }
 }

@@ -407,10 +407,11 @@ public class PlayerController : MonoBehaviour
                 somethingExist = true;
             }
             //Checking Monster
-            //else if (hit.collider.gameObject.layer == (int)Define.Layer.Monster)
-            //{
-
-            //}
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.Monster)
+            {
+                hit.collider.gameObject.GetComponent<MonsterController>().SetMonster();
+                somethingExist = true;
+            }
             // Checking Item
             else if (hit.collider.gameObject.layer == (int)Define.Layer.CItem)
             {
