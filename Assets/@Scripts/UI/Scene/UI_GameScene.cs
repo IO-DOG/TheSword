@@ -87,7 +87,7 @@ public class UI_GameScene : UI_Scene
 
     public void Refresh()
     {
-        GetText((int)Texts.MainUIMapNameText).text = Managers.GetString(Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].DungeonNameID);
+        GetText((int)Texts.MainUIMapNameText).text = Managers.GetString(Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].DungeonNameScriptID);
         GetText((int)Texts.PlayerLevelText).text = Managers.Game.PlayerData.Level.ToString();
         int level = Managers.Game.PlayerData.Level;
         Managers.Game.PlayerData.Level = Mathf.Max(level, 1);

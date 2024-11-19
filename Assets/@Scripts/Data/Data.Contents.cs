@@ -255,7 +255,7 @@ namespace Data
         public int DEF;
         public int EXP;
         public string BGM;
-        public int DungeonNameID;
+        public int DungeonNameScriptID;
     }
 
     [Serializable]

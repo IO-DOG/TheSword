@@ -661,7 +661,7 @@ public class DataTransformer : EditorWindow
             sd.DEF = ConvertValue<int>(row[i++]);
             sd.EXP = ConvertValue<int>(row[i++]);
             sd.BGM = ConvertValue<string>(row[i++]);
-            sd.DungeonNameID = ConvertValue<int>(row[i++]);
+            sd.DungeonNameScriptID = ConvertValue<int>(row[i++]);
             loader.stageInfos.Add(sd);
         }
         #endregion
