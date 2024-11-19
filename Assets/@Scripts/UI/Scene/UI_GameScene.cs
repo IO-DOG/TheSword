@@ -102,8 +102,33 @@ public class UI_GameScene : UI_Scene
         SetPlayerInfo();
     }
 
+    int _mask = (1 << (int)Define.Layer.Monster);
+
     private void Update()
     {
+        if (Input.GetMouseButtonDown(0))
+        {
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            bool raycastHit = Physics.Raycast(ray, out hit, 100.0f, _mask);
+            Debug.DrawRay(Camera.main.transform.position, ray.direction * 100.0f, Color.red, 1.0f);
+
+            if (raycastHit)
+            {
+                if (hit.collider.gameObject.layer == (int)Define.Layer.Monster)
+                {
+                    MonsterController monster = hit.collider.gameObject.GetComponent<MonsterController>();
+                    int id = monster.id;
+                    Debug.Log($"MonsterName : {Managers.Data.MonsterDic[id].Name}");
+                    Debug.Log($"MonsterImage : {Managers.Data.MonsterDic[id].IdleAnimStr}");
+                    Debug.Log($"MonsterImage : {Managers.Data.MonsterDic[id].IdleAnimStr}");
+
+                    UI_MonsterInfo monsterInfo = Managers.UI.MakeSubItem<UI_MonsterInfo>(monster.transform);
+                    monsterInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
+                }
+            }
+        }
+
         #region for_test
         if (Input.GetKeyDown(KeyCode.F1))
         {

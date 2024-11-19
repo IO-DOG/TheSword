@@ -33,11 +33,8 @@ public class UI_MonsterInfo : UI_Base
         set
         {
             _position = value;
-            Debug.Log("change monster info position");
             GetComponentsInChildren<UnityEngine.UI.Image>()[0].GetComponent<RectTransform>().anchoredPosition = _position +
                 new Vector3((float)(GetComponentsInChildren<BoxCollider>()[0].bounds.max.x - GetComponentsInChildren<BoxCollider>()[0].bounds.min.x) / 2 + 50, 0, 0);
-            Debug.Log($"GetComponentsInChildren<BoxCollider>()[0].bounds.max.x : {GetComponentsInChildren<BoxCollider>()[0].bounds.max.x}");
-            Debug.Log($"GetComponentsInChildren<BoxCollider>()[0].bounds.min.x : {GetComponentsInChildren<BoxCollider>()[0].bounds.min.x}");
             //GetImage((int)Images.BGImage).gameObject.GetComponent<RectTransform>().anchoredPosition = Input.mousePosition;
         }
     }
@@ -60,7 +57,7 @@ public class UI_MonsterInfo : UI_Base
     void SetInfo()
     {
         int id = gameObject.transform.parent.GetComponent<MonsterController>().id;
-        GetText((int)Texts.MonsterNameText).text = Managers.Data.MonsterDic[id].Name;
+        GetText((int)Texts.MonsterNameText).text = Managers.GetString(Managers.Data.MonsterDic[id].MonsterNameId);
         //GetText((int)Texts.MonsterClassText).text = "특성 : " + Managers.Data.MonsterClassDic[Managers.Data.MonsterDic[id].Feature].ClassName;
         GetText((int)Texts.MonsterAttackText).text = Managers.Data.MonsterDic[id].Attack.ToString();
         GetText((int)Texts.MonsterDefenseText).text = Managers.Data.MonsterDic[id].Defence.ToString();

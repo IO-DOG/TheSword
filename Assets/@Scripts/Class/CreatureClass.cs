@@ -28,7 +28,7 @@ public static class EffectFactory
             case (int)Define.Trait.Armor:
                 return new ArmorTrait();
             case (int)Define.Trait.KingSlime:
-                return new KingSlimeTrait();
+                return new SplitTrait();
             default:
                 return new DefaultTrait();
         };
@@ -359,7 +359,8 @@ public class CreatureClass : MonoBehaviour
         }
     }
 
-    public class KingSlimeTrait : ITrait
+    // 분열 특성
+    public class SplitTrait : ITrait
     {
         public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
@@ -423,6 +424,43 @@ public class CreatureClass : MonoBehaviour
                 monster.name = $"KingSlimeSplitMonster";
             }
             creature.OnDeadAction.Invoke();
+        }
+    }
+
+    // 물약 특성
+    public class PotionTrait : ITrait
+    {
+        public void ExcuteOnDead(CreatureData creature)
+        {
+            creature.CurHP = 0;
+            // todo
+            // 물약 생성해야 함
+
+            creature.OnDeadAction.Invoke();
+        }
+
+        public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
+        {
+            damage = Mathf.Max(0, damage);
+            target.CurHP -= damage;
+            if (target.CurHP <= 0)
+            {
+                ExcuteOnDead(target);
+            }
+
+            target.OnHitAction.Invoke();
+        }
+
+        public int ExecuteAttack(CreatureData attacker, CreatureData target)
+        {
+            int damage = (int)Mathf.Max(0, attacker.Attack);
+            if (attacker.IsCritical) damage = damage * (int)(attacker.CriticalAttack / 100);
+            damage -= (int)target.Defence;
+            damage = (int)Mathf.Max(0, damage);
+            if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);
+            else if (target.IsDefence) damage = 0;
+
+            return damage;
         }
     }
 
