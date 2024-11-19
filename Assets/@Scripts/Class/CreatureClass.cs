@@ -76,10 +76,7 @@ public class CreatureClass : MonoBehaviour
 
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
         {
-            Debug.Log($"attacker.Attack : {attacker.Attack}");
             int damage = (int)Mathf.Max(0, attacker.Attack);
-            Debug.Log($"CriticalAttack : {attacker.CriticalAttack} , {(int)(attacker.CriticalAttack / 100)}");
-            Debug.Log($"damage : {damage}");
             if (attacker.IsCritical) damage *= (int)(attacker.CriticalAttack / 100);
             damage -= (int)target.Defence;
             if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);

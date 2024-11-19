@@ -69,11 +69,10 @@ public class UI_BaseCard : UI_Base
         int abilityIndex = _creature.Ability;
         string battleBGImage = Managers.Data.MonsterClassDic[abilityIndex].BattleBGImage;
         string abilityImage = Managers.Data.MonsterClassDic[abilityIndex].AbilityImage;
+        GetImage((int)Images.BattleBGImage).sprite = Managers.Resource.Load<Sprite>(battleBGImage);
+
         if (abilityIndex != 0)
-        {
-            GetImage((int)Images.BattleBGImage).sprite = Managers.Resource.Load<Sprite>(battleBGImage);
             GetImage((int)Images.AbilityImage).sprite = Managers.Resource.Load<Sprite>(abilityImage);
-        }
     }
 
     public virtual void Refresh()
@@ -113,7 +112,7 @@ public class UI_BaseCard : UI_Base
         GetImage((int)Images.DefenceDelayGauge).fillAmount = _defenceCoolTime / _maxDefenceCoolTime;
 
         GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Shield);
-        Debug.Log($"Managers.Data.MonsterClassDic[_creature.Ability].Shield : {Managers.Data.MonsterClassDic[_creature.Ability].Shield}");
+        Debug.Log($"Shield : {Managers.Data.MonsterClassDic[_creature.Ability].Shield}");
         //GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIDefenceIcon");
         _creature.IsDefence = true;
     }
