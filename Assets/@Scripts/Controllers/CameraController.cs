@@ -49,7 +49,7 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-        if (_isCombineMap)
+        if (_isCombineMap == true)
         {
             Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[2];
             Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[2];

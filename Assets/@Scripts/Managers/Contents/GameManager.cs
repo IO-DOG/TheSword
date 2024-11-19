@@ -57,7 +57,6 @@ public class GameManager
 
     public Action OnKingSlimeDeadAction;
     public Action OnGuardianEffectAction;
-
     public Action OnPortalAction;
 
     public Texture2D _screenShot = null;

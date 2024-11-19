@@ -24,6 +24,8 @@ public class PortalController : MonoBehaviour
 
     public void UsePortal()
     {
+        if (Managers.Game.OnFade)
+            return;
         Vector3 nextPos = Vector3.zero;
 
         if(_portalType == Type.UpStairs)
@@ -89,14 +91,6 @@ public class PortalController : MonoBehaviour
         Managers.Game.Player.SetIdleState(Managers.Game.Player._moveDir);
         Managers.Game.OnDirect = true;
         Managers.Game.OnFadeAction.Invoke(0.3f);
-        yield return new WaitForSeconds(0.03f);
-
-        Debug.Log($"Setting player position to2: {nextPos}");
-        
-        Managers.Game.Player.transform.position = nextPos;
-        Managers.Game.Player._cellPos = nextPos;
-        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
-
         int nextStageID = Managers.Game.PlayerData.CurStageid;
 
         if (nextStageID == 2)
@@ -107,9 +101,17 @@ public class PortalController : MonoBehaviour
         {
             CameraController._isCombineMap = false;
         }
+        yield return new WaitForSeconds(0.03f);
+
+        Debug.Log($"Setting player position to2: {nextPos}");
+        
+        Managers.Game.Player.transform.position = nextPos;
+        Managers.Game.Player._cellPos = nextPos;
+        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
+
         Managers.Game.OnPortalAction.Invoke();
         Managers.Game.GameScene.Refresh();
-
+        Managers.Game.SaveGame();
         Managers.Game.OnDirect = false;
     }
 }

@@ -259,7 +259,6 @@ public class UI_MonsterCard : UI_BaseCard
 
         if (Managers.Data.MonsterDic[Managers.Game.Monster.id].RewardItem != -1)
         {
-            Debug.Log("Item Drop!");
             GameObject item = Managers.Resource.Instantiate("EquipItem", Managers.Game.Items.transform);
             item.transform.position = Managers.Game.Monster.transform.localPosition;
             item.GetComponent<Equip>()._id = Managers.Data.MonsterDic[Managers.Game.Monster.id].RewardItem;

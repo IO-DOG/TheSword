@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEditor.Build.Pipeline;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class Effects_00 : MonoBehaviour
 {
@@ -23,8 +26,10 @@ public class Effects_00 : MonoBehaviour
 
         Managers.Game.OnPortalAction -= SetFogPosition;
         Managers.Game.OnPortalAction += SetFogPosition;
+        Managers.Game.OnPortalAction -= SetLight;
+        Managers.Game.OnPortalAction += SetLight;
+        Managers.Game.OnPortalAction.Invoke();
 
-        SetFogPosition();
         StartCoroutine(FallingLeaves());
     }
 
@@ -58,6 +63,49 @@ public class Effects_00 : MonoBehaviour
     void SetFogPosition()
     {
         fog.transform.localPosition = Managers.Game.Player.transform.position;
+        if (Managers.Game.PlayerData.CurStageid == 0)
+        {
+            fog.SetActive(false);
+        }
+        else
+        {
+            fog.SetActive(true);
+        }
+
+    }
+
+    void SetLight()
+    {
+        if (Managers.Game.PlayerData.CurStageid != 2)
+        {
+            Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
+            ColorAdjustments colorAdjustments;
+            if (postProcessingVolume.profile.TryGet<ColorAdjustments>(out colorAdjustments))
+            {
+                colorAdjustments.active = false;
+            }
+        }
+
+        if (Managers.Game.PlayerData.CurStageid == 0)
+        {
+            Managers.Game.DirectionalLight.intensity = 1.5f;
+            Managers.Game.DirectionalLight.color = new Color(255/255f, 244/255f, 214/255f);
+        }
+        else if(Managers.Game.PlayerData.CurStageid == 1)
+        {
+            Managers.Game.DirectionalLight.intensity = 1f;
+            Managers.Game.DirectionalLight.color = new Color(239/255f, 236/255f, 206/255f);
+        }
+        else if (Managers.Game.PlayerData.CurStageid == 2)
+        {
+            Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
+            ColorAdjustments colorAdjustments;
+            if (postProcessingVolume.profile.TryGet<ColorAdjustments>(out colorAdjustments))
+            {
+                colorAdjustments.active = true; // 효과 활성화
+                colorAdjustments.hueShift.Override(Mathf.Clamp(116, -180, 180));
+            }
+        }
     }
 
     Vector3 GetSpawnPosition()
