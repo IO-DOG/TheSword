@@ -300,7 +300,7 @@ public class MapEditor : EditorWindow
                 {
                     GameObject lever = Instantiate(defaulTileMap[objectData.Id], levers.transform);
                     lever.name = $"portal{objectData.Count}";
-                    lever.transform.position = new Vector3(objectData.Position.X, objectData.Position.Y, objectData.Position.Z);
+                    lever.transform.position = new Vector3(objectData.Position.X, objectData.Position.Y - Define.TILE_SIZE / 2, objectData.Position.Z);
                 }
                 else if (objectData.ObjectType == (int)Define.ObjectType.Pillar)
                 {
