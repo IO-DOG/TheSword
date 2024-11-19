@@ -43,8 +43,7 @@ namespace Data
     {
         public int id { get; set; }
         public int Chapter { get; set; }
-        public string Class { get; set; }
-        public int Feature { get; set; }
+        public int Ability { get; set; }
         public string Name { get; set; }
         public float Attack { get; set; }
         public float Defence { get; set; }
@@ -153,12 +152,12 @@ namespace Data
     public class MonsterClassData
     {
         public int id { get; set; }
-        public string ClassName { get; set; }
-        public string ClassDesc { get; set; }
-        public string Image { get; set; }
-        public string AttackFX { get; set; }
-        public int ClassId { get; set; }
-        public int EffectDescId { get; set; }
+        public int ClassName { get; set; }
+        public int ClassDesc { get; set; }
+        public string TraitImage { get; set; }
+        public string BattleBGImage { get; set; }
+        public string WeaponImage { get; set; }
+        public string ShieldImage { get; set; }
     }
 
     [Serializable]

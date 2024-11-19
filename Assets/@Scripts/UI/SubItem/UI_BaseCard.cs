@@ -50,6 +50,12 @@ public class UI_BaseCard : UI_Base
     {
         _creature = creature;
         SetUI();
+        SetTraitUI();
+    }
+
+    void SetTraitUI()
+    {
+
     }
 
     void SetUI()

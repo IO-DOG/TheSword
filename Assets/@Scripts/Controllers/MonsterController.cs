@@ -26,9 +26,8 @@ public class MonsterController : MonoBehaviour
 
             Managers.Game.MonsterData[0].id = Managers.Data.MonsterDic[id].id;
             Managers.Game.MonsterData[0].Chapter = Managers.Data.MonsterDic[id].Chapter;
-            Managers.Game.MonsterData[0].Class = Managers.Data.MonsterDic[id].Class;
+            Managers.Game.MonsterData[0].Ability = Managers.Data.MonsterDic[id].Ability;
             Managers.Game.MonsterData[0].Name = Managers.Data.MonsterDic[id].Name;
-            Managers.Game.MonsterData[0].Feature = Managers.Data.MonsterDic[id].Feature;
             Managers.Game.MonsterData[0].MaxHP = Managers.Data.MonsterDic[id].MaxHP;
             Managers.Game.MonsterData[0].CurHP = Managers.Data.MonsterDic[id].MaxHP;
             Managers.Game.MonsterData[0].Attack = Managers.Data.MonsterDic[id].Attack;

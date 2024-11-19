@@ -142,8 +142,7 @@ public class DataTransformer : EditorWindow
             MonsterData cd = new MonsterData();
             cd.id = ConvertValue<int>(row[i++]);
             cd.Chapter = ConvertValue<int>(row[i++]);
-            cd.Class = ConvertValue<string>(row[i++]);
-            cd.Feature = ConvertValue<int>(row[i++]);
+            cd.Ability = ConvertValue<int>(row[i++]);
             cd.Name = ConvertValue<string>(row[i++]);
             cd.Attack = ConvertValue<float>(row[i++]);
             cd.Defence = ConvertValue<float>(row[i++]);
@@ -524,12 +523,12 @@ public class DataTransformer : EditorWindow
             int i = 0;
             MonsterClassData cd = new MonsterClassData();
             cd.id = ConvertValue<int>(row[i++]);
-            cd.ClassName = ConvertValue<string>(row[i++]);
-            cd.ClassDesc = ConvertValue<string>(row[i++]);
-            cd.Image = ConvertValue<string>(row[i++]);
-            cd.AttackFX = ConvertValue<string>(row[i++]);
-            cd.ClassId = ConvertValue<int>(row[i++]);
-            cd.EffectDescId = ConvertValue<int>(row[i++]);
+            cd.ClassName = ConvertValue<int>(row[i++]);
+            cd.ClassDesc = ConvertValue<int>(row[i++]);
+            cd.TraitImage = ConvertValue<string>(row[i++]);
+            cd.BattleBGImage = ConvertValue<string>(row[i++]);
+            cd.WeaponImage = ConvertValue<string>(row[i++]);
+            cd.ShieldImage = ConvertValue<string>(row[i++]);
             loader.monsterClasses.Add(cd);
         }
 
