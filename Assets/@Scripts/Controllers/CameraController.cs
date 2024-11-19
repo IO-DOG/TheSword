@@ -17,7 +17,8 @@ public class CameraController : MonoBehaviour
     int[] _resolutionY = { 540, 360, 256, 80 };
 
     //float _angle = 60f; // 원하는 x축 회전 각도
-    public float _scaleMultiplier;
+    [HideInInspector]
+    public float _scaleMultiplier = 2f;
     float _scrollSpeed = 10f;
 
     GameObject confinerCollider;
@@ -38,6 +39,7 @@ public class CameraController : MonoBehaviour
     }
     private void Start()
     {
+        _scaleMultiplier = 2f;
         _vCam = GetComponent<CinemachineVirtualCamera>();
         _vCam.Follow = Managers.Game.Player.transform;
 
@@ -80,17 +82,17 @@ public class CameraController : MonoBehaviour
         GetComponent<CinemachineVirtualCamera>().LookAt = null;
     }
 
-    public void ChangeView(float angle, GameObject go)
-    {
-        _scaleMultiplier = 1 / Mathf.Cos(angle * Mathf.Deg2Rad);
-        _playerOriginScale = Managers.Game.Player.transform.localScale;
-        _goOriginScale = go.transform.localScale;
+    //public void ChangeView(float angle, GameObject go)
+    //{
+    //    _scaleMultiplier = 1 / Mathf.Cos(angle * Mathf.Deg2Rad);
+    //    _playerOriginScale = Managers.Game.Player.transform.localScale;
+    //    _goOriginScale = go.transform.localScale;
 
-        if (go.GetComponent<PlayerController>() != null)
-            go.transform.localScale = new Vector3(_playerOriginScale.x, _playerOriginScale.y * _scaleMultiplier, _playerOriginScale.z * _scaleMultiplier);
-        else
-            go.transform.localScale = new Vector3(_goOriginScale.x, _goOriginScale.y * _scaleMultiplier, _goOriginScale.z);
-    }
+    //    if (go.GetComponent<PlayerController>() != null)
+    //        go.transform.localScale = new Vector3(_playerOriginScale.x, _playerOriginScale.y * _scaleMultiplier, _playerOriginScale.z * _scaleMultiplier);
+    //    else
+    //        go.transform.localScale = new Vector3(_goOriginScale.x, _goOriginScale.y * _scaleMultiplier, _goOriginScale.z);
+    //}
 
     public void SetupCameraConfiner()
     {
