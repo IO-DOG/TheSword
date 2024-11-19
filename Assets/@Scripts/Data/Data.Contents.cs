@@ -154,10 +154,10 @@ namespace Data
         public int id { get; set; }
         public int ClassName { get; set; }
         public int ClassDesc { get; set; }
-        public string TraitImage { get; set; }
+        public string AbilityImage { get; set; }
         public string BattleBGImage { get; set; }
-        public string WeaponImage { get; set; }
-        public string ShieldImage { get; set; }
+        public string Weapon { get; set; }
+        public string Shield { get; set; }
     }
 
     [Serializable]

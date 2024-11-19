@@ -525,10 +525,10 @@ public class DataTransformer : EditorWindow
             cd.id = ConvertValue<int>(row[i++]);
             cd.ClassName = ConvertValue<int>(row[i++]);
             cd.ClassDesc = ConvertValue<int>(row[i++]);
-            cd.TraitImage = ConvertValue<string>(row[i++]);
+            cd.AbilityImage = ConvertValue<string>(row[i++]);
             cd.BattleBGImage = ConvertValue<string>(row[i++]);
-            cd.WeaponImage = ConvertValue<string>(row[i++]);
-            cd.ShieldImage = ConvertValue<string>(row[i++]);
+            cd.Weapon = ConvertValue<string>(row[i++]);
+            cd.Shield = ConvertValue<string>(row[i++]);
             loader.monsterClasses.Add(cd);
         }
 

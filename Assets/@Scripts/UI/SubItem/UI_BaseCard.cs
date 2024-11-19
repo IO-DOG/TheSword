@@ -20,6 +20,8 @@ public class UI_BaseCard : UI_Base
         DefenceIcon,
         CreatureSwordImage,
         CreatureShieldImage,
+        BattleBGImage,
+        AbilityImage,
     }
 
     protected enum Texts
@@ -50,12 +52,6 @@ public class UI_BaseCard : UI_Base
     {
         _creature = creature;
         SetUI();
-        SetTraitUI();
-    }
-
-    void SetTraitUI()
-    {
-
     }
 
     void SetUI()
@@ -65,10 +61,19 @@ public class UI_BaseCard : UI_Base
         BindText(typeof(Texts));
         #endregion
 
-        GetText((int)Texts.CreatureName).text = "Player!";
+        GetText((int)Texts.CreatureName).text = _creature.Name;
         GetText((int)Texts.HPBarText).text = _creature.CurHP.ToString();
         GetText((int)Texts.AttackStatusText).text = _creature.Attack.ToString();
         GetText((int)Texts.DefenceStatusText).text = _creature.Defence.ToString();
+
+        int abilityIndex = _creature.Ability;
+        string battleBGImage = Managers.Data.MonsterClassDic[abilityIndex].BattleBGImage;
+        string abilityImage = Managers.Data.MonsterClassDic[abilityIndex].AbilityImage;
+        if (abilityIndex != 0)
+        {
+            GetImage((int)Images.BattleBGImage).sprite = Managers.Resource.Load<Sprite>(battleBGImage);
+            GetImage((int)Images.AbilityImage).sprite = Managers.Resource.Load<Sprite>(abilityImage);
+        }
     }
 
     public virtual void Refresh()
@@ -107,7 +112,8 @@ public class UI_BaseCard : UI_Base
         _defenceCoolTime = _maxDefenceCoolTime;
         GetImage((int)Images.DefenceDelayGauge).fillAmount = _defenceCoolTime / _maxDefenceCoolTime;
 
-        GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIDefenceIcon");
+        GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Shield);
+        //GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIDefenceIcon");
         _creature.IsDefence = true;
     }
 
