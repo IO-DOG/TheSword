@@ -85,7 +85,7 @@ public class GameManager
         public Action OnDeadAction;
 
         public CreatureClass.ITrait Trait { get; set; }
-        public string Class { get; set; }
+        public int Ability { get; set; }
         public string Name { get; set; }
         public float MaxHP { get; set; }
         public float CurHP { get; set; }

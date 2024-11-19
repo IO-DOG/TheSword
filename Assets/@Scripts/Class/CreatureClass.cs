@@ -9,46 +9,29 @@ public static class EffectFactory
 {
     public static ITrait GetTrait(CreatureData creatureData, UI_BaseCard baseCard = null)
     {
-        if (creatureData.Class == Define.Trait.Beast.ToString())
+        switch (creatureData.Ability)
         {
-            return new BeastTrait();
-        }
-        else if (creatureData.Class == Define.Trait.Magic.ToString())
-        {
-            return new MagicTrait();
-        }
-        else if (creatureData.Class == Define.Trait.Guardian.ToString())
-        {
-            return new GuardianTrait(baseCard);
-        }
-        else if (creatureData.Class == Define.Trait.Immortal.ToString())
-        {
-            return new ImmortalTrait();
-        }
-        else if (creatureData.Class == Define.Trait.Knight.ToString())
-        {
-            return new KnightTrait();
-        }
-        else if (creatureData.Class == Define.Trait.Titan.ToString())
-        {
-            return new TitanTrait();
-        }
-        else if (creatureData.Class == Define.Trait.Assassin.ToString())
-        {
-            return new AssassinTrait();
-        }
-        else if (creatureData.Class == Define.Trait.Armor.ToString())
-        {
-            return new ArmorTrait();
-        }
-        else if (creatureData.Class == Define.Trait.KingSlime.ToString())
-        {
-            return new KingSlimeTrait();
-        }
-        else
-        {
-            return new DefaultTrait();
-        }
+            case (int)Define.Trait.Beast:
+                return new BeastTrait();
+            case (int)Define.Trait.Magic:
+                return new MagicTrait();
+            case (int)Define.Trait.Guardian:
+                return new GuardianTrait(baseCard);
+            case (int)Define.Trait.Immortal:
+                return new ImmortalTrait();
+            case (int)Define.Trait.Knight:
+                return new KnightTrait();
+            case (int)Define.Trait.Titan:
+                return new TitanTrait();
+            case (int)Define.Trait.Assassin:
+                return new AssassinTrait();
+            case (int)Define.Trait.Armor:
+                return new ArmorTrait();
+            case (int)Define.Trait.KingSlime:
+                return new KingSlimeTrait();
+            default:
+                return new DefaultTrait();
+        };
     }
 }
 
