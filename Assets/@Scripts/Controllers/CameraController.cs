@@ -95,7 +95,7 @@ public class CameraController : MonoBehaviour
     public void SetupCameraConfiner()
     {
         string curDungeonName = $"Dungeon_{Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].DungeonID}";
-        _bg = GameObject.Find(curDungeonName).transform.Find("Deco/BG").gameObject.GetComponent<SpriteRenderer>();
+        _bg = GameObject.Find(curDungeonName).transform.Find("Decos/BG").gameObject.GetComponent<SpriteRenderer>();
 
         if (confinerCollider != null)
             Managers.Resource.Destroy(confinerCollider);
