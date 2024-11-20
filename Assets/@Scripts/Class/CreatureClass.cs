@@ -120,16 +120,21 @@ public class CreatureClass : MonoBehaviour
 
     public class GuardianTrait : ITrait
     {
+        public System.Action OnGuardianAction;
+
         public GuardianTrait(UI_BaseCard uI_BaseCard)
         {
             Debug.Log(uI_BaseCard);
-            Managers.Event.Unsubscribe(Define.GameEvent.FillDefenceGague, uI_BaseCard.FillDefenceGague);
-            Managers.Event.Subscribe(Define.GameEvent.FillDefenceGague, uI_BaseCard.FillDefenceGague);
+            //OnGuardianAction -= uI_BaseCard.FillDefenceGague;
+            //OnGuardianAction += uI_BaseCard.FillDefenceGague;
+            //Managers.Event.Unsubscribe(Define.GameEvent.FillDefenceGague, uI_BaseCard.FillDefenceGague);
+            //Managers.Event.Subscribe(Define.GameEvent.FillDefenceGague, uI_BaseCard.FillDefenceGague);
+            uI_BaseCard.FillDefenceGague();
         }
 
         ~GuardianTrait()
         {
-            Managers.Event.DeleteEvent(Define.GameEvent.FillDefenceGague);
+            //Managers.Event.DeleteEvent(Define.GameEvent.FillDefenceGague);
         }
 
         public void ExcuteOnDead(CreatureData creature)
