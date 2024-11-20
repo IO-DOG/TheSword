@@ -282,6 +282,14 @@ public class UI_PlayerCard : UI_BaseCard
         //CreatePlayerDeathParticle();
         Managers.Game.OnBattleAction.Invoke();
         Managers.Game.OnBattle = false;
+
+        // 몬스터 죽는 파티클 생성
+        Vector3 particlePos = new Vector3 (Managers.Game.PlayerData.CurPosition.X, Managers.Game.PlayerData.CurPosition.Y, Managers.Game.PlayerData.CurPosition.Z);
+        GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
+        deathSoulPurple.transform.position = particlePos;
+        deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        Destroy(deathSoulPurple, 3);
+        Destroy(Managers.Game.Player.gameObject);
         return;
     }
 
