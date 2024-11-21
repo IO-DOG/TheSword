@@ -181,7 +181,6 @@ public class Events
         if (Managers.Game.Player.gameObject.transform.position.x < 303.5f || Managers.Game.Player.gameObject.transform.position.x > 304.2f
             || Managers.Game.Player.gameObject.transform.position.z < -7f) // 하드코딩. 일단 놔두자.
             return;
-        Debug.Log("킹 슬라임을 만났다!!");
 
         Managers.Game.OnMeetKingSlime = true;
         Managers.Game.OnDirect = true;
@@ -260,8 +259,6 @@ public class Events
         Vector3 target = new Vector3(0f, 14.5f, -5f); ;
         float moveTime = 10f;
         CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
-
-        //Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 16.5f, -5f);
 
         GameObject.Find("SlimeFall4").GetComponent<ParticleSystem>().Play();
         yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 1.5f));
@@ -540,6 +537,20 @@ public class Events
         }
 
         Managers.Game.OnDirect = false;
+        Managers.Game.OnKingSlimeDeadAction -= Unlock4Floor;
+        Managers.Game.OnKingSlimeDeadAction += Unlock4Floor;
+    }
+
+    public void Unlock4Floor()
+    {
+        // todo
+        // path particle
+        // open 4floor
+        GameObject parent = GameObject.Find("Dungeon_00_003");
+        GameObject go = Managers.Resource.Instantiate("FX_BossClearLine", parent.transform);
+        go.transform.position = new Vector3(3.83f, 0.66f, -3.75f);
+        go.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+
     }
 
     #endregion
