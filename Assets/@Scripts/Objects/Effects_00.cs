@@ -85,23 +85,40 @@ public class Effects_00 : MonoBehaviour
 
     void SetLight()
     {
+        Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
+        ColorAdjustments colorAdjustments;
+        Vignette vignette;
+
+        if (Managers.Game.PlayerData.CurStageid != 2)
+        {
+            if (postProcessingVolume.profile.TryGet<ColorAdjustments>(out colorAdjustments))
+            {
+                colorAdjustments.hueShift.Override(Mathf.Clamp(0, -180, 180));
+            }
+
+            if (postProcessingVolume.profile.TryGet<Vignette>(out vignette))
+            {
+                vignette.intensity.Override(Mathf.Clamp(0.126f, 0, 1));
+            }
+        
+        }
         if (Managers.Game.PlayerData.CurStageid == 0)
         {
-            Managers.Game.DirectionalLight.intensity = 1.5f;
             Managers.Game.DirectionalLight.color = new Color(255/255f, 244/255f, 214/255f);
         }
         else if(Managers.Game.PlayerData.CurStageid == 1)
         {
-            Managers.Game.DirectionalLight.intensity = 1f;
-            Managers.Game.DirectionalLight.color = new Color(239/255f, 236/255f, 206/255f);
+            Managers.Game.DirectionalLight.color = new Color(192/255f, 189/255f, 179/255f);
+
+            if (postProcessingVolume.profile.TryGet<Vignette>(out vignette))
+            {
+                vignette.intensity.Override(Mathf.Clamp(0.3f, 0, 1));
+            }
         }
         else if (Managers.Game.PlayerData.CurStageid == 2)
         {
-            Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
-            ColorAdjustments colorAdjustments;
             if (postProcessingVolume.profile.TryGet<ColorAdjustments>(out colorAdjustments))
             {
-                colorAdjustments.active = true; // 효과 활성화
                 colorAdjustments.hueShift.Override(Mathf.Clamp(116, -180, 180));
             }
         }

@@ -19,16 +19,16 @@ public class Pillar : MonoBehaviour
 
     IEnumerator WaitAndOpen(float time)
     {
-        Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_XDamping = 1f;
-        Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_YDamping = 1f;
+        Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_XDamping = 0.3f;
+        Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_YDamping = 0.3f;
         Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().Follow = transform;
         yield return new WaitForSeconds(time);
         _pillar = gameObject.GetComponentInChildren<Animator>().gameObject;
         _pillar.GetComponent<Animator>().Play("Pillar");
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.7f);
         _pillar.SetActive(false);
         Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().Follow = Managers.Game.Player.transform;
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1f);
         Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_XDamping = 0f;
         Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_YDamping = 0f;
     }
