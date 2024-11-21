@@ -10,6 +10,7 @@ public class Effects_00 : MonoBehaviour
 {
     GameObject fog;
     GameObject fallingLeavesPrefab;
+    GameObject dust;
     List<GameObject> fallingLeaves = new List<GameObject>();
     int leavesPoolSize = 7;
 
@@ -17,6 +18,7 @@ public class Effects_00 : MonoBehaviour
     void Start()
     {
         fog = Managers.Resource.Instantiate("Fog", transform);
+        dust = Managers.Resource.Instantiate("DustFloaty", transform);
         for (int i = 0; i < leavesPoolSize; i++)
         {
             fallingLeavesPrefab = Managers.Resource.Instantiate("FallingLeaves", transform);
@@ -28,6 +30,8 @@ public class Effects_00 : MonoBehaviour
         Managers.Game.OnPortalAction += SetFogPosition;
         Managers.Game.OnPortalAction -= SetLight;
         Managers.Game.OnPortalAction += SetLight;
+        //Managers.Game.OnPortalAction -= SetDustPosition;
+        //Managers.Game.OnPortalAction += SetDustPosition;
         Managers.Game.OnPortalAction.Invoke();
 
         StartCoroutine(FallingLeaves());
@@ -73,6 +77,11 @@ public class Effects_00 : MonoBehaviour
         }
 
     }
+
+    //void SetDustPosition()
+    //{
+    //    dust.transform.localPosition = Managers.Game.Player.transform.position;
+    //}
 
     void SetLight()
     {
