@@ -30,8 +30,8 @@ public class Effects_00 : MonoBehaviour
         Managers.Game.OnPortalAction += SetFogPosition;
         Managers.Game.OnPortalAction -= SetLight;
         Managers.Game.OnPortalAction += SetLight;
-        //Managers.Game.OnPortalAction -= SetDustPosition;
-        //Managers.Game.OnPortalAction += SetDustPosition;
+        Managers.Game.OnPortalAction -= SetDustPosition;
+        Managers.Game.OnPortalAction += SetDustPosition;
         Managers.Game.OnPortalAction.Invoke();
 
         StartCoroutine(FallingLeaves());
@@ -78,23 +78,13 @@ public class Effects_00 : MonoBehaviour
 
     }
 
-    //void SetDustPosition()
-    //{
-    //    dust.transform.localPosition = Managers.Game.Player.transform.position;
-    //}
+    void SetDustPosition()
+    {
+        dust.transform.localPosition = Managers.Game.Player.transform.position;
+    }
 
     void SetLight()
     {
-        if (Managers.Game.PlayerData.CurStageid != 2)
-        {
-            Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
-            ColorAdjustments colorAdjustments;
-            if (postProcessingVolume.profile.TryGet<ColorAdjustments>(out colorAdjustments))
-            {
-                colorAdjustments.active = false;
-            }
-        }
-
         if (Managers.Game.PlayerData.CurStageid == 0)
         {
             Managers.Game.DirectionalLight.intensity = 1.5f;
