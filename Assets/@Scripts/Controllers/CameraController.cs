@@ -42,10 +42,10 @@ public class CameraController : MonoBehaviour
     {
         _scaleMultiplier = 2f;
         _vCam = GetComponent<CinemachineVirtualCamera>();
-        _vCam.Follow = Managers.Game.Player.transform;
+        //_vCam.Follow = Managers.Game.Player.transform;
 
         _transposer = _vCam.GetCinemachineComponent<CinemachineTransposer>();
-        _transposer.m_FollowOffset = new Vector3(0f, 10f, -5f);
+        //_transposer.m_FollowOffset = new Vector3(0f, 10f, -5f);
     }
 
     private void Update()

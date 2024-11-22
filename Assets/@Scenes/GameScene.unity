@@ -325,17 +325,29 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1883170516997004607, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1883170516997004607, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1883170516997004607, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2835394005480972901, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 3.2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2835394005480972901, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 13
+      value: 11.5
       objectReference: {fileID: 0}
     - target: {fileID: 2835394005480972901, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.8999999
+      value: -5
       objectReference: {fileID: 0}
     - target: {fileID: 2835394005480972901, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
       propertyPath: m_LocalRotation.w
@@ -365,6 +377,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3464486184394321213, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
+      propertyPath: m_FollowOffset.y
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3464486184394321213, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
+      propertyPath: m_FollowOffset.z
+      value: -5
+      objectReference: {fileID: 0}
     - target: {fileID: 3582222762096364646, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
       propertyPath: m_Name
       value: MainCamera
@@ -381,6 +401,10 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7536666164468340467, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
+      propertyPath: m_Follow
+      value: 
+      objectReference: {fileID: 2104500031}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -586,6 +610,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 66bc3db3a9f5f7043971da3e16020667, type: 3}
+--- !u!4 &2104500031 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7309430656472859024, guid: 66bc3db3a9f5f7043971da3e16020667, type: 3}
+  m_PrefabInstance: {fileID: 2104500030}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

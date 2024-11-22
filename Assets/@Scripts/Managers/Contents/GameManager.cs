@@ -29,7 +29,7 @@ public class GameManager
     public bool OnInteract = false;
     public bool OnMeetKingSlime = false;
 
-    public int ResolutionIdx = 0;
+    public int ResolutionIdx = 1;
     public int CurEventID;
     public string CurChapter;
     public int TotalKillSplitSlime = 0;
@@ -368,8 +368,8 @@ public class GameManager
 
         foreach (Transform child in Maps[mapId].transform.Find("Doors"))
         {
-            if (child.TryGetComponent(out Door door) &&
-                Managers.Data.DoorActiveDic[door._doorIndex_forActive] == false)
+            Door door = child.GetComponentInChildren<Door>();
+            if (door != null && Managers.Data.DoorActiveDic[door._doorIndex_forActive] == false)
             {
                 door.gameObject.SetActive(false);
             }
@@ -378,19 +378,20 @@ public class GameManager
 
         foreach (Transform child in Maps[mapId].transform.Find("Pillars"))
         {
-            if (child.TryGetComponent(out Pillar pillar)
-                && Managers.Data.PillarActiveDic[pillar._pillarIndex_forActive] == false)
+            Pillar pillar = child.GetComponentInChildren<Pillar>();
+            if (pillar != null && Managers.Data.PillarActiveDic[pillar._pillarIndex_forActive] == false)
             {
-                pillar.Open(0f);
+                pillar.SetInActive();
             }
         }
 
         foreach (Transform child in Maps[mapId].transform.Find("Levers"))
         {
-            if (child.TryGetComponent(out Lever lever)
-                && Managers.Data.LeverActiveDic[lever._leverIndex_forActive] == false)
+            Lever lever = child.GetComponentInChildren<Lever>();
+            if (lever != null && Managers.Data.LeverActiveDic[lever._leverIndex_forActive] == false)
             {
                 lever.Play(0f);
+                lever.SetActive();
             }
         }
     }

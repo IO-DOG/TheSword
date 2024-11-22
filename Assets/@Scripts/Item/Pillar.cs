@@ -17,6 +17,11 @@ public class Pillar : MonoBehaviour
         StartCoroutine(WaitAndOpen(time));
     }
 
+    public void SetInActive()
+    {
+        Managers.Data.PillarActiveDic[_pillarIndex_forActive] = false;
+    }
+
     IEnumerator WaitAndOpen(float time)
     {
         Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_XDamping = 0.3f;

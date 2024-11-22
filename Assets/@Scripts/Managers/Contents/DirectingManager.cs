@@ -571,9 +571,6 @@ public class Events
 
         Managers.Game.OnDirect = true;
 
-        // Set Camera Position
-        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetCameraTarget(Managers.Game.Player.gameObject);
-
         // Player Movement
         float originalSpeed = Managers.Game.PlayerData.MoveSpeed;
         Managers.Game.Player.Speed = 1f;
@@ -581,9 +578,6 @@ public class Events
 
         yield return new WaitForSeconds(0.5f);
         Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
-
-        // Show Stage Name
-        Managers.UI.ShowPopupUI<UI_StageNamePopup>();
 
         yield return new WaitForSeconds(Define.STAGE_NAME_DURATION * 2.2f);
 

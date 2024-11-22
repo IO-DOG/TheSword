@@ -63,6 +63,10 @@ public class UI_GameScene : UI_Scene
         Managers.Game.PlayerData.MoveSpeed = 1f;
         Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
 
+
+        Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST;
+        Managers.Game.PlayerData.CurShield = 0;
+
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
         GetObject((int)GameObjects.GreenKey).SetActive(false);
         GetObject((int)GameObjects.YellowKey).SetActive(false);
@@ -82,6 +86,12 @@ public class UI_GameScene : UI_Scene
 
 
         Managers.Game.OnFadeAction.Invoke(1f);
+
+        Managers.UI.ShowPopupUI<UI_StageNamePopup>();
+
+        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1)
+            Managers.Directing.Events.CoPlayTutorial_1();
+
 
         return true;
     }
