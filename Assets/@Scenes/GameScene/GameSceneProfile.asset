@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d7fd9488000d3734a9e00ee676215985, type: 3}
-  m_Name: MainCamera Profile
+  m_Name: GameSceneProfile
   m_EditorClassIdentifier: 
   components:
   - {fileID: 3293543652201246743}
@@ -132,7 +132,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c01700fd266d6914ababb731e09af2eb, type: 3}
   m_Name: DepthOfField
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   mode:
     m_OverrideState: 1
     m_Value: 1
@@ -144,7 +144,7 @@ MonoBehaviour:
     m_Value: 30
   gaussianMaxRadius:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 0.847
   highQualitySampling:
     m_OverrideState: 1
     m_Value: 0
