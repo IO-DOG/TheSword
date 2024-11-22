@@ -178,7 +178,7 @@ public class Events
             _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = false;
         }
 
-        if (Managers.Game.Player.gameObject.transform.position.x < 303.5f || Managers.Game.Player.gameObject.transform.position.x > 304.2f
+        if (Managers.Game.Player.gameObject != null && Managers.Game.Player.gameObject.transform.position.x < 303.5f || Managers.Game.Player.gameObject.transform.position.x > 304.2f
             || Managers.Game.Player.gameObject.transform.position.z < -7f) // 하드코딩. 일단 놔두자.
             return;
 

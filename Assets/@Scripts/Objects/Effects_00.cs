@@ -66,6 +66,10 @@ public class Effects_00 : MonoBehaviour
 
     void SetFogPosition()
     {
+        if (Managers.Game.Player.gameObject == null)
+            return;
+        if (fog == null)
+            return;
         fog.transform.localPosition = Managers.Game.Player.transform.position;
         if (Managers.Game.PlayerData.CurStageid == 0)
         {

@@ -220,6 +220,7 @@ public class UI_PlayerCard : UI_BaseCard
             yield return new WaitForSeconds(0.005f);
         }
         yield return delay;
+
         Destroy(go);
 
         //WaitForSeconds delay = new WaitForSeconds(0.1f);
@@ -289,7 +290,10 @@ public class UI_PlayerCard : UI_BaseCard
         deathSoulPurple.transform.position = particlePos;
         deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
         Destroy(deathSoulPurple, 3);
-        Destroy(Managers.Game.Player.gameObject);
+        Managers.Game.Player.gameObject.SetActive(false);
+        //Destroy(Managers.Game.Player.gameObject);
+
+        Managers.UI.ShowPopupUI<UI_GameOverPopup>();
         return;
     }
 
