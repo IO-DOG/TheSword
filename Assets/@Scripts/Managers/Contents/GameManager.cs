@@ -320,6 +320,11 @@ public class GameManager
         SpawnPoints = ParentMap.GetComponentsInChildren<Transform>().Where(child => child.CompareTag("SpawnPoint")).ToArray();
         BossRoomId = Managers.Data.StageInfoDic.Where(pair => pair.Value.Type == Define.DungeonType.Boss)
                     .Select(pair => pair.Key).FirstOrDefault();
+
+        if (Managers.Game.PlayerData.CurStageid == 2)
+        {
+            CameraController._isCombineMap = true;
+        }
         //MainCamera.GetComponentInChildren<CustomCameraLimiter>().SetBG();
 
         Managers.Resource.Instantiate($"Effects_{CurChapter}", ParentMap.transform);
