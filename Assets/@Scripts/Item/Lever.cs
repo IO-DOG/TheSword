@@ -13,7 +13,6 @@ public class Lever : MonoBehaviour
     public int _leverIndex_forActive = 0;
     public bool _IsActive;
 
-
     public Tween Play(float time)
     {
         Vector3 rotateAngle = new Vector3(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z + 25f);
@@ -21,6 +20,12 @@ public class Lever : MonoBehaviour
 
         Tween tween = lever.transform.DORotateQuaternion(targetRotation, time);
         return tween;
+    }
+
+    public void SetInActive()
+    {
+        On.SetActive(false);
+        Off.SetActive(true);
     }
 
     public void SetActive()
@@ -43,8 +48,9 @@ public class Lever : MonoBehaviour
         {
             if(child.GetComponentInChildren<Pillar>() != null)
             {
-                child.GetComponentInChildren<Pillar>().Open(2.0f);
+                child.GetComponentInChildren<Pillar>().Open(1.0f);
                 Managers.Data.LeverActiveDic[_leverIndex_forActive] = false ;
+                Managers.Game.SaveGame();
             }
         }
     }

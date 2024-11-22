@@ -555,4 +555,60 @@ public class Events
     }
 
     #endregion
+
+    #region 
+    public void CoPlayTutorial_1()
+    {
+        CoroutineManager.StartCoroutine(PlayTutorial_1());
+    }
+
+    IEnumerator PlayTutorial_1()
+    {
+        Managers.Game.CurEventID = 0;
+        // Set Player Dir
+        Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
+
+        yield return new WaitForSeconds(0.5f);
+
+        Managers.Game.OnDirect = true;
+
+        // Player Movement
+        float originalSpeed = Managers.Game.PlayerData.MoveSpeed;
+        Managers.Game.Player.Speed = 1f;
+        Managers.Game.Player.Moving(Define.MoveDir.Up);
+
+        yield return new WaitForSeconds(0.5f);
+        Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
+
+        yield return new WaitForSeconds(Define.STAGE_NAME_DURATION * 2.2f);
+
+        Managers.Game.OnDirect = false;
+
+        UI_ConversationPopup conversation = Managers.UI.ShowPopupUI<UI_ConversationPopup>();
+
+        // Reset Player Stat
+        Managers.Game.Player.Speed = originalSpeed;
+
+        #region 테스트 후 다시 활성화해야 함
+        bool prevConvsersationState = Managers.Game.OnConversation;
+
+        while (true)
+        {
+            bool currentConversationState = Managers.Game.OnConversation;
+            if (prevConvsersationState && !currentConversationState)
+            {
+                Managers.Game.OnDirect = false;
+                break;
+            }
+
+            prevConvsersationState = currentConversationState;
+
+            yield return null;
+        }
+        #endregion
+
+        PlayerPrefs.SetInt("ISFIRST", 0);
+        Managers.Game.SaveGame();
+    }
+    #endregion
 }

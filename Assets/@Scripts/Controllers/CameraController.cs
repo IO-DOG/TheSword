@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering.Universal;
+using UnityEngine.Rendering;
 
 public class CameraController : MonoBehaviour
 {
@@ -41,15 +42,15 @@ public class CameraController : MonoBehaviour
     {
         _scaleMultiplier = 2f;
         _vCam = GetComponent<CinemachineVirtualCamera>();
-        _vCam.Follow = Managers.Game.Player.transform;
+        //_vCam.Follow = Managers.Game.Player.transform;
 
         _transposer = _vCam.GetCinemachineComponent<CinemachineTransposer>();
-        _transposer.m_FollowOffset = new Vector3(0f, 10f, -5f);
+        //_transposer.m_FollowOffset = new Vector3(0f, 10f, -5f);
     }
 
     private void Update()
     {
-        if (_isCombineMap == true)
+        if (_isCombineMap ==  true)
         {
             Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[2];
             Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[2];
@@ -107,6 +108,7 @@ public class CameraController : MonoBehaviour
         _collider = confinerCollider.AddComponent<BoxCollider>();
         _collider.size = new Vector3(_bg.bounds.size.x, _bg.bounds.size.z * Mathf.Sqrt(3) / 2, Define.CONFINER_HEIGHT);
         _collider.center = new Vector3(0, _collider.size.y, 0);
+
         confinerCollider.transform.position = new Vector3(_bg.bounds.min.x + _bg.bounds.size.x / 2 + Define.TILE_SIZE / 2, 0, _bg.bounds.min.z + _bg.bounds.center.z + -Define.TILE_SIZE / 2);
 
         // Cinemachine Confiner 설정

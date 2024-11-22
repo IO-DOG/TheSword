@@ -186,7 +186,10 @@ public class MapEditor : EditorWindow
 
         foreach (GameObject go in SelectedTileMap)
         {
-            go.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            if (go.name != "Tilemap_C0_W000")
+                go.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            else
+                go.transform.localScale = new Vector3(0.14f, 0.14f, 0.14f);
         }
 
         if (MapDic.ContainsKey(mapId))
@@ -313,7 +316,10 @@ public class MapEditor : EditorWindow
                     if (objectData.ObjectType == (int)Define.ObjectType.Wall)
                     {
                         GameObject wall = Instantiate(SelectedTileMap[objectData.Id], walls.transform);
-                        wall.transform.position = new Vector3(objectData.Position.X, objectData.Position.Y - Define.TILE_SIZE / 2, objectData.Position.Z);
+                        if (wall.name.Contains("Tilemap_C0_W00"))
+                            wall.transform.position = new Vector3(objectData.Position.X, wall.transform.position.y, objectData.Position.Z);
+                        else
+                            wall.transform.position = new Vector3(objectData.Position.X, wall.transform.position.y - Define.TILE_SIZE / 2, objectData.Position.Z);
                     }
                     else if (objectData.ObjectType == (int)Define.ObjectType.Void)
                     {

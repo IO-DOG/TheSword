@@ -12,6 +12,7 @@ public class UI_IntroScene : UI_Scene
     enum Images
     {
         SceneImage,
+        EscapeGauge,
         //SceneFrameImage,
     }
 
@@ -23,6 +24,9 @@ public class UI_IntroScene : UI_Scene
 
     int idx = 0;
     int totalCount;
+    bool isPressing = false;
+    float requiredHoldTime = 3f;
+    float holdTime = 0f;
     List<ScriptData> _scripts;
 
     public override bool Init()
@@ -42,6 +46,7 @@ public class UI_IntroScene : UI_Scene
         totalCount = 7;
 
         GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx++].id);
+        GetImage((int)Images.EscapeGauge).gameObject.SetActive(false);
         return true;
     }
 
@@ -57,8 +62,30 @@ public class UI_IntroScene : UI_Scene
         }
 
         //test
-        if (Input.GetKeyDown(KeyCode.Escape))
-            Managers.Scene.LoadScene(Define.Scene.GameScene);
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            isPressing = true;
+        }
+
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            isPressing = false;
+            GetImage((int)Images.EscapeGauge).fillAmount = 0;
+            GetImage((int)Images.EscapeGauge).gameObject.SetActive(false);
+            holdTime = 0f;
+        }
+
+        if(isPressing)
+        {
+            GetImage((int)Images.EscapeGauge).gameObject.SetActive(true);
+            holdTime += Time.deltaTime;
+            float progress = holdTime / requiredHoldTime;
+            GetImage((int)Images.EscapeGauge).fillAmount = progress;
+            if (holdTime >= requiredHoldTime)
+            {
+                Managers.Scene.LoadScene(Define.Scene.GameScene);
+            }
+        }
     }
 
     void NextScene()
