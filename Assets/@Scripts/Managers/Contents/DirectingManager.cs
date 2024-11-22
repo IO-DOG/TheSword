@@ -111,6 +111,7 @@ public class Events
     #region Contract Sword
     public void CoStartContractSword()
     {
+        PlayerPrefs.SetInt("ISMEETSWORD", 1);
         CoroutineManager.StartCoroutine(ContractSword());
     }
 
