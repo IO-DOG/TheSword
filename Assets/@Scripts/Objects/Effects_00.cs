@@ -84,6 +84,10 @@ public class Effects_00 : MonoBehaviour
 
     void SetDustPosition()
     {
+        if (Managers.Game.Player.gameObject == null)
+            return;
+        if (dust == null)
+            return;
         dust.transform.localPosition = Managers.Game.Player.transform.position;
     }
 

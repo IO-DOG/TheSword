@@ -23,10 +23,9 @@ public class UI_GameOverPopup : UI_Popup
             // 마검 습득 후
             if (PlayerPrefs.GetInt("ISMEETSWORD") == 1)
             {
-                Managers.Game.SaveGame();
-
+                Managers.Game.PlayerData.Clear();
                 Managers.Game.Player.gameObject.SetActive(true);
-                Managers.Game.Player.SetPlayerPosition(Managers.Game.SpawnPoints[1].position);
+                Managers.Game.Player.SetPlayerPosition(Managers.Game.SpawnPoints[2].position);
                 Managers.Game.LoadGame();
             }
             else
