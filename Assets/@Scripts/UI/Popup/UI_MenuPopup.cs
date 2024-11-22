@@ -73,6 +73,7 @@ public class UI_MenuPopup : UI_Popup
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            Managers.Game.GameScene.isOpenMenuPopup = false;
             OpenOtherUI();
             //Managers.UI.ClosePopupUI();
         }

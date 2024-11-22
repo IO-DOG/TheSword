@@ -34,18 +34,20 @@ public class UI_GameScene : UI_Scene
     enum Images
     {
         MainUIEXPGaugeImage,
-        //MainUIAuxiliaryHPGaugeImage,
+        MainUIAuxiliaryHPGaugeImage,
         MainUIOptionAImage,
         MainUIOptionBImage,
-        //MainUIInventoryAImage,
-        //MainUIInventoryBImage,
-        //MainUISwordAImage,
-        //MainUISwordBImage,
-        //MainUIWarpAImage,
-        //MainUIWarpBImage,
+        MainUIInventoryAImage,
+        MainUIInventoryBImage,
+        MainUISwordAImage,
+        MainUISwordBImage,
+        MainUIWarpAImage,
+        MainUIWarpBImage,
     }
 
     #endregion
+
+    public bool isOpenMenuPopup = false;
 
     public override bool Init()
     {
@@ -72,6 +74,37 @@ public class UI_GameScene : UI_Scene
         GetObject((int)GameObjects.YellowKey).SetActive(false);
         GetObject((int)GameObjects.RedKey).SetActive(false);
 
+
+        // UI 활성화 여부 체크
+        if (PlayerPrefs.GetInt("ISOPENINVENUI") == 0) // 인벤 활성화 x
+            OffUIInventory();
+        if (PlayerPrefs.GetInt("ISOPENWARPUI") == 0)
+            OffUIWarp();
+        if (PlayerPrefs.GetInt("ISOPENCLASSUI") == 0)
+            OffUISword();
+
+        GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
+        {
+            GameObject go = GameObject.Find("UI_MenuPopup");
+            if (go == null)
+            {
+                isOpenMenuPopup = true;
+                Managers.UI.ShowPopupUI<UI_MenuPopup>();
+            }
+            else
+                go.GetComponent<UI_MenuPopup>().OpenOtherUI();
+        });
+        GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(OnClickMainUIInventoryAImage);
+
+        //GetButton((int)Buttons.PlayConversation).gameObject.BindEvent(() =>
+        //{
+        //    if (!Managers.Game.OnBattle)
+        //    {
+        //        Managers.UI.ShowPopupUI<UI_ConversationPopup>();
+        //        Managers.Game.CurEventID = Define.EVENT_SWORD_FIRST;
+        //    }
+        //});
+
         Refresh();
         Data.MyVector3 loadPos = Managers.Game.PlayerData.CurPosition;
 
@@ -84,6 +117,10 @@ public class UI_GameScene : UI_Scene
             Managers.Game.Player.SetPlayerPosition(playerPos);
         }
 
+        if (PlayerPrefs.GetInt("ISOPENSWORD") == 0)
+            GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(false);
+        if (PlayerPrefs.GetInt("ISOPENPORTAL") == 0)
+            GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(false);
 
         Managers.Game.OnFadeAction.Invoke(1f);
 
@@ -116,7 +153,7 @@ public class UI_GameScene : UI_Scene
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !isOpenMenuPopup)
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -205,5 +242,46 @@ public class UI_GameScene : UI_Scene
         GetText((int)Texts.PlayerHPText).text = $"{Managers.Game.PlayerData.CurHP}";
         GetText((int)Texts.PlayerAttackText).text = $"{Managers.Game.PlayerData.Attack}";
         GetText((int)Texts.PlayerDefenseText).text = $"{Managers.Game.PlayerData.Defence}";
+    }
+
+    public void OnClickMainUIInventoryAImage()
+    {
+        if (GameObject.Find("UI_InvenPopup") == null)
+            Managers.UI.ShowPopupUI<UI_InvenPopup>();
+        else
+            Managers.UI.ClosePopupUI();
+    }
+
+    public void OffUIInventory()
+    {
+        GetImage((int)Images.MainUIInventoryAImage).gameObject.SetActive(false);
+        GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(false);
+    }
+
+    public void OffUISword()
+    {
+        GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(false);
+        GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false);
+    }
+
+    public void OffUIWarp()
+    {
+        GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(false);
+        GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false);
+    }
+
+    public void OffUI()
+    {
+        OffUIInventory();
+        OffUISword();
+        OffUIWarp();
+    }
+
+    public void OnUI()
+    {
+        GetImage((int)Images.MainUIOptionAImage).gameObject.SetActive(true);
+        GetImage((int)Images.MainUIInventoryAImage).gameObject.SetActive(true);
+        GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(true);
+        GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(true);
     }
 }

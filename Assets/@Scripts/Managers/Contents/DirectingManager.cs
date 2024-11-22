@@ -548,7 +548,7 @@ public class Events
         // open 4floor
         GameObject parent = GameObject.Find("Dungeon_00_003");
         GameObject go = Managers.Resource.Instantiate("FX_BossClearLine", parent.transform);
-        go.transform.position = new Vector3(3.83f, 0.66f, -3.75f);
+        go.transform.localPosition = new Vector3(3.83f, 0.66f, -3.75f);
         go.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
 
     }
