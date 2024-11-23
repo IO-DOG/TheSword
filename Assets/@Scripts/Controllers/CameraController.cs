@@ -37,6 +37,7 @@ public class CameraController : MonoBehaviour
     private void Awake()
     {
         Managers.Game.MainCamera = this.transform.parent.GetComponent<Camera>();
+        _vCam = GetComponent<CinemachineVirtualCamera>();
     }
     private void Start()
     {
@@ -50,6 +51,8 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
+        if (Managers.Game.OnDirect == true)
+            return;
         if (_isCombineMap ==  true)
         {
             Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[2];

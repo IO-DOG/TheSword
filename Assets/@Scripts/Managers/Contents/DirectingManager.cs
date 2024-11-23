@@ -556,7 +556,7 @@ public class Events
 
     #endregion
 
-    #region 
+    #region Tutorial
     public void CoPlayTutorial_1()
     {
         CoroutineManager.StartCoroutine(PlayTutorial_1());

@@ -24,7 +24,7 @@ public class PortalController : MonoBehaviour
 
     public void UsePortal()
     {
-        if (Managers.Game.OnFade)
+        if (Managers.Game.OnFade || Managers.Game.OnInteract)
             return;
         Vector3 nextPos = Vector3.zero;
 
@@ -106,7 +106,7 @@ public class PortalController : MonoBehaviour
     {
         yield return new WaitForSeconds(0.2f);
         Managers.Game.Player.SetIdleState(Managers.Game.Player._moveDir);
-        Managers.Game.OnDirect = true;
+        Managers.Game.OnInteract = true;
         Managers.Game.OnFadeAction.Invoke(0.3f);
         int nextStageID = SetStageID();
         if (nextStageID == 2)
@@ -127,8 +127,8 @@ public class PortalController : MonoBehaviour
 
         Managers.Game.OnPortalAction.Invoke();
         Managers.Game.GameScene.Refresh();
-        Managers.Game.OnDirect = false;
+        Managers.Game.OnInteract = false;
 
-        Managers.UI.ShowPopupUI<UI_StageNamePopup>();
+        Managers.UI.ShowStageNamePopup(1f);
     }
 }

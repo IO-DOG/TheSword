@@ -19,11 +19,12 @@ public class Pillar : MonoBehaviour
 
     public void SetInActive()
     {
-        Managers.Data.PillarActiveDic[_pillarIndex_forActive] = false;
+        _pillar.SetActive(false);
     }
 
     IEnumerator WaitAndOpen(float time)
     {
+        Managers.Game.OnDirect = true;
         Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_XDamping = 0.3f;
         Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_YDamping = 0.3f;
         Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().Follow = transform;
@@ -36,5 +37,6 @@ public class Pillar : MonoBehaviour
         yield return new WaitForSeconds(1f);
         Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_XDamping = 0f;
         Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_YDamping = 0f;
+        Managers.Game.OnDirect = false;
     }
 }

@@ -345,7 +345,7 @@ public class PlayerController : MonoBehaviour
 
         // Checking Forward
         // If Obstacles, Stop
-        if (CheckSomething())
+        if (isObstacled())
         {
             _isMoving = false;
             return;
@@ -390,7 +390,7 @@ public class PlayerController : MonoBehaviour
          }
     }
 
-    bool CheckSomething()
+    bool isObstacled()
     {
         bool somethingExist = false;
         //int layerMask = (1 << (int)Define.Layer.Wall) + (1 << (int)Define.Layer.CItem) + (1 << (int)Define.Layer.Door) + (1 << (int)Define.Layer.Portal)

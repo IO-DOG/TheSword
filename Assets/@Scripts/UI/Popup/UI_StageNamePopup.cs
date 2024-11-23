@@ -20,35 +20,49 @@ public class UI_StageNamePopup : UI_Popup
         StageNameText,
     }
 
+    private void Awake()
+    {
+        #region Bind
+        BindText(typeof(Texts));
+        BindImage(typeof(Images));
+        #endregion
+    }
+
     public override bool Init()
     {
         if (base.Init() == false)
             return false;
 
-        #region Bind
-        BindText(typeof(Texts));
-        BindImage(typeof(Images));
-        #endregion
 
-        StartCoroutine(PlayAndDestory());
-        GetText((int)Texts.StageNameText).text = Managers.GetString(Managers.Data.ScriptDic[(int)Define.STAGE_NAME + Managers.Game.PlayerData.CurStageid].id);
+        //StartCoroutine(PlayAndDestory());
+        //GetText((int)Texts.StageNameText).text = Managers.GetString(Managers.Data.ScriptDic[(int)Define.STAGE_NAME + Managers.Game.PlayerData.CurStageid].id);
 
         return true;
     }
 
-    IEnumerator PlayAndDestory()
+    public void SetStageName()
+    {
+        GetText((int)Texts.StageNameText).text = Managers.GetString(Managers.Data.ScriptDic[(int)Define.STAGE_NAME + Managers.Game.PlayerData.CurStageid].id);
+    }
+
+    public IEnumerator HideStageNamePopup(float duration)
     {
         GetImage((int)Images.StageNameStart).DOFade(1f, 1f);
         GetImage((int)Images.StageNameLine).DOFade(1f, 1f);
         GetImage((int)Images.StageNameEnd).DOFade(1f, 1f);
-        yield return new WaitForSeconds(_duration);
+        yield return new WaitForSeconds(duration);
 
         gameObject.GetComponentInChildren<TypewriterByCharacter>().StartDisappearingText();
         GetImage((int)Images.StageNameStart).DOFade(0f, 1f);
         GetImage((int)Images.StageNameLine).DOFade(0f, 1f);
         GetImage((int)Images.StageNameEnd).DOFade(0f, 1f);
-        
-        yield return new WaitForSeconds(_duration);
-        ClosePopupUI();
+
+        yield return new WaitForSeconds(duration);
+
+        if (Managers.UI.StageNamePopup != null)
+        {
+            Managers.UI.ClosePopupUI(Managers.UI.StageNamePopup);
+            Managers.UI.StageNamePopup = null;
+        }
     }
 }
