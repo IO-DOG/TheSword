@@ -221,4 +221,34 @@ public static class Util
         color.a = alpha;
         image.color = color;
     }
+
+
+    /// <summary>
+    /// flag는 true가 기본 상태
+    /// true면 0에서 1로 alpha가 변하고 flase면 1에서 0으로 변한다.
+    /// </summary>
+    /// <param name="image">alpha값이 변할 이미지</param>
+    /// <param name="time">연출 총 시간</param>
+    /// <param name="flag"></param>
+    /// <returns></returns>
+    public static IEnumerator CoFade(Image image, float time, bool flag = true)
+    {
+        Debug.Log("Start CoFade");
+        image.color = new Color(1, 1, 1, 0);
+
+        float total = 0f;
+
+        while (total <= time)
+        {
+            float delta = total / time;
+            if (flag)
+                image.color = new Color(1, 1, 1, delta);
+            else
+                image.color = new Color(1, 1, 1, 1 - delta);
+            total += Time.deltaTime;
+            yield return null;
+        }
+
+        image.color = new Color(1, 1, 1, 1);
+    }
 }

@@ -187,7 +187,7 @@ public class UI_GameScene : UI_Scene
         }
         if (Input.GetKeyDown(KeyCode.F3))
         {
-            Managers.Game.SaveGame();
+            Managers.Game.PlayerData.CurHP -= 10;
         }
         if (Input.GetKeyDown(KeyCode.F4))
         {
