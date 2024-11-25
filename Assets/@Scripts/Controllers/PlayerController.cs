@@ -382,12 +382,17 @@ public class PlayerController : MonoBehaviour
         RaycastHit hit;
         Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset, LayerMask.GetMask("InteractObjects"));
 
-         if (hit.collider != null)
-         {
+        if (hit.collider == null)
+            return;
+
+        Vector3 playerDir = (transform.position - hit.collider.transform.position).normalized;
+        float dotProduct = Vector3.Dot(Vector3.back, playerDir);
+        if (dotProduct > 0.7f)
+        {
             InteractObjectController interactObejct = hit.collider.gameObject.GetComponent<InteractObjectController>();
             Managers.Game.CurInteractObject = hit.collider.gameObject;
             interactObejct.Interact();
-         }
+        }
     }
 
     bool isObstacled()
@@ -458,6 +463,7 @@ public class PlayerController : MonoBehaviour
             {
                 somethingExist = false;
                 hit.collider.gameObject.GetComponentInChildren<PortalController>().UsePortal();
+                
             }
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Lever)
             {
@@ -494,7 +500,13 @@ public class PlayerController : MonoBehaviour
                     return false;
 
                 somethingExist = true;
-                Managers.UI.ShowPopupUI<UI_BossRoomCheckPopup>();
+
+                Vector3 playerDir = (transform.position - hit.collider.transform.position).normalized;
+                float dotProduct = Vector3.Dot(Vector3.back, playerDir);
+                if (dotProduct > 0.7f)
+                {
+                    Managers.UI.ShowPopupUI<UI_BossRoomCheckPopup>();
+                }
             }
         }
 
