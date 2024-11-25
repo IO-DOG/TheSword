@@ -46,6 +46,7 @@ public class UI_IntroScene : UI_Scene
         totalCount = 7;
 
         GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx++].id);
+        NextScene();
         GetImage((int)Images.EscapeGauge).gameObject.SetActive(false);
         return true;
     }
@@ -108,7 +109,7 @@ public class UI_IntroScene : UI_Scene
 
         GetImage((int)Images.SceneImage).sprite = ImageList[idx - 1];
         if (idx != totalCount - 1)
-        GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx].id);
+        GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx - 1].id);
 
         if (idx == 1) // ó�� Ŭ����
         {
@@ -162,7 +163,7 @@ public class UI_IntroScene : UI_Scene
         }
         yield return null;
 
-        Managers.Scene.LoadScene(Define.Scene.TutorialScene);
+        Managers.Scene.LoadScene(Define.Scene.GameScene);
     }
 
     IEnumerator CoFadeOutImage(Image image)

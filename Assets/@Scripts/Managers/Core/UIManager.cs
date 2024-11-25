@@ -1,4 +1,5 @@
 ﻿using DG.Tweening;
+using Febucci.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,6 +19,8 @@ public class UIManager
     Stack<UI_Toast> _toastStack = new Stack<UI_Toast>();
     UI_Scene _sceneUI = null;
     public UI_Scene SceneUI { get { return _sceneUI; } }
+
+    public UI_StageNamePopup StageNamePopup;
 
     public event Action<int> OnTimeScaleChanged;
 
@@ -221,6 +224,27 @@ public class UIManager
         return card;
     }
 
+    #region StageName Popup 처리
+    Coroutine CoHideStageNamePopup;
+    public void ShowStageNamePopup(float duration)
+    {
+        if (StageNamePopup != null)
+        {
+            StageNamePopup.SetStageName();
+            if (CoHideStageNamePopup != null)
+                CoroutineManager.StopCoroutine(CoHideStageNamePopup);
+        }
+        else
+        {
+            StageNamePopup = Managers.UI.ShowPopupUI<UI_StageNamePopup>();
+            StageNamePopup.SetStageName();
+        }
+
+        CoHideStageNamePopup = CoroutineManager.StartCoroutine(StageNamePopup.HideStageNamePopup(duration));
+    }
+
+
+    #endregion
     #region 임시
     bool _isActiveSoulShop = false;
     public bool IsActiveSoulShop

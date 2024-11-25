@@ -302,12 +302,14 @@ public class MapEditor : EditorWindow
                 else if (objectData.ObjectType == (int)Define.ObjectType.Lever)
                 {
                     GameObject lever = Instantiate(defaulTileMap[objectData.Id], levers.transform);
+                    lever.GetComponentInChildren<Lever>()._leverIndex_forActive = objectData.Count;
                     lever.name = $"portal{objectData.Count}";
                     lever.transform.position = new Vector3(objectData.Position.X, objectData.Position.Y - Define.TILE_SIZE / 2, objectData.Position.Z);
                 }
                 else if (objectData.ObjectType == (int)Define.ObjectType.Pillar)
                 {
                     GameObject pillar = Instantiate(defaulTileMap[objectData.Id], pillars.transform);
+                    pillar.GetComponentInChildren<Pillar>()._pillarIndex_forActive = objectData.Count;
                     pillar.name = $"pillar{objectData.Count}";
                     pillar.transform.position = new Vector3(objectData.Position.X, objectData.Position.Y - Define.TILE_SIZE / 2, objectData.Position.Z);
                 }

@@ -124,7 +124,7 @@ public class UI_GameScene : UI_Scene
 
         Managers.Game.OnFadeAction.Invoke(1f);
 
-        Managers.UI.ShowPopupUI<UI_StageNamePopup>();
+        Managers.UI.ShowStageNamePopup(1f);
 
         if (PlayerPrefs.GetInt("ISFIRST", 1) == 1)
             Managers.Directing.Events.CoPlayTutorial_1();
