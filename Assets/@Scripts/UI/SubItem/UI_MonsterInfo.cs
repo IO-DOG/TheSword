@@ -57,12 +57,13 @@ public class UI_MonsterInfo : UI_Base
     void SetInfo()
     {
         int id = gameObject.transform.parent.GetComponent<MonsterController>().id;
+        Debug.Log(Managers.Data.MonsterDic[id].MonsterNameId);
         GetText((int)Texts.MonsterNameText).text = Managers.GetString(Managers.Data.MonsterDic[id].MonsterNameId);
         //GetText((int)Texts.MonsterClassText).text = "특성 : " + Managers.Data.MonsterClassDic[Managers.Data.MonsterDic[id].Feature].ClassName;
         GetText((int)Texts.MonsterAttackText).text = Managers.Data.MonsterDic[id].Attack.ToString();
         GetText((int)Texts.MonsterDefenseText).text = Managers.Data.MonsterDic[id].Defence.ToString();
         GetText((int)Texts.MonsterHPText).text = Managers.Data.MonsterDic[id].MaxHP.ToString();
-        //GetText((int)Texts.MonsterDescText).text = Managers.Data.MonsterDic[id].
+        GetText((int)Texts.MonsterDescText).text = Managers.GetString(Managers.Data.MonsterDic[id].MonsterDescId);
     }
 
     private void Update()

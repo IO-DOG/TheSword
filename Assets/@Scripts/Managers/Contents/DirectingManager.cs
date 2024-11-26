@@ -119,7 +119,6 @@ public class Events
 
     IEnumerator ContractSword()
     {
-        Managers.UI.CloseGameSceneUI();
         Managers.Game.OnDirect = true;
 
         Managers.Game.DirectionalLight.DOIntensity(0.05f, 0.5f);

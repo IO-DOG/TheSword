@@ -138,12 +138,14 @@ public class UI_ConversationPopup : UI_Popup
             Debug.Log("Conversation ended");
             Managers.Game.OnConversation = false;
             ClosePopupUI();
-            Managers.UI.OpenGameSceneUI();
+
             if(Managers.Directing.PopupAction != null)
             {
                 Managers.Directing.PopupAction.Invoke();
                 Managers.Directing.PopupAction = null;
             }
+            else
+                Managers.UI.OpenGameSceneUI();
 
             return;
         }

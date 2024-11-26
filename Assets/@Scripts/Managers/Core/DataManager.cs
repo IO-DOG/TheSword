@@ -33,7 +33,7 @@ public class DataManager
 
     public void Init()
     {
-        //AssetDatabase.Refresh();
+        AssetDatabase.Refresh();
 
         PlayerDic = LoadJson<Data.PlayerDataLoader, int, Data.PlayerData>("PlayerData").MakeDict();
         MonsterDic = LoadJson<Data.MonsterDataLoader, int, Data.MonsterData>("MonsterData").MakeDict();
@@ -45,29 +45,12 @@ public class DataManager
         StageInfoDic = LoadJson<Data.StageInfoDataLoader, int, Data.StageInfoData>("StageInfoData").MakeDict();
         EventDic = LoadJson<Data.EventDataLoader, int, Data.EventData>("EventData").MakeDict();
 
-        #region Active Dic
-        TextAsset monsterActiveDataTextAsset = Managers.Resource.Load<TextAsset>("MonsterActiveData");
-        MonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(monsterActiveDataTextAsset.text);
-        TextAsset bossMonsterActiveDataTextAsset = Managers.Resource.Load<TextAsset>("BossMonsterActiveData");
-        BossMonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(bossMonsterActiveDataTextAsset.text);
-        TextAsset cItemActiveDataTextAsset = Managers.Resource.Load<TextAsset>("CItemActiveData");
-        CItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(cItemActiveDataTextAsset.text);
-        TextAsset eItemActiveDataTextAsset = Managers.Resource.Load<TextAsset>("EItemActiveData");
-        EItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(eItemActiveDataTextAsset.text);
-        TextAsset doorActiveDataTextAsset = Managers.Resource.Load<TextAsset>("DoorActiveData");
-        DoorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(doorActiveDataTextAsset.text);
-        TextAsset pillarActiveDataTextAsset = Managers.Resource.Load<TextAsset>("PillarActiveData");
-        PillarActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(pillarActiveDataTextAsset.text);
-        TextAsset leverActiveDataTextAsset = Managers.Resource.Load<TextAsset>("LeverActiveData");
-        LeverActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(leverActiveDataTextAsset.text);
-        #endregion
-
         CheckSaveData();
     }
 
     Loader LoadJson<Loader, Key, Value>(string path) where Loader : ILoader<Key, Value>
-    { 
-        TextAsset textAsset = Managers.Resource.Load<TextAsset>($"{path}");
+    {
+        TextAsset textAsset = Managers.Resource.Load<TextAsset>(path);
 
         if (path == "MapData")
         {
