@@ -61,6 +61,8 @@ public class UI_GameScene : UI_Scene
         BindImage(typeof(Images));
         #endregion
 
+        Managers.UI.UI_GameScene = this;
+
         Managers.Game.GenerateMap(Managers.Game.PlayerData.CurStageid);
         Managers.Game.PlayerData.MoveSpeed = 1f;
         Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();

@@ -55,6 +55,7 @@ public class Events
     }
     IEnumerator EVENT_1()
     {
+        Managers.UI.CloseGameSceneUI();
         Managers.Game.OnDirect = true;
         Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
 
@@ -104,6 +105,7 @@ public class Events
         }
         #endregion
         Managers.Game.OnDirect = false;
+        Managers.UI.CloseGameSceneUI();
         Managers.UI.ShowPopupUI<UI_ConversationPopup>();
     }
     #endregion
@@ -117,6 +119,7 @@ public class Events
 
     IEnumerator ContractSword()
     {
+        Managers.UI.CloseGameSceneUI();
         Managers.Game.OnDirect = true;
 
         Managers.Game.DirectionalLight.DOIntensity(0.05f, 0.5f);
@@ -157,6 +160,7 @@ public class Events
         Managers.Game.Player._isEquiptShield = true;
         Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
         Managers.Game.OnDirect = false;
+        Managers.UI.OpenGameSceneUI();
         Managers.Game.SaveGame();
     }
 
@@ -584,6 +588,7 @@ public class Events
 
         Managers.Game.OnDirect = false;
 
+        Managers.UI.CloseGameSceneUI();
         UI_ConversationPopup conversation = Managers.UI.ShowPopupUI<UI_ConversationPopup>();
 
         // Reset Player Stat

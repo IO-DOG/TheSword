@@ -46,6 +46,9 @@ public class CameraController : MonoBehaviour
         //_vCam.Follow = Managers.Game.Player.transform;
 
         _transposer = _vCam.GetCinemachineComponent<CinemachineTransposer>();
+
+        Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[Managers.Game.ResolutionIdx];
+        Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[Managers.Game.ResolutionIdx];
         //_transposer.m_FollowOffset = new Vector3(0f, 10f, -5f);
     }
 

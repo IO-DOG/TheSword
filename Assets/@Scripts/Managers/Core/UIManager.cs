@@ -21,6 +21,7 @@ public class UIManager
     public UI_Scene SceneUI { get { return _sceneUI; } }
 
     public UI_StageNamePopup StageNamePopup;
+    public UI_GameScene UI_GameScene;
 
     public event Action<int> OnTimeScaleChanged;
 
@@ -157,6 +158,17 @@ public class UIManager
     {
         while (_popupStack.Count > 0)
             ClosePopupUI();
+    }
+
+    public void CloseGameSceneUI()
+    {
+        CloseAllPopupUI();
+        UI_GameScene.gameObject.SetActive(false);
+    }
+
+    public void OpenGameSceneUI()
+    {
+        UI_GameScene.gameObject.SetActive(true);
     }
 
     public UI_Toast ShowToast(string msg)
