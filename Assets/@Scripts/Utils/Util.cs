@@ -249,6 +249,9 @@ public static class Util
             yield return null;
         }
 
-        image.color = new Color(1, 1, 1, 1);
+        if (flag == true)
+            image.color = new Color(1, 1, 1, 1);
+        else
+            image.color = new Color(1, 1, 1, 0);
     }
 }
