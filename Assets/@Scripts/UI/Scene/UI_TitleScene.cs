@@ -154,7 +154,7 @@ public class UI_TitleScene : UI_Scene
             switch (buttonsIdx)
             {
                 case 0:
-                    StartCoroutine(CoFadeOutImage());
+                    StartCoroutine(CoOnClickNewGameButton());
                     //OnClickNewGameButton();
                     break;
                 case 1:
@@ -204,11 +204,16 @@ public class UI_TitleScene : UI_Scene
         }
         yield return new WaitForSeconds(0.5f);
 
-        OnClickNewGameButton();
+        //OnClickNewGameButton();
     }
 
-    void OnClickNewGameButton()
+    IEnumerator CoOnClickNewGameButton()
     {
+        GetImage((int)Images.BlackBGImage).gameObject.SetActive(true);
+        GetImage((int)Images.BlackBGImage).color = new Color(1, 1, 1, 0);
+        StartCoroutine(Util.CoFade(GetImage((int)Images.BlackBGImage), 3));
+        yield return new WaitForSeconds(3f);
+
         //test
         Managers.Game.PlayerData.Ability = (int)Define.Trait.None;
         Debug.Log("Cllck OnClickNewGameButton");
