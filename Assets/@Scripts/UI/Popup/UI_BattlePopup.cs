@@ -60,6 +60,14 @@ public class UI_BattlePopup : UI_Popup
 
     public void BattleEnd()
     {
+        float closeTime = 0.3f;
+        StartCoroutine(CoBattleEnd(closeTime));
+    }
+
+    IEnumerator CoBattleEnd(float time)
+    {
+        yield return new WaitForSeconds(time);
+
         Destroy(playerCard.gameObject);
         Destroy(monsterCard.gameObject);
 
