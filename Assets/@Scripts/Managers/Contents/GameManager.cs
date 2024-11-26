@@ -29,7 +29,7 @@ public class GameManager
     public bool OnInteract = false;
     public bool OnMeetKingSlime = false;
 
-    public int ResolutionIdx = 1;
+    public int ResolutionIdx = 2;
     public int CurEventID;
     public string CurChapter;
     public int TotalKillSplitSlime = 0;

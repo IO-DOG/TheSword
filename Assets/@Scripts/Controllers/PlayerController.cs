@@ -378,7 +378,7 @@ public class PlayerController : MonoBehaviour
         bool somethingExist = false;
 
         RaycastHit hit;
-        Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset);
+        Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset * 1.3f);
 
         if (hit.collider != null)
         {

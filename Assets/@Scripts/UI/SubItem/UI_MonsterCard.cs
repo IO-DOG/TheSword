@@ -258,13 +258,12 @@ public class UI_MonsterCard : UI_BaseCard
         Managers.Game.OnBattleAction.Invoke();
         Managers.Game.OnBattle = false;
 
-        if (Managers.Data.MonsterDic[Managers.Game.Monster.id].RewardItem != -1)
-        {
-            GameObject item = Managers.Resource.Instantiate("EquipItem", Managers.Game.DropItems.transform);
-            item.transform.localScale = new Vector3(1f, 2f, 2f);
-            item.transform.position = Managers.Game.Monster.transform.localPosition;
-            item.GetComponent<Equip>()._id = Managers.Data.MonsterDic[Managers.Game.Monster.id].RewardItem;
-        }
+        //if (Managers.Data.MonsterDic[Managers.Game.Monster.id].RewardItem != -1)
+        //{
+        //    GameObject item = Managers.Resource.Instantiate("EquipItem", Managers.Game.DropItems.transform);
+        //    item.transform.position = Managers.Game.Monster.transform.localPosition + Vector3.back * 0.1f;
+        //    item.GetComponent<Equip>()._id = Managers.Data.MonsterDic[Managers.Game.Monster.id].RewardItem;
+        //}
 
         // 몬스터 죽는 파티클 생성
         Transform particlePos = Managers.Game.Monster.gameObject.transform;
