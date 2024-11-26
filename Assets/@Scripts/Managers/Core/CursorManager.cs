@@ -119,7 +119,7 @@ public class CursorManager : MonoBehaviour
             }
             else
             {
-                if (_cursor != CursorType.Normal && _cursor != CursorType.Press)
+                if (_cursor != CursorType.Normal)
                     _cursor = CursorType.Normal;
             }
         }
