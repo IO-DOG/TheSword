@@ -13,6 +13,7 @@ public class UI_IntroScene : UI_Scene
     {
         SceneImage,
         EscapeGauge,
+        CurtainCall,
         //SceneFrameImage,
     }
 
@@ -39,6 +40,8 @@ public class UI_IntroScene : UI_Scene
         BindText(typeof(Texts));
         #endregion
 
+        StartCoroutine(CoCurtaintCall(2f));
+
         GetImage((int)Images.SceneImage).gameObject.SetActive(false);
         //GetImage((int)Images.SceneFrameImage).gameObject.SetActive(false);
 
@@ -53,6 +56,9 @@ public class UI_IntroScene : UI_Scene
 
     private void Update()
     {
+        if (_lock)
+            return;
+
         if (!GetText((int)Texts.SceneText).GetComponent<TextAnimator_TMP>().allLettersShown && (Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0)))
         {
             GetText((int)Texts.SceneText).GetComponent<TextAnimator_TMP>().SetVisibilityEntireText(true);
@@ -87,6 +93,15 @@ public class UI_IntroScene : UI_Scene
                 Managers.Scene.LoadScene(Define.Scene.GameScene);
             }
         }
+    }
+
+    bool _lock = true;
+    IEnumerator CoCurtaintCall(float time)
+    {
+        yield return new WaitForSeconds(time);
+
+        StartCoroutine(Util.CoFade(GetImage((int)Images.CurtainCall), 0.3f, false));
+        _lock = false;
     }
 
     void NextScene()
