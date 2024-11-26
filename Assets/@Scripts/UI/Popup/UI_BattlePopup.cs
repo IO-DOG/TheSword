@@ -51,9 +51,9 @@ public class UI_BattlePopup : UI_Popup
 
         //monsterCard.Data = Managers.Game.MonsterData;
 
+        Managers.Game.OnBattle = true;
         Managers.Game.OnBattleAction -= BattleEnd;
         Managers.Game.OnBattleAction += BattleEnd;
-        Managers.Game.OnBattle = true;
 
         return true;
     }
@@ -77,6 +77,9 @@ public class UI_BattlePopup : UI_Popup
             Managers.Game.GameScene.SetPlayerInfo();
             Managers.Game.GameScene.Refresh();
         }
+
+        Managers.Game.OnBattle = false;
+
         Managers.Game.SaveGame();
         ClosePopupUI();
     }
