@@ -257,7 +257,7 @@ public class UI_MonsterCard : UI_BaseCard
         }
 
         Managers.Game.OnBattleAction.Invoke();
-        Managers.Game.OnBattle = false;
+        //Managers.Game.OnBattle = false;
 
         //if (Managers.Data.MonsterDic[Managers.Game.Monster.id].RewardItem != -1)
         //{

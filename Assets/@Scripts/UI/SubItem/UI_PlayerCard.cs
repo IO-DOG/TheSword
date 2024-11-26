@@ -283,7 +283,7 @@ public class UI_PlayerCard : UI_BaseCard
         // Game Over Popup TODO
         //CreatePlayerDeathParticle();
         Managers.Game.OnBattleAction.Invoke();
-        Managers.Game.OnBattle = false;
+        //Managers.Game.OnBattle = false;
 
         // 몬스터 죽는 파티클 생성
         Vector3 particlePos = new Vector3 (Managers.Game.PlayerData.CurPosition.X, Managers.Game.PlayerData.CurPosition.Y, Managers.Game.PlayerData.CurPosition.Z);
