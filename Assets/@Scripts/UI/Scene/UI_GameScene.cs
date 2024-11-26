@@ -153,7 +153,7 @@ public class UI_GameScene : UI_Scene
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0) && !isOpenMenuPopup)
+        if (!isOpenMenuPopup)
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);

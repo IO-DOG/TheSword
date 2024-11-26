@@ -67,7 +67,7 @@ public class UI_MonsterInfo : UI_Base
 
     private void Update()
     {
-        if (Input.anyKeyDown || Input.GetMouseButtonDown(0))
+        if (Input.GetAxis("Mouse X") != 0 || Input.GetAxis("Mouse Y") != 0)
         {
             Destroy(gameObject);
         }
