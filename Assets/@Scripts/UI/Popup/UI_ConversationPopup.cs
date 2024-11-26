@@ -49,11 +49,13 @@ public class UI_ConversationPopup : UI_Popup
 
     private void Update()
     {
-        if(!GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().allLettersShown && Input.GetKeyDown(KeyCode.Return))
+        if(!GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().allLettersShown 
+            && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space)))
         {
             GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().SetVisibilityEntireText(true);
         }
-        else if(GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().allLettersShown && Input.GetKeyDown(KeyCode.Return))
+        else if(GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().allLettersShown
+            && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space)))
         {
             ShowNextScript();
         }

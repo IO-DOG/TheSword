@@ -48,14 +48,14 @@ public class KeyInventory
 
     public bool TryUseKey(GameObject door)
     {
-        Managers.Data.DoorActiveDic[door.GetComponent<Door>()._doorIndex_forActive] = false;
-        Managers.Game.SaveGame();
         if (_keys[door.GetComponentInChildren<Door>()._keyIndex] == 0)
         {
             return false;
         }
         else
         {
+            Managers.Data.DoorActiveDic[door.GetComponent<Door>()._doorIndex_forActive] = false;
+            Managers.Game.SaveGame();
             // TODO Save
             _keys[door.GetComponentInChildren<Door>()._keyIndex]--;
             ShowKeySlot(Managers.Game.Player._keyInventory);

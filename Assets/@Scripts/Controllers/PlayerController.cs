@@ -70,6 +70,7 @@ public class PlayerController : MonoBehaviour
         if (Managers.Game.OnBattle || Managers.Game.OnConversation || Managers.Game.OnLever
             || Managers.Game.OnFade || Managers.Game.OnDirect || Managers.Game.OnInteract)
         {
+            _moveDir = MoveDir.None;
             return;
         }
 
@@ -424,9 +425,10 @@ public class PlayerController : MonoBehaviour
                 }
                 else if(!Managers.Game.KeyInventory.TryUseKey(hit.collider.gameObject))
                 {
-                    hit.collider.gameObject.GetComponentInChildren<Door>().CoDoorLockLockedAnim();
                     Managers.Game.OnInteract = true;
+                    hit.collider.gameObject.GetComponentInChildren<Door>().CoDoorLockLockedAnim();
                     somethingExist = true;
+
                     InteractAnim().OnComplete(() =>
                     {
                         SetIdleState(_moveDir);
