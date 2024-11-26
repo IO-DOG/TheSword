@@ -61,6 +61,28 @@ public class UI_GameScene : UI_Scene
         BindImage(typeof(Images));
         #endregion
 
+        #region PointerEnter&PointerExit
+        GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
+        { GetImage((int)Images.MainUIOptionBImage).gameObject.SetActive(true); }, null, Define.UIEvent.PointerEnter);
+        GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
+        { GetImage((int)Images.MainUIOptionBImage).gameObject.SetActive(false); ; }, null, Define.UIEvent.PointerExit);
+
+        GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(() =>
+        { GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(true); }, null, Define.UIEvent.PointerEnter);
+        GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(() =>
+        { GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(false); }, null, Define.UIEvent.PointerExit);
+
+        GetImage((int)Images.MainUISwordAImage).gameObject.BindEvent(() =>
+        { GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(true); }, null, Define.UIEvent.PointerEnter);
+        GetImage((int)Images.MainUISwordAImage).gameObject.BindEvent(() =>
+        { GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false); ; }, null, Define.UIEvent.PointerExit);
+
+        GetImage((int)Images.MainUIWarpAImage).gameObject.BindEvent(() =>
+        { GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(true); }, null, Define.UIEvent.PointerEnter);
+        GetImage((int)Images.MainUIWarpAImage).gameObject.BindEvent(() =>
+        { GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false); ; }, null, Define.UIEvent.PointerExit);
+        #endregion
+
         Managers.Game.GenerateMap(Managers.Game.PlayerData.CurStageid);
         Managers.Game.PlayerData.MoveSpeed = 1f;
         Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
