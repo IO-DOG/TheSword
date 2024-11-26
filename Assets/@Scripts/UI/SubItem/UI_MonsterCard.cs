@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -267,13 +268,36 @@ public class UI_MonsterCard : UI_BaseCard
         }
 
         // 몬스터 죽는 파티클 생성
+        StartCoroutine(CoDead());
+        
+        return;
+    }
+
+    IEnumerator CoDead()
+    {
+        yield return new WaitForSeconds(0.3f);
         Transform particlePos = Managers.Game.Monster.gameObject.transform;
         GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
         deathSoulPurple.transform.position = particlePos.position;
         deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
         Destroy(deathSoulPurple, 3);
-        Destroy(Managers.Game.Monster.gameObject);
-        return;
+        Destroy(Managers.Game.Monster.gameObject.GetComponent<BoxCollider>());
+        Managers.Game.Monster.gameObject.GetComponent<Animator>().Play("Stop");
+        SpriteRenderer sr = Managers.Game.Monster.gameObject.GetOrAddComponent<SpriteRenderer>();
+        sr.material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        sr.color = Util.DamagedColor();
+        //float i = 0;
+        //while (i < 20)
+        //{
+        //    //image.SetNativeSize();
+        //    //swordImage.SetNativeSize();
+        //    //shieldImage.SetNativeSize();
+        //    i += 1;
+        //    sr.color += new Color(0, 0, 0, -0.05f);
+        //    yield return new WaitForSeconds(0.01f);
+        //}
+        Destroy(Managers.Game.Monster.gameObject, 1);
+        Destroy(sr, 1f);
     }
 
     private void OnDestroy()

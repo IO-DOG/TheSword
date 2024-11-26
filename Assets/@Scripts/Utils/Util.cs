@@ -254,4 +254,14 @@ public static class Util
         else
             image.color = new Color(1, 1, 1, 0);
     }
+
+    /// <summary>
+    /// 코루틴 딜레이만 하는 역할
+    /// </summary>
+    /// <param name="time"></param>
+    /// <returns></returns>
+    public static IEnumerator CoDelay(float time)
+    {
+        yield return new WaitForSeconds(time);
+    }
 }
