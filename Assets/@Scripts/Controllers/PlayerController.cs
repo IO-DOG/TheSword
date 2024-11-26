@@ -95,11 +95,6 @@ public class PlayerController : MonoBehaviour
         {
             Moving(_moveDir);
         }
-
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            CheckInteract();
-        }
     }
 
     private void Update()
@@ -377,29 +372,9 @@ public class PlayerController : MonoBehaviour
     }
     #endregion
 
-    void CheckInteract()
-    {
-        RaycastHit hit;
-        Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset, LayerMask.GetMask("InteractObjects"));
-
-        if (hit.collider == null)
-            return;
-
-        Vector3 playerDir = (transform.position - hit.collider.transform.position).normalized;
-        float dotProduct = Vector3.Dot(Vector3.back, playerDir);
-        if (dotProduct > 0.7f)
-        {
-            InteractObjectController interactObejct = hit.collider.gameObject.GetComponent<InteractObjectController>();
-            Managers.Game.CurInteractObject = hit.collider.gameObject;
-            interactObejct.Interact();
-        }
-    }
-
     bool isObstacled()
     {
         bool somethingExist = false;
-        //int layerMask = (1 << (int)Define.Layer.Wall) + (1 << (int)Define.Layer.CItem) + (1 << (int)Define.Layer.Door) + (1 << (int)Define.Layer.Portal)
-            //+ (1 << (int)Define.Layer.EItem) + (1 << (int)Define.Layer.Lever) + (1 << (int)Define.Layer.Monster) + (1 << (int)Define.Layer.InteractObjects); 
 
         RaycastHit hit;
         Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset);
@@ -407,7 +382,7 @@ public class PlayerController : MonoBehaviour
         if (hit.collider != null)
         {
             // Checking Wall
-            if (hit.collider.gameObject.layer == (int)Define.Layer.Wall || hit.collider.gameObject.layer == (int)Define.Layer.InteractObjects)
+            if (hit.collider.gameObject.layer == (int)Define.Layer.Wall)
             {
                 somethingExist = true;
             }
@@ -506,6 +481,18 @@ public class PlayerController : MonoBehaviour
                 if (dotProduct > 0.7f)
                 {
                     Managers.UI.ShowPopupUI<UI_BossRoomCheckPopup>();
+                }
+            }
+            else if(hit.collider.gameObject.layer == (int)Define.Layer.InteractObjects)
+            {
+                somethingExist = true;
+                Vector3 playerDir = (transform.position - hit.collider.transform.position).normalized;
+                float dotProduct = Vector3.Dot(Vector3.back, playerDir);
+                if (dotProduct > 0.7f)
+                {
+                    InteractObjectController interactObejct = hit.collider.gameObject.GetComponent<InteractObjectController>();
+                    Managers.Game.CurInteractObject = hit.collider.gameObject;
+                    interactObejct.Interact();
                 }
             }
         }
