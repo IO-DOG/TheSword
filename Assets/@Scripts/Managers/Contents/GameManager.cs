@@ -11,6 +11,7 @@ using System.Threading;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor;
+using UnityEditor.Scripting;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.Playables;
@@ -495,22 +496,7 @@ public class GameManager
         });
         File.WriteAllText(_path, jsonStr);
 
-        #region ActiveDic
-        string monsterActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.MonsterActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/MonsterActiveData.json", monsterActiveDicJsonStr);
-        string bossMonsterActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.BossMonsterActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/BossMonsterActiveData.json", bossMonsterActiveDicJsonStr);
-        string cItemActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.CItemActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/CItemActiveData.json", cItemActiveDicJsonStr);
-        string eItemActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.EItemActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/EItemActiveData.json", eItemActiveDicJsonStr);
-        string doorActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.DoorActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/DoorActiveData.json", doorActiveDicJsonStr);
-        string pillarActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.PillarActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/PillarActiveData.json", pillarActiveDicJsonStr);
-        string leverActiveDicJsonStr = JsonConvert.SerializeObject(Managers.Data.LeverActiveDic, Formatting.Indented);
-        File.WriteAllText(Application.persistentDataPath + "/LeverActiveData.json", leverActiveDicJsonStr);
-        #endregion
+        Managers.Data.UpdateActiveDic();
     }
 
     public bool LoadGame()
@@ -520,6 +506,7 @@ public class GameManager
             string path = Application.persistentDataPath + "/SaveData.json";
             if (File.Exists(path))
                 File.Delete(path);
+
 
             Managers.Game.PlayerData.Clear();
 
@@ -552,29 +539,7 @@ public class GameManager
         {
             PlayerData = data;
 
-            #region Active Dic
-            string monsterActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/MonsterActiveData.json");
-            Dictionary<int, bool> monsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(monsterActiveDicFile);
-            Managers.Data.MonsterActiveDic = monsterActiveDic;
-            string bossMonsterActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/BossMonsterActiveData.json");
-            Dictionary<int, bool> bossMonsterActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(bossMonsterActiveDicFile);
-            Managers.Data.BossMonsterActiveDic = bossMonsterActiveDic;
-            string cItemActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/CItemActiveData.json");
-            Dictionary<int, bool> cItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(cItemActiveDicFile);
-            Managers.Data.CItemActiveDic = cItemActiveDic;
-            string eItemActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/EItemActiveData.json");
-            Dictionary<int, bool> eItemActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(eItemActiveDicFile);
-            Managers.Data.EItemActiveDic = eItemActiveDic;
-            string doorActiveDicFile = File.ReadAllText(Application.persistentDataPath+ "/DoorActiveData.json");
-            Dictionary<int, bool> doorActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(doorActiveDicFile);
-            Managers.Data.DoorActiveDic = doorActiveDic;
-            string pillarActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/PillarActiveData.json");
-            Dictionary<int, bool> pillarActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(pillarActiveDicFile);
-            Managers.Data.PillarActiveDic = pillarActiveDic;
-            string leverActiveDicFile = File.ReadAllText(Application.persistentDataPath + "/LeverActiveData.json");
-            Dictionary<int, bool> leverActiveDic = JsonConvert.DeserializeObject<Dictionary<int, bool>>(leverActiveDicFile);
-            Managers.Data.LeverActiveDic = leverActiveDic;
-            #endregion
+            Managers.Data.LoadActiveDic();
             Debug.Log("Complete Loading Data.");
         }
 
@@ -593,46 +558,7 @@ public class GameManager
     {
         PlayerPrefs.DeleteAll();
         PlayerPrefs.DeleteKey("ISFIRST");
-        {
-            string path = Application.persistentDataPath + "/SaveData.json";
-            if (File.Exists(path))
-                File.Delete(path);
-        }
-        {
-            string path = Application.persistentDataPath + "/MonsterActiveData.json";
-            if (File.Exists(path))
-                File.Delete(path);
-        }
-        {
-            string path = Application.persistentDataPath + "/BossMonsterActiveData.json";
-            if (File.Exists(path))
-                File.Delete(path);
-        }
-        {
-            string path = Application.persistentDataPath + "/CItemActiveData.json";
-            if (File.Exists(path))
-                File.Delete(path);
-        }
-        {
-            string path = Application.persistentDataPath + "/EItemActiveData.json";
-            if (File.Exists(path))
-                File.Delete(path);
-        }
-        {
-            string path = Application.persistentDataPath + "/DoorActiveData.json";
-            if (File.Exists(path))
-                File.Delete(path);
-        }
-        {
-            string path = Application.persistentDataPath + "/PillarActiveData.json";
-            if (File.Exists(path))
-                File.Delete(path);
-        }
-        {
-            string path = Application.persistentDataPath + "/LeverActiveData.json";
-            if (File.Exists(path))
-                File.Delete(path);
-        }
+        Managers.Data.ResetActiveDic();
         //ParseMapData();
         Managers.Game.PlayerData.Clear();
         Debug.Log("Complete DeleteGameData");

@@ -1,8 +1,12 @@
 ﻿using Data;
 using DG.Tweening;
 using Febucci.UI;
+using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -49,7 +53,6 @@ public class UI_IntroScene : UI_Scene
         totalCount = 7;
 
         GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx++].id);
-        NextScene();
         GetImage((int)Images.EscapeGauge).gameObject.SetActive(false);
         return true;
     }
@@ -124,7 +127,7 @@ public class UI_IntroScene : UI_Scene
 
         GetImage((int)Images.SceneImage).sprite = ImageList[idx - 1];
         if (idx != totalCount - 1)
-        GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx - 1].id);
+        GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx].id);
 
         if (idx == 1) // ó�� Ŭ����
         {

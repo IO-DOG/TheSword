@@ -210,7 +210,7 @@ public class DataTransformer : EditorWindow
         AssetDatabase.Refresh();
     }
 
-    static void ParseMapData()
+    public static void ParseMapData()
     {
         MapDataLoader loader = new MapDataLoader();
         DirectoryInfo di = new DirectoryInfo($"{Application.dataPath}/@Resources/Data/Excel/");
