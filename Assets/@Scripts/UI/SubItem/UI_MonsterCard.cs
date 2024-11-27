@@ -285,17 +285,13 @@ public class UI_MonsterCard : UI_BaseCard
         SpriteRenderer sr = Managers.Game.Monster.gameObject.GetOrAddComponent<SpriteRenderer>();
         sr.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         sr.color = Util.DamagedColor();
-        //float i = 0;
-        //while (i < 20)
-        //{
-        //    //image.SetNativeSize();
-        //    //swordImage.SetNativeSize();
-        //    //shieldImage.SetNativeSize();
-        //    i += 1;
-        //    sr.color += new Color(0, 0, 0, -0.05f);
-        //    yield return new WaitForSeconds(0.01f);
-        //}
-        Destroy(Managers.Game.Monster.gameObject, 1);
+
+        GameObject go = Instantiate(Managers.Game.Monster.gameObject);
+        go.transform.localPosition = Managers.Game.Monster.gameObject.transform.localPosition;
+        go.GetComponent<Animator>().Play("Stop");
+        Destroy(go.GetComponent<BoxCollider>());
+        Destroy(Managers.Game.Monster.gameObject);
+        Destroy(go, 1);
         Destroy(sr, 1f);
     }
 
