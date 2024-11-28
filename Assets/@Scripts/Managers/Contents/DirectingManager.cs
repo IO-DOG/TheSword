@@ -179,7 +179,8 @@ public class Events
         {
             _clearKingSlime = true;
             _kingSlime = GameObject.Find("bossMonster0");
-            _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = false;
+            if (_kingSlime != null)
+                _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = false;
         }
 
         if (Managers.Game.Player.gameObject != null && Managers.Game.Player.gameObject.transform.position.x < 303.5f || Managers.Game.Player.gameObject.transform.position.x > 304.2f
