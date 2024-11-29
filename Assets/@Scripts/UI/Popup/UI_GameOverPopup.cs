@@ -22,6 +22,9 @@ public class UI_GameOverPopup : UI_Popup
 
         BindImage(typeof(Images));
 
+        GetImage((int)Images.BG).gameObject.SetActive(false);
+        GetImage((int)Images.GameOverIllust).gameObject.SetActive(false);
+
         DeadAni();
 
         return true;
@@ -50,12 +53,26 @@ public class UI_GameOverPopup : UI_Popup
 
     void DeadAni()
     {
+        // 몬스터 죽는 파티클 생성
+        Vector3 particlePos = new Vector3(Managers.Game.PlayerData.CurPosition.X, Managers.Game.PlayerData.CurPosition.Y, Managers.Game.PlayerData.CurPosition.Z);
+        GameObject deathSoulPurple = Managers.Resource.Instantiate("FX_UserDeath");
+        deathSoulPurple.transform.position = particlePos;
+        deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        Destroy(deathSoulPurple, 3);
+        Managers.Game.Player.gameObject.GetComponent<Animator>().Play("Player_Death");
+        //Destroy(Managers.Game.Player.gameObject);
+
         StartCoroutine(CoDeadAni());
     }
 
     IEnumerator CoDeadAni()
     {
         GetImage((int)Images.GameOverIllust).color = new Color(1, 1, 1, 0);
+
+        yield return new WaitForSeconds(1.4f);
+
+        GetImage((int)Images.BG).gameObject.SetActive(true);
+        GetImage((int)Images.GameOverIllust).gameObject.SetActive(true);
 
         // todo
         // 죽음 인겜 연출 재생 (1.5초)
@@ -65,8 +82,12 @@ public class UI_GameOverPopup : UI_Popup
 
         // 게임 오버 일러 서서히 등장
         StartCoroutine(Util.CoFade(GetImage((int)Images.GameOverIllust), 2f));
+        yield return new WaitForSeconds(2f);
+
+        GetImage((int)Images.GameOverIllust).GetComponent<Animator>().Play("UI_GameOverAni");
+
         // 등장 1.5초뒤
-        yield return new WaitForSeconds(3.5f);
+        yield return new WaitForSeconds(1.5f);
 
         // 게임 오버 일러스트 페이드 아웃
         StartCoroutine(Util.CoFade(GetImage((int)Images.GameOverIllust), 1f, false));

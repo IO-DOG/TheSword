@@ -280,20 +280,10 @@ public class UI_PlayerCard : UI_BaseCard
     {
         base.Dead();
         Managers.Game.OnInputLock = true;
-        // Game Over Popup TODO
-        //CreatePlayerDeathParticle();
         Managers.Game.OnBattleAction.Invoke();
-        //Managers.Game.OnBattle = false;
+        Managers.Game.OnBattle = false;
 
-        // 몬스터 죽는 파티클 생성
-        Vector3 particlePos = new Vector3 (Managers.Game.PlayerData.CurPosition.X, Managers.Game.PlayerData.CurPosition.Y, Managers.Game.PlayerData.CurPosition.Z);
-        GameObject deathSoulPurple = Managers.Resource.Instantiate("FX_UserDeath");
-        deathSoulPurple.transform.position = particlePos;
-        deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-        Destroy(deathSoulPurple, 3);
-        Managers.Game.Player.gameObject.GetComponent<Animator>().Play("Player_Death");
-        //Destroy(Managers.Game.Player.gameObject);
-
+        // Game Over Popup
         Managers.UI.ShowPopupUI<UI_GameOverPopup>();
         return;
     }
