@@ -68,7 +68,7 @@ public class PlayerController : MonoBehaviour
     void OnKeyboard()
     {
         if (Managers.Game.OnBattle || Managers.Game.OnConversation || Managers.Game.OnLever
-            || Managers.Game.OnFade || Managers.Game.OnDirect || Managers.Game.OnInteract)
+            || Managers.Game.OnFade || Managers.Game.OnDirect || Managers.Game.OnInteract || Managers.Game.OnInputLock)
         {
             _moveDir = MoveDir.None;
             return;
@@ -103,7 +103,7 @@ public class PlayerController : MonoBehaviour
         PlayAnimation();
 
         if (Managers.Game.OnBattle || Managers.Game.OnConversation || Managers.Game.OnLever
-            || Managers.Game.OnFade || Managers.Game.OnDirect || Managers.Game.OnInteract)
+            || Managers.Game.OnFade || Managers.Game.OnDirect || Managers.Game.OnInteract || Managers.Game.OnInputLock)
         {
             return;
         }

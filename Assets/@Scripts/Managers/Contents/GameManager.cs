@@ -29,6 +29,7 @@ public class GameManager
     public bool OnDirect = false;
     public bool OnInteract = false;
     public bool OnMeetKingSlime = false;
+    public bool OnInputLock = false;
 
     public int ResolutionIdx = 2;
     public int CurEventID;

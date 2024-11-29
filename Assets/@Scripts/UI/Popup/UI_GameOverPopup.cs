@@ -71,7 +71,10 @@ public class UI_GameOverPopup : UI_Popup
         // 게임 오버 일러스트 페이드 아웃
         StartCoroutine(Util.CoFade(GetImage((int)Images.GameOverIllust), 1f, false));
 
+
         Managers.Game.LoadGame();
+
+        Managers.Game.OnInputLock = false;
 
         Managers.Game.Player.gameObject.SetActive(true);
 

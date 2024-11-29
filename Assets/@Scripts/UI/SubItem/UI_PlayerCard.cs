@@ -279,7 +279,7 @@ public class UI_PlayerCard : UI_BaseCard
     public override void Dead()
     {
         base.Dead();
-
+        Managers.Game.OnInputLock = true;
         // Game Over Popup TODO
         //CreatePlayerDeathParticle();
         Managers.Game.OnBattleAction.Invoke();
@@ -287,11 +287,11 @@ public class UI_PlayerCard : UI_BaseCard
 
         // 몬스터 죽는 파티클 생성
         Vector3 particlePos = new Vector3 (Managers.Game.PlayerData.CurPosition.X, Managers.Game.PlayerData.CurPosition.Y, Managers.Game.PlayerData.CurPosition.Z);
-        GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
+        GameObject deathSoulPurple = Managers.Resource.Instantiate("FX_UserDeath");
         deathSoulPurple.transform.position = particlePos;
         deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
         Destroy(deathSoulPurple, 3);
-        Managers.Game.Player.gameObject.SetActive(false);
+        Managers.Game.Player.gameObject.GetComponent<Animator>().Play("Player_Death");
         //Destroy(Managers.Game.Player.gameObject);
 
         Managers.UI.ShowPopupUI<UI_GameOverPopup>();
