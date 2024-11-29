@@ -259,6 +259,9 @@ public class PlayerController : MonoBehaviour
                 _isEquiptShield = false;
                 _isEquiptWeapon = false;
                 break;
+            case PlayerState.Death:
+                GetComponent<Animator>().Play("Player_Death");
+                break;
         }
     }
 

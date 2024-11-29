@@ -282,9 +282,6 @@ public class UI_PlayerCard : UI_BaseCard
         Managers.Game.OnInputLock = true;
         Managers.Game.OnBattleAction.Invoke();
         Managers.Game.OnBattle = false;
-
-        // Game Over Popup
-        Managers.UI.ShowPopupUI<UI_GameOverPopup>();
         return;
     }
 

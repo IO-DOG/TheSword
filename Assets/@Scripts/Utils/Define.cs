@@ -180,6 +180,7 @@ public class Define
         DrawSword,
         ContractSword,
         BackStep,
+        Death,
     }
 
     public enum EventClass

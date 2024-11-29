@@ -80,7 +80,9 @@ public class UI_BattlePopup : UI_Popup
 
         Managers.Game.OnBattle = false;
 
-        Managers.Game.SaveGame();
         ClosePopupUI();
+
+        // Game Over Popup
+        Managers.UI.ShowPopupUI<UI_GameOverPopup>();
     }
 }

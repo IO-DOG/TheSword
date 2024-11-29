@@ -53,13 +53,17 @@ public class UI_GameOverPopup : UI_Popup
 
     void DeadAni()
     {
-        // 몬스터 죽는 파티클 생성
+        GameObject.Find("WeaponSlot")?.SetActive(false);
+        GameObject.Find("ShieldSlot")?.SetActive(false);
+
+        // player 죽는 파티클 생성
         Vector3 particlePos = new Vector3(Managers.Game.PlayerData.CurPosition.X, Managers.Game.PlayerData.CurPosition.Y, Managers.Game.PlayerData.CurPosition.Z);
         GameObject deathSoulPurple = Managers.Resource.Instantiate("FX_UserDeath");
         deathSoulPurple.transform.position = particlePos;
-        deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        //deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
         Destroy(deathSoulPurple, 3);
-        Managers.Game.Player.gameObject.GetComponent<Animator>().Play("Player_Death");
+
+        Managers.Game.Player.SetState(Define.PlayerState.Death);
         //Destroy(Managers.Game.Player.gameObject);
 
         StartCoroutine(CoDeadAni());
@@ -69,7 +73,7 @@ public class UI_GameOverPopup : UI_Popup
     {
         GetImage((int)Images.GameOverIllust).color = new Color(1, 1, 1, 0);
 
-        yield return new WaitForSeconds(1.4f);
+        yield return new WaitForSeconds(2.4f);
 
         GetImage((int)Images.BG).gameObject.SetActive(true);
         GetImage((int)Images.GameOverIllust).gameObject.SetActive(true);
