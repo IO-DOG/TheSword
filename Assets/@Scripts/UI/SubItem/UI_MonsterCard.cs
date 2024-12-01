@@ -1,4 +1,5 @@
-﻿using DG.Tweening;
+﻿using Coffee.UIExtensions;
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -228,9 +229,19 @@ public class UI_MonsterCard : UI_BaseCard
 
     void CreatePlayerHitParticle()
     {
-        string battleParticleHit = _creature.BattleParticleHit;
-        GameObject player = GameObject.Find("CreatureImage");
-        GameObject go = Managers.Resource.Instantiate(battleParticleHit, player.transform);
+        string hitFX = _creature.BattleParticleHit;
+        GameObject player = GameObject.Find("UI_PlayerCard");
+        GameObject go = Managers.Resource.Instantiate(hitFX, player.transform);
+        go.transform.position += new Vector3(0, 70, 0);
+        var uiParticle = go.GetOrAddComponent<UIParticle>();
+
+        //var childrenUIParticle = go.GetComponentsInChildren<UIParticle>()[1]; // 이거 좀 위험한 코드임.
+        uiParticle.scale = 50;
+        //childrenUIParticle.scale = 300;
+        //Debug.Log($"childrenUIParticle.gameObject.name : {childrenUIParticle.gameObject.name}");
+        uiParticle.Play();
+        //childrenUIParticle.Play();
+        //Destroy(uiParticle, 0.3f);
     }
 
     void PlayMonsterAttackAnim()

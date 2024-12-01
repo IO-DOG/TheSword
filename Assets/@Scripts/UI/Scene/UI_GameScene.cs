@@ -214,7 +214,7 @@ public class UI_GameScene : UI_Scene
         }
         if (Input.GetKeyDown(KeyCode.F4))
         {
-            Managers.Game.LoadGame();
+            Managers.Game.PlayerData.Attack -= 10;
         }
         if (Input.GetKeyDown(KeyCode.F5))
         {
