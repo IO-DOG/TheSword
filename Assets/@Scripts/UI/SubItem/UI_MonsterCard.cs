@@ -298,7 +298,7 @@ public class UI_MonsterCard : UI_BaseCard
         sr.color = Util.DamagedColor();
 
         GameObject go = Instantiate(Managers.Game.Monster.gameObject);
-        go.transform.localPosition = Managers.Game.Monster.gameObject.transform.localPosition;
+        go.transform.position = Managers.Game.Monster.gameObject.transform.position;
         go.GetComponent<Animator>().Play("Stop");
         Destroy(go.GetComponent<BoxCollider>());
         Destroy(Managers.Game.Monster.gameObject);
