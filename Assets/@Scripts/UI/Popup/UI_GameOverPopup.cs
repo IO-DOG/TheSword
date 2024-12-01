@@ -53,8 +53,9 @@ public class UI_GameOverPopup : UI_Popup
 
     void DeadAni()
     {
-        GameObject.Find("WeaponSlot")?.SetActive(false);
-        GameObject.Find("ShieldSlot")?.SetActive(false);
+        // 장비 없애기
+        Managers.Game.Player._isEquiptShield = false;
+        Managers.Game.Player._isEquiptWeapon = false;
 
         // player 죽는 파티클 생성
         Vector3 particlePos = new Vector3(Managers.Game.PlayerData.CurPosition.X, Managers.Game.PlayerData.CurPosition.Y, Managers.Game.PlayerData.CurPosition.Z);
@@ -71,10 +72,10 @@ public class UI_GameOverPopup : UI_Popup
 
     IEnumerator CoDeadAni()
     {
-        GetImage((int)Images.GameOverIllust).color = new Color(1, 1, 1, 0);
-
         yield return new WaitForSeconds(2.4f);
 
+        GetImage((int)Images.BG).color = new Color(1, 1, 1, 0);
+        GetImage((int)Images.GameOverIllust).color = new Color(1, 1, 1, 0);
         GetImage((int)Images.BG).gameObject.SetActive(true);
         GetImage((int)Images.GameOverIllust).gameObject.SetActive(true);
 
@@ -85,16 +86,17 @@ public class UI_GameOverPopup : UI_Popup
         yield return new WaitForSeconds(0.2f);
 
         // 게임 오버 일러 서서히 등장
-        StartCoroutine(Util.CoFade(GetImage((int)Images.GameOverIllust), 2f));
-        yield return new WaitForSeconds(2f);
+        //StartCoroutine(Util.CoFade(GetImage((int)Images.GameOverIllust), 2f));
+        //yield return new WaitForSeconds(2f);
 
         GetImage((int)Images.GameOverIllust).GetComponent<Animator>().Play("UI_GameOverAni");
 
         // 등장 1.5초뒤
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(3.5f);
 
         // 게임 오버 일러스트 페이드 아웃
         StartCoroutine(Util.CoFade(GetImage((int)Images.GameOverIllust), 1f, false));
+        yield return new WaitForSeconds(1f);
 
 
         Managers.Game.LoadGame();
