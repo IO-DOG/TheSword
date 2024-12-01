@@ -83,6 +83,7 @@ public class UI_BattlePopup : UI_Popup
         ClosePopupUI();
 
         // Game Over Popup
-        Managers.UI.ShowPopupUI<UI_GameOverPopup>();
+        if (Managers.Game.IsPlayerDead)
+            Managers.UI.ShowPopupUI<UI_GameOverPopup>();
     }
 }

@@ -30,6 +30,7 @@ public class GameManager
     public bool OnInteract = false;
     public bool OnMeetKingSlime = false;
     public bool OnInputLock = false;
+    public bool IsPlayerDead = false;
 
     public int ResolutionIdx = 2;
     public int CurEventID;

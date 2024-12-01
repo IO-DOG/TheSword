@@ -280,6 +280,7 @@ public class UI_PlayerCard : UI_BaseCard
     {
         base.Dead();
         Managers.Game.OnInputLock = true;
+        Managers.Game.IsPlayerDead = true;
         Managers.Game.OnBattleAction.Invoke();
         Managers.Game.OnBattle = false;
         return;
