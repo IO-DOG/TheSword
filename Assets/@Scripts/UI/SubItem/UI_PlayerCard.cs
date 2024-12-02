@@ -264,16 +264,10 @@ public class UI_PlayerCard : UI_BaseCard
         string hitFX = Managers.Data.EquipDic[swordId].HitFX;
         GameObject monster = GameObject.Find("UI_MonsterCard");
         GameObject go = Managers.Resource.Instantiate(hitFX, monster.transform);
-        go.transform.position += new Vector3(0, 70, 0);
         var uiParticle = go.GetOrAddComponent<UIParticle>();
 
-        //var childrenUIParticle = go.GetComponentsInChildren<UIParticle>()[1]; // 이거 좀 위험한 코드임.
         uiParticle.scale = 50;
-        //childrenUIParticle.scale = 300;
-        //Debug.Log($"childrenUIParticle.gameObject.name : {childrenUIParticle.gameObject.name}");
         uiParticle.Play();
-        //childrenUIParticle.Play();
-        //Destroy(uiParticle, 0.3f);
     }
 
     public override void Dead()
