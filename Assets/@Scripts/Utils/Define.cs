@@ -204,6 +204,8 @@ public class Define
     public static string MainUI_Warp_A = "MainUI_Warp_A.sprite";
     public static string MainUI_Warp_B = "MainUI_Warp_B.sprite";
 
+    public static int LETTER_BOX_HEIGHT = 200;
+
     public static Color BossLight = new Color(1f, 0, 0);
 
     #region Script Data

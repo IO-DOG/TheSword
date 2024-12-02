@@ -188,8 +188,8 @@ public class Events
             return;
 
         Managers.Game.OnMeetKingSlime = true;
+        Managers.Game.ResolutionIdx = 2;
         Managers.Game.OnDirect = true;
-
         // 주인공을 길 중간 위치로 이동
         // 주인공이 정면을 바라보도록
         // 카메라 워킹 및 UI사라짐
@@ -216,12 +216,13 @@ public class Events
 
             DG.Tweening.Sequence sequence = DOTween.Sequence();
             Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
-            Vector3 target = new Vector3(0f, 17.5f, -5f); ;
+            Vector3 target = new Vector3(0f, 20f, -5f); ;
             float moveTime = 2f;
 
             GameObject parent = GameObject.Find("Dungeon_00_003");
             GameObject scoutSlime = Managers.Resource.Instantiate("BossScene_C0_000", parent.transform);
-            Vector3 pos = new Vector3(3.547f, 3.123f, -2f);
+            Vector3 pos = new Vector3(3.547f, 3.123f, -2.08f);
+
             scoutSlime.transform.localPosition = pos;
 
             OnMeetKingSlime -= KingSlimeAction;
@@ -234,7 +235,6 @@ public class Events
     void KingSlimeAction()
     {
         OnMeetKingSlime = null;
-
         CoroutineManager.StartCoroutine(CoKingSlimeAction());
     }
 
@@ -243,13 +243,13 @@ public class Events
         WaitForSeconds waitForSeconds = new WaitForSeconds(1f);
         GameObject parent = GameObject.Find("Dungeon_00_003");
         GameObject midlePos = GameObject.Find("SpawnKingSlime");
-        Vector3 pos = new Vector3(3.547f, 3.123f, -2f);
+        Vector3 pos = new Vector3(3.547f, 3.123f, -2.08f);
         GameObject scoutSlime = GameObject.Find("BossScene_C0_000");
-        Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 17.5f, -5f);
+        Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 20f, -5f);
         scoutSlime.transform.localPosition = pos;
 
 
-        Vector3 scoutSlimeMoveDest = new Vector3(pos.x + 0.5f, pos.y, pos.z);
+        Vector3 scoutSlimeMoveDest = new Vector3(pos.x + 0.2f, pos.y, pos.z);
         CoroutineManager.StartCoroutine(CoMoveToDest(scoutSlime, scoutSlimeMoveDest, 2.5f));
 
 
@@ -486,6 +486,7 @@ public class Events
 
     public IEnumerator CoVirtualCameraMove(Vector3 original, Vector3 target, float time)
     {
+        Managers.Game.GameScene.StartLetterBox();
         yield return null;
 
         float totalTime = 0f;
