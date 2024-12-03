@@ -114,6 +114,7 @@ public class Events
     public void CoStartContractSword()
     {
         PlayerPrefs.SetInt("ISMEETSWORD", 1);
+        Managers.Game.SaveGame();
         CoroutineManager.StartCoroutine(ContractSword());
     }
 
@@ -564,6 +565,7 @@ public class Events
     public void CoPlayTutorial_1()
     {
         CoroutineManager.StartCoroutine(PlayTutorial_1());
+        Managers.Game.SaveGame();
     }
 
     IEnumerator PlayTutorial_1()
