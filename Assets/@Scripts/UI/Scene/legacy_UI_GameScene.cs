@@ -174,6 +174,7 @@ public class legacy_UI_GameScene : UI_Scene
             }
         }
 
+#if UNITY_EDITOR
         #region for_test
         if (Input.GetKeyDown(KeyCode.F1))
         {
@@ -211,6 +212,7 @@ public class legacy_UI_GameScene : UI_Scene
 
         }
         #endregion
+#endif
     }
 
     /// <summary>

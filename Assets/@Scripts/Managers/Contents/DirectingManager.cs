@@ -160,7 +160,7 @@ public class Events
         Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
         Managers.Game.OnDirect = false;
         Managers.UI.OpenGameSceneUI();
-        Managers.Game.SaveGame();
+        //Managers.Game.SaveGame();
     }
 
     #endregion
@@ -613,7 +613,7 @@ public class Events
         #endregion
 
         PlayerPrefs.SetInt("ISFIRST", 0);
-        Managers.Game.SaveGame();
+        //Managers.Game.SaveGame();
     }
     #endregion
 }

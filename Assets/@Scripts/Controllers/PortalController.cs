@@ -62,7 +62,7 @@ public class PortalController : MonoBehaviour
             //Managers.Game.PlayerData.CurStageid = Managers.Game.BossRoomId;
         }
         Debug.Log($"Setting player position to: {nextPos}");
-        Managers.Game.SaveGame();
+        //Managers.Game.SaveGame();
         CoStartWait(nextPos);
     }
 
@@ -123,7 +123,7 @@ public class PortalController : MonoBehaviour
         
         Managers.Game.Player.transform.position = nextPos;
         Managers.Game.Player._cellPos = nextPos;
-        Managers.Game.SaveGame();
+        //Managers.Game.SaveGame();
 
         Managers.Game.OnPortalAction.Invoke();
         Managers.Game.GameScene.Refresh();
