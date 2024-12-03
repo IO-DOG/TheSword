@@ -189,22 +189,19 @@ public class UI_TitleScene : UI_Scene
         #endregion
     }
 
-    IEnumerator CoFadeOutImage()
+    IEnumerator CoFadeOutSound(float time)
     {
-        GetImage((int)Images.BlackBGImage).gameObject.SetActive(true);
+        float total = 0f;
 
-        GetImage((int)Images.BlackBGImage).color = new Color(0, 0, 0, 0);
-
-        float tick = 0;
-        while (tick < 1)
+        while (total <= time)
         {
-            GetImage((int)Images.BlackBGImage).color += new Color(0, 0, 0, +0.1f);
-            tick += 0.1f;
-            yield return new WaitForSeconds(0.1f);
-        }
-        yield return new WaitForSeconds(0.5f);
+            float delta = total / time;
 
-        //OnClickNewGameButton();
+            Managers.Sound.SetBGMVolume(1 - delta);
+
+            total += Time.deltaTime;
+            yield return null;
+        }
     }
 
     IEnumerator CoOnClickNewGameButton()
@@ -212,6 +209,7 @@ public class UI_TitleScene : UI_Scene
         GetImage((int)Images.BlackBGImage).gameObject.SetActive(true);
         GetImage((int)Images.BlackBGImage).color = new Color(1, 1, 1, 0);
         StartCoroutine(Util.CoFade(GetImage((int)Images.BlackBGImage), 3));
+        StartCoroutine(CoFadeOutSound(3f));
         yield return new WaitForSeconds(3f);
 
         //test
