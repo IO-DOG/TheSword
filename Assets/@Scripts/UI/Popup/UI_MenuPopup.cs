@@ -266,6 +266,8 @@ public class UI_MenuPopup : UI_Popup
             UIImages.SetActive(true);
         if (PlayConversation != null)
             PlayConversation.SetActive(true);
+        Managers.Game.GameScene.isOpenMenuPopup = false;
+
         Managers.UI.ClosePopupUI();
     }
 }

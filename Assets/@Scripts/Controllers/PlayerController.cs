@@ -469,7 +469,7 @@ public class PlayerController : MonoBehaviour
                             Managers.Game.OnLever = false;
                             _cellPos = originPos;
                             transform.position = _cellPos;
-                            Managers.Game.SaveGame();
+                            //Managers.Game.SaveGame();
                         });
                     });
                 });
@@ -502,7 +502,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        Managers.Game.SaveGame();
+        //Managers.Game.SaveGame();
 
         return somethingExist;
     }

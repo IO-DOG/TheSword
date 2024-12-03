@@ -575,6 +575,6 @@ public class GameManager
         if (LoadGame())
             return;
 
-        SaveGame();
+        //SaveGame();
     }
 }

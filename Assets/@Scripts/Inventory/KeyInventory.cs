@@ -55,7 +55,7 @@ public class KeyInventory
         else
         {
             Managers.Data.DoorActiveDic[door.GetComponent<Door>()._doorIndex_forActive] = false;
-            Managers.Game.SaveGame();
+            //Managers.Game.SaveGame();
             // TODO Save
             _keys[door.GetComponentInChildren<Door>()._keyIndex]--;
             ShowKeySlot(Managers.Game.Player._keyInventory);
