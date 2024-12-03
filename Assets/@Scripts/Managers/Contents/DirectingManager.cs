@@ -258,7 +258,12 @@ public class Events
 
         scoutSlime.GetComponent<Animator>().Play("bossScene_C0_001");
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1f);
+
+        scoutSlime.transform.DOLocalMoveZ(-0.3f, 1f);
+
+
+        yield return new WaitForSeconds(1f);
 
         // camera slow down
         Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
