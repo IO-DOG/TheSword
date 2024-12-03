@@ -45,8 +45,6 @@ public class UI_GameScene : UI_Scene
         MainUISwordBImage,
         MainUIWarpAImage,
         MainUIWarpBImage,
-        LetterBoxTop,
-        LetterBoxBottom,
     }
 
     #endregion
@@ -100,20 +98,6 @@ public class UI_GameScene : UI_Scene
         GetObject((int)GameObjects.GreenKey).SetActive(false);
         GetObject((int)GameObjects.YellowKey).SetActive(false);
         GetObject((int)GameObjects.RedKey).SetActive(false);
-
-        #region Letter Box
-        GetImage((int)Images.LetterBoxTop).GetComponent<RectTransform>().sizeDelta = new Vector2(Screen.width, Define.LETTER_BOX_HEIGHT);
-        GetImage((int)Images.LetterBoxBottom).GetComponent<RectTransform>().sizeDelta = new Vector2(Screen.width, Define.LETTER_BOX_HEIGHT);
-        GetImage((int)Images.LetterBoxTop).GetComponent<RectTransform>().position = Util.WorldToScreenCood(new Vector3(0f, Screen.height/2 + Define.LETTER_BOX_HEIGHT, 0f));
-        GetImage((int)Images.LetterBoxBottom).GetComponent<RectTransform>().position = Util.WorldToScreenCood(new Vector3(0f, -Screen.height/2 - Define.LETTER_BOX_HEIGHT, 0f));
-        GetImage((int)Images.LetterBoxTop).gameObject.SetActive(false);
-        GetImage((int)Images.LetterBoxBottom).gameObject.SetActive(false);
-
-        #endregion
-
-        GetImage((int)Images.LetterBoxTop).gameObject.SetActive(false);
-        GetImage((int)Images.LetterBoxBottom).gameObject.SetActive(false);
-
 
         // UI 활성화 여부 체크
         if (PlayerPrefs.GetInt("ISOPENINVENUI") == 0) // 인벤 활성화 x
@@ -322,27 +306,5 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUIInventoryAImage).gameObject.SetActive(true);
         GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(true);
         GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(true);
-    }
-
-    public void StartLetterBox()
-    {
-        GetImage((int)Images.LetterBoxTop).gameObject.SetActive(true);
-        GetImage((int)Images.LetterBoxBottom).gameObject.SetActive(true);
-        GetImage((int)Images.LetterBoxTop).GetComponent<RectTransform>().DOMove(Util.WorldToScreenCood(new Vector3(0f, Screen.height / 2, 0f)), 1f);
-        GetImage((int)Images.LetterBoxBottom).GetComponent<RectTransform>().DOMove(Util.WorldToScreenCood(new Vector3(0f, -Screen.height / 2, 0f)), 1f);
-    }
-
-    public void StopLetterBox()
-    {
-        Tween twe1 = GetImage((int)Images.LetterBoxTop).GetComponent<RectTransform>().DOMove(Util.WorldToScreenCood(new Vector3(0f, Screen.height / 2 + Define.LETTER_BOX_HEIGHT, 0f)), 1f);
-        Tween twe2 = GetImage((int)Images.LetterBoxBottom).GetComponent<RectTransform>().DOMove(Util.WorldToScreenCood(new Vector3(0f, -Screen.height / 2 - Define.LETTER_BOX_HEIGHT, 0f)), 1f);
-
-        Sequence seq = DOTween.Sequence();
-        seq.Append(twe1);
-        seq.Join(twe2).OnComplete(() =>
-        {
-            GetImage((int)Images.LetterBoxTop).gameObject.SetActive(false);
-            GetImage((int)Images.LetterBoxBottom).gameObject.SetActive(false);
-        });
     }
 }

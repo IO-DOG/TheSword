@@ -109,6 +109,8 @@ public class Effects_00 : MonoBehaviour
             }
         
         }
+
+        // light
         if (Managers.Game.PlayerData.CurStageid == 0)
         {
             Managers.Game.DirectionalLight.color = new Color(255/255f, 244/255f, 214/255f);
@@ -116,11 +118,6 @@ public class Effects_00 : MonoBehaviour
         else if(Managers.Game.PlayerData.CurStageid > 0)
         {
             Managers.Game.DirectionalLight.color = new Color(192/255f, 189/255f, 179/255f);
-
-            if (postProcessingVolume.profile.TryGet<Vignette>(out vignette))
-            {
-                vignette.intensity.Override(Mathf.Clamp(0.3f, 0, 1));
-            }
         }
     }
 
