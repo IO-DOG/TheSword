@@ -222,7 +222,7 @@ public class Events
 
             GameObject parent = GameObject.Find("Dungeon_00_003");
             GameObject scoutSlime = Managers.Resource.Instantiate("BossScene_C0_000", parent.transform);
-            Vector3 pos = new Vector3(3.547f, 3.123f, -2.08f);
+            Vector3 pos = new Vector3(3.845f, 1.47f, -1.408f);
 
             scoutSlime.transform.localPosition = pos;
 
@@ -244,13 +244,13 @@ public class Events
         WaitForSeconds waitForSeconds = new WaitForSeconds(1f);
         GameObject parent = GameObject.Find("Dungeon_00_003");
         GameObject midlePos = GameObject.Find("SpawnKingSlime");
-        Vector3 pos = new Vector3(3.547f, 3.123f, -2.08f);
+        Vector3 pos = new Vector3(3.845f, 1.47f, -1.408f);
         GameObject scoutSlime = GameObject.Find("BossScene_C0_000");
         Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 20f, -5f);
         scoutSlime.transform.localPosition = pos;
 
 
-        Vector3 scoutSlimeMoveDest = new Vector3(pos.x + 0.2f, pos.y, pos.z);
+        Vector3 scoutSlimeMoveDest = new Vector3(pos.x, pos.y, pos.z - 0.3f);
         CoroutineManager.StartCoroutine(CoMoveToDest(scoutSlime, scoutSlimeMoveDest, 2.5f));
 
 

@@ -111,7 +111,7 @@ public class Effects_00 : MonoBehaviour
         }
 
         // light
-        if (Managers.Game.PlayerData.CurStageid == 0)
+        if (Managers.Game.PlayerData.CurStageid == 0 || Managers.Game.PlayerData.CurStageid == Managers.Game.BossRoomId)
         {
             Managers.Game.DirectionalLight.color = new Color(255/255f, 244/255f, 214/255f);
         }
