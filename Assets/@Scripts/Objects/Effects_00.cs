@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.VFX;
 
 public class Effects_00 : MonoBehaviour
 {
@@ -118,6 +119,24 @@ public class Effects_00 : MonoBehaviour
         else if(Managers.Game.PlayerData.CurStageid > 0)
         {
             Managers.Game.DirectionalLight.color = new Color(192/255f, 189/255f, 179/255f);
+        }
+
+        // fog
+        if(Managers.Game.PlayerData.CurStageid == Managers.Game.BossRoomId)
+        {
+            if (fog.GetComponent<VisualEffect>().HasVector4("FogSeconderyColor"))
+            {
+                Vector4 color = new Color(12 / 255f, 166 / 255f, 18 / 255f);
+                fog.GetComponent<VisualEffect>().SetVector4("FogSeconderyColor", color);
+            }
+        }
+        else
+        {
+            if (fog.GetComponent<VisualEffect>().HasVector4("FogSeconderyColor"))
+            {
+                Vector4 color = new Color(1f, 1f, 1f);
+                fog.GetComponent<VisualEffect>().SetVector4("FogSeconderyColor", color);
+            }
         }
     }
 
