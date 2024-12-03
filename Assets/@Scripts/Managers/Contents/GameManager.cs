@@ -27,6 +27,7 @@ public class GameManager
     public bool OnLever = false;
     public bool OnFade = false;
     public bool OnDirect = false;
+    public bool OnStaticResolution = false;
     public bool OnInteract = false;
     public bool OnMeetKingSlime = false;
     public bool OnInputLock = false;
@@ -326,7 +327,7 @@ public class GameManager
 
         if (Managers.Game.PlayerData.CurStageid == 2)
         {
-            CameraController._isCombineMap = true;
+            Managers.Game.OnStaticResolution = true;
         }
         //MainCamera.GetComponentInChildren<CustomCameraLimiter>().SetBG();
 

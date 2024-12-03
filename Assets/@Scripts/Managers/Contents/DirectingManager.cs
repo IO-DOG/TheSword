@@ -14,7 +14,7 @@ public class DirectingManager
 {
     public Action PopupAction;
     public Events Events = new Events();
-
+    public UI_LetterBox letterBox;
     public void PlayDirecting(int eventId)
     {
         switch (eventId)
@@ -24,6 +24,20 @@ public class DirectingManager
                 PopupAction += (() => Managers.UI.ShowPopupUI<UI_MagicalSwordCheckPopup>());
                 break;
         }
+    }
+
+    public void PlayLetterBox()
+    {
+        letterBox = Managers.UI.ShowPopupUI<UI_LetterBox>();
+        letterBox.Init();
+        letterBox.StartLetterBox();
+
+    }
+
+    public void CloseLetterBox()
+    {
+        Managers.Directing.letterBox.StopLetterBox();
+        Managers.Directing.letterBox = null;
     }
 }
 
@@ -188,8 +202,6 @@ public class Events
             return;
 
         Managers.Game.OnMeetKingSlime = true;
-        Managers.Game.ResolutionIdx = 2;
-        Managers.Game.OnDirect = true;
         // 주인공을 길 중간 위치로 이동
         // 주인공이 정면을 바라보도록
         // 카메라 워킹 및 UI사라짐
@@ -198,23 +210,12 @@ public class Events
         GameObject gameScene = Managers.Game.GameScene.gameObject;
         if (gameScene != null)
         {
-            // UI Off
-            RectTransform[] rectTransforms = gameScene.gameObject.GetComponentsInChildren<RectTransform>();
-            for (int i = 1; i < rectTransforms.Length; i++)
-            {
-                Image image = rectTransforms[i].gameObject.GetComponent<Image>();
-                if (image != null)
-                {
-                    image.color = new Color(1, 1, 1, 0);
-                }
-                TMP_Text tMP_Text = rectTransforms[i].gameObject.GetComponent<TMP_Text>();
-                if (tMP_Text != null)
-                {
-                    tMP_Text.color = new Color(1, 1, 1, 0);
-                }
-            }
+            Managers.UI.CloseGameSceneUI();
+            Managers.Directing.PlayLetterBox();
 
-            DG.Tweening.Sequence sequence = DOTween.Sequence();
+            Managers.Game.OnStaticResolution = true;
+            Managers.Game.OnDirect = true;
+
             Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
             Vector3 target = new Vector3(0f, 20f, -5f); ;
             float moveTime = 2f;
@@ -384,6 +385,12 @@ public class Events
         image.GetComponent<Image>().color = new Color(1, 1, 1, 0);
         GameObject.Find("Effects_00")?.SetActive(false);
 
+
+        Managers.Game.OnDirect = false;
+        Managers.Directing.CloseLetterBox();
+        Managers.Game.OnStaticResolution = false;
+        Managers.UI.OpenGameSceneUI();
+
         AfterMeetKingSlime();
     }
 
@@ -486,7 +493,6 @@ public class Events
 
     public IEnumerator CoVirtualCameraMove(Vector3 original, Vector3 target, float time)
     {
-        Managers.Game.GameScene.StartLetterBox();
         yield return null;
 
         float totalTime = 0f;

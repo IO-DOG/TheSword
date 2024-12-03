@@ -111,11 +111,11 @@ public class PortalController : MonoBehaviour
         int nextStageID = SetStageID();
         if (nextStageID == 2)
         {
-            CameraController._isCombineMap = true;
+            Managers.Game.OnStaticResolution = true;
         }
         else
         {
-            CameraController._isCombineMap = false;
+            Managers.Game.OnStaticResolution = false;
         }
         yield return new WaitForSeconds(0.03f);
         Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();

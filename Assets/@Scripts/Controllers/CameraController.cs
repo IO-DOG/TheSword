@@ -11,8 +11,6 @@ public class CameraController : MonoBehaviour
 {
     public SpriteRenderer _bg;
 
-    public static bool _isCombineMap = false;
-
     // 픽셀 퍼펙트 카메라 해상도
     int[] _resolutionX = { 960, 640, 384, 320 };
     int[] _resolutionY = { 540, 360, 256, 80 };
@@ -54,18 +52,13 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-        if (Managers.Game.OnDirect == true)
-            return;
-        if (_isCombineMap ==  true)
+        if (Managers.Game.OnStaticResolution == true)
         {
             Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[2];
             Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[2];
         }
-        if(Managers.Game.OnMeetKingSlime)
-        {
-            Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[0];
-            Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[0];
-        }
+        if (Managers.Game.OnDirect == true)
+            return;
         else if (Managers.UI.GetPopupCount() == 0)
         {
             float scroll = Input.GetAxis("Mouse ScrollWheel") * _scrollSpeed * Time.deltaTime;
