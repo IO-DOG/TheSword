@@ -104,8 +104,8 @@ public class UI_GameScene : UI_Scene
         #region Letter Box
         GetImage((int)Images.LetterBoxTop).GetComponent<RectTransform>().sizeDelta = new Vector2(Screen.width, Define.LETTER_BOX_HEIGHT);
         GetImage((int)Images.LetterBoxBottom).GetComponent<RectTransform>().sizeDelta = new Vector2(Screen.width, Define.LETTER_BOX_HEIGHT);
-        GetImage((int)Images.LetterBoxTop).GetComponent<RectTransform>().position = Util.WorldToScreenCood(new Vector3(0f, Screen.height/2 + Define.LETTER_BOX_HEIGHT, 0f));
-        GetImage((int)Images.LetterBoxBottom).GetComponent<RectTransform>().position = Util.WorldToScreenCood(new Vector3(0f, -Screen.height/2 - Define.LETTER_BOX_HEIGHT, 0f));
+        GetImage((int)Images.LetterBoxTop).GetComponent<RectTransform>().position = Util.WorldToScreenCood(new Vector3(0f, Screen.height / 2 + Define.LETTER_BOX_HEIGHT, 0f));
+        GetImage((int)Images.LetterBoxBottom).GetComponent<RectTransform>().position = Util.WorldToScreenCood(new Vector3(0f, -Screen.height / 2 - Define.LETTER_BOX_HEIGHT, 0f));
         GetImage((int)Images.LetterBoxTop).gameObject.SetActive(false);
         GetImage((int)Images.LetterBoxBottom).gameObject.SetActive(false);
 
@@ -188,32 +188,12 @@ public class UI_GameScene : UI_Scene
         SetPlayerInfo();
     }
 
-    int _mask = (1 << (int)Define.Layer.Monster);
+    int _mask = (1 << (int)Define.Layer.Monster | 1 << (int)Define.Layer.CItem);
 
     private void Update()
     {
-        if (!isOpenMenuPopup)
-        {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            bool raycastHit = Physics.Raycast(ray, out hit, 100.0f, _mask);
-            Debug.DrawRay(Camera.main.transform.position, ray.direction * 100.0f, Color.red, 1.0f);
-
-            if (raycastHit)
-            {
-                if (hit.collider.gameObject.layer == (int)Define.Layer.Monster)
-                {
-                    MonsterController monster = hit.collider.gameObject.GetComponent<MonsterController>();
-                    int id = monster.id;
-                    Debug.Log($"MonsterName : {Managers.Data.MonsterDic[id].Name}");
-                    Debug.Log($"MonsterImage : {Managers.Data.MonsterDic[id].IdleAnimStr}");
-                    Debug.Log($"MonsterImage : {Managers.Data.MonsterDic[id].IdleAnimStr}");
-
-                    UI_MonsterInfo monsterInfo = Managers.UI.MakeSubItem<UI_MonsterInfo>(monster.transform);
-                    monsterInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
-                }
-            }
-        }
+        ShowCItemInfo();
+        ShowMonsterInfo();
 
         #region for_test
         if (Input.GetKeyDown(KeyCode.F1))
@@ -256,7 +236,7 @@ public class UI_GameScene : UI_Scene
         if (Input.GetKeyDown(KeyCode.F6))
         {
             GameObject monsters = GameObject.Find("Monsters");
-            if (monsters != null ) monsters.gameObject.SetActive(false);
+            if (monsters != null) monsters.gameObject.SetActive(false);
             GameObject pillars = GameObject.Find("Pillars");
             if (pillars != null) pillars.gameObject.SetActive(false);
         }
@@ -267,8 +247,58 @@ public class UI_GameScene : UI_Scene
             Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset =
                 Vector3.Lerp(Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset, new Vector3(0f, 20f, -5f), 2f);
         }
-        
+
         #endregion
+    }
+
+    void ShowMonsterInfo()
+    {
+        if (isOpenMenuPopup)
+            return;
+
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        bool raycastHit = Physics.Raycast(ray, out hit, 100.0f, _mask);
+        Debug.DrawRay(Camera.main.transform.position, ray.direction * 100.0f, Color.red, 1.0f);
+
+        if (raycastHit)
+        {
+            if (hit.collider.gameObject.layer == (int)Define.Layer.Monster)
+            {
+                MonsterController monster = hit.collider.gameObject.GetComponent<MonsterController>();
+                int id = monster.id;
+                Debug.Log($"MonsterName : {Managers.Data.MonsterDic[id].Name}");
+                Debug.Log($"MonsterImage : {Managers.Data.MonsterDic[id].IdleAnimStr}");
+                Debug.Log($"MonsterImage : {Managers.Data.MonsterDic[id].IdleAnimStr}");
+
+                UI_MonsterInfo monsterInfo = Managers.UI.MakeSubItem<UI_MonsterInfo>(monster.transform);
+                monsterInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
+            }
+        }
+    }
+
+    void ShowCItemInfo()
+    {
+        if (isOpenMenuPopup)
+            return;
+
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        bool raycastHit = Physics.Raycast(ray, out hit, 1000.0f, _mask);
+
+        if (raycastHit)
+        {
+            Debug.Log(hit.collider.gameObject.layer);
+            if (hit.collider.gameObject.layer == (int)Define.Layer.CItem)
+            {
+                ConsumableItem cItem = hit.collider.gameObject.GetComponent<ConsumableItem>();
+                int id = cItem.id;
+                Debug.Log($"cItem : {Managers.GetString(Managers.Data.ConsumableItemDic[id].ScriptNameId)}");
+
+                UI_CItemInfo cItemInfo = Managers.UI.MakeSubItem<UI_CItemInfo>(cItem.transform);
+                cItemInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
+            }
+        }
     }
 
     /// <summary>
