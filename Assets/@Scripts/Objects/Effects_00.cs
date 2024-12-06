@@ -94,21 +94,12 @@ public class Effects_00 : MonoBehaviour
     void SetLight()
     {
         Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
-        ColorAdjustments colorAdjustments;
         Vignette vignette;
 
-        if (Managers.Game.PlayerData.CurStageid != 2)
-        {
-            if (postProcessingVolume.profile.TryGet<ColorAdjustments>(out colorAdjustments))
-            {
-                colorAdjustments.hueShift.Override(Mathf.Clamp(0, -180, 180));
-            }
 
-            if (postProcessingVolume.profile.TryGet<Vignette>(out vignette))
-            {
-                vignette.intensity.Override(Mathf.Clamp(0.126f, 0, 1));
-            }
-        
+        if (postProcessingVolume.profile.TryGet<Vignette>(out vignette))
+        {
+            vignette.intensity.Override(Mathf.Clamp(0.3f, 0, 1));
         }
 
         // light

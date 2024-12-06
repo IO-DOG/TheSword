@@ -90,8 +90,6 @@ public class UI_GameScene : UI_Scene
         Managers.Game.PlayerData.MoveSpeed = 1f;
         Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
 
-
-        Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST;
         Managers.Game.PlayerData.CurShield = 0;
 
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);

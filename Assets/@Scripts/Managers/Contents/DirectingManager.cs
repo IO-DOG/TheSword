@@ -388,7 +388,7 @@ public class Events
         kingSlimeAction.SetActive(false);
         _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
         image.GetComponent<Image>().color = new Color(1, 1, 1, 0);
-        GameObject.Find("Effects_00")?.SetActive(false);
+        //GameObject.Find("Effects_00")?.SetActive(false);
 
 
         Managers.Game.OnDirect = false;

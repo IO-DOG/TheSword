@@ -176,6 +176,7 @@ public class GameManager
             Managers.Game.PlayerData.IsDefence = false;
             Managers.Game.PlayerData.CurStageid = 0;
             Managers.Game.PlayerData.CurPosition = new MyVector3() { X = 0, Y = 1.5f, Z = 0 };
+            Managers.Game.PlayerData.IsContractedSword = false;
         }
     }
 
