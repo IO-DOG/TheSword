@@ -52,7 +52,7 @@ public class UI_GameScene : UI_Scene
     #endregion
 
     public bool isOpenMenuPopup = false;
-
+    public bool isOpenInfoPopup = false;
     public override bool Init()
     {
         if (base.Init() == false)
@@ -192,8 +192,7 @@ public class UI_GameScene : UI_Scene
 
     private void Update()
     {
-        ShowCItemInfo();
-        ShowMonsterInfo();
+        ShowInfo();
 
         #region for_test
         if (Input.GetKeyDown(KeyCode.F1))
@@ -251,9 +250,11 @@ public class UI_GameScene : UI_Scene
         #endregion
     }
 
-    void ShowMonsterInfo()
+    void ShowInfo()
     {
         if (isOpenMenuPopup)
+            return;
+        if (isOpenInfoPopup)
             return;
 
         RaycastHit hit;
@@ -267,35 +268,18 @@ public class UI_GameScene : UI_Scene
             {
                 MonsterController monster = hit.collider.gameObject.GetComponent<MonsterController>();
                 int id = monster.id;
-                Debug.Log($"MonsterName : {Managers.Data.MonsterDic[id].Name}");
-                Debug.Log($"MonsterImage : {Managers.Data.MonsterDic[id].IdleAnimStr}");
-                Debug.Log($"MonsterImage : {Managers.Data.MonsterDic[id].IdleAnimStr}");
 
                 UI_MonsterInfo monsterInfo = Managers.UI.MakeSubItem<UI_MonsterInfo>(monster.transform);
+                isOpenInfoPopup = true;
                 monsterInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
             }
-        }
-    }
-
-    void ShowCItemInfo()
-    {
-        if (isOpenMenuPopup)
-            return;
-
-        RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        bool raycastHit = Physics.Raycast(ray, out hit, 1000.0f, _mask);
-
-        if (raycastHit)
-        {
-            Debug.Log(hit.collider.gameObject.layer);
-            if (hit.collider.gameObject.layer == (int)Define.Layer.CItem)
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.CItem)
             {
                 ConsumableItem cItem = hit.collider.gameObject.GetComponent<ConsumableItem>();
                 int id = cItem.id;
-                Debug.Log($"cItem : {Managers.GetString(Managers.Data.ConsumableItemDic[id].ScriptNameId)}");
 
                 UI_CItemInfo cItemInfo = Managers.UI.MakeSubItem<UI_CItemInfo>(cItem.transform);
+                isOpenInfoPopup = true;
                 cItemInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
             }
         }

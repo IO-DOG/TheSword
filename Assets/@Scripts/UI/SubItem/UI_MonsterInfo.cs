@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 
@@ -21,7 +22,17 @@ public class UI_MonsterInfo : UI_Base
         MonsterHPText,
         MonsterDescText,
     }
+
+    enum Objects
+    {
+        ScrollView,
+        Content,
+    }
     #endregion
+
+    float mScrollSpeed = 10.1f;  // 스크롤 속도
+    float mScrollDelay = 1f;  // 자동 스크롤 시작 딜레이
+    int _mask = (1 << (int)Define.Layer.Monster | 1 << (int)Define.Layer.CItem | 1 << (int)Define.Layer.Wall | 1 << (int)Define.Layer.Default);
 
     public Vector3 _position;
     public Vector3 Position
@@ -47,9 +58,13 @@ public class UI_MonsterInfo : UI_Base
         #region Bind
         BindImage(typeof(Images));
         BindText(typeof(Texts));
+        BindObject(typeof(Objects));
         #endregion
 
         SetInfo();
+
+        GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().velocity = Vector2.zero;
+        StartCoroutine(CoAutoScroll());
 
         return true;
     }
@@ -57,7 +72,7 @@ public class UI_MonsterInfo : UI_Base
     void SetInfo()
     {
         int id = gameObject.transform.parent.GetComponent<MonsterController>().id;
-        Debug.Log(Managers.Data.MonsterDic[id].MonsterNameId);
+        //Debug.Log(Managers.Data.MonsterDic[id].MonsterNameId);
         GetText((int)Texts.MonsterNameText).text = Managers.GetString(Managers.Data.MonsterDic[id].MonsterNameId);
         //GetText((int)Texts.MonsterClassText).text = "특성 : " + Managers.Data.MonsterClassDic[Managers.Data.MonsterDic[id].Feature].ClassName;
         GetText((int)Texts.MonsterAttackText).text = Managers.Data.MonsterDic[id].Attack.ToString();
@@ -68,9 +83,38 @@ public class UI_MonsterInfo : UI_Base
 
     private void Update()
     {
-        if (Input.GetAxis("Mouse X") != 0 || Input.GetAxis("Mouse Y") != 0)
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        bool raycastHit = Physics.Raycast(ray, out hit, 1000.0f, _mask);
+
+        if (raycastHit)
         {
-            Destroy(gameObject);
+            //Debug.Log(hit.collider.gameObject.layer);
+            if (hit.collider.gameObject.layer != (int)Define.Layer.Monster)
+            {
+                Managers.Game.GameScene.isOpenInfoPopup = false;
+                Destroy(gameObject);
+            }
         }
     }
+
+    private IEnumerator CoAutoScroll()
+    {
+        yield return new WaitForSecondsRealtime(mScrollDelay);
+
+        while (true)
+        {
+            GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().verticalNormalizedPosition -= 10f * Time.deltaTime / GetObject((int)Objects.Content).GetComponent<RectTransform>().sizeDelta.y;
+
+            //스크롤의 끝 영역에 도달했다면 방향을 반전
+            if (GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition <= 0f || GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition >= 1f)
+                    mScrollSpeed = -mScrollSpeed;
+            //if ((GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().verticalNormalizedPosition : GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition) <= 0f || (mIsVerticalScroll ? GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().verticalNormalizedPosition : GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition) >= 1f)
+            //    mScrollSpeed = -mScrollSpeed;
+
+
+            yield return null;
+        }
+    }
+
 }

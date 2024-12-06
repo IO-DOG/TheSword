@@ -21,7 +21,17 @@ public class UI_CItemInfo : UI_Base
         MonsterHPText,
         MonsterDescText,
     }
+
+    enum Objects
+    {
+        ScrollView,
+        Content,
+    }
     #endregion
+
+    float mScrollSpeed = 10.1f;  // 스크롤 속도
+    float mScrollDelay = 1f;  // 자동 스크롤 시작 딜레이
+    int _mask = (1 << (int)Define.Layer.Monster | 1 << (int)Define.Layer.CItem | 1 << (int)Define.Layer.Wall | 1 << (int)Define.Layer.Default);
 
     public Vector3 _position;
     public Vector3 Position
@@ -39,7 +49,6 @@ public class UI_CItemInfo : UI_Base
         }
     }
 
-
     public override bool Init()
     {
         if (base.Init() == false)
@@ -48,9 +57,13 @@ public class UI_CItemInfo : UI_Base
         #region Bind
         BindImage(typeof(Images));
         BindText(typeof(Texts));
+        BindObject(typeof(Objects));
         #endregion
 
         SetInfo();
+
+        GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().velocity = Vector2.zero;
+        StartCoroutine(CoAutoScroll());
 
         return true;
     }
@@ -67,77 +80,37 @@ public class UI_CItemInfo : UI_Base
 
     private void Update()
     {
-        if (Input.GetAxis("Mouse X") != 0 || Input.GetAxis("Mouse Y") != 0)
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        bool raycastHit = Physics.Raycast(ray, out hit, 1000.0f, _mask);
+
+        if (raycastHit)
         {
-            Destroy(gameObject);
+            //Debug.Log(hit.collider.gameObject.layer);
+            if (hit.collider.gameObject.layer != (int)Define.Layer.CItem)
+            {
+                Managers.Game.GameScene.isOpenInfoPopup = false;
+                Destroy(gameObject);
+            }
         }
     }
 
-    //private ScrollRect mScrollRect;  // 스크롤 영역
-    //private Coroutine? mCoAutoScroll; // 자동 스크롤 코루틴
-    //private bool mIsPointerEnter = false; // 현재 포인터가 영역에 들어왔는가?
+    private IEnumerator CoAutoScroll()
+    {
+        yield return new WaitForSecondsRealtime(mScrollDelay);
 
-    //private void Awake()
-    //{
-    //    mScrollRect = GetComponent<ScrollRect>();
-    //}
+        while (true)
+        {
+            GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().verticalNormalizedPosition -= 10f * Time.deltaTime / GetObject((int)Objects.Content).GetComponent<RectTransform>().sizeDelta.y;
 
-    //private void OnEnable()
-    //{
-    //    ToggleAutoScroll(true);
-    //}
+            //스크롤의 끝 영역에 도달했다면 방향을 반전
+            if (GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition <= 0f || GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition >= 1f)
+                mScrollSpeed = -mScrollSpeed;
+            //if ((GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().verticalNormalizedPosition : GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition) <= 0f || (mIsVerticalScroll ? GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().verticalNormalizedPosition : GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition) >= 1f)
+            //    mScrollSpeed = -mScrollSpeed;
 
-    //private void OnDisable()
-    //{
-    //    ToggleAutoScroll(false);
-    //}
 
-    //private void ToggleAutoScroll(bool isEnable)
-    //{
-    //    mScrollRect.velocity = Vector2.zero;
-
-    //    if (mCoAutoScroll is not null)
-    //        StopCoroutine(mCoAutoScroll);
-
-    //    if (isEnable)
-    //    {
-    //        mCoAutoScroll = StartCoroutine(CoAutoScroll());
-    //        mIsPointerEnter = false;
-    //    }
-    //}
-
-    //private IEnumerator CoAutoScroll()
-    //{
-    //    yield return new WaitForSecondsRealtime(mScrollDelay);
-
-    //    while (true)
-    //    {
-    //        // 스크롤 방향에 따라 계산
-    //        if (mIsVerticalScroll)
-    //            mScrollRect.verticalNormalizedPosition -= mScrollSpeed * Time.deltaTime / mScrollRectTransform.sizeDelta.y;
-    //        else
-    //            mScrollRect.horizontalNormalizedPosition -= mScrollSpeed * Time.deltaTime / mScrollRectTransform.sizeDelta.x;
-
-    //        // 스크롤의 끝 영역에 도달했다면 방향을 반전
-    //        if ((mIsVerticalScroll ? mScrollRect.verticalNormalizedPosition : mScrollRect.horizontalNormalizedPosition) <= 0f || (mIsVerticalScroll ? mScrollRect.verticalNormalizedPosition : mScrollRect.horizontalNormalizedPosition) >= 1f)
-    //            mScrollSpeed = -mScrollSpeed;
-
-    //        // 영역에 포인터가 진입한 상태에서 클릭 또는 드래그를 했다면?
-    //        if (mIsPointerEnter && (Input.GetMouseButton(0) || Input.GetAxis("Mouse ScrollWheel") > 0))
-    //            ToggleAutoScroll(false);
-
-    //        yield return null;
-    //    }
-    //}
-
-    //public void OnPointerEnter(PointerEventData eventData)
-    //{
-    //    mIsPointerEnter = true;
-    //}
-
-    //public void OnPointerExit(PointerEventData eventData)
-    //{
-    //    mIsPointerEnter = false;
-    //    ToggleAutoScroll(true);
-    //}
+            yield return null;
+        }
+    }
 }
