@@ -114,7 +114,6 @@ public class Events
     public void CoStartContractSword()
     {
         PlayerPrefs.SetInt("ISMEETSWORD", 1);
-        Managers.Game.SaveGame();
         CoroutineManager.StartCoroutine(ContractSword());
     }
 
@@ -161,7 +160,7 @@ public class Events
         Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
         Managers.Game.OnDirect = false;
         Managers.UI.OpenGameSceneUI();
-        //Managers.Game.SaveGame();
+        Managers.Game.SaveGame();
     }
 
     #endregion

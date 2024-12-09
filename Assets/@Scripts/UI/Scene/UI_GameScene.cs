@@ -194,6 +194,7 @@ public class UI_GameScene : UI_Scene
     {
         ShowInfo();
 
+#if UNITY_EDITOR
         #region for_test
         if (Input.GetKeyDown(KeyCode.F1))
         {
@@ -241,13 +242,14 @@ public class UI_GameScene : UI_Scene
         }
         if (Input.GetKeyDown(KeyCode.F7))
         {
-            Managers.Game.OnMeetKingSlime = true;
-
-            Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset =
-                Vector3.Lerp(Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset, new Vector3(0f, 20f, -5f), 2f);
+            if (Managers.Game.PlayerData.CurSword != Define.EQUIP_SOWRD_FIRST)
+                Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST;
+            else
+                Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
         }
 
         #endregion
+#endif
     }
 
     void ShowInfo()
@@ -264,7 +266,7 @@ public class UI_GameScene : UI_Scene
 
         if (raycastHit)
         {
-            if (hit.collider.gameObject.layer == (int)Define.Layer.Monster)
+            if (hit.collider.gameObject.layer == (int)Define.Layer.Monster && Managers.Cursor._cursor == CursorType.Search)
             {
                 MonsterController monster = hit.collider.gameObject.GetComponent<MonsterController>();
                 int id = monster.id;
@@ -273,7 +275,7 @@ public class UI_GameScene : UI_Scene
                 isOpenInfoPopup = true;
                 monsterInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
             }
-            else if (hit.collider.gameObject.layer == (int)Define.Layer.CItem)
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.CItem && Managers.Cursor._cursor == CursorType.Search)
             {
                 ConsumableItem cItem = hit.collider.gameObject.GetComponent<ConsumableItem>();
                 int id = cItem.id;

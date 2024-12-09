@@ -100,6 +100,8 @@ public class CursorManager : MonoBehaviour
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
+        Debug.DrawRay(Camera.main.transform.position, ray.direction * 100.0f, Color.red, 1.0f);
+
         if (Physics.Raycast(ray, out hit, 100.0f, _mask))
         {
             // 몬스터, 장비, 물약
