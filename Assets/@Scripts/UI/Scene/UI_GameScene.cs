@@ -93,8 +93,8 @@ public class UI_GameScene : UI_Scene
         Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
 
 
-        Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST;
-        Managers.Game.PlayerData.CurShield = 0;
+        //Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST;
+        //Managers.Game.PlayerData.CurShield = 0;
 
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
         GetObject((int)GameObjects.GreenKey).SetActive(false);
@@ -246,8 +246,13 @@ public class UI_GameScene : UI_Scene
                 Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST;
             else
                 Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
-        }
 
+            Managers.Game.SaveGame();
+        }
+        if (Input.GetKeyDown(KeyCode.F8))
+        {
+            Managers.Game.SaveGame();
+        }
         #endregion
 #endif
     }
