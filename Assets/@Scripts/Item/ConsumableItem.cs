@@ -55,7 +55,7 @@ public class ConsumableItem : MonoBehaviour
             Managers.Game.PlayerData.MaxHP += Managers.Game.ConsumableItemData.HPUp;   
         }
 
-        Managers.Game.SaveGame();
+        //Managers.Game.SaveGame();
     }
 
     private void PlayParticle()

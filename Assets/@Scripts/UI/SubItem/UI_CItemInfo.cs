@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 
-public class UI_MonsterInfo : UI_Base
+public class UI_CItemInfo : UI_Base
 {
     #region Enum
     enum Images
@@ -71,14 +70,12 @@ public class UI_MonsterInfo : UI_Base
 
     void SetInfo()
     {
-        int id = gameObject.transform.parent.GetComponent<MonsterController>().id;
-        //Debug.Log(Managers.Data.MonsterDic[id].MonsterNameId);
-        GetText((int)Texts.MonsterNameText).text = Managers.GetString(Managers.Data.MonsterDic[id].MonsterNameId);
-        //GetText((int)Texts.MonsterClassText).text = "특성 : " + Managers.Data.MonsterClassDic[Managers.Data.MonsterDic[id].Feature].ClassName;
-        GetText((int)Texts.MonsterAttackText).text = Managers.Data.MonsterDic[id].Attack.ToString();
-        GetText((int)Texts.MonsterDefenseText).text = Managers.Data.MonsterDic[id].Defence.ToString();
-        GetText((int)Texts.MonsterHPText).text = Managers.Data.MonsterDic[id].MaxHP.ToString();
-        GetText((int)Texts.MonsterDescText).text = Managers.GetString(Managers.Data.MonsterDic[id].MonsterDescId);
+        int id = gameObject.transform.parent.GetComponent<ConsumableItem>().id;
+        GetText((int)Texts.MonsterNameText).text = Managers.GetString(Managers.Data.ConsumableItemDic[id].ScriptNameId);
+        GetText((int)Texts.MonsterAttackText).text = "0";
+        GetText((int)Texts.MonsterDefenseText).text = "0";
+        GetText((int)Texts.MonsterHPText).text = "0";
+        GetText((int)Texts.MonsterDescText).text = Managers.GetString(Managers.Data.ConsumableItemDic[id].ScriptDescriptionId);
     }
 
     private void Update()
@@ -90,7 +87,7 @@ public class UI_MonsterInfo : UI_Base
         if (raycastHit)
         {
             //Debug.Log(hit.collider.gameObject.layer);
-            if (hit.collider.gameObject.layer != (int)Define.Layer.Monster)
+            if (hit.collider.gameObject.layer != (int)Define.Layer.CItem)
             {
                 Managers.Game.GameScene.isOpenInfoPopup = false;
                 Destroy(gameObject);
@@ -108,7 +105,7 @@ public class UI_MonsterInfo : UI_Base
 
             //스크롤의 끝 영역에 도달했다면 방향을 반전
             if (GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition <= 0f || GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition >= 1f)
-                    mScrollSpeed = -mScrollSpeed;
+                mScrollSpeed = -mScrollSpeed;
             //if ((GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().verticalNormalizedPosition : GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition) <= 0f || (mIsVerticalScroll ? GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().verticalNormalizedPosition : GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition) >= 1f)
             //    mScrollSpeed = -mScrollSpeed;
 
@@ -116,5 +113,4 @@ public class UI_MonsterInfo : UI_Base
             yield return null;
         }
     }
-
 }

@@ -94,12 +94,15 @@ public class CursorManager : MonoBehaviour
     void UpdateMouseCursor()
     {
         if (!_init) return;
+        if (Managers.Game.GameScene != null && Managers.Game.GameScene.isOpenMenuPopup) return;
 
         _frameTimer += Time.deltaTime;
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, 1000.0f, _mask))
+        Debug.DrawRay(Camera.main.transform.position, ray.direction * 100.0f, Color.red, 1.0f);
+
+        if (Physics.Raycast(ray, out hit, 100.0f, _mask))
         {
             // 몬스터, 장비, 물약
             if (hit.collider.gameObject.layer == (int)Define.Layer.Monster || hit.collider.gameObject.layer == (int)Define.Layer.EItem || hit.collider.gameObject.layer == (int)Define.Layer.CItem)

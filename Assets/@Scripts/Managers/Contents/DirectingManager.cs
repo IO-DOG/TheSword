@@ -576,6 +576,7 @@ public class Events
     public void CoPlayTutorial_1()
     {
         CoroutineManager.StartCoroutine(PlayTutorial_1());
+        Managers.Game.SaveGame();
     }
 
     IEnumerator PlayTutorial_1()
@@ -625,7 +626,7 @@ public class Events
         #endregion
 
         PlayerPrefs.SetInt("ISFIRST", 0);
-        Managers.Game.SaveGame();
+        //Managers.Game.SaveGame();
     }
     #endregion
 }

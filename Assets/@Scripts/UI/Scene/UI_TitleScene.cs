@@ -116,7 +116,8 @@ public class UI_TitleScene : UI_Scene
                 GetButton((int)Buttons.NewGameButton).gameObject.SetActive(true);
 
                 // cursor 시작
-                GameObject.Find("@Cursor").GetOrAddComponent<CursorManager>().Init();
+                Managers.Cursor = GameObject.Find("@Cursor").GetOrAddComponent<CursorManager>();
+                Managers.Cursor.Init();
                 // continueData로 플레이어 적용시키기. TODO
             }
         });
@@ -189,22 +190,19 @@ public class UI_TitleScene : UI_Scene
         #endregion
     }
 
-    IEnumerator CoFadeOutImage()
+    IEnumerator CoFadeOutSound(float time)
     {
-        GetImage((int)Images.BlackBGImage).gameObject.SetActive(true);
+        float total = 0f;
 
-        GetImage((int)Images.BlackBGImage).color = new Color(0, 0, 0, 0);
-
-        float tick = 0;
-        while (tick < 1)
+        while (total <= time)
         {
-            GetImage((int)Images.BlackBGImage).color += new Color(0, 0, 0, +0.1f);
-            tick += 0.1f;
-            yield return new WaitForSeconds(0.1f);
-        }
-        yield return new WaitForSeconds(0.5f);
+            float delta = total / time;
 
-        //OnClickNewGameButton();
+            Managers.Sound.SetBGMVolume(1 - delta);
+
+            total += Time.deltaTime;
+            yield return null;
+        }
     }
 
     IEnumerator CoOnClickNewGameButton()
@@ -212,6 +210,7 @@ public class UI_TitleScene : UI_Scene
         GetImage((int)Images.BlackBGImage).gameObject.SetActive(true);
         GetImage((int)Images.BlackBGImage).color = new Color(1, 1, 1, 0);
         StartCoroutine(Util.CoFade(GetImage((int)Images.BlackBGImage), 3));
+        StartCoroutine(CoFadeOutSound(3f));
         yield return new WaitForSeconds(3f);
 
         //test
@@ -219,7 +218,7 @@ public class UI_TitleScene : UI_Scene
         Debug.Log("Cllck OnClickNewGameButton");
         Managers.Game.DeleteGameData();
         Managers.Data.Init();
-        SetPlayerprefs();
+        SetPlayerInitSetting();
         Managers.Scene.LoadScene(Define.Scene.IntroScene);
     }
 
@@ -253,7 +252,7 @@ public class UI_TitleScene : UI_Scene
     {
         if (PlayerPrefs.GetInt("ISFIRST", 1) == 1) // 최초 실행 시
         {
-            SetPlayerprefs();
+            SetPlayerInitSetting();
 
             GetText((int)Texts.NewGameText).text = "Game Start";
             buttonsIdx = 0;
@@ -277,7 +276,7 @@ public class UI_TitleScene : UI_Scene
         if (PlayerPrefs.GetInt("ISFIRST", 1) == 1) // 최초 실행 시
         {
             GetText((int)Texts.NewGameText).text = "Game Start";
-            SetPlayerprefs();
+            SetPlayerInitSetting();
         }
         else
             GetText((int)Texts.NewGameText).text = "New Game";
@@ -300,10 +299,12 @@ public class UI_TitleScene : UI_Scene
         texts[index].text = $"- {str} -";
     }
 
-    void SetPlayerprefs()
+    void SetPlayerInitSetting()
     {
         PlayerPrefs.SetInt("ISOPENINVENUI", 0);
         PlayerPrefs.SetInt("ISOPENWARPUI", 0);
         PlayerPrefs.SetInt("ISOPENCLASSUI", 0);
+        Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST;
+        Managers.Game.PlayerData.CurShield = 0;
     }
 }

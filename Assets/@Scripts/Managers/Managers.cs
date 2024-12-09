@@ -19,7 +19,7 @@ public class Managers : MonoBehaviour
     public static GameManager Game { get { return Instance?._game; } }
     public static DirectingManager Directing { get { return Instance?._directing; } }
     public static EventManager Event { get { return Instance?._event; } }
-
+    public static CursorManager Cursor = null;
     #endregion
 
     #region Core

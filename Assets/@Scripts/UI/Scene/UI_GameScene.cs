@@ -50,7 +50,7 @@ public class UI_GameScene : UI_Scene
     #endregion
 
     public bool isOpenMenuPopup = false;
-
+    public bool isOpenInfoPopup = false;
     public override bool Init()
     {
         if (base.Init() == false)
@@ -90,7 +90,9 @@ public class UI_GameScene : UI_Scene
         Managers.Game.PlayerData.MoveSpeed = 1f;
         Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
 
-        Managers.Game.PlayerData.CurShield = 0;
+
+        //Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST;
+        //Managers.Game.PlayerData.CurShield = 0;
 
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
         GetObject((int)GameObjects.GreenKey).SetActive(false);
@@ -170,33 +172,13 @@ public class UI_GameScene : UI_Scene
         SetPlayerInfo();
     }
 
-    int _mask = (1 << (int)Define.Layer.Monster);
+    int _mask = (1 << (int)Define.Layer.Monster | 1 << (int)Define.Layer.CItem);
 
     private void Update()
     {
-        if (!isOpenMenuPopup)
-        {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            bool raycastHit = Physics.Raycast(ray, out hit, 100.0f, _mask);
-            Debug.DrawRay(Camera.main.transform.position, ray.direction * 100.0f, Color.red, 1.0f);
+        ShowInfo();
 
-            if (raycastHit)
-            {
-                if (hit.collider.gameObject.layer == (int)Define.Layer.Monster)
-                {
-                    MonsterController monster = hit.collider.gameObject.GetComponent<MonsterController>();
-                    int id = monster.id;
-                    Debug.Log($"MonsterName : {Managers.Data.MonsterDic[id].Name}");
-                    Debug.Log($"MonsterImage : {Managers.Data.MonsterDic[id].IdleAnimStr}");
-                    Debug.Log($"MonsterImage : {Managers.Data.MonsterDic[id].IdleAnimStr}");
-
-                    UI_MonsterInfo monsterInfo = Managers.UI.MakeSubItem<UI_MonsterInfo>(monster.transform);
-                    monsterInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
-                }
-            }
-        }
-
+#if UNITY_EDITOR
         #region for_test
         if (Input.GetKeyDown(KeyCode.F1))
         {
@@ -238,19 +220,60 @@ public class UI_GameScene : UI_Scene
         if (Input.GetKeyDown(KeyCode.F6))
         {
             GameObject monsters = GameObject.Find("Monsters");
-            if (monsters != null ) monsters.gameObject.SetActive(false);
+            if (monsters != null) monsters.gameObject.SetActive(false);
             GameObject pillars = GameObject.Find("Pillars");
             if (pillars != null) pillars.gameObject.SetActive(false);
         }
         if (Input.GetKeyDown(KeyCode.F7))
         {
-            Managers.Game.OnMeetKingSlime = true;
+            if (Managers.Game.PlayerData.CurSword != Define.EQUIP_SOWRD_FIRST)
+                Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST;
+            else
+                Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
 
-            Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset =
-                Vector3.Lerp(Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset, new Vector3(0f, 20f, -5f), 2f);
+            Managers.Game.SaveGame();
         }
-        
+        if (Input.GetKeyDown(KeyCode.F8))
+        {
+            Managers.Game.SaveGame();
+        }
         #endregion
+#endif
+    }
+
+    void ShowInfo()
+    {
+        if (isOpenMenuPopup)
+            return;
+        if (isOpenInfoPopup)
+            return;
+
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        bool raycastHit = Physics.Raycast(ray, out hit, 100.0f, _mask);
+        Debug.DrawRay(Camera.main.transform.position, ray.direction * 100.0f, Color.red, 1.0f);
+
+        if (raycastHit)
+        {
+            if (hit.collider.gameObject.layer == (int)Define.Layer.Monster && Managers.Cursor._cursor == CursorType.Search)
+            {
+                MonsterController monster = hit.collider.gameObject.GetComponent<MonsterController>();
+                int id = monster.id;
+
+                UI_MonsterInfo monsterInfo = Managers.UI.MakeSubItem<UI_MonsterInfo>(monster.transform);
+                isOpenInfoPopup = true;
+                monsterInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
+            }
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.CItem && Managers.Cursor._cursor == CursorType.Search)
+            {
+                ConsumableItem cItem = hit.collider.gameObject.GetComponent<ConsumableItem>();
+                int id = cItem.id;
+
+                UI_CItemInfo cItemInfo = Managers.UI.MakeSubItem<UI_CItemInfo>(cItem.transform);
+                isOpenInfoPopup = true;
+                cItemInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
+            }
+        }
     }
 
     /// <summary>

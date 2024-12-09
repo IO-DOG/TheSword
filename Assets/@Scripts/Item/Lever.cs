@@ -50,7 +50,7 @@ public class Lever : MonoBehaviour
             {
                 child.GetComponentInChildren<Pillar>().Open(1.0f);
                 Managers.Data.LeverActiveDic[_leverIndex_forActive] = false ;
-                Managers.Game.SaveGame();
+                //Managers.Game.SaveGame();
             }
         }
     }
