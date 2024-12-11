@@ -56,6 +56,8 @@ public class UI_PlayerCard : UI_BaseCard
         CreatePlayerAttackParticle();
         CreateMonsterHitParticle();
 
+        Managers.Sound.Play(Define.Sound.Effect, "HeroAttack0_SFX");
+
         if (Managers.Game.AttackCount == Managers.Game.PlayerData.Critical)
         {
             _creature.IsCritical = true;
@@ -117,6 +119,8 @@ public class UI_PlayerCard : UI_BaseCard
 
     public override void ClearDefence()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "Defense_SFX");
+
         StartCoroutine(CoStartShieldFX());
         StartCoroutine(CoDefenceMat());
         base.ClearDefence();
@@ -272,6 +276,8 @@ public class UI_PlayerCard : UI_BaseCard
 
     public override void Dead()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "GameOver_Event");
+
         base.Dead();
         Managers.Game.OnInputLock = true;
         Managers.Game.IsPlayerDead = true;

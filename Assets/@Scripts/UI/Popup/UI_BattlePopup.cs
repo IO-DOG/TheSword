@@ -34,6 +34,8 @@ public class UI_BattlePopup : UI_Popup
 
         GetImage((int)Images.BGImage).sprite = Managers.Game._screenShot2;
 
+        Managers.Sound.Play(Define.Sound.Effect, "BattleStart_SFX");
+
         // TODO
         // show Creature Card
         playerCard = Managers.UI.SetBattleCard<UI_PlayerCard>(gameObject.transform, Managers.Game.PlayerData);

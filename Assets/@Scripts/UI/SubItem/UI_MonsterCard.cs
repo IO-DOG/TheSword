@@ -49,6 +49,8 @@ public class UI_MonsterCard : UI_BaseCard
 
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Weapon);
 
+        Managers.Sound.Play(Define.Sound.Effect, "MonsterAttack0_SFX");
+
         if (_totalAttackCount > 0 && _totalAttackCount % 20 == 0)
         {
             Berserk();
@@ -129,6 +131,8 @@ public class UI_MonsterCard : UI_BaseCard
 
     public override void ClearDefence()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "Defense_SFX");
+
         StartCoroutine(CoStartShieldFX());
         StartCoroutine(CoDefenceMat());
         base.ClearDefence();

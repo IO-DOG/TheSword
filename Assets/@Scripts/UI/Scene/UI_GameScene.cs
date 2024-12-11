@@ -90,6 +90,7 @@ public class UI_GameScene : UI_Scene
         Managers.Game.PlayerData.MoveSpeed = 1f;
         Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
 
+        Managers.Sound.Play(Define.Sound.Effect, "MapTransition_SFX");
 
         //Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST;
         //Managers.Game.PlayerData.CurShield = 0;
@@ -178,7 +179,6 @@ public class UI_GameScene : UI_Scene
     {
         ShowInfo();
 
-#if UNITY_EDITOR
         #region for_test
         if (Input.GetKeyDown(KeyCode.F1))
         {
@@ -238,7 +238,6 @@ public class UI_GameScene : UI_Scene
             Managers.Game.SaveGame();
         }
         #endregion
-#endif
     }
 
     void ShowInfo()

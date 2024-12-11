@@ -90,6 +90,7 @@ public class UI_GameOverPopup : UI_Popup
         //yield return new WaitForSeconds(2f);
 
         GetImage((int)Images.GameOverIllust).GetComponent<Animator>().Play("UI_GameOverAni");
+        Managers.Sound.Play(Define.Sound.Effect, "GameOver_SFX");
 
         // 등장 1.5초뒤
         yield return new WaitForSeconds(3.5f);

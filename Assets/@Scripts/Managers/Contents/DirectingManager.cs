@@ -576,6 +576,7 @@ public class Events
     public void CoPlayTutorial_1()
     {
         CoroutineManager.StartCoroutine(PlayTutorial_1());
+        Managers.Sound.Play(Define.Sound.Bgm, "Chapter0_BGM");
         Managers.Game.SaveGame();
     }
 

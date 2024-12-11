@@ -354,8 +354,11 @@ public class PlayerController : MonoBehaviour
         _cellPos += _nextCellPos;
         transform.DOMove(_cellPos, _duration).SetEase(Ease.Linear).OnComplete(()=> 
         {
+            Managers.Sound.Play(Define.Sound.Effect, "HeroMove_SFX");
+
             _isMoving = false;
         });
+
     }
 
     public void SetIdleState(MoveDir moveDir)
@@ -454,6 +457,8 @@ public class PlayerController : MonoBehaviour
 
                 transform.DOMove(movePos, 0.2f).OnPlay(() =>
                 {
+                    Managers.Sound.Play(Define.Sound.Effect, "Gimic_leverOn_SFX");
+
                     _state = PlayerState.OnLever;
                     Managers.Game.OnLever = true;
 
