@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.U2D;
 using UnityEngine.UI;
 using static GameManager;
 
@@ -27,6 +28,10 @@ public class UI_MonsterCard : UI_BaseCard
         _creature.OnHitAction += StartDamagedMat;
         _creature.OnDeadAction += Dead;
         _creature.OnDataRefreshAction += Refresh;
+
+        //SpriteAtlas spriteAtlas = Managers.Resource.Load<SpriteAtlas>("BattleUI_Weppon2");
+
+        //GetImage((int)Images.AttackIcon).sprite = spriteAtlas.GetSprite("BattleUI_Weppon2_0");
 
         StartCoroutine(CoDelayAttack());
         StartCoroutine(CoDelayDefence());

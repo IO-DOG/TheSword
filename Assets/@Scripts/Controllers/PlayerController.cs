@@ -16,8 +16,8 @@ public class PlayerController : MonoBehaviour
         get { return _speed; }
         set
         {
-           _speed = Managers.Game.PlayerData.MoveSpeed * 5;
-           _duration = 1 / _speed;
+            _speed = Managers.Game.PlayerData.MoveSpeed * 5;
+            _duration = 1 / _speed;
         }
     }
 
@@ -91,8 +91,8 @@ public class PlayerController : MonoBehaviour
             _moveDir = MoveDir.Right;
         }
 
-        if(_moveDir != MoveDir.None && (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.DownArrow)||
-            Input.GetKey(KeyCode.LeftArrow)|| Input.GetKey(KeyCode.RightArrow)))
+        if (_moveDir != MoveDir.None && (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.DownArrow) ||
+            Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow)))
         {
             Moving(_moveDir);
         }
@@ -269,7 +269,7 @@ public class PlayerController : MonoBehaviour
     {
         if (_isEquiptWeapon)
         {
-            switch(_state)
+            switch (_state)
             {
                 case PlayerState.IdleFront:
                     _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName}_Idle_F", 0, 0.0f);
@@ -283,7 +283,7 @@ public class PlayerController : MonoBehaviour
             }
 
         }
-            
+
         if (_isEquiptShield)
         {
             switch (_state)
@@ -318,7 +318,7 @@ public class PlayerController : MonoBehaviour
         _isMoving = true;
 
         _nextCellPos = Vector3.zero;
-        switch (moveDir) 
+        switch (moveDir)
         {
             case MoveDir.Up:
                 _nextCellPos = Vector3.forward * _offset;
@@ -352,7 +352,7 @@ public class PlayerController : MonoBehaviour
 
         // Move
         _cellPos += _nextCellPos;
-        transform.DOMove(_cellPos, _duration).SetEase(Ease.Linear).OnComplete(()=> 
+        transform.DOMove(_cellPos, _duration).SetEase(Ease.Linear).OnComplete(() =>
         {
             Managers.Sound.Play(Define.Sound.Effect, "HeroMove_SFX");
 
@@ -429,7 +429,7 @@ public class PlayerController : MonoBehaviour
                         somethingExist = false;
                     });
                 }
-                else if(!Managers.Game.KeyInventory.TryUseKey(hit.collider.gameObject))
+                else if (!Managers.Game.KeyInventory.TryUseKey(hit.collider.gameObject))
                 {
                     Managers.Game.OnInteract = true;
                     hit.collider.gameObject.GetComponentInChildren<Door>().CoDoorLockLockedAnim();
@@ -446,7 +446,7 @@ public class PlayerController : MonoBehaviour
             {
                 somethingExist = false;
                 hit.collider.gameObject.GetComponentInChildren<PortalController>().UsePortal();
-                
+
             }
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Lever)
             {
@@ -457,20 +457,21 @@ public class PlayerController : MonoBehaviour
 
                 transform.DOMove(movePos, 0.2f).OnPlay(() =>
                 {
-                    Managers.Sound.Play(Define.Sound.Effect, "Gimic_leverOn_SFX");
-
                     _state = PlayerState.OnLever;
                     Managers.Game.OnLever = true;
 
+                    StartCoroutine(Managers.Sound.CoPlay(Define.Sound.Effect, "Gimic_leverOn_SFX", 1, 0.3f));
+
                     hit.collider.gameObject.GetComponentInChildren<Lever>().Play(1.0f).OnComplete(() =>
                     {
+
                         _state = PlayerState.IdleFront;
                         hit.collider.gameObject.GetComponentInChildren<Lever>().SetActive();
                         hit.collider.gameObject.GetComponentInChildren<Lever>().Open();
                         _isEquiptShield = true;
                         _isEquiptWeapon = true;
-                        transform.DOMove(originPos, 0.2f).OnComplete(()=>
-                        { 
+                        transform.DOMove(originPos, 0.2f).OnComplete(() =>
+                        {
                             Managers.Game.OnLever = false;
                             _cellPos = originPos;
                             transform.position = _cellPos;
@@ -493,7 +494,7 @@ public class PlayerController : MonoBehaviour
                     Managers.UI.ShowPopupUI<UI_BossRoomCheckPopup>();
                 }
             }
-            else if(hit.collider.gameObject.layer == (int)Define.Layer.InteractObjects)
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.InteractObjects)
             {
                 somethingExist = true;
                 Vector3 playerDir = (transform.position - hit.collider.transform.position).normalized;
