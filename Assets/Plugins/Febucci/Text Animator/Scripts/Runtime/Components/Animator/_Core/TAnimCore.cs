@@ -131,14 +131,16 @@ namespace Febucci.UI.Core
 
                 for (int i = 0; i < charactersCount; i++)
                 {
-                    if (!characters[i].isVisible)
+                    if (characters[i].isVisible)
                     {
-                        if (characters[i].passedTime <= 0)
+                        // not fully shown yet
+                        if (characters[i].info.isRendered && characters[i].passedTime < characters[i].info.appearancesMaxDuration)
                             return false;
                     }
                     else
                     {
-                        if (characters[i].info.isRendered && characters[i].passedTime < characters[i].info.appearancesMaxDuration)
+                        // hidden
+                        if (characters[i].passedTime <= 0)
                             return false;
                     }
                 }
@@ -154,7 +156,7 @@ namespace Febucci.UI.Core
         /// <remarks>
         /// You can use this to check if the disappearance effects are still running.
         /// </remarks>
-        public bool anyLetterVisible //TODO test 
+        public bool anyLetterVisible
         {
             get
             {
@@ -337,6 +339,38 @@ namespace Febucci.UI.Core
             get => disappearances;
             set => disappearances = value;
         }
+        
+        Vector2Int[] typewriterDisabledRange;
+
+        /// <summary>
+        /// Holds any range where the typewriter should be skipped entirely and show the entire text.
+        /// Only takes effect if you're using a <see cref="TypewriterCore"/>
+        /// </summary>
+        /// <remarks><seealso cref="IsTypewriterEnabledAtIndex"/>
+        ///P.S. this value is reset every time you set a new text, calculating the "notypewriter" tags in it
+        /// </remarks>
+        public Vector2Int[] TypewriterDisabledRange
+        {
+            get => typewriterDisabledRange;
+            set => typewriterDisabledRange = value;
+        }
+        
+        /// <summary>
+        /// True if the typewriter should calculate a <see cref="CharacterData"/> appearance or disappearance time.
+        /// Calculated from <see cref="TypewriterDisabledRange"/> 
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public bool IsTypewriterEnabledAtIndex(int index)
+        {
+            foreach (var range in typewriterDisabledRange)
+            {
+                if (index >= range.x && index < range.y) return false;
+            }
+
+            return true;
+        }
+        
         #endregion
 
         #region Actions and Events
@@ -507,6 +541,7 @@ namespace Febucci.UI.Core
             disappearances = new AnimationRegion[0];
             actions = new ActionMarker[0];
             events = new EventMarker[0];
+            typewriterDisabledRange = Array.Empty<Vector2Int>();
             
             if(DatabaseActions) DatabaseActions.ForceBuildRefresh();
             if(DatabaseAppearances) DatabaseAppearances.ForceBuildRefresh();
@@ -520,7 +555,21 @@ namespace Febucci.UI.Core
         /// Contains TextAnimator's current time values.
         /// </summary>
         [HideInInspector] public TimeData time;
+        
 
+        /// <summary>
+        /// Returns the first character index inside the page, in case the text has an overflow mode set up and the text is paginated.
+        /// </summary>
+        /// <example>
+        /// If each page has 5 characters, and we're on page 2, then this method would return 5 as the starting index of the text.
+        /// </example>
+        /// <returns></returns>
+        public virtual int GetFirstCharacterIndexInsidePage() => 0;
+        /// <summary>
+        /// Returns the number of characters that fit inside the page, in case the text has an overflow mode set up and the text is paginated. (otherwise simply returns the characters count)
+        /// </summary>
+        /// <returns></returns>
+        public virtual int GetRenderedCharactersCountInsidePage() => CharactersCount;
 
         void UpdateUniformIntensity()
         {
@@ -559,7 +608,7 @@ namespace Febucci.UI.Core
         /// </summary>
         [Tooltip("Controls how default tags should be applied.\n\"Fallback\" will apply the effects only to characters that don't have any.\n\"Constant\" will apply the default effects to all the characters, even if they already have other tags via text.")]
         public DefaultTagsMode defaultTagsMode = DefaultTagsMode.Fallback;
-
+        
         #region Text
 
         protected virtual TagParserBase[] GetExtraParsers(){ return Array.Empty<TagParserBase>(); }
@@ -567,6 +616,9 @@ namespace Febucci.UI.Core
         TextAnimatorSettings settings;
         void ConvertText(string textToParse, ShowTextMode showTextMode)
         {
+            if (textToParse is null) // prevents error along the method if text is passed as null
+                textToParse = string.Empty;
+            
             #region Local Methods
             void PopulateCharacters(bool resetVisibility)
             {
@@ -832,6 +884,8 @@ namespace Febucci.UI.Core
             ActionParser ruleActions = new ActionParser(settings.actions.openingSymbol, '/', settings.actions.closingSymbol, databaseActions);
             EventParser ruleEvents = new EventParser('<', '/', '>');
 
+            var typewriterDisabled = new PlainTagParser(settings.controlTags.disableTypewriter, '<', '/', '>');
+            
             //TODO optimize
             var parsers = new System.Collections.Generic.List<TagParserBase>()
             {
@@ -839,7 +893,8 @@ namespace Febucci.UI.Core
                 ruleAppearance,
                 ruleDisappearance,
                 ruleActions,
-                ruleEvents
+                ruleEvents,
+                typewriterDisabled
             };
             
             foreach (var extraParser in GetExtraParsers())
@@ -867,6 +922,7 @@ namespace Febucci.UI.Core
             disappearances = ruleDisappearance.results;
             actions = ruleActions.results;
             events = ruleEvents.results;
+            typewriterDisabledRange = typewriterDisabled.results;
 
             //Adds fallback effects to characters that have no effect assigned
             AddFallbackEffectsFor(ref behaviors, VisibilityMode.Persistent,databaseBehaviors, defaultBehaviorsTags);
@@ -966,19 +1022,19 @@ namespace Febucci.UI.Core
             bool previousResettingTime = isResettingTimeOnNewText;
             isResettingTimeOnNewText = false;
             
-            int currentMax = maxVisibleCharacters;
+            int previousMaximum = maxVisibleCharacters;
             int currentFirst = firstVisibleCharacter;
             SetText(textFull + appendedText, hideText);
 
             //restores visibility
             isResettingTimeOnNewText = previousResettingTime;
-            maxVisibleCharacters = currentMax;
             firstVisibleCharacter = currentFirst;
-            for (int i = firstVisibleCharacter; i < maxVisibleCharacters; i++)
+            for (int i = firstVisibleCharacter; i < previousMaximum; i++)
             {
                 characters[i].isVisible = true;
                 characters[i].passedTime = characters[i].info.appearancesMaxDuration;
             }
+            maxVisibleCharacters = CharactersCount;
         }
 
         void SetTypewriterText(string text)
@@ -997,27 +1053,49 @@ namespace Febucci.UI.Core
         /// </summary>
         /// <param name="index">Character's index. See <see cref="CharactersCount"/> and the <see cref="Characters"/> array.</param>
         /// <param name="isVisible">Controls if the character should be visible</param>
-        public void SetVisibilityChar(int index, bool isVisible)
+        /// <param name="canPlayEffects"></param>
+        public void SetVisibilityChar(int index, bool isVisible, bool canPlayEffects = true)
         {
-            if(index<0 ||index>=charactersCount) return;
+            if (index < 0 || index >= charactersCount) return;
             characters[index].isVisible = isVisible;
-            if (isVisible) latestCharacterShown = characters[index];
+            if (isVisible)
+            {
+                latestCharacterShown = characters[index];
+            }
+            else
+            {
+                // fixes a bug that prevents disappearances from firing in case the character has finished appearing (if any) but that wouldn't be enough time to show disappearances at all
+                // - limit edge case would be no appearance, so the char time would be something close to zero (deltaTime), disappearances 1sec or similar, thus disappearing instantly
+                if (characters[index].info.disappearancesMaxDuration > characters[index].passedTime && characters[index].passedTime >= characters[index].info.appearancesMaxDuration)
+                    characters[index].passedTime = characters[index].info.disappearancesMaxDuration;
+            }
+
+
+
+            if (!canPlayEffects)
+            {
+                if (isVisible)
+                    characters[index].passedTime = characters[index].info.appearancesMaxDuration;
+                else
+                    characters[index].passedTime = 0;
+            }
         }
-        
+
         //TODO TEST
         /// <summary>
         /// Sets a word visibility.
         /// </summary>
         /// <param name="index">Word's index. See <see cref="WordsCount"/> and the <see cref="Words"/> array.</param>
         /// <param name="isVisible">Controls if the word should be visible</param>
-        public void SetVisibilityWord(int index, bool isVisible)
+        /// <param name="canPlayEffects"></param>
+        public void SetVisibilityWord(int index, bool isVisible, bool canPlayEffects = true)
         {
             if(index<0 || index >= wordsCount) return;
             
             WordInfo word = words[index];
             for (int i = Mathf.Max(word.firstCharacterIndex, 0); i <= word.lastCharacterIndex && i < charactersCount; i++)
             {
-                SetVisibilityChar(i, isVisible);
+                SetVisibilityChar(i, isVisible, canPlayEffects);
             }
         }
         
@@ -1032,25 +1110,7 @@ namespace Febucci.UI.Core
         {
             for (int i = 0; i < charactersCount; i++)
             {
-                SetVisibilityChar(i, isVisible);
-            }
-
-            if (!canPlayEffects)
-            {
-                if (isVisible)
-                {
-                    for (int i = 0; i < charactersCount;i++)
-                    {
-                        characters[i].passedTime = characters[i].info.appearancesMaxDuration;
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < charactersCount;i++)
-                    {
-                        characters[i].passedTime = 0;
-                    }
-                }
+                SetVisibilityChar(i, isVisible, canPlayEffects);
             }
         }
 

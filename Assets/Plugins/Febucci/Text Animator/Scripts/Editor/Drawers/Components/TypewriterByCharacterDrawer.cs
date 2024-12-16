@@ -9,7 +9,7 @@ namespace Febucci.UI.Core.Editors
         SerializedProperty waitForNormalChars;
         SerializedProperty waitLong;
         SerializedProperty waitMiddle;
-        SerializedProperty avoidMultiplePunctuactionWait;
+        SerializedProperty avoidMultiplePunctuationWait;
         SerializedProperty waitForNewLines;
         SerializedProperty waitForLastCharacter;
 
@@ -24,7 +24,7 @@ namespace Febucci.UI.Core.Editors
             waitForNormalChars = serializedObject.FindProperty("waitForNormalChars");
             waitLong = serializedObject.FindProperty("waitLong");
             waitMiddle = serializedObject.FindProperty("waitMiddle");
-            avoidMultiplePunctuactionWait = serializedObject.FindProperty("avoidMultiplePunctuactionWait");
+            avoidMultiplePunctuationWait = serializedObject.FindProperty("avoidMultiplePunctuationWait");
             waitForNewLines = serializedObject.FindProperty("waitForNewLines");
             waitForLastCharacter = serializedObject.FindProperty("waitForLastCharacter");
             useTypewriterWaitForDisappearances = new PropertyWithDifferentLabel(serializedObject, "useTypewriterWaitForDisappearances", "Use Typewriter Wait Times");
@@ -40,11 +40,12 @@ namespace Febucci.UI.Core.Editors
                 "waitLong",
                 "waitMiddle",
                 "avoidMultiplePunctuactionWait",
+                "avoidMultiplePunctuationWait",
                 "waitForNewLines",
                 "waitForLastCharacter",
                 "useTypewriterWaitForDisappearances",
                 "disappearanceSpeedMultiplier",
-                "disappearanceWaitTime"
+                "disappearanceWaitTime",
             };
 
             string[] baseProperties = base.GetPropertiesToExclude();
@@ -70,7 +71,7 @@ namespace Febucci.UI.Core.Editors
             EditorGUILayout.PropertyField(waitLong);
             EditorGUILayout.PropertyField(waitMiddle);
 
-            EditorGUILayout.PropertyField(avoidMultiplePunctuactionWait);
+            EditorGUILayout.PropertyField(avoidMultiplePunctuationWait);
             EditorGUILayout.PropertyField(waitForNewLines);
             EditorGUILayout.PropertyField(waitForLastCharacter);
         }

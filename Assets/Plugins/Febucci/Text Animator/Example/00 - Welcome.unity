@@ -381,7 +381,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 61.6
+  m_fontSize: 45.3
   m_fontSizeBase: 53.61
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -508,9 +508,12 @@ MonoBehaviour:
   useTypeWriter: 1
   startTypewriterMode: 3
   hideAppearancesOnSkip: 0
+  hideDisappearancesOnSkip: 0
   triggerEventsOnSkip: 0
   resetTypingSpeedAtStartup: 1
   disappearanceOrientation: 0
+  waitForFullAppearance: 0
+  waitForFullDisappearance: 0
   onTextShowed:
     m_PersistentCalls:
       m_Calls: []
@@ -529,7 +532,7 @@ MonoBehaviour:
   waitForNormalChars: 0.02
   waitLong: 0.33333334
   waitMiddle: 0.06666667
-  avoidMultiplePunctuactionWait: 0
+  avoidMultiplePunctuationWait: 0
   waitForNewLines: 1
   waitForLastCharacter: 1
   useTypewriterWaitForDisappearances: 1

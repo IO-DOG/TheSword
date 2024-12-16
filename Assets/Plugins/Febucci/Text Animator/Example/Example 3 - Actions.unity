@@ -540,9 +540,12 @@ MonoBehaviour:
   useTypeWriter: 1
   startTypewriterMode: 3
   hideAppearancesOnSkip: 0
+  hideDisappearancesOnSkip: 0
   triggerEventsOnSkip: 0
   resetTypingSpeedAtStartup: 1
   disappearanceOrientation: 0
+  waitForFullAppearance: 0
+  waitForFullDisappearance: 0
   onTextShowed:
     m_PersistentCalls:
       m_Calls: []
@@ -561,7 +564,7 @@ MonoBehaviour:
   waitForNormalChars: 0.03
   waitLong: 0.6
   waitMiddle: 0.2
-  avoidMultiplePunctuactionWait: 0
+  avoidMultiplePunctuationWait: 0
   waitForNewLines: 1
   waitForLastCharacter: 1
   useTypewriterWaitForDisappearances: 1

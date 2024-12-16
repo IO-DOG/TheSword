@@ -1,5 +1,6 @@
 ﻿using Febucci.UI.Core;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Febucci.UI
 {
@@ -16,7 +17,12 @@ namespace Febucci.UI
         [SerializeField, Attributes.CharsDisplayTime, Tooltip("Wait time for normal letters")] public float waitForNormalChars = .03f;
         [SerializeField, Attributes.CharsDisplayTime, Tooltip("Wait time for ! ? .")] public float waitLong = .6f;
         [SerializeField, Attributes.CharsDisplayTime, Tooltip("Wait time for ; : ) - ,")] public float waitMiddle = .2f;
-        [SerializeField, Tooltip("-True: only the last punctuaction on a sequence waits for its category time.\n-False: each punctuaction will wait, regardless if it's in a sequence or not")] public bool avoidMultiplePunctuactionWait = false;
+
+        [System.Obsolete("Typo, please use 'avoidMultiplePunctuationWait' instead.")]
+        public bool avoidMultiplePunctuactionWait => avoidMultiplePunctuationWait;
+        
+        [FormerlySerializedAs("avoidMultiplePunctuactionWait")]
+        [SerializeField, Tooltip("-True: only the last punctuation on a sequence waits for its category time.\n-False: each punctuation will wait, regardless if it's in a sequence or not")] public bool avoidMultiplePunctuationWait = false;
 
         [SerializeField, Tooltip("True if you want the typewriter to wait for new line characters")] public bool waitForNewLines = true;
 
@@ -35,7 +41,7 @@ namespace Febucci.UI
                 return 0;
 
             //avoids waiting for multiple times if there are puntuactions near each other
-            if (avoidMultiplePunctuactionWait && char.IsPunctuation(character)) //curr char is punctuation
+            if (avoidMultiplePunctuationWait && char.IsPunctuation(character)) //curr char is punctuation
             {
                 //next char is punctuation too, so skips this one
                 if (charIndex < TextAnimator.CharactersCount - 1

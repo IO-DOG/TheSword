@@ -115,6 +115,26 @@ namespace Febucci.UI.Core
 
         #endregion
 
+        /// <summary>
+        /// <c>true</c> if you want to wait for every single character to animate before invoking <see cref="onTextShowed"/>.
+        /// Otherwise, you might have that event invoked even if the very last character(s) are animating.
+        /// </summary>
+        /// <remarks>
+        /// Usually users don't want to wait for the very last letter(s), similar to punctuation. That said, this option might come useful in cases like you have very slow letters.
+        /// </remarks>
+        [Tooltip("True if you want to wait for every single character appearance to finish before triggering 'onTextShowed'. Default to false, as effects are usually fast enough and make the letters visible, and users are able to read them instantly.")]
+        public bool triggerShowedAfterEffectsEnd = false;
+        
+        /// <summary>
+        /// <c>true</c> if you want to wait for every single character to animate before invoking <see cref="onTextDisappeared"/>.
+        /// Otherwise, you might have that event invoked even if the very last character(s) are animating.
+        /// </summary>
+        /// <remarks>
+        /// Usually users don't want to wait for the very last letter(s), similar to punctuation. That said, this option might come useful in cases like you have very slow letters.
+        /// </remarks>
+        [Tooltip("True if you want to wait for every single character disappearance to finish before triggering 'onTextDisappeared'. Default to false, as effects are usually fast enough")]
+        public bool triggerDisappearedAfterEffectsEnd = false;
+        
         #endregion
 
         #region Events
@@ -200,12 +220,32 @@ namespace Febucci.UI.Core
         /// </remarks>
         public void SkipTypewriter()
         {
+            void SetVisibilityWithOverflow(bool visible)
+            {
+                var visibleCharactersInPage = TextAnimator.GetRenderedCharactersCountInsidePage();
+                if (visibleCharactersInPage > 0 && visibleCharactersInPage != TextAnimator.CharactersCount)
+                {
+                    int firstCharacter = TextAnimator.GetFirstCharacterIndexInsidePage();
+                    if(firstCharacter<0) firstCharacter = 0;
+                    int lastCharacter = firstCharacter + visibleCharactersInPage;
+                    for (int i = firstCharacter; i < lastCharacter; i++)
+                    {
+                        TextAnimator.SetVisibilityChar(i, visible, !hideAppearancesOnSkip);
+                    }
+                }
+                else
+                {
+                    TextAnimator.SetVisibilityEntireText(visible, !hideAppearancesOnSkip);
+                }
+
+            }
+            
             if (isShowingText)
             {
                 StopAllCoroutines();
                 isShowingText = false;
-                
-                TextAnimator.SetVisibilityEntireText(true, !hideAppearancesOnSkip);
+
+                SetVisibilityWithOverflow(true);
                 
                 if (triggerEventsOnSkip)
                 {
@@ -221,7 +261,7 @@ namespace Febucci.UI.Core
                 isHidingText = false;
                 onTextDisappeared?.Invoke();
                 
-                TextAnimator.SetVisibilityEntireText(false, !hideDisappearancesOnSkip);
+                SetVisibilityWithOverflow(false);
 
                 // No events on disappearance
                 
@@ -261,6 +301,13 @@ namespace Febucci.UI.Core
             if (restart)
             {
                 TextAnimator.SetVisibilityEntireText(false, false);
+            }
+
+            // makes sure to reset actions etc. if no text is about to restart
+            // (might also happen if restart=false, but user called SetText and/or text finished and should restart
+            // calling this method)
+            if (TextAnimator.firstVisibleCharacter == 0)
+            {
                 latestActionTriggered = 0;
                 latestEventTriggered = 0;
             }
@@ -269,6 +316,7 @@ namespace Febucci.UI.Core
             isShowingText = true;
             showRoutine = StartCoroutine(ShowTextRoutine());
         }
+
 
         protected abstract float GetWaitAppearanceTimeOf(int charIndex);
 
@@ -290,7 +338,14 @@ namespace Febucci.UI.Core
             bool actionsEnabled = settings && settings.actions.enabled;
 
             // --- SHOWS TEXT LETTERS ---
-            for(int i=0;i<TextAnimator.CharactersCount;i++)
+            int visibleCharsInPage = TextAnimator.GetRenderedCharactersCountInsidePage();
+            if(visibleCharsInPage<=0) visibleCharsInPage = TextAnimator.CharactersCount;
+
+            int firstCharacter = TextAnimator.GetFirstCharacterIndexInsidePage();
+            if(firstCharacter<0) firstCharacter = 0;
+            int lastCharacter = firstCharacter + visibleCharsInPage;
+            
+            for(int i=firstCharacter;i<TextAnimator.CharactersCount && i < lastCharacter; i++)
             {
                 // -- actions --
                 if (actionsEnabled)
@@ -307,39 +362,42 @@ namespace Febucci.UI.Core
                 
                 // -- events --
                 TriggerEventsUntil(i+1);
-                
-                if(TextAnimator.Characters[i].isVisible) continue;
+
+                if (TextAnimator.Characters[i].isVisible) continue;
 
                 // -- shows letter --
                 TextAnimator.SetVisibilityChar(i, true);
                 onCharacterVisible?.Invoke(TextAnimator.latestCharacterShown.info.character);
-                
-                // -- WAITS TIME -- (identical to HideTextRoutine, in order to skip frames correctly)
-                float timeToWait = GetWaitAppearanceTimeOf(i);
-                
-                float deltaTime = GetDeltaTime(typingInfo);
-                if (timeToWait < 0) timeToWait = 0;
-                if (timeToWait < deltaTime) //waiting less time than a frame, we don't wait yet
-                {
-                    typingInfo.timePassed += timeToWait;
-                    if (typingInfo.timePassed >= deltaTime) //waits only if we "surpassed" a frame duration
-                    {
-                        yield return null;
-                        //saves remaining time to next frame as already waited time
-                        typingInfo.timePassed %= deltaTime; 
-                    }
-                }
-                else
-                {
-                    //waits until enough time has passed
-                    while (typingInfo.timePassed < timeToWait)
-                    {
-                        typingInfo.timePassed += deltaTime;
-                        yield return null;
-                        deltaTime = GetDeltaTime(typingInfo);
-                    }
 
-                    typingInfo.timePassed %= timeToWait; //saves remaining time to next frame
+                // -- WAITS TIME -- (identical to HideTextRoutine, in order to skip frames correctly)
+                if (_textAnimator.IsTypewriterEnabledAtIndex(i))
+                {
+                    float timeToWait = GetWaitAppearanceTimeOf(i);
+
+                    float deltaTime = GetDeltaTime(typingInfo);
+                    if (timeToWait < 0) timeToWait = 0;
+                    if (timeToWait < deltaTime) //waiting less time than a frame, we don't wait yet
+                    {
+                        typingInfo.timePassed += timeToWait;
+                        if (typingInfo.timePassed >= deltaTime) //waits only if we "surpassed" a frame duration
+                        {
+                            yield return null;
+                            //saves remaining time to next frame as already waited time
+                            typingInfo.timePassed %= deltaTime;
+                        }
+                    }
+                    else
+                    {
+                        //waits until enough time has passed
+                        while (typingInfo.timePassed < timeToWait)
+                        {
+                            typingInfo.timePassed += deltaTime;
+                            yield return null;
+                            deltaTime = GetDeltaTime(typingInfo);
+                        }
+
+                        typingInfo.timePassed %= timeToWait; //saves remaining time to next frame
+                    }
                 }
             }
 
@@ -356,9 +414,15 @@ namespace Febucci.UI.Core
             }
             TriggerEventsUntil(int.MaxValue);
 
+            if (triggerShowedAfterEffectsEnd)
+            {
+                while (!_textAnimator.allLettersShown)
+                    yield return null;
+            }
+            
             // --- CALLBACKS ---
-            onTextShowed?.Invoke();
             isShowingText = false;
+            onTextShowed?.Invoke();
         }
 
         /// <summary>
@@ -444,20 +508,29 @@ namespace Febucci.UI.Core
             // --- INITIALIZATION ---
             TypingInfo typingInfo = new TypingInfo();
             
+            
+            int visibleCharsInPage = TextAnimator.GetRenderedCharactersCountInsidePage();
+            if(visibleCharsInPage<=0) visibleCharsInPage = TextAnimator.CharactersCount;
+
+            int firstCharacter = TextAnimator.GetFirstCharacterIndexInsidePage();
+            if(firstCharacter<0) firstCharacter = 0;
+            int lastCharacter = firstCharacter + visibleCharsInPage;
+
+            
             // Chooses the order in which the letters will disappear
             int[] indexes = new int[TextAnimator.CharactersCount];
             switch (disappearanceOrientation)
             {
                 default:
                 case DisappearanceOrientation.SameAsTypewriter: //disappears from the end
-                    for (int i = 0; i < TextAnimator.CharactersCount; i++) indexes[i] = i;
+                    for (int i = firstCharacter; i < TextAnimator.CharactersCount && i < lastCharacter; i++) indexes[i] = i;
                     break;
                 case DisappearanceOrientation.Inverted:
-                    for (int i = 0; i < TextAnimator.CharactersCount; i++) indexes[i] = TextAnimator.CharactersCount - i - 1;
+                    for (int i = firstCharacter; i < TextAnimator.CharactersCount && i < lastCharacter; i++) indexes[i] = visibleCharsInPage - i - 1;
                     break;
                 
                 case DisappearanceOrientation.Random:
-                    for (int i = 0; i < TextAnimator.CharactersCount; i++) indexes[i] = i;
+                    for (int i = firstCharacter; i < TextAnimator.CharactersCount && i < lastCharacter; i++) indexes[i] = i;
                     indexes = ShuffleArray(indexes);
                     break;
             }
@@ -465,7 +538,8 @@ namespace Febucci.UI.Core
             // --- CALLBACKS ---
             
             // --- HIDES TEXT ---
-            for (int i = 0; i < TextAnimator.CharactersCount; i++)
+            
+            for (int i = 0; i < indexes.Length; i++)
             {
                 int indexToHide = indexes[i];
                 if(!TextAnimator.Characters[indexToHide].isVisible) continue;
@@ -474,35 +548,44 @@ namespace Febucci.UI.Core
                 float timeToWait = GetWaitDisappearanceTimeOf(indexToHide);
                 
                 // -- WAITS TIME -- (identical to ShowTextRoutine, in order to skip frames correctly)
-                float deltaTime = GetDeltaTime(typingInfo);
-                if (timeToWait < 0) timeToWait = 0;
-                if (timeToWait < deltaTime) //waiting less time than a frame, we don't wait yet
+                if (_textAnimator.IsTypewriterEnabledAtIndex(i))
                 {
-                    typingInfo.timePassed += timeToWait;
-                    if (typingInfo.timePassed >= deltaTime) //waits only if we "surpassed" a frame duration
+                    float deltaTime = GetDeltaTime(typingInfo);
+                    if (timeToWait < 0) timeToWait = 0;
+                    if (timeToWait < deltaTime) //waiting less time than a frame, we don't wait yet
                     {
-                        yield return null;
-                        //saves remaining time to next frame as already waited time
-                        typingInfo.timePassed %= deltaTime; 
+                        typingInfo.timePassed += timeToWait;
+                        if (typingInfo.timePassed >= deltaTime) //waits only if we "surpassed" a frame duration
+                        {
+                            yield return null;
+                            //saves remaining time to next frame as already waited time
+                            typingInfo.timePassed %= deltaTime;
+                        }
                     }
-                }
-                else
-                {
-                    //waits until enough time has passed
-                    while (typingInfo.timePassed < timeToWait)
+                    else
                     {
-                        typingInfo.timePassed += deltaTime;
-                        yield return null;
-                        deltaTime = GetDeltaTime(typingInfo);
-                    }
+                        //waits until enough time has passed
+                        while (typingInfo.timePassed < timeToWait)
+                        {
+                            typingInfo.timePassed += deltaTime;
+                            yield return null;
+                            deltaTime = GetDeltaTime(typingInfo);
+                        }
 
-                    typingInfo.timePassed %= timeToWait; //saves remaining time to next frame
+                        typingInfo.timePassed %= timeToWait; //saves remaining time to next frame
+                    }
                 }
             }
-
+            
+            if (triggerDisappearedAfterEffectsEnd)
+            {
+                while (_textAnimator.anyLetterVisible)
+                    yield return null;
+            }
+            
             // --- CALLBACKS ---
-            onTextDisappeared?.Invoke();
             isHidingText = false;
+            onTextDisappeared?.Invoke();
         }
 
         #endregion

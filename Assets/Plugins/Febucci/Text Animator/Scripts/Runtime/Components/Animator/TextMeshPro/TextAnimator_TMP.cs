@@ -2,6 +2,7 @@
 using Febucci.UI.Core.Parsing;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Febucci.UI
 {
@@ -93,10 +94,23 @@ namespace Febucci.UI
             if (attachedInputField) attachedInputField.text = text; //renders input field
             else tmpComponent.text = text; //<-- sets the text
 
+
+            // forces rebuilding the layout for text that is truncated etc., otherwise it keeps the
+            // old textInfo
+            switch (tmpComponent.overflowMode)
+            {
+                case TextOverflowModes.Overflow:
+                case TextOverflowModes.ScrollRect:
+                case TextOverflowModes.Masking:
+                    break;
+                default:
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(tmpComponent.rectTransform);
+                    break;
+            }
+            
             OnForceMeshUpdate();
 
             textInfo = tmpComponent.GetTextInfo(tmpComponent.text);
-            
 #if UNITY_EDITOR
             if (!Application.isPlaying)
             {
@@ -180,6 +194,16 @@ namespace Febucci.UI
                     characters[i].source.colors[k] = textInfo.meshInfo[currentCharInfo.materialReferenceIndex].colors32[currentCharInfo.vertexIndex + k];
                 }
             }
+        }
+
+        public override int GetRenderedCharactersCountInsidePage() => TMProComponent.overflowMode != TextOverflowModes.Overflow ? TMProComponent.firstOverflowCharacterIndex : base.GetRenderedCharactersCountInsidePage();
+
+        public override int GetFirstCharacterIndexInsidePage()
+        {
+            if(TMProComponent.pageToDisplay <= 1)
+                return 0;
+            
+            return TMProComponent.textInfo.pageInfo[TMProComponent.pageToDisplay - 1].firstCharacterIndex;
         }
 
         protected override void PasteMeshToSource(CharacterData[] characters)

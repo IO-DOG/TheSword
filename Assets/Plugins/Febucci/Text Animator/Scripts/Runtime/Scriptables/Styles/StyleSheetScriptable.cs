@@ -38,15 +38,16 @@ namespace Febucci.UI.Styles
             
             foreach (var style in styles)
             {
-                if (string.IsNullOrEmpty(style.styleTag)) continue;
+                var tag = style.styleTag.ToLowerInvariant();
+                if (string.IsNullOrEmpty(tag)) continue;
 
-                if (dictionary.ContainsKey(style.styleTag))
+                if (dictionary.ContainsKey(tag))
                 {
-                    Debug.LogError($"[TextAnimator] StyleSheetScriptable: duplicated style tag '{style.styleTag}", this);
+                    Debug.LogError($"[TextAnimator] StyleSheetScriptable: duplicated style tag '{tag}", this);
                     continue;
                 }
 
-                dictionary.Add(style.styleTag, style);
+                dictionary.Add(tag, style);
             }
         }
 
@@ -56,7 +57,7 @@ namespace Febucci.UI.Styles
             BuildOnce();
         }
 
-        public bool TryGetStyle(string tag, out Style result)
+        public virtual bool TryGetStyle(string tag, out Style result)
         {
             BuildOnce();
             return dictionary.TryGetValue(tag, out result);

@@ -43,7 +43,8 @@ namespace Febucci.UI.Core.Parsing
             new TMPTagInfo("<u>"), new TMPTagInfo( "</u>"),
             new TMPTagInfo("<uppercase>"), new TMPTagInfo( "</uppercase>"),
             new TMPTagInfo("<voffset="), new TMPTagInfo( "</voffset>"),
-            new TMPTagInfo("<width="), new TMPTagInfo( "</width>")
+            new TMPTagInfo("<width="), new TMPTagInfo( "</width>"),
+            new TMPTagInfo("<br>", true)
         };
 
         struct TMPTagInfo

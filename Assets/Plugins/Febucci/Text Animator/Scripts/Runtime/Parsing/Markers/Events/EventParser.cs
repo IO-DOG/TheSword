@@ -45,7 +45,6 @@ namespace Febucci.UI.Core.Parsing
 
             System.Array.Resize(ref _results, _results.Length + 1);
             _results[_results.Length - 1] = textEvent;
-
             return true;
         }
     }

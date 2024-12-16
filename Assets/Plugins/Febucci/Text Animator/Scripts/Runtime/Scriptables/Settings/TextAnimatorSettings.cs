@@ -101,5 +101,18 @@ namespace Febucci.UI
         public Category<ActionDatabase> actions = new Category<ActionDatabase>('<', '>');
         
         public StyleSheetScriptable defaultStyleSheet;
+        
+        [System.Serializable]
+        public struct ControlTags
+        {
+            public string disableTypewriter;
+
+            public ControlTags(string disableTypewriter)
+            {
+                this.disableTypewriter = disableTypewriter;
+            }
+        }
+
+        public ControlTags controlTags = new ControlTags("notype");
     }
 }

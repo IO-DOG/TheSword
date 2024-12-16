@@ -13,6 +13,7 @@ namespace Febucci.UI
         SerializedProperty appearances;
         SerializedProperty styles;
         SerializedProperty actions;
+        SerializedProperty controlTags;
 
 
         void OnEnable()
@@ -21,6 +22,7 @@ namespace Febucci.UI
             appearances = serializedObject.FindProperty(nameof(TextAnimatorSettings.appearances));
             styles = serializedObject.FindProperty(nameof(TextAnimatorSettings.defaultStyleSheet));
             actions = serializedObject.FindProperty(nameof(TextAnimatorSettings.actions));
+            controlTags = serializedObject.FindProperty(nameof(TextAnimatorSettings.controlTags));
         }
 
         void DrawEffects()
@@ -61,6 +63,9 @@ namespace Febucci.UI
             
             DrawStyles();
             EditorGUILayout.Space();
+
+            EditorGUILayout.PropertyField(controlTags);
+            EditorGUILayout.Space();
             
             extraSettings = EditorGUILayout.Foldout(extraSettings, "Extra Settings", EditorStyles.foldoutHeader);
             if (extraSettings)
@@ -74,6 +79,9 @@ namespace Febucci.UI
                     }
                 }
             }
+
+            if (serializedObject.hasModifiedProperties)
+                serializedObject.ApplyModifiedProperties();
         }
     }
 }

@@ -32,6 +32,7 @@ namespace Febucci.UI.Core
 
                 current.positions = new Vector3[Core.TextUtilities.verticesPerChar];
                 current.colors = new Color32[Core.TextUtilities.verticesPerChar];
+                info.initialized = true;
             }
 
         }
