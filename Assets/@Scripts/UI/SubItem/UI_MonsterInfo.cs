@@ -96,6 +96,11 @@ public class UI_MonsterInfo : UI_Base
                 Destroy(gameObject);
             }
         }
+        else
+        {
+            Managers.Game.GameScene.isOpenInfoPopup = false;
+            Destroy(gameObject);
+        }
     }
 
     private IEnumerator CoAutoScroll()

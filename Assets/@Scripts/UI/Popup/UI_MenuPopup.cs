@@ -55,7 +55,7 @@ public class UI_MenuPopup : UI_Popup
         GetText((int)Texts.SettingButtonText).text = Managers.GetString(Define.SETTING);
         GetText((int)Texts.SelectLanguageButtonText).text = Managers.GetString(Define.LANGUAGE);
         GetText((int)Texts.QuitGameButtonText).text = Managers.GetString(Define.QUIT_GAME);
-        
+
         GetImage((int)Images.ContinueButton).gameObject.BindEvent(OnClickContinueGameButton);
         GetImage((int)Images.SettingButton).gameObject.BindEvent(OnClickSettingButton);
         GetImage((int)Images.SelectLanguageButton).gameObject.BindEvent(OnClickSelectLanguageButton);
@@ -94,36 +94,44 @@ public class UI_MenuPopup : UI_Popup
 
     void OnEnterExitImage()
     {
-        GetImage((int)Images.ContinueButton).gameObject.BindEvent(() => {
-            Refresh(); GetImage((int)Images.ContinueButtonChoice).gameObject.SetActive(true); 
+        GetImage((int)Images.ContinueButton).gameObject.BindEvent(() =>
+        {
+            Refresh(); GetImage((int)Images.ContinueButtonChoice).gameObject.SetActive(true);
         }, null, Define.UIEvent.PointerEnter);
 
-        GetImage((int)Images.SettingButton).gameObject.BindEvent(() => {
+        GetImage((int)Images.SettingButton).gameObject.BindEvent(() =>
+        {
             Refresh(); GetImage((int)Images.SettingButtonChoice).gameObject.SetActive(true);
         }, null, Define.UIEvent.PointerEnter);
 
-        GetImage((int)Images.SelectLanguageButton).gameObject.BindEvent(() => {
+        GetImage((int)Images.SelectLanguageButton).gameObject.BindEvent(() =>
+        {
             Refresh(); GetImage((int)Images.SelectLanguageButtonChoice).gameObject.SetActive(true);
         }, null, Define.UIEvent.PointerEnter);
 
-        GetImage((int)Images.QuitGameButton).gameObject.BindEvent(() => {
+        GetImage((int)Images.QuitGameButton).gameObject.BindEvent(() =>
+        {
             Refresh(); GetImage((int)Images.QuitGameButtonChoice).gameObject.SetActive(true);
         }, null, Define.UIEvent.PointerEnter);
 
 
-        GetImage((int)Images.ContinueButton).gameObject.BindEvent(() => {
+        GetImage((int)Images.ContinueButton).gameObject.BindEvent(() =>
+        {
             GetImage((int)Images.ContinueButtonChoice).gameObject.SetActive(false);
         }, null, Define.UIEvent.PointerExit);
 
-        GetImage((int)Images.SettingButton).gameObject.BindEvent(() => {
+        GetImage((int)Images.SettingButton).gameObject.BindEvent(() =>
+        {
             GetImage((int)Images.SettingButtonChoice).gameObject.SetActive(false);
         }, null, Define.UIEvent.PointerExit);
 
-        GetImage((int)Images.SelectLanguageButton).gameObject.BindEvent(() => {
+        GetImage((int)Images.SelectLanguageButton).gameObject.BindEvent(() =>
+        {
             GetImage((int)Images.SelectLanguageButtonChoice).gameObject.SetActive(false);
         }, null, Define.UIEvent.PointerExit);
 
-        GetImage((int)Images.QuitGameButton).gameObject.BindEvent(() => {
+        GetImage((int)Images.QuitGameButton).gameObject.BindEvent(() =>
+        {
             GetImage((int)Images.QuitGameButtonChoice).gameObject.SetActive(false);
         }, null, Define.UIEvent.PointerExit);
     }
@@ -266,7 +274,8 @@ public class UI_MenuPopup : UI_Popup
             UIImages.SetActive(true);
         if (PlayConversation != null)
             PlayConversation.SetActive(true);
-        Managers.Game.GameScene.isOpenMenuPopup = false;
+        if (Managers.Game.GameScene != null)
+            Managers.Game.GameScene.isOpenMenuPopup = false;
 
         Managers.UI.ClosePopupUI();
     }
