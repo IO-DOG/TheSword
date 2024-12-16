@@ -39,8 +39,6 @@ public class UI_ConversationPopup : UI_Popup
         BindObject(typeof(GameObjects));
         #endregion
 
-        GetImage((int)Images.RightPortrait).gameObject.transform.localScale = new Vector3(-1, 1, 1);
-
         Managers.Game.OnConversation = true;
         InitScript();
 
