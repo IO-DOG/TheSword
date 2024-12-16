@@ -33,7 +33,7 @@ public class GameManager
     public bool OnInputLock = false;
     public bool IsPlayerDead = false;
 
-    public int ResolutionIdx = 1;
+    public int ResolutionIdx = 0;
     public int CurEventID;
     public string CurChapter;
     public int TotalKillSplitSlime = 0;
