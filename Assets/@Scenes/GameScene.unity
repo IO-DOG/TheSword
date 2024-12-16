@@ -391,7 +391,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5449387712889805294, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
       propertyPath: orthographic size
-      value: 2.63
+      value: 1.8
       objectReference: {fileID: 0}
     - target: {fileID: 5449387712889805294, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
       propertyPath: m_CullingMask.m_Bits
@@ -408,8 +408,33 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1950374848315738223, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1168971816}
   m_SourcePrefab: {fileID: 100100000, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
+--- !u!1 &1168971815 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1950374848315738223, guid: 2558d215fcb69a1468ea56d277fa3485, type: 3}
+  m_PrefabInstance: {fileID: 1168971814}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1168971816
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1168971815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68bb026fafb42b14791938953eaace77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_NoiseProfile: {fileID: 0}
+  m_PivotOffset: {x: 0, y: 0, z: 0}
+  m_AmplitudeGain: 1
+  m_FrequencyGain: 1
+  mNoiseOffsets: {x: 0, y: 0, z: 0}
 --- !u!1 &1908555433
 GameObject:
   m_ObjectHideFlags: 0

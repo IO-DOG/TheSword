@@ -104,9 +104,9 @@ public class PortalController : MonoBehaviour
     }
     IEnumerator WaitAndWarp(Vector3 nextPos)
     {
+        Managers.Game.OnInteract = true;
         yield return new WaitForSeconds(0.2f);
         Managers.Game.Player.SetIdleState(Managers.Game.Player._moveDir);
-        Managers.Game.OnInteract = true;
         Managers.Game.OnFadeAction.Invoke(0.3f);
         int nextStageID = SetStageID();
         if (nextStageID == 2)

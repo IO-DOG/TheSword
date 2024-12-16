@@ -439,7 +439,7 @@ public class PlayerController : MonoBehaviour
                     });
                 }
             }
-            else if (hit.collider.gameObject.layer == (int)Define.Layer.Portal)
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.Portal && !Managers.Game.OnFade && !Managers.Game.OnInteract)
             {
                 somethingExist = false;
                 hit.collider.gameObject.GetComponentInChildren<PortalController>().UsePortal();

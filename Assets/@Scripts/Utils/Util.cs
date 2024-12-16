@@ -6,6 +6,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using static Define;
+using static UnityEngine.ParticleSystem;
 using static UnityEngine.RuleTile.TilingRuleOutput;
 using Random = UnityEngine.Random;
 using Transform = UnityEngine.Transform;

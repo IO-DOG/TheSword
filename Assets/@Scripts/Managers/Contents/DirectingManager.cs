@@ -213,6 +213,7 @@ public class Events
             Managers.UI.CloseGameSceneUI();
             Managers.Directing.PlayLetterBox();
 
+            Managers.Game.Player.SetIdleState(Managers.Game.Player._moveDir);
             Managers.Game.OnStaticResolution = true;
             Managers.Game.OnDirect = true;
 
@@ -263,94 +264,40 @@ public class Events
         scoutSlime.transform.DOLocalMoveZ(-0.3f, 1f);
 
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.5f);
 
         // camera slow down
         Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
-        Vector3 target = new Vector3(0f, 14.5f, -5f); ;
-        float moveTime = 10f;
+        Vector3 target = new Vector3(0f, 14.5f, -6f); ;
+        float moveTime = 3f;
         CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
 
+        yield return new WaitForSeconds(0.5f);
+
         GameObject.Find("SlimeFall4").GetComponent<ParticleSystem>().Play();
-        yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 1.5f));
+        //yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 1.5f));
         GameObject.Find("SlimeFall2").GetComponent<ParticleSystem>().Play();
-        yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 1.5f));
+        //yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 1.5f));
         GameObject.Find("SlimeFall3").GetComponent<ParticleSystem>().Play();
-        yield return new WaitForSeconds(UnityEngine.Random.Range(0.5f, 1f));
+        //yield return new WaitForSeconds(UnityEngine.Random.Range(0.5f, 1f));
         GameObject.Find("SlimeFall1").GetComponent<ParticleSystem>().Play();
-        yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.5f));
+        //yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.5f));
         GameObject.Find("SlimeFall5").GetComponent<ParticleSystem>().Play();
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.5f);
 
-        GameObject slimeSpawner = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
-        slimeSpawner.transform.localPosition = new Vector3(3.94f, 0.474f, -2.43f);
-        slimeSpawner.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
-        GameObject slimeSpawner2 = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
-        slimeSpawner2.transform.localPosition = new Vector3(5.26f, 0.41f, -3f);
-        slimeSpawner2.transform.rotation = Quaternion.Euler(6.73f, 39.188f, 0.649f);
-        slimeSpawner2.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
-        GameObject slimeSpawner3 = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
-        slimeSpawner3.transform.localPosition = new Vector3(2.5f, 0.48f, -3f);
-        slimeSpawner3.transform.rotation = Quaternion.Euler(14.75f, -53.521f, -7.414f);
-        slimeSpawner3.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
-        GameObject slimeSpawner4 = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
-        slimeSpawner4.transform.localPosition = new Vector3(2f, 0.7f, -4.6f);
-        slimeSpawner4.transform.rotation = Quaternion.Euler(34.123f, -90, 0);
-        slimeSpawner4.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
-        GameObject slimeSpawner5 = Managers.Resource.Instantiate("BossScene_C0_006", parent.transform);
-        slimeSpawner5.transform.localPosition = new Vector3(5.8f, 0.6f, -4.5f);
-        slimeSpawner5.transform.rotation = Quaternion.Euler(35.874f, 90, 0);
-        slimeSpawner5.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
-        CoroutineManager.StartCoroutine(CoBright(slimeSpawner, 3f));
-        CoroutineManager.StartCoroutine(CoBright(slimeSpawner2, 3f));
-        CoroutineManager.StartCoroutine(CoBright(slimeSpawner3, 3f));
-        CoroutineManager.StartCoroutine(CoBright(slimeSpawner4, 3f));
-        CoroutineManager.StartCoroutine(CoBright(slimeSpawner5, 3f));
-
-        // create fog
-
-
-        for (int i = 0; i < 7; ++i)
-        {
-            float randValue = UnityEngine.Random.Range(0f, 0.5f);
-            WaitForSeconds delay = new WaitForSeconds(randValue);
-            GameObject slime1 = Managers.Resource.Instantiate("BossScene_C0_003", parent.transform);
-            slime1.transform.localPosition = new Vector3(UnityEngine.Random.Range(3f, 4.5f), 0.7f, -2.5f);
-            yield return delay;
-
-            GameObject slime2 = Managers.Resource.Instantiate("BossScene_C0_004", parent.transform);
-            slime2.transform.localPosition = new Vector3(UnityEngine.Random.Range(4.6f, 5.5f), 0.7f, UnityEngine.Random.Range(-2.7f, -3.3f));
-
-            GameObject slime3 = Managers.Resource.Instantiate("BossScene_C0_005", parent.transform);
-            slime3.transform.localPosition = new Vector3(UnityEngine.Random.Range(2.2f, 3.0f), 0.7f, UnityEngine.Random.Range(-3.6f, -2.6f));
-            yield return delay;
-
-            GameObject slime4 = Managers.Resource.Instantiate("BossScene_C0_004", parent.transform);
-            slime4.transform.localPosition = new Vector3(2.1f, 0.7f, UnityEngine.Random.Range(-3.6f, -5f));
-
-            GameObject slime5 = Managers.Resource.Instantiate("BossScene_C0_003", parent.transform);
-            slime5.transform.localPosition = new Vector3(5.5f, 0.7f, UnityEngine.Random.Range(-3.6f, -5f));
-            yield return delay;
-
-            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime1, midlePos.transform.localPosition, 4));
-            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime2, midlePos.transform.localPosition, 4));
-            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime3, midlePos.transform.localPosition, 4));
-            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime4, midlePos.transform.localPosition, 4));
-            CoroutineManager.StartCoroutine(CoMoveToKingSlimeMidlePos(slime5, midlePos.transform.localPosition, 4));
-        }
-
-        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner, 3f));
-        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner2, 3f));
-        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner3, 3f));
-        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner4, 3f));
-        CoroutineManager.StartCoroutine(CoBlack(slimeSpawner5, 3f));
+        GameObject slimesPos = GameObject.Find("SlimesPos");
+        GameObject slimes = Managers.Resource.Instantiate("Slimes", slimesPos.transform);
+        GameObject slimesCore = Managers.Resource.Instantiate("SlimesCore", slimesPos.transform);
+        slimesCore.transform.DOScale(Vector3.one * 2f, 1f);
 
         _kingSlime = GameObject.Find("bossMonster0");
-        GameObject kingSlimeAction = GameObject.Find("KingSlimeAction");
-        kingSlimeAction.GetComponent<Animator>().Play("KingSlimeAction");
+        GameObject kingSlimeActionFront = GameObject.Find("KingSlimeActionFront");
+        kingSlimeActionFront.GetComponent<Animator>().Play("NewKingSlimeActionFront");
+        GameObject kingSlimeActionBack = GameObject.Find("KingSlimeActionBack");
+        kingSlimeActionBack.GetComponent<Animator>().Play("NewKingSlimeActionBack");
 
         {
-            WaitForSeconds delay = new WaitForSeconds(0.5f);
+            WaitForSeconds delay = new WaitForSeconds(0.4f);
             yield return delay;
             GameObject.Find("SlimeFall1").GetComponent<ParticleSystem>().Stop();
             yield return delay;
@@ -363,58 +310,54 @@ public class Events
             GameObject.Find("SlimeFall5").GetComponent<ParticleSystem>().Stop();
         }
 
+        //kingSlimeAction.transform.DOScaleY(2f, 0.5f).OnComplete(()=>
+        //{
+        //    kingSlimeAction.transform.DOScaleY(1f, 0.5f);
+        //});
+
+        slimes.GetComponent<ParticleSystem>().Stop();
+        slimesCore.GetComponent<ParticleSystem>().Stop();
+        yield return new WaitForSeconds(1f);
+
         // flash bang
-        CoroutineManager.StartCoroutine(CoFlashBang(1f));
-        yield return new WaitForSeconds(0.6f);
-        GameObject image = new GameObject();
-        image.AddComponent<Image>();
-        GameObject gameScene = Managers.Game.GameScene.gameObject;
-        image.transform.parent = gameScene.transform;
-        RectTransform parentRect = image.transform.parent.GetComponent<RectTransform>();
-        // 앵커를 부모의 전체 크기에 맞게 설정
-        RectTransform rectTransform = image.GetComponent<RectTransform>();
-        rectTransform.anchorMin = Vector2.zero;
-        rectTransform.anchorMax = Vector2.one;
-        // 오프셋을 0으로 설정하여 부모에 맞게 확장
-        rectTransform.anchoredPosition = Vector2.zero;
-        rectTransform.sizeDelta = Vector2.zero;
-        image.GetComponent<Image>().color = new Color(1, 1, 1, 0);
-        Util.TriggerFlash(image.GetComponent<Image>(), 1, 1.2f);
+        CoroutineManager.StartCoroutine(CoFlashBang());
+        CoroutineManager.StartCoroutine(CoShakeCamera());
 
-        yield return new WaitForSeconds(1.6f);
+        yield return new WaitForSeconds(0.9f);
+        Managers.Resource.Instantiate("Stones", GameObject.Find("Actions").transform);
 
-        image.SetActive(false);
-        // create boss
-        kingSlimeAction.SetActive(false);
+        kingSlimeActionFront.SetActive(false);
+        kingSlimeActionBack.SetActive(false);
         _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
-        image.GetComponent<Image>().color = new Color(1, 1, 1, 0);
-        //GameObject.Find("Effects_00")?.SetActive(false);
+        GameObject.Find("Effects_00")?.SetActive(false);
 
-
-        Managers.Game.OnDirect = false;
-        Managers.Directing.CloseLetterBox();
-        Managers.Game.OnStaticResolution = false;
-        Managers.UI.OpenGameSceneUI();
-
-        AfterMeetKingSlime();
+        yield return new WaitForSeconds(0.5f);
+        CoroutineManager.StartCoroutine(AfterMeetKingSlime());
     }
 
-    public IEnumerator CoFlashBang(float time)
+    public IEnumerator CoShakeCamera()
     {
+        yield return new WaitForSeconds(0.8f);
+        var noise = Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+        noise.m_NoiseProfile = Managers.Resource.Load<NoiseSettings>("6D Shake");
+        noise.enabled = true;
+        noise.m_AmplitudeGain = 5f;
+
+        yield return new WaitForSeconds(0.5f);
+        noise.enabled = false;
+    }
+
+    public IEnumerator CoFlashBang()
+    {
+        yield return new WaitForSeconds(0.3f);
         GameObject go = GameObject.Find("Directional Light");
         Light light = go.GetComponent<Light>();
         float start = light.intensity;
-        float totalTime = 0;
-        while (totalTime <= time)
-        {
-            float delta = totalTime / time;
-            light.intensity = 100 * delta;
-            totalTime += Time.deltaTime;
-            yield return null;
-        }
-        light.intensity = 0f;
-        yield return new WaitForSeconds(1f);
-        light.intensity = start;
+        light.DOIntensity(0, 0.5f);
+        yield return new WaitForSeconds(0.5f);
+        light.DOIntensity(50f, 0.1f);
+        yield return new WaitForSeconds(0.15f);
+        light.DOIntensity(start, 0.5f);
         light.color = new Color(1, 244 / 255f, 214 / 255f, 1);
     }
 
@@ -517,7 +460,7 @@ public class Events
             OnMeetKingSlime?.Invoke();
     }
 
-    public void AfterMeetKingSlime()
+    public IEnumerator AfterMeetKingSlime()
     {
         Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
         Vector3 target = new Vector3(0f, 10f, -5f); ;
@@ -532,28 +475,11 @@ public class Events
             _kingSlime.gameObject.GetOrAddComponent<Animator>().Play("Boss_C0_I000");
         }
 
-        GameObject tutorialSene = GameObject.Find("UI_TutorialScene");
-        if (tutorialSene != null)
-        {
-            // UI On
-            RectTransform[] rectTransforms = tutorialSene.gameObject.GetComponentsInChildren<RectTransform>();
-            for (int i = 1; i < rectTransforms.Length; i++)
-            {
-                //rectTransforms[i].gameObject.SetActive(false);
-                Image image = rectTransforms[i].gameObject.GetComponent<Image>();
-                if (image != null)
-                {
-                    image.color = new Color(1, 1, 1, 1);
-                }
-                TMP_Text tMP_Text = rectTransforms[i].gameObject.GetComponent<TMP_Text>();
-                if (tMP_Text != null)
-                {
-                    tMP_Text.color = new Color(1, 1, 1, 1);
-                }
-            }
-        }
-
+        yield return new WaitForSeconds(2f);
+        Managers.Game.OnStaticResolution = false;
         Managers.Game.OnDirect = false;
+        Managers.Directing.CloseLetterBox();
+        Managers.UI.OpenGameSceneUI();
         Managers.Game.OnKingSlimeDeadAction -= Unlock4Floor;
         Managers.Game.OnKingSlimeDeadAction += Unlock4Floor;
     }
