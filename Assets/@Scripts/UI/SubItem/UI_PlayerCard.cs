@@ -29,6 +29,8 @@ public class UI_PlayerCard : UI_BaseCard
             GetImage((int)Images.CreatureShieldImage).gameObject.SetActive(false);
         }
 
+        //GetImage((int)Images.AttackIcon).sprite = Managers.Resource.Load<Sprite>(Managers.Data.MonsterClassDic[_creature.Ability].Weapon + "[" + Managers.Data.MonsterClassDic[_creature.Ability].Weapon + "_0]");
+
         return true;
     }
 
@@ -47,7 +49,7 @@ public class UI_PlayerCard : UI_BaseCard
             target.OnDefenceAction.Invoke();
         }
 
-        Debug.Log(Managers.Game.PlayerData.CurSword);
+        //Debug.Log(Managers.Game.PlayerData.CurSword);
         GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play("UIPlayerAttackAnim");
         GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play($"UISword1AttackAnim");
         if (Managers.Game.PlayerData.CurShield != 0)
@@ -55,6 +57,8 @@ public class UI_PlayerCard : UI_BaseCard
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Weapon);
         CreatePlayerAttackParticle();
         CreateMonsterHitParticle();
+
+        Managers.Sound.Play(Define.Sound.Effect, "HeroAttack0_SFX");
 
         if (Managers.Game.AttackCount == Managers.Game.PlayerData.Critical)
         {
@@ -117,6 +121,8 @@ public class UI_PlayerCard : UI_BaseCard
 
     public override void ClearDefence()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "Defense_SFX");
+
         StartCoroutine(CoStartShieldFX());
         StartCoroutine(CoDefenceMat());
         base.ClearDefence();
@@ -272,6 +278,8 @@ public class UI_PlayerCard : UI_BaseCard
 
     public override void Dead()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "GameOver_Event");
+
         base.Dead();
         Managers.Game.OnInputLock = true;
         Managers.Game.IsPlayerDead = true;

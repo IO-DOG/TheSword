@@ -93,6 +93,11 @@ public class UI_CItemInfo : UI_Base
                 Destroy(gameObject);
             }
         }
+        else
+        {
+            Managers.Game.GameScene.isOpenInfoPopup = false;
+            Destroy(gameObject);
+        }
     }
 
     private IEnumerator CoAutoScroll()

@@ -33,13 +33,16 @@ public class Door : MonoBehaviour
 
     Coroutine _openDoorCoroutine;
     public void CoOpenDoor(float time)
-    { 
+    {
+        Managers.Sound.Play(Define.Sound.Effect, "DoorUnlock_SFX");
         _openDoorCoroutine = StartCoroutine(OpenDoor(time));
     }
 
     IEnumerator OpenDoor(float time)
     {
         yield return new WaitForSeconds(1f);
+        Managers.Sound.Play(Define.Sound.Effect, "DoorOpen_SFX");
+
         float elapsedTime = 0.0f;
         Quaternion targetRotation = Quaternion.Euler(_rotateAngle);
 
@@ -79,6 +82,8 @@ public class Door : MonoBehaviour
     Coroutine _doorLockLockedAnimCoroutine;
     IEnumerator DoorLockLockedAnim()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "DoorLock_SFX");
+
         GameObject go = Managers.Resource.Instantiate("DoorLock", _doorLockPos);
         go.GetComponent<Animator>().Play("DoorLockIsLocked");
         go.transform.localScale = new Vector3(go.transform.localScale.x, go.transform.localScale.y * _camera._scaleMultiplier, go.transform.localScale.z * _camera._scaleMultiplier);

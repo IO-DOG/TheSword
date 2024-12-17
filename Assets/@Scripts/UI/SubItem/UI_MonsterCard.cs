@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.U2D;
 using UnityEngine.UI;
 using static GameManager;
 
@@ -28,6 +29,10 @@ public class UI_MonsterCard : UI_BaseCard
         _creature.OnDeadAction += Dead;
         _creature.OnDataRefreshAction += Refresh;
 
+        //SpriteAtlas spriteAtlas = Managers.Resource.Load<SpriteAtlas>("BattleUI_Weppon2");
+
+        //GetImage((int)Images.AttackIcon).sprite = spriteAtlas.GetSprite("BattleUI_Weppon2_0");
+
         StartCoroutine(CoDelayAttack());
         StartCoroutine(CoDelayDefence());
 
@@ -48,6 +53,8 @@ public class UI_MonsterCard : UI_BaseCard
         }
 
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Weapon);
+
+        Managers.Sound.Play(Define.Sound.Effect, "MonsterAttack0_SFX");
 
         if (_totalAttackCount > 0 && _totalAttackCount % 20 == 0)
         {
@@ -129,6 +136,8 @@ public class UI_MonsterCard : UI_BaseCard
 
     public override void ClearDefence()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "Defense_SFX");
+
         StartCoroutine(CoStartShieldFX());
         StartCoroutine(CoDefenceMat());
         base.ClearDefence();

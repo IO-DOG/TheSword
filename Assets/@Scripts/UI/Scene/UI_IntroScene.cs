@@ -44,6 +44,9 @@ public class UI_IntroScene : UI_Scene
         BindText(typeof(Texts));
         #endregion
 
+        Managers.Sound.Play(Define.Sound.Effect, "StartIntro_SFX");
+        Managers.Sound.SetBGMVolume(1);
+
         StartCoroutine(CoCurtaintCall(2f));
 
         GetImage((int)Images.SceneImage).gameObject.SetActive(false);
@@ -102,6 +105,8 @@ public class UI_IntroScene : UI_Scene
     IEnumerator CoCurtaintCall(float time)
     {
         yield return new WaitForSeconds(time);
+
+        Managers.Sound.Play(Define.Sound.Bgm, "StartIntro_BGM");
 
         StartCoroutine(Util.CoFade(GetImage((int)Images.CurtainCall), 0.3f, false));
         _lock = false;

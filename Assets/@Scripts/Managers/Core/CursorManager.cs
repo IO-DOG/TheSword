@@ -126,6 +126,11 @@ public class CursorManager : MonoBehaviour
                     _cursor = CursorType.Normal;
             }
         }
+        else
+        {
+            if (_cursor != CursorType.Normal)
+                _cursor = CursorType.Normal;
+        }
         //Debug.Log(_frameTimer);
 
         switch (_cursor)
@@ -133,64 +138,64 @@ public class CursorManager : MonoBehaviour
             case CursorType.Normal:
                 //_frameTimer = 0;
                 if (_frameTimer < 3.500f)
-                    Cursor.SetCursor(_normalCursor0, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_normalCursor0, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 3.550f)
-                    Cursor.SetCursor(_normalCursor1, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_normalCursor1, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 3.600f)
-                    Cursor.SetCursor(_normalCursor2, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_normalCursor2, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 4.300f)
-                    Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 4.350f)
-                    Cursor.SetCursor(_normalCursor4, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_normalCursor4, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 4.400f)
-                    Cursor.SetCursor(_normalCursor5, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_normalCursor5, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else
                     _frameTimer = 0;
                 break;
             case CursorType.Search:
                 if (_frameTimer < 3.500f)
-                    Cursor.SetCursor(_searchCursor0, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_searchCursor0, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 3.550f)
-                    Cursor.SetCursor(_searchCursor1, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_searchCursor1, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 3.600f)
-                    Cursor.SetCursor(_searchCursor2, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_searchCursor2, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 4.300f)
-                    Cursor.SetCursor(_searchCursor3, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_searchCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 4.350f)
-                    Cursor.SetCursor(_searchCursor4, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_searchCursor4, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 4.400f)
-                    Cursor.SetCursor(_searchCursor5, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_searchCursor5, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else
                     _frameTimer = 0;
                 break;
             case CursorType.Grap:
                 if (_frameTimer < 3.500f)
-                    Cursor.SetCursor(_handleCursor0, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_handleCursor0, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 3.550f)
-                    Cursor.SetCursor(_handleCursor1, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_handleCursor1, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 3.600f)
-                    Cursor.SetCursor(_handleCursor2, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_handleCursor2, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 4.300f)
-                    Cursor.SetCursor(_handleCursor3, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_handleCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 4.350f)
-                    Cursor.SetCursor(_handleCursor4, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_handleCursor4, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 4.400f)
-                    Cursor.SetCursor(_handleCursor5, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_handleCursor5, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else
                     _frameTimer = 0;
                 break;
             case CursorType.Click:
                 if (_frameTimer < 0.005f)
-                    Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 0.105f)
-                    Cursor.SetCursor(_normalCursor4, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_normalCursor4, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 0.150f)
-                    Cursor.SetCursor(_normalCursor5, new Vector2(0, 0), CursorMode.Auto);
+                    Cursor.SetCursor(_normalCursor5, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else
                     _cursor = CursorType.Normal;
                 break;
             case CursorType.Press:
-                Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.Auto);
+                Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
                 break;
             default:
                 break;

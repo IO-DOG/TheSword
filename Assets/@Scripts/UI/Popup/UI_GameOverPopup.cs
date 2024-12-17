@@ -56,9 +56,10 @@ public class UI_GameOverPopup : UI_Popup
         // 장비 없애기
         Managers.Game.Player._isEquiptShield = false;
         Managers.Game.Player._isEquiptWeapon = false;
+        GameObject.Find("UI_PlayerHPBar")?.SetActive(false);
 
         // player 죽는 파티클 생성
-        Vector3 particlePos = new Vector3(Managers.Game.PlayerData.CurPosition.X, Managers.Game.PlayerData.CurPosition.Y, Managers.Game.PlayerData.CurPosition.Z);
+        Vector3 particlePos = Managers.Game.Player.gameObject.transform.position;
         GameObject deathSoulPurple = Managers.Resource.Instantiate("FX_UserDeath");
         deathSoulPurple.transform.position = particlePos;
         //deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
@@ -90,20 +91,31 @@ public class UI_GameOverPopup : UI_Popup
         //yield return new WaitForSeconds(2f);
 
         GetImage((int)Images.GameOverIllust).GetComponent<Animator>().Play("UI_GameOverAni");
+        Managers.Sound.Play(Define.Sound.Effect, "GameOver_SFX");
 
         // 등장 1.5초뒤
-        yield return new WaitForSeconds(3.5f);
+        yield return new WaitForSeconds(6f);
 
         // 게임 오버 일러스트 페이드 아웃
-        StartCoroutine(Util.CoFade(GetImage((int)Images.GameOverIllust), 1f, false));
-        yield return new WaitForSeconds(1f);
-
-
-        Managers.Game.LoadGame();
-
-        Managers.Game.OnInputLock = false;
+        //StartCoroutine(Util.CoFade(GetImage((int)Images.GameOverIllust), 1f, false));
 
         Managers.Game.Player.gameObject.SetActive(true);
+        GameObject.Find("UI_PlayerHPBar")?.SetActive(true);
+
+        Managers.Game.LoadGame();
+        //Managers.Game.PlayerData.Ability = (int)Define.Trait.None;
+        //Debug.Log("Cllck OnClickNewGameButton");
+        //Managers.Game.DeleteGameData();
+        //Managers.Data.Init();
+        Managers.Game.OnInputLock = false;
+
+        GameObject.Find("Maps")?.SetActive(false);
+        Managers.Game.GameScene.gameObject?.SetActive(false);
+        //Managers.Scene.LoadScene(Define.Scene.TitleScene);
+        Managers.Scene.LoadScene(Define.Scene.GameScene);
+        //Managers.Game.LoadGame();
+
+        //Managers.Game.Player.gameObject.SetActive(true);
 
         ClosePopupUI();
     }

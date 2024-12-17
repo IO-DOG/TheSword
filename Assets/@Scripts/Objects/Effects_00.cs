@@ -123,7 +123,7 @@ public class Effects_00 : MonoBehaviour
         }
         else
         {
-            if (fog.GetComponent<VisualEffect>().HasVector4("FogSeconderyColor"))
+            if (fog != null && fog.GetComponent<VisualEffect>().HasVector4("FogSeconderyColor"))
             {
                 Vector4 color = new Color(1f, 1f, 1f);
                 fog.GetComponent<VisualEffect>().SetVector4("FogSeconderyColor", color);

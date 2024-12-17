@@ -49,6 +49,8 @@ public class Lever : MonoBehaviour
             if(child.GetComponentInChildren<Pillar>() != null)
             {
                 child.GetComponentInChildren<Pillar>().Open(1.0f);
+                StartCoroutine(Managers.Sound.CoPlay(Define.Sound.Effect, "Gimic_leverDown_SFX", 1, 0.2f));
+
                 Managers.Data.LeverActiveDic[_leverIndex_forActive] = false ;
                 //Managers.Game.SaveGame();
             }

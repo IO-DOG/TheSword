@@ -95,6 +95,13 @@ public class SoundManager
         }
     }
 
+    public IEnumerator CoPlay(Define.Sound type, string key, float pitch = 1.0f, float time = 0f)
+    {
+        yield return new WaitForSeconds(time);
+
+        Play(type, key, pitch);
+    }
+
     public void Play(Define.Sound type, AudioClip audioClip, float pitch = 1.0f)
     {
         AudioSource audioSource = _audioSources[(int)type];

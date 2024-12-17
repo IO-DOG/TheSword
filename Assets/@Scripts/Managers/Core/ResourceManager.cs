@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.U2D;
 using Object = UnityEngine.Object;
 
 public class ResourceManager
@@ -30,6 +31,15 @@ public class ResourceManager
                 return temp as T;
             }
         }
+
+        //if (typeof(T) == typeof(SpriteAtlas))
+        //{
+        //    key = key + ".spriteatlas";
+        //    if (_resources.TryGetValue(key, out Object temp))
+        //    {
+        //        return temp as T;
+        //    }
+        //}
 
         return null;
     }
@@ -72,6 +82,8 @@ public class ResourceManager
         string loadKey = key;
         if (key.Contains(".sprite"))
             loadKey = $"{key}[{key.Replace(".sprite", "")}]";
+        //if (key.Contains(".spriteatlas"))
+        //    loadKey = $"{key}[{key.Replace(".spriteatlas", "_0")}]";
 
         var asyncOperation = Addressables.LoadAssetAsync<T>(loadKey);
         asyncOperation.Completed += (op) =>
