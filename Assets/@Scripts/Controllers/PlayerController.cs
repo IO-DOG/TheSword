@@ -26,8 +26,8 @@ public class PlayerController : MonoBehaviour
 
     PortalController _bossRoom;
 
-    GameObject _weapon;
-    GameObject _shield;
+    public GameObject _weapon;
+    public GameObject _shield;
 
     float _duration;
     bool _isMoving = false;
