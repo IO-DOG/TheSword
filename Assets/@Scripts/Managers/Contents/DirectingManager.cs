@@ -503,6 +503,8 @@ public class Events
     {
         CoroutineManager.StartCoroutine(PlayTutorial_1());
         Managers.Sound.Play(Define.Sound.Bgm, "Chapter0_BGM");
+        Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND"));
+
         GameObject.Find("UI_PlayerHPBar").GetComponent<Image>().color = new Color(1, 1, 1, 0);
         GameObject.Find("PlayerHPBarGauge").GetComponent<Image>().color = new Color(1, 1, 1, 0);
         Managers.Game.Player._isEquiptWeapon = false;
