@@ -71,8 +71,6 @@ public class CursorManager : MonoBehaviour
 
     void Update()
     {
-        UpdateMousePosition();
-        UpdateMouseCursor();
         if (Input.GetMouseButton(0) && _cursor == CursorType.Normal)
         {
             _cursor = CursorType.Press;
@@ -82,6 +80,9 @@ public class CursorManager : MonoBehaviour
             _frameTimer = 0;
             _cursor = CursorType.Normal;
         }
+
+        UpdateMousePosition();
+        UpdateMouseCursor();
     }
 
     void UpdateMousePosition()
@@ -122,13 +123,13 @@ public class CursorManager : MonoBehaviour
             }
             else
             {
-                if (_cursor != CursorType.Normal)
+                if (_cursor != CursorType.Press && _cursor != CursorType.Normal)
                     _cursor = CursorType.Normal;
             }
         }
         else
         {
-            if (_cursor != CursorType.Normal)
+            if (_cursor != CursorType.Press && _cursor != CursorType.Normal)
                 _cursor = CursorType.Normal;
         }
         //Debug.Log(_frameTimer);
@@ -159,11 +160,11 @@ public class CursorManager : MonoBehaviour
                     Cursor.SetCursor(_searchCursor1, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else if (_frameTimer < 3.600f)
                     Cursor.SetCursor(_searchCursor2, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 4.300f)
+                else if (_frameTimer < 3.650f)
                     Cursor.SetCursor(_searchCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 4.350f)
+                else if (_frameTimer < 3.700f)
                     Cursor.SetCursor(_searchCursor4, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 4.400f)
+                else if (_frameTimer < 3.750f)
                     Cursor.SetCursor(_searchCursor5, new Vector2(0, 0), CursorMode.ForceSoftware);
                 else
                     _frameTimer = 0;
