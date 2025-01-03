@@ -88,7 +88,7 @@ public class UI_IntroScene : UI_Scene
             holdTime = 0f;
         }
 
-        if(isPressing)
+        if (isPressing)
         {
             GetImage((int)Images.EscapeGauge).gameObject.SetActive(true);
             holdTime += Time.deltaTime;
@@ -132,7 +132,7 @@ public class UI_IntroScene : UI_Scene
 
         GetImage((int)Images.SceneImage).sprite = ImageList[idx - 1];
         if (idx != totalCount - 1)
-        GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx].id);
+            GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx].id);
 
         if (idx == 1) // ó�� Ŭ����
         {
@@ -219,14 +219,20 @@ public class UI_IntroScene : UI_Scene
             yield return new WaitForSeconds(0.1f);
         }
 
+        bool flag = false;
         while (GetImage((int)Images.SceneImage).transform.position.y > 0)
         {
+            if (!flag && GetImage((int)Images.SceneImage).transform.position.y < 500)
+            {
+                flag = true;
+                StartCoroutine(CoFadeOutImage());
+            }
+
             GetImage((int)Images.SceneImage).transform.position -= new Vector3(0, 1.5f, 0);
             yield return tick;
         }
-        yield return null;
+        //yield return null;
 
-        StartCoroutine(CoFadeOutImage());
         //StartCoroutine(CoFadeOutImage(GetImage((int)Images.SceneFrameImage)));
 
 
