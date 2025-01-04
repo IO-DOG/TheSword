@@ -69,7 +69,6 @@ public class GameManager
     public Camera MainCamera;
     public GameObject ParentMap;
     public Dictionary<int, GameObject> Maps = new Dictionary<int, GameObject>();
-    public GameObject Monsters;
     public GameObject DropItems;
     public GameObject Lights;
 

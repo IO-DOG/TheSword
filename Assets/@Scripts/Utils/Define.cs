@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class Define
 {
+    #region Postprocessing Profile
+    public static float POSTPROCESSING_DEFAULT_EXPOSURE = 0.03f;
+    public static float POSTPROCESSING_WHITE_EXPOSURE = 15f;
+    public static float POSTPROCESSING_BLACK_EXPOSURE = -10f;
+    #endregion
+
     #region Enum
 
     public enum Scene

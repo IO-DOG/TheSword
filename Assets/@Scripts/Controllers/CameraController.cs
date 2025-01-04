@@ -6,9 +6,17 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering.Universal;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class CameraController : MonoBehaviour
-{
+{ 
+    public enum Exposure
+    {
+        Default,
+        White,
+        Black,
+    }
+
     public SpriteRenderer _bg;
 
     // 픽셀 퍼펙트 카메라 해상도
@@ -118,5 +126,36 @@ public class CameraController : MonoBehaviour
         _confiner = _vCam.GetComponent<CinemachineConfiner>();
         _confiner.m_BoundingVolume = _collider;
         _confiner.InvalidatePathCache();
+    }
+
+    public static IEnumerator CoExposureWhite(float time, Exposure exposure)
+    {
+        Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
+        ColorAdjustments colorAdjustment;
+
+        if (postProcessingVolume.profile.TryGet<ColorAdjustments>(out colorAdjustment))
+        {
+            float startExposure = colorAdjustment.postExposure.value;
+            float targetExposure;
+
+            // Select Exposure Type
+            if (exposure == Exposure.Default)
+                targetExposure = Define.POSTPROCESSING_DEFAULT_EXPOSURE;
+            else if (exposure == Exposure.White)
+                targetExposure = Define.POSTPROCESSING_WHITE_EXPOSURE;
+            else
+                targetExposure = Define.POSTPROCESSING_BLACK_EXPOSURE;
+
+            float elapsed = 0f; // 경과 시간
+
+            while (elapsed < time)
+            {
+                elapsed += Time.deltaTime;
+                colorAdjustment.postExposure.value = Mathf.Lerp(startExposure, targetExposure, elapsed / time);
+                yield return null;
+            }
+
+            colorAdjustment.postExposure.value = targetExposure;
+        }
     }
 }

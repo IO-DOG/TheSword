@@ -4,9 +4,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 using static UnityEngine.RuleTile.TilingRuleOutput;
 using static UnityEngine.UI.Image;
@@ -207,7 +208,8 @@ public class Events
             return;
         {
             Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
-            Vector3 target = new Vector3(0f, 20f, -6f); ;
+            //Vector3 target = new Vector3(0f, 20f, -6f);
+            Vector3 target = new Vector3(0f, 20f, -7f);
             float moveTime = 2f;
             CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
             CoStartKingSlimeDead();
@@ -331,7 +333,7 @@ public class Events
         yield return new WaitForSeconds(1f);
 
         // flash bang
-        CoroutineManager.StartCoroutine(CoFlashBang());
+        //CoroutineManager.StartCoroutine(CoFlashBang(0.5f, 0.1f));
         CoroutineManager.StartCoroutine(CoShakeCamera());
 
         yield return new WaitForSeconds(0.9f);
@@ -358,51 +360,6 @@ public class Events
         noise.enabled = false;
     }
 
-    public IEnumerator CoFlashBang()
-    {
-        yield return new WaitForSeconds(0.3f);
-        GameObject go = GameObject.Find("Directional Light");
-        Light light = go.GetComponent<Light>();
-        float start = light.intensity;
-        light.DOIntensity(0, 0.5f);
-        yield return new WaitForSeconds(0.5f);
-        light.DOIntensity(50f, 0.1f);
-        yield return new WaitForSeconds(0.15f);
-        light.DOIntensity(start, 0.5f);
-        light.color = new Color(1, 244 / 255f, 214 / 255f, 1);
-    }
-
-    public IEnumerator CoBright(GameObject go, float time)
-    {
-        yield return null;
-
-        float totalTime = 0f;
-        SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
-        while (totalTime <= time)
-        {
-            float delta = totalTime / time;
-            sr.color = new Color(1, 1, 1, delta);
-            totalTime += Time.deltaTime;
-            yield return null;
-        }
-    }
-
-    public IEnumerator CoBlack(GameObject go, float time)
-    {
-        yield return null;
-
-        float totalTime = 0f;
-        SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
-        while (totalTime <= time)
-        {
-            float delta = totalTime / time;
-            sr.color = new Color(1, 1, 1, 1 - delta);
-            totalTime += Time.deltaTime;
-            yield return null;
-        }
-
-        sr.color = new Color(1, 1, 1, 0);
-    }
 
     public IEnumerator CoMoveToKingSlimeMidlePos(GameObject original, Vector3 target, float time)
     {
@@ -522,11 +479,14 @@ public class Events
         Managers.Directing.PlayLetterBox();
         Managers.Game.OnDirect = true;
 
+        #region Slime orbs event
+        // Slime orbs down = 5s
+        
         GameObject slimeOrb = Managers.Resource.Instantiate("SlimeOrb", _kingSlime.transform);
         yield return new WaitForSeconds(1f);
 
         slimeOrb.transform.DOLocalMoveY(1f, 3f);
-        yield return new WaitForSeconds(3f);
+         yield return new WaitForSeconds(3f);
 
         slimeOrb.transform.GetChild(0).DOLocalMoveX(-1.5f, 2f);
         slimeOrb.transform.GetChild(2).DOLocalMoveX(1.5f, 2f);
@@ -536,11 +496,62 @@ public class Events
         slimeOrb.transform.GetChild(2).DOLocalMoveY(-1f, 2f);
         yield return new WaitForSeconds(2f);
 
-        slimeOrb.transform.GetChild(0).DOScale(2f, 2f);
-        slimeOrb.transform.GetChild(2).DOLocalMoveY(-1f, 2f);
-        yield return new WaitForSeconds(2f);
+        Sequence seq = DOTween.Sequence();
 
-        Managers.Resource.Destroy(slimeOrb);
+        // Yellow Down
+        Sequence yellow = DOTween.Sequence();
+        yellow.Append(slimeOrb.transform.GetChild(0).DOScale(2f, 2f));
+        yellow.Append(slimeOrb.transform.GetChild(0).DOLocalMoveY(-2f, 1f));
+        yellow.Append(slimeOrb.transform.GetChild(0).DOScale(0f, 0.2f));
+
+        // Red Down
+        Sequence red = DOTween.Sequence();
+        red.Append(slimeOrb.transform.GetChild(1).DOScale(2f, 2f));
+        red.Append(slimeOrb.transform.GetChild(1).DOLocalMoveY(-2f, 1f));
+        red.Append(slimeOrb.transform.GetChild(1).DOScale(0f, 0.2f));
+
+        // Blue Down
+        Sequence blue = DOTween.Sequence();
+        blue.Append(slimeOrb.transform.GetChild(2).DOScale(2f, 2f));
+        blue.Append(slimeOrb.transform.GetChild(2).DOLocalMoveY(-2f, 1f));
+        blue.Append(slimeOrb.transform.GetChild(2).DOScale(0f, 0.2f));
+
+        seq.Append(yellow).Join(red).Join(blue).Play().OnComplete(() =>
+        {
+            Managers.Resource.Destroy(slimeOrb);
+        });
+
+        yield return new WaitForSeconds(3.2f);
+        #endregion
+
+        #region FlashBang Effect
+        // FlashBang Effect
+
+        float whiteTime = 0.5f;
+        float defaultTime = 0.5f;
+        CoroutineManager.StartCoroutine(CameraController.CoExposureWhite(whiteTime, CameraController.Exposure.White));
+        yield return new WaitForSeconds(whiteTime);
+
+        CoroutineManager.StartCoroutine(CameraController.CoExposureWhite(defaultTime, CameraController.Exposure.Default));
+        yield return new WaitForSeconds(defaultTime);
+        #endregion
+
+        #region Instantiate 3 Slimes
+        GameObject map = GameObject.Find("Dungeon_00_003");
+
+        GameObject yellowSlime = Managers.Resource.Instantiate("BossMonster", map.transform);
+        yellowSlime.transform.position = GameObject.Find("YellowSlimePos").transform.position;
+        yellowSlime.GetComponent<MonsterController>().id = 7;
+
+        GameObject redSlime = Managers.Resource.Instantiate("BossMonster", map.transform);
+        redSlime.transform.position = GameObject.Find("RedSlimePos").transform.position;
+        redSlime.GetComponent<MonsterController>().id = 6;
+
+        GameObject blueSlime = Managers.Resource.Instantiate("BossMonster", map.transform);
+        blueSlime.transform.position = GameObject.Find("BlueSlimePos").transform.position;
+        blueSlime.GetComponent<MonsterController>().id = 8;
+        #endregion
+
 
         Managers.UI.OpenGameSceneUI();
         Managers.Directing.CloseLetterBox();
