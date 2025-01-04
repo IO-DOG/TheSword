@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.UI;
 using static UnityEngine.RuleTile.TilingRuleOutput;
+using static UnityEngine.UI.Image;
 
 public class DirectingManager
 {
@@ -201,6 +202,19 @@ public class Events
             || Managers.Game.Player.gameObject.transform.position.z < -7f) // 하드코딩. 일단 놔두자.
             return;
 
+        #region Test
+        if (Managers.Game.OnDirect)
+            return;
+        {
+            Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
+            Vector3 target = new Vector3(0f, 20f, -6f); ;
+            float moveTime = 2f;
+            CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
+            CoStartKingSlimeDead();
+            return;
+        }
+        #endregion
+
         Managers.Game.OnMeetKingSlime = true;
         // 주인공을 길 중간 위치로 이동
         // 주인공이 정면을 바라보도록
@@ -226,9 +240,6 @@ public class Events
             Vector3 pos = new Vector3(3.845f, 1.47f, -1.408f);
 
             scoutSlime.transform.localPosition = pos;
-
-            OnMeetKingSlime -= KingSlimeAction;
-            OnMeetKingSlime += KingSlimeAction;
 
             CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
         }
@@ -482,6 +493,8 @@ public class Events
         Managers.UI.OpenGameSceneUI();
         Managers.Game.OnKingSlimeDeadAction -= Unlock4Floor;
         Managers.Game.OnKingSlimeDeadAction += Unlock4Floor;
+
+        //CoStartKingSlimeDead();
     }
 
     public void Unlock4Floor()
@@ -493,9 +506,46 @@ public class Events
         GameObject go = Managers.Resource.Instantiate("FX_BossClearLine", parent.transform);
         go.transform.localPosition = new Vector3(3.83f, 0.66f, -3.75f);
         go.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-
     }
 
+    #endregion
+
+    #region KingSlimeDead
+    public void CoStartKingSlimeDead()
+    {
+        CoroutineManager.StartCoroutine(StartKingSlimeDead());
+    }
+
+    IEnumerator StartKingSlimeDead()
+    {
+        Managers.UI.CloseGameSceneUI();
+        Managers.Directing.PlayLetterBox();
+        Managers.Game.OnDirect = true;
+
+        GameObject slimeOrb = Managers.Resource.Instantiate("SlimeOrb", _kingSlime.transform);
+        yield return new WaitForSeconds(1f);
+
+        slimeOrb.transform.DOLocalMoveY(1f, 3f);
+        yield return new WaitForSeconds(3f);
+
+        slimeOrb.transform.GetChild(0).DOLocalMoveX(-1.5f, 2f);
+        slimeOrb.transform.GetChild(2).DOLocalMoveX(1.5f, 2f);
+        yield return new WaitForSeconds(2f);
+
+        slimeOrb.transform.GetChild(0).DOLocalMoveY(-1f, 2f);
+        slimeOrb.transform.GetChild(2).DOLocalMoveY(-1f, 2f);
+        yield return new WaitForSeconds(2f);
+
+        slimeOrb.transform.GetChild(0).DOScale(2f, 2f);
+        slimeOrb.transform.GetChild(2).DOLocalMoveY(-1f, 2f);
+        yield return new WaitForSeconds(2f);
+
+        Managers.Resource.Destroy(slimeOrb);
+
+        Managers.UI.OpenGameSceneUI();
+        Managers.Directing.CloseLetterBox();
+        Managers.Game.OnDirect = false;
+    }
     #endregion
 
     #region Tutorial
