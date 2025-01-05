@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Define
 {
+    public static Vector3 DEFALUT_CAMERA_OFFSET = new Vector3(0f, 10f, -5f);
+
     #region Postprocessing Profile
     public static float POSTPROCESSING_DEFAULT_EXPOSURE = 0.03f;
     public static float POSTPROCESSING_WHITE_EXPOSURE = 15f;

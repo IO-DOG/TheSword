@@ -192,15 +192,15 @@ public class UI_GameScene : UI_Scene
         }
         if (Input.GetKeyDown(KeyCode.F2))
         {
-            Managers.Game.PlayerData.Attack += 10;
+            Managers.Game.PlayerData.Attack += 10000;
         }
         if (Input.GetKeyDown(KeyCode.F3))
         {
-            Managers.Game.PlayerData.CurHP -= 10;
+            Managers.Game.PlayerData.CurHP += 10000;
         }
         if (Input.GetKeyDown(KeyCode.F4))
         {
-            Managers.Game.PlayerData.Attack -= 10;
+            Managers.Game.PlayerData.MaxHP += 10000;
         }
         if (Input.GetKeyDown(KeyCode.F5))
         {

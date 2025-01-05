@@ -1,0 +1,25 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class SplitSlimeController : BossMonsterController
+{
+    protected override void Init()
+    {
+        base.Init();
+        SetDeadEvent();
+    }
+
+    public override void OnDeadEvent()
+    {
+        Managers.Game.TotalKillSplitSlime++;
+        if(Managers.Game.TotalKillSplitSlime == 3)
+            Managers.Directing.BossOnDeadAction.Invoke();
+    }
+
+    public override void SetDeadEvent()
+    {
+        Managers.Directing.BossOnDeadAction = null;
+        Managers.Directing.BossOnDeadAction += Managers.Directing.Events.Unlock4Floor;
+    }
+}

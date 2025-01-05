@@ -54,8 +54,6 @@ public class PlayerController : MonoBehaviour
     {
         Managers.Input.KeyAction -= OnKeyboard;
         Managers.Input.KeyAction += OnKeyboard;
-        Managers.Input.KeyAction -= Managers.Directing.Events.MeetKingSlime;
-        Managers.Input.KeyAction += Managers.Directing.Events.MeetKingSlime;
 
         transform.localScale = new Vector3(1f, 2f, 1f);
 

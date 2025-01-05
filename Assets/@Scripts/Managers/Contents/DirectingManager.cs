@@ -9,11 +9,12 @@ using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
-using static UnityEngine.RuleTile.TilingRuleOutput;
 using static UnityEngine.UI.Image;
 
 public class DirectingManager
 {
+    public Action BossOnAppearAction;
+    public Action BossOnDeadAction;
     public Action PopupAction;
     public Events Events = new Events();
     public UI_LetterBox letterBox;
@@ -185,39 +186,19 @@ public class Events
     public GameObject _kingSlime;
 
     bool _clearKingSlime = false;
-    public Action OnMeetKingSlime = null;
 
     public void MeetKingSlime()
     {
-        if (Managers.Game.OnMeetKingSlime)
-            return;
         if (_clearKingSlime == false)
         {
             _clearKingSlime = true;
             _kingSlime = GameObject.Find("bossMonster0");
+            _kingSlime.GetComponent<MonsterController>().PromoteToBoss(typeof(KingSlimeController));
+
             if (_kingSlime != null)
                 _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = false;
         }
 
-        if (Managers.Game.Player.gameObject != null && Managers.Game.Player.gameObject.transform.position.x < 303.5f || Managers.Game.Player.gameObject.transform.position.x > 304.2f
-            || Managers.Game.Player.gameObject.transform.position.z < -7f) // 하드코딩. 일단 놔두자.
-            return;
-
-        #region Test
-        if (Managers.Game.OnDirect)
-            return;
-        {
-            Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
-            //Vector3 target = new Vector3(0f, 20f, -6f);
-            Vector3 target = new Vector3(0f, 20f, -7f);
-            float moveTime = 2f;
-            CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
-            CoStartKingSlimeDead();
-            return;
-        }
-        #endregion
-
-        Managers.Game.OnMeetKingSlime = true;
         // 주인공을 길 중간 위치로 이동
         // 주인공이 정면을 바라보도록
         // 카메라 워킹 및 UI사라짐
@@ -236,6 +217,7 @@ public class Events
             Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
             Vector3 target = new Vector3(0f, 20f, -5f); ;
             float moveTime = 2f;
+            StartCoVirtualCameraMove(original, target, moveTime);
 
             GameObject parent = GameObject.Find("Dungeon_00_003");
             GameObject scoutSlime = Managers.Resource.Instantiate("BossScene_C0_000", parent.transform);
@@ -243,14 +225,8 @@ public class Events
 
             scoutSlime.transform.localPosition = pos;
 
-            CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
+            CoroutineManager.StartCoroutine(CoKingSlimeAction());
         }
-    }
-
-    void KingSlimeAction()
-    {
-        OnMeetKingSlime = null;
-        CoroutineManager.StartCoroutine(CoKingSlimeAction());
     }
 
     IEnumerator CoKingSlimeAction()
@@ -263,28 +239,21 @@ public class Events
         Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = new Vector3(0f, 20f, -5f);
         scoutSlime.transform.localPosition = pos;
 
-
         Vector3 scoutSlimeMoveDest = new Vector3(pos.x, pos.y, pos.z - 0.3f);
         CoroutineManager.StartCoroutine(CoMoveToDest(scoutSlime, scoutSlimeMoveDest, 2.5f));
-
-
         yield return new WaitForSeconds(2.5f);
 
         scoutSlime.GetComponent<Animator>().Play("bossScene_C0_001");
-
         yield return new WaitForSeconds(1f);
 
         scoutSlime.transform.DOLocalMoveZ(-0.3f, 1f);
-
-
         yield return new WaitForSeconds(0.5f);
 
         // camera slow down
         Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
         Vector3 target = new Vector3(0f, 14.5f, -6f); ;
         float moveTime = 3f;
-        CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
-
+        StartCoVirtualCameraMove(original, target, moveTime);
         yield return new WaitForSeconds(0.5f);
 
         GameObject.Find("SlimeFall4").GetComponent<ParticleSystem>().Play();
@@ -323,68 +292,31 @@ public class Events
             GameObject.Find("SlimeFall5").GetComponent<ParticleSystem>().Stop();
         }
 
-        //kingSlimeAction.transform.DOScaleY(2f, 0.5f).OnComplete(()=>
-        //{
-        //    kingSlimeAction.transform.DOScaleY(1f, 0.5f);
-        //});
-
         slimes.GetComponent<ParticleSystem>().Stop();
         slimesCore.GetComponent<ParticleSystem>().Stop();
         yield return new WaitForSeconds(1f);
 
-        // flash bang
-        //CoroutineManager.StartCoroutine(CoFlashBang(0.5f, 0.1f));
-        CoroutineManager.StartCoroutine(CoShakeCamera());
+        // white
+        CoroutineManager.StartCoroutine(CameraController.CoExposure(1f, CameraController.Exposure.White));
+        yield return new WaitForSeconds(1f);
 
-        yield return new WaitForSeconds(0.9f);
-        Managers.Resource.Instantiate("Stones", GameObject.Find("Actions").transform);
+        // black
+        CoroutineManager.StartCoroutine(CameraController.CoExposure(0.2f, CameraController.Exposure.Black));
+        yield return new WaitForSeconds(0.2f);
+
+        // default
+        CoroutineManager.StartCoroutine(CameraController.CoExposure(0.5f, CameraController.Exposure.Default));
+        yield return new WaitForSeconds(0.2f);
+
+        Managers.Resource.Instantiate("KingSlimeInstantiateEffect", GameObject.Find("Actions").transform);
+        CoroutineManager.StartCoroutine(CameraController.CoShakeCamera(0.5f));
 
         kingSlimeActionFront.SetActive(false);
         kingSlimeActionBack.SetActive(false);
         _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
         GameObject.Find("Effects_00")?.SetActive(false);
-
-        yield return new WaitForSeconds(0.5f);
         CoroutineManager.StartCoroutine(AfterMeetKingSlime());
     }
-
-    public IEnumerator CoShakeCamera()
-    {
-        yield return new WaitForSeconds(0.8f);
-        var noise = Managers.Game.MainCamera.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
-        noise.m_NoiseProfile = Managers.Resource.Load<NoiseSettings>("6D Shake");
-        noise.enabled = true;
-        noise.m_AmplitudeGain = 5f;
-
-        yield return new WaitForSeconds(0.5f);
-        noise.enabled = false;
-    }
-
-
-    public IEnumerator CoMoveToKingSlimeMidlePos(GameObject original, Vector3 target, float time)
-    {
-        yield return null;
-
-        float totalTime = 0f;
-
-        float originalX = original.transform.localPosition.x;
-        float originalY = original.transform.localPosition.y;
-        float originalZ = original.transform.localPosition.z;
-
-        while (totalTime <= time)
-        {
-            float delta = totalTime / time;
-            float x = originalX + (target.x - originalX) * delta;
-            float y = originalY + (target.y - originalY) * delta;
-            float z = originalZ + (target.z - originalZ) * delta;
-            original.transform.localPosition = new Vector3(x, original.transform.position.y, z);
-            totalTime += Time.deltaTime;
-            yield return null;
-        }
-
-        original.SetActive(false);
-    }
-
     public IEnumerator CoMoveToDest(GameObject original, Vector3 target, float time)
     {
         yield return null;
@@ -406,8 +338,14 @@ public class Events
             yield return null;
         }
     }
-
-    public IEnumerator CoVirtualCameraMove(Vector3 original, Vector3 target, float time)
+    Coroutine CoVirtualCameraMove;
+    void StartCoVirtualCameraMove(Vector3 original, Vector3 target, float time)
+    {
+        if(CoVirtualCameraMove != null)
+            CoroutineManager.StopCoroutine(CoVirtualCameraMove);
+        CoVirtualCameraMove = CoroutineManager.StartCoroutine(VirtualCameraMove(original, target, time));
+    }
+    private IEnumerator VirtualCameraMove(Vector3 original, Vector3 target, float time)
     {
         yield return null;
 
@@ -423,35 +361,31 @@ public class Events
             totalTime += Time.deltaTime;
             yield return null;
         }
-
-        if (OnMeetKingSlime != null)
-            OnMeetKingSlime?.Invoke();
     }
 
     public IEnumerator AfterMeetKingSlime()
     {
-        Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
-        Vector3 target = new Vector3(0f, 10f, -5f); ;
-        float moveTime = 2f;
-        CoroutineManager.StartCoroutine(CoVirtualCameraMove(original, target, moveTime));
-
         if (_kingSlime != null)
         {
             _kingSlime.transform.localScale = new Vector3(1f, 2f, 1f);
             _kingSlime.transform.localPosition = new Vector3(3.84f, 3f, -6f);
             _kingSlime.SetActive(true);
+            if (_kingSlime != null)
+                _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
             _kingSlime.gameObject.GetOrAddComponent<Animator>().Play("Boss_C0_I000");
         }
+
+        yield return new WaitForSeconds(2f);
+        Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
+        Vector3 target = new Vector3(0f, 10f, -5f); ;
+        float moveTime = 2f;
+        StartCoVirtualCameraMove(original, target, moveTime);
 
         yield return new WaitForSeconds(2f);
         Managers.Game.OnStaticResolution = false;
         Managers.Game.OnDirect = false;
         Managers.Directing.CloseLetterBox();
         Managers.UI.OpenGameSceneUI();
-        Managers.Game.OnKingSlimeDeadAction -= Unlock4Floor;
-        Managers.Game.OnKingSlimeDeadAction += Unlock4Floor;
-
-        //CoStartKingSlimeDead();
     }
 
     public void Unlock4Floor()
@@ -475,21 +409,30 @@ public class Events
 
     IEnumerator StartKingSlimeDead()
     {
+        Transform orbsTransform = GameObject.Find("OrbsSpawnPos").transform;
+        yield return new WaitForSeconds(2f);
+
         Managers.UI.CloseGameSceneUI();
         Managers.Directing.PlayLetterBox();
         Managers.Game.OnDirect = true;
 
+        Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
+        Vector3 target = new Vector3(0f, 18f, -5f); ;
+        float moveTime = 2f;
+        StartCoVirtualCameraMove(original, target, moveTime);
+
         #region Slime orbs event
         // Slime orbs down = 5s
-        
-        GameObject slimeOrb = Managers.Resource.Instantiate("SlimeOrb", _kingSlime.transform);
+
+        GameObject slimeOrb = Managers.Resource.Instantiate("SlimeOrb", orbsTransform);
+        slimeOrb.transform.position = new Vector3(orbsTransform.position.x, orbsTransform.position.y, orbsTransform.position.z + 1.6f);
         yield return new WaitForSeconds(1f);
 
         slimeOrb.transform.DOLocalMoveY(1f, 3f);
          yield return new WaitForSeconds(3f);
 
-        slimeOrb.transform.GetChild(0).DOLocalMoveX(-1.5f, 2f);
-        slimeOrb.transform.GetChild(2).DOLocalMoveX(1.5f, 2f);
+        slimeOrb.transform.GetChild(0).DOLocalMoveX(-2.24f, 2f);
+        slimeOrb.transform.GetChild(2).DOLocalMoveX(2.24f, 2f);
         yield return new WaitForSeconds(2f);
 
         slimeOrb.transform.GetChild(0).DOLocalMoveY(-1f, 2f);
@@ -500,58 +443,78 @@ public class Events
 
         // Yellow Down
         Sequence yellow = DOTween.Sequence();
-        yellow.Append(slimeOrb.transform.GetChild(0).DOScale(2f, 2f));
-        yellow.Append(slimeOrb.transform.GetChild(0).DOLocalMoveY(-2f, 1f));
-        yellow.Append(slimeOrb.transform.GetChild(0).DOScale(0f, 0.2f));
+        yellow.Append(slimeOrb.transform.GetChild(0).DOLocalMoveY(-4f, 1f));
+        yellow.Append(slimeOrb.transform.GetChild(0).DOScale(5f, 1f));
 
         // Red Down
         Sequence red = DOTween.Sequence();
-        red.Append(slimeOrb.transform.GetChild(1).DOScale(2f, 2f));
         red.Append(slimeOrb.transform.GetChild(1).DOLocalMoveY(-2f, 1f));
-        red.Append(slimeOrb.transform.GetChild(1).DOScale(0f, 0.2f));
+        red.Append(slimeOrb.transform.GetChild(1).DOScale(5f, 1f));
 
         // Blue Down
         Sequence blue = DOTween.Sequence();
-        blue.Append(slimeOrb.transform.GetChild(2).DOScale(2f, 2f));
-        blue.Append(slimeOrb.transform.GetChild(2).DOLocalMoveY(-2f, 1f));
-        blue.Append(slimeOrb.transform.GetChild(2).DOScale(0f, 0.2f));
+        blue.Append(slimeOrb.transform.GetChild(2).DOLocalMoveY(-4f, 1f));
+        blue.Append(slimeOrb.transform.GetChild(2).DOScale(5f, 1f));
+
+        Vector3 original2 = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
+        Vector3 target2 = new Vector3(0f, 16f, -6f); ;
+        float moveTime2 = 3f;
+        StartCoVirtualCameraMove(original2, target2, moveTime2);
 
         seq.Append(yellow).Join(red).Join(blue).Play().OnComplete(() =>
         {
             Managers.Resource.Destroy(slimeOrb);
         });
 
-        yield return new WaitForSeconds(3.2f);
+        yield return new WaitForSeconds(1.6f);
         #endregion
 
         #region FlashBang Effect
         // FlashBang Effect
 
         float whiteTime = 0.5f;
-        float defaultTime = 0.5f;
-        CoroutineManager.StartCoroutine(CameraController.CoExposureWhite(whiteTime, CameraController.Exposure.White));
+        float defaultTime = 0.2f;
+        CoroutineManager.StartCoroutine(CameraController.CoExposure(whiteTime, CameraController.Exposure.White));
         yield return new WaitForSeconds(whiteTime);
 
-        CoroutineManager.StartCoroutine(CameraController.CoExposureWhite(defaultTime, CameraController.Exposure.Default));
+        CoroutineManager.StartCoroutine(CameraController.CoExposure(defaultTime, CameraController.Exposure.Default));
         yield return new WaitForSeconds(defaultTime);
         #endregion
 
         #region Instantiate 3 Slimes
         GameObject map = GameObject.Find("Dungeon_00_003");
 
-        GameObject yellowSlime = Managers.Resource.Instantiate("BossMonster", map.transform);
+        GameObject yellowSlime = Managers.Resource.Instantiate("BossMonster_3Slimes", map.transform);
         yellowSlime.transform.position = GameObject.Find("YellowSlimePos").transform.position;
         yellowSlime.GetComponent<MonsterController>().id = 7;
+        GameObject jumpCloud0 = Managers.Resource.Instantiate("JumpCloud", yellowSlime.transform);
+        jumpCloud0.transform.localScale = new Vector3(jumpCloud0.transform.localScale.x * 1.5f, jumpCloud0.transform.localScale.y * 1.5f, jumpCloud0.transform.localScale.z * 1.5f);
 
-        GameObject redSlime = Managers.Resource.Instantiate("BossMonster", map.transform);
+        GameObject redSlime = Managers.Resource.Instantiate("BossMonster_3Slimes", map.transform);
         redSlime.transform.position = GameObject.Find("RedSlimePos").transform.position;
         redSlime.GetComponent<MonsterController>().id = 6;
+        GameObject jumpCloud1 = Managers.Resource.Instantiate("JumpCloud", redSlime.transform);
+        jumpCloud1.transform.localScale = new Vector3(jumpCloud0.transform.localScale.x * 1.5f, jumpCloud0.transform.localScale.y * 1.5f, jumpCloud0.transform.localScale.z * 1.5f);
 
-        GameObject blueSlime = Managers.Resource.Instantiate("BossMonster", map.transform);
+
+        GameObject blueSlime = Managers.Resource.Instantiate("BossMonster_3Slimes", map.transform);
         blueSlime.transform.position = GameObject.Find("BlueSlimePos").transform.position;
         blueSlime.GetComponent<MonsterController>().id = 8;
+        GameObject jumpCloud2 = Managers.Resource.Instantiate("JumpCloud", blueSlime.transform);
+        jumpCloud2.transform.localScale = new Vector3(jumpCloud0.transform.localScale.x * 1.5f, jumpCloud0.transform.localScale.y * 1.5f, jumpCloud0.transform.localScale.z * 1.5f);
+
+        CoroutineManager.StartCoroutine(CameraController.CoShakeCamera(0.4f, 3.5f));
+        Managers.Resource.Instantiate("Stones", map.transform);
+
         #endregion
 
+        yield return new WaitForSeconds(3f);
+        Vector3 original3 = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
+        Vector3 target3 = Define.DEFALUT_CAMERA_OFFSET;
+        float moveTime3 = 1f;
+        StartCoVirtualCameraMove(original3, target3, moveTime3);
+
+        yield return new WaitForSeconds(1);
 
         Managers.UI.OpenGameSceneUI();
         Managers.Directing.CloseLetterBox();

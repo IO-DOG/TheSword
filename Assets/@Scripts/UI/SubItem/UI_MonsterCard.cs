@@ -262,15 +262,11 @@ public class UI_MonsterCard : UI_BaseCard
 
         Managers.Data.MonsterActiveDic[Managers.Game.MonsterData[0].IsActiveIndex] = false;
 
-        // for king slime
-        if (Managers.Game.Monster.gameObject.name == "KingSlimeSplitMonster")
-        {
-            Managers.Game.TotalKillSplitSlime++;
-            if (Managers.Game.TotalKillSplitSlime == 3)
-                Managers.Game.OnKingSlimeDeadAction.Invoke();
-        }
+        // Call specific Boss monster dead event
+        Managers.Game.Monster.GetComponent<BossMonsterController>()?.OnDeadEvent();
 
         Managers.Game.OnBattleAction.Invoke();
+
         //Managers.Game.OnBattle = false;
 
         //if (Managers.Data.MonsterDic[Managers.Game.Monster.id].RewardItem != -1)

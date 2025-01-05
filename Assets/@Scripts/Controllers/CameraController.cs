@@ -128,7 +128,7 @@ public class CameraController : MonoBehaviour
         _confiner.InvalidatePathCache();
     }
 
-    public static IEnumerator CoExposureWhite(float time, Exposure exposure)
+    public static IEnumerator CoExposure(float time, Exposure exposure)
     {
         Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
         ColorAdjustments colorAdjustment;
@@ -157,5 +157,53 @@ public class CameraController : MonoBehaviour
 
             colorAdjustment.postExposure.value = targetExposure;
         }
+    }
+
+    public static IEnumerator CoShakeCamera(float time, float force = 5f)
+    {
+        var cinmemachineCamera = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>();
+        var transposer = cinmemachineCamera.GetCinemachineComponent<CinemachineTransposer>();
+        var defalutFllowOffset = transposer.m_FollowOffset;
+        var noise = cinmemachineCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+
+        #region Shake Camera
+        noise.m_NoiseProfile = Managers.Resource.Load<NoiseSettings>("6D Shake");
+        noise.enabled = true;
+        noise.m_AmplitudeGain = force;
+
+        yield return new WaitForSeconds(time);
+        #endregion
+
+        #region To Slow Stop Shake
+        float duration = 0f; // 감쇄 시간
+        float elapsed = 0f;
+        float initialAmplitude = noise.m_AmplitudeGain;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            noise.m_AmplitudeGain = Mathf.Lerp(initialAmplitude, 0f, elapsed / duration);
+            yield return null;
+        }
+
+        noise.m_AmplitudeGain = 0f;
+        noise.enabled = false;
+        #endregion
+
+        #region To Set Slowly Default Camera Offset
+        // set camera default offset
+        float offsetElapsed = 0f;
+        Vector3 curFllowOffset = transposer.m_FollowOffset;
+
+        while (offsetElapsed < duration)
+        {
+            offsetElapsed += Time.deltaTime;
+            transposer.m_FollowOffset.x = Mathf.Lerp(curFllowOffset.x, defalutFllowOffset.x, offsetElapsed / duration);
+            transposer.m_FollowOffset.y = Mathf.Lerp(curFllowOffset.y, defalutFllowOffset.y, offsetElapsed / duration);
+            transposer.m_FollowOffset.z = Mathf.Lerp(curFllowOffset.z, defalutFllowOffset.z, offsetElapsed / duration);
+            yield return null;
+        }
+        transposer.m_FollowOffset = defalutFllowOffset;
+        #endregion
     }
 }

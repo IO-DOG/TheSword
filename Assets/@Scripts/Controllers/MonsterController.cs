@@ -15,7 +15,6 @@ public class MonsterController : MonoBehaviour
     public int id = 0;
     [HideInInspector]
     public int _monsterIndex_forActive = 0;
-
     public void SetMonster()
     {
         Managers.Game.MonsterData.Clear();
@@ -59,11 +58,23 @@ public class MonsterController : MonoBehaviour
         //Util.Screenshot2((screenShot) => {Managers.Game._screenShot2 = screenShot; });
     }
 
-    private void Start()
+    public void PromoteToBoss(Type bossType)
     {
+        var bossController = gameObject.AddComponent(bossType) as BossMonsterController;
+        bossController.id = id;
+
+        Destroy(this);
+    }
+
+    protected virtual void Init()
+    { 
         GetComponent<Animator>().Play($"{Managers.Data.MonsterDic[id].IdleAnimStr}");
         GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>(Managers.Data.MonsterDic[id].Shadow);
-
         //id = 1;
+    }
+
+    private void Start()
+    {
+        Init();
     }
 }
