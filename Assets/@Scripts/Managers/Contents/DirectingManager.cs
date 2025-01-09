@@ -421,43 +421,42 @@ public class Events
         StartCoVirtualCameraMove(original, target, moveTime);
 
         #region Slime orbs event
-        // Slime orbs down = 5s
 
         GameObject slimeOrb = Managers.Resource.Instantiate("SlimeOrb", orbsTransform);
-        slimeOrb.transform.position = new Vector3(orbsTransform.position.x, orbsTransform.position.y, orbsTransform.position.z + 1.6f);
-        yield return new WaitForSeconds(1f);
+        slimeOrb.transform.position = new Vector3(orbsTransform.position.x, orbsTransform.position.y, orbsTransform.position.z);
+        yield return new WaitForSeconds(0.3f);
 
-        slimeOrb.transform.DOLocalMoveY(1f, 3f);
-         yield return new WaitForSeconds(3f);
+        slimeOrb.transform.DOLocalMoveY(3f, 1f);
+         yield return new WaitForSeconds(1f);
 
-        slimeOrb.transform.GetChild(0).DOLocalMoveX(-2.24f, 2f);
-        slimeOrb.transform.GetChild(2).DOLocalMoveX(2.24f, 2f);
-        yield return new WaitForSeconds(2f);
+        slimeOrb.transform.GetChild(0).DOLocalMoveX(-2.24f, 0.5f);
+        slimeOrb.transform.GetChild(2).DOLocalMoveX(2.24f, 0.5f);
+        yield return new WaitForSeconds(0.5f);
 
-        slimeOrb.transform.GetChild(0).DOLocalMoveY(-1f, 2f);
-        slimeOrb.transform.GetChild(2).DOLocalMoveY(-1f, 2f);
-        yield return new WaitForSeconds(2f);
+        slimeOrb.transform.GetChild(0).DOLocalMoveY(-1f, 0.5f);
+        slimeOrb.transform.GetChild(2).DOLocalMoveY(-1f, 0.5f);
+        yield return new WaitForSeconds(0.5f);
 
         Sequence seq = DOTween.Sequence();
 
         // Yellow Down
         Sequence yellow = DOTween.Sequence();
-        yellow.Append(slimeOrb.transform.GetChild(0).DOLocalMoveY(-4f, 1f));
-        yellow.Append(slimeOrb.transform.GetChild(0).DOScale(5f, 1f));
+        yellow.Append(slimeOrb.transform.GetChild(0).DOLocalMoveY(-10f, 0.5f));
+        yellow.Append(slimeOrb.transform.GetChild(0).DOScale(5f, 0.5f));
 
         // Red Down
         Sequence red = DOTween.Sequence();
-        red.Append(slimeOrb.transform.GetChild(1).DOLocalMoveY(-2f, 1f));
-        red.Append(slimeOrb.transform.GetChild(1).DOScale(5f, 1f));
+        red.Append(slimeOrb.transform.GetChild(1).DOLocalMoveY(-6f, 0.5f));
+        red.Append(slimeOrb.transform.GetChild(1).DOScale(5f, 0.5f));
 
         // Blue Down
         Sequence blue = DOTween.Sequence();
-        blue.Append(slimeOrb.transform.GetChild(2).DOLocalMoveY(-4f, 1f));
-        blue.Append(slimeOrb.transform.GetChild(2).DOScale(5f, 1f));
+        blue.Append(slimeOrb.transform.GetChild(2).DOLocalMoveY(-10f, 0.5f));
+        blue.Append(slimeOrb.transform.GetChild(2).DOScale(5f, 0.5f));
 
         Vector3 original2 = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
         Vector3 target2 = new Vector3(0f, 16f, -6f); ;
-        float moveTime2 = 3f;
+        float moveTime2 = 0.5f;
         StartCoVirtualCameraMove(original2, target2, moveTime2);
 
         seq.Append(yellow).Join(red).Join(blue).Play().OnComplete(() =>
@@ -465,7 +464,7 @@ public class Events
             Managers.Resource.Destroy(slimeOrb);
         });
 
-        yield return new WaitForSeconds(1.6f);
+        yield return new WaitForSeconds(0.6f);
         #endregion
 
         #region FlashBang Effect
@@ -507,7 +506,7 @@ public class Events
 
         #endregion
 
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(1f);
         Vector3 original3 = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
         Vector3 target3 = Define.DEFALUT_CAMERA_OFFSET;
         float moveTime3 = 1f;
