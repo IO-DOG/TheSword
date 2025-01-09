@@ -143,9 +143,9 @@ public class UI_GameScene : UI_Scene
         //}
 
         #region Test
-        Managers.Game.Player.SetPlayerPosition(Managers.Game.SpawnPoints[1].position);
-        Managers.Game.PlayerData.CurStageid = 3;
-        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
+        //Managers.Game.Player.SetPlayerPosition(Managers.Game.SpawnPoints[0].position);
+        //Managers.Game.PlayerData.CurStageid = 3;
+        //Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
         #endregion
 
         if (PlayerPrefs.GetInt("ISOPENSWORD") == 0)
@@ -158,7 +158,11 @@ public class UI_GameScene : UI_Scene
         Managers.UI.ShowStageNamePopup(1f);
 
         if (PlayerPrefs.GetInt("ISFIRST", 1) == 1)
+        {
+            Managers.Game.Player.SetPlayerPosition(Managers.Game.SpawnPoints[0].position);
+
             Managers.Directing.Events.CoPlayTutorial_1();
+        }
         else
         {
             // 하드코딩
