@@ -134,13 +134,13 @@ public class UI_GameScene : UI_Scene
         Data.MyVector3 loadPos = Managers.Game.PlayerData.CurPosition;
 
         // 최초 실행 시 스폰 포인트 못 찾는 문제 예외 처리
-        //if (loadPos.X == 0 && loadPos.Z == 0)
-        //    Managers.Game.Player.SetPlayerPosition(Managers.Game.SpawnPoints[0].position);
-        //else
-        //{
-        //    Vector3 playerPos = new Vector3(loadPos.X, loadPos.Y, loadPos.Z);
-        //    Managers.Game.Player.SetPlayerPosition(playerPos);
-        //}
+        if (loadPos.X == 0 && loadPos.Z == 0)
+            Managers.Game.Player.SetPlayerPosition(Managers.Game.SpawnPoints[0].position);
+        else
+        {
+            Vector3 playerPos = new Vector3(loadPos.X, loadPos.Y, loadPos.Z);
+            Managers.Game.Player.SetPlayerPosition(playerPos);
+        }
 
         #region Test
         //Managers.Game.Player.SetPlayerPosition(Managers.Game.SpawnPoints[0].position);

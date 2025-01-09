@@ -198,14 +198,14 @@ public class UI_MenuPopup : UI_Popup
 
     void ButtonsMoveToLeft()
     {
+        float dist = Screen.width * 0.365f;
         //GetObject((int)GameObjects.Buttons).gameObject.transform.DOMoveX(700, 0.3f);
-        GetImage((int)Images.ContinueButton).gameObject.transform.DOMoveX(700, 0.3f);
-
+        GetImage((int)Images.ContinueButton).gameObject.transform.DOMoveX(dist, 0.3f);
         DG.Tweening.Sequence mySequence = DOTween.Sequence()
-        .Insert(0.1f, GetImage((int)Images.ContinueButton).gameObject.transform.DOMoveX(700, 0.3f))
-        .Insert(0.12f, GetImage((int)Images.SettingButton).gameObject.transform.DOMoveX(700, 0.3f))
-        .Insert(0.14f, GetImage((int)Images.SelectLanguageButton).gameObject.transform.DOMoveX(700, 0.3f))
-        .Insert(0.16f, GetImage((int)Images.QuitGameButton).gameObject.transform.DOMoveX(700, 0.3f));
+        .Insert(0.1f, GetImage((int)Images.ContinueButton).gameObject.transform.DOMoveX(dist, 0.3f))
+        .Insert(0.12f, GetImage((int)Images.SettingButton).gameObject.transform.DOMoveX(dist, 0.3f))
+        .Insert(0.14f, GetImage((int)Images.SelectLanguageButton).gameObject.transform.DOMoveX(dist, 0.3f))
+        .Insert(0.16f, GetImage((int)Images.QuitGameButton).gameObject.transform.DOMoveX(dist, 0.3f));
 
     }
 

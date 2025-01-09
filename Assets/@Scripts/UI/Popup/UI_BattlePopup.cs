@@ -40,15 +40,18 @@ public class UI_BattlePopup : UI_Popup
         // show Creature Card
         playerCard = Managers.UI.SetBattleCard<UI_PlayerCard>(gameObject.transform, Managers.Game.PlayerData);
 
-        playerCard.transform.position = new Vector3(580, 650, 0);
+        float width = Screen.width;
+        float height = Screen.height;
+        playerCard.transform.position = new Vector3(width * 0.3f, height * 0.6f, 0);
+        playerCard.transform.localScale = new Vector3(width / 1920 * 4.5f, height / 1080 * 4.5f, 1);
         //playerCard.Data = Managers.Game.Player.Data;
 
         for (int i = 0; i < Managers.Game.MonsterData.Count; i++)
         {
             monsterCard = Managers.UI.SetBattleCard<UI_MonsterCard>(gameObject.transform, Managers.Game.MonsterData[i]);
 
-            monsterCard.transform.position = new Vector3(1340, 650, 0);
-
+            monsterCard.transform.position = new Vector3(width * 0.7f, height * 0.6f, 0);
+            monsterCard.transform.localScale = new Vector3(width / 1920 * 4.5f, height / 1080 * 4.5f, 1);
         }
 
         //monsterCard.Data = Managers.Game.MonsterData;

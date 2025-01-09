@@ -66,7 +66,9 @@ public class UI_SettingPopup : UI_Popup
         GetText((int)Texts.FullWindowScreenText).text = Managers.GetString(Define.FULL_WINDOW_SCREEN);
 
         //GetImage((int)Images.BackgroundImage).gameObject.transform.localScale = new Vector3(0, 0, 0);
-        GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveX(1240, 0.2f);
+        float dist = Screen.width * 0.645f;
+
+        GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveX(dist, 0.2f);
         //GetImage((int)Images.BackgroundImage).gameObject.transform.DOScale(2, 0.2f);
 
         //GetObject((int)GameObjects.SoundToggle).gameObject.BindEvent(OnClickSoundToggle);
