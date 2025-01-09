@@ -164,11 +164,15 @@ public class UIManager
     {
         CloseAllPopupUI();
         UI_GameScene.gameObject.SetActive(false);
+        GameObject.Find("UI_PlayerHPBar").GetComponent<Image>().color = new Color(1, 1, 1, 0);
+        GameObject.Find("PlayerHPBarGauge").GetComponent<Image>().color = new Color(1, 1, 1, 0);
     }
 
     public void OpenGameSceneUI()
     {
         UI_GameScene.gameObject.SetActive(true);
+        GameObject.Find("UI_PlayerHPBar").GetComponent<Image>().color = new Color(1, 1, 1, 1);
+        GameObject.Find("PlayerHPBarGauge").GetComponent<Image>().color = new Color(1, 1, 1, 1);
     }
 
     public UI_Toast ShowToast(string msg)

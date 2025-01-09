@@ -159,6 +159,12 @@ public class UI_GameScene : UI_Scene
 
         if (PlayerPrefs.GetInt("ISFIRST", 1) == 1)
             Managers.Directing.Events.CoPlayTutorial_1();
+        else
+        {
+            // 하드코딩
+            Managers.Sound.Play(Define.Sound.Bgm, "Chapter0_BGM");
+            Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND"));
+        }
 
         return true;
     }
