@@ -141,6 +141,11 @@ public class Define
         KingSlime,
     }
 
+    public enum Boss
+    {
+        KingSlime = 5,
+    }
+
     #endregion
 
     #region Map

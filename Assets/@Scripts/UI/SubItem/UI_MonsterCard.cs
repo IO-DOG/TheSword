@@ -295,7 +295,6 @@ public class UI_MonsterCard : UI_BaseCard
         SpriteRenderer sr = Managers.Game.Monster.gameObject.GetOrAddComponent<SpriteRenderer>();
         sr.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         sr.color = Util.DamagedColor();
-
         GameObject go = Instantiate(Managers.Game.Monster.gameObject);
         go.transform.position = Managers.Game.Monster.gameObject.transform.position;
         go.GetComponent<Animator>().Play("Stop");

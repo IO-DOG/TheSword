@@ -193,7 +193,6 @@ public class Events
         {
             _clearKingSlime = true;
             _kingSlime = GameObject.Find("bossMonster0");
-            _kingSlime.GetComponent<MonsterController>().PromoteToBoss(typeof(KingSlimeController));
 
             if (_kingSlime != null)
                 _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = false;
@@ -409,12 +408,12 @@ public class Events
 
     IEnumerator StartKingSlimeDead()
     {
+        Managers.Game.OnDirect = true;
         Transform orbsTransform = GameObject.Find("OrbsSpawnPos").transform;
         yield return new WaitForSeconds(2f);
 
         Managers.UI.CloseGameSceneUI();
         Managers.Directing.PlayLetterBox();
-        Managers.Game.OnDirect = true;
 
         Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
         Vector3 target = new Vector3(0f, 18f, -5f); ;

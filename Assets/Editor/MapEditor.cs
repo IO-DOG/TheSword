@@ -1,4 +1,6 @@
-﻿using Data;
+﻿
+using Codice.CM.SEIDInfo;
+using Data;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -258,28 +260,19 @@ public class MapEditor : EditorWindow
                 {
                     GameObject boss = Instantiate(BossMonster, bossMonsters.transform);
                     boss.transform.localPosition = new Vector3(objectData.Position.X, objectData.Position.Y, objectData.Position.Z);
-                    int tileIndex = objectData.Id;
-                    switch (tileIndex)
-                    {
-                        case 0:
-                            boss.GetComponent<MonsterController>().id = Define.KingSlime;
-                            boss.gameObject.name = "KingSlime";
-                            break;
-                        default:
-                            break;
-                    }
-                    boss.name = $"bossMonster{objectData.Count}";
-                    boss.GetComponent<MonsterController>()._monsterIndex_forActive = objectData.Count;
+                    boss.GetComponent<MonsterController>().id = (int)Define.Boss.KingSlime;
+                    boss.GetComponent<SpriteRenderer>().enabled = false;    
+                    boss.name = $"bossMonster{objectData.Id}";
 
-                    int id = boss.GetComponent<MonsterController>().id;
-                    switch (id)
+                    int bossId = (int)Define.Boss.KingSlime;
+                    switch (bossId)
                     {
-                        case Define.KingSlime:
-                            boss.AddComponent<BlackSlimeController>();
+                        case (int)Define.Boss.KingSlime:
+                            boss.GetComponent<MonsterController>().PromoteToBoss(typeof(KingSlimeController));
                             //boss.transform.localScale = new Vector3(1.7f, 1.7f, 1.7f);
                             boss.transform.localPosition += new Vector3(0, 1.7f, -1.84f);
                             boss.GetOrAddComponent<BoxCollider>().center = new Vector3(0, -0.4f, 0);
-                            boss.GetOrAddComponent<BoxCollider>().size = new Vector3(1.5f, 2f, 0.32f);
+                            boss.GetOrAddComponent<BoxCollider>().size = new Vector3(1.5f, 3f, 0.32f);
                             break;
                         default:
                             break;

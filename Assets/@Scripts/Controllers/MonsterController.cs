@@ -63,7 +63,7 @@ public class MonsterController : MonoBehaviour
         var bossController = gameObject.AddComponent(bossType) as BossMonsterController;
         bossController.id = id;
 
-        Destroy(this);
+        DestroyImmediate(this);
     }
 
     protected virtual void Init()
