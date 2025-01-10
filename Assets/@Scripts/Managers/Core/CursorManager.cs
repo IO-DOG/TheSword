@@ -45,6 +45,25 @@ public class CursorManager : MonoBehaviour
     Texture2D _searchCursor4 = null;
     Texture2D _searchCursor5 = null;
 
+    Texture2D _normalCursorSmall0 = null;
+    Texture2D _normalCursorSmall1 = null;
+    Texture2D _normalCursorSmall2 = null;
+    Texture2D _normalCursorSmall3 = null;
+    Texture2D _normalCursorSmall4 = null;
+    Texture2D _normalCursorSmall5 = null;
+    Texture2D _handleCursorSmall0 = null;
+    Texture2D _handleCursorSmall1 = null;
+    Texture2D _handleCursorSmall2 = null;
+    Texture2D _handleCursorSmall3 = null;
+    Texture2D _handleCursorSmall4 = null;
+    Texture2D _handleCursorSmall5 = null;
+    Texture2D _searchCursorSmall0 = null;
+    Texture2D _searchCursorSmall1 = null;
+    Texture2D _searchCursorSmall2 = null;
+    Texture2D _searchCursorSmall3 = null;
+    Texture2D _searchCursorSmall4 = null;
+    Texture2D _searchCursorSmall5 = null;
+
     public void Init()
     {
         _init = true;
@@ -67,6 +86,25 @@ public class CursorManager : MonoBehaviour
         _searchCursor3 = Resources.Load<Texture2D>("Cursor/MouseCursor_MagnifierGlass_3");
         _searchCursor4 = Resources.Load<Texture2D>("Cursor/MouseCursor_MagnifierGlass_4");
         _searchCursor5 = Resources.Load<Texture2D>("Cursor/MouseCursor_MagnifierGlass_5");
+
+        _normalCursorSmall0 = Resources.Load<Texture2D>("Cursor/MouseCursor_Normal_Small_0");
+        _normalCursorSmall1 = Resources.Load<Texture2D>("Cursor/MouseCursor_Normal_Small_1");
+        _normalCursorSmall2 = Resources.Load<Texture2D>("Cursor/MouseCursor_Normal_Small_2");
+        _normalCursorSmall3 = Resources.Load<Texture2D>("Cursor/MouseCursor_Normal_Small_3");
+        _normalCursorSmall4 = Resources.Load<Texture2D>("Cursor/MouseCursor_Normal_Small_4");
+        _normalCursorSmall5 = Resources.Load<Texture2D>("Cursor/MouseCursor_Normal_Small_5");
+        _handleCursorSmall0 = Resources.Load<Texture2D>("Cursor/MouseCursor_Handle_Small_0");
+        _handleCursorSmall1 = Resources.Load<Texture2D>("Cursor/MouseCursor_Handle_Small_1");
+        _handleCursorSmall2 = Resources.Load<Texture2D>("Cursor/MouseCursor_Handle_Small_2");
+        _handleCursorSmall3 = Resources.Load<Texture2D>("Cursor/MouseCursor_Handle_Small_3");
+        _handleCursorSmall4 = Resources.Load<Texture2D>("Cursor/MouseCursor_Handle_Small_4");
+        _handleCursorSmall5 = Resources.Load<Texture2D>("Cursor/MouseCursor_Handle_Small_5");
+        _searchCursorSmall0 = Resources.Load<Texture2D>("Cursor/MouseCursor_MagnifierGlass_Small_0");
+        _searchCursorSmall1 = Resources.Load<Texture2D>("Cursor/MouseCursor_MagnifierGlass_Small_1");
+        _searchCursorSmall2 = Resources.Load<Texture2D>("Cursor/MouseCursor_MagnifierGlass_Small_2");
+        _searchCursorSmall3 = Resources.Load<Texture2D>("Cursor/MouseCursor_MagnifierGlass_Small_3");
+        _searchCursorSmall4 = Resources.Load<Texture2D>("Cursor/MouseCursor_MagnifierGlass_Small_4");
+        _searchCursorSmall5 = Resources.Load<Texture2D>("Cursor/MouseCursor_MagnifierGlass_Small_5");
     }
 
     void Update()
@@ -134,73 +172,147 @@ public class CursorManager : MonoBehaviour
         }
         //Debug.Log(_frameTimer);
 
-        switch (_cursor)
+        if (Managers.Game.ScreenType == Define.ScreenType.Window)
         {
-            case CursorType.Normal:
-                //_frameTimer = 0;
-                if (_frameTimer < 3.500f)
-                    Cursor.SetCursor(_normalCursor0, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 3.550f)
-                    Cursor.SetCursor(_normalCursor1, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 3.600f)
-                    Cursor.SetCursor(_normalCursor2, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 4.300f)
-                    Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 4.350f)
-                    Cursor.SetCursor(_normalCursor4, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 4.400f)
-                    Cursor.SetCursor(_normalCursor5, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else
-                    _frameTimer = 0;
-                break;
-            case CursorType.Search:
-                if (_frameTimer < 3.500f)
-                    Cursor.SetCursor(_searchCursor0, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 3.550f)
-                    Cursor.SetCursor(_searchCursor1, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 3.600f)
-                    Cursor.SetCursor(_searchCursor2, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 3.650f)
-                    Cursor.SetCursor(_searchCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 3.700f)
-                    Cursor.SetCursor(_searchCursor4, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 3.750f)
-                    Cursor.SetCursor(_searchCursor5, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else
-                    _frameTimer = 0;
-                break;
-            case CursorType.Grap:
-                if (_frameTimer < 3.500f)
-                    Cursor.SetCursor(_handleCursor0, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 3.550f)
-                    Cursor.SetCursor(_handleCursor1, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 3.600f)
-                    Cursor.SetCursor(_handleCursor2, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 4.300f)
-                    Cursor.SetCursor(_handleCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 4.350f)
-                    Cursor.SetCursor(_handleCursor4, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 4.400f)
-                    Cursor.SetCursor(_handleCursor5, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else
-                    _frameTimer = 0;
-                break;
-            case CursorType.Click:
-                if (_frameTimer < 0.005f)
-                    Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 0.105f)
-                    Cursor.SetCursor(_normalCursor4, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else if (_frameTimer < 0.150f)
-                    Cursor.SetCursor(_normalCursor5, new Vector2(0, 0), CursorMode.ForceSoftware);
-                else
-                    _cursor = CursorType.Normal;
-                break;
-            case CursorType.Press:
-                Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
-                break;
-            default:
-                break;
+            switch (_cursor)
+            {
+                case CursorType.Normal:
+                    //_frameTimer = 0;
+                    if (_frameTimer < 3.500f)
+                        Cursor.SetCursor(_normalCursorSmall0, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.550f)
+                        Cursor.SetCursor(_normalCursorSmall1, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.600f)
+                        Cursor.SetCursor(_normalCursorSmall2, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 4.300f)
+                        Cursor.SetCursor(_normalCursorSmall3, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 4.350f)
+                        Cursor.SetCursor(_normalCursorSmall4, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 4.400f)
+                        Cursor.SetCursor(_normalCursorSmall5, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else
+                        _frameTimer = 0;
+                    break;
+                case CursorType.Search:
+                    if (_frameTimer < 3.500f)
+                        Cursor.SetCursor(_searchCursorSmall0, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.550f)
+                        Cursor.SetCursor(_searchCursorSmall1, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.600f)
+                        Cursor.SetCursor(_searchCursorSmall2, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.650f)
+                        Cursor.SetCursor(_searchCursorSmall3, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.700f)
+                        Cursor.SetCursor(_searchCursorSmall4, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.750f)
+                        Cursor.SetCursor(_searchCursorSmall5, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else
+                        _frameTimer = 0;
+                    break;
+                case CursorType.Grap:
+                    if (_frameTimer < 3.500f)
+                        Cursor.SetCursor(_handleCursorSmall0, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.550f)
+                        Cursor.SetCursor(_handleCursorSmall1, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.600f)
+                        Cursor.SetCursor(_handleCursorSmall2, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 4.300f)
+                        Cursor.SetCursor(_handleCursorSmall3, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 4.350f)
+                        Cursor.SetCursor(_handleCursorSmall4, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 4.400f)
+                        Cursor.SetCursor(_handleCursorSmall5, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else
+                        _frameTimer = 0;
+                    break;
+                case CursorType.Click:
+                    if (_frameTimer < 0.005f)
+                        Cursor.SetCursor(_normalCursorSmall3, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 0.105f)
+                        Cursor.SetCursor(_normalCursorSmall4, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 0.150f)
+                        Cursor.SetCursor(_normalCursorSmall5, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else
+                        _cursor = CursorType.Normal;
+                    break;
+                case CursorType.Press:
+                    Cursor.SetCursor(_normalCursorSmall3, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    break;
+                default:
+                    break;
+            }
         }
+        else
+        {
+            switch (_cursor)
+            {
+                case CursorType.Normal:
+                    //_frameTimer = 0;
+                    if (_frameTimer < 3.500f)
+                        Cursor.SetCursor(_normalCursor0, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.550f)
+                        Cursor.SetCursor(_normalCursor1, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.600f)
+                        Cursor.SetCursor(_normalCursor2, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 4.300f)
+                        Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 4.350f)
+                        Cursor.SetCursor(_normalCursor4, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 4.400f)
+                        Cursor.SetCursor(_normalCursor5, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else
+                        _frameTimer = 0;
+                    break;
+                case CursorType.Search:
+                    if (_frameTimer < 3.500f)
+                        Cursor.SetCursor(_searchCursor0, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.550f)
+                        Cursor.SetCursor(_searchCursor1, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.600f)
+                        Cursor.SetCursor(_searchCursor2, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.650f)
+                        Cursor.SetCursor(_searchCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.700f)
+                        Cursor.SetCursor(_searchCursor4, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.750f)
+                        Cursor.SetCursor(_searchCursor5, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else
+                        _frameTimer = 0;
+                    break;
+                case CursorType.Grap:
+                    if (_frameTimer < 3.500f)
+                        Cursor.SetCursor(_handleCursor0, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.550f)
+                        Cursor.SetCursor(_handleCursor1, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 3.600f)
+                        Cursor.SetCursor(_handleCursor2, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 4.300f)
+                        Cursor.SetCursor(_handleCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 4.350f)
+                        Cursor.SetCursor(_handleCursor4, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 4.400f)
+                        Cursor.SetCursor(_handleCursor5, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else
+                        _frameTimer = 0;
+                    break;
+                case CursorType.Click:
+                    if (_frameTimer < 0.005f)
+                        Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 0.105f)
+                        Cursor.SetCursor(_normalCursor4, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else if (_frameTimer < 0.150f)
+                        Cursor.SetCursor(_normalCursor5, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    else
+                        _cursor = CursorType.Normal;
+                    break;
+                case CursorType.Press:
+                    Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    break;
+                default:
+                    break;
+            }
+        }
+        
     }
 
 }

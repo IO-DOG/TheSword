@@ -136,7 +136,7 @@ public class UI_MenuPopup : UI_Popup
         }, null, Define.UIEvent.PointerExit);
     }
 
-    void OnClickContinueGameButton()
+    public void OnClickContinueGameButton()
     {
         {
             GameObject go = GameObject.Find("UI_SelectLanguagePopup");
@@ -172,7 +172,8 @@ public class UI_MenuPopup : UI_Popup
         }
 
         ButtonsMoveToLeft();
-        Managers.UI.ShowPopupUI<UI_SettingPopup>();
+        UI_SettingPopup ui_SettingPopup = Managers.UI.ShowPopupUI<UI_SettingPopup>();
+        ui_SettingPopup.menuPopup = this;
     }
 
     void OnClickSelectLanguageButton()
