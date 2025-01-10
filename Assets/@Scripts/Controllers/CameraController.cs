@@ -206,4 +206,49 @@ public class CameraController : MonoBehaviour
         transposer.m_FollowOffset = defalutFllowOffset;
         #endregion
     }
+
+    public void SetVCamOffset(Transform transform, float time)
+    {
+        if (transform == null)
+        {
+            Debug.Log("SetVCamOffset - transform is null!");
+            return;
+        }
+
+        Vector3 diff = transform.position - Managers.Game.Player.transform.position;
+        Vector3 offset = new Vector3(diff.x, Define.DEFALUT_CAMERA_OFFSET.y, -diff.z);
+        StartCoVirtualCameraMove(offset, time);
+    }
+
+    Coroutine CoVirtualCameraMove;
+    void StartCoVirtualCameraMove(Vector3 offset, float time)
+    {
+        if (CoVirtualCameraMove != null)
+            CoroutineManager.StopCoroutine(CoVirtualCameraMove);
+        CoVirtualCameraMove = CoroutineManager.StartCoroutine(VirtualCameraMove(offset, time));
+    }
+
+    private IEnumerator VirtualCameraMove(Vector3 offset, float time)
+    {
+        float elapsedTime = 0f;
+
+        Vector3 initOffset = _transposer.m_FollowOffset;
+
+        while (elapsedTime < time)
+        {
+            float t = Mathf.Clamp01(elapsedTime / time);
+            _transposer.m_FollowOffset = Vector3.Lerp(initOffset, offset, t);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        _transposer.m_FollowOffset = offset;
+    }
+
+    //float GetConfinerMinZ()
+    //{
+    //    var bounds = _vCam.GetComponent<CinemachineConfiner>().m_BoundingVolume.bounds;
+    //    Debug.Log("minZ: " + (bounds.min.z - _transposer.m_FollowOffset.z));
+    //    return bounds.min.z - _transposer.m_FollowOffset.z;
+    //}
 }
