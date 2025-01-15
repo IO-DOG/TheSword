@@ -157,7 +157,11 @@ public class UI_GameScene : UI_Scene
 
 
         if (PlayerPrefs.GetInt("ISFIRST", 1) == 1)
+        {
+            Managers.Game.Player.SetPlayerPosition(Managers.Game.SpawnPoints[0].position);
+
             Managers.Directing.Events.CoPlayTutorial_1();
+        }
         else
         {
             Managers.UI.ShowStageNamePopup(1f);

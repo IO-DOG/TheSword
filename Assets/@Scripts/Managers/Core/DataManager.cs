@@ -34,7 +34,7 @@ public class DataManager
 
     public void Init()
     {
-        AssetDatabase.Refresh();
+        //AssetDatabase.Refresh();
 
         PlayerDic = LoadJson<Data.PlayerDataLoader, int, Data.PlayerData>("PlayerData").MakeDict();
         MonsterDic = LoadJson<Data.MonsterDataLoader, int, Data.MonsterData>("MonsterData").MakeDict();
@@ -193,7 +193,7 @@ public class DataManager
     public void ResetActiveDic()
     {
         MapDataLoader loader = new MapDataLoader();
-        DirectoryInfo di = new DirectoryInfo($"{Application.dataPath}/@Resources/Data/Excel/");
+        DirectoryInfo di = new DirectoryInfo($"{Application.streamingAssetsPath}/Data/Excel/");
 
         #region Active Dic
         Dictionary<int, bool> monsterActiveDic = new Dictionary<int, bool>();
@@ -223,7 +223,7 @@ public class DataManager
             if (file.Name.Contains("Dungeon") && !file.Name.Contains("meta"))
             {
                 List<Data.ObjectData> tiles = new List<Data.ObjectData>();
-                string[] lines = File.ReadAllText($"{Application.dataPath}/@Resources/Data/Excel/{file.Name}").Split("\n");
+                string[] lines = File.ReadAllText($"{Application.streamingAssetsPath}/Data/Excel/{file.Name}").Split("\n");
                 float zPos = 0;
 
                 for (int y = 0; y < lines.Length; y++)
@@ -473,13 +473,13 @@ public class DataManager
         string leverActiveDicJsonStr = JsonConvert.SerializeObject(leverActiveDic, Formatting.Indented);
         File.WriteAllText($"{Application.persistentDataPath}/LeverActiveData.json", leverActiveDicJsonStr);
 
-        AssetDatabase.Refresh();
+        //AssetDatabase.Refresh();
         #endregion
 
         string mapDicJsonStr = JsonConvert.SerializeObject(loader);
         File.WriteAllText($"{Application.persistentDataPath}/MapData.json", mapDicJsonStr);
-        File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/MapData.json", mapDicJsonStr);
-        AssetDatabase.Refresh();
+        File.WriteAllText($"{Application.streamingAssetsPath}/Data/JsonData/MapData.json", mapDicJsonStr);
+        //AssetDatabase.Refresh();
     }
     #endregion
 }
