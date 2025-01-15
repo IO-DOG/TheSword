@@ -510,7 +510,7 @@ public class Events
         // Set Player Dir
         Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.1f);
         Managers.UI.ShowStageNamePopup(Define.STAGE_NAME_DURATION);
         Managers.Game.OnDirect = true;
 
@@ -522,7 +522,7 @@ public class Events
         yield return new WaitForSeconds(0.5f);
         Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
 
-        yield return new WaitForSeconds(Define.STAGE_NAME_DURATION + 1f);
+        yield return new WaitForSeconds(Define.STAGE_NAME_DURATION + 1.5f);
 
         Managers.Game.OnDirect = false;
 
