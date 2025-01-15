@@ -73,25 +73,25 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.UpArrow))
+        if (Input.GetKeyDown(KeyCode.W))
         {
             _moveDir = MoveDir.Up;
         }
-        else if (Input.GetKeyDown(KeyCode.DownArrow))
+        else if (Input.GetKeyDown(KeyCode.S))
         {
             _moveDir = MoveDir.Down;
         }
-        else if (Input.GetKeyDown(KeyCode.LeftArrow))
+        else if (Input.GetKeyDown(KeyCode.A))
         {
             _moveDir = MoveDir.Left;
         }
-        else if (Input.GetKeyDown(KeyCode.RightArrow))
+        else if (Input.GetKeyDown(KeyCode.D))
         {
             _moveDir = MoveDir.Right;
         }
 
-        if (_moveDir != MoveDir.None && (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.DownArrow) ||
-            Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow)))
+        if (_moveDir != MoveDir.None && (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) ||
+            Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
         {
             Moving(_moveDir, false);
         }
