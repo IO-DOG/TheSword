@@ -82,7 +82,7 @@ public class Define
         Lever = 14,
         InteractObjects = 15,
         BossDoor = 16,
-        SlimeWater = 17,
+        BossEventTrigger = 17,
     }
 
     public enum MoveDir

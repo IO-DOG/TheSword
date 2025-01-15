@@ -4,6 +4,7 @@ using UnityEngine;
 using DG.Tweening;
 using static Define;
 using Unity.Burst.CompilerServices;
+using UnityEditor.Experimental.GraphView;
 
 public class PlayerController : MonoBehaviour
 {
@@ -92,7 +93,7 @@ public class PlayerController : MonoBehaviour
         if (_moveDir != MoveDir.None && (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.DownArrow) ||
             Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow)))
         {
-            Moving(_moveDir);
+            Moving(_moveDir, false);
         }
     }
 
@@ -306,9 +307,9 @@ public class PlayerController : MonoBehaviour
     }
 
     #region Moving
-    public void Moving(Define.MoveDir moveDir)
+    public void Moving(Define.MoveDir moveDir, bool isDirecting)
     {
-        if (_isMoving)
+        if (_isMoving && !isDirecting)
         {
             return;
         }
@@ -495,14 +496,31 @@ public class PlayerController : MonoBehaviour
             else if (hit.collider.gameObject.layer == (int)Define.Layer.InteractObjects)
             {
                 somethingExist = true;
-                Vector3 playerDir = (transform.position - hit.collider.transform.position).normalized;
-                float dotProduct = Vector3.Dot(Vector3.back, playerDir);
-                if (dotProduct > 0.7f)
+                if (GetTouchDirection(hit.collider.transform, Vector3.back) != TouchDir.None)
                 {
                     InteractObjectController interactObejct = hit.collider.gameObject.GetComponent<InteractObjectController>();
                     Managers.Game.CurInteractObject = hit.collider.gameObject;
                     interactObejct.Interact();
                 }
+            }
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.BossEventTrigger)
+            {
+                if (GetTouchDirection(hit.collider.transform, Vector3.back) == TouchDir.Right)
+                {
+                    Debug.Log("left");
+                    Moving(MoveDir.Left, true);
+                    somethingExist=true;
+                    Managers.Resource.Destroy(hit.collider.gameObject);
+
+                }
+                else if (GetTouchDirection(hit.collider.transform, Vector3.back) == TouchDir.Left)
+                {
+                    Debug.Log("Right");
+                    Moving(MoveDir.Right, true);
+                    somethingExist = true;
+                    Managers.Resource.Destroy(hit.collider.gameObject);
+                }
+                Managers.Directing.BossOnAppearAction?.Invoke();
             }
         }
 
@@ -536,5 +554,46 @@ public class PlayerController : MonoBehaviour
         seq.Append(gameObject.transform.DOMove(_cellPos, 0.2f));
 
         return seq;
+    }
+
+    public enum TouchDir
+    {
+        None,
+        Right,
+        Left,
+        FaceToFace,
+    }
+
+    public TouchDir GetTouchDirection(Transform otherObject, Vector3 otherObjectDir)
+    {
+        // 플레이어와 otherObject 간의 방향 벡터 계산
+        Vector3 playerDir = (transform.position - otherObject.position).normalized;
+
+        // otherObject의 Local Space X축 (Right)
+        Vector3 rightDir = otherObject.right;
+
+        // Y축 평면으로 투영
+        Vector3 flattenedPlayerDir = new Vector3(playerDir.x, 0, playerDir.z).normalized;
+        Vector3 flattenedRightDir = new Vector3(rightDir.x, 0, rightDir.z).normalized;
+
+        // 정면 충돌 여부 확인
+        float dotProduct = Vector3.Dot(otherObjectDir, flattenedPlayerDir);
+        if (dotProduct > 0.98f) // 정면 기준 충돌
+        {
+            return TouchDir.FaceToFace;
+        }
+        else if(dotProduct > 0.7f)
+        {
+            if (flattenedPlayerDir.x > 0) // 오른쪽
+            {
+                return TouchDir.Right;
+            }
+            else if (flattenedPlayerDir.x < 0) // 왼쪽
+            {
+                return TouchDir.Left;
+            }
+        }
+
+        return TouchDir.None; // 정면 충돌 아님
     }
 }

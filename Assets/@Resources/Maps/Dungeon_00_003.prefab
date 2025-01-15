@@ -17976,7 +17976,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2936227416986365040}
+  - {fileID: 3453916913415311332}
   - {fileID: 6260849178346173168}
   - {fileID: 4474812603373341017}
   - {fileID: 3550739228852620409}
@@ -93140,72 +93140,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.32, y: 0.32, z: 0.32}
   m_Center: {x: 0, y: 0.32, z: 0}
---- !u!1 &8234321746272803467
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2936227416986365040}
-  - component: {fileID: 298209141577958058}
-  - component: {fileID: 1904007325543345671}
-  m_Layer: 0
-  m_Name: BoseZone
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2936227416986365040
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8234321746272803467}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4.1638002, y: 0.484, z: -6.455}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 7454714032877110179}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &298209141577958058
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8234321746272803467}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1904007325543345671
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8234321746272803467}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 10637844edb482c4dbf4a54b85da16e7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &8236044056605201328
 GameObject:
   m_ObjectHideFlags: 0
@@ -109174,4 +109108,66 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 304340732278150663, guid: 2156366f43968b0459feb881185ae9c8, type: 3}
   m_PrefabInstance: {fileID: 1779745648079816784}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &8565293931932056268
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7454714032877110179}
+    m_Modifications:
+    - target: {fileID: 272869193817932755, guid: 626ac5b967c1dce418a19c3262a0b322, type: 3}
+      propertyPath: m_Name
+      value: BoseEventTrigger
+      objectReference: {fileID: 0}
+    - target: {fileID: 6426863516926031144, guid: 626ac5b967c1dce418a19c3262a0b322, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 4.1638002
+      objectReference: {fileID: 0}
+    - target: {fileID: 6426863516926031144, guid: 626ac5b967c1dce418a19c3262a0b322, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.484
+      objectReference: {fileID: 0}
+    - target: {fileID: 6426863516926031144, guid: 626ac5b967c1dce418a19c3262a0b322, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -6.455
+      objectReference: {fileID: 0}
+    - target: {fileID: 6426863516926031144, guid: 626ac5b967c1dce418a19c3262a0b322, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6426863516926031144, guid: 626ac5b967c1dce418a19c3262a0b322, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6426863516926031144, guid: 626ac5b967c1dce418a19c3262a0b322, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6426863516926031144, guid: 626ac5b967c1dce418a19c3262a0b322, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6426863516926031144, guid: 626ac5b967c1dce418a19c3262a0b322, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6426863516926031144, guid: 626ac5b967c1dce418a19c3262a0b322, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6426863516926031144, guid: 626ac5b967c1dce418a19c3262a0b322, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 626ac5b967c1dce418a19c3262a0b322, type: 3}
+--- !u!4 &3453916913415311332 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6426863516926031144, guid: 626ac5b967c1dce418a19c3262a0b322, type: 3}
+  m_PrefabInstance: {fileID: 8565293931932056268}
   m_PrefabAsset: {fileID: 0}

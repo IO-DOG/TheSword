@@ -14,7 +14,7 @@ public class SlimeBlackHole : MonoBehaviour
 
     }
 
-    int _layer = (1 << (int)Define.Layer.SlimeWater);
+    //int _layer = (1 << (int)Define.Layer.SlimeWater);
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -26,15 +26,15 @@ public class SlimeBlackHole : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.gameObject.layer != _layer)
-            return;
+        //if (collision.gameObject.layer != _layer)
+        //    return;
 
-        // 블랙홀
-        Vector3 dir = collision.gameObject.transform.position - gameObject.transform.position;
-        Vector3.Normalize(dir);
-        Rigidbody rb = collision.gameObject.GetOrAddComponent<Rigidbody>();
-        rb.AddForce(dir * 70, ForceMode.Force);
-        return;
+        //// 블랙홀
+        //Vector3 dir = collision.gameObject.transform.position - gameObject.transform.position;
+        //Vector3.Normalize(dir);
+        //Rigidbody rb = collision.gameObject.GetOrAddComponent<Rigidbody>();
+        //rb.AddForce(dir * 70, ForceMode.Force);
+        //return;
     }
 
     private void OnTriggerExit2D(Collider2D collision)

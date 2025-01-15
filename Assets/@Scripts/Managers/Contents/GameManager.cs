@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Unity.Burst.CompilerServices;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor;

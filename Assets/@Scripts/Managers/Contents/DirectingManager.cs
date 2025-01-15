@@ -88,11 +88,11 @@ public class Events
         {
             Managers.Game.CurInteractObject.layer = (int)Define.Layer.Default;
             float originalSpeed = Managers.Game.PlayerData.MoveSpeed;
-            Managers.Game.Player.Moving(Define.MoveDir.Up);
+            Managers.Game.Player.Moving(Define.MoveDir.Up, true);
             yield return new WaitForSeconds(0.2f);
             Managers.Game.Player.SetState(Define.PlayerState.DrawSword);
             yield return new WaitForSeconds(1f);
-            Managers.Game.Player.Moving(Define.MoveDir.Back);
+            Managers.Game.Player.Moving(Define.MoveDir.Back, true);
             yield return new WaitForSeconds(0.2f);
             Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
             yield return new WaitForSeconds(1f);
@@ -198,38 +198,30 @@ public class Events
                 _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = false;
         }
 
-        // 주인공을 길 중간 위치로 이동
-        // 주인공이 정면을 바라보도록
-        // 카메라 워킹 및 UI사라짐
-        // 카메라 흔들림 등의 연출 효과
-        // 연출이 끝나면 UI 활성화
-        GameObject gameScene = Managers.Game.GameScene.gameObject;
-        if (gameScene != null)
-        {
-            Managers.UI.CloseGameSceneUI();
-            Managers.Directing.PlayLetterBox();
-
-            Managers.Game.Player.SetIdleState(Managers.Game.Player._moveDir);
-            Managers.Game.OnStaticResolution = true;
-            Managers.Game.OnDirect = true;
-
-            Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
-            Vector3 target = new Vector3(0f, 20f, -5f); ;
-            float moveTime = 2f;
-            Managers.Game.MainCamera.GetComponentInChildren<CameraController>().StartCoVirtualCameraMove(original, target, moveTime);
-
-            GameObject parent = GameObject.Find("Dungeon_00_003");
-            GameObject scoutSlime = Managers.Resource.Instantiate("BossScene_C0_000", parent.transform);
-            Vector3 pos = new Vector3(3.845f, 1.47f, -1.408f);
-
-            scoutSlime.transform.localPosition = pos;
-
-            CoroutineManager.StartCoroutine(CoKingSlimeAction());
-        }
+        CoroutineManager.StartCoroutine(CoKingSlimeAction());
     }
 
     IEnumerator CoKingSlimeAction()
     {
+        Managers.Game.OnDirect = true;
+        yield return new WaitForSeconds(0.5f);
+        Managers.Game.OnStaticResolution = true;
+        Managers.UI.CloseGameSceneUI();
+        Managers.Directing.PlayLetterBox();
+
+        Managers.Game.Player.SetIdleState(Define.MoveDir.Up);
+
+        Vector3 original0 = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
+        Vector3 target0 = new Vector3(0f, 20f, -5f); ;
+        float moveTime0 = 2f;
+        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().StartCoVirtualCameraMove(original0, target0, moveTime0);
+
+        GameObject parent0 = GameObject.Find("Dungeon_00_003");
+        GameObject scoutSlime0 = Managers.Resource.Instantiate("BossScene_C0_000", parent0.transform);
+        Vector3 pos0 = new Vector3(3.845f, 1.47f, -1.408f);
+
+        scoutSlime0.transform.localPosition = pos0;
+
         yield return new WaitForSeconds(2f);
         GameObject parent = GameObject.Find("Dungeon_00_003");
         GameObject midlePos = GameObject.Find("SpawnKingSlime");
@@ -525,7 +517,7 @@ public class Events
         // Player Movement
         float originalSpeed = Managers.Game.PlayerData.MoveSpeed;
         Managers.Game.Player.Speed = 1f;
-        Managers.Game.Player.Moving(Define.MoveDir.Up);
+        Managers.Game.Player.Moving(Define.MoveDir.Up, true);
 
         yield return new WaitForSeconds(0.5f);
         Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
