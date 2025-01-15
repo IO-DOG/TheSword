@@ -256,7 +256,8 @@ public class UIManager
             StageNamePopup.SetStageName();
         }
 
-        CoHideStageNamePopup = CoroutineManager.StartCoroutine(StageNamePopup.HideStageNamePopup(duration));
+        if(StageNamePopup != null)
+            CoHideStageNamePopup = CoroutineManager.StartCoroutine(StageNamePopup.HideStageNamePopup(duration));
     }
 
 

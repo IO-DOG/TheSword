@@ -52,17 +52,25 @@ public class UI_StageNamePopup : UI_Popup
         GetImage((int)Images.StageNameEnd).DOFade(1f, 1f);
         yield return new WaitForSeconds(duration);
 
-        gameObject.GetComponentInChildren<TypewriterByCharacter>().StartDisappearingText();
-        GetImage((int)Images.StageNameStart).DOFade(0f, 1f);
-        GetImage((int)Images.StageNameLine).DOFade(0f, 1f);
-        GetImage((int)Images.StageNameEnd).DOFade(0f, 1f);
-
-        yield return new WaitForSeconds(duration);
-
-        if (Managers.UI.StageNamePopup != null)
+        if (this == null && gameObject == null)
         {
-            Managers.UI.ClosePopupUI(Managers.UI.StageNamePopup);
-            Managers.UI.StageNamePopup = null;
+
         }
+        else
+        {
+            gameObject.GetComponentInChildren<TypewriterByCharacter>().StartDisappearingText();
+            GetImage((int)Images.StageNameStart).DOFade(0f, 1f);
+            GetImage((int)Images.StageNameLine).DOFade(0f, 1f);
+            GetImage((int)Images.StageNameEnd).DOFade(0f, 1f);
+
+            yield return new WaitForSeconds(duration);
+
+            if (Managers.UI.StageNamePopup != null)
+            {
+                Managers.UI.ClosePopupUI(Managers.UI.StageNamePopup);
+                Managers.UI.StageNamePopup = null;
+            }
+        }
+        
     }
 }

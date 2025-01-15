@@ -242,7 +242,7 @@ public class Events
 
         // camera slow down
         Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
-        Vector3 target = new Vector3(0f, 14.5f, -5.7f); ;
+        Vector3 target = new Vector3(0f, 14.5f, -5f); ;
         float moveTime = 3f;
         Managers.Game.MainCamera.GetComponentInChildren<CameraController>().StartCoVirtualCameraMove(original, target, moveTime);
         yield return new WaitForSeconds(0.5f);
@@ -496,7 +496,7 @@ public class Events
         CoroutineManager.StartCoroutine(PlayTutorial_1());
         Managers.Sound.Play(Define.Sound.Bgm, "Chapter0_BGM");
         Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND"));
-
+        Managers.UI.CloseGameSceneUI();
         GameObject.Find("UI_PlayerHPBar").GetComponent<Image>().color = new Color(1, 1, 1, 0);
         GameObject.Find("PlayerHPBarGauge").GetComponent<Image>().color = new Color(1, 1, 1, 0);
         Managers.Game.Player._isEquiptWeapon = false;
@@ -511,7 +511,7 @@ public class Events
         Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
 
         yield return new WaitForSeconds(0.5f);
-
+        Managers.UI.ShowStageNamePopup(Define.STAGE_NAME_DURATION);
         Managers.Game.OnDirect = true;
 
         // Player Movement
@@ -522,11 +522,10 @@ public class Events
         yield return new WaitForSeconds(0.5f);
         Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
 
-        yield return new WaitForSeconds(Define.STAGE_NAME_DURATION * 2.2f);
+        yield return new WaitForSeconds(Define.STAGE_NAME_DURATION + 1f);
 
         Managers.Game.OnDirect = false;
 
-        Managers.UI.CloseGameSceneUI();
         UI_ConversationPopup conversation = Managers.UI.ShowPopupUI<UI_ConversationPopup>();
 
         // Reset Player Stat
@@ -554,6 +553,7 @@ public class Events
         Managers.Game.Player._weapon.SetActive(true);
 
         PlayerPrefs.SetInt("ISFIRST", 0);
+        Managers.UI.OpenGameSceneUI();
         //Managers.Game.SaveGame();
     }
     #endregion
