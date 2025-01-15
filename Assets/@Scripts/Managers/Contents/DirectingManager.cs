@@ -308,6 +308,7 @@ public class Events
         GameObject.Find("Effects_00")?.SetActive(false);
         CoroutineManager.StartCoroutine(AfterMeetKingSlime());
     }
+
     public IEnumerator CoMoveToDest(GameObject original, Vector3 target, float time)
     {
         yield return null;

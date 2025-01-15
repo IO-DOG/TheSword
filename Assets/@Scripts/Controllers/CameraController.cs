@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering.Universal;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.UIElements;
 
 public class CameraController : MonoBehaviour
 { 
@@ -29,8 +30,8 @@ public class CameraController : MonoBehaviour
     float _scrollSpeed = 10f;
 
     GameObject confinerCollider;
-    CinemachineTransposer _transposer;
-    CinemachineVirtualCamera _vCam;
+    public static CinemachineTransposer _transposer;
+    public static CinemachineVirtualCamera _vCam;
     CinemachineConfiner _confiner;
     BoxCollider _collider;
 
@@ -159,52 +160,46 @@ public class CameraController : MonoBehaviour
         }
     }
 
-    public static IEnumerator CoShakeCamera(float time, float force = 5f)
+    public static IEnumerator CoShakeCamera(float time, float force = 1f)
     {
-        var cinmemachineCamera = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>();
-        var transposer = cinmemachineCamera.GetCinemachineComponent<CinemachineTransposer>();
-        var defalutFllowOffset = transposer.m_FollowOffset;
-        var noise = cinmemachineCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
-
-        #region Shake Camera
-        noise.m_NoiseProfile = Managers.Resource.Load<NoiseSettings>("6D Shake");
-        noise.enabled = true;
-        noise.m_AmplitudeGain = force;
-
-        yield return new WaitForSeconds(time);
-        #endregion
-
-        #region To Slow Stop Shake
-        float duration = 0f; // 감쇄 시간
-        float elapsed = 0f;
-        float initialAmplitude = noise.m_AmplitudeGain;
-
-        while (elapsed < duration)
+        float noiseOffsetX = Random.Range(0f, 80f); // X축 노이즈 시작점
+        float noiseOffsetY = Random.Range(0f, 80f); // Y축 노이즈 시작점
+        yield return new WaitForSeconds(0.1f);
+        Vector3 originalOffset = _transposer.m_FollowOffset;
+        float elapsedTime = 0f;
+        while (elapsedTime < time)
         {
-            elapsed += Time.deltaTime;
-            noise.m_AmplitudeGain = Mathf.Lerp(initialAmplitude, 0f, elapsed / duration);
+            elapsedTime += Time.deltaTime;
+            Vector3 shakeOffset = new Vector3(
+             (Mathf.PerlinNoise(noiseOffsetX, elapsedTime * 8f) - 0.5f) * force * 2f,
+             0,//(Mathf.PerlinNoise(noiseOffsetY, elapsedTime * 6.5f) - 0.5f) * force * 2f,
+             (Mathf.PerlinNoise(noiseOffsetY, elapsedTime * 8f) - 0.5f) * force * 2f
+         );
+            _transposer.m_FollowOffset = originalOffset + shakeOffset;
             yield return null;
         }
 
-        noise.m_AmplitudeGain = 0f;
-        noise.enabled = false;
-        #endregion
-
-        #region To Set Slowly Default Camera Offset
-        // set camera default offset
-        float offsetElapsed = 0f;
-        Vector3 curFllowOffset = transposer.m_FollowOffset;
-
-        while (offsetElapsed < duration)
+        Vector3 curOffset = _transposer.m_FollowOffset;
+        Debug.Log(curOffset);
+        float resetOffsetTime = 0f;
+        float resetDuration = 0.2f;
+        while (resetOffsetTime < resetDuration)
         {
-            offsetElapsed += Time.deltaTime;
-            transposer.m_FollowOffset.x = Mathf.Lerp(curFllowOffset.x, defalutFllowOffset.x, offsetElapsed / duration);
-            transposer.m_FollowOffset.y = Mathf.Lerp(curFllowOffset.y, defalutFllowOffset.y, offsetElapsed / duration);
-            transposer.m_FollowOffset.z = Mathf.Lerp(curFllowOffset.z, defalutFllowOffset.z, offsetElapsed / duration);
+            resetOffsetTime += Time.deltaTime;
+            _transposer.m_FollowOffset = Vector3.Lerp(curOffset, originalOffset, resetOffsetTime / resetDuration);
+            Debug.Log(_transposer.m_FollowOffset);
             yield return null;
         }
-        transposer.m_FollowOffset = defalutFllowOffset;
-        #endregion
+
+        _transposer.m_FollowOffset = originalOffset;
+    }
+
+    Coroutine CoVirtualCameraMove;
+    public void StartCoVirtualCameraMove(Vector3 originalOffset, Vector3 targetOffset, float time)
+    {
+        if (CoVirtualCameraMove != null)
+            CoroutineManager.StopCoroutine(CoVirtualCameraMove);
+        CoVirtualCameraMove = CoroutineManager.StartCoroutine(VirtualCameraMove(originalOffset, targetOffset, time));
     }
 
     private IEnumerator VirtualCameraMove(Vector3 originalOffset, Vector3 targetOffset, float time)
