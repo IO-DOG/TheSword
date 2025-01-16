@@ -38,7 +38,10 @@ public class UI_SelectLanguagePopup : UI_Popup
         BindImage(typeof(Images));
 
         //GetImage((int)Images.BackgroundImage).gameObject.transform.localScale = new Vector3(0, 0, 0);
-        GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveX(1240, 0.2f);
+        float dist = Screen.width * 0.645f;
+
+        GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveX(dist, 0.2f);
+        //GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveX(1240, 0.2f);
         //GetImage((int)Images.BackgroundImage).gameObject.transform.DOScale(1, 0.2f);
 
         GetButton((int)Buttons.Korean).gameObject.BindEvent(OnClickKorean);

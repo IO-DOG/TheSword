@@ -22,6 +22,7 @@ public class UI_BaseCard : UI_Base
         CreatureShieldImage,
         BattleBGImage,
         AbilityImage,
+        BattleUI_CharacterBG,
     }
 
     protected enum Texts
@@ -30,6 +31,11 @@ public class UI_BaseCard : UI_Base
         HPBarText,
         AttackStatusText,
         DefenceStatusText,
+    }
+
+    protected enum GameObjects
+    {
+        AttackFX,
     }
 
     //public CreatureClass.IEffect effect;
@@ -58,6 +64,7 @@ public class UI_BaseCard : UI_Base
         #region Bind
         BindImage(typeof(Images));
         BindText(typeof(Texts));
+        BindObject(typeof(GameObjects));
         #endregion
 
         GetText((int)Texts.CreatureName).text = _creature.Name;

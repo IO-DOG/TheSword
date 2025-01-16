@@ -112,7 +112,7 @@ public class UI_MonsterInfo : UI_Base
             GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().verticalNormalizedPosition -= 10f * Time.deltaTime / GetObject((int)Objects.Content).GetComponent<RectTransform>().sizeDelta.y;
 
             //스크롤의 끝 영역에 도달했다면 방향을 반전
-            if (GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition <= 0f || GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition >= 1f)
+            if (GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().verticalNormalizedPosition <= 0f || GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().verticalNormalizedPosition >= 1f)
                     mScrollSpeed = -mScrollSpeed;
             //if ((GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().verticalNormalizedPosition : GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition) <= 0f || (mIsVerticalScroll ? GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().verticalNormalizedPosition : GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition) >= 1f)
             //    mScrollSpeed = -mScrollSpeed;

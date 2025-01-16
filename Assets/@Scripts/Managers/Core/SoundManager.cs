@@ -83,7 +83,7 @@ public class SoundManager
                 audioSource.pitch = Managers.Game.GameSpeed;
 
                 //audioSource.pitch = pitch;
-                audioSource.volume = PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) / (float)_totalEffectCount; // 오디오 수에 따를 볼륨 조절
+                //audioSource.volume = PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) / (float)_totalEffectCount; // 오디오 수에 따를 볼륨 조절
                 _totalEffectCount++;
                 //if (Managers.Game.EffectSoundOn)
                 float audioLength = audioClip.length;

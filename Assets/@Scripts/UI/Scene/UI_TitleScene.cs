@@ -42,6 +42,7 @@ public class UI_TitleScene : UI_Scene
     bool isPreload = false;
     int buttonsIdx = 0;
     int maxButtonCount = 4;
+    bool _lock = false;
 
     public override bool Init()
     {
@@ -59,12 +60,12 @@ public class UI_TitleScene : UI_Scene
 
         //GetObject((int)Objects.Slider).GetComponent<Slider>().value = 0;
         GetObject((int)Objects.Slider).GetComponent<Slider>().gameObject.SetActive(false);
-        // 테스트용
-        GetButton((int)Buttons.NewGameButton).gameObject.BindEvent(() =>
-        {
-            if (isPreload)
-                Managers.Scene.LoadScene(Define.Scene.GameScene, transform);
-        });
+
+        GetButton((int)Buttons.NewGameButton).gameObject.BindEvent(() => { buttonsIdx = 0; SetButtonColorAndButtonsText(buttonsIdx); StartCoroutine(CoOnClickNewGameButton()); });
+        GetButton((int)Buttons.LoadGameButton).gameObject.BindEvent(() => { buttonsIdx = 1; SetButtonColorAndButtonsText(buttonsIdx); OnClickLoadGameButton(); });
+        GetButton((int)Buttons.SettingButton).gameObject.BindEvent(() => { buttonsIdx = 2; SetButtonColorAndButtonsText(buttonsIdx); OnClickSettingButton(); });
+        GetButton((int)Buttons.ExitButton).gameObject.BindEvent(() => { buttonsIdx = 3; SetButtonColorAndButtonsText(buttonsIdx); OnClickExitButton(); });
+
         GetImage((int)Images.Buttons).gameObject.SetActive(false);
         GetButton((int)Buttons.NewGameButton).gameObject.SetActive(false);
 
@@ -129,6 +130,9 @@ public class UI_TitleScene : UI_Scene
 
     private void Update()
     {
+        if (_lock)
+            return;
+
         if (isPreload && Input.anyKeyDown && GetText((int)Texts.PessAnyKeyText).gameObject.activeSelf && !Input.GetKeyDown(KeyCode.Return) && !Input.GetKeyDown(KeyCode.UpArrow) && !Input.GetKeyDown(KeyCode.DownArrow))
         {
             GetText((int)Texts.PessAnyKeyText).gameObject.SetActive(false);
@@ -154,8 +158,6 @@ public class UI_TitleScene : UI_Scene
 
         if (Input.GetKeyDown(KeyCode.Return) && !GetText((int)Texts.PessAnyKeyText).gameObject.activeSelf)
         {
-            Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UIselect");
-
             switch (buttonsIdx)
             {
                 case 0:
@@ -196,13 +198,14 @@ public class UI_TitleScene : UI_Scene
 
     IEnumerator CoFadeOutSound(float time)
     {
-        float total = 0f;
+        float total = 0;
+        float curSound = PlayerPrefs.GetFloat("CURBGMSOUND", 1);
 
         while (total <= time)
         {
             float delta = total / time;
 
-            Managers.Sound.SetBGMVolume(1 - delta);
+            Managers.Sound.SetBGMVolume(curSound - delta);
 
             total += Time.deltaTime;
             yield return null;
@@ -211,6 +214,10 @@ public class UI_TitleScene : UI_Scene
 
     IEnumerator CoOnClickNewGameButton()
     {
+        _lock = true;
+
+        Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UIselect");
+
         GetImage((int)Images.BlackBGImage).gameObject.SetActive(true);
         GetImage((int)Images.BlackBGImage).color = new Color(1, 1, 1, 0);
         StartCoroutine(Util.CoFade(GetImage((int)Images.BlackBGImage), 3));
@@ -228,6 +235,8 @@ public class UI_TitleScene : UI_Scene
 
     void OnClickLoadGameButton()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UIselect");
+
         if (PlayerPrefs.GetInt("ISFIRST", 1) == 1)
         {
             Debug.Log("Cllck OnClickLoadGameButton Nut Data is Null");
@@ -242,12 +251,16 @@ public class UI_TitleScene : UI_Scene
 
     void OnClickSettingButton()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UIselect");
+
         Debug.Log("Cllck OnClickSettingButton");
         Managers.UI.ShowPopupUI<UI_MenuPopup>();
     }
 
     void OnClickExitButton()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UIselect");
+
         Debug.Log("Cllck OnClickExitButton");
         Application.Quit();
     }

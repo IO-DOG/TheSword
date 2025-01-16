@@ -49,6 +49,9 @@ public class UI_MenuPopup : UI_Popup
         BindText(typeof(Texts));
         #endregion
 
+        // Sound
+        Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_SFX");
+
         Managers.Game.playerControllLock = true;
 
         GetText((int)Texts.ContinueButtonText).text = Managers.GetString(Define.CONTINUE);
@@ -56,10 +59,16 @@ public class UI_MenuPopup : UI_Popup
         GetText((int)Texts.SelectLanguageButtonText).text = Managers.GetString(Define.LANGUAGE);
         GetText((int)Texts.QuitGameButtonText).text = Managers.GetString(Define.QUIT_GAME);
 
+        GetImage((int)Images.ContinueButton).gameObject.BindEvent(OnPointerEnterContinueButton, type: Define.UIEvent.PointerEnter);
+        GetImage((int)Images.SettingButton).gameObject.BindEvent(OnPointerEnterSettingButton, type: Define.UIEvent.PointerEnter);
+        GetImage((int)Images.SelectLanguageButton).gameObject.BindEvent(OnPointerEnterSelectLanguageButton, type: Define.UIEvent.PointerEnter);
+        GetImage((int)Images.QuitGameButton).gameObject.BindEvent(OnPointerEnterQuitGameButton, type: Define.UIEvent.PointerEnter);
+
+
         GetImage((int)Images.ContinueButton).gameObject.BindEvent(OnClickContinueGameButton);
         GetImage((int)Images.SettingButton).gameObject.BindEvent(OnClickSettingButton);
         GetImage((int)Images.SelectLanguageButton).gameObject.BindEvent(OnClickSelectLanguageButton);
-        GetImage((int)Images.QuitGameButton).gameObject.BindEvent(() => { Application.Quit(); });
+        GetImage((int)Images.QuitGameButton).gameObject.BindEvent(() => { Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Click_SFX"); Application.Quit(); });
         OnEnterExitImage();
 
         CloseOtherUI();
@@ -73,11 +82,36 @@ public class UI_MenuPopup : UI_Popup
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            // Sound
+            Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Back_SFX");
+
             Managers.Game.GameScene.isOpenMenuPopup = false;
             OpenOtherUI();
             //Managers.UI.ClosePopupUI();
         }
     }
+
+    #region Pointer Interaction
+    void OnPointerEnterContinueButton()
+    {
+        Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_SFX");
+    }
+
+    void OnPointerEnterSettingButton()
+    {
+        Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_SFX");
+    }
+
+    void OnPointerEnterSelectLanguageButton()
+    {
+        Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_SFX");
+    }
+
+    void OnPointerEnterQuitGameButton()
+    {
+        Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_SFX");
+    }
+    #endregion
 
     void Refresh()
     {
@@ -136,7 +170,7 @@ public class UI_MenuPopup : UI_Popup
         }, null, Define.UIEvent.PointerExit);
     }
 
-    void OnClickContinueGameButton()
+    public void OnClickContinueGameButton()
     {
         {
             GameObject go = GameObject.Find("UI_SelectLanguagePopup");
@@ -149,6 +183,9 @@ public class UI_MenuPopup : UI_Popup
             if (go != null)
                 Managers.UI.ClosePopupUI();
         }
+
+        // Sound
+        Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Click_SFX");
 
         OpenOtherUI();
         //Managers.UI.ClosePopupUI();
@@ -171,8 +208,12 @@ public class UI_MenuPopup : UI_Popup
                 Managers.UI.ClosePopupUI();
         }
 
+        // Sound
+        Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Click_SFX");
+
         ButtonsMoveToLeft();
-        Managers.UI.ShowPopupUI<UI_SettingPopup>();
+        UI_SettingPopup ui_SettingPopup = Managers.UI.ShowPopupUI<UI_SettingPopup>();
+        ui_SettingPopup.menuPopup = this;
     }
 
     void OnClickSelectLanguageButton()
@@ -192,20 +233,23 @@ public class UI_MenuPopup : UI_Popup
                 Managers.UI.ClosePopupUI();
         }
 
+        // Sound
+        Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Click_SFX");
+
         ButtonsMoveToLeft();
         Managers.UI.ShowPopupUI<UI_SelectLanguagePopup>();
     }
 
     void ButtonsMoveToLeft()
     {
+        float dist = Screen.width * 0.365f;
         //GetObject((int)GameObjects.Buttons).gameObject.transform.DOMoveX(700, 0.3f);
-        GetImage((int)Images.ContinueButton).gameObject.transform.DOMoveX(700, 0.3f);
-
+        GetImage((int)Images.ContinueButton).gameObject.transform.DOMoveX(dist, 0.3f);
         DG.Tweening.Sequence mySequence = DOTween.Sequence()
-        .Insert(0.1f, GetImage((int)Images.ContinueButton).gameObject.transform.DOMoveX(700, 0.3f))
-        .Insert(0.12f, GetImage((int)Images.SettingButton).gameObject.transform.DOMoveX(700, 0.3f))
-        .Insert(0.14f, GetImage((int)Images.SelectLanguageButton).gameObject.transform.DOMoveX(700, 0.3f))
-        .Insert(0.16f, GetImage((int)Images.QuitGameButton).gameObject.transform.DOMoveX(700, 0.3f));
+        .Insert(0.1f, GetImage((int)Images.ContinueButton).gameObject.transform.DOMoveX(dist, 0.3f))
+        .Insert(0.12f, GetImage((int)Images.SettingButton).gameObject.transform.DOMoveX(dist, 0.3f))
+        .Insert(0.14f, GetImage((int)Images.SelectLanguageButton).gameObject.transform.DOMoveX(dist, 0.3f))
+        .Insert(0.16f, GetImage((int)Images.QuitGameButton).gameObject.transform.DOMoveX(dist, 0.3f));
 
     }
 

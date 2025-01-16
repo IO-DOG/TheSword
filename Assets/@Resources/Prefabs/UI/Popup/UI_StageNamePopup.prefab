@@ -79,7 +79,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 1080, y: 1920}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
@@ -452,6 +452,8 @@ MonoBehaviour:
   triggerEventsOnSkip: 0
   resetTypingSpeedAtStartup: 1
   disappearanceOrientation: 0
+  triggerShowedAfterEffectsEnd: 0
+  triggerDisappearedAfterEffectsEnd: 0
   onTextShowed:
     m_PersistentCalls:
       m_Calls: []
@@ -470,7 +472,7 @@ MonoBehaviour:
   waitForNormalChars: 0.03
   waitLong: 0.6
   waitMiddle: 0.2
-  avoidMultiplePunctuactionWait: 0
+  avoidMultiplePunctuationWait: 0
   waitForNewLines: 1
   waitForLastCharacter: 1
   useTypewriterWaitForDisappearances: 1

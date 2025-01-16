@@ -293,6 +293,7 @@ public class UI_MonsterCard : UI_BaseCard
     IEnumerator CoDead()
     {
         yield return new WaitForSeconds(0.3f);
+        Managers.Sound.Play(Define.Sound.Effect, "MonsterDeath_SFX");
         Transform particlePos = Managers.Game.Monster.gameObject.transform;
         GameObject deathSoulPurple = Managers.Resource.Instantiate("DeathSoulPurple");
         deathSoulPurple.transform.position = particlePos.position;

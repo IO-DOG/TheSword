@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -49,12 +49,15 @@ public class UI_MagicalSwordCheckPopup : UI_Popup
     #region Pointer Interaction
     void YesPointerEnter()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "ButtonUI_Choice_SFX");
+
         GetButton((int)Buttons.YesBtn).gameObject.GetComponent<Animator>().Play("OnlyYesMouseOver");
     }
 
     void YesClick()
     {
         Managers.Game.OnDirect = false;
+        Managers.Sound.Play(Define.Sound.Effect, "ButtonUI_Ok_SFX");
 
         Managers.Directing.Events.CoStartContractSword();
         ClosePopupUI();
