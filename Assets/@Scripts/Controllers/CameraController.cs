@@ -180,14 +180,12 @@ public class CameraController : MonoBehaviour
         }
 
         Vector3 curOffset = _transposer.m_FollowOffset;
-        Debug.Log(curOffset);
         float resetOffsetTime = 0f;
         float resetDuration = 0.2f;
         while (resetOffsetTime < resetDuration)
         {
             resetOffsetTime += Time.deltaTime;
             _transposer.m_FollowOffset = Vector3.Lerp(curOffset, originalOffset, resetOffsetTime / resetDuration);
-            Debug.Log(_transposer.m_FollowOffset);
             yield return null;
         }
 

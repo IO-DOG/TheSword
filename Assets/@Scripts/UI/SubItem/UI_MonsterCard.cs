@@ -262,9 +262,6 @@ public class UI_MonsterCard : UI_BaseCard
 
         Managers.Data.MonsterActiveDic[Managers.Game.MonsterData[0].IsActiveIndex] = false;
 
-        // Call specific Boss monster dead event
-        Managers.Game.Monster.GetComponent<BossMonsterController>()?.OnDeadEvent();
-
         Managers.Game.OnBattleAction.Invoke();
 
         //Managers.Game.OnBattle = false;
@@ -276,9 +273,17 @@ public class UI_MonsterCard : UI_BaseCard
         //    item.GetComponent<Equip>()._id = Managers.Data.MonsterDic[Managers.Game.Monster.id].RewardItem;
         //}
 
-        // 몬스터 죽는 파티클 생성
-        StartCoroutine(CoDead());
-        
+        if(Managers.Game.Monster.GetComponent<BossMonsterController>()!= null)
+        {
+            // Call specific Boss monster dead event
+            Managers.Game.Monster.GetComponent<BossMonsterController>()?.OnDeadEvent();
+        }
+        else
+        {
+            // 몬스터 죽는 파티클 생성
+            StartCoroutine(CoDead());
+        }
+
         return;
     }
 
