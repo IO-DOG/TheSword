@@ -76,6 +76,9 @@ public class Events
         Managers.Game.OnDirect = true;
         Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
 
+        // Sound
+        Managers.Sound.Play(Define.Sound.Effect, "EgoSword_Encounter_Event");
+
         #region #1
         {
             StartCoPlayEmoji(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);

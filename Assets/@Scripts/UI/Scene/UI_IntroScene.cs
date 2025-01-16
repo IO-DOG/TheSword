@@ -137,7 +137,7 @@ public class UI_IntroScene : UI_Scene
         if (idx == 1) // ó�� Ŭ����
         {
             GetImage((int)Images.SceneImage).gameObject.SetActive(true);
-            GetText((int)Texts.SceneText).gameObject.transform.position = Util.WorldToScreenCood(new Vector3(0, -400, 0));
+            GetText((int)Texts.SceneText).gameObject.transform.position = Util.WorldToScreenCood(new Vector3(0, -Screen.height * 0.37f, 0));
         }
         if (idx == totalCount - 3)
         {
@@ -149,7 +149,7 @@ public class UI_IntroScene : UI_Scene
             GetText((int)Texts.SceneText).text = "";
             GetImage((int)Images.SceneImage).sprite = ImageList[idx - 1];
             GetImage((int)Images.SceneImage).SetNativeSize();
-            GetImage((int)Images.SceneImage).transform.position = new Vector3(960, 1100, 0);
+            GetImage((int)Images.SceneImage).transform.position = new Vector3(Screen.width * 0.5f, Screen.height * 1.02f, 0);
             GetImage((int)Images.SceneImage).transform.localScale = new Vector3(0.7f, 0.7f, 0);
             StartCoroutine(CoLastIntroImage());
         }
@@ -222,7 +222,7 @@ public class UI_IntroScene : UI_Scene
         bool flag = false;
         while (GetImage((int)Images.SceneImage).transform.position.y > 0)
         {
-            if (!flag && GetImage((int)Images.SceneImage).transform.position.y < 500)
+            if (!flag && GetImage((int)Images.SceneImage).transform.position.y < Screen.height * 0.463f)
             {
                 flag = true;
                 StartCoroutine(CoFadeOutImage());

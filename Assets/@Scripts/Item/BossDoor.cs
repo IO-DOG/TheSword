@@ -19,6 +19,9 @@ public class BossDoor : PortalController
 
         yield return new WaitForSeconds(0.3f);
 
+        // Sound
+        Managers.Sound.Play(Define.Sound.Effect, "BossGate_Event");
+
         gameObject.GetComponentInChildren<Animator>().Play("BossPortal_Activation");
         yield return new WaitForSeconds(1f);
 
@@ -47,7 +50,11 @@ public class BossDoor : PortalController
         Managers.Game.OnDirect = false; 
         Managers.Game.DirectionalLight.color = originLightColor;
 
+        // Sound
+        Managers.Sound.Play(Define.Sound.Bgm, "Boss_Entry_BGM");
+
         yield return new WaitForSeconds(5f);
+
         Managers.Resource.Destroy(gameObject);
     }
 }

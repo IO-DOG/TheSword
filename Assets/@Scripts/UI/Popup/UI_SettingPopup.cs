@@ -45,6 +45,8 @@ public class UI_SettingPopup : UI_Popup
     }
     #endregion
 
+    public UI_MenuPopup menuPopup;
+
     public override bool Init()
     {
         if (base.Init() == false)
@@ -66,7 +68,9 @@ public class UI_SettingPopup : UI_Popup
         GetText((int)Texts.FullWindowScreenText).text = Managers.GetString(Define.FULL_WINDOW_SCREEN);
 
         //GetImage((int)Images.BackgroundImage).gameObject.transform.localScale = new Vector3(0, 0, 0);
-        GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveX(1240, 0.2f);
+        float dist = Screen.width * 0.645f;
+
+        GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveX(dist, 0.2f);
         //GetImage((int)Images.BackgroundImage).gameObject.transform.DOScale(2, 0.2f);
 
         //GetObject((int)GameObjects.SoundToggle).gameObject.BindEvent(OnClickSoundToggle);
@@ -177,6 +181,7 @@ public class UI_SettingPopup : UI_Popup
             default:
                 break;
         }
+
     }
 
     void OnClickFullScreenCheckBox()
@@ -186,6 +191,8 @@ public class UI_SettingPopup : UI_Popup
         Screen.SetResolution(1920, 1080, FullScreenMode.FullScreenWindow);
 
         Refresh();
+
+        menuPopup.OnClickContinueGameButton();
     }
 
     void OnClickWindowScreenCheckBox()
@@ -195,6 +202,8 @@ public class UI_SettingPopup : UI_Popup
         Screen.SetResolution(960, 540, FullScreenMode.Windowed);
 
         Refresh();
+
+        menuPopup.OnClickContinueGameButton();
     }
 
     void OnClickFullWindowScreenCheckBox()
@@ -204,18 +213,7 @@ public class UI_SettingPopup : UI_Popup
         Screen.SetResolution(1920, 1080, FullScreenMode.Windowed);
 
         Refresh();
+
+        menuPopup.OnClickContinueGameButton();
     }
-
-    //void OnClickSoundToggle()
-    //{
-    //    if (GetObject((int)GameObjects.SoundToggle).GetComponent<Toggle>().isOn == true)
-    //    {
-    //        Managers.Sound.SetVolume(PlayerPrefs.GetFloat("SAVESOUND", 1));
-    //    }
-    //    else
-    //    {
-    //        Managers.Sound.SetVolume(0);
-    //    }
-    //}
-
 }
