@@ -247,7 +247,8 @@ public class UI_GameScene : UI_Scene
         }
         if (Input.GetKeyDown(KeyCode.F8))
         {
-            Managers.Game.SaveGame();
+            Debug.Log("move count : " + PlayerPrefs.GetInt("MOVECOUNT"));
+            Debug.Log("death count : " + PlayerPrefs.GetInt("DEATHCOUNT"));
         }
         #endregion
     }
