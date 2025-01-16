@@ -264,7 +264,7 @@ public class UI_MonsterCard : UI_BaseCard
 
         Managers.Game.OnBattleAction.Invoke();
 
-        //Managers.Game.OnBattle = false;
+        Debug.Log(Managers.Game.OnBattle);
 
         //if (Managers.Data.MonsterDic[Managers.Game.Monster.id].RewardItem != -1)
         //{
@@ -275,8 +275,11 @@ public class UI_MonsterCard : UI_BaseCard
 
         if(Managers.Game.Monster.GetComponent<BossMonsterController>()!= null)
         {
+            //Managers.Game.OnBattle = false;
             // Call specific Boss monster dead event
-            Managers.Game.Monster.GetComponent<BossMonsterController>()?.OnDeadEvent();
+            Managers.Game.Monster.GetComponent<BossMonsterController>().OnDeadEvent();
+
+            Debug.Log(Managers.Game.OnBattle);
         }
         else
         {

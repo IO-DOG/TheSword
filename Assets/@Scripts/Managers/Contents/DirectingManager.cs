@@ -373,34 +373,32 @@ public class Events : MonoBehaviour
     #region KingSlimeDead
     public void CoStartKingSlimeDead()
     {
-        CoroutineManager.StartCoroutine(StartKingSlimeDead());
+        if(!Managers.Game.IsPlayerDead)
+            CoroutineManager.StartCoroutine(StartKingSlimeDead());
     }
 
     IEnumerator StartKingSlimeDead()
     {
+        yield return new WaitForSeconds(0.4f);
         Managers.UI.CloseGameSceneUI();
         Managers.Directing.PlayLetterBox();
         Managers.Game.OnDirect = true;
-        GameObject kingSlime = Managers.Game.Monster.gameObject;
-        SpriteRenderer sr = kingSlime.GetOrAddComponent<SpriteRenderer>();
-        kingSlime.GetOrAddComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>("PaintWhiteMat");
-        sr.color = new Color(1f, 1f, 1f);
-        kingSlime.GetComponent<Animator>().speed = 0f;
-        kingSlime.transform.DOScale(0f, 3f);
-        kingSlime.transform.DOLocalMoveZ(-7f, 3f);
+        GameObject greenSmoke = GameObject.Find("SmokeFlatWhiteGreen");
+        greenSmoke.GetComponent<ParticleSystem>().Stop();
 
         yield return new WaitForSeconds(2f);
 
         #region Slime orbs event
-        GameObject slimeOrb = Managers.Resource.Instantiate("SlimeOrb");
-        slimeOrb.transform.position = new Vector3(kingSlime.transform.position.x, kingSlime.transform.position.y, kingSlime.transform.position.z);
+        Transform orbsSpawnPos = GameObject.Find("OrbsSpawnPos").transform;
+        GameObject slimeOrb = Managers.Resource.Instantiate("SlimeOrb", orbsSpawnPos);
+        //slimeOrb.transform.position = new Vector3(kingSlime.transform.position.x, kingSlime.transform.position.y, kingSlime.transform.position.z);
         yield return new WaitForSeconds(0.5f);
 
         Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
         Vector3 target = new Vector3(0f, 18f, -5f); ;
         float moveTime = 1f;
         Managers.Game.MainCamera.GetComponentInChildren<CameraController>().StartCoVirtualCameraMove(original, target, moveTime);
-        slimeOrb.transform.DOLocalMoveZ(-3f, 1f);
+        slimeOrb.transform.DOLocalMoveZ(2f, 1f);
         yield return new WaitForSeconds(1f);
 
         slimeOrb.transform.GetChild(0).DOLocalMoveX(-2.24f, 0.5f);
@@ -455,6 +453,7 @@ public class Events : MonoBehaviour
         #endregion
 
         #region Instantiate 3 Slimes
+
         GameObject map = GameObject.Find("Dungeon_00_003");
 
         GameObject yellowSlime = Managers.Resource.Instantiate("BossMonster_3Slimes", map.transform);
@@ -462,19 +461,30 @@ public class Events : MonoBehaviour
         yellowSlime.GetComponent<MonsterController>().id = 7;
         GameObject jumpCloud0 = Managers.Resource.Instantiate("JumpCloud", yellowSlime.transform);
         jumpCloud0.transform.localScale = new Vector3(jumpCloud0.transform.localScale.x * 1.5f, jumpCloud0.transform.localScale.y * 1.5f, jumpCloud0.transform.localScale.z * 1.5f);
+        GameObject explosion0 = Managers.Resource.Instantiate("PoisonExplosionYellow", yellowSlime.transform);
+        GameObject smoke0 = Managers.Resource.Instantiate("SmokeFlatBlack", yellowSlime.transform);
+        smoke0.transform.localPosition = new Vector3(0f, -0.8f, 0.5f);
+        smoke0.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
 
         GameObject redSlime = Managers.Resource.Instantiate("BossMonster_3Slimes", map.transform);
         redSlime.transform.position = GameObject.Find("RedSlimePos").transform.position;
         redSlime.GetComponent<MonsterController>().id = 6;
         GameObject jumpCloud1 = Managers.Resource.Instantiate("JumpCloud", redSlime.transform);
         jumpCloud1.transform.localScale = new Vector3(jumpCloud0.transform.localScale.x * 1.5f, jumpCloud0.transform.localScale.y * 1.5f, jumpCloud0.transform.localScale.z * 1.5f);
-
+        GameObject explosion1 = Managers.Resource.Instantiate("PoisonExplosionRed", redSlime.transform);
+        GameObject smoke1 = Managers.Resource.Instantiate("SmokeFlatBlack", redSlime.transform);
+        smoke1.transform.localPosition = new Vector3(0f, -0.8f, 0.5f);
+        smoke1.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
 
         GameObject blueSlime = Managers.Resource.Instantiate("BossMonster_3Slimes", map.transform);
         blueSlime.transform.position = GameObject.Find("BlueSlimePos").transform.position;
         blueSlime.GetComponent<MonsterController>().id = 8;
         GameObject jumpCloud2 = Managers.Resource.Instantiate("JumpCloud", blueSlime.transform);
         jumpCloud2.transform.localScale = new Vector3(jumpCloud0.transform.localScale.x * 1.5f, jumpCloud0.transform.localScale.y * 1.5f, jumpCloud0.transform.localScale.z * 1.5f);
+        GameObject explosion2 = Managers.Resource.Instantiate("PoisonExplosionBlue", blueSlime.transform);
+        GameObject smoke2 = Managers.Resource.Instantiate("SmokeFlatBlack", blueSlime.transform);
+        smoke2.transform.localPosition = new Vector3(0f, -0.8f, 0.5f);
+        smoke2.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
 
         CoroutineManager.StartCoroutine(CameraController.CoShakeCamera(0.7f, 0.7f));
         Managers.Resource.Instantiate("Stones", map.transform);
@@ -562,4 +572,56 @@ public class Events : MonoBehaviour
         //Managers.Game.SaveGame();
     }
     #endregion
+
+    public void StartBossDeathEffect(GameObject boss)
+    {
+        CoroutineManager.StartCoroutine(BossDeadEffect(boss));
+    }
+
+    IEnumerator BossDeadEffect(GameObject boss)
+    {
+        Vector3 bossPos = boss.transform.position;
+
+        boss.GetComponent<SpriteRenderer>().enabled = true;
+        SpriteRenderer sr = boss.GetOrAddComponent<SpriteRenderer>();
+        sr.color = Util.DamagedColor();
+        boss.GetComponent<Animator>().speed = 0f;
+        //yield return new WaitForSeconds(defaultTime);
+        yield return new WaitForSeconds(0.1f);
+        GameObject fog = Managers.Resource.Instantiate("BossDeathBoom");
+        fog.transform.position = boss.transform.position;
+        //fog.transform.localScale = new Vector3(2f, 6f, 3f);
+        boss.GetComponent<Collider>().enabled = false;
+
+        yield return new WaitForSeconds(0.5f);
+
+        // 하얗게
+        boss.GetOrAddComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        sr.DOColor(Color.white, 2f);
+
+        yield return new WaitForSeconds(0.5f);
+
+        Managers.Resource.Destroy(fog);
+
+        GameObject light = Managers.Resource.Instantiate("BossDeathLight");
+        light.transform.position = boss.transform.position;
+        light.transform.localScale = new Vector3(3f, 6f, 3f);
+        AnimationClip lightClip = light.GetComponent<Animator>().runtimeAnimatorController.animationClips[0];
+        yield return new WaitForSeconds(1f);
+
+        float whiteTime = 0.5f;
+        float defaultTime = 0.2f;
+        CoroutineManager.StartCoroutine(CameraController.CoExposure(whiteTime, CameraController.Exposure.White));
+        yield return new WaitForSeconds(whiteTime);
+        Managers.Resource.Destroy(light);
+        Managers.Resource.Destroy(boss);
+        CoroutineManager.StartCoroutine(CameraController.CoExposure(defaultTime, CameraController.Exposure.Default));
+        yield return new WaitForSeconds(defaultTime);
+
+        GameObject poofCloudArcs = Managers.Resource.Instantiate("PoofCloudArcs");
+        poofCloudArcs.transform.position = bossPos;
+
+        GameObject poofCloudNova = Managers.Resource.Instantiate("PoofCloudNova");
+        poofCloudNova.transform.position = bossPos;
+    }
 }
