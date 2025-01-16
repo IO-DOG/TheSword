@@ -53,7 +53,16 @@ public class MonsterController : MonoBehaviour
         StartCoroutine(Util.Screenshot2((screenShot) =>
         {
             Managers.Game._screenShot2 = screenShot;
-            Managers.UI.ShowPopupUI<UI_BattlePopup>();
+            if (gameObject.GetComponent<BossMonsterController>() != null)
+            {
+                // todo
+                // 보스면 연출 있다가 배틀로
+                StartCoroutine(CoBossEnter());
+            }
+            else
+            {
+                Managers.UI.ShowPopupUI<UI_BattlePopup>();
+            }
         }));
         //Util.Screenshot2((screenShot) => {Managers.Game._screenShot2 = screenShot; });
     }
@@ -67,7 +76,7 @@ public class MonsterController : MonoBehaviour
     }
 
     protected virtual void Init()
-    { 
+    {
         GetComponent<Animator>().Play($"{Managers.Data.MonsterDic[id].IdleAnimStr}");
         GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>(Managers.Data.MonsterDic[id].Shadow);
         //id = 1;
@@ -76,5 +85,16 @@ public class MonsterController : MonoBehaviour
     private void Start()
     {
         Init();
+    }
+
+    IEnumerator CoBossEnter()
+    {
+        yield return null;
+
+        Managers.Game.OnFadeAction.Invoke(1.3f);
+        yield return new WaitForSeconds(1.3f);
+
+        Managers.UI.ShowPopupUI<UI_BattlePopup>();
+
     }
 }

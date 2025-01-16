@@ -79,22 +79,30 @@ public class UI_BossRoomCheckPopup : UI_Popup
     #region Pointer interaction
     void YesPointerEnter()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "ButtonUI_Choice_SFX");
+
         GetButton((int)Buttons.YesBtn).gameObject.GetComponent<Animator>().Play("YesMouseOver");
     }
 
     void NoPointerEnter()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "ButtonUI_Choice_SFX");
+
         GetButton((int)Buttons.NoBtn).gameObject.GetComponent<Animator>().Play("NoMouseOver");
     }
 
     void YesClick()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "ButtonUI_Ok_SFX");
+
         Managers.Game.ParentMap.GetComponentInChildren<BossDoor>().CoStartPlayEffect();
         ClosePopupUI();
     }
 
     void NoClick()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "ButtonUI_No_SFX");
+
         Managers.Game.OnDirect = false;
         ClosePopupUI();
     }

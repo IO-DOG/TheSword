@@ -95,6 +95,11 @@ public class UI_BattlePopup : UI_Popup
 
         // Game Over Popup
         if (Managers.Game.IsPlayerDead)
+        {
+            int moveCount = PlayerPrefs.GetInt("DEATHCOUNT", 0);
+            moveCount++;
+            PlayerPrefs.SetInt("DEATHCOUNT", moveCount);
             Managers.UI.ShowPopupUI<UI_GameOverPopup>();
+        }
     }
 }

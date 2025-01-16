@@ -314,6 +314,9 @@ public class PlayerController : MonoBehaviour
         }
 
         _isMoving = true;
+        int moveCount = PlayerPrefs.GetInt("MOVECOUNT", 0);
+        moveCount++;
+        PlayerPrefs.SetInt("MOVECOUNT", moveCount);
 
         _nextCellPos = Vector3.zero;
         switch (moveDir)
