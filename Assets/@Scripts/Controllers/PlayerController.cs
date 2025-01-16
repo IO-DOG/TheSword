@@ -396,8 +396,9 @@ public class PlayerController : MonoBehaviour
                 somethingExist = true;
             }
             //Checking Monster
-            else if (hit.collider.gameObject.layer == (int)Define.Layer.Monster)
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.Monster && !Managers.Game.OnBattle)
             {
+                Debug.Log(hit.collider.gameObject.name);
                 hit.collider.gameObject.GetComponent<MonsterController>().SetMonster();
                 somethingExist = true;
             }

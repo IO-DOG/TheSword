@@ -17,6 +17,8 @@ public class MonsterController : MonoBehaviour
     public int _monsterIndex_forActive = 0;
     public void SetMonster()
     {
+        Managers.Game.OnBattle = true;
+        Managers.Game.Player.SetIdleState(Managers.Game.Player._moveDir);
         Managers.Game.MonsterData.Clear();
 
         Managers.Game.MonsterData.Add(new GameManager.CurMonsterData());
@@ -90,7 +92,6 @@ public class MonsterController : MonoBehaviour
     IEnumerator CoBossEnter()
     {
         yield return null;
-
         Managers.Game.OnFadeAction.Invoke(1.3f);
         yield return new WaitForSeconds(1.3f);
 

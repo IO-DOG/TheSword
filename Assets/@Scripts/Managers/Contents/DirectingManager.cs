@@ -616,11 +616,11 @@ public class Events : MonoBehaviour
         //float defaultTime = 0.2f;
         //CoroutineManager.StartCoroutine(CameraController.CoExposure(whiteTime, CameraController.Exposure.White));
         //yield return new WaitForSeconds(whiteTime);
-        //Managers.Resource.Destroy(light);
-        //Managers.Resource.Destroy(boss);
+
         //CoroutineManager.StartCoroutine(CameraController.CoExposure(defaultTime, CameraController.Exposure.Default));
         //yield return new WaitForSeconds(defaultTime);
-
+        Managers.Resource.Destroy(light);
+        Managers.Resource.Destroy(boss);
         GameObject poofCloudArcs = Managers.Resource.Instantiate("PoofCloudArcs");
         poofCloudArcs.transform.position = bossPos;
 
