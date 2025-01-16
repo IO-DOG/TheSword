@@ -612,14 +612,14 @@ public class Events : MonoBehaviour
         AnimationClip lightClip = light.GetComponent<Animator>().runtimeAnimatorController.animationClips[0];
         yield return new WaitForSeconds(1f);
 
-        float whiteTime = 0.5f;
-        float defaultTime = 0.2f;
-        CoroutineManager.StartCoroutine(CameraController.CoExposure(whiteTime, CameraController.Exposure.White));
-        yield return new WaitForSeconds(whiteTime);
-        Managers.Resource.Destroy(light);
-        Managers.Resource.Destroy(boss);
-        CoroutineManager.StartCoroutine(CameraController.CoExposure(defaultTime, CameraController.Exposure.Default));
-        yield return new WaitForSeconds(defaultTime);
+        //float whiteTime = 0.5f;
+        //float defaultTime = 0.2f;
+        //CoroutineManager.StartCoroutine(CameraController.CoExposure(whiteTime, CameraController.Exposure.White));
+        //yield return new WaitForSeconds(whiteTime);
+        //Managers.Resource.Destroy(light);
+        //Managers.Resource.Destroy(boss);
+        //CoroutineManager.StartCoroutine(CameraController.CoExposure(defaultTime, CameraController.Exposure.Default));
+        //yield return new WaitForSeconds(defaultTime);
 
         GameObject poofCloudArcs = Managers.Resource.Instantiate("PoofCloudArcs");
         poofCloudArcs.transform.position = bossPos;
