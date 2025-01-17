@@ -232,6 +232,7 @@ public class GameManager
     public int GameSpeed = 1;
     public UI_GameScene GameScene = null;
     public int AttackCount { get; set; }
+    public float PlayTime = 0f;
 
     public static void LevelUp()
     {
@@ -523,6 +524,7 @@ public class GameManager
             // 오픈하면 1로 변경해야함.
             PlayerPrefs.SetInt("ISOPENSWORD", 0);
             PlayerPrefs.SetInt("ISOPENPORTAL", 0);
+            PlayTime = PlayerPrefs.GetFloat("PLAYTIME", 0);
 
             return false;
         }
@@ -543,6 +545,7 @@ public class GameManager
         {
             PlayerData = data;
 
+            PlayTime = PlayerPrefs.GetFloat("PLAYTIME", 0);
             Managers.Data.LoadActiveDic();
             Debug.Log("Complete Loading Data.");
         }

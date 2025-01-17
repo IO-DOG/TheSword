@@ -56,7 +56,7 @@ public class UI_BossRoomCheckPopup : UI_Popup
 
         StartCoroutine(PopupAnimation());
 
-        Managers.Game.OnDirect = true;
+        //Managers.Game.OnDirect = true;
 
         return true;
     }
