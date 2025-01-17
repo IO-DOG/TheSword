@@ -421,6 +421,12 @@ public class Events : MonoBehaviour
         slimeOrb.transform.GetChild(2).DOLocalMoveZ(-1f, 0.25f);
         yield return new WaitForSeconds(0.5f);
 
+        Vector3 original2 = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
+        Vector3 target2 = new Vector3(0f, 16f, -7f); ;
+        float moveTime2 = 0.5f;
+        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().StartCoVirtualCameraMove(original2, target2, moveTime2);
+
+        yield return new WaitForSeconds(0.1f);
 
         Sequence seq = DOTween.Sequence();
 
@@ -439,10 +445,6 @@ public class Events : MonoBehaviour
         blue.Append(slimeOrb.transform.GetChild(2).DOLocalMoveZ(-3f, 0.5f));
         blue.Append(slimeOrb.transform.GetChild(2).DOScale(5f, 0.5f));
 
-        Vector3 original2 = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
-        Vector3 target2 = new Vector3(0f, 16f, -6f); ;
-        float moveTime2 = 0.5f;
-        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().StartCoVirtualCameraMove(original2, target2, moveTime2);
 
         seq.Append(yellow).Join(red).Join(blue).Play().OnComplete(() =>
         {
