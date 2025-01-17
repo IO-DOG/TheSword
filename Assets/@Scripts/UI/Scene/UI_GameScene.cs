@@ -191,6 +191,9 @@ public class UI_GameScene : UI_Scene
     {
         ShowInfo();
 
+        // Timer
+        StartTimer();
+
         #region for_test
         if (Input.GetKeyDown(KeyCode.F1))
         {
@@ -249,6 +252,7 @@ public class UI_GameScene : UI_Scene
         {
             Debug.Log("move count : " + PlayerPrefs.GetInt("MOVECOUNT"));
             Debug.Log("death count : " + PlayerPrefs.GetInt("DEATHCOUNT"));
+            Debug.Log("paly time : " + PlayerPrefs.GetFloat("PLAYTIME"));
         }
         #endregion
     }
@@ -339,5 +343,12 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUIInventoryAImage).gameObject.SetActive(true);
         GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(true);
         GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(true);
+    }
+
+    public void StartTimer()
+    {
+        float playTime = PlayerPrefs.GetFloat("PLAYTIME", 0);
+        playTime += Time.deltaTime;
+        PlayerPrefs.SetFloat("PLAYTIME", playTime);
     }
 }

@@ -13,6 +13,7 @@ public enum CursorType
     Grap,
     Click,
     Press,
+    Directing,
 }
 
 public class CursorManager : MonoBehaviour
@@ -25,6 +26,8 @@ public class CursorManager : MonoBehaviour
         (1 << (int)Define.Layer.BossDoor) | (1 << (int)Define.Layer.Door) | (1 << (int)Define.Layer.Portal) | 
         (1 << (int)Define.Layer.Lever) | (1 << (int)Define.Layer.InteractObjects) | (1 << (int)Define.Layer.Default) |
         (1 << (int)Define.Layer.Wall) | (1 << (int)Define.Layer.Player);
+
+    Texture2D _directingCursor = null;
 
     Texture2D _normalCursor0 = null;
     Texture2D _normalCursor1 = null;
@@ -67,6 +70,8 @@ public class CursorManager : MonoBehaviour
     public void Init()
     {
         _init = true;
+
+        _directingCursor = Resources.Load<Texture2D>("Cursor/MouseCursor_Directing");
 
         _normalCursor0 = Resources.Load<Texture2D>("Cursor/MouseCursor_Normal_0");
         _normalCursor1 = Resources.Load<Texture2D>("Cursor/MouseCursor_Normal_1");
@@ -141,22 +146,34 @@ public class CursorManager : MonoBehaviour
         RaycastHit hit;
         Debug.DrawRay(Camera.main.transform.position, ray.direction * 100.0f, Color.red, 1.0f);
 
-        if (Physics.Raycast(ray, out hit, 100.0f, _mask))
+        if (Managers.Game.OnDirect)
         {
-            // 몬스터, 장비, 물약
-            if (hit.collider.gameObject.layer == (int)Define.Layer.Monster || hit.collider.gameObject.layer == (int)Define.Layer.EItem || hit.collider.gameObject.layer == (int)Define.Layer.CItem)
+            _cursor = CursorType.Directing;
+        }
+        else
+        {
+            if (Physics.Raycast(ray, out hit, 100.0f, _mask))
             {
-                if (_cursor != CursorType.Search)
+                // 몬스터, 장비, 물약
+                if (hit.collider.gameObject.layer == (int)Define.Layer.Monster || hit.collider.gameObject.layer == (int)Define.Layer.EItem || hit.collider.gameObject.layer == (int)Define.Layer.CItem)
                 {
-                    _cursor = CursorType.Search;
+                    if (_cursor != CursorType.Search)
+                    {
+                        _cursor = CursorType.Search;
+                    }
                 }
-            }
-            // 보스문, 문, 포탈, 레버, 상호작용 물체
-            else if (hit.collider.gameObject.layer == (int)Define.Layer.BossDoor || hit.collider.gameObject.layer == (int)Define.Layer.Door || hit.collider.gameObject.layer == (int)Define.Layer.Portal || hit.collider.gameObject.layer == (int)Define.Layer.Lever || hit.collider.gameObject.layer == (int)Define.Layer.InteractObjects)
-            {
-                if (_cursor != CursorType.Grap)
+                // 보스문, 문, 포탈, 레버, 상호작용 물체
+                else if (hit.collider.gameObject.layer == (int)Define.Layer.BossDoor || hit.collider.gameObject.layer == (int)Define.Layer.Door || hit.collider.gameObject.layer == (int)Define.Layer.Portal || hit.collider.gameObject.layer == (int)Define.Layer.Lever || hit.collider.gameObject.layer == (int)Define.Layer.InteractObjects)
                 {
-                    _cursor = CursorType.Grap;
+                    if (_cursor != CursorType.Grap)
+                    {
+                        _cursor = CursorType.Grap;
+                    }
+                }
+                else
+                {
+                    if (_cursor != CursorType.Press && _cursor != CursorType.Normal)
+                        _cursor = CursorType.Normal;
                 }
             }
             else
@@ -165,12 +182,6 @@ public class CursorManager : MonoBehaviour
                     _cursor = CursorType.Normal;
             }
         }
-        else
-        {
-            if (_cursor != CursorType.Press && _cursor != CursorType.Normal)
-                _cursor = CursorType.Normal;
-        }
-        //Debug.Log(_frameTimer);
 
         if (Managers.Game.ScreenType == Define.ScreenType.Window)
         {
@@ -237,6 +248,9 @@ public class CursorManager : MonoBehaviour
                     break;
                 case CursorType.Press:
                     Cursor.SetCursor(_normalCursorSmall3, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    break;
+                case CursorType.Directing:
+                    Cursor.SetCursor(_directingCursor, new Vector2(0, 0), CursorMode.ForceSoftware);
                     break;
                 default:
                     break;
@@ -307,6 +321,9 @@ public class CursorManager : MonoBehaviour
                     break;
                 case CursorType.Press:
                     Cursor.SetCursor(_normalCursor3, new Vector2(0, 0), CursorMode.ForceSoftware);
+                    break;
+                case CursorType.Directing:
+                    Cursor.SetCursor(_directingCursor, new Vector2(0, 0), CursorMode.ForceSoftware);
                     break;
                 default:
                     break;
