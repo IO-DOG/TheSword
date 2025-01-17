@@ -9,6 +9,7 @@ using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
+using static Define;
 using static UnityEngine.UI.Image;
 
 public class DirectingManager
@@ -267,6 +268,7 @@ public class Events : MonoBehaviour
         slimesCore.transform.DOScale(Vector3.one * 2f, 1f);
 
         _kingSlime = GameObject.Find("bossMonster0");
+
         GameObject kingSlimeActionFront = GameObject.Find("KingSlimeActionFront");
         kingSlimeActionFront.GetComponent<Animator>().Play("NewKingSlimeActionFront");
         GameObject kingSlimeActionBack = GameObject.Find("KingSlimeActionBack");
@@ -288,26 +290,31 @@ public class Events : MonoBehaviour
 
         slimes.GetComponent<ParticleSystem>().Stop();
         slimesCore.GetComponent<ParticleSystem>().Stop();
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(2.1f);
+        CoroutineManager.StartCoroutine(CameraController.WhiteBang(0.1f));
+        Managers.Resource.Destroy(kingSlimeActionFront);
 
-        // white
-        CoroutineManager.StartCoroutine(CameraController.CoExposure(1f, CameraController.Exposure.White));
-        yield return new WaitForSeconds(1f);
+        _kingSlime.transform.localPosition = new Vector3(3.84f, 3f, -5.5f);
+        _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
 
-        // black
-        CoroutineManager.StartCoroutine(CameraController.CoExposure(0.2f, CameraController.Exposure.Black));
-        yield return new WaitForSeconds(0.2f);
+        _kingSlime.GetComponent<Animator>().speed = 0f;
+        _kingSlime.transform.DOLocalMoveZ(_kingSlime.transform.localPosition.z - 0.5f, 0.2f);
+        _kingSlime.transform.DOScaleY(0.5f, 0.15f);
+        _kingSlime.GetComponent<KingSlimeController>()._sr.material = Managers.Resource.Load<Material>("PaintWhiteMat");
+        _kingSlime.GetComponent<KingSlimeController>()._sr.color = Color.white;
+        yield return new WaitForSeconds(0.15f);
 
-        // default
-        CoroutineManager.StartCoroutine(CameraController.CoExposure(0.5f, CameraController.Exposure.Default));
-        yield return new WaitForSeconds(0.2f);
+        _kingSlime.GetComponent<Animator>().speed = 1f;
+        _kingSlime.transform.DOLocalMoveZ(_kingSlime.transform.localPosition.z + 0.5f, 0.1f);
+        _kingSlime.transform.DOScaleY(2f, 0.15f);
 
+        _kingSlime.GetComponent<KingSlimeController>()._sr.material = Managers.Resource.Load<Material>("HalfSpriteShadow");
         Managers.Resource.Instantiate("KingSlimeInstantiateEffect", GameObject.Find("Actions").transform);
         CoroutineManager.StartCoroutine(CameraController.CoShakeCamera(0.7f, 0.7f));
 
-        kingSlimeActionFront.SetActive(false);
+        //kingSlimeActionFront.SetActive(false);
         kingSlimeActionBack.SetActive(false);
-        _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
+        //_kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
         GameObject.Find("Effects_00")?.SetActive(false);
         CoroutineManager.StartCoroutine(AfterMeetKingSlime());
     }
@@ -339,11 +346,11 @@ public class Events : MonoBehaviour
         if (_kingSlime != null)
         {
             _kingSlime.transform.localScale = new Vector3(1f, 2f, 1f);
-            _kingSlime.transform.localPosition = new Vector3(3.84f, 3f, -6f);
+            _kingSlime.transform.localPosition = new Vector3(3.84f, 3f, -5.5f);
             _kingSlime.SetActive(true);
-            if (_kingSlime != null)
-                _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
-            _kingSlime.gameObject.GetOrAddComponent<Animator>().Play("Boss_C0_I000");
+            //if (_kingSlime != null)
+            //    //_kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
+            //_kingSlime.gameObject.GetOrAddComponent<Animator>().Play("Boss_C0_I000");
         }
 
         yield return new WaitForSeconds(2f);
@@ -608,8 +615,7 @@ public class Events : MonoBehaviour
 
         GameObject light = Managers.Resource.Instantiate("BossDeathLight");
         light.transform.position = boss.transform.position;
-        light.transform.localScale = new Vector3(3f, 6f, 3f);
-        AnimationClip lightClip = light.GetComponent<Animator>().runtimeAnimatorController.animationClips[0];
+        light.transform.localScale = new Vector3(1f, 2f, 1f);
         yield return new WaitForSeconds(1f);
 
         //float whiteTime = 0.5f;

@@ -8,6 +8,7 @@ using UnityEngine.Experimental.Rendering.Universal;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UIElements;
+using static CameraController;
 
 public class CameraController : MonoBehaviour
 { 
@@ -157,6 +158,21 @@ public class CameraController : MonoBehaviour
             }
 
             colorAdjustment.postExposure.value = targetExposure;
+        }
+    }
+
+    public static IEnumerator WhiteBang(float time)
+    {
+        Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
+        ColorAdjustments colorAdjustment;
+        if (postProcessingVolume.profile.TryGet<ColorAdjustments>(out colorAdjustment))
+        {
+            colorAdjustment.postExposure.value = Define.POSTPROCESSING_WHITE_EXPOSURE;
+        }
+        yield return new WaitForSeconds(time);
+        if (postProcessingVolume.profile.TryGet<ColorAdjustments>(out colorAdjustment))
+        {
+            colorAdjustment.postExposure.value = Define.POSTPROCESSING_DEFAULT_EXPOSURE;
         }
     }
 
