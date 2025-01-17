@@ -167,8 +167,8 @@ public class PlayerController : MonoBehaviour
             _moveDir = MoveDir.Left;
         }
 
-        if (_moveDir != MoveDir.None /*&& (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) ||
-            Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))*/)
+        if (_moveDir != MoveDir.None && (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) ||
+            Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
         {
             Moving(_moveDir, false);
         }
