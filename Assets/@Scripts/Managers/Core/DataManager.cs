@@ -34,7 +34,7 @@ public class DataManager
 
     public void Init()
     {
-        AssetDatabase.Refresh();
+        //AssetDatabase.Refresh();
 
         PlayerDic = LoadJson<Data.PlayerDataLoader, int, Data.PlayerData>("PlayerData").MakeDict();
         MonsterDic = LoadJson<Data.MonsterDataLoader, int, Data.MonsterData>("MonsterData").MakeDict();
@@ -473,13 +473,13 @@ public class DataManager
         string leverActiveDicJsonStr = JsonConvert.SerializeObject(leverActiveDic, Formatting.Indented);
         File.WriteAllText($"{Application.persistentDataPath}/LeverActiveData.json", leverActiveDicJsonStr);
 
-        AssetDatabase.Refresh();
+        //AssetDatabase.Refresh();
         #endregion
 
         string mapDicJsonStr = JsonConvert.SerializeObject(loader);
         File.WriteAllText($"{Application.persistentDataPath}/MapData.json", mapDicJsonStr);
         File.WriteAllText($"{Application.dataPath}/@Resources/Data/JsonData/MapData.json", mapDicJsonStr);
-        AssetDatabase.Refresh();
+        //AssetDatabase.Refresh();
     }
     #endregion
 }
