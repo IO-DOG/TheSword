@@ -160,19 +160,38 @@ public class UIManager
             ClosePopupUI();
     }
 
+    private void ClosePlayerHpBar()
+    {
+        GameObject UI_PlayerHPBar = GameObject.Find("UI_PlayerHPBar");
+        if (UI_PlayerHPBar != null)
+            UI_PlayerHPBar.GetComponent<Image>().color = new Color(1, 1, 1, 0);
+
+        GameObject UI_PlayerHPBarGauge = GameObject.Find("PlayerHPBarGauge");
+        if (UI_PlayerHPBarGauge != null)
+            UI_PlayerHPBarGauge.GetComponent<Image>().color = new Color(1, 1, 1, 0);
+    }
+    private void ShowPlayerHpBar()
+    {
+        GameObject UI_PlayerHPBar = GameObject.Find("UI_PlayerHPBar");
+        if (UI_PlayerHPBar != null)
+            UI_PlayerHPBar.GetComponent<Image>().color = new Color(1, 1, 1, 1);
+
+        GameObject UI_PlayerHPBarGauge = GameObject.Find("PlayerHPBarGauge");
+        if (UI_PlayerHPBarGauge != null)
+            UI_PlayerHPBarGauge.GetComponent<Image>().color = new Color(1, 1, 1, 1);
+    }
+
     public void CloseGameSceneUI()
     {
         CloseAllPopupUI();
+        ClosePlayerHpBar();
         UI_GameScene.gameObject.SetActive(false);
-        GameObject.Find("UI_PlayerHPBar").GetComponent<Image>().color = new Color(1, 1, 1, 0);
-        GameObject.Find("PlayerHPBarGauge").GetComponent<Image>().color = new Color(1, 1, 1, 0);
     }
 
-    public void OpenGameSceneUI()
+    public void ShowGameSceneUI()
     {
         UI_GameScene.gameObject.SetActive(true);
-        GameObject.Find("UI_PlayerHPBar").GetComponent<Image>().color = new Color(1, 1, 1, 1);
-        GameObject.Find("PlayerHPBarGauge").GetComponent<Image>().color = new Color(1, 1, 1, 1);
+        ShowPlayerHpBar();
     }
 
     public UI_Toast ShowToast(string msg)

@@ -115,7 +115,7 @@ public class Effects_00 : MonoBehaviour
         // fog
         if(Managers.Game.PlayerData.CurStageid == Managers.Game.BossRoomId)
         {
-            if (fog.GetComponent<VisualEffect>().HasVector4("FogSeconderyColor"))
+            if (fog !=null && fog.GetComponent<VisualEffect>().HasVector4("FogSeconderyColor"))
             {
                 Vector4 color = new Color(12 / 255f, 166 / 255f, 18 / 255f);
                 fog.GetComponent<VisualEffect>().SetVector4("FogSeconderyColor", color);

@@ -143,7 +143,7 @@ public class UI_ConversationPopup : UI_Popup
                 Managers.Directing.PopupAction = null;
             }
             else
-                Managers.UI.OpenGameSceneUI();
+                Managers.UI.ShowGameSceneUI();
 
             return;
         }

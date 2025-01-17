@@ -8,9 +8,13 @@ using UnityEngine.UI;
 public class UI_Fade : UI_Base
 {
     private float _offset = 300;
-    void Start()
+
+    private void Awake()
     {
         Managers.Game.OnFade = true;
+    }
+    void Start()
+    {
         gameObject.GetComponentInChildren<Image>().gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(Screen.width + _offset, Screen.height);
     }
 

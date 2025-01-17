@@ -473,8 +473,9 @@ public class PlayerController : MonoBehaviour
                 somethingExist = true;
             }
             //Checking Monster
-            else if (hit.collider.gameObject.layer == (int)Define.Layer.Monster)
+            else if (hit.collider.gameObject.layer == (int)Define.Layer.Monster && !Managers.Game.OnBattle)
             {
+                Debug.Log(hit.collider.gameObject.name);
                 hit.collider.gameObject.GetComponent<MonsterController>().SetMonster();
                 somethingExist = true;
             }
@@ -587,19 +588,14 @@ public class PlayerController : MonoBehaviour
             {
                 if (GetTouchDirection(hit.collider.transform, Vector3.back) == TouchDir.Right)
                 {
-                    Debug.Log("left");
                     Moving(MoveDir.Left, true);
-                    somethingExist=true;
-                    Managers.Resource.Destroy(hit.collider.gameObject);
-
                 }
                 else if (GetTouchDirection(hit.collider.transform, Vector3.back) == TouchDir.Left)
                 {
-                    Debug.Log("Right");
                     Moving(MoveDir.Right, true);
-                    somethingExist = true;
-                    Managers.Resource.Destroy(hit.collider.gameObject);
                 }
+                somethingExist = true;
+                Managers.Resource.Destroy(hit.collider.gameObject);
                 Managers.Directing.BossOnAppearAction?.Invoke();
             }
         }
