@@ -480,6 +480,11 @@ public class Events : MonoBehaviour
         smoke0.transform.localPosition = new Vector3(0f, -0.8f, 0.5f);
         smoke0.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
 
+        CoroutineManager.StartCoroutine(CameraController.CoShakeCamera(0.3f, 0.4f));
+        Managers.Resource.Instantiate("Stones", map.transform);
+
+        yield return new WaitForSeconds(0.2f);
+
         GameObject redSlime = Managers.Resource.Instantiate("BossMonster_3Slimes", map.transform);
         redSlime.transform.position = GameObject.Find("RedSlimePos").transform.position;
         redSlime.GetComponent<MonsterController>().id = 6;
@@ -489,6 +494,11 @@ public class Events : MonoBehaviour
         GameObject smoke1 = Managers.Resource.Instantiate("SmokeFlatBlack", redSlime.transform);
         smoke1.transform.localPosition = new Vector3(0f, -0.8f, 0.5f);
         smoke1.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+
+        CoroutineManager.StartCoroutine(CameraController.CoShakeCamera(0.3f, 0.4f));
+        Managers.Resource.Instantiate("Stones", map.transform);
+
+        yield return new WaitForSeconds(0.1f);
 
         GameObject blueSlime = Managers.Resource.Instantiate("BossMonster_3Slimes", map.transform);
         blueSlime.transform.position = GameObject.Find("BlueSlimePos").transform.position;
@@ -500,7 +510,7 @@ public class Events : MonoBehaviour
         smoke2.transform.localPosition = new Vector3(0f, -0.8f, 0.5f);
         smoke2.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
 
-        CoroutineManager.StartCoroutine(CameraController.CoShakeCamera(0.7f, 0.7f));
+        CoroutineManager.StartCoroutine(CameraController.CoShakeCamera(0.3f, 0.4f));
         Managers.Resource.Instantiate("Stones", map.transform);
 
         #endregion
