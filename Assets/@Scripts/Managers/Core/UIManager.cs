@@ -21,6 +21,7 @@ public class UIManager
     public UI_Scene SceneUI { get { return _sceneUI; } }
 
     public UI_StageNamePopup StageNamePopup;
+    public UI_BossNamePopup BossNamePopup;
     public UI_GameScene UI_GameScene;
 
     public event Action<int> OnTimeScaleChanged;
@@ -277,6 +278,29 @@ public class UIManager
 
         if(StageNamePopup != null)
             CoHideStageNamePopup = CoroutineManager.StartCoroutine(StageNamePopup.HideStageNamePopup(duration));
+    }
+
+
+    #endregion
+
+    #region BossNamePopup
+    Coroutine CoHideBossNamePopup;
+    public void ShowBossNamePopup(float duration)
+    {
+        if (BossNamePopup != null)
+        {
+            BossNamePopup.SetBossName();
+            if (CoHideBossNamePopup != null)
+                CoroutineManager.StopCoroutine(CoHideBossNamePopup);
+        }
+        else
+        {
+            BossNamePopup = Managers.UI.ShowPopupUI<UI_BossNamePopup>();
+            BossNamePopup.SetBossName();
+        }
+
+        if (BossNamePopup != null)
+            CoHideBossNamePopup = CoroutineManager.StartCoroutine(BossNamePopup.HideBossNamePopup(duration));
     }
 
 

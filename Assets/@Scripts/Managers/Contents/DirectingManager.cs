@@ -353,6 +353,8 @@ public class Events : MonoBehaviour
             //_kingSlime.gameObject.GetOrAddComponent<Animator>().Play("Boss_C0_I000");
         }
 
+        Managers.UI.ShowBossNamePopup(2f);
+
         yield return new WaitForSeconds(2f);
 
         Vector3 original = CameraController._transposer.m_FollowOffset;
