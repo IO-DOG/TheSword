@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1737039282491787576}
   - component: {fileID: 2498588713243514168}
   - component: {fileID: 3464486184394321213}
+  - component: {fileID: 6495291351425051613}
   m_Layer: 0
   m_Name: cm
   m_TagString: Untagged
@@ -58,7 +59,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BindingMode: 1
-  m_FollowOffset: {x: 0, y: 0, z: 0}
+  m_FollowOffset: {x: 0, y: 10, z: -5}
   m_XDamping: 0
   m_YDamping: 0
   m_ZDamping: 0
@@ -67,6 +68,23 @@ MonoBehaviour:
   m_YawDamping: 0
   m_RollDamping: 0
   m_AngularDamping: 0
+--- !u!114 &6495291351425051613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1950374848315738223}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68bb026fafb42b14791938953eaace77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_NoiseProfile: {fileID: 0}
+  m_PivotOffset: {x: 0, y: 0, z: 0}
+  m_AmplitudeGain: 1
+  m_FrequencyGain: 1
+  mNoiseOffsets: {x: 0, y: 0, z: 0}
 --- !u!1 &3582222762096364646
 GameObject:
   m_ObjectHideFlags: 0
@@ -144,7 +162,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 131039
+    m_Bits: 4294967295
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -370,6 +388,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f938d73b67a713458df88f0fe880908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _bg: {fileID: 0}
   _scaleMultiplier: 0
 --- !u!114 &5432944651992392917
 MonoBehaviour:

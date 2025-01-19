@@ -166,11 +166,6 @@ public class Events : MonoBehaviour
         Managers.Resource.Destroy(go1);
         Managers.Resource.Destroy(go2);
 
-        GameObject key = Managers.Resource.Instantiate("ConsumableItem");
-        key.transform.position = swordPos;
-        key.transform.localScale = new Vector3(1f, 2f, 1f);
-        key.GetComponent<ConsumableItem>().id = 1;
-
         yield return new WaitForSeconds(1.5f);
 
         Managers.Game.PlayerData.IsContractedSword = true;
@@ -182,6 +177,12 @@ public class Events : MonoBehaviour
         Managers.Game.OnDirect = false;
         Managers.UI.ShowGameSceneUI();
         Managers.Game.SaveGame();
+
+        GameObject curMAp = GameObject.Find("Dungeon_00_002");
+        GameObject key = curMAp.transform.Find("Items/CItem19").gameObject;
+        key.GetComponent<SpriteRenderer>().enabled = true;
+        key.GetComponent<BoxCollider>().enabled = true;
+        key.SetActive(true);
     }
 
     #endregion
@@ -353,7 +354,7 @@ public class Events : MonoBehaviour
             //_kingSlime.gameObject.GetOrAddComponent<Animator>().Play("Boss_C0_I000");
         }
 
-        Managers.UI.ShowBossNamePopup(2f);
+        Managers.UI.ShowBossNamePopup(1.5f);
 
         yield return new WaitForSeconds(2f);
 
@@ -369,15 +370,21 @@ public class Events : MonoBehaviour
         Managers.UI.ShowGameSceneUI();
     }
 
-    public void Unlock4Floor()
+    public void CoStartUnLock4Floor()
     {
+        StartCoroutine(Unlock4Floor());
+    }
+
+    IEnumerator Unlock4Floor()
+    {
+        yield return new WaitForSeconds(10f);
         // todo
         // path particle
         // open 4floor
         GameObject parent = GameObject.Find("Dungeon_00_003");
         GameObject go = Managers.Resource.Instantiate("FX_BossClearLine", parent.transform);
-        go.transform.localPosition = new Vector3(3.83f, 0.66f, -3.75f);
-        go.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        go.transform.localPosition = new Vector3(3.83f, 0.033f, -3.032f);
+        go.transform.localScale = new Vector3(0.3f, 0.4f, 0.4f);
     }
 
     #endregion
@@ -525,7 +532,11 @@ public class Events : MonoBehaviour
 
         Managers.UI.ShowGameSceneUI();
         Managers.Directing.CloseLetterBox();
+
+        yield return new WaitForSeconds(1f);
         Managers.Game.OnDirect = false;
+        Managers.UI.ShowPopupUI<UI_ConversationPopup>();
+        Managers.Game.CurEventID = Define.EVENT_KINGSLIME_DEAD;
     }
     #endregion
 
@@ -611,12 +622,12 @@ public class Events : MonoBehaviour
         SpriteRenderer sr = boss.GetOrAddComponent<SpriteRenderer>();
         sr.color = Util.DamagedColor();
         boss.GetComponent<Animator>().speed = 0f;
-        //yield return new WaitForSeconds(defaultTime);
         yield return new WaitForSeconds(0.1f);
-        GameObject fog = Managers.Resource.Instantiate("BossDeathBoom");
-        fog.transform.position = boss.transform.position;
-        //fog.transform.localScale = new Vector3(2f, 6f, 3f);
+
+        GameObject boom = Managers.Resource.Instantiate("BossDeathBoom");
+        boom.transform.position = boss.transform.position;
         boss.GetComponent<Collider>().enabled = false;
+        boom.GetComponent<BossBoom>().StartCoBossBoom(boss);
 
         yield return new WaitForSeconds(0.5f);
 
@@ -626,20 +637,12 @@ public class Events : MonoBehaviour
 
         yield return new WaitForSeconds(0.5f);
 
-        Managers.Resource.Destroy(fog);
-
         GameObject light = Managers.Resource.Instantiate("BossDeathLight");
         light.transform.position = boss.transform.position;
         light.transform.localScale = new Vector3(1f, 2f, 1f);
         yield return new WaitForSeconds(1f);
 
-        //float whiteTime = 0.5f;
-        //float defaultTime = 0.2f;
-        //CoroutineManager.StartCoroutine(CameraController.CoExposure(whiteTime, CameraController.Exposure.White));
-        //yield return new WaitForSeconds(whiteTime);
 
-        //CoroutineManager.StartCoroutine(CameraController.CoExposure(defaultTime, CameraController.Exposure.Default));
-        //yield return new WaitForSeconds(defaultTime);
         Managers.Resource.Destroy(light);
         Managers.Resource.Destroy(boss);
         GameObject poofCloudArcs = Managers.Resource.Instantiate("PoofCloudArcs");

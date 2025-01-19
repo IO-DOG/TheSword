@@ -1,6 +1,7 @@
 <linker>
   <assembly fullname="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
     <type fullname="BlackSlimeController" preserve="all" />
+    <type fullname="BossBoom" preserve="all" />
     <type fullname="BossDoor" preserve="all" />
     <type fullname="ConsumableItem" preserve="all" />
     <type fullname="Door" preserve="all" />
@@ -16,6 +17,7 @@
     <type fullname="PostPointLight" preserve="all" />
     <type fullname="RetroArsenal.RetroPitchRandomizer" preserve="all" />
     <type fullname="SplitSlimeController" preserve="all" />
+    <type fullname="UI_BossNamePopup" preserve="all" />
     <type fullname="UI_CItemInfo" preserve="all" />
     <type fullname="UI_ConversationPopup" preserve="all" />
     <type fullname="UI_EventHandler" preserve="all" />
@@ -90,8 +92,10 @@
   </assembly>
   <assembly fullname="Unity.RenderPipelines.Universal.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
     <type fullname="UnityEngine.Rendering.Universal.Bloom" preserve="all" />
+    <type fullname="UnityEngine.Rendering.Universal.ChromaticAberration" preserve="all" />
     <type fullname="UnityEngine.Rendering.Universal.ColorAdjustments" preserve="all" />
     <type fullname="UnityEngine.Rendering.Universal.DepthOfField" preserve="all" />
+    <type fullname="UnityEngine.Rendering.Universal.LensDistortion" preserve="all" />
     <type fullname="UnityEngine.Rendering.Universal.UniversalAdditionalLightData" preserve="all" />
     <type fullname="UnityEngine.Rendering.Universal.Vignette" preserve="all" />
     <type fullname="UnityEngine.Rendering.Universal.DepthOfFieldModeParameter" preserve="nothing" serialized="true" />

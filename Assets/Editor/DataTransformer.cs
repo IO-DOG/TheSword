@@ -67,6 +67,7 @@ public class DataTransformer : EditorWindow
     [MenuItem("Tools/ParseExcel %#K")]
     public static void ParseExcel()
     {
+        AssetDatabase.Refresh();
         ParsePlayerData("Player");
         ParseMonsterData("Monster");
         ParseConsumableItemData("ConsumableItem");

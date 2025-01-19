@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using System.Threading;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 using static GameManager;
+using static Unity.VisualScripting.Member;
 
 public class MonsterController : MonoBehaviour
 {
@@ -92,10 +94,56 @@ public class MonsterController : MonoBehaviour
     IEnumerator CoBossEnter()
     {
         yield return null;
-        Managers.Game.OnFadeAction.Invoke(1.3f);
-        yield return new WaitForSeconds(1.3f);
+
+        Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
+        ChromaticAberration chromaticAberration;
+        if (postProcessingVolume.profile.TryGet<ChromaticAberration>(out chromaticAberration))
+        {
+            chromaticAberration.intensity.value = 1;
+        }
+
+        LensDistortion lensDistortion;
+
+        // 볼록 렌즈 효과
+        float plusTime = 0.5f;
+        if (postProcessingVolume.profile.TryGet<LensDistortion>(out lensDistortion))
+        {
+            lensDistortion.active = true;
+            float originalIntensity = lensDistortion.intensity.value;
+            float targetIntensity = 0.8f;
+            float elapsedTime = 0f;
+            while (elapsedTime < plusTime)
+            {
+                elapsedTime += Time.deltaTime;
+                lensDistortion.intensity.value = Mathf.Lerp(originalIntensity, targetIntensity, elapsedTime / plusTime);
+                yield return null;
+            }
+
+            lensDistortion.intensity.value = targetIntensity;
+        }
+
+        // 오목 렌즈 효과
+        float minusTime = 0.1f;
+        if (postProcessingVolume.profile.TryGet<LensDistortion>(out lensDistortion))
+        {
+            float originalIntensity = lensDistortion.intensity.value;
+            float targetIntensity = -1f;
+            float elapsedTime = 0f;
+            while (elapsedTime < minusTime)
+            {
+                elapsedTime += Time.deltaTime;
+                lensDistortion.intensity.value = Mathf.Lerp(originalIntensity, targetIntensity, elapsedTime / minusTime);
+                yield return null;
+            }
+
+            lensDistortion.intensity.value = targetIntensity;
+        }
+
+        yield return new WaitForSeconds(0.05f);
 
         Managers.UI.ShowPopupUI<UI_BattlePopup>();
 
+        chromaticAberration.intensity.value = 0;
+        lensDistortion.active = false;
     }
 }

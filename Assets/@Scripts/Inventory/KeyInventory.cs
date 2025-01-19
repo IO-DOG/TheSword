@@ -37,6 +37,12 @@ public class KeyInventory
         if (item.GetComponent<ConsumableItem>().id < NUM_OF_KEYS)
         {
             _keys[item.GetComponent<ConsumableItem>().id]++;
+            if (item.GetComponent<ConsumableItem>().id == 0)
+                PlayerPrefs.SetInt("ISOPENGREENKEY", 1);
+            if (item.GetComponent<ConsumableItem>().id == 1)
+                PlayerPrefs.SetInt("ISOPENYELLOWKEY", 1);
+            if (item.GetComponent<ConsumableItem>().id == 2)
+                PlayerPrefs.SetInt("ISOPENREDKEY", 1);
             if (Managers.Game.Player._keyInventory.transform.GetChild(item.GetComponent<ConsumableItem>().id).gameObject.activeSelf == false)
             {
                 Managers.Game.Player._keyInventory.transform.GetChild(item.GetComponent<ConsumableItem>().id).gameObject.SetActive(true);

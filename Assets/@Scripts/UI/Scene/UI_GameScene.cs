@@ -96,9 +96,13 @@ public class UI_GameScene : UI_Scene
         //Managers.Game.PlayerData.CurShield = 0;
 
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
-        GetObject((int)GameObjects.GreenKey).SetActive(false);
-        GetObject((int)GameObjects.YellowKey).SetActive(false);
-        GetObject((int)GameObjects.RedKey).SetActive(false);
+
+        if (PlayerPrefs.GetInt("ISOPENGREENKEY") == 0)
+            GetObject((int)GameObjects.GreenKey).SetActive(false);
+        if (PlayerPrefs.GetInt("ISOPENYELLOWKEY") == 0)
+            GetObject((int)GameObjects.YellowKey).SetActive(false);
+        if (PlayerPrefs.GetInt("ISOPENREDKEY") == 0)
+            GetObject((int)GameObjects.RedKey).SetActive(false);
 
         // UI 활성화 여부 체크
         if (PlayerPrefs.GetInt("ISOPENINVENUI") == 0) // 인벤 활성화 x
@@ -133,7 +137,7 @@ public class UI_GameScene : UI_Scene
         Refresh();
         Data.MyVector3 loadPos = Managers.Game.PlayerData.CurPosition;
 
-        // 최초 실행 시 스폰 포인트 못 찾는 문제 예외 처리
+        //최초 실행 시 스폰 포인트 못 찾는 문제 예외 처리
         if (loadPos.X == 0 && loadPos.Z == 0)
             Managers.Game.Player.SetPlayerPosition(Managers.Game.SpawnPoints[0].position);
         else
@@ -167,6 +171,16 @@ public class UI_GameScene : UI_Scene
             Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND"));
         }
 
+        if (PlayerPrefs.GetInt("ISMEETSWORD") == 1)
+        {
+
+            // 검 먹고 남은 자리에 있는 key 활성화
+            GameObject map = GameObject.Find("Dungeon_00_002");
+            GameObject key = map.transform.Find("Items/CItem19").gameObject;
+            key.GetComponent<SpriteRenderer>().enabled = true;
+            key.GetComponent<BoxCollider>().enabled = true;
+            key.SetActive(true);
+        }
         return true;
     }
 

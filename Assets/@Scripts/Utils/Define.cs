@@ -248,6 +248,7 @@ public class Define
     #region Event ID
     public static int EVENT_TUTORIAL = 0;
     public static int EVENT_SWORD_FIRST = 1;
+    public static int EVENT_KINGSLIME_DEAD = 23;
     #endregion
 
     public static float FADE_DURATION = 2f;

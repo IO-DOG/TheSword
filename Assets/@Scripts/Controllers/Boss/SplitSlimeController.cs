@@ -23,7 +23,7 @@ public class SplitSlimeController : BossMonsterController
     public override void SetDeadEvent()
     {
         Managers.Directing.BossOnDeadAction = null;
-        Managers.Directing.BossOnDeadAction += Managers.Directing.Events.Unlock4Floor;
+        Managers.Directing.BossOnDeadAction += Managers.Directing.Events.CoStartUnLock4Floor;
     }
 
     public override void SetAppearEvent()

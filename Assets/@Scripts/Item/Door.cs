@@ -34,6 +34,7 @@ public class Door : MonoBehaviour
     Coroutine _openDoorCoroutine;
     public void CoOpenDoor(float time)
     {
+        gameObject.GetComponent<Collider>().enabled = false;
         Managers.Sound.Play(Define.Sound.Effect, "DoorUnlock_SFX");
         _openDoorCoroutine = StartCoroutine(OpenDoor(time));
     }
@@ -63,13 +64,12 @@ public class Door : MonoBehaviour
 
     IEnumerator DoorLockOpenAnim()
     {
-        Managers.Game.OnDirect = true;
         GameObject go = Managers.Resource.Instantiate("DoorLock", _doorLockPos);
         go.transform.localScale = new Vector3(go.transform.localScale.x, go.transform.localScale.y * _camera._scaleMultiplier, go.transform.localScale.z * _camera._scaleMultiplier);
         float time = go.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length;
         yield return new WaitForSeconds(time);
-        Managers.Game.OnDirect = false;
         Managers.Resource.Destroy(go);
+        Managers.Game.OnInteract = false;
     }
 
 
