@@ -39,7 +39,7 @@ public class UI_MagicalSwordCheckPopup : UI_Popup
 
         GetText((int)Texts.MagicalSwordCheckText).text = Managers.GetString(Managers.Data.ScriptDic[Define.SWOARD_ALERT].id);
 
-        Managers.Game.OnDirect = true;
+        //Managers.Game.OnDirect = true;
 
         YesPointerExit();
 

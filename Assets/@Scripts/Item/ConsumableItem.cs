@@ -52,7 +52,9 @@ public class ConsumableItem : MonoBehaviour
         {
             Managers.Game.PlayerData.Attack += Managers.Game.ConsumableItemData.AttackUp;
             Managers.Game.PlayerData.Defence += Managers.Game.ConsumableItemData.DefenceUp;   
-            Managers.Game.PlayerData.MaxHP += Managers.Game.ConsumableItemData.HPUp;   
+            Managers.Game.PlayerData.CurHP += Managers.Game.ConsumableItemData.HPUp;
+            if (Managers.Game.PlayerData.CurHP > Managers.Game.PlayerData.MaxHP)
+                Managers.Game.PlayerData.CurHP = Managers.Game.PlayerData.MaxHP;
         }
 
         //Managers.Game.SaveGame();

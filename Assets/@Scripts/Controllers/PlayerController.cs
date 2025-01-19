@@ -4,7 +4,7 @@ using UnityEngine;
 using DG.Tweening;
 using static Define;
 using Unity.Burst.CompilerServices;
-using UnityEditor.Experimental.GraphView;
+//using UnityEditor.Experimental.GraphView;
 
 public class PlayerController : MonoBehaviour
 {
@@ -64,6 +64,8 @@ public class PlayerController : MonoBehaviour
         _shield = GameObject.Find("ShieldSlot");
     }
 
+    Stack<int> keyInputStack = new Stack<int>();
+
     void OnKeyboard()
     {
         if (Managers.Game.OnBattle || Managers.Game.OnConversation || Managers.Game.OnLever
@@ -75,19 +77,94 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.W))
         {
+            keyInputStack.Push((int)MoveDir.Up);
+        }
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            keyInputStack.Push((int)MoveDir.Right);
+        }
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            keyInputStack.Push((int)MoveDir.Down);
+        }
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            keyInputStack.Push((int)MoveDir.Left);
+        }
+
+        // 값을 임시로 저장할 스택 생성
+        Stack<int> tempStack = new Stack<int>();
+
+        if (Input.GetKeyUp(KeyCode.W))
+        {
+            while (keyInputStack.Count > 0)
+            {
+                int current = keyInputStack.Pop();
+                if (current == (int)MoveDir.Up)
+                    break;
+                else
+                    tempStack.Push(current);
+            }
+            while (tempStack.Count > 0)
+                keyInputStack.Push(tempStack.Pop());
+        }
+        if (Input.GetKeyUp(KeyCode.D))
+        {
+            while (keyInputStack.Count > 0)
+            {
+                int current = keyInputStack.Pop();
+                if (current == (int)MoveDir.Right)
+                    break;
+                else
+                    tempStack.Push(current);
+            }
+            while (tempStack.Count > 0)
+                keyInputStack.Push(tempStack.Pop());
+        }
+        if (Input.GetKeyUp(KeyCode.S))
+        {
+            while (keyInputStack.Count > 0)
+            {
+                int current = keyInputStack.Pop();
+                if (current == (int)MoveDir.Down)
+                    break;
+                else
+                    tempStack.Push(current);
+            }
+            while (tempStack.Count > 0)
+                keyInputStack.Push(tempStack.Pop());
+        }
+        if (Input.GetKeyUp(KeyCode.A))
+        {
+            while (keyInputStack.Count > 0)
+            {
+                int current = keyInputStack.Pop();
+                if (current == (int)MoveDir.Left)
+                    break;
+                else
+                    tempStack.Push(current);
+            }
+            while (tempStack.Count > 0)
+                keyInputStack.Push(tempStack.Pop());
+        }
+
+        int topKey = -1;
+        keyInputStack.TryPeek(out topKey);
+        if (Input.GetKey(KeyCode.W) && topKey == (int)MoveDir.Up)
+        {
             _moveDir = MoveDir.Up;
         }
-        else if (Input.GetKeyDown(KeyCode.S))
+        if (Input.GetKey(KeyCode.D) && topKey == (int)MoveDir.Right)
+        {
+            _moveDir = MoveDir.Right;
+        }
+        if (Input.GetKey(KeyCode.S) && topKey == (int)MoveDir.Down)
         {
             _moveDir = MoveDir.Down;
         }
-        else if (Input.GetKeyDown(KeyCode.A))
+        if (Input.GetKey(KeyCode.A) && topKey == (int)MoveDir.Left)
         {
             _moveDir = MoveDir.Left;
-        }
-        else if (Input.GetKeyDown(KeyCode.D))
-        {
-            _moveDir = MoveDir.Right;
         }
 
         if (_moveDir != MoveDir.None && (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) ||

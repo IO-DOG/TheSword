@@ -256,7 +256,7 @@ public class UI_PlayerCard : UI_BaseCard
         string attackFX = Managers.Data.EquipDic[swordId].AttackFX;
         GameObject player = GameObject.Find("CreatureImage");
         GameObject go = Managers.Resource.Instantiate(attackFX, GetImage((int)GameObjects.AttackFX).transform);
-        go.transform.localPosition += new Vector3(-50, -150, 0);
+        go.transform.localPosition += new Vector3(-50, -50, 0);
         var uiParticle = go.GetOrAddComponent<UIParticle>();
         uiParticle.scale = 270;
         uiParticle.Play();
