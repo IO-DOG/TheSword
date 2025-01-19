@@ -21,6 +21,7 @@ public class Define
         IntroScene,
         GameScene,
         TutorialScene,
+        EndingScene,
     }
 
     public enum StageName

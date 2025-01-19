@@ -55,6 +55,6 @@ public class BossDoor : PortalController
 
         yield return new WaitForSeconds(5f);
 
-        Managers.Resource.Destroy(gameObject);
+        gameObject.SetActive(false);
     }
 }

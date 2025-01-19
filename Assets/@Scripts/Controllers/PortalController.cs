@@ -78,6 +78,7 @@ public class PortalController : MonoBehaviour
         }
 
         Debug.Log("포탈 없음");
+        Managers.Directing.Events.CoStartEndingScene();
         return null;
     }
 

@@ -39,7 +39,7 @@ public class UI_MagicalSwordCheckPopup : UI_Popup
 
         GetText((int)Texts.MagicalSwordCheckText).text = Managers.GetString(Managers.Data.ScriptDic[Define.SWOARD_ALERT].id);
 
-        //Managers.Game.OnDirect = true;
+        Managers.Game.OnConversation = true;
 
         YesPointerExit();
 
@@ -59,6 +59,7 @@ public class UI_MagicalSwordCheckPopup : UI_Popup
         Managers.Game.OnDirect = false;
         Managers.Sound.Play(Define.Sound.Effect, "ButtonUI_Ok_SFX");
 
+        Managers.Game.OnConversation = false;
         Managers.Directing.Events.CoStartContractSword();
         ClosePopupUI();
     }

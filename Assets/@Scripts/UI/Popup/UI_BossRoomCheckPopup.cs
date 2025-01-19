@@ -56,7 +56,7 @@ public class UI_BossRoomCheckPopup : UI_Popup
 
         StartCoroutine(PopupAnimation());
 
-        //Managers.Game.OnDirect = true;
+        Managers.Game.OnConversation = true;
 
         return true;
     }
@@ -96,6 +96,7 @@ public class UI_BossRoomCheckPopup : UI_Popup
         Managers.Sound.Play(Define.Sound.Effect, "ButtonUI_Ok_SFX");
 
         Managers.Game.ParentMap.GetComponentInChildren<BossDoor>().CoStartPlayEffect();
+        Managers.Game.OnConversation = false;
         ClosePopupUI();
     }
 
@@ -103,7 +104,7 @@ public class UI_BossRoomCheckPopup : UI_Popup
     {
         Managers.Sound.Play(Define.Sound.Effect, "ButtonUI_No_SFX");
 
-        Managers.Game.OnDirect = false;
+        Managers.Game.OnConversation = false;
         ClosePopupUI();
     }
 

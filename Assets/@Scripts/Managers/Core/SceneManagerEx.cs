@@ -23,6 +23,10 @@ public class SceneManagerEx
                 Managers.Clear();
                 SceneManager.LoadScene(GetSceneName(type));
                 break;
+            case Define.Scene.EndingScene:
+                Managers.Clear();
+                SceneManager.LoadScene(GetSceneName(type));
+                break;
         }
     }
 

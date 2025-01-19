@@ -1,5 +1,6 @@
 ﻿using Cinemachine;
 using DG.Tweening;
+using Febucci.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -372,7 +373,7 @@ public class Events : MonoBehaviour
 
     public void CoStartUnLock4Floor()
     {
-        StartCoroutine(Unlock4Floor());
+        CoroutineManager.StartCoroutine(Unlock4Floor());
     }
 
     IEnumerator Unlock4Floor()
@@ -523,6 +524,13 @@ public class Events : MonoBehaviour
         #endregion
 
         yield return new WaitForSeconds(1f);
+
+        // yellow Slime Potion
+        GameObject potion = Managers.Resource.Instantiate("ConsumableItem");
+        potion.GetComponent<ConsumableItem>().id = 7;
+        potion.transform.position = new Vector3(yellowSlime.transform.position.x, 0f, -4.05f);
+        potion.transform.localScale = new Vector3(1f, 2f, 1f);
+       
         Vector3 original3 = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
         Vector3 target3 = Define.DEFALUT_CAMERA_OFFSET;
         float moveTime3 = 1f;
@@ -650,5 +658,21 @@ public class Events : MonoBehaviour
 
         GameObject poofCloudNova = Managers.Resource.Instantiate("PoofCloudNova");
         poofCloudNova.transform.position = bossPos;
+    }
+
+    public void CoStartEndingScene()
+    {
+        CoroutineManager.StartCoroutine(StartEndingScene());
+    }
+    IEnumerator StartEndingScene()
+    {
+        Managers.UI.CloseGameSceneUI();
+        Managers.Game.OnDirect = true;
+
+        CoroutineManager.StartCoroutine(CameraController.CoExposure(1.5f, CameraController.Exposure.Black));
+        yield return new WaitForSeconds(1.5f);
+
+        Managers.Scene.LoadScene(Define.Scene.EndingScene);
+        Managers.Game.OnDirect = false;
     }
 }
