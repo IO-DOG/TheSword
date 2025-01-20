@@ -82,6 +82,10 @@ public class UI_SettingPopup : UI_Popup
         GetImage((int)Images.WindowScreenCheckBox).gameObject.BindEvent(OnClickWindowScreenCheckBox);
         GetImage((int)Images.FullWindowScreenCheckBox).gameObject.BindEvent(OnClickFullWindowScreenCheckBox);
 
+        GetObject((int)GameObjects.TotalSoundSlider).GetComponent<Slider>().value = PlayerPrefs.GetFloat("CURSOUND");
+        GetObject((int)GameObjects.BGMSoundSlider).GetComponent<Slider>().value = PlayerPrefs.GetFloat("CURBGMSOUND");
+        GetObject((int)GameObjects.EffectSoundSlider).GetComponent<Slider>().value = PlayerPrefs.GetFloat("CUREFFECTSOUND");
+
         OnEnterExitImage();
 
         Refresh();

@@ -141,14 +141,14 @@ public class UI_TitleScene : UI_Scene
             CheckFirstGame();
         }
 
-        if (Input.GetKeyDown(KeyCode.DownArrow))
+        if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S))
         {
             if (buttonsIdx != (maxButtonCount - 1)) Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UImove");
             buttonsIdx++;
             buttonsIdx = Mathf.Min(buttonsIdx, maxButtonCount - 1);
             SetButtonColorAndButtonsText(buttonsIdx);
         }
-        if (Input.GetKeyDown(KeyCode.UpArrow))
+        if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W))
         {
             if (buttonsIdx != 0) Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UImove");
             buttonsIdx--;
