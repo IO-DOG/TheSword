@@ -146,11 +146,11 @@ public class UI_GameScene : UI_Scene
             Managers.Game.Player.SetPlayerPosition(playerPos);
         }
 
-        #region Test
+        //#region Test
         //Managers.Game.Player.SetPlayerPosition(Managers.Game.SpawnPoints[1].position);
         //Managers.Game.PlayerData.CurStageid = 3;
         //Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
-        #endregion
+        //#endregion
 
         if (PlayerPrefs.GetInt("ISOPENSWORD") == 0)
             GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(false);

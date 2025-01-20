@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -59,9 +60,9 @@ public class SoundManager
                 if (audioSource.isPlaying)
                     audioSource.Stop();
 
-                audioSource.clip = audioClip;
-                //if (Managers.Game.BGMOn)
-                audioSource.Play();
+               audioSource.clip = audioClip;
+               //if (Managers.Game.BGMOn)
+               audioSource.Play();
             });
         }
         else if (type == Define.Sound.SubBgm)
@@ -237,5 +238,26 @@ public class SoundManager
         yield return delay;
         _totalEffectCount--;
         _totalEffectCount = Mathf.Max(1, _totalEffectCount);
+    }
+
+    // 페이드 타임이 총 합쳐서 time.
+    // time/2 시간씩 fadeOut, fadeIn
+    public void FadeAndPlayBGM(string key, float time)
+    {
+        AudioSource audioSource = _audioSources[(int)Define.Sound.Bgm];
+        float volume = audioSource.volume;
+        LoadAudioClip(key, (audioClip) =>
+        {
+            if (audioSource.isPlaying)
+            {
+                audioSource.DOFade(0f, time / 2f).OnComplete(() =>
+                {
+                    audioSource.Stop();
+                    audioSource.clip = audioClip;
+                    audioSource.Play();
+                    audioSource.DOFade(volume, time / 2f);
+                });
+            }
+        });
     }
 }
