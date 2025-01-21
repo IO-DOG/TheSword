@@ -14,6 +14,7 @@ public class UI_PlayerCard : UI_BaseCard
 
         //Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
 
+        _creature.Name = "Demian";
         Refresh();
         _creature.OnDefenceAction += ClearDefence;
         _creature.OnHitAction += Refresh;
@@ -31,12 +32,14 @@ public class UI_PlayerCard : UI_BaseCard
 
         //GetImage((int)Images.AttackIcon).sprite = Managers.Resource.Load<Sprite>(Managers.Data.MonsterClassDic[_creature.Ability].Weapon + "[" + Managers.Data.MonsterClassDic[_creature.Ability].Weapon + "_0]");
 
+        SetUI();
         return true;
     }
 
     public override void Refresh()
     {
         base.Refresh();
+        SetUI();
     }
 
     public override void Attack(CreatureData attacker, CreatureData target)
@@ -168,7 +171,7 @@ public class UI_PlayerCard : UI_BaseCard
         swordanimator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("CreatureSwordImage");
         shieldanimator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("CreatureShieldImage");
         animator.Play($"UIPlayerIdleAnim");
-        swordanimator.Play($"UISword{Managers.Game.PlayerData.CurSword - 9}IdleAnim");
+        swordanimator.Play($"UISword{Managers.Game.PlayerData.CurSword - Define.EQUIP_SOWRD_FIRST}IdleAnim");
         if (Managers.Game.PlayerData.CurShield != 0)
             shieldanimator.Play($"UIShield{Managers.Game.PlayerData.CurShield - 20}IdleAnim");
         image.sprite = GetImage((int)Images.CreatureImage).sprite;

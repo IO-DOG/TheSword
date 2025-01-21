@@ -310,7 +310,7 @@ public class GameManager
         int count = 0;
         KeyValuePair<int, int> mapStartAndEnd = GetChapterCount(mapId);
 
-        ParentMap = new GameObject(name : "Maps");
+        ParentMap = new GameObject(name: "Maps");
 
         for (int i = mapStartAndEnd.Key; i <= mapStartAndEnd.Value; i++)
         {
@@ -411,18 +411,22 @@ public class GameManager
         {
             case 1:
                 curIdx = Managers.Game.PlayerData.CurSword;
+                Managers.Game.PlayerData.CurSword = idx;
                 break;
             case 2:
                 curIdx = Managers.Game.PlayerData.CurShield;
+                Managers.Game.PlayerData.CurShield = idx;
                 break;
             case 3:
                 curIdx = Managers.Game.PlayerData.CurRing;
+                Managers.Game.PlayerData.CurRing = idx;
                 break;
             case 4:
                 //curIdx = Managers.Game.CurPlayerData.CurSword;
                 break;
             case 5:
                 curIdx = Managers.Game.PlayerData.CurShoes;
+                Managers.Game.PlayerData.CurShoes = idx;
                 break;
             case 6:
                 //curIdx = Managers.Game.CurPlayerData.CurSword;
@@ -433,14 +437,14 @@ public class GameManager
 
         if (curIdx == 0)
         {
-            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[curIdx].ATK;
-            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[curIdx].DEF;
-            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[curIdx].HP;
-            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[curIdx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[curIdx].DSPD;
-            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[curIdx].CRI;
-            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[curIdx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[curIdx].MSPD;
+            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[idx].ATK;
+            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[idx].DEF;
+            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[idx].HP;
+            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[idx].ASPD;
+            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[idx].DSPD;
+            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[idx].CRI;
+            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[idx].CRIATK;
+            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[idx].MSPD;
             return;
         }
         else
@@ -464,7 +468,8 @@ public class GameManager
             Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[idx].MSPD;
         }
 
-        Managers.Game.GameScene.Refresh();
+        if (Managers.Game.GameScene != null)
+            Managers.Game.GameScene.Refresh();
     }
 
     #endregion
