@@ -56,17 +56,16 @@ public class UI_BaseCard : UI_Base
     public void SetData(CreatureData creature)
     {
         _creature = creature;
-        SetUI();
-    }
-
-    void SetUI()
-    {
         #region Bind
         BindImage(typeof(Images));
         BindText(typeof(Texts));
         BindObject(typeof(GameObjects));
         #endregion
+        SetUI();
+    }
 
+    protected void SetUI()
+    {
         GetText((int)Texts.CreatureName).text = _creature.Name;
         GetText((int)Texts.HPBarText).text = _creature.CurHP.ToString();
         GetText((int)Texts.AttackStatusText).text = _creature.Attack.ToString();

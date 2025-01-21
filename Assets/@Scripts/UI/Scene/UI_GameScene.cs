@@ -191,13 +191,16 @@ public class UI_GameScene : UI_Scene
         int level = Managers.Game.PlayerData.Level;
         Managers.Game.PlayerData.Level = Mathf.Max(level, 1);
         level = Mathf.Max(level, 1);
-        Debug.Log($"{Managers.Game.PlayerData.CurExp} , {Managers.Data.PlayerDic[level + 1].NeedExp}");
+
         GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.PlayerData.CurExp / Managers.Data.PlayerDic[level + 1].NeedExp;
         float hpRatio = Managers.Game.PlayerData.CurHP / Managers.Game.PlayerData.MaxHP;
         //GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = hpRatio;
         GameObject.Find("PlayerHPBarGauge").GetComponent<Image>().fillAmount = hpRatio;
         Managers.Game.KeyInventory.ShowKeySlot(Managers.Game.Player._keyInventory);
         SetPlayerInfo();
+
+        Debug.Log($"{Managers.Game.PlayerData.CurExp} , {Managers.Data.PlayerDic[level + 1].NeedExp}");
+        Debug.Log($"ATK : {Managers.Game.PlayerData.Attack} , total ATK : {Managers.Game.PlayerData.Attack + Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ATK}, cursword : {Managers.Game.PlayerData.CurSword}");
     }
 
     int _mask = (1 << (int)Define.Layer.Monster | 1 << (int)Define.Layer.CItem);
@@ -257,11 +260,12 @@ public class UI_GameScene : UI_Scene
         if (Input.GetKeyDown(KeyCode.F7))
         {
             if (Managers.Game.PlayerData.CurSword != Define.EQUIP_SOWRD_FIRST)
-                Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST;
+                Managers.Game.SwapEquip(Define.EQUIP_SOWRD_FIRST);
             else
-                Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
+                Managers.Game.SwapEquip(Define.EQUIP_SOWRD_FIRST + 1);
 
-            Managers.Game.SaveGame();
+            Refresh();
+            //Managers.Game.SaveGame();
         }
         if (Input.GetKeyDown(KeyCode.F8))
         {

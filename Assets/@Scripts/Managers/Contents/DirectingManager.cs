@@ -174,7 +174,9 @@ public class Events : MonoBehaviour
         Managers.Game.Player._moveDir = Define.MoveDir.Down;
         Managers.Game.Player._isEquiptWeapon = true;
         Managers.Game.Player._isEquiptShield = true;
-        Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
+
+        Managers.Game.SwapEquip(Define.EQUIP_SOWRD_FIRST + 1);
+        //Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
         Managers.Game.OnDirect = false;
         Managers.UI.ShowGameSceneUI();
         Managers.Game.SaveGame();

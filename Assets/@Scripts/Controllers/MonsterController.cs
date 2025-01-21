@@ -33,9 +33,10 @@ public class MonsterController : MonoBehaviour
         Managers.Game.MonsterData[0].Name = Managers.Data.MonsterDic[id].Name;
         Managers.Game.MonsterData[0].MaxHP = Managers.Data.MonsterDic[id].MaxHP;
         Managers.Game.MonsterData[0].CurHP = Managers.Data.MonsterDic[id].MaxHP;
+        
+        Managers.Game.MonsterData[0].Attack = Managers.Data.StageInfoDic[stageId].ATK * Managers.Data.MonsterDic[id].Attack;
+        Managers.Game.MonsterData[0].Defence = Managers.Data.StageInfoDic[stageId].DEF * Managers.Data.MonsterDic[id].Defence;
 
-        Managers.Game.MonsterData[0].Attack = Managers.Data.MonsterDic[id].Attack + Managers.Data.StageInfoDic[stageId].ATK * Managers.Data.MonsterDic[id].Attack;
-        Managers.Game.MonsterData[0].Defence = Managers.Data.MonsterDic[id].Defence + Managers.Data.StageInfoDic[stageId].DEF * Managers.Data.MonsterDic[id].Defence;
         Managers.Game.MonsterData[0].AttackSpeed = Managers.Data.MonsterDic[id].AttackSpeed;
         Managers.Game.MonsterData[0].DefenceSpeed = Managers.Data.MonsterDic[id].DefenceSpeed;
         Managers.Game.MonsterData[0].Critical = Managers.Data.MonsterDic[id].Critical;
