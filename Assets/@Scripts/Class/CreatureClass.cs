@@ -368,6 +368,12 @@ public class CreatureClass : MonoBehaviour
     // 분열 특성
     public class SplitTrait : ITrait
     {
+        public void ExcuteOnDead(CreatureData creature)
+        {
+            creature.CurHP = 0;
+            creature.OnDeadAction.Invoke();
+        }
+
         public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
             damage = Mathf.Max(0, damage);
@@ -392,45 +398,45 @@ public class CreatureClass : MonoBehaviour
             return damage;
         }
 
-        public void ExcuteOnDead(CreatureData creature)
-        {
-            Transform boss = Managers.Game.GetBoss().gameObject.transform;
-            creature.CurHP = 0;
-            Vector3 pos = boss.localPosition;
-            float size = Define.TILE_SIZE;
+        //public void ExcuteOnDead(CreatureData creature)
+        //{
+        //    Transform boss = Managers.Game.GetBoss().gameObject.transform;
+        //    creature.CurHP = 0;
+        //    Vector3 pos = boss.localPosition;
+        //    float size = Define.TILE_SIZE;
 
-            int[] dx = { -1, 0, 1/*, 1, 1, 0, -1, -1*/ };
-            int[] dy = { 1, 2, 1/*, 0, -1, -1, -1, 0*/ };
-            bool[] ch = { false, false, false, false, false, false, false, false };
-            List<int> s = new List<int>();
-            int cnt = 0;
+        //    int[] dx = { -1, 0, 1/*, 1, 1, 0, -1, -1*/ };
+        //    int[] dy = { 1, 2, 1/*, 0, -1, -1, -1, 0*/ };
+        //    bool[] ch = { false, false, false, false, false, false, false, false };
+        //    List<int> s = new List<int>();
+        //    int cnt = 0;
 
-            while (cnt < 3)
-            {
-                int randValue = UnityEngine.Random.Range(0, dx.Length);
-                if (ch[randValue] == false)
-                {
-                    cnt++;
-                    ch[randValue] = true;
-                    s.Add(randValue);
-                }
-            }
+        //    while (cnt < 3)
+        //    {
+        //        int randValue = UnityEngine.Random.Range(0, dx.Length);
+        //        if (ch[randValue] == false)
+        //        {
+        //            cnt++;
+        //            ch[randValue] = true;
+        //            s.Add(randValue);
+        //        }
+        //    }
 
-            for (int i = 0; i < s.Count; i++)
-            {
-                int idx = s[i];
-                Vector3 vector = new Vector3(pos.x + dx[idx] * size * 4, 2f, pos.z + dy[idx] * size * 4);
-                Debug.Log($"vector : {vector.x}, {vector.y}, {vector.z}");
+        //    for (int i = 0; i < s.Count; i++)
+        //    {
+        //        int idx = s[i];
+        //        Vector3 vector = new Vector3(pos.x + dx[idx] * size * 4, 2f, pos.z + dy[idx] * size * 4);
+        //        Debug.Log($"vector : {vector.x}, {vector.y}, {vector.z}");
 
-                GameObject monster = Managers.Resource.Instantiate("Monster", boss.parent);
-                monster.GetOrAddComponent<MonsterController>().id = 6 + i;
-                monster.GetComponent<BoxCollider>().size = new Vector3(1.5f, 2f, 0.2f);
-                monster.transform.localPosition += vector;
-                monster.transform.localScale = new Vector3(1, 2, 1);
-                monster.name = $"KingSlimeSplitMonster";
-            }
-            creature.OnDeadAction.Invoke();
-        }
+        //        GameObject monster = Managers.Resource.Instantiate("Monster", boss.parent);
+        //        monster.GetOrAddComponent<MonsterController>().id = 6 + i;
+        //        monster.GetComponent<BoxCollider>().size = new Vector3(1.5f, 2f, 0.2f);
+        //        monster.transform.localPosition += vector;
+        //        monster.transform.localScale = new Vector3(1, 2, 1);
+        //        monster.name = $"KingSlimeSplitMonster";
+        //    }
+        //    creature.OnDeadAction.Invoke();
+        //}
     }
 
     // 물약 특성
