@@ -96,6 +96,7 @@ public class MonsterController : MonoBehaviour
     {
         yield return null;
 
+        Managers.Sound.Play(Define.Sound.Effect, "BossBattleStart_Event");
         Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
         ChromaticAberration chromaticAberration;
         if (postProcessingVolume.profile.TryGet<ChromaticAberration>(out chromaticAberration))

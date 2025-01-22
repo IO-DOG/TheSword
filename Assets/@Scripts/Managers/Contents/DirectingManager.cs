@@ -212,7 +212,7 @@ public class Events : MonoBehaviour
     IEnumerator CoKingSlimeAction()
     {
         Managers.Game.OnDirect = true;
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.4f);
         Managers.Game.OnStaticResolution = true;
         Managers.UI.CloseGameSceneUI();
         Managers.Directing.PlayLetterBox();
@@ -230,7 +230,9 @@ public class Events : MonoBehaviour
 
         scoutSlime0.transform.localPosition = pos0;
 
-        yield return new WaitForSeconds(2f);
+        Managers.Sound.FadeAndPlayBGM("Chapter0_Boss_Event", 0.5f);
+  
+        yield return new WaitForSeconds(1.75f);
         GameObject parent = GameObject.Find("Dungeon_00_003");
         GameObject midlePos = GameObject.Find("SpawnKingSlime");
         Vector3 pos = new Vector3(3.845f, 1.47f, -1.408f);
@@ -371,6 +373,7 @@ public class Events : MonoBehaviour
         Managers.Game.OnStaticResolution = false;
         Managers.Game.OnDirect = false;
         Managers.UI.ShowGameSceneUI();
+        Managers.Sound.FadeAndPlayBGM("Chapter0_Boss_BGM", 1f);
     }
 
     public void CoStartUnLock4Floor()
@@ -414,13 +417,14 @@ public class Events : MonoBehaviour
         Transform orbsSpawnPos = GameObject.Find("OrbsSpawnPos").transform;
         GameObject slimeOrb = Managers.Resource.Instantiate("SlimeOrb", orbsSpawnPos);
         //slimeOrb.transform.position = new Vector3(kingSlime.transform.position.x, kingSlime.transform.position.y, kingSlime.transform.position.z);
+        Managers.Sound.Play(Define.Sound.Effect, "Chapter0_Boss_Event2");
         yield return new WaitForSeconds(0.5f);
-
         Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
         Vector3 target = new Vector3(0f, 18f, -5f); ;
         float moveTime = 1f;
         Managers.Game.MainCamera.GetComponentInChildren<CameraController>().StartCoVirtualCameraMove(original, target, moveTime);
         slimeOrb.transform.DOLocalMoveZ(2f, 1f);
+
         yield return new WaitForSeconds(1f);
 
         slimeOrb.transform.GetChild(0).DOLocalMoveX(-2.24f, 0.5f);
@@ -626,6 +630,7 @@ public class Events : MonoBehaviour
 
     IEnumerator BossDeadEffect(GameObject boss)
     {
+        Managers.Sound.Play(Define.Sound.Effect, "BossDeath_SFX");
         Vector3 bossPos = boss.transform.position;
 
         boss.GetComponent<SpriteRenderer>().enabled = true;
