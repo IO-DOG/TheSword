@@ -559,7 +559,7 @@ public class Events : MonoBehaviour
     {
         PlayerPrefs.SetFloat("CURBGMSOUND", 1);
         Managers.Sound.Play(Define.Sound.Bgm, "Chapter0_BGM");
-        Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND"));
+        Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND") * PlayerPrefs.GetFloat("SAVESOUND", 1));
         CoroutineManager.StartCoroutine(PlayTutorial_1());
         Managers.UI.CloseGameSceneUI();
         GameObject.Find("UI_PlayerHPBar").GetComponent<Image>().color = new Color(1, 1, 1, 0);

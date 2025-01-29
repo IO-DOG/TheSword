@@ -111,7 +111,7 @@ public class UI_TitleScene : UI_Scene
                 PlayerPrefs.SetFloat("CURBGMSOUND", 1);
                 PlayerPrefs.SetFloat("CUREFFECTSOUND", 1);
                 Managers.Sound.Play(Define.Sound.Bgm, "MainTitle_BGM");
-                Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND"));
+                Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND") * PlayerPrefs.GetFloat("SAVESOUND", 1));
                 //Managers.Sound.SetVolume(PlayerPrefs.GetFloat("CURSOUND", 1));
                 //Managers.Sound.SetVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1));
                 //Managers.Sound.SetVolume(PlayerPrefs.GetFloat("CUREFFECTSOUND", 1));
