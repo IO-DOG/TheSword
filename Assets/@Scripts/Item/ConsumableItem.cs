@@ -47,6 +47,7 @@ public class ConsumableItem : MonoBehaviour
         else if(id < NUM_OF_POTIONS)
         {
             float heal = Managers.Game.ConsumableItemData.Heal * Managers.Game.PlayerData.MaxHP / 100;
+            heal = Mathf.Round(heal);
             Managers.Game.PlayerData.CurHP += heal;
 
             if (Managers.Game.PlayerData.CurHP > Managers.Game.PlayerData.MaxHP)
