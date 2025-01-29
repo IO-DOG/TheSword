@@ -108,6 +108,7 @@ public class UI_GameOverPopup : UI_Popup
         //Managers.Game.DeleteGameData();
         //Managers.Data.Init();
         Managers.Game.OnInputLock = false;
+        Managers.Game.IsPlayerDead = false;
 
         GameObject.Find("Maps")?.SetActive(false);
         Managers.Game.GameScene.gameObject?.SetActive(false);
