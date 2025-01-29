@@ -108,14 +108,14 @@ public class UI_SettingPopup : UI_Popup
         {
             PlayerPrefs.SetFloat("CURBGMSOUND", GetObject((int)GameObjects.BGMSoundSlider).GetComponent<Slider>().value);
             PlayerPrefs.SetFloat("SAVEBGMSOUND", GetObject((int)GameObjects.BGMSoundSlider).GetComponent<Slider>().value);
-            Managers.Sound.SetBGMVolume(GetObject((int)GameObjects.BGMSoundSlider).GetComponent<Slider>().value);
+            Managers.Sound.SetBGMVolume(GetObject((int)GameObjects.BGMSoundSlider).GetComponent<Slider>().value * GetObject((int)GameObjects.TotalSoundSlider).GetComponent<Slider>().value);
         }
 
         if (PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) != GetObject((int)GameObjects.EffectSoundSlider).GetComponent<Slider>().value /*&& GetObject((int)GameObjects.SoundToggle).GetComponent<Toggle>().isOn == true*/)
         {
             PlayerPrefs.SetFloat("CUREFFECTSOUND", GetObject((int)GameObjects.EffectSoundSlider).GetComponent<Slider>().value);
             PlayerPrefs.SetFloat("SAVEEFFECTSOUND", GetObject((int)GameObjects.EffectSoundSlider).GetComponent<Slider>().value);
-            Managers.Sound.SetEffectVolume(GetObject((int)GameObjects.EffectSoundSlider).GetComponent<Slider>().value);
+            Managers.Sound.SetEffectVolume(GetObject((int)GameObjects.EffectSoundSlider).GetComponent<Slider>().value * GetObject((int)GameObjects.TotalSoundSlider).GetComponent<Slider>().value);
         }
     }
 

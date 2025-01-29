@@ -57,6 +57,10 @@ public class ConsumableItem : MonoBehaviour
                 Managers.Game.PlayerData.CurHP = Managers.Game.PlayerData.MaxHP;
         }
 
+        if (Managers.Game.GameScene != null)
+        {
+            Managers.Game.GameScene.Refresh();
+        }
         //Managers.Game.SaveGame();
     }
 
