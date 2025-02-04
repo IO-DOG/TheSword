@@ -35,6 +35,7 @@ public class UI_PlayerCard : UI_BaseCard
         GetText((int)Texts.HPBarText).text = _creature.CurHP.ToString();
         GetImage((int)Images.HPHar).fillAmount = _creature.CurHP / _creature.MaxHP;
         GetImage((int)Images.HPHarGauge).fillAmount = _creature.CurHP / _creature.MaxHP;
+        GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play($"UISword{Managers.Game.PlayerData.CurSword - Define.EQUIP_SOWRD_FIRST}IdleAnim");
         SetUI();
         return true;
     }
@@ -57,9 +58,9 @@ public class UI_PlayerCard : UI_BaseCard
 
         //Debug.Log(Managers.Game.PlayerData.CurSword);
         GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play("UIPlayerAttackAnim");
-        GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play($"UISword1AttackAnim");
+        GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play($"UISword{Managers.Game.PlayerData.CurSword - Define.EQUIP_SOWRD_FIRST}AttackAnim");
         if (Managers.Game.PlayerData.CurShield != 0)
-            GetImage((int)Images.CreatureShieldImage).gameObject.GetComponent<Animator>().Play($"UIShield1AttackAnim");
+            GetImage((int)Images.CreatureShieldImage).gameObject.GetComponent<Animator>().Play($"UIShield{Managers.Game.PlayerData.CurShield - Define.EQUIP_SHIELD_FIRST}AttackAnim");
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Weapon);
         CreatePlayerAttackParticle();
         CreateMonsterHitParticle();
@@ -176,7 +177,7 @@ public class UI_PlayerCard : UI_BaseCard
         animator.Play($"UIPlayerIdleAnim");
         swordanimator.Play($"UISword{Managers.Game.PlayerData.CurSword - Define.EQUIP_SOWRD_FIRST}IdleAnim");
         if (Managers.Game.PlayerData.CurShield != 0)
-            shieldanimator.Play($"UIShield{Managers.Game.PlayerData.CurShield - 20}IdleAnim");
+            shieldanimator.Play($"UIShield{Managers.Game.PlayerData.CurShield - Define.EQUIP_SHIELD_FIRST}IdleAnim");
         image.sprite = GetImage((int)Images.CreatureImage).sprite;
         swordImage.sprite = GetImage((int)Images.CreatureImage).sprite;
         shieldImage.sprite = GetImage((int)Images.CreatureImage).sprite;

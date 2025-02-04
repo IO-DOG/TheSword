@@ -257,7 +257,8 @@ public class Define
 
     #region EquipDataForInven
     public static int EQUIP_SOWRD_FIRST = 9;
-    public static int EQUIP_SOWRD_END = 19;
+    public static int EQUIP_SOWRD_END = 20;
+    public static int EQUIP_SHIELD_FIRST = 21;
 
     #endregion
 }
