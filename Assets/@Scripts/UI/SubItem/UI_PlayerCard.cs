@@ -32,6 +32,9 @@ public class UI_PlayerCard : UI_BaseCard
 
         //GetImage((int)Images.AttackIcon).sprite = Managers.Resource.Load<Sprite>(Managers.Data.MonsterClassDic[_creature.Ability].Weapon + "[" + Managers.Data.MonsterClassDic[_creature.Ability].Weapon + "_0]");
 
+        GetText((int)Texts.HPBarText).text = _creature.CurHP.ToString();
+        GetImage((int)Images.HPHar).fillAmount = _creature.CurHP / _creature.MaxHP;
+        GetImage((int)Images.HPHarGauge).fillAmount = _creature.CurHP / _creature.MaxHP;
         SetUI();
         return true;
     }
