@@ -178,6 +178,7 @@ public class Events : MonoBehaviour
         Managers.Game.SwapEquip(Define.EQUIP_SOWRD_FIRST + 1);
         //Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
         Managers.Game.OnDirect = false;
+        Managers.Game.GameScene?.OnUIInventory();
         Managers.UI.ShowGameSceneUI();
         Managers.Game.SaveGame();
 
@@ -569,6 +570,7 @@ public class Events : MonoBehaviour
         Managers.Game.SaveGame();
     }
 
+    // 마검 만남
     IEnumerator PlayTutorial_1()
     {
         Managers.Game.CurEventID = 0;

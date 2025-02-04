@@ -337,6 +337,13 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(false);
     }
 
+    public void OnUIInventory()
+    {
+        PlayerPrefs.SetInt("ISOPENINVENUI", 1);
+        GetImage((int)Images.MainUIInventoryAImage).gameObject.SetActive(true);
+        GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(true);
+    }
+
     public void OffUISword()
     {
         GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(false);
