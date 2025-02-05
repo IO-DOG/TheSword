@@ -175,7 +175,12 @@ public class Events : MonoBehaviour
         Managers.Game.Player._isEquiptWeapon = true;
         Managers.Game.Player._isEquiptShield = true;
 
+        // 인벤토리에 마검 추가
+        Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Add(10);
+
+        // 현재 검 변경
         Managers.Game.SwapEquip(Define.EQUIP_SOWRD_FIRST + 1);
+
         //Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
         Managers.Game.OnDirect = false;
         Managers.Game.GameScene?.OnUIInventory();

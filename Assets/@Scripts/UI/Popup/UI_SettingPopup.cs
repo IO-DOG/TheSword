@@ -74,9 +74,6 @@ public class UI_SettingPopup : UI_Popup
         //GetImage((int)Images.BackgroundImage).gameObject.transform.DOScale(2, 0.2f);
 
         //GetObject((int)GameObjects.SoundToggle).gameObject.BindEvent(OnClickSoundToggle);
-        GetObject((int)GameObjects.TotalSoundSlider).GetComponent<Slider>().value = PlayerPrefs.GetFloat("CURSOUND", 1);
-        GetObject((int)GameObjects.BGMSoundSlider).GetComponent<Slider>().value = PlayerPrefs.GetFloat("CURBGMSOUND", 1);
-        GetObject((int)GameObjects.EffectSoundSlider).GetComponent<Slider>().value = PlayerPrefs.GetFloat("CUREFFECTSOUND", 1);
 
         GetImage((int)Images.FullScreenCheckBox).gameObject.BindEvent(OnClickFullScreenCheckBox);
         GetImage((int)Images.WindowScreenCheckBox).gameObject.BindEvent(OnClickWindowScreenCheckBox);

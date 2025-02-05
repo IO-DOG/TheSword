@@ -192,7 +192,7 @@ public class PlayerController : MonoBehaviour
 
     void CheckWeapon()
     {
-        if (Managers.Game.PlayerData.CurSword == 0)
+        if (Managers.Game.PlayerData.CurSword == Define.NOT_EQUIP)
             _isEquiptWeapon = false;
         if (_isEquiptWeapon)
             _weapon.SetActive(true);
@@ -202,7 +202,7 @@ public class PlayerController : MonoBehaviour
 
     void CheckShield()
     {
-        if (Managers.Game.PlayerData.CurShield == 0)
+        if (Managers.Game.PlayerData.CurShield == Define.NOT_EQUIP)
             _isEquiptShield = false;
         if (_isEquiptShield)
             _shield.SetActive(true);

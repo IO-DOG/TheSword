@@ -352,9 +352,19 @@ public class UI_InvenPopup : UI_Popup
         }
     }
 
+    void OffInventory_MyInfo_On()
+    {
+        _isInventory_MyInfo_On = false;
+        GetImage((int)Images.Inventory_MyInfo_On).color = new Color(1, 1, 1, 0);
+        GetImage((int)Images.Inventory_InfoFrame).gameObject.SetActive(false);
+        GetImage((int)Images.Inventory_MyInfo).gameObject.SetActive(false);
+        GetObject((int)GameObjects.EquipInfo).gameObject.SetActive(true);
+    }
+
     void OnClickSword()
     {
         Refresh();
+        OffInventory_MyInfo_On();
         SetSwordListImage();
         PrintEquipAbilityAndDesc(Managers.Game.PlayerData.CurSword);
 
@@ -389,6 +399,7 @@ public class UI_InvenPopup : UI_Popup
         }
     }
 
+    private Coroutine illustCoroutine;
     void ShowSwordIllust()
     {
         GetObject((int)GameObjects.EquipIllust).gameObject.SetActive(true);
@@ -398,7 +409,14 @@ public class UI_InvenPopup : UI_Popup
 
         GetImage((int)Images.IllustBG).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[curSwordIdx].IllustBG}");
         GetImage((int)Images.Illust).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[curSwordIdx].Illust}");
-        StartCoroutine(CoIllustUIEffect());
+
+        // 이미 일러스트 코루틴이 실행 중이라면 중단한다.
+        if (illustCoroutine != null)
+        {
+            StopCoroutine(illustCoroutine);
+            illustCoroutine = null;
+        }
+        illustCoroutine = StartCoroutine(CoIllustUIEffect());
         GetImage((int)Images.IllustFX).GetComponent<Animator>().Play($"{Managers.Data.EquipDic[curSwordIdx].IllustFX}");
     }
 
@@ -418,8 +436,11 @@ public class UI_InvenPopup : UI_Popup
     void OnClickShield()
     {
         Refresh();
+        OffInventory_MyInfo_On();
         SetShieldListImage();
-        PrintEquipAbilityAndDesc(Managers.Game.PlayerData.CurShield);
+        // 0은 워프석 반지임
+        if (Managers.Game.PlayerData.CurShield != Define.NOT_EQUIP)
+            PrintEquipAbilityAndDesc(Managers.Game.PlayerData.CurShield);
 
         GetImage((int)Images.Inventory_Shield_Get).gameObject.SetActive(true);
         GetImage((int)Images.Inventory_Shield_On).gameObject.SetActive(true);
@@ -455,41 +476,52 @@ public class UI_InvenPopup : UI_Popup
     void OnClickNecklace()
     {
         Refresh();
+        OffInventory_MyInfo_On();
         GetImage((int)Images.Inventory_accessory_necklace_Get).gameObject.SetActive(true);
         GetImage((int)Images.Inventory_accessory_necklace_On).gameObject.SetActive(true);
 
         int idx = Managers.Game.PlayerData.CurNecklace;
-        PrintEquipAbilityAndDesc(idx);
+        // 0은 워프석 반지임
+        if (idx != Define.NOT_EQUIP)
+            PrintEquipAbilityAndDesc(idx);
     }
 
     void OnClickRing()
     {
         Refresh();
+        OffInventory_MyInfo_On();
         GetImage((int)Images.Inventory_accessory_ring_Get).gameObject.SetActive(true);
         GetImage((int)Images.Inventory_accessory_ring_On).gameObject.SetActive(true);
 
         int idx = Managers.Game.PlayerData.CurRing;
-        PrintEquipAbilityAndDesc(idx);
+        if (idx != Define.NOT_EQUIP)
+            PrintEquipAbilityAndDesc(idx);
     }
 
     void OnClickShoes()
     {
         Refresh();
+        OffInventory_MyInfo_On();
         GetImage((int)Images.Inventory_accessory_shoes_Get).gameObject.SetActive(true);
         GetImage((int)Images.Inventory_accessory_shoes_On).gameObject.SetActive(true);
 
         int idx = Managers.Game.PlayerData.CurShoes;
-        PrintEquipAbilityAndDesc(idx);
+        // 0은 워프석 반지임
+        if (idx != Define.NOT_EQUIP)
+            PrintEquipAbilityAndDesc(idx);
     }
 
     void OnClickBook()
     {
         Refresh();
+        OffInventory_MyInfo_On();
         GetImage((int)Images.Inventory_accessory_book_Get).gameObject.SetActive(true);
         GetImage((int)Images.Inventory_accessory_book_On).gameObject.SetActive(true);
 
         int idx = Managers.Game.PlayerData.CurBook;
-        PrintEquipAbilityAndDesc(idx);
+        // 0은 워프석 반지임
+        if (idx != Define.NOT_EQUIP)
+            PrintEquipAbilityAndDesc(idx);
     }
 
     void OnClickEquipList(int idx)
@@ -516,9 +548,13 @@ public class UI_InvenPopup : UI_Popup
 
         //Refresh();
         GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
-        int equipIdx = Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword][idx - 1];
+        //int swordCount = Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Count;
+
+        //if (idx - 1 >= swordCount) return;
+        //int equipIdx = Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword][idx - 1];
+
         // 검 리스트를 보여줘야 할 때
-        if (equipIdx >= Define.EQUIP_SOWRD_FIRST && equipIdx <= Define.EQUIP_SOWRD_END)
+        if (GetImage((int)Images.Inventory_Sword_On).gameObject.activeSelf)
         {
             //Refresh();
 
@@ -761,9 +797,9 @@ public class UI_InvenPopup : UI_Popup
         GetText((int)Texts.AddCRIATK).text = Managers.Game.PlayerData.CriticalAttack.ToString();
         GetText((int)Texts.BaseCRIATK).text = Managers.Game.PlayerData.CriticalAttack.ToString();
 
-        GetText((int)Texts.TotalLV).text = Managers.Data.PlayerDic[Managers.Game.PlayerData.Level].TotalExp.ToString();
-        GetText((int)Texts.AddLV).text = Managers.Game.PlayerData.CurExp.ToString();
-        GetText((int)Texts.BaseLV).text = Managers.Data.PlayerDic[Managers.Game.PlayerData.Level].NeedExp.ToString();
+        GetText((int)Texts.TotalLV).text = Managers.Game.PlayerData.Level.ToString();
+        GetText((int)Texts.AddLV).text = Managers.Data.PlayerDic[Managers.Game.PlayerData.Level + 1].NeedExp.ToString();
+        GetText((int)Texts.BaseLV).text = Managers.Game.PlayerData.CurExp.ToString();
 
         GetText((int)Texts.TotalATKSPEED).text = Managers.Game.PlayerData.AttackSpeed.ToString();
         GetText((int)Texts.AddATKSPEED).text = Managers.Game.PlayerData.AttackSpeed.ToString();
@@ -861,7 +897,7 @@ public class UI_InvenPopup : UI_Popup
 
     public void SetPlayerStatByEquip()
     {
-        if (Managers.Game.PlayerData.CurSword != 0)
+        if (Managers.Game.PlayerData.CurSword != Define.NOT_EQUIP)
         {
             int swordIdx = Managers.Game.PlayerData.CurSword;
             Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[swordIdx].ATK;
@@ -874,7 +910,7 @@ public class UI_InvenPopup : UI_Popup
             Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[swordIdx].MSPD;
             // TODO ADD AbilityID
         }
-        if (Managers.Game.PlayerData.CurShield != 0)
+        if (Managers.Game.PlayerData.CurShield != Define.NOT_EQUIP)
         {
             int shieldIdx = Managers.Game.PlayerData.CurShield;
             Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[shieldIdx].ATK;

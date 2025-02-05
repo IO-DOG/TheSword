@@ -68,7 +68,7 @@ public class UI_StatusInfo : UI_Base
                 _statValueText.text = Managers.Data.EquipDic[equipId].HP.ToString();
                 break;
             case 3:
-                _statNameText.text = "ATK \n SPEED";
+                _statNameText.text = "ATK\nSPEED";
                 _statValueText.text = Managers.Data.EquipDic[equipId].ASPD.ToString();
                 break;
             case 4:
@@ -80,7 +80,7 @@ public class UI_StatusInfo : UI_Base
                 _statValueText.text = Managers.Data.EquipDic[equipId].CRI.ToString();
                 break;
             case 6:
-                _statNameText.text = "CRI \n ATK";
+                _statNameText.text = "CRI\nATK";
                 _statValueText.text = Managers.Data.EquipDic[equipId].CRIATK.ToString();
                 break;
             case 7:

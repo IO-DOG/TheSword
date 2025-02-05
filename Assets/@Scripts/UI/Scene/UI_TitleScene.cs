@@ -321,10 +321,14 @@ public class UI_TitleScene : UI_Scene
         PlayerPrefs.SetInt("ISOPENINVENUI", 0);
         PlayerPrefs.SetInt("ISOPENWARPUI", 0);
         PlayerPrefs.SetInt("ISOPENCLASSUI", 0);
-        Managers.Game.PlayerData.CurSword = 0;
+        Managers.Game.PlayerData.CurSword = Define.NOT_EQUIP;
         Managers.Game.SwapEquip(Define.EQUIP_SOWRD_FIRST);
         //Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST;
-        Managers.Game.PlayerData.CurShield = 0;
+        Managers.Game.PlayerData.CurShield = Define.NOT_EQUIP;
+        Managers.Game.PlayerData.CurNecklace = Define.NOT_EQUIP;
+        Managers.Game.PlayerData.CurRing = Define.NOT_EQUIP;
+        Managers.Game.PlayerData.CurShoes = Define.NOT_EQUIP;
+        Managers.Game.PlayerData.CurBook = Define.NOT_EQUIP;
     }
 }
 

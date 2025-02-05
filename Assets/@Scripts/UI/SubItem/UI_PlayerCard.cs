@@ -59,7 +59,7 @@ public class UI_PlayerCard : UI_BaseCard
         //Debug.Log(Managers.Game.PlayerData.CurSword);
         GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play("UIPlayerAttackAnim");
         GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play($"UISword{Managers.Game.PlayerData.CurSword - Define.EQUIP_SOWRD_FIRST}AttackAnim");
-        if (Managers.Game.PlayerData.CurShield != 0)
+        if (Managers.Game.PlayerData.CurShield != Define.NOT_EQUIP)
             GetImage((int)Images.CreatureShieldImage).gameObject.GetComponent<Animator>().Play($"UIShield{Managers.Game.PlayerData.CurShield - Define.EQUIP_SHIELD_FIRST}AttackAnim");
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Weapon);
         CreatePlayerAttackParticle();
@@ -176,7 +176,7 @@ public class UI_PlayerCard : UI_BaseCard
         shieldanimator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("CreatureShieldImage");
         animator.Play($"UIPlayerIdleAnim");
         swordanimator.Play($"UISword{Managers.Game.PlayerData.CurSword - Define.EQUIP_SOWRD_FIRST}IdleAnim");
-        if (Managers.Game.PlayerData.CurShield != 0)
+        if (Managers.Game.PlayerData.CurShield != Define.NOT_EQUIP)
             shieldanimator.Play($"UIShield{Managers.Game.PlayerData.CurShield - Define.EQUIP_SHIELD_FIRST}IdleAnim");
         image.sprite = GetImage((int)Images.CreatureImage).sprite;
         swordImage.sprite = GetImage((int)Images.CreatureImage).sprite;

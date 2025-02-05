@@ -261,4 +261,6 @@ public class Define
     public static int EQUIP_SHIELD_FIRST = 21;
 
     #endregion
+
+    public static int NOT_EQUIP = 0;
 }
