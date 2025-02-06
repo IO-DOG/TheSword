@@ -79,7 +79,7 @@ public class Events : MonoBehaviour
         Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
 
         // Sound
-        Managers.Sound.Play(Define.Sound.Effect, "EgoSword_Encounter_Event");
+        Managers.Sound.FadeAndPlayBGM("EgoSword_Encounter_Event", 0.8f);
 
         #region #1
         {
@@ -192,6 +192,9 @@ public class Events : MonoBehaviour
         key.GetComponent<SpriteRenderer>().enabled = true;
         key.GetComponent<BoxCollider>().enabled = true;
         key.SetActive(true);
+
+        // Sound
+        Managers.Sound.FadeAndPlayBGM("Chapter0_BGM", 0.8f);
     }
 
     #endregion
