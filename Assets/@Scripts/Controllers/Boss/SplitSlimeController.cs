@@ -24,8 +24,6 @@ public class SplitSlimeController : BossMonsterController
     {
         Managers.Directing.BossOnDeadAction = null;
         Managers.Directing.BossOnDeadAction += Managers.Directing.Events.CoStartUnLock4Floor;
-
-        Managers.Game.Portals[Managers.Game.Portals.Length - 1].transform.parent.gameObject.SetActive(true);
     }
 
     public override void SetAppearEvent()

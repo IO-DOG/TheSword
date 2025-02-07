@@ -126,8 +126,8 @@ public class CameraController : MonoBehaviour
 
         // Cinemachine Confiner 설정
         _confiner = _vCam.GetComponent<CinemachineConfiner>();
-        _confiner.m_BoundingVolume = _collider;
         _confiner.InvalidatePathCache();
+        _confiner.m_BoundingVolume = _collider;
     }
 
     public static IEnumerator CoExposure(float time, Exposure exposure)

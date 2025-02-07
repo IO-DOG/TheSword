@@ -392,6 +392,7 @@ public class Events : MonoBehaviour
 
     IEnumerator Unlock4Floor()
     {
+        Managers.Game.Portals[Managers.Game.Portals.Length - 1].transform.parent.gameObject.SetActive(true);
         yield return new WaitForSeconds(10f);
         // todo
         // path particle
