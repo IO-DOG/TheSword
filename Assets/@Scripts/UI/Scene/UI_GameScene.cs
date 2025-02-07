@@ -166,9 +166,8 @@ public class UI_GameScene : UI_Scene
         {
             Managers.UI.ShowStageNamePopup(1f);
             // 하드코딩
-            PlayerPrefs.SetFloat("CURBGMSOUND", 1);
             Managers.Sound.Play(Define.Sound.Bgm, "Chapter0_BGM");
-            Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND") * PlayerPrefs.GetFloat("SAVESOUND", 1));
+            Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND") * PlayerPrefs.GetFloat("SAVESOUND"));
         }
 
         if (PlayerPrefs.GetInt("ISMEETSWORD") == 1)

@@ -438,9 +438,7 @@ public class UI_InvenPopup : UI_Popup
         Refresh();
         OffInventory_MyInfo_On();
         SetShieldListImage();
-        // 0은 워프석 반지임
-        if (Managers.Game.PlayerData.CurShield != Define.NOT_EQUIP)
-            PrintEquipAbilityAndDesc(Managers.Game.PlayerData.CurShield);
+        PrintEquipAbilityAndDesc(Managers.Game.PlayerData.CurShield);
 
         GetImage((int)Images.Inventory_Shield_Get).gameObject.SetActive(true);
         GetImage((int)Images.Inventory_Shield_On).gameObject.SetActive(true);
@@ -481,9 +479,7 @@ public class UI_InvenPopup : UI_Popup
         GetImage((int)Images.Inventory_accessory_necklace_On).gameObject.SetActive(true);
 
         int idx = Managers.Game.PlayerData.CurNecklace;
-        // 0은 워프석 반지임
-        if (idx != Define.NOT_EQUIP)
-            PrintEquipAbilityAndDesc(idx);
+        PrintEquipAbilityAndDesc(idx);
     }
 
     void OnClickRing()
@@ -494,8 +490,7 @@ public class UI_InvenPopup : UI_Popup
         GetImage((int)Images.Inventory_accessory_ring_On).gameObject.SetActive(true);
 
         int idx = Managers.Game.PlayerData.CurRing;
-        if (idx != Define.NOT_EQUIP)
-            PrintEquipAbilityAndDesc(idx);
+        PrintEquipAbilityAndDesc(idx);
     }
 
     void OnClickShoes()
@@ -506,9 +501,7 @@ public class UI_InvenPopup : UI_Popup
         GetImage((int)Images.Inventory_accessory_shoes_On).gameObject.SetActive(true);
 
         int idx = Managers.Game.PlayerData.CurShoes;
-        // 0은 워프석 반지임
-        if (idx != Define.NOT_EQUIP)
-            PrintEquipAbilityAndDesc(idx);
+        PrintEquipAbilityAndDesc(idx);
     }
 
     void OnClickBook()
@@ -519,9 +512,7 @@ public class UI_InvenPopup : UI_Popup
         GetImage((int)Images.Inventory_accessory_book_On).gameObject.SetActive(true);
 
         int idx = Managers.Game.PlayerData.CurBook;
-        // 0은 워프석 반지임
-        if (idx != Define.NOT_EQUIP)
-            PrintEquipAbilityAndDesc(idx);
+        PrintEquipAbilityAndDesc(idx);
     }
 
     void OnClickEquipList(int idx)
@@ -963,6 +954,7 @@ public class UI_InvenPopup : UI_Popup
             // TODO ADD AbilityID
         }
     }
+
 
 
 }

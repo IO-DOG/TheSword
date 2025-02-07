@@ -42,6 +42,9 @@ public class UI_BaseCard : UI_Base
     public CreatureData _creature;
     public float _defenceCoolTime = 0f;
     public float _maxDefenceCoolTime = 3f;
+    public int _hitDamage = 0;
+    public bool _isCriHit = false;
+    public bool _isHeal = false;
 
     public override bool Init()
     {
@@ -106,7 +109,10 @@ public class UI_BaseCard : UI_Base
 
     public virtual void Attack(CreatureData attacker, CreatureData target)
     {
-        target.Trait.ExcuteOnHit(attacker, target, attacker.Trait.ExecuteAttack(attacker, target));
+        int damage = attacker.Trait.ExecuteAttack(attacker, target);
+        target.Trait.ExcuteOnHit(attacker, target, damage);
+        _hitDamage = damage;
+        _isCriHit = attacker.IsCritical;
     }
 
     public virtual void Defence()

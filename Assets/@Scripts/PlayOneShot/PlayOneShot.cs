@@ -28,7 +28,7 @@ public class PlayOneShot : MonoBehaviour
         PessAnyKeyText.SetActive(true);
 
         AudioSource audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.volume = PlayerPrefs.GetFloat("CUREFFECTSOUND", 1);
+        audioSource.volume = PlayerPrefs.GetFloat("CUREFFECTSOUND");
         audioSource.PlayOneShot(_audioClip);
     }
 }

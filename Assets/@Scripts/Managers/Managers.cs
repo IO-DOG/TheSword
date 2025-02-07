@@ -15,11 +15,13 @@ public class Managers : MonoBehaviour
     GameManager _game = new GameManager();
     DirectingManager _directing = new DirectingManager();
     EventManager _event = new EventManager();
+    ObjectManager _object = new ObjectManager();
 
     public static GameManager Game { get { return Instance?._game; } }
     public static DirectingManager Directing { get { return Instance?._directing; } }
     public static EventManager Event { get { return Instance?._event; } }
     public static CursorManager Cursor = null;
+    public static ObjectManager Object { get { return Instance?._object; } }
     #endregion
 
     #region Core
