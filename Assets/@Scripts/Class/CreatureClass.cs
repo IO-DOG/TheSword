@@ -91,9 +91,11 @@ public class CreatureClass : MonoBehaviour
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
         {
             attacker.IsCritical = true;
-            int damage = (int)Mathf.Max(0, attacker.Attack);
-            if (attacker.IsCritical == true) damage *= (int)(attacker.CriticalAttack / 100);
+            float num = (int)Mathf.Max(0, attacker.Attack);
+            if (attacker.IsCritical) num = num * (attacker.CriticalAttack / 100);
+            int damage = Mathf.RoundToInt(num);
             damage -= (int)target.Defence;
+            damage = (int)Mathf.Max(0, damage);
             if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);
             else if (target.IsDefence) damage = 0;
 
@@ -156,9 +158,11 @@ public class CreatureClass : MonoBehaviour
 
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
         {
-            int damage = (int)Mathf.Max(0, attacker.Attack);
-            if (attacker.IsCritical) damage *= (int)(attacker.CriticalAttack / 100);
+            float num = (int)Mathf.Max(0, attacker.Attack);
+            if (attacker.IsCritical) num = num * (attacker.CriticalAttack / 100);
+            int damage = Mathf.RoundToInt(num);
             damage -= (int)target.Defence;
+            damage = (int)Mathf.Max(0, damage);
             if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);
             else if (target.IsDefence) damage = 0;
 
@@ -189,9 +193,11 @@ public class CreatureClass : MonoBehaviour
 
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
         {
-            int damage = (int)Mathf.Max(0, attacker.Attack);
-            if (attacker.IsCritical) damage *= (int)(attacker.CriticalAttack / 100);
+            float num = (int)Mathf.Max(0, attacker.Attack);
+            if (attacker.IsCritical) num = num * (attacker.CriticalAttack / 100);
+            int damage = Mathf.RoundToInt(num);
             damage -= (int)target.Defence;
+            damage = (int)Mathf.Max(0, damage);
             if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);
             else if (target.IsDefence) damage = 0;
 
@@ -220,9 +226,11 @@ public class CreatureClass : MonoBehaviour
 
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
         {
-            int damage = (int)Mathf.Max(0, attacker.Attack);
-            if (attacker.IsCritical) damage *= (int)(attacker.CriticalAttack / 100);
+            float num = (int)Mathf.Max(0, attacker.Attack);
+            if (attacker.IsCritical) num = num * (attacker.CriticalAttack / 100);
+            int damage = Mathf.RoundToInt(num);
             damage -= (int)target.Defence;
+            damage = (int)Mathf.Max(0, damage);
             if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);
             else if (target.IsDefence) damage = 0;
 
@@ -268,9 +276,11 @@ public class CreatureClass : MonoBehaviour
 
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
         {
-            int damage = (int)Mathf.Max(0, attacker.Attack);
-            if (attacker.IsCritical) damage *= (int)(attacker.CriticalAttack / 100);
+            float num = (int)Mathf.Max(0, attacker.Attack);
+            if (attacker.IsCritical) num = num * (attacker.CriticalAttack / 100);
+            int damage = Mathf.RoundToInt(num);
             damage -= (int)target.Defence;
+            damage = (int)Mathf.Max(0, damage);
             if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);
             else if (target.IsDefence) damage = 0;
 
@@ -279,9 +289,11 @@ public class CreatureClass : MonoBehaviour
 
         public int Roar(CreatureData attacker, CreatureData target)
         {
-            int damage = (int)Mathf.Max(0, attacker.Attack * 0.2f);
-            if (attacker.IsCritical) damage *= (int)(attacker.CriticalAttack / 100);
+            float num = (int)Mathf.Max(0, attacker.Attack);
+            if (attacker.IsCritical) num = num * (attacker.CriticalAttack / 100);
+            int damage = Mathf.RoundToInt(num);
             damage -= (int)target.Defence;
+            damage = (int)Mathf.Max(0, damage);
             if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);
             else if (target.IsDefence) damage = 0;
 
@@ -315,9 +327,11 @@ public class CreatureClass : MonoBehaviour
 
         int ITrait.ExecuteAttack(CreatureData attacker, CreatureData target)
         {
-            int damage = (int)Mathf.Max(0, attacker.Attack);
-            if (attacker.IsCritical) damage *= (int)(attacker.CriticalAttack / 100);
+            float num = (int)Mathf.Max(0, attacker.Attack);
+            if (attacker.IsCritical) num = num * (attacker.CriticalAttack / 100);
+            int damage = Mathf.RoundToInt(num);
             damage -= (int)target.Defence;
+            damage = (int)Mathf.Max(0, damage);
             if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);
             else if (target.IsDefence) damage = 0;
 
@@ -359,9 +373,11 @@ public class CreatureClass : MonoBehaviour
 
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
         {
-            int damage = (int)Mathf.Max(0, attacker.Attack);
-            if (attacker.IsCritical) damage *= (int)(attacker.CriticalAttack / 100);
+            float num = (int)Mathf.Max(0, attacker.Attack);
+            if (attacker.IsCritical) num = num * (attacker.CriticalAttack / 100);
+            int damage = Mathf.RoundToInt(num);
             damage -= (int)target.Defence;
+            damage = (int)Mathf.Max(0, damage);
             if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);
             else if (target.IsDefence) damage = 0;
 
@@ -392,8 +408,9 @@ public class CreatureClass : MonoBehaviour
 
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
         {
-            int damage = (int)Mathf.Max(0, attacker.Attack);
-            if (attacker.IsCritical) damage = damage * (int)(attacker.CriticalAttack / 100);
+            float num = (int)Mathf.Max(0, attacker.Attack);
+            if (attacker.IsCritical) num = num * (attacker.CriticalAttack / 100);
+            int damage = Mathf.RoundToInt(num);
             damage -= (int)target.Defence;
             damage = (int)Mathf.Max(0, damage);
             if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);
@@ -469,8 +486,9 @@ public class CreatureClass : MonoBehaviour
 
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
         {
-            int damage = (int)Mathf.Max(0, attacker.Attack);
-            if (attacker.IsCritical) damage = damage * (int)(attacker.CriticalAttack / 100);
+            float num = (int)Mathf.Max(0, attacker.Attack);
+            if (attacker.IsCritical) num = num * (attacker.CriticalAttack / 100);
+            int damage = Mathf.RoundToInt(num);
             damage -= (int)target.Defence;
             damage = (int)Mathf.Max(0, damage);
             if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);

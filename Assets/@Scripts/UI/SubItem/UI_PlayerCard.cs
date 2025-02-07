@@ -49,7 +49,7 @@ public class UI_PlayerCard : UI_BaseCard
     public override void Attack(CreatureData attacker, CreatureData target)
     {
         Managers.Game.AttackCount++;
-        if (Managers.Game.AttackCount == /*Managers.Game.PlayerData.Critical*/2)
+        if (Managers.Game.AttackCount == Managers.Game.PlayerData.Critical)
         {
             _creature.IsCritical = true;
             Managers.Game.AttackCount = 0;
