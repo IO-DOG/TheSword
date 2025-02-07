@@ -48,8 +48,24 @@ public class UI_PlayerCard : UI_BaseCard
 
     public override void Attack(CreatureData attacker, CreatureData target)
     {
-        base.Attack(attacker, target);
         Managers.Game.AttackCount++;
+        if (Managers.Game.AttackCount == Managers.Game.PlayerData.Critical)
+        {
+            _creature.IsCritical = true;
+            Managers.Game.AttackCount = 0;
+        }
+
+        base.Attack(attacker, target);
+
+        Vector3 pos = GameObject.Find("UI_MonsterCard").GetComponent<UI_MonsterCard>().GetImage((int)Images.CreatureImage).gameObject.transform.position;
+        pos = new Vector3(pos.x, pos.y + 200, pos.z);
+
+        GameObject go = GameObject.Find("UI_BattlePopup");
+        if (go != null)
+        {
+            Managers.Object.ShowDamageFont(pos, _hitDamage, 0, go.transform, attacker.IsCritical, target.IsDefence);
+            if (attacker.IsCritical) attacker.IsCritical = false;
+        }
 
         if (target.IsDefence)
         {
@@ -66,12 +82,6 @@ public class UI_PlayerCard : UI_BaseCard
         CreateMonsterHitParticle();
 
         Managers.Sound.Play(Define.Sound.Effect, "HeroAttack0_SFX");
-
-        if (Managers.Game.AttackCount == Managers.Game.PlayerData.Critical)
-        {
-            _creature.IsCritical = true;
-            Managers.Game.AttackCount = 0;
-        }
     }
 
     public override void Defence()

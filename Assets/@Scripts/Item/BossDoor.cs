@@ -8,6 +8,8 @@ public class BossDoor : PortalController
 {
    public void CoStartPlayEffect()
     {
+        Managers.Game.SaveGame();
+
         StartCoroutine(PlayEffect());
     }
 

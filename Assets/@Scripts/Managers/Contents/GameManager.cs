@@ -574,6 +574,12 @@ public class GameManager
         Managers.Data.ResetActiveDic();
         //ParseMapData();
         Managers.Game.PlayerData.Clear();
+        Managers.Game.PlayerData.Inventory.Clear();
+        for (int i = 0; i < 10; ++i)
+        {
+            Managers.Game.PlayerData.Inventory.Add(new List<int>());
+        }
+
         Debug.Log("Complete DeleteGameData");
     }
 

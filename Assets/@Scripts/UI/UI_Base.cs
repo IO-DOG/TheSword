@@ -63,11 +63,11 @@ public abstract class UI_Base : MonoBehaviour
         return objects[idx] as T;
     }
 
-    protected GameObject GetObject(int idx) { return Get<GameObject>(idx); }
-    protected TMP_Text GetText(int idx) { return Get<TMP_Text>(idx); }
-    protected Button GetButton(int idx) { return Get<Button>(idx); }
-    protected Image GetImage(int idx) { return Get<Image>(idx); }
-    protected Toggle GetToggle(int idx) { return Get<Toggle>(idx); }
+    public GameObject GetObject(int idx) { return Get<GameObject>(idx); }
+    public TMP_Text GetText(int idx) { return Get<TMP_Text>(idx); }
+    public Button GetButton(int idx) { return Get<Button>(idx); }
+    public Image GetImage(int idx) { return Get<Image>(idx); }
+    public Toggle GetToggle(int idx) { return Get<Toggle>(idx); }
 
 
     public static void BindEvent(GameObject go, Action action = null, Action<BaseEventData> dragAction = null, Define.UIEvent type = Define.UIEvent.Click)

@@ -46,7 +46,25 @@ public class UI_MonsterCard : UI_BaseCard
 
     public override void Attack(CreatureData attacker, CreatureData target)
     {
+        _attackCount++;
+        if (_attackCount == _creature.Critical)
+        {
+            _creature.IsCritical = true;
+            _attackCount = 0;
+        }
+
         base.Attack(attacker, target);
+
+        Vector3 pos = GameObject.Find("UI_PlayerCard").GetComponent<UI_PlayerCard>().GetImage((int)Images.CreatureImage).gameObject.transform.position;
+        pos = new Vector3(pos.x, pos.y - 100, pos.z);
+
+        GameObject go = GameObject.Find("UI_BattlePopup");
+        if (go != null)
+        {
+            Managers.Object.ShowDamageFont(pos, _hitDamage, 0, go.transform, attacker.IsCritical, target.IsDefence);
+            if (attacker.IsCritical) attacker.IsCritical = false;
+        }
+
         if (target.IsDefence)
         {
             target.OnDefenceAction.Invoke();
@@ -61,13 +79,6 @@ public class UI_MonsterCard : UI_BaseCard
             Berserk();
         }
 
-        if (_attackCount == _creature.Critical)
-        {
-            _creature.IsCritical = true;
-            _attackCount = 0;
-        }
-
-        _attackCount++;
         PlayMonsterAttackAnim();
         CreateMonsterAttackParticle();
         CreatePlayerHitParticle();

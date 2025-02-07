@@ -85,7 +85,8 @@ public class UI_MenuPopup : UI_Popup
             // Sound
             Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Back_SFX");
 
-            Managers.Game.GameScene.isOpenMenuPopup = false;
+            if (Managers.Game.GameScene != null)
+                Managers.Game.GameScene.isOpenMenuPopup = false;
             OpenOtherUI();
             //Managers.UI.ClosePopupUI();
         }
