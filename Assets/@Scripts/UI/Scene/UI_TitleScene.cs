@@ -107,14 +107,9 @@ public class UI_TitleScene : UI_Scene
                 Managers.Data.Init();
                 Managers.Game.Init();
                 Managers.Sound.Init();
-                PlayerPrefs.SetFloat("CURSOUND", 1);
-                PlayerPrefs.SetFloat("CURBGMSOUND", 1);
-                PlayerPrefs.SetFloat("CUREFFECTSOUND", 1);
                 Managers.Sound.Play(Define.Sound.Bgm, "MainTitle_BGM");
                 Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND") * PlayerPrefs.GetFloat("SAVESOUND", 1));
-                //Managers.Sound.SetVolume(PlayerPrefs.GetFloat("CURSOUND", 1));
-                //Managers.Sound.SetVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1));
-                //Managers.Sound.SetVolume(PlayerPrefs.GetFloat("CUREFFECTSOUND", 1));
+                Managers.Sound.SetEffectVolume(PlayerPrefs.GetFloat("CUREFFECTSOUND") * PlayerPrefs.GetFloat("SAVESOUND", 1));
 
                 GameObject.Find("MainTitle_BGAnim").GetComponent<Animator>().Play("TitleOpeningAnimation");
                 GetObject((int)Objects.Slider).gameObject.SetActive(false);

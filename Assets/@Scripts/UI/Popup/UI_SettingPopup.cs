@@ -98,7 +98,9 @@ public class UI_SettingPopup : UI_Popup
         {
             PlayerPrefs.SetFloat("CURSOUND", GetObject((int)GameObjects.TotalSoundSlider).GetComponent<Slider>().value);
             PlayerPrefs.SetFloat("SAVESOUND", GetObject((int)GameObjects.TotalSoundSlider).GetComponent<Slider>().value);
-            Managers.Sound.SetVolume(GetObject((int)GameObjects.TotalSoundSlider).GetComponent<Slider>().value);
+            //Managers.Sound.SetVolume(GetObject((int)GameObjects.TotalSoundSlider).GetComponent<Slider>().value);
+            Managers.Sound.SetBGMVolume(GetObject((int)GameObjects.BGMSoundSlider).GetComponent<Slider>().value * GetObject((int)GameObjects.TotalSoundSlider).GetComponent<Slider>().value);
+            Managers.Sound.SetEffectVolume(GetObject((int)GameObjects.EffectSoundSlider).GetComponent<Slider>().value * GetObject((int)GameObjects.TotalSoundSlider).GetComponent<Slider>().value);
         }
 
         if (PlayerPrefs.GetFloat("CURBGMSOUND", 1) != GetObject((int)GameObjects.BGMSoundSlider).GetComponent<Slider>().value /*&& GetObject((int)GameObjects.SoundToggle).GetComponent<Toggle>().isOn == true*/)
