@@ -333,6 +333,7 @@ public class GameManager
         }
         //MainCamera.GetComponentInChildren<CustomCameraLimiter>().SetBG();
 
+        Managers.Game.Portals[Managers.Game.Portals.Length - 1].transform.parent.gameObject.SetActive(false);
         Managers.Resource.Instantiate($"Effects_{CurChapter}", ParentMap.transform);
     }
 

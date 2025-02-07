@@ -260,4 +260,17 @@ public class SoundManager
             }
         });
     }
+
+    public void FadeAndStopBGM(float time)
+    {
+        AudioSource audioSource = _audioSources[(int)Define.Sound.Bgm];
+
+        if (audioSource.isPlaying)
+        {
+            audioSource.DOFade(0f, time).OnComplete(() =>
+            {
+                audioSource.Stop();
+            });
+        }
+    }
 }

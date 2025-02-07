@@ -686,6 +686,8 @@ public class Events : MonoBehaviour
         Managers.UI.CloseGameSceneUI();
         Managers.Game.OnDirect = true;
 
+        Managers.Sound.FadeAndStopBGM(1.5f);
+
         CoroutineManager.StartCoroutine(CameraController.CoExposure(1.5f, CameraController.Exposure.Black));
         yield return new WaitForSeconds(1.5f);
 
