@@ -45,7 +45,7 @@ public class UI_IntroScene : UI_Scene
         #endregion
 
         Managers.Sound.Play(Define.Sound.Effect, "StartIntro_SFX");
-        Managers.Sound.SetBGMVolume(1);
+        Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND") * PlayerPrefs.GetFloat("SAVESOUND", 1));
 
         StartCoroutine(CoCurtaintCall(2f));
 
