@@ -244,6 +244,11 @@ public class Define
     public static int TOTAL_SOUND = 18;
     public static int BGM = 19;
     public static int EFFECT = 20;
+    public static int USER_NAME_INDEX = 6;
+    public static int GUIDE_BATTLE = 21;
+    public static int GUIDE_RECOVERY = 22;
+    public static int GUIDE_KEY = 22;
+    public static int GUIDE_LEVER = 22;
     #endregion
 
     #region Event ID

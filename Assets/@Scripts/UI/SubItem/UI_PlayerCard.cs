@@ -14,7 +14,7 @@ public class UI_PlayerCard : UI_BaseCard
 
         //Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
 
-        _creature.Name = "Demian";
+        _creature.Name = Managers.GetString(Define.USER_NAME_INDEX);
         Refresh();
         _creature.OnDefenceAction += ClearDefence;
         _creature.OnHitAction += Refresh;
