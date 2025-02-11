@@ -294,12 +294,12 @@ public class UI_GameScene : UI_Scene
                 MonsterController monster = hit.collider.gameObject.GetComponent<MonsterController>();
                 int id = monster.id;
 
-                // 화면밖으로 튀어나가면 보정해야 됨
                 UI_MonsterInfo monsterInfo = Managers.UI.MakeSubItem<UI_MonsterInfo>(monster.transform);
                 Vector3 monsterInfoPos = monsterInfo.gameObject.transform.position;
-                
+
                 isOpenInfoPopup = true;
                 monsterInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
+
             }
             else if (hit.collider.gameObject.layer == (int)Define.Layer.CItem && Managers.Cursor._cursor == CursorType.Search)
             {
@@ -309,6 +309,7 @@ public class UI_GameScene : UI_Scene
                 UI_CItemInfo cItemInfo = Managers.UI.MakeSubItem<UI_CItemInfo>(cItem.transform);
                 isOpenInfoPopup = true;
                 cItemInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
+
             }
         }
     }
