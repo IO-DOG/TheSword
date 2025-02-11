@@ -518,6 +518,14 @@ public class PlayerController : MonoBehaviour
                         Managers.Game.OnInteract = false;
                     });
                 }
+
+                // 최초 문인지 확인
+                if (PlayerPrefs.GetInt("ISFIRSTKEY") == 0)
+                {
+                    PlayerPrefs.SetInt("ISFIRSTKEY", 1);
+                    UI_GuidePopup guidePopup = Managers.UI.ShowPopupUI<UI_GuidePopup>();
+                    guidePopup.SetInfo(Define.GUIDE_KEY);
+                }
             }
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Portal && !Managers.Game.OnFade && !Managers.Game.OnInteract)
             {
@@ -556,6 +564,14 @@ public class PlayerController : MonoBehaviour
                         });
                     });
                 });
+
+                // 최초 레버인지 확인
+                if (PlayerPrefs.GetInt("ISFIRSTLEVER") == 0)
+                {
+                    PlayerPrefs.SetInt("ISFIRSTLEVER", 1);
+                    UI_GuidePopup guidePopup = Managers.UI.ShowPopupUI<UI_GuidePopup>();
+                    guidePopup.SetInfo(Define.GUIDE_LEVER);
+                }
             }
             else if (hit.collider.gameObject.layer == (int)Define.Layer.BossDoor)
             {

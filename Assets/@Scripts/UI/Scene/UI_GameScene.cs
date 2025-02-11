@@ -167,7 +167,7 @@ public class UI_GameScene : UI_Scene
             Managers.UI.ShowStageNamePopup(1f);
             // 하드코딩
             Managers.Sound.Play(Define.Sound.Bgm, "Chapter0_BGM");
-            Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND") * PlayerPrefs.GetFloat("SAVESOUND"));
+            Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1));
         }
 
         if (PlayerPrefs.GetInt("ISMEETSWORD") == 1)
@@ -295,8 +295,11 @@ public class UI_GameScene : UI_Scene
                 int id = monster.id;
 
                 UI_MonsterInfo monsterInfo = Managers.UI.MakeSubItem<UI_MonsterInfo>(monster.transform);
+                Vector3 monsterInfoPos = monsterInfo.gameObject.transform.position;
+
                 isOpenInfoPopup = true;
                 monsterInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
+
             }
             else if (hit.collider.gameObject.layer == (int)Define.Layer.CItem && Managers.Cursor._cursor == CursorType.Search)
             {
@@ -306,6 +309,7 @@ public class UI_GameScene : UI_Scene
                 UI_CItemInfo cItemInfo = Managers.UI.MakeSubItem<UI_CItemInfo>(cItem.transform);
                 isOpenInfoPopup = true;
                 cItemInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
+
             }
         }
     }
