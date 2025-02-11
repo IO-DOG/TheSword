@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class UI_GuidePopup : UI_Popup
@@ -8,6 +9,7 @@ public class UI_GuidePopup : UI_Popup
     enum Images
     {
         GuideImage,
+        OnlyYestButton,
     }
 
     enum Texts
@@ -16,7 +18,14 @@ public class UI_GuidePopup : UI_Popup
     }
     #endregion
 
-    public Animator anim = null;
+    public Animator guideAnim = null;
+    public Animator btnAnim = null;
+    public TMP_Text guideText = null;
+
+    private void Awake()
+    {
+        Init();
+    }
 
     public override bool Init()
     {
@@ -28,7 +37,16 @@ public class UI_GuidePopup : UI_Popup
         BindText(typeof(Texts));
         #endregion
 
-        anim = GetImage((int)Images.GuideImage).gameObject.GetComponent<Animator>();
+        Managers.Game.OnInputLock = true;
+
+        //guideAnim = GetImage((int)Images.GuideImage).gameObject.GetComponent<Animator>();
+        //btnAnim = GetImage((int)Images.OnlyYestButton).gameObject.GetComponent<Animator>();
+        //guideText = GetText((int)Texts.GuideText);
+
+        GetImage((int)Images.OnlyYestButton).gameObject.GetComponent<Animator>().Play("OnlyYesIdle");
+        GetImage((int)Images.OnlyYestButton).gameObject.BindEvent(YesPointerEnter, type: Define.UIEvent.PointerEnter);
+        GetImage((int)Images.OnlyYestButton).gameObject.BindEvent(YesClick, type: Define.UIEvent.Click);
+        GetImage((int)Images.OnlyYestButton).gameObject.BindEvent(YesPointerExit, type: Define.UIEvent.PointerExit);
 
         return true;
     }
@@ -38,12 +56,35 @@ public class UI_GuidePopup : UI_Popup
         GetText((int)Texts.GuideText).text = Managers.GetString(index);
 
         if (index == Define.GUIDE_BATTLE)
-            anim.Play("UI_GuideBattle");
+            GetImage((int)Images.GuideImage).gameObject.GetComponent<Animator>().Play("UI_GuideBattle");
         else if (index == Define.GUIDE_RECOVERY)
-            anim.Play("UI_GuideRecovery");
+            GetImage((int)Images.GuideImage).gameObject.GetComponent<Animator>().Play("UI_GuideRecovery");
         else if (index == Define.GUIDE_LEVER)
-            anim.Play("UI_GuideLever");
+            GetImage((int)Images.GuideImage).gameObject.GetComponent<Animator>().Play("UI_GuideLever");
         else if (index == Define.GUIDE_KEY)
-            anim.Play("UI_GuideKey");
+            GetImage((int)Images.GuideImage).gameObject.GetComponent<Animator>().Play("UI_GuideKey");
     }
+
+    #region Pointer Interaction
+    void YesPointerEnter()
+    {
+        Managers.Sound.Play(Define.Sound.Effect, "ButtonUI_Choice_SFX");
+
+        GetImage((int)Images.OnlyYestButton).gameObject.GetComponent<Animator>().Play("OnlyYesMouseOver");
+    }
+
+    void YesClick()
+    {
+        Managers.Game.OnInputLock = false;
+        Managers.Sound.Play(Define.Sound.Effect, "ButtonUI_Ok_SFX");
+
+        ClosePopupUI();
+    }
+
+    void YesPointerExit()
+    {
+        GetImage((int)Images.OnlyYestButton).gameObject.GetComponent<Animator>().Play("OnlyYesIdle");
+    }
+    #endregion
+
 }

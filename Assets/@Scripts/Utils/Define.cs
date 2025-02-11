@@ -247,8 +247,8 @@ public class Define
     public static int USER_NAME_INDEX = 6;
     public static int GUIDE_BATTLE = 21;
     public static int GUIDE_RECOVERY = 22;
-    public static int GUIDE_KEY = 22;
-    public static int GUIDE_LEVER = 22;
+    public static int GUIDE_KEY = 23;
+    public static int GUIDE_LEVER = 24;
     #endregion
 
     #region Event ID

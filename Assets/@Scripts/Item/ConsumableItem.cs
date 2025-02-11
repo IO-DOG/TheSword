@@ -43,6 +43,14 @@ public class ConsumableItem : MonoBehaviour
         if (id < NUM_OF_KEYS)
         {
             Managers.Game.KeyInventory.AddItem(this);
+
+            // 최초 문인지 확인
+            if (PlayerPrefs.GetInt("ISFIRSTKEY") == 0)
+            {
+                PlayerPrefs.SetInt("ISFIRSTKEY", 1);
+                UI_GuidePopup guidePopup = Managers.UI.ShowPopupUI<UI_GuidePopup>();
+                guidePopup.SetInfo(Define.GUIDE_KEY);
+            }
         }
         else if(id < NUM_OF_POTIONS)
         {
@@ -52,6 +60,14 @@ public class ConsumableItem : MonoBehaviour
 
             if (Managers.Game.PlayerData.CurHP > Managers.Game.PlayerData.MaxHP)
                 Managers.Game.PlayerData.CurHP = Managers.Game.PlayerData.MaxHP;
+
+            // 최초 포션인지 확인
+            if (PlayerPrefs.GetInt("ISFIRSTRECOVERY") == 0)
+            {
+                PlayerPrefs.SetInt("ISFIRSTRECOVERY", 1);
+                UI_GuidePopup guidePopup = Managers.UI.ShowPopupUI<UI_GuidePopup>();
+                guidePopup.SetInfo(Define.GUIDE_RECOVERY);
+            }
         }
         else if(id < NUM_OF_RUNES)
         {

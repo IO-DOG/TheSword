@@ -101,5 +101,13 @@ public class UI_BattlePopup : UI_Popup
             PlayerPrefs.SetInt("DEATHCOUNT", moveCount);
             Managers.UI.ShowPopupUI<UI_GameOverPopup>();
         }
+
+        // 최초 포션인지 확인
+        if (PlayerPrefs.GetInt("ISFIRSTBATTLE") == 0)
+        {
+            PlayerPrefs.SetInt("ISFIRSTBATTLE", 1);
+            UI_GuidePopup guidePopup = Managers.UI.ShowPopupUI<UI_GuidePopup>();
+            guidePopup.SetInfo(Define.GUIDE_BATTLE);
+        }
     }
 }
