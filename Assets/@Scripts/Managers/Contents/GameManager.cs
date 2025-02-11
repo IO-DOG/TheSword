@@ -568,8 +568,24 @@ public class GameManager
 
     public void DeleteGameData()
     {
-        PlayerPrefs.DeleteAll();
+        //PlayerPrefs.DeleteAll();
+        // ISFIRST를 지워야하나? 진짜 최초는 아닌데
         PlayerPrefs.DeleteKey("ISFIRST");
+        PlayerPrefs.DeleteKey("ISFIRSTBATTLE");
+        PlayerPrefs.DeleteKey("ISFIRSTLEVER");
+        PlayerPrefs.DeleteKey("ISFIRSTRECOVERY");
+        PlayerPrefs.DeleteKey("ISFIRSTKEY");
+        // 여기까지 찐으로 처음만 표시해야할거같은데
+
+        PlayerPrefs.DeleteKey("ISOPENSWORD");
+        PlayerPrefs.DeleteKey("ISOPENPORTAL");
+        PlayerPrefs.DeleteKey("ISOPENINVENUI");
+        PlayerPrefs.DeleteKey("ISOPENWARPUI");
+        PlayerPrefs.DeleteKey("ISOPENCLASSUI");
+        PlayerPrefs.DeleteKey("DEATHCOUNT");
+        PlayerPrefs.DeleteKey("MOVECOUNT");
+        PlayerPrefs.DeleteKey("PLAYTIME");
+
         Managers.Data.ResetActiveDic();
         //ParseMapData();
         Managers.Game.PlayerData.Clear();
