@@ -170,9 +170,10 @@ public class UI_GameScene : UI_Scene
             Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1));
         }
 
-        if (PlayerPrefs.GetInt("ISMEETSWORD") == 1)
+        // 보스를 만나지 않았을 때만 키를 다시 생성
+        // 보스를 만나면, 세이브 지점이 달라지므로 키를 다시 생성할 필요가 없다. 
+        if (PlayerPrefs.GetInt("ISMEETSWORD") == 1 && PlayerPrefs.GetInt("ISMEETBOSS") == 0)
         {
-
             // 검 먹고 남은 자리에 있는 key 활성화
             GameObject map = GameObject.Find("Dungeon_00_002");
             GameObject key = map.transform.Find("Items/CItem19").gameObject;

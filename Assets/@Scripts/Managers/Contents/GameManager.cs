@@ -583,6 +583,13 @@ public class GameManager
         PlayerPrefs.DeleteKey("ISOPENINVENUI");
         PlayerPrefs.DeleteKey("ISOPENWARPUI");
         PlayerPrefs.DeleteKey("ISOPENCLASSUI");
+        PlayerPrefs.DeleteKey("ISMEETSWORD"); // 마검 만났는지
+        PlayerPrefs.DeleteKey("ISMEETBOSS"); // 해당 스테이지 보스 만났는지
+        // Key Slot ---------------
+        PlayerPrefs.DeleteKey("ISOPENGREENKEY");
+        PlayerPrefs.DeleteKey("ISOPENYELLOWKEY");
+        PlayerPrefs.DeleteKey("ISOPENREDKEY");
+        // ------------------------
         PlayerPrefs.DeleteKey("DEATHCOUNT");
         PlayerPrefs.DeleteKey("MOVECOUNT");
         PlayerPrefs.DeleteKey("PLAYTIME");

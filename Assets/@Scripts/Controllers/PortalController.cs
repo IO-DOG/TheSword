@@ -40,6 +40,7 @@ public class PortalController : MonoBehaviour
             {
                 Managers.Game.GenerateMap(++Managers.Game.PlayerData.CurStageid);
                 nextPos = Managers.Game.SpawnPoints[0].transform.position;
+                PlayerPrefs.SetInt("ISMEETBOSS", 0);
             }
             else
             {
@@ -56,9 +57,10 @@ public class PortalController : MonoBehaviour
             nextPos = tartgetPortal.transform.position;
             //Managers.Game.PlayerData.CurStageid--;
         }
-        else
+        else // 보스룸 입장
         {
             nextPos = Managers.Game.SpawnPoints[1].transform.position;
+            PlayerPrefs.SetInt("ISMEETBOSS", 1);
             //Managers.Game.PlayerData.CurStageid = Managers.Game.BossRoomId;
         }
         Debug.Log($"Setting player position to: {nextPos}");
