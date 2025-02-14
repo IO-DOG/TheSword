@@ -1,5 +1,6 @@
 ﻿using Cinemachine;
 using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -45,6 +46,8 @@ public class UI_GameScene : UI_Scene
         MainUISwordBImage,
         MainUIWarpAImage,
         MainUIWarpBImage,
+        MainUIStatusHPImage,
+        LoadingIllustImage,
     }
 
     #endregion
@@ -209,6 +212,9 @@ public class UI_GameScene : UI_Scene
     {
         ShowInfo();
 
+        // ESC 설정창
+        OnClickESC();
+
         // Timer
         StartTimer();
 
@@ -224,10 +230,13 @@ public class UI_GameScene : UI_Scene
         if (Input.GetKeyDown(KeyCode.F3))
         {
             Managers.Game.PlayerData.CurHP += 10000;
+            Refresh();
+
         }
         if (Input.GetKeyDown(KeyCode.F4))
         {
             Managers.Game.PlayerData.MaxHP += 10000;
+            Refresh();
         }
         if (Input.GetKeyDown(KeyCode.F5))
         {
@@ -315,6 +324,21 @@ public class UI_GameScene : UI_Scene
         }
     }
 
+    void OnClickESC()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            GameObject go = GameObject.Find("UI_MenuPopup");
+            if (go == null)
+            {
+                isOpenMenuPopup = true;
+                Managers.UI.ShowPopupUI<UI_MenuPopup>();
+            }
+            else
+                go.GetComponent<UI_MenuPopup>().OpenOtherUI();
+        }
+    }
+
     /// <summary>
     /// �������� �÷��̾� ������ �����ϴ� �Լ�
     /// �÷��̾� ������ �߰��Ǹ� ���Լ� ���� �߰��Ǿ����.
@@ -322,9 +346,17 @@ public class UI_GameScene : UI_Scene
     public void SetPlayerInfo()
     {
         //GetText((int)Texts.PlayerNameText).text = "PlayerName";
-        GetText((int)Texts.PlayerHPText).text = $"{Managers.Game.PlayerData.CurHP}";
+        GetText((int)Texts.PlayerHPText).text = $"{Managers.Game.PlayerData.CurHP} / {Managers.Game.PlayerData.MaxHP}";
         GetText((int)Texts.PlayerAttackText).text = $"{Managers.Game.PlayerData.Attack}";
         GetText((int)Texts.PlayerDefenseText).text = $"{Managers.Game.PlayerData.Defence}";
+
+        float textWidth = GetText((int)Texts.PlayerHPText).preferredWidth;
+
+        // 이미지의 RectTransform 가져오기
+        RectTransform imageRect = GetImage((int)Images.MainUIStatusHPImage).GetComponent<RectTransform>();
+        // 이미지의 가로 크기를 텍스트 너비 + 여백으로 설정
+        imageRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, textWidth + 30f);
+
     }
 
     public void OnClickMainUIInventoryAImage()
@@ -380,5 +412,139 @@ public class UI_GameScene : UI_Scene
         float playTime = PlayerPrefs.GetFloat("PLAYTIME", 0);
         playTime += Time.deltaTime;
         PlayerPrefs.SetFloat("PLAYTIME", playTime);
+    }
+
+    /// <summary>
+    /// 가짜 로딩창 만드는 함수
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator CoShowLoadingIllust()
+    {
+        yield return null;
+        Managers.Game.OnInputLock = true;
+
+        // 일러스트 표현
+        if (Managers.Game.GameScene == null)
+            yield return null;
+
+        int randValue = UnityEngine.Random.Range(1, 7);
+        GetImage((int)Images.LoadingIllustImage).color = new Color(0, 0, 0, 1);
+        GetImage((int)Images.LoadingIllustImage).sprite = Managers.Resource.Load<Sprite>($"LoadingIllust{randValue}");
+        float timer = 0f;
+        float duration = 2f;
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            float t = Mathf.Clamp01(timer / duration);
+            GetImage((int)Images.LoadingIllustImage).color = new Color(t, t, t, 1);
+            //// 소리끄기
+            //Managers.Sound.SetVolume(0);
+            Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1) - t);
+            Managers.Sound.SetEffectVolume(PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1) - t);
+
+            yield return null;
+        }
+
+        //Image image = Managers.Game.GameScene.ShowLoadingIllust(randValue);
+        yield return new WaitForSeconds(UnityEngine.Random.Range(1, 2));
+
+        timer = 0f;
+        while (timer < duration / 2)
+        {
+            timer += Time.deltaTime;
+            float t = Mathf.Clamp01(timer / (duration / 2));
+            GetImage((int)Images.LoadingIllustImage).color = new Color(1 - t, 1 - t, 1 - t, 1);
+
+            yield return null;
+        }
+
+        Managers.Game.OnInputLock = false;
+
+        // 일러스트 끄기
+        GetImage((int)Images.LoadingIllustImage).color = new Color(1, 1, 1, 0);
+    }
+
+    /// <summary>
+    /// 마검방 들어갈때 삽화 애니 연출
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator CoShowMagicSwordAni()
+    {
+        yield return null;
+        Managers.Game.OnInputLock = true;
+        // 소리끄기
+        //Managers.Sound.SetVolume(0);
+        // 일러스트 표현
+        if (Managers.Game.GameScene == null)
+            yield return null;
+
+        GetImage((int)Images.LoadingIllustImage).color = new Color(0, 0, 0, 1);
+        GetImage((int)Images.LoadingIllustImage).sprite = Managers.Resource.Load<Sprite>($"ForestIllust");
+        GameObject UI_LoadingIllustImage = Managers.Resource.Instantiate($"UI_LoadingIllustImage", gameObject.transform);
+        UI_LoadingIllustImage.GetComponent<Image>().sprite = Managers.Resource.Load<Sprite>($"ForestIllust");
+
+        float timer1 = 0f;
+        while (timer1 < 2)
+        {
+            timer1 += Time.deltaTime;
+            float t = Mathf.Clamp01(timer1 / 1);
+            UI_LoadingIllustImage.GetComponent<Image>().color = new Color(t, t, t, 1);
+            //// 소리끄기
+            //Managers.Sound.SetVolume(0);
+            Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1) - t);
+            Managers.Sound.SetEffectVolume(PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1) - t);
+
+            yield return null;
+        }
+
+        GameObject go = Managers.Resource.Instantiate($"UI_LoadingIllustImage", gameObject.transform);
+        go.GetComponent<Image>().sprite = Managers.Resource.Load<Sprite>($"ForestColorIllust");
+        go.GetComponent<Image>().color = Color.white;
+
+        float timer = 0f;
+        float duration = 4f;
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            float t = Mathf.Clamp01(timer / duration);
+
+            // imageA는 점점 투명해지고, imageB는 점점 불투명해짐
+            SetImageAlpha(UI_LoadingIllustImage.GetComponent<Image>(), 1f - t);
+            SetImageAlpha(go.GetComponent<Image>(), t);
+
+            yield return null;
+        }
+        //Image image = Managers.Game.GameScene.ShowLoadingIllust(randValue);
+        yield return new WaitForSeconds(1);
+
+        timer = 0f;
+        while (timer < duration / 2)
+        {
+            timer += Time.deltaTime;
+            float t = Mathf.Clamp01(timer / (duration / 2));
+            go.GetComponent<Image>().color = new Color(1 - t, 1 - t, 1 - t, 1);
+
+            yield return null;
+        }
+
+        Managers.Game.OnInputLock = false;
+
+        // 일러스트 끄기
+        GetImage((int)Images.LoadingIllustImage).color = new Color(1, 1, 1, 0);
+        Destroy(go);
+        Destroy(UI_LoadingIllustImage);
+    }
+
+    /// <summary>
+    /// Image의 색상 알파값을 설정하는 헬퍼 함수
+    /// </summary>
+    private void SetImageAlpha(Image img, float alpha)
+    {
+        if (img != null)
+        {
+            Color col = img.color;
+            col.a = alpha;
+            img.color = col;
+        }
     }
 }

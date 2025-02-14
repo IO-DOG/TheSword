@@ -118,19 +118,19 @@ public class UI_PlayerCard : UI_BaseCard
 
         while (true)
         {
-            if (_defenceCoolTime >= _maxDefenceCoolTime)
+            if (Managers.Game.DefenceCoolTime >= _maxDefenceCoolTime)
             {
                 if (_creature.IsDefence == false)
                 {
                     _creature.IsDefence = true;
                     Defence();
                 }
-                _defenceCoolTime = _maxDefenceCoolTime;
+                Managers.Game.DefenceCoolTime = _maxDefenceCoolTime;
                 //_defenceCoolTime = 0f;
             }
-            _defenceCoolTime += Time.deltaTime * Managers.Game.GameSpeed;
+            Managers.Game.DefenceCoolTime += Time.deltaTime * Managers.Game.GameSpeed;
 
-            GetImage((int)Images.DefenceDelayGauge).fillAmount = _defenceCoolTime / _maxDefenceCoolTime;
+            GetImage((int)Images.DefenceDelayGauge).fillAmount = Managers.Game.DefenceCoolTime / _maxDefenceCoolTime;
 
             yield return new WaitForFixedUpdate();
         }

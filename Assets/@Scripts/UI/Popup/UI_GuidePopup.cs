@@ -48,6 +48,8 @@ public class UI_GuidePopup : UI_Popup
         GetImage((int)Images.OnlyYestButton).gameObject.BindEvent(YesClick, type: Define.UIEvent.Click);
         GetImage((int)Images.OnlyYestButton).gameObject.BindEvent(YesPointerExit, type: Define.UIEvent.PointerExit);
 
+        Managers.Sound.Play(Define.Sound.Effect, "PopUpUI_TutorialGuide");
+
         return true;
     }
 

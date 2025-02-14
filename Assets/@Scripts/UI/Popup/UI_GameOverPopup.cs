@@ -111,6 +111,9 @@ public class UI_GameOverPopup : UI_Popup
         Managers.Game.OnInputLock = false;
         Managers.Game.IsPlayerDead = false;
 
+        // 죽을때 타격횟수 초기화
+        Managers.Game.AttackCount = 0;
+
         GameObject.Find("Maps")?.SetActive(false);
         Managers.Game.GameScene.gameObject?.SetActive(false);
         //Managers.Scene.LoadScene(Define.Scene.TitleScene);

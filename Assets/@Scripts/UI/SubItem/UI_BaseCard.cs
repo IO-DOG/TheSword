@@ -97,6 +97,7 @@ public class UI_BaseCard : UI_Base
     public virtual void ClearDefence()
     {
         _defenceCoolTime = 0f;
+        Managers.Game.DefenceCoolTime = 0f;
         _creature.IsDefence = false;
         if (GetImage((int)Images.DefenceIcon) != null)
             GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
