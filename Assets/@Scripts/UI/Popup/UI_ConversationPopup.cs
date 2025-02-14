@@ -8,7 +8,7 @@ using UnityEngine;
 public class UI_ConversationPopup : UI_Popup
 {
     bool _endFlag = false;
-
+    bool _isAllTextShown = false;
     enum Texts
     {
         ConversationText,
@@ -47,18 +47,21 @@ public class UI_ConversationPopup : UI_Popup
 
     private void Update()
     {
-        if(!GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().allLettersShown 
-            && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space)))
+        if(!_isAllTextShown && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space)))
         {
             GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().SetVisibilityEntireText(true);
+            _isAllTextShown = true;
         }
-        else if(GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().allLettersShown
-            && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space)))
+        else if(_isAllTextShown && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space)))
         {
             ShowNextScript();
+            _isAllTextShown = false;
         }
 
-         if(GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().allLettersShown)
+        if(GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().allLettersShown)
+            _isAllTextShown = true;
+
+        if (_isAllTextShown)
             GetImage((int)Images.ConversationArrow).gameObject.SetActive(true);
         else
             GetImage((int)Images.ConversationArrow).gameObject.SetActive(false);
