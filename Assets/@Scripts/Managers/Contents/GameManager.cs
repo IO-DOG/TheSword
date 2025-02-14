@@ -129,6 +129,7 @@ public class GameManager
                     curExp = curExp - needExp;
                     Level++;
                     Debug.Log("Level UP!!");
+                    Managers.Resource.Instantiate("LevelUp", Managers.Game.Player.transform);
                     LevelUp();
                 }
             }
