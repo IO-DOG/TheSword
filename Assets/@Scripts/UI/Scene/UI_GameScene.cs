@@ -209,6 +209,9 @@ public class UI_GameScene : UI_Scene
     {
         ShowInfo();
 
+        // ESC 설정창
+        OnClickESC();
+
         // Timer
         StartTimer();
 
@@ -312,6 +315,21 @@ public class UI_GameScene : UI_Scene
                 cItemInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
 
             }
+        }
+    }
+
+    void OnClickESC()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            GameObject go = GameObject.Find("UI_MenuPopup");
+            if (go == null)
+            {
+                isOpenMenuPopup = true;
+                Managers.UI.ShowPopupUI<UI_MenuPopup>();
+            }
+            else
+                go.GetComponent<UI_MenuPopup>().OpenOtherUI();
         }
     }
 
