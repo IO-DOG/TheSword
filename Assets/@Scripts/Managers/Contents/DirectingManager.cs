@@ -174,6 +174,14 @@ public class Events : MonoBehaviour
             godray.GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>("Godray3");
         }
 
+        Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
+        ColorAdjustments colorAdjustments;
+
+        if (postProcessingVolume.profile.TryGet<ColorAdjustments>(out colorAdjustments))
+        {
+            colorAdjustments.colorFilter.Override(new Color(255 / 255f, 231 / 255f, 206 / 255f));
+        }
+
         Managers.Game.DirectionalLight.color = new Color(255 / 255f, 244 / 255f, 214 / 255f);
         // Sound
 

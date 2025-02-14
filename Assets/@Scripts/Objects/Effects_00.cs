@@ -110,7 +110,7 @@ public class Effects_00 : MonoBehaviour
         }
         else if(Managers.Game.PlayerData.CurStageid == 2)
         {
-            // 마검 뽑은 후
+            // 마검 뽑기 전
             if(PlayerPrefs.GetInt("ISMEETSWORD") == 0)
             {
                 // 마검방 
