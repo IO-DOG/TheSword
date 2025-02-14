@@ -273,4 +273,27 @@ public class SoundManager
             });
         }
     }
+
+    public void FadeInBGM(float time)
+    {
+        CoroutineManager.StartCoroutine(CoFadeInBGM(time));
+    }
+
+    IEnumerator CoFadeInBGM(float time)
+    {
+        yield return null;
+        float timer = 0f;
+        while (timer < time)
+        {
+            timer += Time.deltaTime;
+            float t = Mathf.Clamp01(timer / time);
+            //// 소리켜기
+            Managers.Sound.SetBGMVolume(Mathf.Min(t, PlayerPrefs.GetFloat("CURBGMSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1)));
+            Managers.Sound.SetEffectVolume(Mathf.Min(t, PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1)));
+
+            yield return null;
+        }
+        Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1));
+        Managers.Sound.SetEffectVolume(PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1));
+    }
 }

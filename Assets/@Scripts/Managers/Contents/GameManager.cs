@@ -234,6 +234,7 @@ public class GameManager
     public int AttackCount { get; set; }
     public float PlayTime = 0f;
     public float DefenceCoolTime = 0f;
+    public bool[] firstEnterMapCheck = new bool[1001];
 
     public static void LevelUp()
     {
