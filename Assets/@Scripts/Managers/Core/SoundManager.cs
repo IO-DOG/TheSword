@@ -273,4 +273,9 @@ public class SoundManager
             });
         }
     }
+
+    public AudioSource GetAudioSource(Define.Sound type)
+    {
+        return _audioSources[(int)type];
+    }
 }

@@ -586,7 +586,7 @@ public class Events : MonoBehaviour
         Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
 
         yield return new WaitForSeconds(0.1f);
-        Managers.UI.ShowStageNamePopup(Define.STAGE_NAME_DURATION);
+
         Managers.Game.OnDirect = true;
 
         // Player Movement
@@ -597,10 +597,7 @@ public class Events : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
 
-        yield return new WaitForSeconds(Define.STAGE_NAME_DURATION + 1.5f);
-
-        Managers.Game.OnDirect = false;
-
+        yield return new WaitForSeconds(1f);
         UI_ConversationPopup conversation = Managers.UI.ShowPopupUI<UI_ConversationPopup>();
 
         // Reset Player Stat
@@ -629,6 +626,8 @@ public class Events : MonoBehaviour
 
         PlayerPrefs.SetInt("ISFIRST", 0);
         Managers.UI.ShowGameSceneUI();
+        Managers.UI.ShowStageNamePopup(Define.STAGE_NAME_DURATION);
+        Managers.Game.OnDirect = false;
         //Managers.Game.SaveGame();
     }
     #endregion

@@ -1,5 +1,6 @@
 ﻿using Data;
 using Febucci.UI;
+using Febucci.UI.Examples;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -33,16 +34,21 @@ public class UI_ConversationPopup : UI_Popup
         if (base.Init() == false)
             return false;
 
+        Managers.Game.OnConversation = true;
+        InitScript();
+
+        return true;
+    }
+
+    private void Awake()
+    {
         #region Bind
         BindImage(typeof(Images));
         BindText(typeof(Texts));
         BindObject(typeof(GameObjects));
         #endregion
 
-        Managers.Game.OnConversation = true;
-        InitScript();
-
-        return true;
+        GetText((int)Texts.ConversationText).GetComponent<TAnimSoundWriter>().source = Managers.Sound.GetAudioSource(Define.Sound.Effect);
     }
 
     private void Update()

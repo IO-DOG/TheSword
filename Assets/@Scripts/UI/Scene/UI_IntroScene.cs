@@ -1,6 +1,7 @@
 ﻿using Data;
 using DG.Tweening;
 using Febucci.UI;
+using Febucci.UI.Examples;
 using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
@@ -39,11 +40,6 @@ public class UI_IntroScene : UI_Scene
         if (base.Init() == false)
             return false;
 
-        #region Bind
-        BindImage(typeof(Images));
-        BindText(typeof(Texts));
-        #endregion
-
         Managers.Sound.Play(Define.Sound.Effect, "StartIntro_SFX");
         Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1));
 
@@ -58,6 +54,16 @@ public class UI_IntroScene : UI_Scene
         GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx++].id);
         GetImage((int)Images.EscapeGauge).gameObject.SetActive(false);
         return true;
+    }
+
+    private void Awake()
+    {
+        #region Bind
+        BindImage(typeof(Images));
+        BindText(typeof(Texts));
+        #endregion
+
+        GetText((int)Texts.SceneText).GetComponent<TAnimSoundWriter>().source = Managers.Sound.GetAudioSource(Define.Sound.Effect);
     }
 
     private void Update()
