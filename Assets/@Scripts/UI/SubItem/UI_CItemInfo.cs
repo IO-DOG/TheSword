@@ -78,7 +78,9 @@ public class UI_CItemInfo : UI_Base
         GetText((int)Texts.MonsterNameText).text = Managers.GetString(Managers.Data.ConsumableItemDic[id].ScriptNameId);
         GetText((int)Texts.MonsterAttackText).text = "0";
         GetText((int)Texts.MonsterDefenseText).text = "0";
-        GetText((int)Texts.MonsterHPText).text = "0";
+        float heal = Managers.Data.ConsumableItemDic[id].Heal * Managers.Game.PlayerData.MaxHP / 100;
+        heal = Mathf.Round(heal);
+        GetText((int)Texts.MonsterHPText).text = $"{heal}";
         GetText((int)Texts.MonsterDescText).text = Managers.GetString(Managers.Data.ConsumableItemDic[id].ScriptDescriptionId);
     }
 
