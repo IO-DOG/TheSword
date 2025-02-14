@@ -108,6 +108,10 @@ public class UI_TitleScene : UI_Scene
                 Managers.Game.Init();
                 Managers.Sound.Init();
                 Managers.Sound.Play(Define.Sound.Bgm, "MainTitle_BGM");
+                if (!PlayerPrefs.HasKey("CURSOUND")) PlayerPrefs.SetFloat("CURSOUND", 1);
+                if (!PlayerPrefs.HasKey("SAVESOUND")) PlayerPrefs.SetFloat("SAVESOUND", 1);
+                if (!PlayerPrefs.HasKey("CURBGMSOUND")) PlayerPrefs.SetFloat("CURBGMSOUND", 1);
+                if (!PlayerPrefs.HasKey("CUREFFECTSOUND")) PlayerPrefs.SetFloat("CUREFFECTSOUND", 1);
                 Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1));
                 Managers.Sound.SetEffectVolume(PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1));
 
@@ -127,14 +131,6 @@ public class UI_TitleScene : UI_Scene
     {
         if (_lock)
             return;
-
-        if (isPreload && Input.anyKeyDown && GetText((int)Texts.PessAnyKeyText).gameObject.activeSelf && !Input.GetKeyDown(KeyCode.Return) && !Input.GetKeyDown(KeyCode.UpArrow) && !Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            GetText((int)Texts.PessAnyKeyText).gameObject.SetActive(false);
-            GetImage((int)Images.Buttons).gameObject.SetActive(true);
-            ButtonsSetting();
-            CheckFirstGame();
-        }
 
         if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S))
         {
@@ -171,6 +167,14 @@ public class UI_TitleScene : UI_Scene
                 default:
                     break;
             }
+        }
+
+        if (isPreload && Input.anyKeyDown && GetText((int)Texts.PessAnyKeyText).gameObject.activeSelf /*&& !Input.GetKeyDown(KeyCode.Return)*/ && !Input.GetKeyDown(KeyCode.UpArrow) && !Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            GetText((int)Texts.PessAnyKeyText).gameObject.SetActive(false);
+            GetImage((int)Images.Buttons).gameObject.SetActive(true);
+            ButtonsSetting();
+            CheckFirstGame();
         }
 
         #region ForTest
