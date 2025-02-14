@@ -68,24 +68,8 @@ public class UI_GameOverPopup : UI_Popup
         Managers.Game.Player.SetState(Define.PlayerState.Death);
         //Destroy(Managers.Game.Player.gameObject);
 
-        StartCoroutine(CoFadeOutSound(3f));
+        Managers.Sound.FadeAndStopBGM(3f);
         StartCoroutine(CoDeadAni());
-    }
-
-    IEnumerator CoFadeOutSound(float time)
-    {
-        float total = 0;
-        float curSound = PlayerPrefs.GetFloat("CURBGMSOUND", 1);
-
-        while (total <= time)
-        {
-            float delta = total / time;
-
-            Managers.Sound.SetBGMVolume(curSound - delta);
-
-            total += Time.deltaTime;
-            yield return null;
-        }
     }
 
     IEnumerator CoDeadAni()

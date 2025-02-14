@@ -191,22 +191,6 @@ public class UI_TitleScene : UI_Scene
         #endregion
     }
 
-    IEnumerator CoFadeOutSound(float time)
-    {
-        float total = 0;
-        float curSound = PlayerPrefs.GetFloat("CURBGMSOUND", 1);
-
-        while (total <= time)
-        {
-            float delta = total / time;
-
-            Managers.Sound.SetBGMVolume(curSound - delta);
-
-            total += Time.deltaTime;
-            yield return null;
-        }
-    }
-
     IEnumerator CoOnClickNewGameButton()
     {
         _lock = true;
@@ -216,7 +200,7 @@ public class UI_TitleScene : UI_Scene
         GetImage((int)Images.BlackBGImage).gameObject.SetActive(true);
         GetImage((int)Images.BlackBGImage).color = new Color(1, 1, 1, 0);
         StartCoroutine(Util.CoFade(GetImage((int)Images.BlackBGImage), 3));
-        StartCoroutine(CoFadeOutSound(3f));
+        Managers.Sound.FadeAndStopBGM(3f);
         yield return new WaitForSeconds(3f);
 
         //test
