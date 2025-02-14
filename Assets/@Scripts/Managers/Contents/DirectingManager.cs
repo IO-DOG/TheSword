@@ -162,7 +162,22 @@ public class Events : MonoBehaviour
 
         yield return new WaitForSeconds(4f);
 
-        Managers.Game.DirectionalLight.DOIntensity(1f, 1f);
+        GameObject fireflies = GameObject.Find("MagicalSwordRoomFireflies");
+        if (fireflies != null)
+        {
+            fireflies.SetActive(false);
+        }
+
+        GameObject godray = GameObject.Find("MagicalSwordRoomGodray");
+        if (godray != null)
+        {
+            godray.GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>("Godray3");
+        }
+
+        Managers.Game.DirectionalLight.color = new Color(255 / 255f, 244 / 255f, 214 / 255f);
+        // Sound
+
+        Managers.Game.DirectionalLight.DOIntensity(1.5f, 1f);
 
         Managers.Resource.Destroy(go1);
         Managers.Resource.Destroy(go2);
@@ -187,13 +202,11 @@ public class Events : MonoBehaviour
         Managers.UI.ShowGameSceneUI();
         Managers.Game.SaveGame();
 
-        GameObject curMAp = GameObject.Find("Dungeon_00_002");
-        GameObject key = curMAp.transform.Find("Items/CItem19").gameObject;
+        GameObject curMap = GameObject.Find("Dungeon_00_002");
+        GameObject key = curMap.transform.Find("Items/CItem13").gameObject;
         key.GetComponent<SpriteRenderer>().enabled = true;
         key.GetComponent<BoxCollider>().enabled = true;
         key.SetActive(true);
-
-        // Sound
         Managers.Sound.FadeAndPlayBGM("Chapter0_BGM", 0.8f);
     }
 

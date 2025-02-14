@@ -176,7 +176,7 @@ public class UI_GameScene : UI_Scene
         {
             // 검 먹고 남은 자리에 있는 key 활성화
             GameObject map = GameObject.Find("Dungeon_00_002");
-            GameObject key = map.transform.Find("Items/CItem19").gameObject;
+            GameObject key = map.transform.Find("Items/CItem13").gameObject;
             key.GetComponent<SpriteRenderer>().enabled = true;
             key.GetComponent<BoxCollider>().enabled = true;
             key.SetActive(true);

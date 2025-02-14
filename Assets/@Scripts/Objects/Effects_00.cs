@@ -95,7 +95,7 @@ public class Effects_00 : MonoBehaviour
     {
         Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
         Vignette vignette;
-
+        ColorAdjustments colorAdjustments;
 
         if (postProcessingVolume.profile.TryGet<Vignette>(out vignette))
         {
@@ -106,14 +106,58 @@ public class Effects_00 : MonoBehaviour
         if (Managers.Game.PlayerData.CurStageid == 0 || Managers.Game.PlayerData.CurStageid == Managers.Game.BossRoomId)
         {
             Managers.Game.DirectionalLight.color = new Color(255/255f, 244/255f, 214/255f);
+            Managers.Game.DirectionalLight.intensity = 1.5f;
         }
-        else if(Managers.Game.PlayerData.CurStageid > 0)
+        else if(Managers.Game.PlayerData.CurStageid == 2)
         {
-            Managers.Game.DirectionalLight.color = new Color(192/255f, 189/255f, 179/255f);
+            // 마검 뽑은 후
+            if(PlayerPrefs.GetInt("ISMEETSWORD") == 0)
+            {
+                // 마검방 
+                Managers.Game.DirectionalLight.color = new Color(213 / 255f, 199 / 255f, 255 / 255f);
+                Managers.Game.DirectionalLight.intensity = 0.57f;
+
+                if (postProcessingVolume.profile.TryGet<ColorAdjustments>(out colorAdjustments))
+                {
+                    colorAdjustments.colorFilter.Override(new Color(205 / 255f, 153 / 255f, 255 / 255f));
+                }
+            }
+            else
+            {
+                Managers.Game.DirectionalLight.color = new Color(255 / 255f, 244 / 255f, 214 / 255f);
+                Managers.Game.DirectionalLight.intensity = 1.5f;
+
+                GameObject fireflies = GameObject.Find("MagicalSwordRoomFireflies");
+                if(fireflies != null)
+                {
+                    fireflies.SetActive(false);
+                }
+
+                GameObject godray = GameObject.Find("MagicalSwordRoomGodray");
+                if (godray != null)
+                {
+                    godray.GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>("Godray3");
+                }
+
+                if (postProcessingVolume.profile.TryGet<ColorAdjustments>(out colorAdjustments))
+                {
+                    colorAdjustments.colorFilter.Override(new Color(255 / 255f, 231 / 255f, 206 / 255f));
+                }
+            }
+        }
+        else
+        {
+            Managers.Game.DirectionalLight.color = new Color(192 / 255f, 189 / 255f, 179 / 255f);
+            Managers.Game.DirectionalLight.intensity = 1.5f;
+
+            if (postProcessingVolume.profile.TryGet<ColorAdjustments>(out colorAdjustments))
+            {
+                colorAdjustments.colorFilter.Override(new Color(255 / 255f, 231 / 255f, 206 / 255f));
+            }
         }
 
         // fog
-        if(Managers.Game.PlayerData.CurStageid == Managers.Game.BossRoomId)
+        if (Managers.Game.PlayerData.CurStageid == Managers.Game.BossRoomId)
         {
             if (fog !=null && fog.GetComponent<VisualEffect>().HasVector4("FogSeconderyColor"))
             {
