@@ -45,6 +45,7 @@ public class UI_GameScene : UI_Scene
         MainUISwordBImage,
         MainUIWarpAImage,
         MainUIWarpBImage,
+        MainUIStatusHPImage,
     }
 
     #endregion
@@ -227,10 +228,13 @@ public class UI_GameScene : UI_Scene
         if (Input.GetKeyDown(KeyCode.F3))
         {
             Managers.Game.PlayerData.CurHP += 10000;
+            Refresh();
+
         }
         if (Input.GetKeyDown(KeyCode.F4))
         {
             Managers.Game.PlayerData.MaxHP += 10000;
+            Refresh();
         }
         if (Input.GetKeyDown(KeyCode.F5))
         {
@@ -340,9 +344,17 @@ public class UI_GameScene : UI_Scene
     public void SetPlayerInfo()
     {
         //GetText((int)Texts.PlayerNameText).text = "PlayerName";
-        GetText((int)Texts.PlayerHPText).text = $"{Managers.Game.PlayerData.CurHP}";
+        GetText((int)Texts.PlayerHPText).text = $"{Managers.Game.PlayerData.CurHP} / {Managers.Game.PlayerData.MaxHP}";
         GetText((int)Texts.PlayerAttackText).text = $"{Managers.Game.PlayerData.Attack}";
         GetText((int)Texts.PlayerDefenseText).text = $"{Managers.Game.PlayerData.Defence}";
+
+        float textWidth = GetText((int)Texts.PlayerHPText).preferredWidth;
+
+        // 이미지의 RectTransform 가져오기
+        RectTransform imageRect = GetImage((int)Images.MainUIStatusHPImage).GetComponent<RectTransform>();
+        // 이미지의 가로 크기를 텍스트 너비 + 여백으로 설정
+        imageRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, textWidth + 30f);
+
     }
 
     public void OnClickMainUIInventoryAImage()
