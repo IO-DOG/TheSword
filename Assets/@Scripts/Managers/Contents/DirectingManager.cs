@@ -233,7 +233,10 @@ public class Events : MonoBehaviour
             _kingSlime = GameObject.Find("bossMonster0");
 
             if (_kingSlime != null)
+            {
                 _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = false;
+                _kingSlime.GetOrAddComponent<BoxCollider>().enabled = false;
+            }
         }
 
         CoroutineManager.StartCoroutine(CoKingSlimeAction());
@@ -332,6 +335,7 @@ public class Events : MonoBehaviour
 
         _kingSlime.transform.localPosition = new Vector3(3.84f, 3f, -5.5f);
         _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
+        _kingSlime.GetOrAddComponent<BoxCollider>().enabled = true;
 
         _kingSlime.GetComponent<Animator>().speed = 0f;
         _kingSlime.transform.DOLocalMoveZ(_kingSlime.transform.localPosition.z - 0.5f, 0.2f);
