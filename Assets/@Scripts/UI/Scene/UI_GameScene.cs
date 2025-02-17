@@ -71,7 +71,7 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
         { GetImage((int)Images.MainUIOptionBImage).gameObject.SetActive(true); }, null, Define.UIEvent.PointerEnter);
         GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
-        { GetImage((int)Images.MainUIOptionBImage).gameObject.SetActive(false); ; }, null, Define.UIEvent.PointerExit);
+        { GetImage((int)Images.MainUIOptionBImage).gameObject.SetActive(false); }, null, Define.UIEvent.PointerExit);
 
         GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(() =>
         { GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(true); }, null, Define.UIEvent.PointerEnter);
@@ -81,12 +81,19 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUISwordAImage).gameObject.BindEvent(() =>
         { GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(true); }, null, Define.UIEvent.PointerEnter);
         GetImage((int)Images.MainUISwordAImage).gameObject.BindEvent(() =>
-        { GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false); ; }, null, Define.UIEvent.PointerExit);
+        { GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false); }, null, Define.UIEvent.PointerExit);
 
         GetImage((int)Images.MainUIWarpAImage).gameObject.BindEvent(() =>
         { GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(true); }, null, Define.UIEvent.PointerEnter);
         GetImage((int)Images.MainUIWarpAImage).gameObject.BindEvent(() =>
-        { GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false); ; }, null, Define.UIEvent.PointerExit);
+        { GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false); }, null, Define.UIEvent.PointerExit);
+        #endregion
+
+        #region OffBImage
+        GetImage((int)Images.MainUIOptionBImage).gameObject.SetActive(false);
+        GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(false);
+        GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false);
+        GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false);
         #endregion
 
         Managers.Game.GenerateMap(Managers.Game.PlayerData.CurStageid);
@@ -229,7 +236,7 @@ public class UI_GameScene : UI_Scene
         }
         if (Input.GetKeyDown(KeyCode.F3))
         {
-            Managers.Game.PlayerData.CurHP += 10000;
+            Managers.Game.PlayerData.CurHP -= 10000;
             Refresh();
 
         }
@@ -329,13 +336,22 @@ public class UI_GameScene : UI_Scene
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             GameObject go = GameObject.Find("UI_MenuPopup");
-            if (go == null)
+            if (Managers.UI.GetPopupCount() > 0 && go == null)
+            {
+                //go.GetComponent<UI_MenuPopup>().OpenOtherUI();
+                Managers.UI.ClosePopupUI();
+                Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Back_SFX");
+            }
+            else if (go != null)
+            {
+                go.GetComponent<UI_MenuPopup>().OpenOtherUI();
+                Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Back_SFX");
+            }
+            else
             {
                 isOpenMenuPopup = true;
                 Managers.UI.ShowPopupUI<UI_MenuPopup>();
             }
-            else
-                go.GetComponent<UI_MenuPopup>().OpenOtherUI();
         }
     }
 
@@ -377,7 +393,7 @@ public class UI_GameScene : UI_Scene
     {
         PlayerPrefs.SetInt("ISOPENINVENUI", 1);
         GetImage((int)Images.MainUIInventoryAImage).gameObject.SetActive(true);
-        GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(true);
+        GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(false);
     }
 
     public void OffUISword()

@@ -171,7 +171,34 @@ public class PortalController : MonoBehaviour
 
     void LoadingAndWarp(Vector3 nextPos)
     {
-        StartCoroutine(CoLoadingAndWarp(nextPos));
+        //StartCoroutine(CoLoadingAndWarp(nextPos));
+
+        Managers.Game.OnInteract = true;
+        //yield return new WaitForSeconds(0.2f);
+        Managers.Game.Player.SetIdleState(Managers.Game.Player._moveDir);
+        Managers.Game.OnFadeAction.Invoke(0.3f);
+        int nextStageID = SetStageID();
+        if (nextStageID == 2)
+        {
+            Managers.Game.OnStaticResolution = true;
+        }
+        else
+        {
+            Managers.Game.OnStaticResolution = false;
+        }
+        //yield return new WaitForSeconds(0.03f);
+        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
+        Debug.Log($"Setting player position to2: {nextPos}");
+
+        Managers.Game.Player.transform.position = nextPos;
+        Managers.Game.Player._cellPos = nextPos;
+        //Managers.Game.SaveGame();
+
+        Managers.Game.OnPortalAction.Invoke();
+        Managers.Game.GameScene.Refresh();
+        Managers.Game.OnInteract = false;
+
+        Managers.UI.ShowStageNamePopup(1f);
     }
     IEnumerator CoLoadingAndWarp(Vector3 nextPos)
     {
