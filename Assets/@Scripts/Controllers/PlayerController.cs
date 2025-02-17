@@ -29,6 +29,7 @@ public class PlayerController : MonoBehaviour
 
     public GameObject _weapon;
     public GameObject _shield;
+    public GameObject _back;
 
     float _duration;
     bool _isMoving = false;
@@ -62,6 +63,12 @@ public class PlayerController : MonoBehaviour
         _keyInventory = GameObject.Find("KeyInventory");
         _weapon = GameObject.Find("WeaponSlot");
         _shield = GameObject.Find("ShieldSlot");
+        _back = GameObject.Find("BackSlot");
+
+        if (PlayerPrefs.GetInt("ISFIRST", 1) != 1)
+        {
+            _back.SetActive(false);
+        }
     }
 
     Stack<int> keyInputStack = new Stack<int>();
@@ -337,6 +344,9 @@ public class PlayerController : MonoBehaviour
                 break;
             case PlayerState.Death:
                 GetComponent<Animator>().Play("Player_Death");
+                break;
+            case PlayerState.TutorialFirst_Ready:
+                GetComponent<Animator>().Play("Player_TutorialFirst_Ready");
                 break;
         }
     }

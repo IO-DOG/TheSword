@@ -614,9 +614,11 @@ public class Events : MonoBehaviour
         float originalSpeed = Managers.Game.PlayerData.MoveSpeed;
         Managers.Game.Player.Speed = 1f;
         Managers.Game.Player.Moving(Define.MoveDir.Up, true);
+        Managers.Game.Player._back.GetComponent<Animator>().Play("Tutorial_First_Run");
 
         yield return new WaitForSeconds(0.5f);
         Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
+        Managers.Game.Player._back.GetComponent<Animator>().Play("Tutorial_First_Idle");
 
         yield return new WaitForSeconds(1f);
         UI_ConversationPopup conversation = Managers.UI.ShowPopupUI<UI_ConversationPopup>();
@@ -632,7 +634,6 @@ public class Events : MonoBehaviour
             bool currentConversationState = Managers.Game.OnConversation;
             if (prevConvsersationState && !currentConversationState)
             {
-                Managers.Game.OnDirect = false;
                 break;
             }
 
@@ -642,6 +643,13 @@ public class Events : MonoBehaviour
         }
         #endregion
 
+        Managers.Sound.Play(Sound.Effect, "HeroReady_SFX");
+        Managers.Game.Player.SetState(PlayerState.TutorialFirst_Ready);
+        Managers.Game.Player._back.SetActive(false);
+
+        yield return new WaitForSeconds(0.5f);
+
+        Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
         Managers.Game.Player._isEquiptWeapon = true;
         Managers.Game.Player._weapon.SetActive(true);
 

@@ -195,6 +195,7 @@ public class Define
         ContractSword,
         BackStep,
         Death,
+        TutorialFirst_Ready,
     }
 
     public enum EventClass
