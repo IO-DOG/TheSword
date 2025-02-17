@@ -236,7 +236,7 @@ public class UI_GameScene : UI_Scene
         }
         if (Input.GetKeyDown(KeyCode.F3))
         {
-            Managers.Game.PlayerData.CurHP += 10000;
+            Managers.Game.PlayerData.CurHP -= 10000;
             Refresh();
 
         }
@@ -336,13 +336,22 @@ public class UI_GameScene : UI_Scene
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             GameObject go = GameObject.Find("UI_MenuPopup");
-            if (go == null)
+            if (Managers.UI.GetPopupCount() > 0 && go == null)
+            {
+                //go.GetComponent<UI_MenuPopup>().OpenOtherUI();
+                Managers.UI.ClosePopupUI();
+                Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Back_SFX");
+            }
+            else if (go != null)
+            {
+                go.GetComponent<UI_MenuPopup>().OpenOtherUI();
+                Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Back_SFX");
+            }
+            else
             {
                 isOpenMenuPopup = true;
                 Managers.UI.ShowPopupUI<UI_MenuPopup>();
             }
-            else
-                go.GetComponent<UI_MenuPopup>().OpenOtherUI();
         }
     }
 
@@ -384,7 +393,7 @@ public class UI_GameScene : UI_Scene
     {
         PlayerPrefs.SetInt("ISOPENINVENUI", 1);
         GetImage((int)Images.MainUIInventoryAImage).gameObject.SetActive(true);
-        GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(true);
+        GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(false);
     }
 
     public void OffUISword()
