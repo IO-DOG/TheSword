@@ -449,35 +449,6 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    public Vector3 GetFuturePos()
-    {
-        switch (_moveDir)
-        {
-            case MoveDir.Up:
-                _nextCellPos = Vector3.forward * _offset;
-                _state = PlayerState.Up;
-                break;
-            case MoveDir.Down:
-                _nextCellPos = Vector3.back * _offset;
-                _state = PlayerState.Down;
-                break;
-            case MoveDir.Left:
-                _nextCellPos = Vector3.left * _offset;
-                _state = PlayerState.Left;
-                break;
-            case MoveDir.Right:
-                _nextCellPos = Vector3.right * _offset;
-                _state = PlayerState.Right;
-                break;
-            case MoveDir.Back:
-                _nextCellPos = Vector3.back * _offset;
-                _state = PlayerState.BackStep;
-                break;
-        }
-
-        return _cellPos + _nextCellPos;
-    }
-
     public void SetIdleState(MoveDir moveDir)
     {
         _isMoving = false;
