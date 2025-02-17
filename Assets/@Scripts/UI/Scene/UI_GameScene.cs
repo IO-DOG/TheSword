@@ -71,7 +71,7 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
         { GetImage((int)Images.MainUIOptionBImage).gameObject.SetActive(true); }, null, Define.UIEvent.PointerEnter);
         GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
-        { GetImage((int)Images.MainUIOptionBImage).gameObject.SetActive(false); ; }, null, Define.UIEvent.PointerExit);
+        { GetImage((int)Images.MainUIOptionBImage).gameObject.SetActive(false); }, null, Define.UIEvent.PointerExit);
 
         GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(() =>
         { GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(true); }, null, Define.UIEvent.PointerEnter);
@@ -81,12 +81,19 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUISwordAImage).gameObject.BindEvent(() =>
         { GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(true); }, null, Define.UIEvent.PointerEnter);
         GetImage((int)Images.MainUISwordAImage).gameObject.BindEvent(() =>
-        { GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false); ; }, null, Define.UIEvent.PointerExit);
+        { GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false); }, null, Define.UIEvent.PointerExit);
 
         GetImage((int)Images.MainUIWarpAImage).gameObject.BindEvent(() =>
         { GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(true); }, null, Define.UIEvent.PointerEnter);
         GetImage((int)Images.MainUIWarpAImage).gameObject.BindEvent(() =>
-        { GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false); ; }, null, Define.UIEvent.PointerExit);
+        { GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false); }, null, Define.UIEvent.PointerExit);
+        #endregion
+
+        #region OffBImage
+        GetImage((int)Images.MainUIOptionBImage).gameObject.SetActive(false);
+        GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(false);
+        GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false);
+        GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false);
         #endregion
 
         Managers.Game.GenerateMap(Managers.Game.PlayerData.CurStageid);
