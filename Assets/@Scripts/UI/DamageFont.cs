@@ -37,8 +37,14 @@ public class DamageFont : UI_Base
         DoAnimation();
     }
 
-    private void OnEnable()
+    public void SetPotionHealingInfo(float healAmount, Transform parentUI)
     {
+        _damageText = GetComponent<TextMeshProUGUI>();
+
+        _damageText.text = $"{Mathf.RoundToInt(healAmount)}";
+        _damageText.color = Util.HexToColor("4EEE6F");
+        _damageText.alpha = 1;
+        DoPotionHealingAnimation();
     }
 
     //private void DoAnimation()
@@ -88,6 +94,21 @@ public class DamageFont : UI_Base
                 .SetRelative(true)
                 .SetEase(Ease.Linear));
 
+        seq.OnComplete(() =>
+        {
+            Managers.Resource.Destroy(gameObject);
+        });
+    }
+
+    private void DoPotionHealingAnimation()
+    {
+        Color transparentColot = new Color(_damageText.color.r, _damageText.color.g, _damageText.color.b, 0);
+
+        Sequence seq = DOTween.Sequence();
+
+        // 위로 올라가면서 투명해짐
+        seq.Append(GetComponent<RectTransform>().DOLocalMoveY(25f, 1f));
+        seq.Join(_damageText.DOColor(transparentColot, 1f));
         seq.OnComplete(() =>
         {
             Managers.Resource.Destroy(gameObject);

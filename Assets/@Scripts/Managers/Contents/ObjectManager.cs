@@ -23,4 +23,13 @@ public class ObjectManager
         }
     }
 
+    public void ShowPotionHealingFont(float healAmount, Transform parentUI)
+    {
+        if (parentUI != null)
+        {
+            GameObject go = Managers.Resource.Instantiate("PotionHealingFont", parentUI);
+            DamageFont damageText = go.GetOrAddComponent<DamageFont>();
+            damageText.SetPotionHealingInfo(healAmount, parentUI);
+        }
+    }
 }

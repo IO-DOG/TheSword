@@ -37,7 +37,6 @@ public class PlayerController : MonoBehaviour
     float _offset = Define.TILE_SIZE;
     Vector3 _interpolateRayPos = new Vector3(0f, Define.TILE_SIZE / 2f, 0f);
     public Vector3 _cellPos;
-
     Vector3 _nextCellPos;
 
     public MoveDir _moveDir = MoveDir.None;
@@ -448,6 +447,35 @@ public class PlayerController : MonoBehaviour
             _isMoving = false;
         });
 
+    }
+
+    public Vector3 GetFuturePos()
+    {
+        switch (_moveDir)
+        {
+            case MoveDir.Up:
+                _nextCellPos = Vector3.forward * _offset;
+                _state = PlayerState.Up;
+                break;
+            case MoveDir.Down:
+                _nextCellPos = Vector3.back * _offset;
+                _state = PlayerState.Down;
+                break;
+            case MoveDir.Left:
+                _nextCellPos = Vector3.left * _offset;
+                _state = PlayerState.Left;
+                break;
+            case MoveDir.Right:
+                _nextCellPos = Vector3.right * _offset;
+                _state = PlayerState.Right;
+                break;
+            case MoveDir.Back:
+                _nextCellPos = Vector3.back * _offset;
+                _state = PlayerState.BackStep;
+                break;
+        }
+
+        return _cellPos + _nextCellPos;
     }
 
     public void SetIdleState(MoveDir moveDir)

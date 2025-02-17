@@ -182,6 +182,12 @@ public class UIManager
             UI_PlayerHPBarGauge.GetComponent<Image>().color = new Color(1, 1, 1, 1);
     }
 
+    public Transform GetPlayerHpBar()
+    {
+        GameObject UI_PlayerHPBar = GameObject.Find("UI_PlayerHPBar");
+        return UI_PlayerHPBar.transform;
+    }
+
     public void CloseGameSceneUI()
     {
         CloseAllPopupUI();

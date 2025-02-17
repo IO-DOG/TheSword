@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 
 [SerializeField]
@@ -57,6 +59,10 @@ public class ConsumableItem : MonoBehaviour
             float heal = Managers.Game.ConsumableItemData.Heal * Managers.Game.PlayerData.MaxHP / 100;
             heal = Mathf.Round(heal);
             Managers.Game.PlayerData.CurHP += heal;
+
+            // Show Healing Font
+            Transform ui_PlayerHpBar = Managers.UI.GetPlayerHpBar();
+            Managers.Object.ShowPotionHealingFont(heal, ui_PlayerHpBar);
 
             if (Managers.Game.PlayerData.CurHP > Managers.Game.PlayerData.MaxHP)
                 Managers.Game.PlayerData.CurHP = Managers.Game.PlayerData.MaxHP;
