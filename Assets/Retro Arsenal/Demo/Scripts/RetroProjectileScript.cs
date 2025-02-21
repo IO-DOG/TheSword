@@ -47,7 +47,7 @@ namespace RetroArsenal
 
             float rad = sphereCollider ? sphereCollider.radius : colliderRadius;
 
-            Vector3 dir = rb.velocity;
+            Vector3 dir = rb.linearVelocity;
             float dist = dir.magnitude * Time.deltaTime;
 
             if (rb.useGravity)
@@ -127,10 +127,10 @@ namespace RetroArsenal
 
         private void RotateTowardsDirection()
         {
-            if (rb.velocity != Vector3.zero)
+            if (rb.linearVelocity != Vector3.zero)
             {
-                Quaternion targetRotation = Quaternion.LookRotation(rb.velocity.normalized, Vector3.up);
-                float angle = Vector3.Angle(myTransform.forward, rb.velocity.normalized);
+                Quaternion targetRotation = Quaternion.LookRotation(rb.linearVelocity.normalized, Vector3.up);
+                float angle = Vector3.Angle(myTransform.forward, rb.linearVelocity.normalized);
                 float lerpFactor = angle * Time.deltaTime; // Use the angle as the interpolation factor
                 myTransform.rotation = Quaternion.Slerp(myTransform.rotation, targetRotation, lerpFactor);
             }
