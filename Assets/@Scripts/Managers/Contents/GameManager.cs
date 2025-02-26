@@ -159,6 +159,7 @@ public class GameManager
         //public bool HasGetEquip { get; set; } // 인벤 UI 개방용
         //public bool HasGetWarp { get; set; } // 워프 UI 개방용
         //public bool HasGetClass { get; set; } // 특성을 얻었는지 -> 특성 UI 개방용
+        public List<bool> FirstEnterMapCheck = new List<bool>();
 
         public void Clear()
         {
@@ -235,7 +236,7 @@ public class GameManager
     public int AttackCount { get; set; }
     public float PlayTime = 0f;
     public float DefenceCoolTime = 0f;
-    public bool[] firstEnterMapCheck = new bool[1001];
+    //public bool[] firstEnterMapCheck = new bool[1001];
 
     public static void LevelUp()
     {
@@ -530,6 +531,7 @@ public class GameManager
             {
                 Managers.Game.PlayerData.Inventory.Add(new List<int>());
             }
+            Managers.Game.PlayerData.FirstEnterMapCheck = new List<bool>(new bool[110]);
             // 오픈하면 1로 변경해야함.
             PlayerPrefs.SetInt("ISOPENSWORD", 0);
             PlayerPrefs.SetInt("ISOPENPORTAL", 0);
