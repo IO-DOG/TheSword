@@ -166,11 +166,16 @@ public class UI_TitleScene : UI_Scene
                     //OnClickNewGameButton();
                     break;
                 case 1:
-                    if (PlayerPrefs.GetInt("ISFIRST", 1) != 1)
+                    if (PlayerPrefs.GetInt("ISFIRST", 1) != 1) // 최초가 아니면
                         OnClickLoadGameButton();
+                    else
+                        OnClickSettingButton();
                     break;
                 case 2:
-                    OnClickSettingButton();
+                    if (PlayerPrefs.GetInt("ISFIRST", 1) != 1) // 최초가 아니면
+                        OnClickSettingButton();
+                    else
+                        OnClickExitButton();
                     break;
                 case 3:
                     OnClickExitButton();
