@@ -333,7 +333,7 @@ public class UI_GameScene : UI_Scene
 
     void OnClickESC()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && !Managers.Game.OnBattle)
         {
             GameObject go = GameObject.Find("UI_MenuPopup");
             if (Managers.UI.GetPopupCount() > 0 && go == null)
