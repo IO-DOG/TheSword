@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
 
 [SerializeField]
