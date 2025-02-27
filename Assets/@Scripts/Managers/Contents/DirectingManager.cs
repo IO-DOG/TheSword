@@ -596,11 +596,7 @@ public class Events : MonoBehaviour
         Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1));
         CoroutineManager.StartCoroutine(PlayTutorial_1());
         Managers.UI.CloseGameSceneUI();
-        GameObject.Find("UI_PlayerHPBar").GetComponent<Image>().color = new Color(1, 1, 1, 0);
-        GameObject.Find("PlayerHPBarGauge").GetComponent<Image>().color = new Color(1, 1, 1, 0);
         Managers.Game.Player._isEquiptWeapon = false;
-        Managers.Game.Player._weapon.SetActive(false);
-        Managers.Game.SaveGame();
     }
 
     // 마검 만남
@@ -661,7 +657,7 @@ public class Events : MonoBehaviour
         Managers.UI.ShowGameSceneUI();
         Managers.UI.ShowStageNamePopup(Define.STAGE_NAME_DURATION);
         Managers.Game.OnDirect = false;
-        //Managers.Game.SaveGame();
+        Managers.Game.SaveGame();
     }
     #endregion
 
