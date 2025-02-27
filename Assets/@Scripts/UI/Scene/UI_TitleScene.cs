@@ -43,6 +43,7 @@ public class UI_TitleScene : UI_Scene
     int buttonsIdx = 0;
     int maxButtonCount = 4;
     bool _lock = false;
+    bool _isFirst = false;
 
     public override bool Init()
     {
@@ -62,9 +63,18 @@ public class UI_TitleScene : UI_Scene
         GetObject((int)Objects.Slider).GetComponent<Slider>().gameObject.SetActive(false);
 
         GetButton((int)Buttons.NewGameButton).gameObject.BindEvent(() => { buttonsIdx = 0; SetButtonColorAndButtonsText(buttonsIdx); StartCoroutine(CoOnClickNewGameButton()); });
-        GetButton((int)Buttons.LoadGameButton).gameObject.BindEvent(() => { buttonsIdx = 1; SetButtonColorAndButtonsText(buttonsIdx); OnClickLoadGameButton(); });
-        GetButton((int)Buttons.SettingButton).gameObject.BindEvent(() => { buttonsIdx = 2; SetButtonColorAndButtonsText(buttonsIdx); OnClickSettingButton(); });
-        GetButton((int)Buttons.ExitButton).gameObject.BindEvent(() => { buttonsIdx = 3; SetButtonColorAndButtonsText(buttonsIdx); OnClickExitButton(); });
+        if (PlayerPrefs.GetInt("ISFIRST", 1) != 1)
+        {
+            GetButton((int)Buttons.LoadGameButton).gameObject.BindEvent(() => { buttonsIdx = 1; SetButtonColorAndButtonsText(buttonsIdx); OnClickLoadGameButton(); });
+        }
+        else
+        {
+            GetButton((int)Buttons.LoadGameButton).gameObject.SetActive(false);
+            _isFirst = true;
+            maxButtonCount = 3;
+        }
+        GetButton((int)Buttons.SettingButton).gameObject.BindEvent(() => { buttonsIdx = _isFirst ? 1 : 2; SetButtonColorAndButtonsText(buttonsIdx); OnClickSettingButton(); });
+        GetButton((int)Buttons.ExitButton).gameObject.BindEvent(() => { buttonsIdx = _isFirst ? 2 : 3; SetButtonColorAndButtonsText(buttonsIdx); OnClickExitButton(); });
 
         GetImage((int)Images.Buttons).gameObject.SetActive(false);
         GetButton((int)Buttons.NewGameButton).gameObject.SetActive(false);
@@ -156,10 +166,16 @@ public class UI_TitleScene : UI_Scene
                     //OnClickNewGameButton();
                     break;
                 case 1:
-                    OnClickLoadGameButton();
+                    if (PlayerPrefs.GetInt("ISFIRST", 1) != 1) // 최초가 아니면
+                        OnClickLoadGameButton();
+                    else
+                        OnClickSettingButton();
                     break;
                 case 2:
-                    OnClickSettingButton();
+                    if (PlayerPrefs.GetInt("ISFIRST", 1) != 1) // 최초가 아니면
+                        OnClickSettingButton();
+                    else
+                        OnClickExitButton();
                     break;
                 case 3:
                     OnClickExitButton();
@@ -292,6 +308,10 @@ public class UI_TitleScene : UI_Scene
             GetText((int)Texts.NewGameText), GetText((int)Texts.LoadGameText),
             GetText((int)Texts.SettingText), GetText((int)Texts.ExitText)
         };
+        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1)
+        {
+            texts.Remove(GetText((int)Texts.LoadGameText));
+        }
 
         ButtonsSetting();
         texts[index].color = new Color(1, 1, 1);

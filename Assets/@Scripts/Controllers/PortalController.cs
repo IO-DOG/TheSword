@@ -42,10 +42,10 @@ public class PortalController : MonoBehaviour
 
             bool ch = true;
             // todo 최초 진입인지 확인
-            if (Managers.Game.firstEnterMapCheck[_mapId + 1] == false)
+            if (Managers.Game.PlayerData.FirstEnterMapCheck[_mapId + 1] == false)
             {
                 ch = false;
-                Managers.Game.firstEnterMapCheck[_mapId + 1] = true;
+                Managers.Game.PlayerData.FirstEnterMapCheck[_mapId + 1] = true;
 
                 if (_mapId + 1 != 2)
                 {

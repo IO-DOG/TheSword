@@ -13,36 +13,52 @@ MonoBehaviour:
   m_Name: Sounds
   m_EditorClassIdentifier: 
   m_GroupName: Sounds
-  m_Data:
-    m_SerializedData: []
   m_GUID: 15b59fb23217eb94783fc96fa53000cd
   m_SerializeEntries:
-  - m_GUID: 9f2201478f28a3c4d956f829a433455b
-    m_Address: MainTitle_Impact
+  - m_GUID: 00d2fed3914fa654abfb433ea667869c
+    m_Address: SettingMenuUI_Choice_SFX
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a8b7d69b9efe29841a7c6d237aef007c
-    m_Address: MainTitle_UImove
+  - m_GUID: 09d1ceec27e3fc84a97b83e5d517ccf0
+    m_Address: ButtonUI_Ok_SFX
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d03feb57e3cb00a4eb090ba13e0d0df3
-    m_Address: MainTitle_UIselect
+  - m_GUID: 15b56bd03e549324f99f3e912ee7f277
+    m_Address: Gimic_leverOn_SFX
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 422cdb94d96ff8b42b96156e01ebf35b
-    m_Address: StartIntro_SFX
+  - m_GUID: 1a1c0760245932d41827656cdd1ae455
+    m_Address: ItemGet_Meat_SFX
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f77fb474e3af70744b41efec1c6d9010
-    m_Address: MainTitle_BGM
+  - m_GUID: 1dc6d9a32c7eef6479f6b59debb2e7b7
+    m_Address: Chapter0_Boss_Event2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2526081ceffeba041be23c60d49fa559
+    m_Address: EgoSword_Encounter_Event
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2e5e38e5dbb8a864d860e7b0257830c4
+    m_Address: MapTransition_SFX
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 34eca1efe7a9e7448904e49d62d2f612
+    m_Address: BossBattleStart_Event
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
@@ -53,26 +69,14 @@ MonoBehaviour:
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5ed6d3f0fb76cf54cac95305d86fd3a0
-    m_Address: BattleStart_SFX
+  - m_GUID: 37117913d84ea1e4b9c0b9b34166f73e
+    m_Address: MonsterAttack0_SFX
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d82825e01f4390349a97df311411f231
-    m_Address: TextOutput_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b9872e116b9aa894bbe9b1a1934cb04f
-    m_Address: ItemGet_Apple_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a780ca80662b715439bf0ad5190ea1c8
-    m_Address: GameOver_SFX
+  - m_GUID: 422cdb94d96ff8b42b96156e01ebf35b
+    m_Address: StartIntro_SFX
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
@@ -83,14 +87,8 @@ MonoBehaviour:
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f7121a1b4722e744e885147891ec79df
-    m_Address: DoorLock_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: db1cd9b21860cf641abb2281c1dd88fb
-    m_Address: Defense_SFX
+  - m_GUID: 529f71f3a6e0ff74f8e26ff9a5c2157d
+    m_Address: BossDeath_SFX
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
@@ -101,14 +99,14 @@ MonoBehaviour:
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cfb9a290e5ceff44b86e604c71d8cb04
-    m_Address: DoorOpen_SFX
+  - m_GUID: 5ed6d3f0fb76cf54cac95305d86fd3a0
+    m_Address: BattleStart_SFX
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 1a1c0760245932d41827656cdd1ae455
-    m_Address: ItemGet_Meat_SFX
+  - m_GUID: 7255ab3442dcb6a43b7b755b7d13ad17
+    m_Address: SettingMenuUI_Back_SFX
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
@@ -125,74 +123,8 @@ MonoBehaviour:
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d6e345a167449764a800e26a9ead460e
-    m_Address: Gimic_leverDown_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: feedf17b9e7a7b949825f9a5bc670e22
-    m_Address: MainTitle_UImove
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2e5e38e5dbb8a864d860e7b0257830c4
-    m_Address: MapTransition_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ac11aaeeffa3eb94cae17c77862481dc
-    m_Address: MainTitle_UIselect
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9e672428a7485744bbebbc0664df506f
-    m_Address: DoorUnlock_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d193b287e5345cc4caa9f9608d5e2072
-    m_Address: HeroAttack0_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 37117913d84ea1e4b9c0b9b34166f73e
-    m_Address: MonsterAttack0_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c6ecc5d8ecec01649882088f2ea27b9a
-    m_Address: ItemGet_BlessPotion_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f53ffaeced41b8a479e2bcae5c0ca04b
-    m_Address: ItemGet_Key_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d9dc0f082c71e1340b63c8e68a76916f
-    m_Address: ItemGet_Potion_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 15b56bd03e549324f99f3e912ee7f277
-    m_Address: Gimic_leverOn_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 26a52ced6c3b8c245a3bbec518acd976
-    m_Address: FX_Potion_G
+  - m_GUID: 7c499a784ffe31141b7fd7a5e3a9094c
+    m_Address: MonsterDeath_SFX
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
@@ -203,14 +135,122 @@ MonoBehaviour:
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 529f71f3a6e0ff74f8e26ff9a5c2157d
-    m_Address: BossDeath_SFX
+  - m_GUID: 9e672428a7485744bbebbc0664df506f
+    m_Address: DoorUnlock_SFX
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: fb0b696dd4528124ab360ac6df714abe
-    m_Address: BossGate_Event
+  - m_GUID: 9f2201478f28a3c4d956f829a433455b
+    m_Address: MainTitle_Impact
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a0365c64773b35c4ca805615845e759c
+    m_Address: Chapter0_Boss_Event
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a780ca80662b715439bf0ad5190ea1c8
+    m_Address: GameOver_SFX
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a8b7d69b9efe29841a7c6d237aef007c
+    m_Address: MainTitle_UImove
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ac11aaeeffa3eb94cae17c77862481dc
+    m_Address: MainTitle_UIselect
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b9872e116b9aa894bbe9b1a1934cb04f
+    m_Address: ItemGet_Apple_SFX
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c4664f0098c79384d96860bed3f35b62
+    m_Address: SettingMenuUI_Click_SFX
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c6ecc5d8ecec01649882088f2ea27b9a
+    m_Address: ItemGet_BlessPotion_SFX
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cccb3943ab1915f4585841bac352e7cc
+    m_Address: HeroReady_SFX
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cfb9a290e5ceff44b86e604c71d8cb04
+    m_Address: DoorOpen_SFX
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d03feb57e3cb00a4eb090ba13e0d0df3
+    m_Address: MainTitle_UIselect
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d193b287e5345cc4caa9f9608d5e2072
+    m_Address: HeroAttack0_SFX
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d1c0a029fcdd7a240a27160e199e72bb
+    m_Address: SettingMenuUI_SFX
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d25763b02f840584fa8d6941d807f925
+    m_Address: Chapter0_Boss_BGM
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d5b0d22a51f559c4fa1203b418008317
+    m_Address: PopUpUI_On
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d6e345a167449764a800e26a9ead460e
+    m_Address: Gimic_leverDown_SFX
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d82825e01f4390349a97df311411f231
+    m_Address: TextOutput_SFX
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d9dc0f082c71e1340b63c8e68a76916f
+    m_Address: ItemGet_Potion_SFX
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: db1cd9b21860cf641abb2281c1dd88fb
+    m_Address: Defense_SFX
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
@@ -227,80 +267,32 @@ MonoBehaviour:
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 09d1ceec27e3fc84a97b83e5d517ccf0
-    m_Address: ButtonUI_Ok_SFX
+  - m_GUID: f53ffaeced41b8a479e2bcae5c0ca04b
+    m_Address: ItemGet_Key_SFX
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d25763b02f840584fa8d6941d807f925
-    m_Address: Chapter0_Boss_BGM
+  - m_GUID: f7121a1b4722e744e885147891ec79df
+    m_Address: DoorLock_SFX
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a0365c64773b35c4ca805615845e759c
-    m_Address: Chapter0_Boss_Event
+  - m_GUID: f77fb474e3af70744b41efec1c6d9010
+    m_Address: MainTitle_BGM
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2526081ceffeba041be23c60d49fa559
-    m_Address: EgoSword_Encounter_Event
+  - m_GUID: fb0b696dd4528124ab360ac6df714abe
+    m_Address: BossGate_Event
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7c499a784ffe31141b7fd7a5e3a9094c
-    m_Address: MonsterDeath_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d5b0d22a51f559c4fa1203b418008317
-    m_Address: PopUpUI_On
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7255ab3442dcb6a43b7b755b7d13ad17
-    m_Address: SettingMenuUI_Back_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 00d2fed3914fa654abfb433ea667869c
-    m_Address: SettingMenuUI_Choice_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c4664f0098c79384d96860bed3f35b62
-    m_Address: SettingMenuUI_Click_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d1c0a029fcdd7a240a27160e199e72bb
-    m_Address: SettingMenuUI_SFX
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 34eca1efe7a9e7448904e49d62d2f612
-    m_Address: BossBattleStart_Event
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 1dc6d9a32c7eef6479f6b59debb2e7b7
-    m_Address: Chapter0_Boss_Event2
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - PreLoad
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cccb3943ab1915f4585841bac352e7cc
-    m_Address: HeroReady_SFX
+  - m_GUID: feedf17b9e7a7b949825f9a5bc670e22
+    m_Address: MainTitle_UImove
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
