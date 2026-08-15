@@ -828,6 +828,19 @@ public class AutoPlayer : MonoBehaviour
             if (push != Define.MoveDir.None)
                 return push;
 
+            // 볼 게 하나도 안 남았는데 포기 목록이 차 있다면, 그 목록이 교착의 원인이다.
+            // 4층 보스는 연출 중에 한 칸 옮겨 간다 — 봇은 옛 자리를 열두 번 밀고
+            // 포기 목록에 넣었고, 그 뒤로 보스를 영영 안 봤다.
+            // 한 번 지우고 다시 본다. 그래도 안 되면 워치독이 잡는다.
+            if (_deadTargets.Count > 0)
+            {
+                Debug.Log($"[AutoPlayer] 볼 게 없어 포기 목록 {_deadTargets.Count}개를 지운다");
+                _deadTargets.Clear();
+                _sameBump = 0;
+                _plan = "포기 목록을 지우고 다시 본다";
+                return Define.MoveDir.None;
+            }
+
             _plan = $"목표없음 flood={_dist.Count} 방문={_visited.Count}";
             return Define.MoveDir.None;
         }
@@ -853,6 +866,7 @@ public class AutoPlayer : MonoBehaviour
             {
                 _deadTargets.Add(bump);   // 열두 번 밀어도 안 되면 그건 안 되는 것이다
                 _sameBump = 0;
+                Debug.Log($"[AutoPlayer] {bump} 을 열두 번 밀어도 반응이 없어 접는다");
             }
         }
         else
