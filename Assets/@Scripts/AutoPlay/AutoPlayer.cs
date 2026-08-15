@@ -554,6 +554,16 @@ public class AutoPlayer : MonoBehaviour
         Vector2Int start = Cell(map, g.Player.transform.position);
         Flood(start);
 
+        // 계단도 몬스터도 아이템도 하나같이 안 닿으면 던전 안에 있는 게 아니다.
+        // 콜라이더 경계 상자는 실제 놀이 공간보다 커서 그것만으로는 못 거른다.
+        // 씬이 뜬 직후 플레이어가 아직 배치되기 전이 정확히 이 상태이고,
+        // 그때 움직이기 시작하면 맵 밖을 하염없이 걸어 다닌다.
+        if (AnythingReachable(map) == false)
+        {
+            _plan = $"던전 밖 {start} — 닿는 게 하나도 없다";
+            return Define.MoveDir.None;
+        }
+
         Vector2Int best = start;
         Vector2Int bump = start;
         bool hasBump = false;
@@ -959,6 +969,21 @@ public class AutoPlayer : MonoBehaviour
         return damage;
     }
     #endregion
+
+    /// <summary>이 층의 물건 중 하나라도 닿는가. 계단은 어느 층에나 있다.</summary>
+    bool AnythingReachable(GameObject map)
+    {
+        foreach (PortalController p in map.GetComponentsInChildren<PortalController>(false))
+            if (Reachable(Cell(map, p.transform.position)))
+                return true;
+        foreach (MonsterController m in map.GetComponentsInChildren<MonsterController>(false))
+            if (Reachable(Cell(map, m.transform.position)))
+                return true;
+        foreach (ConsumableItem c in map.GetComponentsInChildren<ConsumableItem>(false))
+            if (Reachable(Cell(map, c.transform.position)))
+                return true;
+        return false;
+    }
 
     /// <summary>목표 칸 옆에 설 수 있는가.</summary>
     bool Reachable(Vector2Int cell)
