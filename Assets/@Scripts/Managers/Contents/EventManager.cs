@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using static Define;
 using UnityEngine;
 
-public class EventManager : MonoBehaviour
+// Managers 가 new 로 생성하는 순수 pub/sub 이다.
+// MonoBehaviour 를 상속하면 new 가 금지되어(Unity 규칙) 인스턴스가 null 이 된다.
+public class EventManager
 {
     // Dictionary to store events
     private Dictionary<GameEvent, Action> eventDictionary = new Dictionary<GameEvent, Action>();

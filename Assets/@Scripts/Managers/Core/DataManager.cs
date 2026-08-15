@@ -299,11 +299,17 @@ public class DataManager
                         }
                         else if (block[0] == 'B')
                         {
-                            bossMonsterActiveDic.Add(bossMonsterCount, true);
+                            // 보스도 "몬스터 카운터"를 공유한다.
+                            // 전투 결말은 UI_MonsterCard.Dead() 하나뿐이고 거기서 항상
+                            // MonsterActiveDic[IsActiveIndex] 를 끈다. 보스에게 별도 0~4 를
+                            // 주면 1층 일반 몬스터 0~4 가 대신 죽은 것으로 기록되고,
+                            // 정작 보스는 다시 켜진 채로 부활한다.
+                            bossMonsterActiveDic.Add(bossMonsterCount++, true);
+                            monsterActiveDic.Add(monsterCount, true);
                             Data.ObjectData tile = new Data.ObjectData
                             {
                                 Id = id,
-                                Count = bossMonsterCount++,
+                                Count = monsterCount++,
                                 ObjectType = (int)Define.ObjectType.BossMonster,
                                 Position = new Data.MyVector3
                                 {
@@ -426,6 +432,22 @@ public class DataManager
                                         Z = zPos,
                                     },
                                     ObjectType = (int)Define.ObjectType.Portal,
+                                };
+                                tiles.Add(tile);
+                            }
+                            else if (id == 1)
+                            {
+                                // 바닥. MapBuilder 가 프리팹 없는 층을 조립할 때 필요하다.
+                                Data.ObjectData tile = new Data.ObjectData
+                                {
+                                    Id = id,
+                                    Position = new Data.MyVector3
+                                    {
+                                        X = xPos,
+                                        Y = 0,
+                                        Z = zPos,
+                                    },
+                                    ObjectType = (int)Define.ObjectType.Floor,
                                 };
                                 tiles.Add(tile);
                             }

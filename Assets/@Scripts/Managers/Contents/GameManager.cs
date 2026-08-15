@@ -318,7 +318,31 @@ public class GameManager
 
         for (int i = mapStartAndEnd.Key; i <= mapStartAndEnd.Value; i++)
         {
-            GameObject map = Managers.Resource.Instantiate($"Dungeon_{Managers.Data.StageInfoDic[i].DungeonID}", ParentMap.transform);
+            // 1~4층은 손수 만든 프리팹을 그대로 쓴다.
+            // 튜토리얼 / 마검 계약 / 킹슬라임 연출이 DirectingManager 에서 그 층의
+            // 특정 오브젝트 이름("Items/CItem13", "SpawnKingSlime" …)을 직접 찾기 때문에,
+            // 생성된 층으로 갈아끼우면 인트로가 NullReference 로 통째로 깨진다.
+            // 나머지 96개 층은 CSV(MapData)로 조립한다.
+            string dungeonId = Managers.Data.StageInfoDic[i].DungeonID;
+            string mapKey = $"Dungeon_{dungeonId}";
+
+            GameObject map = MapBuilder.IsHandAuthored(dungeonId)
+                ? Managers.Resource.Instantiate(mapKey, ParentMap.transform)
+                : MapBuilder.Build(i, ParentMap.transform);
+
+            if (map == null)  // 프리팹이 없으면 조립으로, 데이터가 없으면 프리팹으로 폴백
+            {
+                map = MapBuilder.IsHandAuthored(dungeonId)
+                    ? MapBuilder.Build(i, ParentMap.transform)
+                    : Managers.Resource.Instantiate(mapKey, ParentMap.transform);
+            }
+
+            if (map == null)
+            {
+                Debug.LogError($"맵 생성 실패 : {mapKey}");
+                continue;
+            }
+
             map.transform.position = new Vector3(count * 100, 0f, 0f);
             Maps.Add(i, map);
             RefreshMap(i);
@@ -328,8 +352,11 @@ public class GameManager
         DropItems.transform.parent = ParentMap.transform;
         Portals = ParentMap.GetComponentsInChildren<PortalController>();
         SpawnPoints = ParentMap.GetComponentsInChildren<Transform>().Where(child => child.CompareTag("SpawnPoint")).ToArray();
-        BossRoomId = Managers.Data.StageInfoDic.Where(pair => pair.Value.Type == Define.DungeonType.Boss)
-                    .Select(pair => pair.Key).FirstOrDefault();
+        // 보스방은 "현재 챕터" 안에서 찾는다 (전역에서 찾으면 항상 첫 챕터 보스가 잡힌다)
+        BossRoomId = Managers.Data.StageInfoDic
+                    .Where(pair => pair.Key >= mapStartAndEnd.Key && pair.Key <= mapStartAndEnd.Value
+                                   && pair.Value.Type == Define.DungeonType.Boss)
+                    .Select(pair => pair.Key).DefaultIfEmpty(mapStartAndEnd.Value).First();
 
         if (Managers.Game.PlayerData.CurStageid == 2)
         {
@@ -337,18 +364,101 @@ public class GameManager
         }
         //MainCamera.GetComponentInChildren<CustomCameraLimiter>().SetBG();
 
-        Managers.Game.Portals[Managers.Game.Portals.Length - 1].transform.parent.gameObject.SetActive(false);
-        Managers.Resource.Instantiate($"Effects_{CurChapter}", ParentMap.transform);
+        RefreshBossGates();
+
+        // 챕터별 분위기: 조명 색 + 파티클 (테마 프리팹이 없는 챕터는 조용히 넘어간다)
+        int chapterIndex = MapBuilder.GetChapter(mapId);
+        if (DirectionalLight != null)
+            DirectionalLight.color = MapBuilder.GetChapterLight(chapterIndex);
+
+        PlayChapterBGM(mapId);
+
+        string effectKey = $"Effects_{CurChapter}";
+        if (Managers.Resource.Load<GameObject>(effectKey) != null)
+            Managers.Resource.Instantiate(effectKey, ParentMap.transform);
+        else if (Managers.Resource.Load<GameObject>("Effects_00") != null)
+            Managers.Resource.Instantiate("Effects_00", ParentMap.transform);
+    }
+
+    /// <summary>
+    /// 보스 층의 위층 계단은 그 층 보스를 잡기 전까지 잠근다 — "순서" 설계의 핵심 관문.
+    ///
+    /// 건드리는 것은 생성된 보스 층의 UpStairs 뿐이다:
+    ///   - 보스방 입구(id 16)는 절대 끄지 않는다. 껐다가 다시 켜주는 곳이 없어서
+    ///     킹슬라임 보스방에 영영 못 들어가고 3층에서 진행이 막혔다.
+    ///   - 손수 만든 1~4층은 기존 연출(BossOnDeadAction -> Unlock4Floor)이 처리한다.
+    ///     그 프리팹의 보스는 _monsterIndex_forActive 가 구워져 있지 않아 여기서 판정할 수 없다.
+    /// </summary>
+    public void RefreshBossGates()
+    {
+        foreach (KeyValuePair<int, GameObject> pair in Maps)
+        {
+            Data.StageInfoData info;
+            if (Managers.Data.StageInfoDic.TryGetValue(pair.Key, out info) == false)
+                continue;
+            if (info.Type != Define.DungeonType.Boss || MapBuilder.IsHandAuthored(info.DungeonID))
+                continue;
+
+            bool bossAlive = IsBossAlive(pair.Value);
+
+            foreach (PortalController portal in pair.Value.GetComponentsInChildren<PortalController>(true))
+            {
+                if (portal._portalType != PortalController.Type.UpStairs)
+                    continue;
+                if (portal.transform.parent != null)
+                    portal.transform.parent.gameObject.SetActive(bossAlive == false);
+            }
+        }
+    }
+
+    static bool IsBossAlive(GameObject map)
+    {
+        foreach (MonsterController mc in map.GetComponentsInChildren<MonsterController>(true))
+        {
+            if (mc.CompareTag("Boss") == false)
+                continue;
+            bool alive;
+            if (Managers.Data.MonsterActiveDic.TryGetValue(mc._monsterIndex_forActive, out alive) == false)
+                return true;   // 모르면 잠가 둔다
+            return alive;
+        }
+        return false;          // 보스가 없는 층은 잠그지 않는다
+    }
+
+    /// <summary>
+    /// 챕터 BGM. StageInfoData 의 BGM 열을 쓴다.
+    ///
+    /// 지금 실재하는 BGM 은 챕터 0 것뿐이라 대부분 폴백으로 떨어진다.
+    /// 챕터 음악을 새로 넣으면 StageInfoData 의 BGM 값(BGM_100 …)에 맞춰
+    /// 어드레서블만 추가하면 이 코드가 그대로 집어간다.
+    /// </summary>
+    void PlayChapterBGM(int mapId)
+    {
+        Data.StageInfoData info;
+        if (Managers.Data.StageInfoDic.TryGetValue(mapId, out info) == false)
+            return;
+
+        string key = info.BGM;
+        if (string.IsNullOrEmpty(key) || Managers.Resource.Load<AudioClip>(key) == null)
+            key = "Chapter0_BGM";
+
+        Managers.Sound.FadeAndPlayBGM(key, 2f);
     }
 
     public MonsterController GetBoss()
     {
-        int bossRoomIdx = BossRoomId - GetChapterCount(PlayerData.CurStageid).Key;
-        MonsterController[] monsters = Maps[bossRoomIdx].GetComponentsInChildren<MonsterController>();
+        // Maps 는 "절대 스테이지 ID" 로 키가 잡혀 있다.
+        // 예전처럼 챕터 시작을 빼서 상대 인덱스로 찾으면 챕터 1 이후에서 예외가 난다.
+        GameObject bossMap;
+        if (Maps.TryGetValue(BossRoomId, out bossMap) == false || bossMap == null)
+            return null;
+
+        MonsterController[] monsters = bossMap.GetComponentsInChildren<MonsterController>(true);
         for (int i = 0; i < monsters.Length; i++)
-            if (monsters[i].gameObject.tag == "Boss")
+            if (monsters[i].CompareTag("Boss") || monsters[i] is BossMonsterController)
                 return monsters[i];
-        return null;
+
+        return monsters.Length > 0 ? monsters[0] : null;
     }
 
     public void RefreshMap(int mapId)

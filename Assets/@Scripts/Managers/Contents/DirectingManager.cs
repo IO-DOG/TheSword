@@ -18,7 +18,23 @@ public class DirectingManager
     public Action BossOnAppearAction;
     public Action BossOnDeadAction;
     public Action PopupAction;
-    public Events Events = new Events();
+    // Events 는 MonoBehaviour 라 new 로 만들 수 없다(그렇게 하면 null 이 되어
+    // 엔딩 연출 CoStartEndingScene 등이 전부 터진다). @Managers 에 컴포넌트로 붙인다.
+    Events _events;
+    public Events Events
+    {
+        get
+        {
+            if (_events == null)
+            {
+                GameObject go = GameObject.Find("@Managers");
+                if (go == null)
+                    go = new GameObject { name = "@Managers" };
+                _events = Util.GetOrAddComponent<Events>(go);
+            }
+            return _events;
+        }
+    }
     public UI_LetterBox letterBox;
     public void PlayDirecting(int eventId)
     {
@@ -417,7 +433,10 @@ public class Events : MonoBehaviour
 
     IEnumerator Unlock4Floor()
     {
-        Managers.Game.Portals[Managers.Game.Portals.Length - 1].transform.parent.gameObject.SetActive(true);
+        // 예전엔 여기서 Portals 배열의 "마지막"을 켰다. 챕터 0 이 5개 맵에서 20개로
+        // 늘어난 뒤로는 그 마지막이 20층 계단이라, 엉뚱한 층의 관문이 열렸다.
+        // 보스 층 잠금은 GameManager.RefreshBossGates 가 층별로 처리한다.
+        Managers.Game.RefreshBossGates();
         yield return new WaitForSeconds(10f);
         // todo
         // path particle

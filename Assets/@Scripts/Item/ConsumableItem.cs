@@ -5,7 +5,6 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 
-[SerializeField]
 public class ConsumableItem : MonoBehaviour
 {
     public const int NUM_OF_KEYS = 3;

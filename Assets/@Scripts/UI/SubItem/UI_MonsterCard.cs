@@ -273,6 +273,9 @@ public class UI_MonsterCard : UI_BaseCard
 
         Managers.Data.MonsterActiveDic[Managers.Game.MonsterData[0].IsActiveIndex] = false;
 
+        // 방금 잡은 게 보스라면 그 층의 위층 계단이 열린다.
+        Managers.Game.RefreshBossGates();
+
         Managers.Game.OnBattleAction.Invoke();
 
 

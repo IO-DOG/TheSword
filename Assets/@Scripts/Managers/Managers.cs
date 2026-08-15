@@ -62,8 +62,13 @@ public class Managers : MonoBehaviour
                 cursor.AddComponent<CursorManager>();
             }
 
-            DontDestroyOnLoad(go);
-            DontDestroyOnLoad(cursor);
+            // DontDestroyOnLoad 는 플레이 모드에서만 허용된다.
+            // (에디터 배치 검증 스크립트가 Managers 를 건드릴 때 예외가 나지 않도록)
+            if (Application.isPlaying)
+            {
+                DontDestroyOnLoad(go);
+                DontDestroyOnLoad(cursor);
+            }
             s_instance = go.GetComponent<Managers>();
         }
     }

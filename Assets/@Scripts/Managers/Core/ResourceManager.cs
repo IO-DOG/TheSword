@@ -44,6 +44,18 @@ public class ResourceManager
         return null;
     }
 
+#if UNITY_EDITOR
+    /// <summary>
+    /// 배치모드 검증용. Addressables 를 초기화하지 않고 캐시를 직접 채운다.
+    /// (헤드리스에서는 LoadAsync 의 완료 콜백이 돌지 않아 리소스를 못 받는다)
+    /// </summary>
+    public void EditorPreload(string key, Object obj)
+    {
+        if (obj != null && _resources.ContainsKey(key) == false)
+            _resources.Add(key, obj);
+    }
+#endif
+
     public GameObject Instantiate(string key, Transform parent = null, bool pooling = false)
     {
         GameObject prefab = Load<GameObject>($"{key}");
