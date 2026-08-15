@@ -1236,9 +1236,23 @@ public class AutoPlayer : MonoBehaviour
     const float NoNewFloorTimeout = 600f;
     int _maxStage = -1;
     float _maxStageAt;
+    float _waitingPlayerSince;
 
     void TickStall()
     {
+        // 플레이어가 생기기 전에는 봇이 할 수 있는 게 없다. "진행 없음"이 아니다.
+        // (인트로가 길거나 맵 데이터를 새로 만드는 중이면 몇 분씩 걸린다.)
+        if (Managers.Game == null || Managers.Game.Player == null)
+        {
+            _lastProgress = Time.unscaledTime;
+            if (_waitingPlayerSince == 0f)
+                _waitingPlayerSince = Time.unscaledTime;
+            else if (Time.unscaledTime - _waitingPlayerSince > 600f)
+                Fail("플레이어가 10분 동안 안 생긴다 — 인트로에서 멈춘 것으로 본다");
+            return;
+        }
+        _waitingPlayerSince = 0f;
+
         // 층과 층 사이를 계속 오가면 "진전"으로 세어져 90초 워치독이 영영 안 돈다.
         // 실제로는 같은 두 층을 도는 중이었고, 그렇게 60분을 태웠다.
         GameManager gm = Managers.Game;
