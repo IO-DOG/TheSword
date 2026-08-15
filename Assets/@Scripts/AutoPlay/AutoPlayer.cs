@@ -168,7 +168,6 @@ public class AutoPlayer : MonoBehaviour
                 TickBattleLog();
                 TickUI();
                 TickPlay();
-                TickStall();
             }
             catch (Exception e)
             {
@@ -177,6 +176,17 @@ public class AutoPlayer : MonoBehaviour
                     _lastError = Time.unscaledTime;
                     Debug.LogWarning($"[AutoPlayer] 프레임 예외: {e}");
                 }
+            }
+
+            // 워치독은 따로 돌린다. 위에서 예외가 나면 같이 건너뛰어져서,
+            // 정작 봇이 망가졌을 때 그걸 잡아야 할 감시가 먼저 꺼졌다.
+            try
+            {
+                TickStall();
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[AutoPlayer] 워치독 예외: {e.Message}");
             }
         }
     }
@@ -715,7 +725,13 @@ public class AutoPlayer : MonoBehaviour
         // 찍어서, 3층에서 무엇이 막혔는지는 로그만 봐서는 알 수가 없었다.
         {
             var info = new System.Text.StringBuilder();
-            info.Append($"열쇠={g.KeyInventory._keys[0]}/{g.KeyInventory._keys[1]}/{g.KeyInventory._keys[2]}");
+            // 열쇠 목록은 InitKeyInventory 전에는 비어 있다. 그냥 인덱싱하면
+            // 매 프레임 예외가 나서 계획도 워치독 갱신도 통째로 날아간다.
+            info.Append("열쇠=");
+            for (int k = 0; k < 3; k++)
+                info.Append(k > 0 ? "/" : "")
+                    .Append(g.KeyInventory != null && g.KeyInventory._keys != null
+                            && g.KeyInventory._keys.Count > k ? g.KeyInventory._keys[k].ToString() : "-");
             foreach (ConsumableItem ci in map.GetComponentsInChildren<ConsumableItem>(false))
             {
                 Vector2Int c = Cell(map, ci.transform.position);
