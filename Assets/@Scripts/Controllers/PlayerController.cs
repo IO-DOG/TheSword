@@ -629,16 +629,23 @@ public class PlayerController : MonoBehaviour
         // 갈 칸을 상자로 한 번 더 훑어 몬스터가 있으면 붙는다.
         if (somethingExist == false && !Managers.Game.OnBattle)
         {
+            // 레이어로 거르지 않는다. 보스는 레이어가 어긋나 있을 수도 있어서,
+            // MonsterController 가 붙어 있는가만 본다.
+            // 콜라이더와 컨트롤러가 다른 오브젝트에 있는 경우도 있어 위아래로 찾는다.
             Vector3 nextCell = _cellPos + _nextCellPos;
             Collider[] found = Physics.OverlapBox(
                 nextCell, Vector3.one * (Define.TILE_SIZE * 0.45f), Quaternion.identity,
-                1 << (int)Define.Layer.Monster, QueryTriggerInteraction.Collide);
+                ~0, QueryTriggerInteraction.Collide);
             for (int i = 0; i < found.Length; i++)
             {
                 MonsterController mc = found[i].GetComponent<MonsterController>();
                 if (mc == null)
+                    mc = found[i].GetComponentInParent<MonsterController>();
+                if (mc == null)
+                    mc = found[i].GetComponentInChildren<MonsterController>();
+                if (mc == null)
                     continue;
-                Debug.Log($"{found[i].gameObject.name} (광선 밖 — 칸 검사로 붙는다)");
+                Debug.Log($"{mc.gameObject.name} (광선 밖 — 칸 검사로 붙는다)");
                 mc.SetMonster();
                 somethingExist = true;
                 break;

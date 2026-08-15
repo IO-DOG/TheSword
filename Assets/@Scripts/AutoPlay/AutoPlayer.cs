@@ -795,7 +795,12 @@ public class AutoPlayer : MonoBehaviour
             foreach (MonsterController mc in map.GetComponentsInChildren<MonsterController>(false))
             {
                 Vector2Int c = Cell(map, mc.transform.position);
-                info.Append($" 몹{mc.id}@{c}={(Reachable(c) ? "닿음" : "막힘")}");
+                // 보스가 왜 안 잡히는지 보려면 높이와 실제 콜라이더 유무가 필요하다.
+                bool solidHere = Physics.CheckBox(CellCenter(c), ProbeHalf, Quaternion.identity,
+                                                  1 << (int)Define.Layer.Monster,
+                                                  QueryTriggerInteraction.Collide);
+                info.Append($" 몹{mc.id}@{c}={(Reachable(c) ? "닿음" : "막힘")}" +
+                            $"/y{mc.transform.position.y:0.00}/콜라이더{(solidHere ? "있음" : "없음")}");
             }
             foreach (Door dr in map.GetComponentsInChildren<Door>(false))
                 info.Append($" 문key{dr._keyIndex}@{Cell(map, dr.transform.position)}");
