@@ -147,12 +147,11 @@ public class AutoPlayer : MonoBehaviour
                 yield break;
             }
 
-            TrackRealProgress();
-
-            // 한 프레임에서 터진 예외가 코루틴을 죽이면 봇도 워치독도 같이 멈춘다.
-            // (마검 팝업 앞에서 정확히 그렇게 굳었다.) 프레임 단위로 막는다.
+            // 한 프레임에서 터진 예외가 코루틴을 죽이면 봇이 통째로 멈춘다.
+            // 진전 추적도 반드시 이 안에 있어야 한다 — 밖에 두면 그게 죽인다.
             try
             {
+                TrackRealProgress();
                 TickBattleLog();
                 TickUI();
                 TickPlay();
@@ -626,7 +625,11 @@ public class AutoPlayer : MonoBehaviour
                 continue;
             if (holdBack)
                 continue;   // 몸부터 추스르고 올라간다
-            Bump(map, portal.transform, PriStairs, 0, ref best, ref bump, ref hasBump, ref bestScore);
+
+            // 보스방 입구는 일반 계단보다 앞이다. 같은 순위로 두면 가까운 계단만 타고
+            // 위아래를 오가느라 보스방에 영영 못 들어간다 (2층 <-> 3층 왕복).
+            int pri = portal._portalType == PortalController.Type.Boss ? PriTrigger : PriStairs;
+            Bump(map, portal.transform, pri, 0, ref best, ref bump, ref hasBump, ref bestScore);
         }
 
         // 보스방 문 / 상호작용 오브젝트는 "아래에서" 밀어야 반응한다.
@@ -639,7 +642,12 @@ public class AutoPlayer : MonoBehaviour
             // 상호작용 오브젝트는 막지 않는다 — 3층의 마검 계약(+10 ATK)이 여기 있고,
             // 그걸 못 받으면 킹슬라임을 이길 수가 없다. 피가 적다고 미룰 대상이 아니다.
             if (layer == (int)Define.Layer.BossDoor || layer == (int)Define.Layer.InteractObjects)
-                BumpCell(c, PriTrigger, 1, ref best, ref bump, ref hasBump, ref bestScore);
+            {
+                // 이것들은 "아래에서 위로" 밀어야만 반응한다 (PlayerController.GetTouchDirection).
+                // 아무 옆면이나 잡으면 밀어도 아무 일이 없다.
+                BumpFrom(c, new Vector2Int(0, -1), PriTrigger, 1,
+                         ref best, ref bump, ref hasBump, ref bestScore);
+            }
             else if (layer == (int)Define.Layer.BossEventTrigger)
                 ConsiderCell(c, PriTrigger, 0, ref best, ref bump, ref hasBump, ref bestScore);
         }
@@ -843,6 +851,27 @@ public class AutoPlayer : MonoBehaviour
               ref Vector2Int best, ref Vector2Int bump, ref bool hasBump, ref long bestScore)
     {
         BumpCell(Cell(map, t.position), priority, weight, ref best, ref bump, ref hasBump, ref bestScore);
+    }
+
+    /// <summary>정해진 방향에서만 밀어야 하는 목표 (보스문, 기둥 등).</summary>
+    void BumpFrom(Vector2Int cell, Vector2Int side, int priority, long weight,
+                  ref Vector2Int best, ref Vector2Int bump, ref bool hasBump, ref long bestScore)
+    {
+        if (_deadTargets.Contains(cell))
+            return;
+
+        Vector2Int stand = cell + side;
+        int d;
+        if (_dist.TryGetValue(stand, out d) == false)
+            return;
+
+        long score = Score(priority, weight, d);
+        if (score >= bestScore)
+            return;
+        bestScore = score;
+        best = stand;
+        bump = cell;
+        hasBump = true;
     }
 
     void BumpCell(Vector2Int cell, int priority, long weight,
