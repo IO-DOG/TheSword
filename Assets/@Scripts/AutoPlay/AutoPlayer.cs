@@ -1173,8 +1173,14 @@ public class AutoPlayer : MonoBehaviour
 
         _boundsMap = map;
         _hasBounds = false;
+
+        // 벽만 센다. 콜라이더를 전부 감싸면 연출용 트리거나 카메라 영역까지 들어와서
+        // 상자가 던전보다 훨씬 커지고, 맵 밖 (24,-23) 에 서 있어도 안으로 쳤다.
+        // 벽은 던전의 테두리 그 자체다.
         foreach (Collider c in map.GetComponentsInChildren<Collider>(false))
         {
+            if (c.gameObject.layer != (int)Define.Layer.Wall)
+                continue;
             if (_hasBounds == false)
             {
                 _mapBounds = c.bounds;
