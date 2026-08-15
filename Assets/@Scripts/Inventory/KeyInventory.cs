@@ -16,17 +16,27 @@ public class KeyInventory
     public List<int> _keys = new List<int>(NUM_OF_KEYS);
     public void InitKeyInventory()
     {
-        for (int i = 0; i < ConsumableItem.NUM_OF_KEYS; ++i)
+        // 새 게임에서는 이 함수가 LoadGame 끝에서만 불려서 아예 안 돌 때가 있다.
+        // 그러면 _keys 가 빈 채로 남고, ShowKeySlot 이 그걸 인덱싱하다 터져서
+        // UI_GameScene.Init 이 통째로 끊긴다 — 맵도 플레이어 배치도 안 된다.
+        // 여러 번 불려도 칸이 늘어나지 않도록 개수를 맞춰서 채운다.
+        List<int> saved = Managers.Game.PlayerData.KeyInventory;
+        if (saved == null)
         {
-            Managers.Game.PlayerData.KeyInventory.Add(0);
+            saved = new List<int>();
+            Managers.Game.PlayerData.KeyInventory = saved;
         }
+        while (saved.Count < ConsumableItem.NUM_OF_KEYS)
+            saved.Add(0);
 
-        for (int i = 0; i < NUM_OF_KEYS; i++)
-        {
-            _keys.Add(0);
-        }
+        _keys = saved;
+    }
 
-        _keys = Managers.Game.PlayerData.KeyInventory;
+    /// <summary>열쇠 칸이 아직 없으면 채운다. 어디서 불려도 안전하다.</summary>
+    public void EnsureKeys()
+    {
+        if (_keys == null || _keys.Count < NUM_OF_KEYS)
+            InitKeyInventory();
     }
 
     public void AddItem(ConsumableItem item)
@@ -71,12 +81,17 @@ public class KeyInventory
 
     public void ShowKeySlot(GameObject keyInventory)
     {
-        if (keyInventory != null)
+        if (keyInventory == null)
+            return;
+
+        EnsureKeys();
+
+        int slots = Mathf.Min(NUM_OF_KEYS, keyInventory.transform.childCount);
+        for (int i = 0; i < slots && i < _keys.Count; i++)
         {
-            for (int i = 0; i < NUM_OF_KEYS; i++)
-            { 
-                keyInventory.transform.GetChild(i).GetComponentInChildren<TMP_Text>().text = _keys[i].ToString();
-            }
+            TMP_Text text = keyInventory.transform.GetChild(i).GetComponentInChildren<TMP_Text>();
+            if (text != null)
+                text.text = _keys[i].ToString();
         }
     }
 }
