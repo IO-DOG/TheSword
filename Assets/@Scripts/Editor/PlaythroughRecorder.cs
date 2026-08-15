@@ -94,6 +94,9 @@ public static class PlaythroughRecorder
         {
             // 예외 스택이 로그 파일에 안 남는다. 직접 받아서 찍는다 —
             // UI_GameScene.Init 이 어디서 끊기는지 이게 없으면 알 수가 없다.
+            // 이 프로젝트는 예외 스택 기록이 꺼져 있어서 조건 문자열만 남는다. 켠다.
+            Application.SetStackTraceLogType(LogType.Exception, StackTraceLogType.ScriptOnly);
+            Application.SetStackTraceLogType(LogType.Error, StackTraceLogType.ScriptOnly);
             Application.logMessageReceived -= OnLog;
             Application.logMessageReceived += OnLog;
 
