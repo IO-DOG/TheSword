@@ -339,11 +339,23 @@ public class AutoPlayer : MonoBehaviour
     #region 플레이
     void TickPlay()
     {
+        // 어디서 빠져나왔는지 남긴다. 이유 없이 조용히 멈추면
+        // 로그만 보고는 씬을 기다리는 중인지 봇이 죽은 건지 구별할 수가 없다.
         if (Managers.Game == null || Managers.Game.Player == null)
+        {
+            _plan = "플레이어 없음";
             return;
-        if (Managers.Scene == null || Managers.Scene.CurrentScene == null
-            || Managers.Scene.CurrentScene.SceneType != Define.Scene.GameScene)
+        }
+        if (Managers.Scene == null || Managers.Scene.CurrentScene == null)
+        {
+            _plan = "씬 없음";
             return;
+        }
+        if (Managers.Scene.CurrentScene.SceneType != Define.Scene.GameScene)
+        {
+            _plan = $"씬={Managers.Scene.CurrentScene.SceneType} — GameScene 을 기다린다";
+            return;
+        }
 
         GameManager g = Managers.Game;
         ApplySpeed(g);
@@ -363,7 +375,10 @@ public class AutoPlayer : MonoBehaviour
 
         GameObject map;
         if (g.Maps == null || g.Maps.TryGetValue(g.PlayerData.CurStageid, out map) == false || map == null)
+        {
+            _plan = $"{g.PlayerData.CurStageid + 1}층 맵이 아직 없다";
             return;
+        }
 
         _maxFloor = Mathf.Max(_maxFloor, g.PlayerData.CurStageid + 1);
 
@@ -708,6 +723,19 @@ public class AutoPlayer : MonoBehaviour
             }
             foreach (Door dr in map.GetComponentsInChildren<Door>(false))
                 info.Append($" 문key{dr._keyIndex}@{Cell(map, dr.transform.position)}");
+            foreach (Lever lv in map.GetComponentsInChildren<Lever>(true))
+                info.Append($" 레버@{Cell(map, lv.transform.position)}=" +
+                            $"{(Reachable(Cell(map, lv.transform.position)) ? "닿음" : "막힘")}" +
+                            $"{(lv._IsActive ? "(당김)" : "")}");
+            // 보스방으로 가는 유일한 길이 이 기둥이다. 열렸는지 눈에 보이게 찍는다.
+            foreach (Pillar pl in map.GetComponentsInChildren<Pillar>(true))
+            {
+                Vector2Int c = Cell(map, pl.transform.position);
+                bool open;
+                info.Append($" 기둥@{c}=" +
+                            $"{(_dist.ContainsKey(c) ? "뚫림" : "막힘")}" +
+                            $"/저장{(Managers.Data.PillarActiveDic.TryGetValue(pl._pillarIndex_forActive, out open) ? (open ? "닫힘" : "열림") : "없음")}");
+            }
             foreach (Collider col in map.GetComponentsInChildren<Collider>(false))
             {
                 if (col.gameObject.layer != (int)Define.Layer.InteractObjects
