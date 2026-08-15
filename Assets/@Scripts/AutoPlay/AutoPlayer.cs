@@ -545,7 +545,7 @@ public class AutoPlayer : MonoBehaviour
         // 씬이 뜬 직후에는 플레이어가 아직 던전 안으로 옮겨지기 전이다.
         // 그때 세운 계획은 맵 밖 허공을 가리키고, 거기엔 벽이 없어서
         // 봇이 한 방향으로 끝없이 걸어 나갔다 (한 번은 80000칸을 갔다).
-        if (InsideMap(g.Player.transform.position) == false)
+        if (InsidePlayArea(g.Player.transform.position) == false)
         {
             // 층이 아직 다 조립되기 전에 잰 범위일 수도 있다. 다음 프레임에 다시 잰다.
             _hasBounds = false;
@@ -1200,17 +1200,30 @@ public class AutoPlayer : MonoBehaviour
                 _mapBounds.Encapsulate(c.bounds);
             }
         }
-        if (_hasBounds)
-            _mapBounds.Expand(Tile);   // 벽 칸 자체는 안에 든다
     }
 
-    /// <summary>이 자리가 층 안인가. 잴 수 없으면 막지 않는다.</summary>
+    /// <summary>탐색이 볼 수 있는 범위. 벽 칸 자체는 안에 들어야 한다.</summary>
     bool InsideMap(Vector3 world)
+    {
+        return Within(world, Tile);
+    }
+
+    /// <summary>
+    /// 플레이어가 정말 던전 안에 서 있는가.
+    /// 바깥 테두리는 벽이니, 제대로 배치됐다면 벽보다 한 칸은 안쪽에 있다.
+    /// 탐색 범위와 같은 여유를 주면 딱 한 칸 밖 (-1,-23) 으로 새어 나갔다.
+    /// </summary>
+    bool InsidePlayArea(Vector3 world)
+    {
+        return Within(world, -Tile);
+    }
+
+    bool Within(Vector3 world, float margin)
     {
         if (_hasBounds == false)
             return true;
-        return world.x >= _mapBounds.min.x && world.x <= _mapBounds.max.x
-               && world.z >= _mapBounds.min.z && world.z <= _mapBounds.max.z;
+        return world.x >= _mapBounds.min.x - margin && world.x <= _mapBounds.max.x + margin
+               && world.z >= _mapBounds.min.z - margin && world.z <= _mapBounds.max.z + margin;
     }
 
     void Flood(Vector2Int start)
