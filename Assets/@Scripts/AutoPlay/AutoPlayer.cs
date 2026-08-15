@@ -96,9 +96,8 @@ public class AutoPlayer : MonoBehaviour
     /// <summary>UI 별로 마지막에 누른 시각. 매 프레임 연타하지 않기 위한 것이다.</summary>
     readonly Dictionary<string, float> _uiCall = new Dictionary<string, float>();
 
-    /// <summary>타이틀/인트로는 한 방향 전환이라 딱 한 번만 누른다.</summary>
+    /// <summary>"새 게임"은 한 방향 전환이라 딱 한 번만 누른다.</summary>
     bool _pressedTitle;
-    bool _pressedIntro;
     /// <summary>연출이 이 시간(초) 넘게 안 끝나면 잠금을 강제로 푼다.</summary>
     public float LockTimeout = 15f;
     float _lastReal;
@@ -279,11 +278,9 @@ public class AutoPlayer : MonoBehaviour
         // 두 번 누르면 전환이 처음부터 다시 돌아서, 플레이어가 배치되기 전으로
         // 되감긴다. 쿨다운으로는 부족했다 — 아예 한 번만 누른다.
         // 눌렀는데도 안 넘어가면 워치독이 10분 뒤에 잡는다.
-        if (_pressedIntro == false && Handle<UI_IntroScene>(p =>
-            {
-                _pressedIntro = true;
-                Call(p, "NextScene");
-            }))
+        // 인트로는 여러 장이라 계속 넘겨야 한다 (Handle 이 2초 간격을 지킨다).
+        // 한 번만 누르게 했더니 두 번째 장에서 영영 멈췄다.
+        if (Handle<UI_IntroScene>(p => Call(p, "NextScene")))
             return;
         if (_pressedTitle == false && Handle<UI_TitleScene>(p =>
             {
