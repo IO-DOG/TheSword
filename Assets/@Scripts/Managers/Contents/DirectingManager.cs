@@ -224,14 +224,66 @@ public class Events : MonoBehaviour
         Managers.Game.OnDirect = false;
         Managers.Game.GameScene?.OnUIInventory();
         Managers.UI.ShowGameSceneUI();
-        Managers.Game.SaveGame();
 
-        GameObject curMap = GameObject.Find("Dungeon_00_002");
-        GameObject key = curMap.transform.Find("Items/CItem13").gameObject;
-        key.GetComponent<SpriteRenderer>().enabled = true;
-        key.GetComponent<BoxCollider>().enabled = true;
-        key.SetActive(true);
+        // 계약이 끝나면 3층에 열쇠가 열린다. 이 열쇠가 있어야 2층의 보스방 구역 문이 열리고,
+        // 그래야 킹슬라임에게 갈 수 있다 — 여기서 실패하면 게임을 더 진행할 수가 없다.
+        // 예전에는 이름으로 맵을 찾고(Instantiate 이름이 다르면 null) SaveGame 이 먼저라
+        // 그 사이 어디서든 예외가 나면 열쇠가 영영 안 나왔다.
+        EnableMagicSwordKey();
+
+        Managers.Game.SaveGame();
         Managers.Sound.FadeAndPlayBGM("Chapter0_BGM", 0.8f);
+    }
+
+    /// <summary>마검 계약 뒤에 열리는 3층 열쇠(Items/CItem13)를 켠다.</summary>
+    static void EnableMagicSwordKey()
+    {
+        GameObject curMap = null;
+
+        // 이름으로 찾는 대신 실제로 생성된 맵에서 집는다.
+        foreach (KeyValuePair<int, GameObject> pair in Managers.Game.Maps)
+        {
+            Data.StageInfoData info;
+            if (Managers.Data.StageInfoDic.TryGetValue(pair.Key, out info) == false)
+                continue;
+            if (info.DungeonID != "00_002")
+                continue;
+            curMap = pair.Value;
+            break;
+        }
+        if (curMap == null)
+            curMap = GameObject.Find("Dungeon_00_002");
+        if (curMap == null)
+        {
+            Debug.LogError("[Directing] 3층 맵을 못 찾아 마검 열쇠를 켜지 못했다");
+            return;
+        }
+
+        Transform key = curMap.transform.Find("Items/CItem13");
+        if (key == null)
+        {
+            Debug.LogError("[Directing] Items/CItem13 이 없어 마검 열쇠를 켜지 못했다");
+            return;
+        }
+
+        key.gameObject.SetActive(true);
+        SpriteRenderer sr = key.GetComponent<SpriteRenderer>();
+        if (sr != null) sr.enabled = true;
+        BoxCollider col = key.GetComponent<BoxCollider>();
+        if (col != null) col.enabled = true;
+
+        // 이 열쇠는 프리팹에 _itemIndex_forActive = 13 이 구워져 있는데,
+        // 2층의 포션(Dungeon_00_001/Items/CItem13)도 같은 13 을 쓴다.
+        // 그래서 2층 포션을 먹는 순간 CItemActiveDic[13] 이 false 가 되고,
+        // 다음 RefreshMap 에서 이 열쇠가 같이 꺼져 버렸다 —
+        // 열쇠가 없으면 2층 (15,-10) 문이 안 열리고 보스방에 영영 못 간다.
+        // 아무도 안 쓰는 번호로 옮겨서 충돌을 끊는다.
+        ConsumableItem ci = key.GetComponent<ConsumableItem>();
+        if (ci != null)
+        {
+            ci._itemIndex_forActive = Define.MAGICAL_SWORD_KEY_INDEX;
+            Managers.Data.CItemActiveDic[Define.MAGICAL_SWORD_KEY_INDEX] = true;
+        }
     }
 
     #endregion

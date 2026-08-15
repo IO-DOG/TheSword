@@ -96,6 +96,9 @@ public class AutoPlayer : MonoBehaviour
     GameObject _map;
     float _probeY;
     string _plan = "";
+    string _bossInfo = "";
+    /// <summary>보스방 입구를 지금 갈 수 있는지 (로그용).</summary>
+    public string BossInfo { get { return _bossInfo; } }
 
     // 길에 두면 "지나가다" 건드려 버리는 것들. 전부 막고, 목표일 때만 옆에서 부딪힌다.
     // 이걸 안 막으면 포션을 향해 가다 몬스터를 밟아 원치 않는 전투가 나고,
@@ -626,10 +629,28 @@ public class AutoPlayer : MonoBehaviour
             if (holdBack)
                 continue;   // 몸부터 추스르고 올라간다
 
-            // 보스방 입구는 일반 계단보다 앞이다. 같은 순위로 두면 가까운 계단만 타고
-            // 위아래를 오가느라 보스방에 영영 못 들어간다 (2층 <-> 3층 왕복).
-            int pri = portal._portalType == PortalController.Type.Boss ? PriTrigger : PriStairs;
-            Bump(map, portal.transform, pri, 0, ref best, ref bump, ref hasBump, ref bestScore);
+            if (portal._portalType == PortalController.Type.Boss)
+            {
+                Vector2Int bc = Cell(map, portal.transform.position);
+                var info = new System.Text.StringBuilder();
+                info.Append($"보스입구{bc} 아래칸도달={_dist.ContainsKey(bc + new Vector2Int(0, -1))}");
+                info.Append($" 열쇠={g.KeyInventory._keys[0]}/{g.KeyInventory._keys[1]}/{g.KeyInventory._keys[2]}");
+                foreach (Door dr in map.GetComponentsInChildren<Door>(false))
+                    info.Append($" 문[key{dr._keyIndex}@{Cell(map, dr.transform.position)}]");
+                foreach (Lever lv in map.GetComponentsInChildren<Lever>(false))
+                    info.Append($" 레버@{Cell(map, lv.transform.position)}=닿음{Reachable(Cell(map, lv.transform.position))}");
+                foreach (ConsumableItem ci in map.GetComponentsInChildren<ConsumableItem>(false))
+                    info.Append($" 아이템{ci.id}@{Cell(map, ci.transform.position)}");
+                _bossInfo = info.ToString();
+
+                // 보스방 입구(2층 (11,-3))는 BossDoor 레이어라 "아래에서 위로" 밀어야
+                // 확인 팝업이 뜬다. 옆에서 밀면 아무 일도 안 일어나고,
+                // 일반 계단과 같은 순위로 두면 가까운 계단만 타며 위아래를 오간다.
+                BumpFrom(Cell(map, portal.transform.position), new Vector2Int(0, -1),
+                         PriTrigger, 0, ref best, ref bump, ref hasBump, ref bestScore);
+                continue;
+            }
+            Bump(map, portal.transform, PriStairs, 0, ref best, ref bump, ref hasBump, ref bestScore);
         }
 
         // 보스방 문 / 상호작용 오브젝트는 "아래에서" 밀어야 반응한다.

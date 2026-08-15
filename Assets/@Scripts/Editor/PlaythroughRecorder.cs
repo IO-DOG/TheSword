@@ -263,7 +263,9 @@ public static class PlaythroughRecorder
                            $"{(g.OnInteract ? "I" : "-")}{(g.OnInputLock ? "L" : "-")}";
             Debug.Log($"[Playthrough] {g.PlayerData.CurStageid + 1}층 " +
                       $"Lv{g.PlayerData.Level} HP {g.PlayerData.CurHP:0}/{g.PlayerData.MaxHP:0} " +
-                      $"검{g.PlayerData.CurSword} [{flags}] | {plan}");
+                      $"검{g.PlayerData.CurSword} [{flags}] | {plan}" +
+                      (AutoPlayer.Instance != null && AutoPlayer.Instance.BossInfo.Length > 0
+                          ? " | " + AutoPlayer.Instance.BossInfo : ""));
         }
         catch (Exception)
         {

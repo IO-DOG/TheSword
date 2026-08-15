@@ -70,6 +70,13 @@ public class Define
         FadeOut,
     }
 
+    /// <summary>
+    /// 마검 계약으로 열리는 3층 열쇠의 세이브 인덱스.
+    /// 프리팹에는 13 이 구워져 있는데 2층 포션과 겹쳐서, 포션을 먹으면 열쇠가 사라졌다.
+    /// 생성된 100층이 쓰는 번호(0~약 509)와 겹치지 않는 자리로 옮긴다.
+    /// </summary>
+    public const int MAGICAL_SWORD_KEY_INDEX = 9000;
+
     public enum Layer
     {
         Default = 0,
