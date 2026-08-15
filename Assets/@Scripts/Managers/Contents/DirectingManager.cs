@@ -588,24 +588,17 @@ public class Events : MonoBehaviour
             Debug.Log("[Directing] 보스 콜라이더가 꺼져 있어 켰다");
         }
 
-        float playerY = Managers.Game.Player.transform.position.y;
-        Bounds b = col.bounds;
-        if (playerY >= b.min.y && playerY <= b.max.y)
-            return;   // 이미 닿는다
-
-        float lossyY = Mathf.Abs(boss.transform.lossyScale.y);
-        if (lossyY < 0.0001f)
-            return;
-
-        // 중심을 기준으로 늘어나므로, 아래쪽 끝이 플레이어 높이에 닿으려면
-        // 필요한 거리의 두 배만큼 키운다.
-        float need = Mathf.Abs(b.center.y - playerY);
-        Vector3 size = col.size;
-        size.y += (need * 2f + Define.TILE_SIZE) / lossyY;
-        col.size = size;
-
-        Debug.Log($"[Directing] 보스 콜라이더를 플레이어 높이({playerY:0.00})까지 늘렸다 " +
-                  $"— 원래 {b.min.y:0.00}~{b.max.y:0.00}");
+        // 싸울 수 있는 몬스터는 예외 없이 바닥(y=0)에 선다. 킹슬라임만 등장 연출
+        // 때문에 y=3 에 뜬 채로 남아서, 플레이어의 충돌 판정 높이에 아예 걸리지
+        // 않는다. 같은 바닥으로 내린다.
+        float groundY = Managers.Game.Player.transform.position.y;
+        Vector3 p = boss.transform.position;
+        if (Mathf.Abs(p.y - groundY) > 0.01f)
+        {
+            boss.transform.position = new Vector3(p.x, groundY, p.z);
+            Debug.Log($"[Directing] 보스를 몬스터와 같은 바닥(y={groundY:0.00})으로 내렸다 " +
+                      $"— 원래 y={p.y:0.00}");
+        }
     }
 
     public void CoStartUnLock4Floor()
