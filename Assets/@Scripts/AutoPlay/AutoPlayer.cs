@@ -392,6 +392,8 @@ public class AutoPlayer : MonoBehaviour
     #region 플레이
     void TickPlay()
     {
+        _waitingForGame = false;
+
         // 어디서 빠져나왔는지 남긴다. 이유 없이 조용히 멈추면
         // 로그만 보고는 씬을 기다리는 중인지 봇이 죽은 건지 구별할 수가 없다.
         if (Managers.Game == null || Managers.Game.Player == null)
@@ -401,11 +403,13 @@ public class AutoPlayer : MonoBehaviour
         }
         if (Managers.Scene == null || Managers.Scene.CurrentScene == null)
         {
+            _waitingForGame = true;
             _plan = "씬 없음";
             return;
         }
         if (Managers.Scene.CurrentScene.SceneType != Define.Scene.GameScene)
         {
+            _waitingForGame = true;
             _plan = $"씬={Managers.Scene.CurrentScene.SceneType} — GameScene 을 기다린다";
             return;
         }
@@ -429,6 +433,7 @@ public class AutoPlayer : MonoBehaviour
         GameObject map = ResolveMap(g);
         if (map == null)
         {
+            _waitingForGame = true;
             _plan = $"{g.PlayerData.CurStageid + 1}층 맵이 아직 없다";
             return;
         }
@@ -592,6 +597,7 @@ public class AutoPlayer : MonoBehaviour
         {
             // 층이 아직 다 조립되기 전에 잰 범위일 수도 있다. 다음 프레임에 다시 잰다.
             _hasBounds = false;
+            _waitingForGame = true;
             _plan = "던전 밖 — 자리 잡기를 기다린다";
             return Define.MoveDir.None;
         }
@@ -608,6 +614,7 @@ public class AutoPlayer : MonoBehaviour
         // 막다른 곳에 선 것뿐이라 탐색/밀기로 빠져나가야 한다.
         if (_movedOnFloor == false && AnythingReachable(map) == false)
         {
+            _waitingForGame = true;
             _plan = $"던전 밖 {start} — 닿는 게 하나도 없다";
             return Define.MoveDir.None;
         }
@@ -1428,8 +1435,20 @@ public class AutoPlayer : MonoBehaviour
     /// <summary>이 층에서 한 발이라도 뗐는가. 던전 안이라는 증거로 쓴다.</summary>
     bool _movedOnFloor;
 
+    /// <summary>이번 프레임에 일부러 손을 놓고 게임을 기다렸는가.</summary>
+    bool _waitingForGame;
+
     void TickStall()
     {
+        // 층이 자리 잡기를 기다리는 중이면 그것도 "진행 없음"이 아니다.
+        // 21층(챕터가 바뀌는 층)으로 넘어가는 순간 90초 워치독에 걸렸다.
+        // 다만 마냥 기다리지는 않는다 — 층 워치독(10분)이 진짜 교착을 잡는다.
+        if (_waitingForGame)
+        {
+            _lastProgress = Time.unscaledTime;
+            return;
+        }
+
         // 플레이어가 생기기 전에는 봇이 할 수 있는 게 없다. "진행 없음"이 아니다.
         // (인트로가 길거나 맵 데이터를 새로 만드는 중이면 몇 분씩 걸린다.)
         if (Managers.Game == null || Managers.Game.Player == null)
