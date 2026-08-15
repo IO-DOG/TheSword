@@ -32,6 +32,10 @@ public class PortalController : MonoBehaviour
     {
         if (Managers.Game.OnFade || Managers.Game.OnInteract)
             yield break;
+
+        // 목록이 비어 있으면 아래에서 인덱싱하다 터지고 계단이 죽는다.
+        Managers.Game.PlayerData.EnsureLists();
+
         Vector3 nextPos = Vector3.zero;
 
         if (_portalType == Type.UpStairs)

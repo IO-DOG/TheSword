@@ -179,6 +179,32 @@ public class GameManager
             Managers.Game.PlayerData.CurStageid = 0;
             Managers.Game.PlayerData.CurPosition = new MyVector3() { X = 0, Y = 1.5f, Z = 0 };
             Managers.Game.PlayerData.IsContractedSword = false;
+
+            EnsureLists();
+        }
+
+        /// <summary>
+        /// 새 게임에서 비어 있으면 안 되는 목록들을 채운다.
+        /// 예전에는 LoadGame 의 "세이브 없음" 분기 안에서만 채워서, 새 게임 경로에
+        /// 따라 빈 채로 남았다. 그러면
+        ///   - FirstEnterMapCheck[_mapId+1] 이 터져서 계단이 죽고
+        ///   - KeyInventory._keys 가 터져서 GameScene 초기화가 통째로 끊긴다.
+        /// 실행마다 되기도 하고 안 되기도 한 원인이었다.
+        /// </summary>
+        public void EnsureLists()
+        {
+            if (FirstEnterMapCheck == null)
+                FirstEnterMapCheck = new List<bool>();
+            while (FirstEnterMapCheck.Count < 110)
+                FirstEnterMapCheck.Add(false);
+
+            if (Inventory == null)
+                Inventory = new List<List<int>>();
+            while (Inventory.Count < 10)
+                Inventory.Add(new List<int>());
+
+            if (Managers.Game.KeyInventory != null)
+                Managers.Game.KeyInventory.EnsureKeys();
         }
     }
 
