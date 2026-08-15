@@ -280,7 +280,13 @@ public class AutoPlayer : MonoBehaviour
         // 눌렀는데도 안 넘어가면 워치독이 10분 뒤에 잡는다.
         // 인트로는 여러 장이라 계속 넘겨야 한다 (Handle 이 2초 간격을 지킨다).
         // 한 번만 누르게 했더니 두 번째 장에서 영영 멈췄다.
-        if (Handle<UI_IntroScene>(p => Call(p, "NextScene")))
+        // 커튼콜이 끝나기 전(_lock)에는 사람도 못 넘긴다 — 그때는 손대지 않는다.
+        if (Handle<UI_IntroScene>(p =>
+            {
+                if (Field<bool>(p, "_lock"))
+                    return;
+                Call(p, "NextScene");
+            }))
             return;
         if (_pressedTitle == false && Handle<UI_TitleScene>(p =>
             {

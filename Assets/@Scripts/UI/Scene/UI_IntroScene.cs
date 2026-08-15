@@ -1,4 +1,4 @@
-﻿using Data;
+using Data;
 using DG.Tweening;
 using Febucci.UI;
 using Febucci.UI.Examples;
@@ -102,7 +102,7 @@ public class UI_IntroScene : UI_Scene
             GetImage((int)Images.EscapeGauge).fillAmount = progress;
             if (holdTime >= requiredHoldTime)
             {
-                Managers.Scene.LoadScene(Define.Scene.GameScene);
+                LoadGameSceneOnce();
             }
         }
     }
@@ -116,6 +116,21 @@ public class UI_IntroScene : UI_Scene
 
         StartCoroutine(Util.CoFade(GetImage((int)Images.CurtainCall), 0.3f, false));
         _lock = false;
+    }
+
+    /// <summary>
+    /// 게임 씬 로드는 한 번만. 마지막 장에서 NextScene 이 다시 불리면
+    /// idx 가 그대로라 또 로드하는데, 초기화 도중 씬이 다시 깔리면서
+    /// 플레이어 배치가 통째로 날아간다 (엔터 연타로도 재현된다).
+    /// </summary>
+    bool _loadingGameScene;
+
+    void LoadGameSceneOnce()
+    {
+        if (_loadingGameScene)
+            return;
+        _loadingGameScene = true;
+        Managers.Scene.LoadScene(Define.Scene.GameScene);
     }
 
     void NextScene()
@@ -132,7 +147,7 @@ public class UI_IntroScene : UI_Scene
 
         if (idx == totalCount)
         {
-            Managers.Scene.LoadScene(Define.Scene.GameScene);
+            LoadGameSceneOnce();
             return;
         }
 
@@ -192,7 +207,7 @@ public class UI_IntroScene : UI_Scene
         }
         yield return null;
 
-        Managers.Scene.LoadScene(Define.Scene.GameScene);
+        LoadGameSceneOnce();
     }
 
     IEnumerator CoFadeOutImage(Image image)
