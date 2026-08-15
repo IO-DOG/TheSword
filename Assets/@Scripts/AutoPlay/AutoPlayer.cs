@@ -113,6 +113,8 @@ public class AutoPlayer : MonoBehaviour
                                   | (1 << (int)Define.Layer.Lever);
     static readonly int DoorMask = 1 << (int)Define.Layer.Door;
     static readonly int WallMask = 1 << (int)Define.Layer.Wall;
+    static readonly int ItemMask = (1 << (int)Define.Layer.CItem)
+                                 | (1 << (int)Define.Layer.EItem);
     static readonly int PushMask = (1 << (int)Define.Layer.InteractObjects)
                                  | (1 << (int)Define.Layer.BossDoor);
 
@@ -673,18 +675,6 @@ public class AutoPlayer : MonoBehaviour
                 ConsiderCell(c, PriTrigger, 0, ref best, ref bump, ref hasBump, ref bestScore);
         }
 
-        // 아무 목표도 없으면 아직 안 밟아 본 칸으로 간다.
-        // 층에 따라서는 밟아야만 열리는 곳이 있다 (3층 킹슬라임).
-        if (bestScore == long.MaxValue)
-        {
-            foreach (KeyValuePair<Vector2Int, int> pair in _dist)
-            {
-                if (pair.Value == 0 || _visited.Contains(pair.Key))
-                    continue;
-                ConsiderCell(pair.Key, PriExplore, 0, ref best, ref bump, ref hasBump, ref bestScore);
-            }
-        }
-
         // 안전한 상대가 없었다면, 이기기는 하는 싸움 중 제일 싼 것을 고른다.
         if (bestScore == long.MaxValue)
         {
@@ -705,6 +695,18 @@ public class AutoPlayer : MonoBehaviour
             }
         }
 
+        // 아무 목표도 없으면 아직 안 밟아 본 칸으로 간다.
+        // 층에 따라서는 밟아야만 열리는 곳이 있다 (3층 킹슬라임).
+        if (bestScore == long.MaxValue)
+        {
+            foreach (KeyValuePair<Vector2Int, int> pair in _dist)
+            {
+                if (pair.Value == 0 || _visited.Contains(pair.Key))
+                    continue;
+                ConsiderCell(pair.Key, PriExplore, 0, ref best, ref bump, ref hasBump, ref bestScore);
+            }
+        }
+
         // 갈 곳이 다 떨어졌다면 옆의 무언가를 밀어 본다.
         // 보스문/기둥/레버처럼 "부딪혀야" 열리는 것들이 있고, 방향도 가려 받는다.
         if (bestScore == long.MaxValue)
@@ -716,6 +718,11 @@ public class AutoPlayer : MonoBehaviour
             _plan = $"목표없음 flood={_dist.Count} 방문={_visited.Count}";
             return Define.MoveDir.None;
         }
+
+        // 트리거(마검/보스문/보스 등장)는 한 번만 밀면 된다.
+        // 계속 밀면 이미 끝난 연출이 다시 켜져서 대화창만 무한히 열린다.
+        if (hasBump && (int)(bestScore / 1000000000000L) == PriTrigger)
+            _deadTargets.Add(bump);
 
         // 목표 옆에 이미 서 있으면 그대로 부딪힌다.
         Define.MoveDir dir = (hasBump && best == start)
@@ -884,7 +891,15 @@ public class AutoPlayer : MonoBehaviour
         Vector2Int stand = cell + side;
         int d;
         if (_dist.TryGetValue(stand, out d) == false)
+        {
+            // 서야 할 칸에 아이템이 놓여 있으면 길이 막힌 것으로 잡힌다.
+            // 2층 보스문 아래 칸(11,-4)에 포션이 있어서 보스방에 영영 못 들어갔다.
+            // 그럴 때는 그 아이템을 먼저 주워 길을 튼다.
+            if (Physics.CheckBox(CellCenter(stand), ProbeHalf, Quaternion.identity,
+                                 ItemMask, QueryTriggerInteraction.Collide))
+                BumpCell(stand, priority, weight, ref best, ref bump, ref hasBump, ref bestScore);
             return;
+        }
 
         long score = Score(priority, weight, d);
         if (score >= bestScore)
