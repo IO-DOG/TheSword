@@ -92,6 +92,9 @@ public class AutoPlayer : MonoBehaviour
     int _retreats;
     int _totalRetreats;
     readonly Dictionary<string, float> _uiLog = new Dictionary<string, float>();
+
+    /// <summary>UI 별로 마지막에 누른 시각. 매 프레임 연타하지 않기 위한 것이다.</summary>
+    readonly Dictionary<string, float> _uiCall = new Dictionary<string, float>();
     /// <summary>연출이 이 시간(초) 넘게 안 끝나면 잠금을 강제로 푼다.</summary>
     public float LockTimeout = 15f;
     float _lastReal;
@@ -281,6 +284,18 @@ public class AutoPlayer : MonoBehaviour
             _uiLog[typeof(T).Name] = now;
             Debug.Log($"[AutoPlayer] UI 처리: {typeof(T).Name}");
         }
+
+        // 같은 UI 를 매 프레임 누르지 않는다. 사람은 그렇게 못 누르고,
+        // 무엇보다 씬을 넘기는 버튼은 누를 때마다 코루틴이 새로 돈다 —
+        // 인트로에서 NextScene 을 프레임마다 불러 전환이 계속 다시 시작됐고,
+        // 그 바람에 플레이어가 아예 배치되지 않은 채로 굳었다.
+        float lastCall;
+        if (_uiCall.TryGetValue(typeof(T).Name, out lastCall) && now - lastCall < 2f)
+        {
+            Progress($"ui:{typeof(T).Name}");
+            return true;   // 이 UI 가 흐름을 잡고 있는 건 맞다. 기다린다.
+        }
+        _uiCall[typeof(T).Name] = now;
 
         try
         {
