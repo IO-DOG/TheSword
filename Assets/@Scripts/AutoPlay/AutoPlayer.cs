@@ -95,6 +95,10 @@ public class AutoPlayer : MonoBehaviour
 
     /// <summary>UI 별로 마지막에 누른 시각. 매 프레임 연타하지 않기 위한 것이다.</summary>
     readonly Dictionary<string, float> _uiCall = new Dictionary<string, float>();
+
+    /// <summary>타이틀/인트로는 한 방향 전환이라 딱 한 번만 누른다.</summary>
+    bool _pressedTitle;
+    bool _pressedIntro;
     /// <summary>연출이 이 시간(초) 넘게 안 끝나면 잠금을 강제로 푼다.</summary>
     public float LockTimeout = 15f;
     float _lastReal;
@@ -271,9 +275,23 @@ public class AutoPlayer : MonoBehaviour
             && Managers.Scene.CurrentScene.SceneType == Define.Scene.GameScene)
             return;
 
-        if (Handle<UI_IntroScene>(p => Call(p, "NextScene")))
+        // 타이틀의 "새 게임"과 인트로의 "다음"은 한 방향 전환이다.
+        // 두 번 누르면 전환이 처음부터 다시 돌아서, 플레이어가 배치되기 전으로
+        // 되감긴다. 쿨다운으로는 부족했다 — 아예 한 번만 누른다.
+        // 눌렀는데도 안 넘어가면 워치독이 10분 뒤에 잡는다.
+        if (_pressedIntro == false && Handle<UI_IntroScene>(p =>
+            {
+                _pressedIntro = true;
+                Call(p, "NextScene");
+            }))
             return;
-        if (Handle<UI_TitleScene>(TitleStart))
+        if (_pressedTitle == false && Handle<UI_TitleScene>(p =>
+            {
+                if (Field<bool>(p, "isPreload") == false || Field<bool>(p, "_lock"))
+                    return;   // 아직 누를 때가 아니다 — 다음 프레임에 다시 본다
+                _pressedTitle = true;
+                TitleStart(p);
+            }))
             return;
     }
 
