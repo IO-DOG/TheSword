@@ -57,7 +57,10 @@ public class DirectingManager
 
     public void CloseLetterBox()
     {
-        Managers.Directing.letterBox.StopLetterBox();
+        // 레터박스가 이미 닫혔거나 애초에 안 열렸을 수 있다. 그때 여기서 터지면
+        // 부르는 쪽 연출이 통째로 죽는다 — 킹슬라임 사망 연출이 그랬다.
+        if (Managers.Directing.letterBox != null)
+            Managers.Directing.letterBox.StopLetterBox();
         Managers.Directing.letterBox = null;
     }
 }

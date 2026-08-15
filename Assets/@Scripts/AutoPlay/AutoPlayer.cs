@@ -1085,6 +1085,12 @@ public class AutoPlayer : MonoBehaviour
         g.Maps.TryGetValue(g.PlayerData.CurStageid, out byStage);
 
         Vector3 p = g.Player.transform.position;
+
+        // 맵은 100 유닛 간격으로 놓이고 한 장은 7 유닛 남짓이다.
+        // 지금 층의 맵 근처에 서 있다면 그게 맞다 — 굳이 다른 맵을 찾지 않는다.
+        // (가장 가까운 맵만 보다가 21층에서 세 칸 떨어진 맵을 골랐다.)
+        if (byStage != null && (byStage.transform.position - p).sqrMagnitude < 50f * 50f)
+            return byStage;
         GameObject best = null;
         float bestDist = float.MaxValue;
         foreach (KeyValuePair<int, GameObject> pair in g.Maps)
