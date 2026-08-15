@@ -407,6 +407,7 @@ public class AutoPlayer : MonoBehaviour
             _visited.Clear();
             _deadTargets.Clear();
             _firedTriggers.Clear();
+            _movedOnFloor = false;
         }
         _visited.Add(Cell(map, g.Player.transform.position));
 
@@ -415,6 +416,7 @@ public class AutoPlayer : MonoBehaviour
             return;
 
         g.Player.Moving(dir, false);
+        _movedOnFloor = true;
         Progress($"{g.PlayerData.CurStageid}:{Cell(map, g.Player.transform.position)}");
     }
 
@@ -558,7 +560,10 @@ public class AutoPlayer : MonoBehaviour
         // 콜라이더 경계 상자는 실제 놀이 공간보다 커서 그것만으로는 못 거른다.
         // 씬이 뜬 직후 플레이어가 아직 배치되기 전이 정확히 이 상태이고,
         // 그때 움직이기 시작하면 맵 밖을 하염없이 걸어 다닌다.
-        if (AnythingReachable(map) == false)
+        // 단, 이 층에서 아직 한 발도 못 뗐을 때만 본다. 일단 걷기 시작했다면
+        // 우리가 던전 안에 있다는 건 이미 증명됐고, 그 뒤로 안 닿는 상황은
+        // 막다른 곳에 선 것뿐이라 탐색/밀기로 빠져나가야 한다.
+        if (_movedOnFloor == false && AnythingReachable(map) == false)
         {
             _plan = $"던전 밖 {start} — 닿는 게 하나도 없다";
             return Define.MoveDir.None;
@@ -1281,6 +1286,9 @@ public class AutoPlayer : MonoBehaviour
     int _maxStage = -1;
     float _maxStageAt;
     float _waitingPlayerSince;
+
+    /// <summary>이 층에서 한 발이라도 뗐는가. 던전 안이라는 증거로 쓴다.</summary>
+    bool _movedOnFloor;
 
     void TickStall()
     {
