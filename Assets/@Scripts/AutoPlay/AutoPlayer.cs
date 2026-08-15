@@ -42,9 +42,9 @@ public class AutoPlayer : MonoBehaviour
     public float AscendHpRatio = 0.75f;
 
     /// <summary>전투 배속. 게임 안에 있는 옵션 그대로다(1/2/4). 녹화 길이를 줄인다.</summary>
-    public int GameSpeed = 4;
+    public int GameSpeed = 8;
     /// <summary>이동 배속. 걷는 시간이 영상의 절반을 먹어서 줄인다.</summary>
-    public float MoveSpeedScale = 3f;
+    public float MoveSpeedScale = 5f;
 
     const float Tile = 0.32f;
 
@@ -86,7 +86,9 @@ public class AutoPlayer : MonoBehaviour
     readonly Dictionary<string, float> _uiLog = new Dictionary<string, float>();
     /// <summary>연출이 이 시간(초) 넘게 안 끝나면 잠금을 강제로 푼다.</summary>
     public float LockTimeout = 15f;
-    float _lockedSince;
+    float _lastReal;
+    string _realSig = "";
+    float _lastError;
     int _guideStuck;
     bool _wasBattle;
     float _hpBefore;
@@ -128,6 +130,7 @@ public class AutoPlayer : MonoBehaviour
     void Start()
     {
         _lastProgress = Time.unscaledTime;
+        _lastReal = Time.unscaledTime;
         StartCoroutine(CoRun());
     }
 
@@ -144,11 +147,45 @@ public class AutoPlayer : MonoBehaviour
                 yield break;
             }
 
-            TickBattleLog();
-            TickUI();
-            TickPlay();
-            TickStall();
+            TrackRealProgress();
+
+            // 한 프레임에서 터진 예외가 코루틴을 죽이면 봇도 워치독도 같이 멈춘다.
+            // (마검 팝업 앞에서 정확히 그렇게 굳었다.) 프레임 단위로 막는다.
+            try
+            {
+                TickBattleLog();
+                TickUI();
+                TickPlay();
+                TickStall();
+            }
+            catch (Exception e)
+            {
+                if (Time.unscaledTime - _lastError > 5f)
+                {
+                    _lastError = Time.unscaledTime;
+                    Debug.LogWarning($"[AutoPlayer] 프레임 예외: {e}");
+                }
+            }
         }
+    }
+
+    /// <summary>층/레벨/HP/위치 중 하나라도 달라지면 "진전"으로 본다.</summary>
+    void TrackRealProgress()
+    {
+        GameManager g = Managers.Game;
+        if (g == null || g.PlayerData == null || g.Player == null)
+            return;
+
+        // 위치는 "칸" 단위로 본다. 연출 중 트윈이 만드는 미세 이동까지 진전으로 세면
+        // 워치독이 영영 안 돈다 (마검 팝업 앞에서 정확히 그랬다).
+        Vector3 pos = g.Player.transform.position;
+        string sig = $"{g.PlayerData.CurStageid}/{g.PlayerData.Level}/" +
+                     $"{Mathf.RoundToInt(g.PlayerData.CurHP)}/" +
+                     $"{Mathf.RoundToInt(pos.x / Tile)},{Mathf.RoundToInt(pos.z / Tile)}";
+        if (sig == _realSig)
+            return;
+        _realSig = sig;
+        _lastReal = Time.unscaledTime;
     }
 
     /// <summary>전투 하나하나를 기록한다. 어디서 왜 죽는지는 이 로그로만 알 수 있다.</summary>
@@ -307,7 +344,6 @@ public class AutoPlayer : MonoBehaviour
             WatchLocks(g);
             return;
         }
-        _lockedSince = 0f;
 
         if (Time.time < _nextStep)
             return;
@@ -350,21 +386,23 @@ public class AutoPlayer : MonoBehaviour
     /// 그러면 사람이 플레이해도 그 자리에서 영영 못 움직인다.
     /// 봇은 일정 시간 뒤 잠금을 직접 풀고 진행한다 (원인은 따로 보고한다).
     /// </summary>
+    /// <summary>에디터 워치독이 잠금을 풀었을 때 불린다 (PlaythroughRecorder.Unstick).</summary>
+    public void OnUnstuck()
+    {
+        _lastReal = Time.unscaledTime;
+        _deadTargets.Add(_lastBump);   // 같은 자리를 또 밀면 죽은 연출이 다시 켜진다
+        FinishBrokenContract(Managers.Game);
+    }
+
     void WatchLocks(GameManager g)
     {
         if (g.OnBattle)
-        {
-            _lockedSince = 0f;   // 전투는 스스로 끝난다
-            return;
-        }
+            return;   // 전투는 스스로 끝난다
 
-        if (_lockedSince == 0f)
-        {
-            _lockedSince = Time.unscaledTime;
-            return;
-        }
-        // 연출 중에는 timeScale 이 0 이 되기도 한다. 실시간으로 재야 한다.
-        if (Time.unscaledTime - _lockedSince < LockTimeout)
+        // 잠금 플래그로 재면 안 된다 — 죽은 연출이 다시 켜지는 사이에
+        // 잠깐 풀린 프레임이 끼어들어 타이머가 계속 초기화된다.
+        // "층/레벨/HP/위치 중 무엇도 달라지지 않았다" 를 기준으로 잡는다.
+        if (Time.unscaledTime - _lastReal < LockTimeout)
             return;
 
         Debug.LogWarning($"[AutoPlayer] 연출/입력 잠금이 {LockTimeout:0}초 넘게 안 풀려 강제 해제 " +
@@ -377,7 +415,7 @@ public class AutoPlayer : MonoBehaviour
         g.OnLever = false;
         Managers.UI.ClosePopupUI();
         Managers.UI.ShowGameSceneUI();
-        _lockedSince = 0f;
+        _lastReal = Time.unscaledTime;
 
         // 같은 자리를 또 밀면 죽은 연출이 다시 켜진다. 그 목표는 버린다.
         _deadTargets.Add(_lastBump);

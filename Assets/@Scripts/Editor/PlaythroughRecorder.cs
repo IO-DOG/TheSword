@@ -30,11 +30,17 @@ public static class PlaythroughRecorder
 
     /// <summary>이 시간이 지나면 결과와 상관없이 녹화를 끊고 나온다.
     /// 봇이 어딘가에서 맴돌아도 mp4 는 정상적으로 마무리돼야 한다.</summary>
-    const double MaxMinutes = 25.0;
+    const double MaxMinutes = 180.0;
+
+    /// <summary>이만큼 아무 진전이 없으면 잠긴 연출을 에디터 쪽에서 직접 푼다.</summary>
+    const double StuckSeconds = 20.0;
 
     static RecorderController _controller;
     static double _nextLog;
     static double _startedAt;
+    static double _lockedTime;
+    static double _lastTick;
+    static double _nextUnstickLog;
 
     static PlaythroughRecorder()
     {
@@ -91,6 +97,8 @@ public static class PlaythroughRecorder
                 StartRecording();
             _nextLog = 0;
             _startedAt = EditorApplication.timeSinceStartup;
+            _lockedTime = 0.0;
+            _lastTick = 0.0;
             EditorApplication.update -= Watch;
             EditorApplication.update += Watch;
         }
@@ -157,6 +165,8 @@ public static class PlaythroughRecorder
         if (EditorApplication.isPlaying == false)
             return;
 
+        Unstick();
+
         AutoPlayer bot = AutoPlayer.Instance;
         if (bot == null)
             return;
@@ -180,6 +190,64 @@ public static class PlaythroughRecorder
         SessionState.SetString(StateKey + ".msg", msg);
         StopRecording();
         EditorApplication.isPlaying = false;
+    }
+
+    /// <summary>
+    /// 손수 만든 연출들이 GameObject.Find 실패로 중간에 죽으면 OnDirect/OnConversation 이
+    /// 켜진 채 남아 게임이 그 자리에서 멈춘다. 봇 코루틴과 무관하게 에디터 루프에서 푼다.
+    /// </summary>
+    static void Unstick()
+    {
+        try
+        {
+            GameManager g = Managers.Game;
+            if (g == null || g.PlayerData == null)
+                return;
+
+            double now = EditorApplication.timeSinceStartup;
+            double dt = _lastTick > 0.0 ? now - _lastTick : 0.0;
+            _lastTick = now;
+            if (dt <= 0.0 || dt > 1.0)
+                return;   // 프레임이 튀면 세지 않는다
+
+            // 죽은 연출은 잠깐씩 풀렸다 다시 걸린다. 그래서 "연속으로 잠겨 있었는가"가
+            // 아니라 "잠겨 있던 시간이 쌓였는가" 로 본다. 전투는 스스로 끝나므로 뺀다.
+            bool locked = g.OnConversation || g.OnDirect || g.OnInteract
+                          || g.OnInputLock || g.OnFade || g.OnLever;
+            if (g.OnBattle)
+            {
+                _lockedTime = 0.0;
+                return;
+            }
+            _lockedTime = locked ? _lockedTime + dt : Math.Max(0.0, _lockedTime - dt * 3.0);
+
+            if (_lockedTime < StuckSeconds)
+                return;
+
+            Debug.LogWarning($"[Playthrough] 잠금이 {_lockedTime:0}초 쌓여 강제로 푼다 " +
+                             $"({g.PlayerData.CurStageid + 1}층)");
+            g.OnDirect = false;
+            g.OnConversation = false;
+            g.OnInteract = false;
+            g.OnInputLock = false;
+            g.OnFade = false;
+            g.OnLever = false;
+            Managers.UI.ClosePopupUI();
+            Managers.UI.ShowGameSceneUI();
+
+            if (AutoPlayer.Instance != null)
+                AutoPlayer.Instance.OnUnstuck();
+
+            _lockedTime = 0.0;
+        }
+        catch (Exception e)
+        {
+            if (EditorApplication.timeSinceStartup > _nextUnstickLog)
+            {
+                _nextUnstickLog = EditorApplication.timeSinceStartup + 15.0;
+                Debug.LogWarning($"[Playthrough] Unstick 예외: {e.Message}");
+            }
+        }
     }
 
     static void LogProgress()
