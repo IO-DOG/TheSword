@@ -75,6 +75,14 @@ public class AutoPlayer : MonoBehaviour
     readonly HashSet<Vector2Int> _visited = new HashSet<Vector2Int>();
     /// <summary>밀어도 아무 일이 없던 목표들. 같은 자리에서 헛돌지 않게 기억해 둔다.</summary>
     readonly HashSet<Vector2Int> _deadTargets = new HashSet<Vector2Int>();
+
+    /// <summary>
+    /// 이미 밀어 본 트리거 칸. _deadTargets 와 반드시 따로 둔다.
+    /// 3층 마검 제단(9,-4)은 계약이 끝나면 바로 그 칸에 노란 열쇠를 떨군다 —
+    /// 트리거를 껐다고 칸 전체를 죽이면 그 열쇠를 영영 못 줍고,
+    /// 열쇠가 없으면 2층 문도 보스방도 열리지 않는다.
+    /// </summary>
+    readonly HashSet<Vector2Int> _firedTriggers = new HashSet<Vector2Int>();
     Vector2Int _lastBump;
     int _sameBump;
     readonly List<KeyValuePair<Transform, float>> _risky = new List<KeyValuePair<Transform, float>>();
@@ -373,6 +381,7 @@ public class AutoPlayer : MonoBehaviour
             _visitedStage = g.PlayerData.CurStageid;
             _visited.Clear();
             _deadTargets.Clear();
+            _firedTriggers.Clear();
         }
         _visited.Add(Cell(map, g.Player.transform.position));
 
@@ -394,7 +403,7 @@ public class AutoPlayer : MonoBehaviour
     public void OnUnstuck()
     {
         _lastReal = Time.unscaledTime;
-        _deadTargets.Add(_lastBump);   // 같은 자리를 또 밀면 죽은 연출이 다시 켜진다
+        _firedTriggers.Add(_lastBump);   // 같은 자리를 또 밀면 죽은 연출이 다시 켜진다
         FinishBrokenContract(Managers.Game);
     }
 
@@ -721,8 +730,10 @@ public class AutoPlayer : MonoBehaviour
 
         // 트리거(마검/보스문/보스 등장)는 한 번만 밀면 된다.
         // 계속 밀면 이미 끝난 연출이 다시 켜져서 대화창만 무한히 열린다.
-        if (hasBump && (int)(bestScore / 1000000000000L) == PriTrigger)
-            _deadTargets.Add(bump);
+        // 단, 실제로 미는 순간에만 센다 — 열한 칸 떨어진 채로 계획만 세웠는데
+        // 껐다가는 도착도 하기 전에 목표가 사라진다.
+        if (hasBump && best == start && (int)(bestScore / 1000000000000L) == PriTrigger)
+            _firedTriggers.Add(bump);
 
         // 목표 옆에 이미 서 있으면 그대로 부딪힌다.
         Define.MoveDir dir = (hasBump && best == start)
@@ -887,6 +898,8 @@ public class AutoPlayer : MonoBehaviour
     {
         if (_deadTargets.Contains(cell))
             return;
+        if (priority == PriTrigger && _firedTriggers.Contains(cell))
+            return;
 
         Vector2Int stand = cell + side;
         int d;
@@ -944,6 +957,8 @@ public class AutoPlayer : MonoBehaviour
     {
         if (_deadTargets.Contains(cell))
             return;   // 밟아도 아무 일이 없던(또는 연출이 죽은) 자리
+        if (priority == PriTrigger && _firedTriggers.Contains(cell))
+            return;
 
         int d;
         if (_dist.TryGetValue(cell, out d) == false)

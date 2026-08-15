@@ -30,7 +30,7 @@ public static class PlaythroughRecorder
 
     /// <summary>이 시간이 지나면 결과와 상관없이 녹화를 끊고 나온다.
     /// 봇이 어딘가에서 맴돌아도 mp4 는 정상적으로 마무리돼야 한다.</summary>
-    const double MaxMinutes = 180.0;
+    const double MaxMinutes = 60.0;
 
     /// <summary>이만큼 아무 진전이 없으면 잠긴 연출을 에디터 쪽에서 직접 푼다.</summary>
     const double StuckSeconds = 20.0;
