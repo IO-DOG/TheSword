@@ -110,8 +110,27 @@ public class CameraController : MonoBehaviour
 
     public void SetupCameraConfiner()
     {
-        string curDungeonName = $"Dungeon_{Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].DungeonID}";
-        _bg = GameObject.Find(curDungeonName).transform.Find("Decos/BG").gameObject.GetComponent<SpriteRenderer>();
+        // 여기서 터지면 부르는 쪽(포탈 워프)이 통째로 죽어서 플레이어가 새 맵으로
+        // 옮겨지지 않는다. 챕터가 바뀌는 20->21층 전환이 정확히 그래서 멈췄다.
+        // 못 찾으면 쓰던 경계를 그대로 두고 넘어간다 — 카메라가 조금 어긋날 뿐
+        // 게임은 진행된다.
+        Data.StageInfoData info;
+        if (Managers.Data.StageInfoDic.TryGetValue(Managers.Game.PlayerData.CurStageid, out info) == false)
+        {
+            Debug.LogWarning($"[Camera] {Managers.Game.PlayerData.CurStageid} 층 정보가 없어 경계를 그대로 둔다");
+            return;
+        }
+
+        string curDungeonName = $"Dungeon_{info.DungeonID}";
+        GameObject dungeon = GameObject.Find(curDungeonName);
+        Transform bgTr = dungeon != null ? dungeon.transform.Find("Decos/BG") : null;
+        SpriteRenderer bgSr = bgTr != null ? bgTr.GetComponent<SpriteRenderer>() : null;
+        if (bgSr == null)
+        {
+            Debug.LogWarning($"[Camera] {curDungeonName}/Decos/BG 를 못 찾아 경계를 그대로 둔다");
+            return;
+        }
+        _bg = bgSr;
 
         if (confinerCollider != null)
             Managers.Resource.Destroy(confinerCollider);
