@@ -696,6 +696,31 @@ public class AutoPlayer : MonoBehaviour
                 ConsiderCell(c, PriTrigger, 0, ref best, ref bump, ref hasBump, ref bestScore);
         }
 
+        // 지금 서 있는 층을 그대로 찍는다. 예전에는 보스 포탈이 있는 층(2층)만
+        // 찍어서, 3층에서 무엇이 막혔는지는 로그만 봐서는 알 수가 없었다.
+        {
+            var info = new System.Text.StringBuilder();
+            info.Append($"열쇠={g.KeyInventory._keys[0]}/{g.KeyInventory._keys[1]}/{g.KeyInventory._keys[2]}");
+            foreach (ConsumableItem ci in map.GetComponentsInChildren<ConsumableItem>(false))
+            {
+                Vector2Int c = Cell(map, ci.transform.position);
+                info.Append($" 아이템{ci.id}@{c}={(Reachable(c) ? "닿음" : "막힘")}");
+            }
+            foreach (Door dr in map.GetComponentsInChildren<Door>(false))
+                info.Append($" 문key{dr._keyIndex}@{Cell(map, dr.transform.position)}");
+            foreach (Collider col in map.GetComponentsInChildren<Collider>(false))
+            {
+                if (col.gameObject.layer != (int)Define.Layer.InteractObjects
+                    && col.gameObject.layer != (int)Define.Layer.BossDoor)
+                    continue;
+                Vector2Int c = Cell(map, col.transform.position);
+                info.Append($" 밀기@{c}={(_dist.ContainsKey(c + new Vector2Int(0, -1)) ? "아래칸OK" : "아래칸막힘")}");
+                if (_firedTriggers.Contains(c))
+                    info.Append("(민적있음)");
+            }
+            _bossInfo = info.ToString();
+        }
+
         // 안전한 상대가 없었다면, 이기기는 하는 싸움 중 제일 싼 것을 고른다.
         if (bestScore == long.MaxValue)
         {
@@ -1179,8 +1204,31 @@ public class AutoPlayer : MonoBehaviour
         _lastProgress = Time.unscaledTime;
     }
 
+    /// <summary>최고 도달 층이 이만큼 안 오르면 맴돌고 있는 것이다.</summary>
+    const float NoNewFloorTimeout = 600f;
+    int _maxStage = -1;
+    float _maxStageAt;
+
     void TickStall()
     {
+        // 층과 층 사이를 계속 오가면 "진전"으로 세어져 90초 워치독이 영영 안 돈다.
+        // 실제로는 같은 두 층을 도는 중이었고, 그렇게 60분을 태웠다.
+        GameManager gm = Managers.Game;
+        if (gm != null && gm.PlayerData != null)
+        {
+            if (gm.PlayerData.CurStageid > _maxStage)
+            {
+                _maxStage = gm.PlayerData.CurStageid;
+                _maxStageAt = Time.unscaledTime;
+            }
+            else if (_maxStageAt > 0f && Time.unscaledTime - _maxStageAt > NoNewFloorTimeout)
+            {
+                Fail($"{_maxStage + 1}층 위로 {NoNewFloorTimeout / 60f:0}분 동안 못 올라감\n" +
+                     $"  plan={_plan}\n  {_bossInfo}");
+                return;
+            }
+        }
+
         if (Time.unscaledTime - _lastProgress < StallTimeout)
             return;
 
