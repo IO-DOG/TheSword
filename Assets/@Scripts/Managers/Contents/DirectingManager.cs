@@ -534,6 +534,7 @@ public class Events : MonoBehaviour
             _kingSlime.transform.localScale = new Vector3(1f, 2f, 1f);
             _kingSlime.transform.localPosition = new Vector3(3.84f, 3f, -5.5f);
             _kingSlime.SetActive(true);
+            MakeBossReachable(_kingSlime);
             //if (_kingSlime != null)
             //    //_kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
             //_kingSlime.gameObject.GetOrAddComponent<Animator>().Play("Boss_C0_I000");
@@ -554,6 +555,49 @@ public class Events : MonoBehaviour
         Managers.Game.OnDirect = false;
         Managers.UI.ShowGameSceneUI();
         Managers.Sound.FadeAndPlayBGM("Chapter0_Boss_BGM", 1f);
+    }
+
+    /// <summary>
+    /// 킹슬라임은 스프라이트를 띄워 놓으려고 바닥보다 한참 위(localY=3)에 선다.
+    /// 그런데 전투는 PlayerController 가 제 키높이로 쏘는 얇은 광선이 몬스터
+    /// 콜라이더에 닿아야 시작된다 — 그 높이에서는 보스를 스치지도 못해서
+    /// 밀어도 아무 일이 없고 그대로 통과했다. 보스방에서 싸움 자체가 안 열린다.
+    ///
+    /// 보이는 위치는 그대로 두고 콜라이더만 플레이어 키높이까지 늘린다.
+    /// </summary>
+    static void MakeBossReachable(GameObject boss)
+    {
+        if (boss == null || Managers.Game.Player == null)
+            return;
+
+        if (boss.layer != (int)Define.Layer.Monster)
+        {
+            Debug.LogWarning($"[Directing] 보스가 Monster 레이어가 아니다 ({boss.layer}) — 옮긴다");
+            boss.layer = (int)Define.Layer.Monster;
+        }
+
+        BoxCollider col = boss.GetComponent<BoxCollider>();
+        if (col == null)
+            return;
+
+        float playerY = Managers.Game.Player.transform.position.y;
+        Bounds b = col.bounds;
+        if (playerY >= b.min.y && playerY <= b.max.y)
+            return;   // 이미 닿는다
+
+        float lossyY = Mathf.Abs(boss.transform.lossyScale.y);
+        if (lossyY < 0.0001f)
+            return;
+
+        // 중심을 기준으로 늘어나므로, 아래쪽 끝이 플레이어 높이에 닿으려면
+        // 필요한 거리의 두 배만큼 키운다.
+        float need = Mathf.Abs(b.center.y - playerY);
+        Vector3 size = col.size;
+        size.y += (need * 2f + Define.TILE_SIZE) / lossyY;
+        col.size = size;
+
+        Debug.Log($"[Directing] 보스 콜라이더를 플레이어 높이({playerY:0.00})까지 늘렸다 " +
+                  $"— 원래 {b.min.y:0.00}~{b.max.y:0.00}");
     }
 
     public void CoStartUnLock4Floor()
