@@ -513,6 +513,18 @@ public class AutoPlayer : MonoBehaviour
         _map = map;
         _probeY = g.Player.transform.position.y + Tile * 0.5f;
         _solid.Clear();
+        UpdateBounds(map);
+
+        // 씬이 뜬 직후에는 플레이어가 아직 던전 안으로 옮겨지기 전이다.
+        // 그때 세운 계획은 맵 밖 허공을 가리키고, 거기엔 벽이 없어서
+        // 봇이 한 방향으로 끝없이 걸어 나갔다 (한 번은 80000칸을 갔다).
+        if (InsideMap(g.Player.transform.position) == false)
+        {
+            // 층이 아직 다 조립되기 전에 잰 범위일 수도 있다. 다음 프레임에 다시 잰다.
+            _hasBounds = false;
+            _plan = "던전 밖 — 자리 잡기를 기다린다";
+            return Define.MoveDir.None;
+        }
 
         Vector2Int start = Cell(map, g.Player.transform.position);
         Flood(start);
@@ -1011,6 +1023,46 @@ public class AutoPlayer : MonoBehaviour
     /// <summary>탐색 상자의 반지름. 층이 23x27 이라 32 면 어디서 재도 전부 들어온다.</summary>
     const int FloodRadius = 32;
 
+    GameObject _boundsMap;
+    Bounds _mapBounds;
+    bool _hasBounds;
+
+    /// <summary>
+    /// 이 층이 실제로 차지하는 범위. 콜라이더를 전부 감싸서 잰다.
+    /// 층마다 한 번만 계산한다 — 맵 오브젝트가 바뀔 때까지 그대로다.
+    /// </summary>
+    void UpdateBounds(GameObject map)
+    {
+        if (ReferenceEquals(_boundsMap, map) && _hasBounds)
+            return;
+
+        _boundsMap = map;
+        _hasBounds = false;
+        foreach (Collider c in map.GetComponentsInChildren<Collider>(false))
+        {
+            if (_hasBounds == false)
+            {
+                _mapBounds = c.bounds;
+                _hasBounds = true;
+            }
+            else
+            {
+                _mapBounds.Encapsulate(c.bounds);
+            }
+        }
+        if (_hasBounds)
+            _mapBounds.Expand(Tile);   // 벽 칸 자체는 안에 든다
+    }
+
+    /// <summary>이 자리가 층 안인가. 잴 수 없으면 막지 않는다.</summary>
+    bool InsideMap(Vector3 world)
+    {
+        if (_hasBounds == false)
+            return true;
+        return world.x >= _mapBounds.min.x && world.x <= _mapBounds.max.x
+               && world.z >= _mapBounds.min.z && world.z <= _mapBounds.max.z;
+    }
+
     void Flood(Vector2Int start)
     {
         _from.Clear();
@@ -1035,6 +1087,11 @@ public class AutoPlayer : MonoBehaviour
                 // 3200만 칸까지 퍼져 한 프레임이 몇 분씩 걸렸다.
                 if (Mathf.Abs(next.x - start.x) > FloodRadius
                     || Mathf.Abs(next.y - start.y) > FloodRadius)
+                    continue;
+
+                // 층이 실제로 차지하는 범위 밖은 벽으로 친다.
+                // 3층 (17,-9) 처럼 경계가 뚫린 자리가 있다.
+                if (InsideMap(CellCenter(next)) == false)
                     continue;
 
                 if (_dist.ContainsKey(next) || Solid(next))
