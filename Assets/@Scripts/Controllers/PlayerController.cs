@@ -622,6 +622,29 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        // 광선이 아무것도 못 맞혔는데 갈 칸에 몬스터가 서 있을 수 있다.
+        // 광선은 플레이어 키높이로 얇게 나가서, 스프라이트를 띄워 놓은 보스처럼
+        // 콜라이더가 위쪽에 있는 상대는 스치지도 못한다 —
+        // 킹슬라임이 정확히 그래서, 밀어도 전투가 안 열리고 그대로 통과했다.
+        // 갈 칸을 상자로 한 번 더 훑어 몬스터가 있으면 붙는다.
+        if (somethingExist == false && !Managers.Game.OnBattle)
+        {
+            Vector3 nextCell = _cellPos + _nextCellPos;
+            Collider[] found = Physics.OverlapBox(
+                nextCell, Vector3.one * (Define.TILE_SIZE * 0.45f), Quaternion.identity,
+                1 << (int)Define.Layer.Monster, QueryTriggerInteraction.Collide);
+            for (int i = 0; i < found.Length; i++)
+            {
+                MonsterController mc = found[i].GetComponent<MonsterController>();
+                if (mc == null)
+                    continue;
+                Debug.Log($"{found[i].gameObject.name} (광선 밖 — 칸 검사로 붙는다)");
+                mc.SetMonster();
+                somethingExist = true;
+                break;
+            }
+        }
+
         //Managers.Game.SaveGame();
 
         return somethingExist;
