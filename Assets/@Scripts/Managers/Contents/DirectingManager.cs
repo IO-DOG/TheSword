@@ -580,6 +580,14 @@ public class Events : MonoBehaviour
         if (col == null)
             return;
 
+        // 연출이 중간에 갈리면 콜라이더가 꺼진 채로 남는다. 꺼져 있으면
+        // 크기를 아무리 맞춰도 물리 판정에 안 잡히고, 보스는 유령이 된다.
+        if (col.enabled == false)
+        {
+            col.enabled = true;
+            Debug.Log("[Directing] 보스 콜라이더가 꺼져 있어 켰다");
+        }
+
         float playerY = Managers.Game.Player.transform.position.y;
         Bounds b = col.bounds;
         if (playerY >= b.min.y && playerY <= b.max.y)
