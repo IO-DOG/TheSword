@@ -1,0 +1,1079 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
+using UnityEngine;
+
+/// <summary>
+/// 게임을 처음부터 끝까지 스스로 플레이한다. 녹화(PlaythroughRecorder)가 이 봇을 띄운다.
+///
+/// 사람이 하는 것과 같은 경로로만 논다 — 상태를 직접 조작하지 않고
+/// PlayerController.Moving() 한 번으로 이동/전투/아이템/문/계단이 전부 일어난다.
+/// 조작 불가능한 지점(대사 넘김, 예/아니오 팝업)만 그 UI 의 공개 진입점을 부른다.
+///
+/// 층 안에서의 우선순위 = 열쇠 -> 몬스터(약한 놈부터) -> 포션(피 낮을 때) -> 장비/레버 -> 계단.
+/// "문을 열 열쇠가 없으면 그 문은 벽" 규칙이 방 순서를, 따라서 전투 순서를 강제한다.
+/// </summary>
+public class AutoPlayer : MonoBehaviour
+{
+    public static AutoPlayer Instance;
+
+    public bool Finished;
+    public bool Failed;
+    public string Result = "";
+
+    /// <summary>한 칸 이동 간격. 이동 트윈(1/speed)보다 넉넉해야 입력이 씹히지 않는다.</summary>
+    public float StepInterval = 0.16f;
+    /// <summary>이 시간 동안 아무 진전이 없으면 실패로 본다.</summary>
+    public float StallTimeout = 90f;
+
+    /// <summary>지금 무엇을 향해 가는 중인지 (로그용).</summary>
+    public string Plan { get { return _plan; } }
+    /// <summary>HP 가 이 비율 아래일 때만 포션을 줍는다 (가득 찬 상태에서 낭비 방지).</summary>
+    public float PotionHpRatio = 0.9f;
+    /// <summary>이 아래로 떨어지면 몬스터보다 포션이 먼저다 (밸런스 시뮬레이터와 같은 값).</summary>
+    public float PotionEmergency = 0.7f;
+    /// <summary>이 아래인데 이 층에 포션이 없으면 아래층으로 되돌아가 찾는다.</summary>
+    public float RetreatHpRatio = 0.4f;
+    /// <summary>싸우고 나서 이만큼은 남아야 덤빈다. 안 되면 다른 놈을 먼저 잡는다.</summary>
+    public float SafeHpAfterFight = 0.35f;
+    /// <summary>이만큼 채우기 전에는 위층/보스방으로 올라가지 않는다.
+    /// 위층은 언제나 더 세다 — 반피로 올라가면 그 층에서 죽는다.</summary>
+    public float AscendHpRatio = 0.75f;
+
+    /// <summary>전투 배속. 게임 안에 있는 옵션 그대로다(1/2/4). 녹화 길이를 줄인다.</summary>
+    public int GameSpeed = 4;
+    /// <summary>이동 배속. 걷는 시간이 영상의 절반을 먹어서 줄인다.</summary>
+    public float MoveSpeedScale = 3f;
+
+    const float Tile = 0.32f;
+
+    // 목표 우선순위 (작을수록 먼저)
+    const int PriHeal = 0;      // 위급 — 포션 먼저
+    const int PriKey = 1;
+    const int PriMonster = 2;
+    const int PriTopUp = 3;     // 여유 있을 때 포션
+    const int PriRune = 4;
+    const int PriEquip = 5;
+    const int PriLever = 6;
+    const int PriTrigger = 7;   // 보스문 / 상호작용 / 보스 등장 트리거
+    const int PriStairs = 8;
+    const int PriExplore = 9;   // 목표가 없을 때 안 밟아 본 칸으로
+
+    float _nextStep;
+    float _baseMove;
+    float _nextUi;
+    float _lastProgress;
+    string _progressKey = "";
+    int _maxFloor = 1;
+
+    // BFS 재사용 버퍼
+    readonly Dictionary<Vector2Int, Vector2Int> _from = new Dictionary<Vector2Int, Vector2Int>();
+    readonly Dictionary<Vector2Int, int> _dist = new Dictionary<Vector2Int, int>();
+    readonly Queue<Vector2Int> _queue = new Queue<Vector2Int>();
+    readonly Dictionary<Vector2Int, bool> _solid = new Dictionary<Vector2Int, bool>();
+    readonly HashSet<Vector2Int> _visited = new HashSet<Vector2Int>();
+    /// <summary>밀어도 아무 일이 없던 목표들. 같은 자리에서 헛돌지 않게 기억해 둔다.</summary>
+    readonly HashSet<Vector2Int> _deadTargets = new HashSet<Vector2Int>();
+    Vector2Int _lastBump;
+    int _sameBump;
+    readonly List<KeyValuePair<Transform, float>> _risky = new List<KeyValuePair<Transform, float>>();
+    float _nextPush;
+    int _pushDir;
+    int _visitedStage = -1;
+    int _retreats;
+    int _totalRetreats;
+    readonly Dictionary<string, float> _uiLog = new Dictionary<string, float>();
+    /// <summary>연출이 이 시간(초) 넘게 안 끝나면 잠금을 강제로 푼다.</summary>
+    public float LockTimeout = 15f;
+    float _lockedSince;
+    int _guideStuck;
+    bool _wasBattle;
+    float _hpBefore;
+
+    GameObject _map;
+    float _probeY;
+    string _plan = "";
+
+    // 길에 두면 "지나가다" 건드려 버리는 것들. 전부 막고, 목표일 때만 옆에서 부딪힌다.
+    // 이걸 안 막으면 포션을 향해 가다 몬스터를 밟아 원치 않는 전투가 나고,
+    // 계단을 밟아 층을 건너뛰기도 한다 — 1층에서 죽던 진짜 원인이었다.
+    static readonly int BlockMask = (1 << (int)Define.Layer.Wall)
+                                  | (1 << (int)Define.Layer.InteractObjects)
+                                  | (1 << (int)Define.Layer.BossDoor)
+                                  | (1 << (int)Define.Layer.Monster)
+                                  | (1 << (int)Define.Layer.CItem)
+                                  | (1 << (int)Define.Layer.EItem)
+                                  | (1 << (int)Define.Layer.Portal)
+                                  | (1 << (int)Define.Layer.Lever);
+    static readonly int DoorMask = 1 << (int)Define.Layer.Door;
+    static readonly int WallMask = 1 << (int)Define.Layer.Wall;
+    static readonly int PushMask = (1 << (int)Define.Layer.InteractObjects)
+                                 | (1 << (int)Define.Layer.BossDoor);
+
+    static readonly Vector2Int[] Dirs =
+    {
+        new Vector2Int(0, 1), new Vector2Int(0, -1),
+        new Vector2Int(-1, 0), new Vector2Int(1, 0),
+    };
+
+    public static AutoPlayer Spawn()
+    {
+        GameObject go = new GameObject("@AutoPlayer");
+        DontDestroyOnLoad(go);
+        Instance = go.AddComponent<AutoPlayer>();
+        return Instance;
+    }
+
+    void Start()
+    {
+        _lastProgress = Time.unscaledTime;
+        StartCoroutine(CoRun());
+    }
+
+    IEnumerator CoRun()
+    {
+        while (Finished == false && Failed == false)
+        {
+            yield return null;
+
+            if (Managers.Scene != null && Managers.Scene.CurrentScene != null
+                && Managers.Scene.CurrentScene.SceneType == Define.Scene.EndingScene)
+            {
+                Succeed($"엔딩 도달 (최고 {_maxFloor}층)");
+                yield break;
+            }
+
+            TickBattleLog();
+            TickUI();
+            TickPlay();
+            TickStall();
+        }
+    }
+
+    /// <summary>전투 하나하나를 기록한다. 어디서 왜 죽는지는 이 로그로만 알 수 있다.</summary>
+    void TickBattleLog()
+    {
+        GameManager g = Managers.Game;
+        if (g == null || g.PlayerData == null)
+            return;
+
+        if (g.OnBattle == _wasBattle)
+            return;
+        _wasBattle = g.OnBattle;
+
+        if (g.OnBattle)
+        {
+            _hpBefore = g.PlayerData.CurHP;
+            int id = g.MonsterData.Count > 0 ? g.MonsterData[0].id : -1;
+            float atk = g.MonsterData.Count > 0 ? g.MonsterData[0].Attack : 0f;
+            float hp = g.MonsterData.Count > 0 ? g.MonsterData[0].MaxHP : 0f;
+            Debug.Log($"[AutoPlayer] 전투 {g.PlayerData.CurStageid + 1}층 몬스터{id} " +
+                      $"(HP {hp:0} ATK {atk:0.#}) vs Lv{g.PlayerData.Level} " +
+                      $"HP {_hpBefore:0}/{g.PlayerData.MaxHP:0}");
+        }
+        else
+        {
+            Debug.Log($"[AutoPlayer] 전투 끝 HP {_hpBefore:0} -> {g.PlayerData.CurHP:0}");
+        }
+    }
+
+    #region UI — 사람이 눌러야만 넘어가는 지점들
+    void TickUI()
+    {
+        if (Time.unscaledTime < _nextUi)
+            return;
+        _nextUi = Time.unscaledTime + 0.35f;
+
+        if (Handle<UI_GameOverPopup>(p => Fail("플레이어 사망")))
+            return;
+        // 대사: 한 장씩 넘긴다. 마지막 장에서 스스로 닫는다.
+        if (Handle<UI_ConversationPopup>(p => p.ShowNextScript()))
+            return;
+        // 예/아니오는 "예"로 간다 — 보스방/마검 계약 둘 다 진행 쪽이 예다.
+        // 버튼을 "누르는" 대신 그 버튼이 부르는 메서드를 직접 호출한다.
+        // 팝업이 스택 위에 묻히면 ClosePopupUI 가 조용히 실패해서(UIManager 제한)
+        // 마우스 클릭만으로는 영영 못 닫고 OnInputLock 이 걸린 채로 멈춘다.
+        if (Handle<UI_MagicalSwordCheckPopup>(p => Call(p, "YesClick")))
+            return;
+        if (Handle<UI_BossRoomCheckPopup>(p => Call(p, "YesClick")))
+            return;
+        if (Handle<UI_GuidePopup>(ClearGuide))
+            return;
+        if (Handle<UI_SelectLanguagePopup>(p => ClickFirst(p.gameObject)))
+            return;
+        if (Handle<UI_IntroScene>(p => Call(p, "NextScene")))
+            return;
+        if (Handle<UI_TitleScene>(TitleStart))
+            return;
+    }
+
+    bool Handle<T>(Action<T> action) where T : MonoBehaviour
+    {
+        T target = FindFirstObjectByType<T>();
+        if (target == null || target.isActiveAndEnabled == false)
+            return false;
+
+        // 어떤 UI 가 흐름을 잡고 있는지 보이게 남긴다 (같은 UI 는 2초에 한 번만).
+        float now = Time.time;
+        float last;
+        if (_uiLog.TryGetValue(typeof(T).Name, out last) == false || now - last > 2f)
+        {
+            _uiLog[typeof(T).Name] = now;
+            Debug.Log($"[AutoPlayer] UI 처리: {typeof(T).Name}");
+        }
+
+        try
+        {
+            action(target);
+        }
+        catch (Exception e)
+        {
+            // 여기서 true 를 돌려주면 뒤에 있는 팝업이 영영 처리되지 않는다.
+            Debug.LogWarning($"[AutoPlayer] {typeof(T).Name}: {e.Message}");
+            return false;
+        }
+        Progress($"ui:{typeof(T).Name}");
+        return true;
+    }
+
+    /// <summary>타이틀은 프리로드가 끝나야 시작할 수 있다. 끝나면 새 게임으로 들어간다.</summary>
+    void TitleStart(UI_TitleScene title)
+    {
+        if (Field<bool>(title, "isPreload") == false)
+            return;
+        if (Field<bool>(title, "_lock"))
+            return;
+        title.StartCoroutine((IEnumerator)Method(title, "CoOnClickNewGameButton").Invoke(title, null));
+    }
+
+    static void Click(GameObject root, string buttonName)
+    {
+        foreach (UI_EventHandler h in root.GetComponentsInChildren<UI_EventHandler>(true))
+        {
+            if (h.name != buttonName || h.OnClickHandler == null)
+                continue;
+            h.gameObject.SetActive(true);
+            h.OnClickHandler.Invoke();
+            return;
+        }
+    }
+
+    static void ClickFirst(GameObject root)
+    {
+        foreach (UI_EventHandler h in root.GetComponentsInChildren<UI_EventHandler>(true))
+        {
+            if (h.OnClickHandler == null)
+                continue;
+            h.OnClickHandler.Invoke();
+            return;
+        }
+    }
+
+    /// <summary>
+    /// 가이드 팝업. YesClick 이 OnInputLock 을 풀고 닫으려 하지만,
+    /// 그 위에 다른 팝업이 쌓여 있으면 닫히지 않는다. 그때는 스택을 한 장씩 걷어낸다.
+    /// </summary>
+    void ClearGuide(UI_GuidePopup guide)
+    {
+        Call(guide, "YesClick");
+        Managers.Game.OnInputLock = false;
+
+        if (++_guideStuck > 3)
+        {
+            _guideStuck = 0;
+            Managers.UI.ClosePopupUI();
+        }
+    }
+    #endregion
+
+    #region 플레이
+    void TickPlay()
+    {
+        if (Managers.Game == null || Managers.Game.Player == null)
+            return;
+        if (Managers.Scene == null || Managers.Scene.CurrentScene == null
+            || Managers.Scene.CurrentScene.SceneType != Define.Scene.GameScene)
+            return;
+
+        GameManager g = Managers.Game;
+        ApplySpeed(g);
+
+        // 전투/연출/페이드 중에는 손대지 않는다. 전투는 알아서 끝난다.
+        if (g.OnBattle || g.OnConversation || g.OnLever || g.OnFade
+            || g.OnDirect || g.OnInteract || g.OnInputLock)
+        {
+            Progress($"busy:{g.PlayerData.CurStageid}");
+            WatchLocks(g);
+            return;
+        }
+        _lockedSince = 0f;
+
+        if (Time.time < _nextStep)
+            return;
+        _nextStep = Time.time + StepInterval;
+
+        GameObject map;
+        if (g.Maps == null || g.Maps.TryGetValue(g.PlayerData.CurStageid, out map) == false || map == null)
+            return;
+
+        _maxFloor = Mathf.Max(_maxFloor, g.PlayerData.CurStageid + 1);
+
+        // 층이 바뀌면 발자국을 지운다 (탐색 폴백용).
+        if (_visitedStage != g.PlayerData.CurStageid)
+        {
+            // 층이 올라갔으면 후퇴 횟수를 리셋한다 (내려온 거면 그대로 센다).
+            if (g.PlayerData.CurStageid > _visitedStage)
+                _retreats = 0;
+            else
+            {
+                _retreats++;
+                _totalRetreats++;
+            }
+            _visitedStage = g.PlayerData.CurStageid;
+            _visited.Clear();
+            _deadTargets.Clear();
+        }
+        _visited.Add(Cell(map, g.Player.transform.position));
+
+        Define.MoveDir dir = PlanStep(map, g);
+        if (dir == Define.MoveDir.None)
+            return;
+
+        g.Player.Moving(dir, false);
+        Progress($"{g.PlayerData.CurStageid}:{Cell(map, g.Player.transform.position)}");
+    }
+
+    /// <summary>
+    /// 연출이 끝나지 않는 경우가 있다. 손수 만든 컷신들이 GameObject.Find 로 짜여 있어서
+    /// 하나라도 못 찾으면 코루틴이 중간에 죽고 OnDirect 가 켜진 채로 남는다 —
+    /// 그러면 사람이 플레이해도 그 자리에서 영영 못 움직인다.
+    /// 봇은 일정 시간 뒤 잠금을 직접 풀고 진행한다 (원인은 따로 보고한다).
+    /// </summary>
+    void WatchLocks(GameManager g)
+    {
+        if (g.OnBattle)
+        {
+            _lockedSince = 0f;   // 전투는 스스로 끝난다
+            return;
+        }
+
+        if (_lockedSince == 0f)
+        {
+            _lockedSince = Time.unscaledTime;
+            return;
+        }
+        // 연출 중에는 timeScale 이 0 이 되기도 한다. 실시간으로 재야 한다.
+        if (Time.unscaledTime - _lockedSince < LockTimeout)
+            return;
+
+        Debug.LogWarning($"[AutoPlayer] 연출/입력 잠금이 {LockTimeout:0}초 넘게 안 풀려 강제 해제 " +
+                         $"({g.PlayerData.CurStageid + 1}층)");
+        g.OnDirect = false;
+        g.OnConversation = false;
+        g.OnInteract = false;
+        g.OnInputLock = false;
+        g.OnFade = false;
+        g.OnLever = false;
+        Managers.UI.ClosePopupUI();
+        Managers.UI.ShowGameSceneUI();
+        _lockedSince = 0f;
+
+        // 같은 자리를 또 밀면 죽은 연출이 다시 켜진다. 그 목표는 버린다.
+        _deadTargets.Add(_lastBump);
+
+        FinishBrokenContract(g);
+    }
+
+    /// <summary>
+    /// 마검 계약 연출(DirectingManager.ContractSword)이 중간에 죽으면
+    /// 마검(+10 ATK)을 못 받은 채로 진행이 막힌다 — 그 층 이후를 이길 수가 없다.
+    /// 연출이 하려던 결과만 손으로 마무리한다. 게임 쪽 버그의 우회다.
+    /// </summary>
+    void FinishBrokenContract(GameManager g)
+    {
+        if (g.PlayerData.IsContractedSword)
+            return;
+        if (g.PlayerData.CurSword != Define.EQUIP_SOWRD_FIRST)
+            return;
+
+        Data.StageInfoData info;
+        if (Managers.Data.StageInfoDic.TryGetValue(g.PlayerData.CurStageid, out info) == false
+            || info.DungeonID != "00_002")
+            return;
+
+        Debug.LogWarning("[AutoPlayer] 마검 계약 연출이 끊겨 결과만 직접 적용한다 (게임 버그 우회)");
+
+        g.PlayerData.IsContractedSword = true;
+        List<int> swords = g.PlayerData.Inventory[(int)Define.Types.Sword];
+        if (swords.Contains(Define.EQUIP_SOWRD_FIRST + 1) == false)
+            swords.Add(Define.EQUIP_SOWRD_FIRST + 1);
+        g.SwapEquip(Define.EQUIP_SOWRD_FIRST + 1);
+        g.Player._isEquiptWeapon = true;
+        g.Player._isEquiptShield = true;
+
+        // 계약 뒤에 열리는 열쇠도 연출이 켜 주는 것이라 같이 켠다.
+        GameObject map;
+        if (g.Maps != null && g.Maps.TryGetValue(g.PlayerData.CurStageid, out map) && map != null)
+        {
+            Transform key = map.transform.Find("Items/CItem13");
+            if (key != null)
+            {
+                key.gameObject.SetActive(true);
+                SpriteRenderer sr = key.GetComponent<SpriteRenderer>();
+                if (sr != null) sr.enabled = true;
+                BoxCollider col = key.GetComponent<BoxCollider>();
+                if (col != null) col.enabled = true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 배속. 100층을 실시간으로 돌면 3시간이 넘어서 영상으로 쓸 수가 없다.
+    /// 전투는 게임에 원래 있는 GameSpeed 옵션을, 이동은 MoveSpeed 를 올려서 줄인다.
+    /// 데미지 계산과 전투 결과는 배속과 무관하다 — 쿨타임이 차는 속도만 바뀐다.
+    /// </summary>
+    void ApplySpeed(GameManager g)
+    {
+        if (g.GameSpeed != GameSpeed)
+            g.GameSpeed = GameSpeed;
+
+        float move = g.PlayerData.MoveSpeed;
+        if (move <= 0f)
+            return;
+
+        if (_baseMove <= 0f)
+            _baseMove = move;
+
+        float want = _baseMove * MoveSpeedScale;
+        if (Mathf.Abs(move - want) > 0.001f)
+        {
+            g.PlayerData.MoveSpeed = want;
+            g.Player.Speed = 0f;   // 세터가 MoveSpeed 를 다시 읽어 _duration 을 고친다
+        }
+
+        // 트윈이 끝나기 전에 다음 입력을 넣으면 씹힌다. 이동 시간보다 살짝 길게.
+        StepInterval = 1f / (want * 5f) + 0.012f;
+    }
+
+    /// <summary>지금 층에서 다음에 밟을 한 칸. 목표가 없으면 None.</summary>
+    Define.MoveDir PlanStep(GameObject map, GameManager g)
+    {
+        _map = map;
+        _probeY = g.Player.transform.position.y + Tile * 0.5f;
+        _solid.Clear();
+
+        Vector2Int start = Cell(map, g.Player.transform.position);
+        Flood(start);
+
+        Vector2Int best = start;
+        Vector2Int bump = start;
+        bool hasBump = false;
+        long bestScore = long.MaxValue;
+
+        _risky.Clear();
+        // 이 층을 다 비웠는가. 계단도, 남은 포션 처리도 이 값으로 갈린다.
+        bool cleared = map.GetComponentsInChildren<MonsterController>(false).Length == 0;
+        float hpRatio = g.PlayerData.MaxHP > 0 ? g.PlayerData.CurHP / g.PlayerData.MaxHP : 1f;
+        bool potionHere = false;
+        foreach (ConsumableItem ci in map.GetComponentsInChildren<ConsumableItem>(false))
+        {
+            if (ci.id < ConsumableItem.NUM_OF_KEYS || ci.id >= ConsumableItem.NUM_OF_POTIONS)
+                continue;
+            // 있어도 못 가면 없는 것이다. 아이템 칸 자체는 길에서 막아 뒀으니 옆칸으로 본다.
+            if (Reachable(Cell(map, ci.transform.position)) == false)
+                continue;
+            potionHere = true;
+            break;
+        }
+        // 피가 바닥인데 이 층에 마실 게 없으면 아래층으로 되돌아간다.
+        // 아래층은 이미 비웠으니 남은 포션을 줍고 다시 올라온다 — 사람이 하는 그대로다.
+        // 1층에는 내려갈 곳이 없다. 그런데도 아래 계단 오브젝트가 남아 있어서
+        // 그걸 밀다 멈췄다 — 게다가 SearchPortal 이 실패하면 엔딩 연출이 튄다.
+        bool hasDown = g.PlayerData.CurStageid > 0;
+        if (hasDown)
+        {
+            hasDown = false;
+            foreach (PortalController p in map.GetComponentsInChildren<PortalController>(false))
+            {
+                if (p._portalType == PortalController.Type.DownStairs)
+                {
+                    hasDown = true;
+                    break;
+                }
+            }
+        }
+        // 내려갈 곳도 없고 마실 것도 없으면 물러설 데가 없다. 그때는 그냥 싸운다.
+        bool retreat = hpRatio < RetreatHpRatio && potionHere == false
+                       && hasDown && _retreats < 3 && _totalRetreats < 8;
+
+        // 채울 방법이 남아 있는데 피가 모자라면 위로 가지 않는다.
+        // 지금 당장 할 수 있는 회복이 있을 때만 참는다. 없으면 그냥 올라간다.
+        bool canHeal = potionHere || retreat;
+        bool holdBack = hpRatio < AscendHpRatio && canHeal;
+
+        // 우선순위가 낮은 숫자일수록 먼저. 같은 우선순위면 (가중치, 거리) 순.
+        foreach (ConsumableItem item in map.GetComponentsInChildren<ConsumableItem>(false))
+        {
+            if (item.id < ConsumableItem.NUM_OF_KEYS)
+            {
+                Bump(map, item.transform, PriKey, 0, ref best, ref bump, ref hasBump, ref bestScore);
+                continue;
+            }
+            if (item.id >= ConsumableItem.NUM_OF_POTIONS)
+            {
+                Bump(map, item.transform, PriRune, 0, ref best, ref bump, ref hasBump, ref bestScore);
+                continue;
+            }
+
+            // 포션. 가득 찼는데 줍는 건 낭비고, 위험할 때는 몬스터보다 먼저다.
+            // 단, 층을 다 비웠으면 남은 건 전부 마시고 올라간다 —
+            // 포션은 층에 배치된 예산이라 다음 층으로 가져갈 수 없고,
+            // 반피로 올라가면 그 층에서 죽는다.
+            if (hpRatio > PotionHpRatio && cleared == false)
+                continue;
+            if (hpRatio >= 0.999f)
+                continue;
+            Data.ConsumableItemData cd;
+            long heal = Managers.Data.ConsumableItemDic.TryGetValue(item.id, out cd)
+                ? (long)cd.Heal : 0;
+            // 작은 포션부터 쓴다 — 큰 것을 넘치게 마시면 뒤가 없다.
+            Bump(map, item.transform, hpRatio < PotionEmergency ? PriHeal : PriTopUp,
+                 heal, ref best, ref bump, ref hasBump, ref bestScore);
+        }
+
+        foreach (MonsterController mc in map.GetComponentsInChildren<MonsterController>(false))
+        {
+            // 약한 놈부터. 순서를 잘못 잡으면 레벨이 못 따라와서 죽는 게 이 게임의 설계다.
+            // 기준은 밸런스 시뮬레이터(simulate_handmade)와 같은 MaxHP * 공격력.
+            if (retreat)
+                continue;   // 이 몸으로 더 싸우면 죽는다
+
+            Data.MonsterData md;
+            if (Managers.Data.MonsterDic.TryGetValue(mc.id, out md) == false)
+                continue;   // 모르는 놈에게는 덤비지 않는다
+
+            // 붙기 전에 결과를 계산한다. 지거나 위험하면 지금은 건너뛴다 —
+            // 다른 몬스터를 먼저 잡아 레벨을 올리면 그때는 이긴다. 그게 이 게임의 순서다.
+            float loss = PredictLoss(md, g);
+            if (loss == float.MaxValue)
+                continue;   // 지는 싸움
+
+            if (g.PlayerData.CurHP - loss < g.PlayerData.MaxHP * SafeHpAfterFight)
+            {
+                // 이기긴 하는데 위험하다. 다른 수가 하나도 없을 때만 쓴다.
+                _risky.Add(new KeyValuePair<Transform, float>(mc.transform, loss));
+                continue;
+            }
+
+            Bump(map, mc.transform, PriMonster, (long)Mathf.Max(0f, loss),
+                 ref best, ref bump, ref hasBump, ref bestScore);
+        }
+
+        foreach (Equip eq in map.GetComponentsInChildren<Equip>(false))
+            Bump(map, eq.transform, PriEquip, 0, ref best, ref bump, ref hasBump, ref bestScore);
+
+        foreach (Lever lever in map.GetComponentsInChildren<Lever>(false))
+            Bump(map, lever.transform, PriLever, 0, ref best, ref bump, ref hasBump, ref bestScore);
+
+        foreach (PortalController portal in map.GetComponentsInChildren<PortalController>(false))
+        {
+            if (portal._portalType == PortalController.Type.DownStairs)
+            {
+                if (retreat && hasDown)
+                    Bump(map, portal.transform, PriHeal, 0, ref best, ref bump, ref hasBump, ref bestScore);
+                continue;
+            }
+            if (portal._portalType == PortalController.Type.UpStairs && cleared == false)
+                continue;
+            if (holdBack)
+                continue;   // 몸부터 추스르고 올라간다
+            Bump(map, portal.transform, PriStairs, 0, ref best, ref bump, ref hasBump, ref bestScore);
+        }
+
+        // 보스방 문 / 상호작용 오브젝트는 "아래에서" 밀어야 반응한다.
+        // 보스 등장 트리거는 그냥 밟으면 된다 (킹슬라임이 이렇게 나온다).
+        foreach (Collider col in map.GetComponentsInChildren<Collider>(false))
+        {
+            int layer = col.gameObject.layer;
+            Vector2Int c = Cell(map, col.transform.position);
+
+            // 상호작용 오브젝트는 막지 않는다 — 3층의 마검 계약(+10 ATK)이 여기 있고,
+            // 그걸 못 받으면 킹슬라임을 이길 수가 없다. 피가 적다고 미룰 대상이 아니다.
+            if (layer == (int)Define.Layer.BossDoor || layer == (int)Define.Layer.InteractObjects)
+                BumpCell(c, PriTrigger, 1, ref best, ref bump, ref hasBump, ref bestScore);
+            else if (layer == (int)Define.Layer.BossEventTrigger)
+                ConsiderCell(c, PriTrigger, 0, ref best, ref bump, ref hasBump, ref bestScore);
+        }
+
+        // 아무 목표도 없으면 아직 안 밟아 본 칸으로 간다.
+        // 층에 따라서는 밟아야만 열리는 곳이 있다 (3층 킹슬라임).
+        if (bestScore == long.MaxValue)
+        {
+            foreach (KeyValuePair<Vector2Int, int> pair in _dist)
+            {
+                if (pair.Value == 0 || _visited.Contains(pair.Key))
+                    continue;
+                ConsiderCell(pair.Key, PriExplore, 0, ref best, ref bump, ref hasBump, ref bestScore);
+            }
+        }
+
+        // 안전한 상대가 없었다면, 이기기는 하는 싸움 중 제일 싼 것을 고른다.
+        if (bestScore == long.MaxValue)
+        {
+            foreach (KeyValuePair<Transform, float> risky in _risky)
+                Bump(map, risky.Key, PriMonster, (long)Mathf.Max(0f, risky.Value),
+                     ref best, ref bump, ref hasBump, ref bestScore);
+        }
+
+        // 이 층에서 할 일이 다 떨어졌고 올라갈 데도 없으면 아래층으로 되돌아간다.
+        // 3층(00_002)은 위층 계단이 아예 없고, 진행 경로는 2층의 보스문이다.
+        if (bestScore == long.MaxValue && hasDown)
+        {
+            foreach (PortalController portal in map.GetComponentsInChildren<PortalController>(false))
+            {
+                if (portal._portalType != PortalController.Type.DownStairs)
+                    continue;
+                Bump(map, portal.transform, PriStairs, 0, ref best, ref bump, ref hasBump, ref bestScore);
+            }
+        }
+
+        // 갈 곳이 다 떨어졌다면 옆의 무언가를 밀어 본다.
+        // 보스문/기둥/레버처럼 "부딪혀야" 열리는 것들이 있고, 방향도 가려 받는다.
+        if (bestScore == long.MaxValue)
+        {
+            Define.MoveDir push = TryPush(start);
+            if (push != Define.MoveDir.None)
+                return push;
+
+            _plan = $"목표없음 flood={_dist.Count} 방문={_visited.Count}";
+            return Define.MoveDir.None;
+        }
+
+        // 목표 옆에 이미 서 있으면 그대로 부딪힌다.
+        Define.MoveDir dir = (hasBump && best == start)
+            ? ToDir(bump - start)
+            : FirstStep(start, best);
+
+        if (hasBump && best == start)
+        {
+            if (bump == _lastBump && ++_sameBump > 12)
+            {
+                _deadTargets.Add(bump);   // 열두 번 밀어도 안 되면 그건 안 되는 것이다
+                _sameBump = 0;
+            }
+            _lastBump = bump;
+        }
+        else
+        {
+            _sameBump = 0;
+        }
+        _plan = $"{start}->{best}{(hasBump ? $"+{bump}" : "")} d={_dist[best]} {dir} flood={_dist.Count}";
+        return dir;
+    }
+
+    /// <summary>
+    /// 이웃 칸에 부딪혀 본다. 밀어야 반응하는 것들(보스문, 기둥, 레버, 보스 등장 트리거)이
+    /// 있고, 어느 쪽에서 미느냐도 따진다 — 그래서 네 방향을 돌아가며 시도한다.
+    /// </summary>
+    Define.MoveDir TryPush(Vector2Int start)
+    {
+        if (Time.time < _nextPush)
+            return Define.MoveDir.None;
+
+        for (int i = 0; i < Dirs.Length; i++)
+        {
+            _pushDir = (_pushDir + 1) % Dirs.Length;
+            Vector2Int c = start + Dirs[_pushDir];
+            if (Physics.CheckBox(CellCenter(c), ProbeHalf, Quaternion.identity,
+                                 PushMask, QueryTriggerInteraction.Collide) == false)
+                continue;
+
+            _nextPush = Time.time + 1.5f;
+            _plan = $"{start} -> {c} 밀기";
+            return ToDir(Dirs[_pushDir]);
+        }
+        return Define.MoveDir.None;
+    }
+
+    static Define.MoveDir ToDir(Vector2Int step)
+    {
+        if (step.y > 0) return Define.MoveDir.Up;
+        if (step.y < 0) return Define.MoveDir.Down;
+        if (step.x < 0) return Define.MoveDir.Left;
+        if (step.x > 0) return Define.MoveDir.Right;
+        return Define.MoveDir.None;
+    }
+
+    #region 전투 예측
+    /// <summary>
+    /// 이 몬스터와 붙으면 HP 를 얼마나 잃는지 미리 계산한다.
+    /// CreatureClass.DefaultTrait + UI_BaseCard/UI_MonsterCard 의 쿨타임 규칙을 그대로 옮긴 것이라
+    /// 실제 결과와 거의 같다. 못 이기면 float.MaxValue.
+    ///
+    /// 이 게임의 설계가 "순서"인 이상, 이길 수 있는 싸움을 고르는 것이 곧 플레이다.
+    /// </summary>
+    float PredictLoss(Data.MonsterData md, GameManager g)
+    {
+        Data.StageInfoData info;
+        float atkScale = 1f, defScale = 1f;
+        if (Managers.Data.StageInfoDic.TryGetValue(g.PlayerData.CurStageid, out info))
+        {
+            atkScale = info.ATK;
+            defScale = info.DEF;
+        }
+
+        float pHp = g.PlayerData.CurHP;
+        float pAtk = g.PlayerData.Attack;
+        float pDef = g.PlayerData.Defence;
+        float pCd = 3f / Mathf.Max(0.01f, g.PlayerData.AttackSpeed);
+        float pDefCd = 3f / Mathf.Max(0.01f, g.PlayerData.DefenceSpeed);
+        int pCrit = Mathf.RoundToInt(g.PlayerData.Critical);
+        float pCritAtk = g.PlayerData.CriticalAttack;
+
+        float mHp = md.MaxHP;
+        float mAtk = md.Attack * atkScale;
+        float mDef = md.Defence * defScale;
+        float mCd = 3f / Mathf.Max(0.01f, md.AttackSpeed);
+        float mDefCd = 3f / Mathf.Max(0.01f, md.DefenceSpeed);
+        int mCrit = Mathf.RoundToInt(md.Critical);
+        float mCritAtk = md.CriticalAttack;
+
+        float pT = 0f, mT = 0f, pDefT = 0f, mDefT = 0f;
+        bool pShield = false, mShield = false;
+        int pCount = 0, mCount = 0;
+        float start = pHp;
+
+        const float dt = 0.02f;
+        for (float t = 0f; t < 600f; t += dt)
+        {
+            if (pT >= pCd)
+            {
+                pT = 0f;
+                pCount++;
+                bool crit = pCrit > 0 && pCount >= pCrit;
+                if (crit) pCount = 0;
+                mHp -= Damage(pAtk, pCritAtk, crit, mDef, mShield);
+                if (mShield) { mShield = false; mDefT = 0f; }
+                if (mHp <= 0f)
+                    return start - pHp;
+            }
+            if (mT >= mCd)
+            {
+                mT = 0f;
+                mCount++;
+                bool crit = mCrit > 0 && mCount >= mCrit;
+                if (crit) mCount = 0;
+                pHp -= Damage(mAtk, mCritAtk, crit, pDef, pShield);
+                if (pShield) { pShield = false; pDefT = 0f; }
+                if (pHp <= 0f)
+                    return float.MaxValue;   // 진다
+            }
+
+            if (pDefT >= pDefCd) pShield = true;
+            if (mDefT >= mDefCd) mShield = true;
+
+            pT += dt; mT += dt; pDefT += dt; mDefT += dt;
+        }
+        return float.MaxValue;   // 안 끝나는 싸움도 하면 안 된다
+    }
+
+    static int Damage(float atk, float critAtk, bool crit, float def, bool shield)
+    {
+        float num = (int)Mathf.Max(0f, atk);
+        if (crit) num = num * (critAtk / 100f);
+        int damage = Mathf.RoundToInt(num);
+        damage -= (int)def;
+        damage = (int)Mathf.Max(1, damage);
+        if (shield && crit) damage = (int)(damage * 0.25f);
+        else if (shield) damage = 1;
+        return damage;
+    }
+    #endregion
+
+    /// <summary>목표 칸 옆에 설 수 있는가.</summary>
+    bool Reachable(Vector2Int cell)
+    {
+        for (int i = 0; i < Dirs.Length; i++)
+            if (_dist.ContainsKey(cell + Dirs[i]))
+                return true;
+        return false;
+    }
+
+    /// <summary>목표 옆에 서서 부딪히는 자리를 찾는다.</summary>
+    void Bump(GameObject map, Transform t, int priority, long weight,
+              ref Vector2Int best, ref Vector2Int bump, ref bool hasBump, ref long bestScore)
+    {
+        BumpCell(Cell(map, t.position), priority, weight, ref best, ref bump, ref hasBump, ref bestScore);
+    }
+
+    void BumpCell(Vector2Int cell, int priority, long weight,
+                  ref Vector2Int best, ref Vector2Int bump, ref bool hasBump, ref long bestScore)
+    {
+        // 벽 너머에 있는 목표는 아무리 밀어도 안 열린다.
+        // (1층의 도달 불가 장비를 향해 벽을 계속 밀며 멈춰 있었다.)
+        if (_deadTargets.Contains(cell))
+            return;
+        if (Physics.CheckBox(CellCenter(cell), ProbeHalf, Quaternion.identity,
+                             WallMask, QueryTriggerInteraction.Collide))
+            return;
+
+        for (int i = 0; i < Dirs.Length; i++)
+        {
+            Vector2Int side = cell + Dirs[i];
+            int d;
+            if (_dist.TryGetValue(side, out d) == false)
+                continue;
+
+            long score = Score(priority, weight, d);
+            if (score >= bestScore)
+                continue;
+            bestScore = score;
+            best = side;
+            bump = cell;
+            hasBump = true;
+        }
+    }
+
+    /// <summary>그 칸 자체로 걸어 들어가는 목표 (탐색, 보스 등장 트리거).</summary>
+    void ConsiderCell(Vector2Int cell, int priority, long weight,
+                      ref Vector2Int best, ref Vector2Int bump, ref bool hasBump, ref long bestScore)
+    {
+        if (_deadTargets.Contains(cell))
+            return;   // 밟아도 아무 일이 없던(또는 연출이 죽은) 자리
+
+        int d;
+        if (_dist.TryGetValue(cell, out d) == false)
+            return;
+        if (d == 0)
+            return;   // 서 있는 칸을 목표로 잡으면 낼 수 있는 수가 없다
+
+        long score = Score(priority, weight, d);
+        if (score >= bestScore)
+            return;
+        bestScore = score;
+        best = cell;
+        bump = cell;
+        hasBump = false;
+    }
+
+    /// <summary>(우선순위, 가중치, 거리) 사전순 하나의 수로.</summary>
+    static long Score(int priority, long weight, int d)
+    {
+        return (long)priority * 1000000000000L
+             + Math.Min(weight, 999999999L) * 1000L
+             + Math.Min(d, 999);
+    }
+
+    /// <summary>목표까지의 경로를 되짚어 첫 한 칸의 방향을 낸다.</summary>
+    Define.MoveDir FirstStep(Vector2Int start, Vector2Int goal)
+    {
+        Vector2Int cur = goal;
+        while (true)
+        {
+            Vector2Int prev;
+            if (_from.TryGetValue(cur, out prev) == false)
+                return Define.MoveDir.None;   // 시작점이거나 경로가 끊겼다
+            if (prev == start)
+                break;
+            cur = prev;
+        }
+
+        Vector2Int step = cur - start;
+        if (step.y > 0) return Define.MoveDir.Up;
+        if (step.y < 0) return Define.MoveDir.Down;
+        if (step.x < 0) return Define.MoveDir.Left;
+        if (step.x > 0) return Define.MoveDir.Right;
+        return Define.MoveDir.None;
+    }
+
+    void Flood(Vector2Int start)
+    {
+        _from.Clear();
+        _dist.Clear();
+        _queue.Clear();
+
+        _dist[start] = 0;
+        _queue.Enqueue(start);
+
+        while (_queue.Count > 0)
+        {
+            Vector2Int cur = _queue.Dequeue();
+            int d = _dist[cur];
+            if (d > 4000)
+                continue;
+
+            for (int i = 0; i < Dirs.Length; i++)
+            {
+                Vector2Int next = cur + Dirs[i];
+                if (_dist.ContainsKey(next) || Solid(next))
+                    continue;
+                _dist[next] = d + 1;
+                _from[next] = cur;
+                _queue.Enqueue(next);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 그 칸을 지나갈 수 없는가. 콜라이더를 직접 재 본다 —
+    /// 손수 만든 층은 벽 하나가 여러 칸을 덮기도 해서 오브젝트 위치로 세면 구멍이 난다.
+    ///
+    /// 열쇠가 없는 문도 벽으로 친다. 이 규칙이 방 순서 = 전투 순서를 강제한다.
+    /// </summary>
+    bool Solid(Vector2Int cell)
+    {
+        bool cached;
+        if (_solid.TryGetValue(cell, out cached))
+            return cached;
+
+        Vector3 world = CellCenter(cell);
+        Vector3 half = ProbeHalf;
+
+        bool blocked = Physics.CheckBox(world, half, Quaternion.identity, BlockMask,
+                                        QueryTriggerInteraction.Collide);
+
+        if (blocked == false && Physics.CheckBox(world, half, Quaternion.identity, DoorMask,
+                                                 QueryTriggerInteraction.Collide))
+        {
+            blocked = HasKeyFor(world, half) == false;
+        }
+
+        _solid[cell] = blocked;
+        return blocked;
+    }
+
+    static readonly Collider[] _hits = new Collider[8];
+
+    bool HasKeyFor(Vector3 world, Vector3 half)
+    {
+        List<int> keys = Managers.Game.KeyInventory != null ? Managers.Game.KeyInventory._keys : null;
+        if (keys == null)
+            return false;
+
+        int n = Physics.OverlapBoxNonAlloc(world, half, _hits, Quaternion.identity, DoorMask,
+                                           QueryTriggerInteraction.Collide);
+        for (int i = 0; i < n; i++)
+        {
+            Door door = _hits[i].GetComponentInChildren<Door>();
+            if (door == null)
+                door = _hits[i].GetComponentInParent<Door>();
+            if (door == null)
+                continue;
+            int idx = door._keyIndex;
+            return idx >= 0 && idx < keys.Count && keys[idx] > 0;
+        }
+        return false;
+    }
+
+    Vector3 CellCenter(Vector2Int cell)
+    {
+        Vector3 world = _map.transform.TransformPoint(new Vector3(cell.x * Tile, 0f, cell.y * Tile));
+        world.y = _probeY;
+        return world;
+    }
+
+    static readonly Vector3 ProbeHalf = new Vector3(Tile * 0.3f, Tile * 0.3f, Tile * 0.3f);
+
+    static Vector2Int Cell(GameObject map, Vector3 world)
+    {
+        Vector3 local = map.transform.InverseTransformPoint(world);
+        return new Vector2Int(Mathf.RoundToInt(local.x / Tile), Mathf.RoundToInt(local.z / Tile));
+    }
+    #endregion
+
+    #region 진행 감시
+    void Progress(string key)
+    {
+        if (key == _progressKey)
+            return;
+        _progressKey = key;
+        _lastProgress = Time.unscaledTime;
+    }
+
+    void TickStall()
+    {
+        if (Time.unscaledTime - _lastProgress < StallTimeout)
+            return;
+
+        int stage = Managers.Game != null ? Managers.Game.PlayerData.CurStageid : -1;
+        Fail($"{stage + 1}층에서 {StallTimeout:0}초 동안 진행 없음\n" +
+             $"  state={_progressKey} plan={_plan}\n  {DumpMap()}");
+    }
+
+    /// <summary>막혔을 때 무엇이 남아 있고 어디까지 갈 수 있었는지.</summary>
+    string DumpMap()
+    {
+        GameObject map;
+        GameManager g = Managers.Game;
+        if (g == null || g.Maps == null
+            || g.Maps.TryGetValue(g.PlayerData.CurStageid, out map) == false || map == null)
+            return "맵 없음";
+
+        var sb = new System.Text.StringBuilder();
+        sb.Append($"player={Cell(map, g.Player.transform.position)} ");
+        sb.Append($"몬스터={map.GetComponentsInChildren<MonsterController>(false).Length} ");
+        sb.Append($"아이템={map.GetComponentsInChildren<ConsumableItem>(false).Length} ");
+        sb.Append($"문={map.GetComponentsInChildren<Door>(false).Length} ");
+        sb.Append($"열쇠=[{string.Join(",", g.KeyInventory._keys)}]");
+
+        // 막힌 곳 주변에 뭐가 있는지 — 대개 여기서 원인이 나온다.
+        Vector2Int at = Cell(map, g.Player.transform.position);
+        foreach (Vector2Int d in Dirs)
+        {
+            int n = Physics.OverlapBoxNonAlloc(CellCenter(at + d), ProbeHalf, _hits,
+                                               Quaternion.identity, ~0, QueryTriggerInteraction.Collide);
+            for (int i = 0; i < n; i++)
+                sb.Append($"\n    이웃{d} {_hits[i].name} layer={_hits[i].gameObject.layer}");
+        }
+
+        foreach (MonsterController mc in map.GetComponentsInChildren<MonsterController>(false))
+        {
+            Vector2Int c = Cell(map, mc.transform.position);
+            sb.Append($"\n    몬스터{mc.id} {c} 도달={Reachable(c)}");
+        }
+        foreach (PortalController p in map.GetComponentsInChildren<PortalController>(false))
+        {
+            Vector2Int c = Cell(map, p.transform.position);
+            sb.Append($"\n    포탈{p._portalType} {c} 도달={Reachable(c)}");
+        }
+        return sb.ToString();
+    }
+
+    void Succeed(string message)
+    {
+        Result = message;
+        Finished = true;
+        Debug.Log($"[AutoPlayer] 완주: {message}");
+    }
+
+    void Fail(string message)
+    {
+        Result = message;
+        Failed = true;
+        Debug.LogError($"[AutoPlayer] 실패: {message}");
+    }
+    #endregion
+
+    #region 리플렉션 (사람 입력으로만 열려 있는 진입점)
+    const BindingFlags Any = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+    static MethodInfo Method(object target, string name)
+    {
+        return target.GetType().GetMethod(name, Any);
+    }
+
+    static void Call(object target, string name)
+    {
+        MethodInfo m = Method(target, name);
+        if (m != null)
+            m.Invoke(target, null);
+    }
+
+    static T Field<T>(object target, string name)
+    {
+        FieldInfo f = target.GetType().GetField(name, Any);
+        return f == null ? default(T) : (T)f.GetValue(target);
+    }
+    #endregion
+}
