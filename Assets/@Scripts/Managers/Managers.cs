@@ -77,28 +77,40 @@ public class Managers : MonoBehaviour
     {
         int scriptType = (int)Managers.Game.ScriptType;
 
+        // 없는 문자열 하나 때문에 부르는 쪽이 통째로 죽으면 안 된다.
+        // 9층 이름(5008)이 없어서 층 이름 팝업이 터졌고, 그걸 부르던
+        // 포탈 워프 코루틴이 같이 죽어 다음 층으로 못 넘어갔다.
+        Data.ScriptData script;
+        if (Managers.Data.ScriptDic.TryGetValue(id, out script) == false || script == null)
+        {
+            Debug.LogWarning($"[Script] {id} 번 문자열이 없다");
+            return "";
+        }
+
         string ret = "";
         switch (scriptType)
         {
             case 0:
-                ret = Managers.Data.ScriptDic[id].ScriptEn;
+                ret = script.ScriptEn;
                 break;
             case 1:
-                ret = Managers.Data.ScriptDic[id].ScriptKr;
+                ret = script.ScriptKr;
                 break;
             case 2:
-                ret = Managers.Data.ScriptDic[id].ScriptEn;
+                ret = script.ScriptEn;
                 break;
             case 3:
-                ret = Managers.Data.ScriptDic[id].ScriptJp;
+                ret = script.ScriptJp;
                 break;
             case 4:
-                ret = Managers.Data.ScriptDic[id].ScriptCn;
+                ret = script.ScriptCn;
                 break;
             default:
-                ret = Managers.Data.ScriptDic[id].ScriptEn;
+                ret = script.ScriptEn;
                 break;
         }
+        if (ret == null)
+            ret = "";
 
         ret = ret.Replace("\\n", "\n");
         ret = ret.Replace("^", ",");

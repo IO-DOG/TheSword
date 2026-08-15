@@ -42,7 +42,12 @@ public class UI_StageNamePopup : UI_Popup
 
     public void SetStageName()
     {
-        GetText((int)Texts.StageNameText).text = Managers.GetString(Managers.Data.ScriptDic[(int)Define.STAGE_NAME + Managers.Game.PlayerData.CurStageid].id);
+        // 층 이름이 없어도 여기서 터지면 안 된다 — 이 팝업을 띄우는 쪽이
+        // 포탈 워프 코루틴이라, 같이 죽으면 다음 층으로 넘어가지 못한다.
+        int id = (int)Define.STAGE_NAME + Managers.Game.PlayerData.CurStageid;
+        TMP_Text text = GetText((int)Texts.StageNameText);
+        if (text != null)
+            text.text = Managers.GetString(id);
     }
 
     public IEnumerator HideStageNamePopup(float duration)
