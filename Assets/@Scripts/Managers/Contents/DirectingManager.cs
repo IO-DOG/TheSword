@@ -588,6 +588,20 @@ public class Events : MonoBehaviour
             Debug.Log("[Directing] 보스 콜라이더가 꺼져 있어 켰다");
         }
 
+        // 콜라이더가 스프라이트에 맞춰 붙어 있어서 제 칸을 벗어나 있다.
+        // 실측: 보스 칸은 (12,-17) 인데 콜라이더 중심은 z 로 1.4칸 북쪽,
+        // 높이는 6유닛(18칸)짜리 거대한 상자였다. 그래서 플레이어가 보스 칸을
+        // 그냥 통과했고 전투가 열리지 않았다.
+        // 다른 몬스터처럼 제 칸 한 칸만 차지하게 맞춘다.
+        Vector3 scale = boss.transform.lossyScale;
+        Vector3 before = col.bounds.center;
+        col.center = Vector3.zero;
+        col.size = new Vector3(
+            Define.TILE_SIZE / Mathf.Max(0.0001f, Mathf.Abs(scale.x)),
+            Define.TILE_SIZE / Mathf.Max(0.0001f, Mathf.Abs(scale.y)),
+            Define.TILE_SIZE / Mathf.Max(0.0001f, Mathf.Abs(scale.z)));
+        Debug.Log($"[Directing] 보스 콜라이더를 제 칸에 맞췄다 — 중심 {before} -> {col.bounds.center}");
+
         // 싸울 수 있는 몬스터는 예외 없이 바닥(y=0)에 선다. 킹슬라임만 등장 연출
         // 때문에 y=3 에 뜬 채로 남아서, 플레이어의 충돌 판정 높이에 아예 걸리지
         // 않는다. 같은 바닥으로 내린다.
