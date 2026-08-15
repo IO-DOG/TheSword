@@ -264,6 +264,13 @@ public class AutoPlayer : MonoBehaviour
             return;
         if (Handle<UI_SelectLanguagePopup>(p => ClickFirst(p.gameObject)))
             return;
+        // 게임 씬에 들어왔으면 타이틀/인트로는 이미 지난 화면이다.
+        // 그런데도 오브젝트가 남아 있을 때가 있고, 그걸 계속 누르면
+        // 씬 전환이 다시 걸려서 플레이어가 배치되기 전으로 되돌아갔다.
+        if (Managers.Scene != null && Managers.Scene.CurrentScene != null
+            && Managers.Scene.CurrentScene.SceneType == Define.Scene.GameScene)
+            return;
+
         if (Handle<UI_IntroScene>(p => Call(p, "NextScene")))
             return;
         if (Handle<UI_TitleScene>(TitleStart))
