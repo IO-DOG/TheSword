@@ -757,6 +757,17 @@ public class AutoPlayer : MonoBehaviour
                      ref best, ref bump, ref hasBump, ref bestScore);
         }
 
+        // 할 일이 다 떨어졌으면 남은 아이템을 줍는다. 길을 막고 있을 수 있다.
+        // 2층 보스 통로 (11,-8) 에 포션이 하나 놓여 있는데, 통로가 한 칸 폭이라
+        // 그게 길을 완전히 막는다. 피가 가득하면 포션은 목표에서 빠지므로
+        // 그 한 칸 때문에 보스방에 영영 못 들어갔다.
+        // 어차피 포션은 층에 배정된 예산이라 다음 층으로 못 가져간다.
+        if (bestScore == long.MaxValue)
+        {
+            foreach (ConsumableItem item in map.GetComponentsInChildren<ConsumableItem>(false))
+                Bump(map, item.transform, PriTopUp, 0, ref best, ref bump, ref hasBump, ref bestScore);
+        }
+
         // 이 층에서 할 일이 다 떨어졌고 올라갈 데도 없으면 아래층으로 되돌아간다.
         // 3층(00_002)은 위층 계단이 아예 없고, 진행 경로는 2층의 보스문이다.
         if (bestScore == long.MaxValue && hasDown)
