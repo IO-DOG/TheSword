@@ -92,6 +92,11 @@ public static class PlaythroughRecorder
 
         if (change == PlayModeStateChange.EnteredPlayMode)
         {
+            // 예외 스택이 로그 파일에 안 남는다. 직접 받아서 찍는다 —
+            // UI_GameScene.Init 이 어디서 끊기는지 이게 없으면 알 수가 없다.
+            Application.logMessageReceived -= OnLog;
+            Application.logMessageReceived += OnLog;
+
             AutoPlayer.Spawn();
             if (mode == "record")
                 StartRecording();
@@ -107,6 +112,14 @@ public static class PlaythroughRecorder
             EditorApplication.update -= Watch;
             Finish();
         }
+    }
+
+    static void OnLog(string condition, string stackTrace, LogType type)
+    {
+        if (type != LogType.Exception)
+            return;
+        // Log 타입으로만 다시 찍는다. Exception 으로 찍으면 이 핸들러가 다시 불린다.
+        Debug.Log($"[예외추적] {condition}\n{stackTrace}");
     }
 
     #region Recorder
