@@ -807,6 +807,21 @@ public class AutoPlayer : MonoBehaviour
                                                   QueryTriggerInteraction.Collide);
                 info.Append($" 몹{mc.id}@{c}={(Reachable(c) ? "닿음" : "막힘")}" +
                             $"/y{mc.transform.position.y:0.00}/콜라이더{(solidHere ? "있음" : "없음")}");
+
+                // 물리에 안 잡히는 몬스터는 콜라이더 상태를 그대로 펼쳐 본다.
+                // 보스가 여기 걸려서 전투가 안 열렸다.
+                if (solidHere == false)
+                {
+                    Collider[] cols = mc.GetComponentsInChildren<Collider>(true);
+                    info.Append($"[{mc.gameObject.name} 활성{mc.gameObject.activeInHierarchy} 콜{cols.Length}");
+                    for (int k = 0; k < cols.Length && k < 3; k++)
+                        info.Append($" ({cols[k].gameObject.name} L{cols[k].gameObject.layer}" +
+                                    $" {(cols[k].enabled ? "on" : "off")}" +
+                                    $" {(cols[k].isTrigger ? "trig" : "solid")}" +
+                                    $" y{cols[k].bounds.min.y:0.0}~{cols[k].bounds.max.y:0.0}" +
+                                    $" x{cols[k].bounds.center.x:0.0}z{cols[k].bounds.center.z:0.0})");
+                    info.Append($" 탐침{CellCenter(c).x:0.0}/{_probeY:0.00}/{CellCenter(c).z:0.0}]");
+                }
             }
             foreach (Door dr in map.GetComponentsInChildren<Door>(false))
                 info.Append($" 문key{dr._keyIndex}@{Cell(map, dr.transform.position)}");
