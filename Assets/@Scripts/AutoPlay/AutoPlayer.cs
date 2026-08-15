@@ -755,6 +755,11 @@ public class AutoPlayer : MonoBehaviour
                 Vector2Int c = Cell(map, ci.transform.position);
                 info.Append($" 아이템{ci.id}@{c}={(Reachable(c) ? "닿음" : "막힘")}");
             }
+            foreach (MonsterController mc in map.GetComponentsInChildren<MonsterController>(false))
+            {
+                Vector2Int c = Cell(map, mc.transform.position);
+                info.Append($" 몹{mc.id}@{c}={(Reachable(c) ? "닿음" : "막힘")}");
+            }
             foreach (Door dr in map.GetComponentsInChildren<Door>(false))
                 info.Append($" 문key{dr._keyIndex}@{Cell(map, dr.transform.position)}");
             foreach (Lever lv in map.GetComponentsInChildren<Lever>(true))
@@ -839,19 +844,23 @@ public class AutoPlayer : MonoBehaviour
             ? ToDir(bump - start)
             : FirstStep(start, best);
 
-        if (hasBump && best == start)
+        // 같은 목표를 계속 잡고 있는 동안만 센다.
+        // 예전에는 "지금 밀고 있지 않으면" 리셋해서, 한 칸 물러섰다 미는 것을
+        // 반복하면 접근 프레임마다 0 이 됐다 — 4층에서 (12,-17) 을 영원히 밀었다.
+        if (hasBump && bump == _lastBump)
         {
-            if (bump == _lastBump && ++_sameBump > 12)
+            if (best == start && ++_sameBump > 12)
             {
                 _deadTargets.Add(bump);   // 열두 번 밀어도 안 되면 그건 안 되는 것이다
                 _sameBump = 0;
             }
-            _lastBump = bump;
         }
         else
         {
             _sameBump = 0;
         }
+        if (hasBump)
+            _lastBump = bump;
         _plan = $"{start}->{best}{(hasBump ? $"+{bump}" : "")} d={_dist[best]} {dir} flood={_dist.Count}";
         return dir;
     }
