@@ -383,8 +383,8 @@ public class AutoPlayer : MonoBehaviour
             return;
         _nextStep = Time.time + StepInterval;
 
-        GameObject map;
-        if (g.Maps == null || g.Maps.TryGetValue(g.PlayerData.CurStageid, out map) == false || map == null)
+        GameObject map = ResolveMap(g);
+        if (map == null)
         {
             _plan = $"{g.PlayerData.CurStageid + 1}층 맵이 아직 없다";
             return;
@@ -974,6 +974,39 @@ public class AutoPlayer : MonoBehaviour
         return damage;
     }
     #endregion
+
+    /// <summary>
+    /// 지금 서 있는 맵을 찾는다.
+    ///
+    /// 보통은 CurStageid 의 맵이지만, 보스방으로 넘어간 직후에는 플레이어가
+    /// 그 맵이 아닌 다른 맵 위에 서 있다 (4층에서 (-614,-5) 가 나왔다).
+    /// 맵들은 서로 100 유닛 넘게 떨어져 놓이고 한 장은 7 유닛 남짓이라,
+    /// 가장 가까운 맵이 곧 지금 서 있는 맵이다.
+    /// </summary>
+    GameObject ResolveMap(GameManager g)
+    {
+        if (g.Maps == null)
+            return null;
+
+        GameObject byStage;
+        g.Maps.TryGetValue(g.PlayerData.CurStageid, out byStage);
+
+        Vector3 p = g.Player.transform.position;
+        GameObject best = null;
+        float bestDist = float.MaxValue;
+        foreach (KeyValuePair<int, GameObject> pair in g.Maps)
+        {
+            if (pair.Value == null)
+                continue;
+            float d = (pair.Value.transform.position - p).sqrMagnitude;
+            if (d < bestDist)
+            {
+                bestDist = d;
+                best = pair.Value;
+            }
+        }
+        return best != null ? best : byStage;
+    }
 
     /// <summary>이 층의 물건 중 하나라도 닿는가. 계단은 어느 층에나 있다.</summary>
     bool AnythingReachable(GameObject map)
