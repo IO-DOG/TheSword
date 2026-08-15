@@ -1,4 +1,4 @@
-﻿using Cinemachine;
+using Cinemachine;
 using DG.Tweening;
 using System;
 using System.Collections;
@@ -147,9 +147,24 @@ public class UI_GameScene : UI_Scene
         Refresh();
         Data.MyVector3 loadPos = Managers.Game.PlayerData.CurPosition;
 
-        //최초 실행 시 스폰 포인트 못 찾는 문제 예외 처리
+        // 새 게임은 CurPosition 이 (0, 1.5, 0) 이라 늘 스폰 포인트 쪽으로 온다.
+        // 그런데 SpawnPoints 는 GenerateMap 이 태그로 긁어 담는 것이라 비어 있을 때가 있고,
+        // 예전에는 여기서 IndexOutOfRange 가 나면서 Init 이 통째로 끊겼다 —
+        // 플레이어는 원점에 남고 튜토리얼 연출까지 전부 건너뛰어졌다.
+        // 실행마다 되기도 하고 안 되기도 한 것이 이것 때문이다.
         if (loadPos.X == 0 && loadPos.Z == 0)
-            Managers.Game.Player.SetPlayerPosition(Managers.Game.SpawnPoints[0].position);
+        {
+            if (Managers.Game.SpawnPoints != null && Managers.Game.SpawnPoints.Length > 0
+                && Managers.Game.SpawnPoints[0] != null)
+            {
+                Managers.Game.Player.SetPlayerPosition(Managers.Game.SpawnPoints[0].position);
+            }
+            else
+            {
+                Debug.LogError("[GameScene] 스폰 포인트가 아직 없다 — 생길 때까지 기다렸다 옮긴다");
+                StartCoroutine(CoPlaceAtSpawnWhenReady());
+            }
+        }
         else
         {
             Vector3 playerPos = new Vector3(loadPos.X, loadPos.Y, loadPos.Z);
@@ -381,6 +396,27 @@ public class UI_GameScene : UI_Scene
             Managers.UI.ShowPopupUI<UI_InvenPopup>();
         else
             Managers.UI.ClosePopupUI();
+    }
+
+    /// <summary>
+    /// 스폰 포인트는 GenerateMap 이 태그로 긁어 담는다. 아직 안 담겼으면
+    /// 담길 때까지 몇 초 기다렸다 옮긴다. 못 옮기면 플레이어가 던전 밖
+    /// 원점에 선 채로 게임이 시작되지 않는다.
+    /// </summary>
+    System.Collections.IEnumerator CoPlaceAtSpawnWhenReady()
+    {
+        for (int i = 0; i < 300; i++)
+        {
+            if (Managers.Game.SpawnPoints != null && Managers.Game.SpawnPoints.Length > 0
+                && Managers.Game.SpawnPoints[0] != null && Managers.Game.Player != null)
+            {
+                Managers.Game.Player.SetPlayerPosition(Managers.Game.SpawnPoints[0].position);
+                Debug.Log("[GameScene] 스폰 포인트가 생겨 플레이어를 옮겼다");
+                yield break;
+            }
+            yield return null;
+        }
+        Debug.LogError("[GameScene] 스폰 포인트를 끝내 못 찾았다");
     }
 
     public void OffUIInventory()
