@@ -517,14 +517,6 @@ public class AutoPlayer : MonoBehaviour
         Vector2Int start = Cell(map, g.Player.transform.position);
         Flood(start);
 
-        // 맵 밖으로 샜다면 아직 층이 자리를 못 잡은 것이다.
-        // 이 상태에서 세운 계획은 전부 엉뚱한 곳을 가리킨다 — 한 프레임 쉰다.
-        if (_floodOverflow)
-        {
-            _plan = $"맵 밖 {start} — 층이 자리 잡기를 기다린다";
-            return Define.MoveDir.None;
-        }
-
         Vector2Int best = start;
         Vector2Int bump = start;
         bool hasBump = false;
@@ -906,13 +898,13 @@ public class AutoPlayer : MonoBehaviour
     {
         if (_deadTargets.Contains(cell))
             return;
-        if (priority == PriTrigger && _firedTriggers.Contains(cell))
-            return;
 
         Vector2Int stand = cell + side;
         int d;
         if (_dist.TryGetValue(stand, out d) == false)
         {
+            // 길 트는 것부터는 이미 밀어 본 목표라도 한다.
+            // 설 자리가 막혀 있었다면 애초에 제대로 밀린 적이 없다는 뜻이다.
             // 서야 할 칸에 아이템이 놓여 있으면 길이 막힌 것으로 잡힌다.
             // 2층 보스문 아래 칸(11,-4)에 포션이 있어서 보스방에 영영 못 들어갔다.
             // 그럴 때는 그 아이템을 먼저 주워 길을 튼다.
@@ -921,6 +913,9 @@ public class AutoPlayer : MonoBehaviour
                 BumpCell(stand, priority, weight, ref best, ref bump, ref hasBump, ref bestScore);
             return;
         }
+
+        if (priority == PriTrigger && _firedTriggers.Contains(cell))
+            return;
 
         long score = Score(priority, weight, d);
         if (score >= bestScore)
@@ -1013,15 +1008,11 @@ public class AutoPlayer : MonoBehaviour
         return Define.MoveDir.None;
     }
 
-    /// <summary>한 층에서 걸어 다닐 수 있는 칸의 상한. 실제 층은 620칸 남짓이다.</summary>
-    const int MaxFlood = 4096;
-
-    /// <summary>이번 탐색이 맵 밖으로 샜는가.</summary>
-    bool _floodOverflow;
+    /// <summary>탐색 상자의 반지름. 층이 23x27 이라 32 면 어디서 재도 전부 들어온다.</summary>
+    const int FloodRadius = 32;
 
     void Flood(Vector2Int start)
     {
-        _floodOverflow = false;
         _from.Clear();
         _dist.Clear();
         _queue.Clear();
@@ -1031,24 +1022,21 @@ public class AutoPlayer : MonoBehaviour
 
         while (_queue.Count > 0)
         {
-            // 층 하나는 아무리 커도 23x27 남짓이다. 그보다 넓게 퍼졌다면
-            // 벽 밖으로 샌 것이다 — 맵이 아직 자리를 못 잡았거나 플레이어가
-            // 던전 밖에 있다. 예전에는 여기서 3200만 칸까지 퍼져서
-            // 한 프레임에 몇 분씩 잡아먹었다.
-            if (_dist.Count > MaxFlood)
-            {
-                _floodOverflow = true;
-                break;
-            }
-
             Vector2Int cur = _queue.Dequeue();
             int d = _dist[cur];
-            if (d > MaxFlood)
-                continue;
 
             for (int i = 0; i < Dirs.Length; i++)
             {
                 Vector2Int next = cur + Dirs[i];
+
+                // 층 하나는 아무리 커도 23x27 이다. 어느 칸에서 재도 반대쪽 끝까지
+                // Radius 안에 들어온다. 이 상자를 벽으로 쳐서 밖으로 새는 것을 막는다.
+                // 3층 (17,-9) 처럼 경계가 뚫린 자리가 있고, 예전에는 거기서
+                // 3200만 칸까지 퍼져 한 프레임이 몇 분씩 걸렸다.
+                if (Mathf.Abs(next.x - start.x) > FloodRadius
+                    || Mathf.Abs(next.y - start.y) > FloodRadius)
+                    continue;
+
                 if (_dist.ContainsKey(next) || Solid(next))
                     continue;
                 _dist[next] = d + 1;
