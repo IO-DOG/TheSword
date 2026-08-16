@@ -617,7 +617,8 @@ public class Events : MonoBehaviour
         Vector3 before = col.bounds.center;
         float groundY = Managers.Game.Player.transform.position.y;
 
-        col.size = new Vector3(Define.TILE_SIZE / sx, Define.TILE_SIZE / sy, Define.TILE_SIZE / sz);
+        // 높이는 넉넉히. 한 칸으로 맞추면 광선이 위끝에 걸쳐 빗나간다.
+        col.size = new Vector3(Define.TILE_SIZE / sx, Define.TILE_SIZE * 16f / sy, Define.TILE_SIZE / sz);
         col.center = new Vector3(0f, (groundY - boss.transform.position.y) / sy, 0f);
 
         Debug.Log($"[Directing] 보스 콜라이더를 제 칸/바닥높이({groundY:0.00})에 맞췄다 " +

@@ -159,8 +159,14 @@ public class AutoPlayer : MonoBehaviour
         {
             yield return null;
 
-            if (Managers.Scene != null && Managers.Scene.CurrentScene != null
-                && Managers.Scene.CurrentScene.SceneType == Define.Scene.EndingScene)
+            // 엔딩은 유니티 씬 이름으로도 확인한다. 게임 쪽 CurrentScene 은
+            // 엔딩 씬이 스스로 Init 을 돌리기 전까지 이전 값을 들고 있어서,
+            // 100층을 끝내고도 완주로 잡히지 않고 워치독이 먼저 돌았다.
+            bool endingByGame = Managers.Scene != null && Managers.Scene.CurrentScene != null
+                                && Managers.Scene.CurrentScene.SceneType == Define.Scene.EndingScene;
+            bool endingByUnity = UnityEngine.SceneManagement.SceneManager
+                                 .GetActiveScene().name.Contains("Ending");
+            if (endingByGame || endingByUnity)
             {
                 Succeed($"엔딩 도달 (최고 {_maxFloor}층)");
                 yield break;
@@ -595,7 +601,10 @@ public class AutoPlayer : MonoBehaviour
         // 봇이 한 방향으로 끝없이 걸어 나갔다 (한 번은 80000칸을 갔다).
         if (InsidePlayArea(g.Player.transform.position) == false)
         {
-            // 층이 아직 다 조립되기 전에 잰 범위일 수도 있다. 다음 프레임에 다시 잰다.
+            // 층이 아직 다 조립되기 전에 잰 범위일 수 있다. 캐시까지 버리고 다시 잰다.
+            // 예전에는 맵별 캐시가 그대로 남아, 한 번 작게 잡히면 그 층에서는
+            // 영영 "던전 밖" 이 되어 10분을 기다렸다 (22층).
+            _wallBounds.Remove(map);
             _hasBounds = false;
             _waitingForGame = true;
             _plan = "던전 밖 — 자리 잡기를 기다린다";
@@ -698,6 +707,30 @@ public class AutoPlayer : MonoBehaviour
                  heal, ref best, ref bump, ref hasBump, ref bestScore);
         }
 
+        // 위층 계단이 있는가. 보스 층은 보스를 잡아야 열리므로 여기서 갈린다.
+        bool hasUp = false;
+        foreach (PortalController portal in map.GetComponentsInChildren<PortalController>(false))
+        {
+            if (portal._portalType == PortalController.Type.UpStairs)
+            {
+                hasUp = true;
+                break;
+            }
+        }
+
+        // 보스 층(위층 계단이 잠긴 층)에서는 포기 목록을 들고 있지 않는다.
+        // 보스를 한 번 접었다가는 그 층에서 나갈 길이 아예 사라진다 —
+        // 20층에서 보스를 "닿음/피해6" 으로 이길 수 있는데도 접어 둔 채
+        // 탐색만 반복했다. 다른 길이 없는 층에서는 늘 다시 본다.
+        if (hasUp == false && _deadTargets.Count > 0)
+        {
+            Debug.Log($"[AutoPlayer] 보스 층이라 포기 목록 {_deadTargets.Count}개를 지운다");
+            _deadTargets.Clear();
+            _sameBump = 0;
+        }
+
+        // 콜라이더가 제 주변을 다 덮어 옆에 설 자리조차 없는 상대가 있는가.
+        bool unreachableMonster = false;
         foreach (MonsterController mc in map.GetComponentsInChildren<MonsterController>(false))
         {
             // 약한 놈부터. 순서를 잘못 잡으면 레벨이 못 따라와서 죽는 게 이 게임의 설계다.
@@ -715,15 +748,19 @@ public class AutoPlayer : MonoBehaviour
             if (loss == float.MaxValue)
                 continue;   // 지는 싸움
 
-            if (g.PlayerData.CurHP - loss < g.PlayerData.MaxHP * SafeHpAfterFight)
+            // 위층 계단이 잠긴 보스 층에서는 미룰 데가 없다. 이 싸움이 곧 길이다.
+            if (g.PlayerData.CurHP - loss < g.PlayerData.MaxHP * SafeHpAfterFight && hasUp)
             {
                 // 이기긴 하는데 위험하다. 다른 수가 하나도 없을 때만 쓴다.
                 _risky.Add(new KeyValuePair<Transform, float>(mc.transform, loss));
                 continue;
             }
 
-            Bump(map, mc.transform, PriMonster, (long)Mathf.Max(0f, loss),
-                 ref best, ref bump, ref hasBump, ref bestScore);
+            long beforeScore = bestScore;
+            BumpWide(map, mc.transform, PriMonster, (long)Mathf.Max(0f, loss),
+                     ref best, ref bump, ref hasBump, ref bestScore);
+            if (bestScore == beforeScore && Reachable(Cell(map, mc.transform.position)) == false)
+                unreachableMonster = true;
         }
 
         foreach (Equip eq in map.GetComponentsInChildren<Equip>(false))
@@ -812,8 +849,18 @@ public class AutoPlayer : MonoBehaviour
                 bool solidHere = Physics.CheckBox(CellCenter(c), ProbeHalf, Quaternion.identity,
                                                   1 << (int)Define.Layer.Monster,
                                                   QueryTriggerInteraction.Collide);
+                // 전투 예측도 같이 찍는다. "진다"고 나오면 봇은 그 상대를 아예
+                // 목표로 잡지 않는데, 그게 보스면 층이 통째로 막힌다.
+                Data.MonsterData md;
+                string fight = Managers.Data.MonsterDic.TryGetValue(mc.id, out md)
+                    ? (PredictLoss(md, g) == float.MaxValue
+                        ? "짐"
+                        : $"피해{PredictLoss(md, g):0}")
+                    : "표없음";
+
                 info.Append($" 몹{mc.id}@{c}={(Reachable(c) ? "닿음" : "막힘")}" +
-                            $"/y{mc.transform.position.y:0.00}/콜라이더{(solidHere ? "있음" : "없음")}");
+                            $"/y{mc.transform.position.y:0.00}/콜라이더{(solidHere ? "있음" : "없음")}" +
+                            $"/{fight}");
 
                 // 물리에 안 잡히는 몬스터는 콜라이더 상태를 그대로 펼쳐 본다.
                 // 보스가 여기 걸려서 전투가 안 열렸다.
@@ -871,8 +918,18 @@ public class AutoPlayer : MonoBehaviour
         if (bestScore == long.MaxValue)
         {
             foreach (KeyValuePair<Transform, float> risky in _risky)
-                Bump(map, risky.Key, PriMonster, (long)Mathf.Max(0f, risky.Value),
-                     ref best, ref bump, ref hasBump, ref bestScore);
+                BumpWide(map, risky.Key, PriMonster, (long)Mathf.Max(0f, risky.Value),
+                         ref best, ref bump, ref hasBump, ref bestScore);
+        }
+
+        // 위층 계단이 잠겨 있고(보스를 잡아야 열린다) 그 보스에게 다가갈 자리가
+        // 없다면, 이 층에서 할 수 있는 일은 보스에게 가는 것뿐이다.
+        // 몬스터 칸을 밟을 수 있다고 치고 길을 뚫는다 — 밟으면 싸움이 시작된다.
+        if (unreachableMonster && hasUp == false)
+        {
+            Define.MoveDir toBoss = StepThroughItems(start);
+            if (toBoss != Define.MoveDir.None)
+                return toBoss;
         }
 
         // 아무 목표도 없으면 아직 안 밟아 본 칸으로 간다.
@@ -891,20 +948,6 @@ public class AutoPlayer : MonoBehaviour
         // 탐색보다 먼저 두면 올라오자마자 되돌아 내려가서 두 층을 오간다
         // (9층과 10층 사이를 2582번 오갔다).
         // 3층(00_002)은 위층 계단이 아예 없어서 결국 여기로 내려간다.
-        // 단, 위층 계단이 있는 층에서는 내려가지 않는다.
-        // 열쇠는 층 공용이라 아래층을 다시 돌면 이 층에서 주운 열쇠를 거기 문에
-        // 써 버린다 — 9층에서 초록 열쇠를 그렇게 잃고 도착 방(27칸)에 갇혔다.
-        // 생성된 층은 그 층에서 나오는 열쇠만으로 끝까지 갈 수 있게 만들어져 있다.
-        bool hasUp = false;
-        foreach (PortalController portal in map.GetComponentsInChildren<PortalController>(false))
-        {
-            if (portal._portalType == PortalController.Type.UpStairs)
-            {
-                hasUp = true;
-                break;
-            }
-        }
-
         if (bestScore == long.MaxValue && hasDown && hasUp == false)
         {
             foreach (PortalController portal in map.GetComponentsInChildren<PortalController>(false))
@@ -924,6 +967,24 @@ public class AutoPlayer : MonoBehaviour
             Define.MoveDir through = StepThroughItems(start);
             if (through != Define.MoveDir.None)
                 return through;
+
+            // 그래도 없으면 닿는 계단을 탄다. 층을 다 비우지 않았어도 상관없다 —
+            // 여기까지 왔다는 건 이 구역에서 할 수 있는 게 없다는 뜻이고,
+            // 실제로 29층에서 도착 주머니(24칸)에 갇힌 채 출구가 계단뿐이었다.
+            // 아래 계단도 뺀 것 없이 전부 본다. 갇힌 자리에서는 그게 유일한
+            // 출구일 수 있다 — 29층 도착 주머니의 출구가 아래 계단 하나뿐이었다.
+            foreach (PortalController portal in map.GetComponentsInChildren<PortalController>(false))
+                Bump(map, portal.transform, PriStairs, 0, ref best, ref bump, ref hasBump, ref bestScore);
+
+            if (bestScore != long.MaxValue)
+            {
+                Define.MoveDir toStairs = (hasBump && best == start)
+                    ? ToDir(bump - start)
+                    : FirstStep(start, best);
+                _plan = $"[{map.name}] 갇혀서 계단을 탄다 {best}+{bump} {toStairs}";
+                if (toStairs != Define.MoveDir.None)
+                    return toStairs;
+            }
 
             Define.MoveDir push = TryPush(start);
             if (push != Define.MoveDir.None)
@@ -967,9 +1028,20 @@ public class AutoPlayer : MonoBehaviour
         {
             if (best == start && ++_sameBump > 12)
             {
-                _deadTargets.Add(bump);   // 열두 번 밀어도 안 되면 그건 안 되는 것이다
                 _sameBump = 0;
-                Debug.Log($"[AutoPlayer] {bump} 을 열두 번 밀어도 반응이 없어 접는다");
+
+                // 몬스터라면 접지 않는다. 접는 순간 그 층에서 나갈 길이 사라진다.
+                // 밀어도 반응이 없는 건 콜라이더가 어긋나 광선에 안 걸리기
+                // 때문인데(20층 챕터 보스), 그건 게임 쪽 결함이라 따로 보고한다.
+                // 여기서는 게임과 같은 진입점으로 전투를 연다.
+                if (ForceFight(bump))
+                    Debug.LogWarning($"[AutoPlayer] {bump} 의 상대가 밀어도 반응하지 않아 " +
+                                     $"직접 전투를 열었다 — 콜라이더가 충돌 광선에 안 걸린다(게임 결함)");
+                else
+                {
+                    _deadTargets.Add(bump);   // 열두 번 밀어도 안 되면 그건 안 되는 것이다
+                    Debug.Log($"[AutoPlayer] {bump} 을 열두 번 밀어도 반응이 없어 접는다");
+                }
             }
         }
         else
@@ -1120,38 +1192,26 @@ public class AutoPlayer : MonoBehaviour
         GameObject byStage;
         g.Maps.TryGetValue(g.PlayerData.CurStageid, out byStage);
 
+        // 게임이 "지금 몇 층인가" 로 쓰는 대응을 먼저 믿는다. 위치만으로 고르면
+        // 맵이 겹칠 때 엉뚱한 층을 잡는다 (29층에서 어느 격자와도 안 맞는 좌표).
         Vector3 p = g.Player.transform.position;
-
-        // 어느 맵의 벽 안에 서 있는지로 정한다. 위치가 가깝다는 것만으로는
-        // 틀린다 — 11층에서 엉뚱한 맵을 잡아 걸을 수 있는 칸이 27개뿐이었고,
-        // 문 좌표가 그 층 격자에 있지도 않은 자리로 찍혔다.
-        // 벽 콜라이더가 하나라도 멀리 떨어져 있으면 경계 상자가 부풀어서
-        // 여러 맵이 동시에 플레이어를 "포함"한다. 11층에서 두 맵을 매 프레임
-        // 번갈아 잡으며 (21,-10)/flood=27 과 (2,-3)/flood=111 을 오갔다.
-        // 포함하는 것 중에서는 중심이 가장 가까운 맵이 진짜 서 있는 맵이다.
         Bounds b;
-        GameObject inside = null;
-        float insideDist = float.MaxValue;
+        if (byStage != null && TryWallBounds(byStage, out b) && InsideXZ(b, p))
+            return byStage;
+
+        // 그 맵이 플레이어를 품지 않는 순간(워프 직후 등)에는 실제로 품는 맵을 쓴다.
         foreach (KeyValuePair<int, GameObject> pair in g.Maps)
         {
             if (pair.Value == null)
                 continue;
-            if (TryWallBounds(pair.Value, out b) == false || InsideXZ(b, p) == false)
-                continue;
-
-            float d = (b.center - p).sqrMagnitude;
-            if (ReferenceEquals(pair.Value, byStage))
-                d *= 0.25f;   // 같은 값이면 지금 층의 맵을 택한다
-            if (d < insideDist)
-            {
-                insideDist = d;
-                inside = pair.Value;
-            }
+            if (TryWallBounds(pair.Value, out b) && InsideXZ(b, p))
+                return pair.Value;
         }
-        if (inside != null)
-            return inside;
 
-        // 벽을 아직 못 잰 순간(층이 조립되는 중)에는 가장 가까운 맵으로 둔다.
+        if (byStage != null)
+            return byStage;
+
+        // 아직 이 층의 맵이 없다면 그나마 가까운 것을 쓴다.
         GameObject best = null;
         float bestDist = float.MaxValue;
         foreach (KeyValuePair<int, GameObject> pair in g.Maps)
@@ -1165,7 +1225,7 @@ public class AutoPlayer : MonoBehaviour
                 best = pair.Value;
             }
         }
-        return best != null ? best : byStage;
+        return best;
     }
 
     /// <summary>이 층의 물건 중 하나라도 닿는가. 계단은 어느 층에나 있다.</summary>
@@ -1197,6 +1257,56 @@ public class AutoPlayer : MonoBehaviour
               ref Vector2Int best, ref Vector2Int bump, ref bool hasBump, ref long bestScore)
     {
         BumpCell(Cell(map, t.position), priority, weight, ref best, ref bump, ref hasBump, ref bestScore);
+    }
+
+    /// <summary>
+    /// 콜라이더가 여러 칸을 덮는 상대용. 덮은 칸을 전부 후보로 놓고 옆에 설
+    /// 자리를 찾는다. 칸 하나만 보면 보스가 제 콜라이더로 이웃 칸을 다 막고
+    /// 있어서 다가갈 자리를 못 찾는다 — 20층 챕터 보스가 그래서 "막힘" 이었다.
+    /// 어느 칸이든 밟아 들어가면 그 자리에서 싸움이 시작된다.
+    /// </summary>
+    void BumpWide(GameObject map, Transform t, int priority, long weight,
+                  ref Vector2Int best, ref Vector2Int bump, ref bool hasBump, ref long bestScore)
+    {
+        Vector2Int home = Cell(map, t.position);
+
+        Collider col = t.GetComponentInChildren<Collider>();
+        if (col == null)
+        {
+            BumpCell(home, priority, weight, ref best, ref bump, ref hasBump, ref bestScore);
+            return;
+        }
+
+        Bounds b = col.bounds;
+        Vector2Int lo = Cell(map, new Vector3(b.min.x, t.position.y, b.min.z));
+        Vector2Int hi = Cell(map, new Vector3(b.max.x, t.position.y, b.max.z));
+
+        int x0 = Mathf.Max(Mathf.Min(lo.x, hi.x), home.x - 3);
+        int x1 = Mathf.Min(Mathf.Max(lo.x, hi.x), home.x + 3);
+        int y0 = Mathf.Max(Mathf.Min(lo.y, hi.y), home.y - 3);
+        int y1 = Mathf.Min(Mathf.Max(lo.y, hi.y), home.y + 3);
+
+        // 실제로 몬스터 콜라이더가 놓인 칸만 노린다.
+        // transform 위치는 스프라이트에 맞춰 어긋나 있어서, 그 칸이 정작
+        // 비어 있는 경우가 있다 — 20층 보스 옆에서 빈 칸을 노리며 좌우로만
+        // 오갔다. 밟아 들어갈 수 있는 자리는 콜라이더가 있는 칸이다.
+        bool found = false;
+        for (int x = x0; x <= x1; x++)
+        {
+            for (int y = y0; y <= y1; y++)
+            {
+                Vector2Int c = new Vector2Int(x, y);
+                if (Physics.CheckBox(CellCenter(c), ProbeHalf, Quaternion.identity,
+                                     1 << (int)Define.Layer.Monster,
+                                     QueryTriggerInteraction.Collide) == false)
+                    continue;
+                found = true;
+                BumpCell(c, priority, weight, ref best, ref bump, ref hasBump, ref bestScore);
+            }
+        }
+
+        if (found == false)
+            BumpCell(home, priority, weight, ref best, ref bump, ref hasBump, ref bestScore);
     }
 
     /// <summary>정해진 방향에서만 밀어야 하는 목표 (보스문, 기둥 등).</summary>
@@ -1517,6 +1627,34 @@ public class AutoPlayer : MonoBehaviour
         Define.MoveDir dir = FirstStep(start, target);
         _plan = $"길 막은 것(아이템/몬스터) 넘어가기 {start}->{target} d={bestDist} {dir}";
         return dir;
+    }
+
+    /// <summary>
+    /// 그 칸의 몬스터와 전투를 연다. 사람이 부딪혔을 때 게임이 부르는 것과
+    /// 같은 함수다. 밀어도 반응이 없을 때의 마지막 수단으로만 쓴다.
+    /// </summary>
+    bool ForceFight(Vector2Int cell)
+    {
+        if (Managers.Game.OnBattle)
+            return false;
+
+        int n = Physics.OverlapBoxNonAlloc(CellCenter(cell), ProbeHalf, _hits,
+                                           Quaternion.identity, ~0,
+                                           QueryTriggerInteraction.Collide);
+        for (int i = 0; i < n; i++)
+        {
+            MonsterController mc = _hits[i].GetComponent<MonsterController>();
+            if (mc == null)
+                mc = _hits[i].GetComponentInParent<MonsterController>();
+            if (mc == null)
+                mc = _hits[i].GetComponentInChildren<MonsterController>();
+            if (mc == null)
+                continue;
+
+            mc.SetMonster();
+            return true;
+        }
+        return false;
     }
 
     /// <summary>걸을 수 있는 구역의 바로 바깥 칸들이 무엇에 막혀 있는지 적는다.</summary>

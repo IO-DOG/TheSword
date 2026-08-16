@@ -1,4 +1,4 @@
-﻿using Cinemachine;
+using Cinemachine;
 using Data;
 using System;
 using System.Collections;
@@ -41,7 +41,20 @@ public class PortalController : MonoBehaviour
         if (_portalType == Type.UpStairs)
         {
             PortalController tartgetPortal = SearchPortal(_mapId + 1, Type.DownStairs);
-            if (tartgetPortal == null)
+
+            // 다음 층 자체가 없으면 그때가 진짜 끝이다.
+            int nextStage = Managers.Game.PlayerData.CurStageid + 1;
+            if (Managers.Data.StageInfoDic.ContainsKey(nextStage) == false)
+            {
+                Managers.Directing.Events.CoStartEndingScene();
+                yield break;
+            }
+
+            // 챕터가 바뀌는 자리에서는 다음 챕터 맵이 아직 없어 포탈을 못 찾는다.
+            // 그때는 아래에서 GenerateMap 으로 새로 만들고 스폰 지점으로 간다.
+            bool chapterEdge =
+                nextStage > Managers.Game.GetChapterCount(Managers.Game.PlayerData.CurStageid).Value;
+            if (tartgetPortal == null && chapterEdge == false)
                 yield break;
 
             bool ch = true;
@@ -117,8 +130,11 @@ public class PortalController : MonoBehaviour
             }
         }
 
-        Debug.Log("포탈 없음");
-        Managers.Directing.Events.CoStartEndingScene();
+        // 챕터 경계에서는 다음 챕터의 맵이 아직 없어서 못 찾는 게 정상이다.
+        // 예전에는 여기서 엔딩을 띄워, 20층 보스를 잡고 계단을 밟으면
+        // 21층으로 가는 대신 게임이 끝나 버렸다.
+        // 진짜 끝인지 아닌지는 부르는 쪽이 판단한다.
+        Debug.LogWarning($"[포탈] {targetmapId} 층의 {targetType} 를 못 찾았다");
         return null;
     }
 

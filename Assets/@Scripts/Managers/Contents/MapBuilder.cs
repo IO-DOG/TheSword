@@ -140,6 +140,7 @@ public static class MapBuilder
                             MonsterController mc = Bind<MonsterController>(go);
                             mc.id = obj.Id;
                             mc._monsterIndex_forActive = obj.Count;
+                            FitColliderToCell(go);
                         }
                         break;
                     }
@@ -339,6 +340,32 @@ public static class MapBuilder
         Vector2 native = sprite.bounds.size;
         if (native.x > 0.0001f && native.y > 0.0001f)
             bg.transform.localScale = new Vector3(width / native.x, height / native.y, 1f);
+    }
+
+    /// <summary>
+    /// 보스 콜라이더를 제 칸 하나에 맞춘다.
+    ///
+    /// 보스는 스프라이트가 커서 콜라이더도 제 칸을 벗어나 여러 칸에 걸치고,
+    /// 중심마저 어긋나 있다. 그러면 플레이어가 제 키높이로 쏘는 얇은 충돌
+    /// 광선이 보스를 스치지 못해서, 바로 옆에서 밀어도 전투가 열리지 않는다.
+    /// 킹슬라임이 같은 이유로 안 잡혔고, 챕터 보스도 마찬가지였다.
+    /// </summary>
+    static void FitColliderToCell(GameObject go)
+    {
+        BoxCollider col = go.GetComponentInChildren<BoxCollider>();
+        if (col == null)
+            return;
+
+        // 가로/세로는 제 칸 하나. 높이는 넉넉히 준다.
+        // 플레이어의 충돌 광선은 정확히 키높이(TILE/2)에서 나가는데, 높이도
+        // 한 칸으로 맞추면 콜라이더 위끝이 딱 그 높이라 광선이 경계에 걸쳐
+        // 빗나간다 — 20층 보스를 바로 옆에서 밀어도 "광선 빈손" 이었다.
+        Vector3 scale = col.transform.lossyScale;
+        col.center = Vector3.zero;
+        col.size = new Vector3(
+            Define.TILE_SIZE / Mathf.Max(0.0001f, Mathf.Abs(scale.x)),
+            Define.TILE_SIZE * 16f / Mathf.Max(0.0001f, Mathf.Abs(scale.y)),
+            Define.TILE_SIZE / Mathf.Max(0.0001f, Mathf.Abs(scale.z)));
     }
 
     static Transform NewContainer(GameObject root, string name)

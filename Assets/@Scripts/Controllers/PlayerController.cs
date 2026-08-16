@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
@@ -467,12 +467,27 @@ public class PlayerController : MonoBehaviour
     }
     #endregion
 
+    float _lastHitLog;
+
     bool isObstacled()
     {
         bool somethingExist = false;
 
         RaycastHit hit;
         Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset * 1.3f);
+
+        // 밀었는데 아무 일도 안 일어나는 경우가 있다. 그때 광선이 무엇을 맞혔는지
+        // 남긴다 — 이 한 줄이 없으면 상대가 왜 반응하지 않는지 알 수가 없다.
+        if (Time.time - _lastHitLog > 2f)
+        {
+            _lastHitLog = Time.time;
+            if (hit.collider == null)
+                Debug.Log($"[충돌] 광선 빈손 dir={_nextCellPos} len={_offset * 1.3f:0.00} " +
+                          $"origin={transform.position + _interpolateRayPos}");
+            else
+                Debug.Log($"[충돌] {hit.collider.gameObject.name} L{hit.collider.gameObject.layer} " +
+                          $"거리{hit.distance:0.00}");
+        }
 
         if (hit.collider != null)
         {
