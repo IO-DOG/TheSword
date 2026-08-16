@@ -830,8 +830,17 @@ public class AutoPlayer : MonoBehaviour
                     info.Append($" 탐침{CellCenter(c).x:0.0}/{_probeY:0.00}/{CellCenter(c).z:0.0}]");
                 }
             }
-            foreach (Door dr in map.GetComponentsInChildren<Door>(false))
-                info.Append($" 문key{dr._keyIndex}@{Cell(map, dr.transform.position)}");
+            // 꺼진 문까지 본다. 문이 열린 것인지 애초에 안 보이는 것인지
+            // 구별이 안 되면 갇힌 이유를 알 수가 없다.
+            foreach (Door dr in map.GetComponentsInChildren<Door>(true))
+            {
+                Vector2Int c = Cell(map, dr.transform.position);
+                bool solid = Physics.CheckBox(CellCenter(c), ProbeHalf, Quaternion.identity,
+                                              DoorMask, QueryTriggerInteraction.Collide);
+                info.Append($" 문key{dr._keyIndex}@{c}=" +
+                            $"{(dr.gameObject.activeInHierarchy ? "켜짐" : "꺼짐")}" +
+                            $"/{(solid ? "막음" : "통과")}");
+            }
             foreach (Lever lv in map.GetComponentsInChildren<Lever>(true))
                 info.Append($" 레버@{Cell(map, lv.transform.position)}=" +
                             $"{(Reachable(Cell(map, lv.transform.position)) ? "닿음" : "막힘")}" +
@@ -910,6 +919,24 @@ public class AutoPlayer : MonoBehaviour
         // 보스문/기둥/레버처럼 "부딪혀야" 열리는 것들이 있고, 방향도 가려 받는다.
         if (bestScore == long.MaxValue)
         {
+            // 갈 곳이 없다면 닿는 아이템은 무조건 줍는다. 피가 가득하다고 미뤄 둔
+            // 포션 하나가 한 칸 통로를 막고 있을 수 있다 — 9층 (23,-17) 이 그랬고,
+            // 2층 보스 통로의 포션도 같은 경우였다.
+            foreach (ConsumableItem item in map.GetComponentsInChildren<ConsumableItem>(false))
+                Bump(map, item.transform, PriTopUp, 0, ref best, ref bump, ref hasBump, ref bestScore);
+            foreach (Equip eq in map.GetComponentsInChildren<Equip>(false))
+                Bump(map, eq.transform, PriEquip, 0, ref best, ref bump, ref hasBump, ref bestScore);
+
+            if (bestScore != long.MaxValue)
+            {
+                Define.MoveDir grab = (hasBump && best == start)
+                    ? ToDir(bump - start)
+                    : FirstStep(start, best);
+                _plan = $"[{map.name}] 길을 막은 아이템을 줍는다 {best}+{bump} {grab}";
+                if (grab != Define.MoveDir.None)
+                    return grab;
+            }
+
             Define.MoveDir push = TryPush(start);
             if (push != Define.MoveDir.None)
                 return push;
@@ -927,7 +954,9 @@ public class AutoPlayer : MonoBehaviour
                 return Define.MoveDir.None;
             }
 
-            _plan = $"목표없음 flood={_dist.Count} 방문={_visited.Count}";
+            // 갇혔다. 걸을 수 있는 구역의 경계에서 무엇이 막는지 그대로 찍는다.
+            // 이게 없으면 문인지 벽인지 아이템인지 짐작만 하게 된다.
+            _plan = $"목표없음 flood={_dist.Count} 방문={_visited.Count} 막은것:{DescribeFrontier(map)}";
             return Define.MoveDir.None;
         }
 
@@ -1451,6 +1480,53 @@ public class AutoPlayer : MonoBehaviour
 
         _solid[cell] = blocked;
         return blocked;
+    }
+
+    /// <summary>걸을 수 있는 구역의 바로 바깥 칸들이 무엇에 막혀 있는지 적는다.</summary>
+    string DescribeFrontier(GameObject map)
+    {
+        var seen = new HashSet<Vector2Int>();
+        var sb = new System.Text.StringBuilder();
+        int shown = 0;
+
+        foreach (KeyValuePair<Vector2Int, int> pair in _dist)
+        {
+            for (int i = 0; i < Dirs.Length && shown < 8; i++)
+            {
+                Vector2Int side = pair.Key + Dirs[i];
+                if (_dist.ContainsKey(side) || seen.Add(side) == false)
+                    continue;
+
+                int n = Physics.OverlapBoxNonAlloc(CellCenter(side), ProbeHalf, _hits,
+                                                   Quaternion.identity, ~0,
+                                                   QueryTriggerInteraction.Collide);
+                if (n == 0)
+                    continue;
+
+                // 벽은 당연하니 건너뛴다. 그 밖의 것이 알고 싶은 것이다.
+                bool onlyWall = true;
+                for (int h = 0; h < n; h++)
+                {
+                    if (_hits[h].gameObject.layer != (int)Define.Layer.Wall)
+                    {
+                        onlyWall = false;
+                        break;
+                    }
+                }
+                if (onlyWall)
+                    continue;
+
+                sb.Append($" {side}[");
+                for (int h = 0; h < n && h < 3; h++)
+                    sb.Append($"{_hits[h].gameObject.name}:L{_hits[h].gameObject.layer} ");
+                sb.Append(']');
+                shown++;
+            }
+            if (shown >= 8)
+                break;
+        }
+
+        return sb.Length == 0 ? "벽뿐" : sb.ToString();
     }
 
     static readonly Collider[] _hits = new Collider[8];
