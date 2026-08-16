@@ -24,8 +24,12 @@ public class KingSlimeController : BossMonsterController
     }
     public override void OnDeadEvent()
     {
+        if (MarkDeadOnce() == false)
+            return;
+
         Managers.Directing.Events.StartBossDeathEffect(this.gameObject);
-        Managers.Directing.BossOnDeadAction.Invoke();
+        if (Managers.Directing.BossOnDeadAction != null)
+            Managers.Directing.BossOnDeadAction.Invoke();
     }
 
 

@@ -42,7 +42,16 @@ public class DirectingManager
         {
             case 1:
                 Events.CoStartEvent_1();
-                PopupAction += (() => Managers.UI.ShowPopupUI<UI_MagicalSwordCheckPopup>());
+                // += 로만 쌓으면 예전 구독이 남아, 엉뚱한 대화가 끝날 때 마검 계약
+                // 팝업이 튀어나온다 (4층 분열 슬라임과 싸우는 중에 떴다).
+                // 매번 새로 건다. 그리고 이미 계약했으면 띄우지 않는다.
+                PopupAction = null;
+                PopupAction += (() =>
+                {
+                    if (Managers.Game.PlayerData.IsContractedSword)
+                        return;
+                    Managers.UI.ShowPopupUI<UI_MagicalSwordCheckPopup>();
+                });
                 break;
         }
     }

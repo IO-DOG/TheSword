@@ -60,8 +60,32 @@ public class CameraController : MonoBehaviour
         //_transposer.m_FollowOffset = new Vector3(0f, 10f, -5f);
     }
 
+    /// <summary>
+    /// 연출이 끝났으면 카메라는 반드시 플레이어를 본다.
+    ///
+    /// 연출들이 Follow 를 보스나 기둥으로 돌려놓고 마지막에 되돌리는데,
+    /// 중간에 코루틴이 죽으면 그대로 남는다. 그러면 보스를 잡고 다음 층으로
+    /// 넘어가도 카메라가 플레이어를 따라가지 않고 엉뚱한 데 멈춰 있다.
+    /// </summary>
+    void RestoreFollowToPlayer()
+    {
+        if (Managers.Game.OnDirect || Managers.Game.OnBattle)
+            return;
+        if (_vCam == null || Managers.Game.Player == null)
+            return;
+
+        Transform player = Managers.Game.Player.transform;
+        if (_vCam.Follow != player)
+        {
+            _vCam.Follow = player;
+            _vCam.LookAt = null;
+        }
+    }
+
     private void Update()
     {
+        RestoreFollowToPlayer();
+
         if (Managers.Game.OnStaticResolution == true)
         {
             Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[2];
