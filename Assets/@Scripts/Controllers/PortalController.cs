@@ -80,7 +80,12 @@ public class PortalController : MonoBehaviour
             // 플레이어의 스테이지 아이디가 해당 챕터의 마지막 아이디라면 
             if (Managers.Game.PlayerData.CurStageid + 1 > Managers.Game.GetChapterCount(Managers.Game.PlayerData.CurStageid).Value)
             {
-                Managers.Game.GenerateMap(++Managers.Game.PlayerData.CurStageid);
+                // 여기서 CurStageid 를 올리면 안 된다. 아래 LoadingAndWarp 가
+                // SetStageID() 로 한 번 더 올리기 때문에 챕터를 넘을 때마다
+                // 층 번호가 두 칸씩 뛴다. 그러면 플레이어는 새 챕터 1층에 서 있는데
+                // 게임은 한 층 위라고 여겨서, 카메라 경계와 맵 갱신이 엉뚱한 층을
+                // 향하고 캐릭터가 다른 층 벽에 파묻혀 보인다.
+                Managers.Game.GenerateMap(Managers.Game.PlayerData.CurStageid + 1);
                 nextPos = Managers.Game.SpawnPoints[0].transform.position;
                 PlayerPrefs.SetInt("ISMEETBOSS", 0);
             }

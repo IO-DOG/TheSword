@@ -1204,8 +1204,20 @@ public class AutoPlayer : MonoBehaviour
         {
             if (pair.Value == null)
                 continue;
-            if (TryWallBounds(pair.Value, out b) && InsideXZ(b, p))
-                return pair.Value;
+            if (TryWallBounds(pair.Value, out b) == false || InsideXZ(b, p) == false)
+                continue;
+
+            // 층 번호와 실제 서 있는 맵이 갈라졌다. 이 상태에서는 카메라 경계와
+            // 맵 갱신이 엉뚱한 층을 향해서, 화면에서는 캐릭터가 다른 층 벽에
+            // 파묻혀 보인다. 눈으로 찾지 않아도 되게 로그로 남긴다.
+            if (Time.unscaledTime - _lastStageMismatchLog > 5f)
+            {
+                _lastStageMismatchLog = Time.unscaledTime;
+                Debug.LogWarning($"[AutoPlayer] 층 어긋남 — 게임은 {g.PlayerData.CurStageid + 1}층" +
+                                 $"({(byStage != null ? byStage.name : "없음")})이라는데 " +
+                                 $"실제로는 {pair.Value.name} 위에 서 있다");
+            }
+            return pair.Value;
         }
 
         if (byStage != null)
@@ -1766,6 +1778,8 @@ public class AutoPlayer : MonoBehaviour
 
     /// <summary>이번 탐색에서 아이템 칸을 밟을 수 있다고 볼 것인가.</summary>
     bool _passItems;
+
+    float _lastStageMismatchLog;
 
     void TickStall()
     {
