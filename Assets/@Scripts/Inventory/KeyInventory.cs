@@ -1,4 +1,4 @@
-﻿using Data;
+using Data;
 using DG.Tweening;
 using Newtonsoft.Json;
 using System.Collections;
@@ -64,19 +64,26 @@ public class KeyInventory
 
     public bool TryUseKey(GameObject door)
     {
-        if (_keys[door.GetComponentInChildren<Door>()._keyIndex] == 0)
+        EnsureKeys();
+
+        // 예전에는 GetComponentInChildren 과 GetComponent 를 섞어 썼다.
+        // 생성된 층은 문 타일의 계층이 달라서 후자가 null 이 되고,
+        // 그 자리에서 예외가 나 문이 영영 안 열렸다.
+        Door d = Door.Find(door);
+        if (d == null)
         {
+            Debug.LogWarning($"[열쇠] {door.name} 에서 Door 를 못 찾았다");
             return false;
         }
-        else
-        {
-            Managers.Data.DoorActiveDic[door.GetComponent<Door>()._doorIndex_forActive] = false;
-            //Managers.Game.SaveGame();
-            // TODO Save
-            _keys[door.GetComponentInChildren<Door>()._keyIndex]--;
-            ShowKeySlot(Managers.Game.Player._keyInventory);
-            return true;
-        }
+
+        int idx = d._keyIndex;
+        if (idx < 0 || idx >= _keys.Count || _keys[idx] == 0)
+            return false;
+
+        Managers.Data.DoorActiveDic[d._doorIndex_forActive] = false;
+        _keys[idx]--;
+        ShowKeySlot(Managers.Game.Player._keyInventory);
+        return true;
     }
 
     public void ShowKeySlot(GameObject keyInventory)

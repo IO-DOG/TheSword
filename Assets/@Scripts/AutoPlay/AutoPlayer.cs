@@ -1728,9 +1728,7 @@ public class AutoPlayer : MonoBehaviour
                                            QueryTriggerInteraction.Collide);
         for (int i = 0; i < n; i++)
         {
-            Door door = _hits[i].GetComponentInChildren<Door>();
-            if (door == null)
-                door = _hits[i].GetComponentInParent<Door>();
+            Door door = Door.Find(_hits[i].gameObject);
             if (door == null)
                 continue;
             int idx = door._keyIndex;

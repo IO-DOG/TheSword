@@ -1,10 +1,34 @@
-﻿using DG.Tweening;
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Door : MonoBehaviour
 {
+    /// <summary>
+    /// 어떤 콜라이더에서든 그 문의 Door 를 찾아낸다.
+    ///
+    /// 문 타일은 프리팹마다 계층이 달라서, Door 가 콜라이더와 같은 오브젝트에
+    /// 있기도 하고 형제 자식에 있기도 하다. GetComponent 하나로 집으면
+    /// 생성된 층에서 null 이 되고, 그러면 문이 영영 안 열린다.
+    /// 부모로 한 칸씩 올라가며 그 아래를 통째로 뒤진다.
+    /// </summary>
+    public static Door Find(GameObject from)
+    {
+        if (from == null)
+            return null;
+
+        Transform t = from.transform;
+        for (int depth = 0; depth < 4 && t != null; depth++)
+        {
+            Door found = t.GetComponentInChildren<Door>(true);
+            if (found != null)
+                return found;
+            t = t.parent;
+        }
+        return null;
+    }
+
     public int _keyIndex = 0;
     public int _doorIndex_forActive = 0;
     CameraController _camera;
