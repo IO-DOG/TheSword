@@ -623,7 +623,6 @@ public class Events : MonoBehaviour
         Debug.Log($"[Directing] 보스 콜라이더를 제 칸/바닥높이({groundY:0.00})에 맞췄다 " +
                   $"— 중심 {before} -> {col.bounds.center} (보스는 y={boss.transform.position.y:0.00} 그대로)");
     }
-    }
 
     public void CoStartUnLock4Floor()
     {
