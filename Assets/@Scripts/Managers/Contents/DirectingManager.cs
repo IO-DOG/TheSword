@@ -1,4 +1,4 @@
-﻿using Cinemachine;
+using Cinemachine;
 using DG.Tweening;
 using Febucci.UI;
 using System;
@@ -600,31 +600,29 @@ public class Events : MonoBehaviour
             Debug.Log("[Directing] 보스 콜라이더가 꺼져 있어 켰다");
         }
 
-        // 콜라이더가 스프라이트에 맞춰 붙어 있어서 제 칸을 벗어나 있다.
+        // 보스는 스프라이트를 세워 보이려고 바닥보다 높이(y=3) 서 있다.
+        // 그 자체를 바닥으로 내리면 스프라이트 아랫부분이 바닥 이미지에 잘려
+        // 절반만 보인다 — 보이는 자리는 그대로 두고 콜라이더만 옮긴다.
+        //
+        // 콜라이더는 스프라이트에 맞춰 붙어 있어서 제 칸도 벗어나 있었다.
         // 실측: 보스 칸은 (12,-17) 인데 콜라이더 중심은 z 로 1.4칸 북쪽,
-        // 높이는 6유닛(18칸)짜리 거대한 상자였다. 그래서 플레이어가 보스 칸을
-        // 그냥 통과했고 전투가 열리지 않았다.
-        // 다른 몬스터처럼 제 칸 한 칸만 차지하게 맞춘다.
+        // 높이는 6유닛(18칸)짜리 상자였다. 플레이어의 충돌 판정은 제 키높이로
+        // 나가는 얇은 광선이라 거기에 걸리지 않았고, 보스를 그냥 통과했다.
+        // 제 칸 한 칸만, 플레이어 키높이에 놓는다.
         Vector3 scale = boss.transform.lossyScale;
-        Vector3 before = col.bounds.center;
-        col.center = Vector3.zero;
-        col.size = new Vector3(
-            Define.TILE_SIZE / Mathf.Max(0.0001f, Mathf.Abs(scale.x)),
-            Define.TILE_SIZE / Mathf.Max(0.0001f, Mathf.Abs(scale.y)),
-            Define.TILE_SIZE / Mathf.Max(0.0001f, Mathf.Abs(scale.z)));
-        Debug.Log($"[Directing] 보스 콜라이더를 제 칸에 맞췄다 — 중심 {before} -> {col.bounds.center}");
+        float sx = Mathf.Max(0.0001f, Mathf.Abs(scale.x));
+        float sy = Mathf.Max(0.0001f, Mathf.Abs(scale.y));
+        float sz = Mathf.Max(0.0001f, Mathf.Abs(scale.z));
 
-        // 싸울 수 있는 몬스터는 예외 없이 바닥(y=0)에 선다. 킹슬라임만 등장 연출
-        // 때문에 y=3 에 뜬 채로 남아서, 플레이어의 충돌 판정 높이에 아예 걸리지
-        // 않는다. 같은 바닥으로 내린다.
+        Vector3 before = col.bounds.center;
         float groundY = Managers.Game.Player.transform.position.y;
-        Vector3 p = boss.transform.position;
-        if (Mathf.Abs(p.y - groundY) > 0.01f)
-        {
-            boss.transform.position = new Vector3(p.x, groundY, p.z);
-            Debug.Log($"[Directing] 보스를 몬스터와 같은 바닥(y={groundY:0.00})으로 내렸다 " +
-                      $"— 원래 y={p.y:0.00}");
-        }
+
+        col.size = new Vector3(Define.TILE_SIZE / sx, Define.TILE_SIZE / sy, Define.TILE_SIZE / sz);
+        col.center = new Vector3(0f, (groundY - boss.transform.position.y) / sy, 0f);
+
+        Debug.Log($"[Directing] 보스 콜라이더를 제 칸/바닥높이({groundY:0.00})에 맞췄다 " +
+                  $"— 중심 {before} -> {col.bounds.center} (보스는 y={boss.transform.position.y:0.00} 그대로)");
+    }
     }
 
     public void CoStartUnLock4Floor()

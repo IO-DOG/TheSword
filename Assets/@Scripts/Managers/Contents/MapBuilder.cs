@@ -93,6 +93,8 @@ public static class MapBuilder
         Transform pillars = NewContainer(root, "Pillars");
         Transform levers = NewContainer(root, "Levers");
 
+        PlaceFloorField(root, mapData, tint);
+
         int doorCount = 0;
 
         foreach (Data.ObjectData obj in mapData.Objects)
@@ -285,6 +287,58 @@ public static class MapBuilder
     static T Bind<T>(GameObject go) where T : Component
     {
         return Components<T>(go)[0];
+    }
+
+    /// <summary>
+    /// 바닥 그림(Decos/BG).
+    ///
+    /// 손으로 만든 층은 층마다 그린 FloorField 스프라이트를 깔아 두는데,
+    /// 100층을 손으로 그릴 수 없어 공용 그림 하나를 층 크기에 맞춰 깐다.
+    /// 없으면 두 가지가 같이 망가진다 —
+    ///   1) 바닥이 비어 보인다.
+    ///   2) CameraController.SetupCameraConfiner 가 Decos/BG 로 범위를 잡는데
+    ///      그게 없으면 이전 층 경계가 남아 카메라가 플레이어를 못 따라간다.
+    /// </summary>
+    static void PlaceFloorField(GameObject root, Data.MapData mapData, Color tint)
+    {
+        Sprite sprite = Resources.Load<Sprite>("Sprites/00/FloorField_99_999");
+        if (sprite == null)
+        {
+            Debug.LogWarning("[MapBuilder] 공용 바닥 그림을 못 찾았다");
+            return;
+        }
+
+        // 층이 차지하는 칸 범위를 실제 오브젝트에서 잰다.
+        float minX = float.MaxValue, maxX = float.MinValue;
+        float minZ = float.MaxValue, maxZ = float.MinValue;
+        foreach (Data.ObjectData obj in mapData.Objects)
+        {
+            if (obj.Position.X < minX) minX = obj.Position.X;
+            if (obj.Position.X > maxX) maxX = obj.Position.X;
+            if (obj.Position.Z < minZ) minZ = obj.Position.Z;
+            if (obj.Position.Z > maxZ) maxZ = obj.Position.Z;
+        }
+        if (minX > maxX)
+            return;
+
+        float width = (maxX - minX) + Define.TILE_SIZE;
+        float height = (maxZ - minZ) + Define.TILE_SIZE;
+
+        Transform decos = NewContainer(root, "Decos");
+        GameObject bg = new GameObject("BG");
+        bg.tag = "BG";
+        bg.transform.SetParent(decos, false);
+        bg.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);   // 눕혀서 바닥에 깐다
+        bg.transform.localPosition = new Vector3((minX + maxX) * 0.5f, 0f, (minZ + maxZ) * 0.5f);
+
+        SpriteRenderer sr = bg.AddComponent<SpriteRenderer>();
+        sr.sprite = sprite;
+        sr.color = tint;
+        sr.sortingOrder = -100;   // 타일보다 아래
+
+        Vector2 native = sprite.bounds.size;
+        if (native.x > 0.0001f && native.y > 0.0001f)
+            bg.transform.localScale = new Vector3(width / native.x, height / native.y, 1f);
     }
 
     static Transform NewContainer(GameObject root, string name)

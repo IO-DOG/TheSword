@@ -1,4 +1,4 @@
-﻿using Cinemachine;
+using Cinemachine;
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
@@ -147,14 +147,30 @@ public class CameraController : MonoBehaviour
 
         string curDungeonName = $"Dungeon_{info.DungeonID}";
         GameObject dungeon = GameObject.Find(curDungeonName);
-        Transform bgTr = dungeon != null ? dungeon.transform.Find("Decos/BG") : null;
-        SpriteRenderer bgSr = bgTr != null ? bgTr.GetComponent<SpriteRenderer>() : null;
-        if (bgSr == null)
+        if (dungeon == null)
         {
-            Debug.LogWarning($"[Camera] {curDungeonName}/Decos/BG 를 못 찾아 경계를 그대로 둔다");
+            Debug.LogWarning($"[Camera] {curDungeonName} 을 못 찾아 경계를 그대로 둔다");
             return;
         }
-        _bg = bgSr;
+
+        // 손으로 만든 층은 Decos/BG(바닥 그림)가 범위를 알려 준다.
+        // 생성한 층에는 그게 없어서, 예전에는 여기서 멈추고 이전 층의 경계를
+        // 그대로 썼다 — 그러면 카메라가 옛 층 범위에 갇혀 플레이어를 못 따라간다.
+        // 없으면 벽으로 범위를 잰다. 벽은 어느 층에나 있다.
+        Transform bgTr = dungeon.transform.Find("Decos/BG");
+        SpriteRenderer bgSr = bgTr != null ? bgTr.GetComponent<SpriteRenderer>() : null;
+
+        Bounds area;
+        if (bgSr != null)
+        {
+            _bg = bgSr;
+            area = bgSr.bounds;
+        }
+        else if (TryWallBounds(dungeon, out area) == false)
+        {
+            Debug.LogWarning($"[Camera] {curDungeonName} 의 범위를 잴 수 없어 경계를 그대로 둔다");
+            return;
+        }
 
         if (confinerCollider != null)
             Managers.Resource.Destroy(confinerCollider);
@@ -162,15 +178,40 @@ public class CameraController : MonoBehaviour
         confinerCollider.transform.Rotate(Define.CAMERA_ANGLE, 0, 0);
 
         _collider = confinerCollider.AddComponent<BoxCollider>();
-        _collider.size = new Vector3(_bg.bounds.size.x, _bg.bounds.size.z * Mathf.Sqrt(3) / 2, Define.CONFINER_HEIGHT);
+        _collider.size = new Vector3(area.size.x, area.size.z * Mathf.Sqrt(3) / 2, Define.CONFINER_HEIGHT);
         _collider.center = new Vector3(0, _collider.size.y, -10);
 
-        confinerCollider.transform.position = new Vector3(_bg.bounds.min.x + _bg.bounds.size.x / 2 + Define.TILE_SIZE / 2, 0, _bg.bounds.min.z + _bg.bounds.center.z + -Define.TILE_SIZE / 2);
+        confinerCollider.transform.position = new Vector3(
+            area.min.x + area.size.x / 2 + Define.TILE_SIZE / 2,
+            0,
+            area.min.z + area.center.z + -Define.TILE_SIZE / 2);
 
         // Cinemachine Confiner 설정
         _confiner = _vCam.GetComponent<CinemachineConfiner>();
         _confiner.InvalidatePathCache();
         _confiner.m_BoundingVolume = _collider;
+    }
+
+    /// <summary>이 층이 벽으로 두르는 범위. 바닥 그림이 없는 생성 층에서 쓴다.</summary>
+    static bool TryWallBounds(GameObject map, out Bounds bounds)
+    {
+        bounds = new Bounds();
+        bool found = false;
+        foreach (Collider c in map.GetComponentsInChildren<Collider>(false))
+        {
+            if (c.gameObject.layer != (int)Define.Layer.Wall)
+                continue;
+            if (found == false)
+            {
+                bounds = c.bounds;
+                found = true;
+            }
+            else
+            {
+                bounds.Encapsulate(c.bounds);
+            }
+        }
+        return found;
     }
 
     public static IEnumerator CoExposure(float time, Exposure exposure)
