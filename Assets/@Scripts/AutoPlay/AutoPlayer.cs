@@ -882,7 +882,21 @@ public class AutoPlayer : MonoBehaviour
         // 탐색보다 먼저 두면 올라오자마자 되돌아 내려가서 두 층을 오간다
         // (9층과 10층 사이를 2582번 오갔다).
         // 3층(00_002)은 위층 계단이 아예 없어서 결국 여기로 내려간다.
-        if (bestScore == long.MaxValue && hasDown)
+        // 단, 위층 계단이 있는 층에서는 내려가지 않는다.
+        // 열쇠는 층 공용이라 아래층을 다시 돌면 이 층에서 주운 열쇠를 거기 문에
+        // 써 버린다 — 9층에서 초록 열쇠를 그렇게 잃고 도착 방(27칸)에 갇혔다.
+        // 생성된 층은 그 층에서 나오는 열쇠만으로 끝까지 갈 수 있게 만들어져 있다.
+        bool hasUp = false;
+        foreach (PortalController portal in map.GetComponentsInChildren<PortalController>(false))
+        {
+            if (portal._portalType == PortalController.Type.UpStairs)
+            {
+                hasUp = true;
+                break;
+            }
+        }
+
+        if (bestScore == long.MaxValue && hasDown && hasUp == false)
         {
             foreach (PortalController portal in map.GetComponentsInChildren<PortalController>(false))
             {
