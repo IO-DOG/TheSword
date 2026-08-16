@@ -29,6 +29,9 @@ from thesword_balance import (
     make_player, player_stats_at, simulate_battle,
 )
 from layout_gen import build_floor_layout, validate_layout
+
+# ConsumableItemData 의 회복% 와 짝. 여기 값을 바꾸면 그 표도 같이 봐야 한다.
+POTION_BY_HEAL = {0.15: "I_03", 0.20: "I_03", 0.30: "I_04", 0.50: "I_06"}
 from mapdata_gen import emit_mapdata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -41,21 +44,40 @@ TOTAL_FLOORS = 100
 FLOORS_PER_CHAPTER = 20
 MOBS_PER_FLOOR = 5
 MAX_LEVEL_TABLE = 115          # CurExp 세터가 Level+1 을 읽으므로 여유를 둔다
-NEW_MONSTER_ID_BASE = 100      # 기존 몬스터 0~16 과 충돌 회피
+NEW_MONSTER_ID_BASE = 100      # (예전 대역. 아래 표로 대체됨)
+# 층마다 몹이 5종이라 대역을 넉넉히 잡는다. 층 F 의 k 번째 몹 = BASE + F*8 + k.
+MOB_ID_BASE = 1000             # 1040 ~ 1804
+BOSS_ID_BASE = 900             # 900 ~ 904
+MOB_NAME_BASE = 11000
+MOB_DESC_BASE = 21000
+BOSS_NAME_BASE = 10900
+BOSS_DESC_BASE = 20900
 SCRIPT_STAGE_NAME_BASE = 5100  # 기존 5000~5004 뒤
 SCRIPT_MON_NAME_BASE = 10100   # 기존 10000~10008 뒤
 SCRIPT_MON_DESC_BASE = 20100   # 기존 20000~20008 뒤
 
 # 층당 전투 목표치 (플레이어 최대 HP 대비 손실 비율, 전투 지속 시간 초)
 # 몹 5마리 * 최대 9.5% = 약 47%, 여기에 포션 2개(각 30%)로 층당 순회복이 되게 잡는다.
-MOB_HP_LOSS = 0.07
+# 층의 몹 5마리는 서로 다른 종이고, 뒤로 갈수록 아프다.
+# 미로가 나무 구조라 경로가 유일하고 문·열쇠가 구역을 자르므로,
+# 이 순서대로 만날 수밖에 없다 — 그게 이 층의 "정답 경로"다.
+MOB_LOSS_RAMP = [0.72, 0.88, 1.00, 1.16, 1.34]
+
+MOB_HP_LOSS = 0.040
 MOB_DURATION = 16.0
 BOSS_HP_LOSS = 0.28
 BOSS_DURATION = 45.0
 
 # 층에 배치되는 포션 (ConsumableItemData 의 회복 % 와 대응)
-FLOOR_POTIONS = [0.30, 0.30]
-BOSS_FLOOR_POTIONS = [0.50, 0.50]
+# 구역별 회복 아이템. 미로의 막다른 길에 하나씩 둔다.
+#   구역0 없음 / 구역1 20% / 구역2 30% / (보스층) 구역3 50%
+# 넘치게 마시면 그만큼 버리는 것이라, 언제 들르느냐가 곧 실력이다.
+# 한 층에서 얻는 회복은 그 층에서 잃는 양과 거의 같게 잡는다.
+# 남아돌면 물약을 아무 때나 마셔도 되니 판단이 사라지고,
+# 모자라면 정답 경로로도 못 간다. 넘치게 마셔 버린 몫이 그대로 빚이 되게 한다.
+FLOOR_POTIONS = [0.15, 0.20]   # 구역1 / 구역2
+EXIT_POTION = 0.15             # 구역3(계단 앞) — 다음 층으로 들고 가는 몫
+BOSS_FLOOR_POTIONS = [0.50]    # 보스층은 계단 앞 대신 이걸 둔다
 POTION_USE_THRESHOLD = 0.55  # 이 비율 밑으로 떨어지면 마신다 (실제 플레이 행동)
 
 # 실재하는 몬스터 아트만 사용한다 (Mob_C0_I000~I007 / Boss_C0_I000~I003)
@@ -266,33 +288,36 @@ def build_monsters(ptable, start_level):
             ptable, level, MOB_HP_LOSS * ramp, MOB_DURATION * ramp, aspd)
 
         theme = CHAPTER_THEMES[ch]
-        art = MOB_ART[idx % len(MOB_ART)]
-        mid = NEW_MONSTER_ID_BASE + floor
         # 층 몹 전부를 잡으면 정확히 1레벨
         reward = round(exp_to_next(ptable, level) / MOBS_PER_FLOOR)
 
-        monsters.append(dict(
-            id=mid, Chapter=ch, Ability=0,
-            Name=f"{theme[1]} {MOB_SPECIES[idx % len(MOB_SPECIES)]}",
-            Attack=float(atk), Defence=float(dfn), MaxHP=float(hp),
-            AttackSpeed=float(aspd), DefenceSpeed=0.1,
-            Critical=99.0, CriticalAttack=200.0,
-            RewardExp=float(reward), RewardItem=-1,
-            IdleAnimStr=art[0], AttackAnimStr=art[1],
-            BattleParticleAttack="FX_WeaponSlash_00",
-            BattleParticleHit="FX_WeaponHit_14",
-            Shadow="Mob_Shadow_000",
-            MonsterNameId=SCRIPT_MON_NAME_BASE + floor,
-            MonsterDescId=SCRIPT_MON_DESC_BASE + floor,
-            _floor=floor, _boss=False,
-        ))
+        for k, ramp_k in enumerate(MOB_LOSS_RAMP[:MOBS_PER_FLOOR]):
+            hp_k, atk_k, dfn_k = solve_monster(
+                ptable, level, MOB_HP_LOSS * ramp * ramp_k,
+                MOB_DURATION * ramp, aspd)
+            art = MOB_ART[(idx + k) % len(MOB_ART)]
+            monsters.append(dict(
+                id=MOB_ID_BASE + floor * 8 + k, Chapter=ch, Ability=0,
+                Name=f"{theme[1]} {MOB_SPECIES[(idx + k) % len(MOB_SPECIES)]}",
+                Attack=float(atk_k), Defence=float(dfn_k), MaxHP=float(hp_k),
+                AttackSpeed=float(aspd), DefenceSpeed=0.1,
+                Critical=99.0, CriticalAttack=200.0,
+                RewardExp=float(reward), RewardItem=-1,
+                IdleAnimStr=art[0], AttackAnimStr=art[1],
+                BattleParticleAttack="FX_WeaponSlash_00",
+                BattleParticleHit="FX_WeaponHit_14",
+                Shadow="Mob_Shadow_000",
+                MonsterNameId=MOB_NAME_BASE + floor * 8 + k,
+                MonsterDescId=MOB_DESC_BASE + floor * 8 + k,
+                _floor=floor, _boss=False, _order=k,
+            ))
 
         if boss:
             bhp, batk, bdfn = solve_monster(
                 ptable, level, BOSS_HP_LOSS, BOSS_DURATION, 1.1)
             bart = BOSS_ART[ch % len(BOSS_ART)]
             monsters.append(dict(
-                id=NEW_MONSTER_ID_BASE + 200 + ch, Chapter=ch, Ability=0,
+                id=BOSS_ID_BASE + ch, Chapter=ch, Ability=0,
                 Name=f"{theme[0]}의 {BOSS_SPECIES[ch % len(BOSS_SPECIES)]}",
                 Attack=float(batk), Defence=float(bdfn), MaxHP=float(bhp),
                 AttackSpeed=1.1, DefenceSpeed=0.15,
@@ -303,8 +328,8 @@ def build_monsters(ptable, start_level):
                 BattleParticleAttack="FX_WeaponSlash_00",
                 BattleParticleHit="FX_WeaponHit_18",
                 Shadow="Mob_Shadow_000",
-                MonsterNameId=SCRIPT_MON_NAME_BASE + 200 + ch,
-                MonsterDescId=SCRIPT_MON_DESC_BASE + 200 + ch,
+                MonsterNameId=BOSS_NAME_BASE + ch,
+                MonsterDescId=BOSS_DESC_BASE + ch,
                 _floor=floor, _boss=True,
             ))
     return monsters
@@ -331,28 +356,54 @@ def simulate_run(ptable, monsters, start_state, verbose=True):
 
     for floor in range(HANDMADE_FLOORS + 1, TOTAL_FLOORS + 1):
         floor_mons = by_floor[floor]
-        mob = next(m for m in floor_mons if not m["_boss"])
+        mobs = sorted((m for m in floor_mons if not m["_boss"]),
+                      key=lambda m: m["_order"])
         boss = next((m for m in floor_mons if m["_boss"]), None)
 
         entry_level, entry_hp = level, cur_hp
-        fights = [mob] * MOBS_PER_FLOOR + ([boss] if boss else [])
+        # 미로가 강제하는 순서 그대로. 약한 놈부터, 마지막에 보스.
+        fights = list(mobs) + ([boss] if boss else [])
 
-        # 층에 배치된 포션. 실제 플레이처럼 HP 가 낮을 때만 마신다.
-        potions = list(FLOOR_POTIONS) + (list(BOSS_FLOOR_POTIONS) if boss else [])
+        # 구역별 포션. (회복비율, 쓸 수 있게 되는 전투 인덱스)
+        # 구역1 포션은 두 번째 전투부터, 구역2 포션은 네 번째 전투부터 닿는다.
+        potions = [(FLOOR_POTIONS[0], 1), (FLOOR_POTIONS[1], 3)]
+        # 보스층은 보스 직전에 쓸 큰 물약과, 올라가기 전에 채울 물약을 따로 둔다.
+        # 큰 것 하나만 두면 보스를 잡고 빈사로 다음 층에 올라가 그대로 죽는다.
+        if boss:
+            potions.append((BOSS_FLOOR_POTIONS[0], len(fights) - 1))
+        potions.append((EXIT_POTION, len(fights)))
 
         for i, md in enumerate(fights):
             stats = player_stats_at(ptable, level)
-            # 위험하면 포션 사용 (보스 앞에서는 반드시 채우고 들어간다)
-            while potions and (cur_hp < stats["hp"] * POTION_USE_THRESHOLD
-                               or (md["_boss"] and cur_hp < stats["hp"] * 0.95)):
-                cur_hp = min(stats["hp"], cur_hp + stats["hp"] * potions.pop(0))
+            m = Creature(md["MaxHP"], md["Attack"], md["Defence"],
+                         md["AttackSpeed"], md["DefenceSpeed"],
+                         md["Critical"], md["CriticalAttack"])
+
+            # 포션은 주우면 즉시 회복이고 최대치에서 잘린다(ConsumableItem.PickUp).
+            # 그래서 넘치게 마시면 그만큼 버리는 것이고, 정답 경로는 "죽지 않을
+            # 만큼만, 가장 늦게" 든다. 이 전투를 그냥 치러 보고 죽을 때만 마신다.
+            while True:
+                probe = Creature(stats["hp"], stats["atk"], stats["dfn"],
+                                 stats["aspd"], stats["dspd"], stats["crit"],
+                                 stats["crit_atk"])
+                probe.hp = min(cur_hp, stats["hp"])
+                probe_m = Creature(md["MaxHP"], md["Attack"], md["Defence"],
+                                   md["AttackSpeed"], md["DefenceSpeed"],
+                                   md["Critical"], md["CriticalAttack"])
+                survives, _, _ = simulate_battle(probe, probe_m)
+                if survives:
+                    break
+                usable = [t for t in potions if t[1] <= i]
+                if not usable:
+                    break
+                heal, _ = usable[0]
+                potions.remove(usable[0])
+                cur_hp = min(stats["hp"], cur_hp + stats["hp"] * heal)
+
             p = Creature(stats["hp"], stats["atk"], stats["dfn"],
                          stats["aspd"], stats["dspd"], stats["crit"],
                          stats["crit_atk"])
             p.hp = min(cur_hp, stats["hp"])
-            m = Creature(md["MaxHP"], md["Attack"], md["Defence"],
-                         md["AttackSpeed"], md["DefenceSpeed"],
-                         md["Critical"], md["CriticalAttack"])
 
             won, dur, loss = simulate_battle(p, m)
             cur_hp = p.hp
@@ -370,6 +421,13 @@ def simulate_run(ptable, monsters, start_state, verbose=True):
                 cur_hp += ptable[level]["hp"]  # LevelUp() 은 CurHP 도 같이 올린다
 
         stats = player_stats_at(ptable, level)
+        # 계단 앞 회복은 올라가기 직전에 든다. 이미 가득하면 그만큼 버린다.
+        stats_end = player_stats_at(ptable, level)
+        for heal, avail_at in list(potions):
+            if avail_at >= len(fights):
+                cur_hp = min(stats_end["hp"], cur_hp + stats_end["hp"] * heal)
+                potions.remove((heal, avail_at))
+
         log.append(dict(floor=floor, entry_level=entry_level, exit_level=level,
                         hp=cur_hp, max_hp=stats["hp"],
                         hp_pct=100.0 * cur_hp / stats["hp"]))
@@ -516,16 +574,26 @@ def emit_layouts(monsters, write=True):
     written, failures = 0, []
     for floor in range(HANDMADE_FLOORS + 1, TOTAL_FLOORS + 1):
         did, ch, _ = dungeon_id(floor)
-        mob = next(m for m in by_floor[floor] if not m["_boss"])
+        mobs = sorted((m for m in by_floor[floor] if not m["_boss"]),
+                      key=lambda m: m["_order"])
         boss = next((m for m in by_floor[floor] if m["_boss"]), None)
         walls = CHAPTER_THEMES[ch][3]
+
+        # 구역별 회복 아이템 (없는 구역은 None)
+        region3 = [POTION_BY_HEAL[EXIT_POTION]]
+        if boss:
+            region3.insert(0, POTION_BY_HEAL[BOSS_FLOOR_POTIONS[0]])
+        pots = [[],
+                [POTION_BY_HEAL[FLOOR_POTIONS[0]]],
+                [POTION_BY_HEAL[FLOOR_POTIONS[1]]],
+                region3]
 
         grid = None
         for attempt in range(50):
             g, origins, doors = build_floor_layout(
-                mob["id"], boss["id"] if boss else None, walls,
+                [m["id"] for m in mobs], boss["id"] if boss else None, walls,
                 seed=floor * 1000 + attempt, mobs_in_floor=MOBS_PER_FLOOR,
-                equip_id=CHAPTER_EQUIP_REWARD.get(floor))
+                equip_id=CHAPTER_EQUIP_REWARD.get(floor), potions=pots)
             if g is None:
                 continue
             ok, err = validate_layout(g, origins, doors)
