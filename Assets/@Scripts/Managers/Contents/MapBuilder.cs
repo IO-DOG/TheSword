@@ -124,6 +124,7 @@ public static class MapBuilder
                             MonsterController mc = Bind<MonsterController>(go);
                             mc.id = obj.Id;
                             mc._monsterIndex_forActive = obj.Count;
+                            SetupLook(go, obj.Id);
                         }
                         break;
                     }
@@ -140,6 +141,7 @@ public static class MapBuilder
                             MonsterController mc = Bind<MonsterController>(go);
                             mc.id = obj.Id;
                             mc._monsterIndex_forActive = obj.Count;
+                            SetupLook(go, obj.Id);
                             FitColliderToCell(go);
                         }
                         break;
@@ -366,6 +368,34 @@ public static class MapBuilder
             Define.TILE_SIZE / Mathf.Max(0.0001f, Mathf.Abs(scale.x)),
             Define.TILE_SIZE * 16f / Mathf.Max(0.0001f, Mathf.Abs(scale.y)),
             Define.TILE_SIZE / Mathf.Max(0.0001f, Mathf.Abs(scale.z)));
+    }
+
+    /// <summary>
+    /// 몬스터의 겉모습을 그 몬스터 데이터에 맞춘다.
+    ///
+    ///  - 세로 비율: 플레이어와 보스 프리팹은 (1,2,1) 인데 일반 몬스터 프리팹만
+    ///    (1,1,1) 이라 화면에서 납작하게 눌려 보였다.
+    ///  - 그림: 프리팹 하나를 모든 몬스터가 함께 쓰기 때문에, 무엇을 그릴지는
+    ///    데이터의 대기 애니메이션(Mob_C0_I003 …)이 정한다. 이걸 지정하지 않으면
+    ///    전부 애니메이터 기본 상태로 나와서 이름과 그림이 따로 놀았고,
+    ///    보스는 컨트롤러에 없는 상태(Boss_C1_I000)를 물고 있어 엉뚱하게 보였다.
+    /// </summary>
+    static void SetupLook(GameObject go, int id)
+    {
+        go.transform.localScale = new Vector3(1f, 2f, 1f);
+
+        Data.MonsterData md;
+        if (Managers.Data.MonsterDic.TryGetValue(id, out md) == false)
+        {
+            Debug.LogWarning($"[MapBuilder] 몬스터 {id} 데이터가 없다");
+            return;
+        }
+        if (string.IsNullOrEmpty(md.IdleAnimStr))
+            return;
+
+        Animator anim = go.GetComponentInChildren<Animator>();
+        if (anim != null)
+            anim.Play(md.IdleAnimStr);
     }
 
     static Transform NewContainer(GameObject root, string name)

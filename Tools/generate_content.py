@@ -72,7 +72,13 @@ CHAPTER_THEMES = [
     ("얼어붙은 심층", "서리", "BGM_101", ["W_01", "W_03"]),
     ("왕좌의 균열", "심연", "BGM_102", ["W_02", "W_01"]),
 ]
-MOB_SUFFIX = ["슬라임", "박쥐", "망령", "골렘", "사냥개", "수호병", "그림자", "파수꾼"]
+# 이름은 반드시 실제로 쓰는 그림을 따라간다. 예전에는 아무 접미어나 붙여서
+# "이끼 골렘" 이 숲의 정령 그림으로 나오는 식이었다.
+# MOB_ART 의 순서(Mob_C0_I000~007)와 한 줄씩 짝이다.
+MOB_SPECIES = ["슬라임", "슬라임", "크로우", "정령",
+               "늑대", "고블린 창병", "해골 전사", "고블린 방패병"]
+# BOSS_ART(Boss_C0_I000~003)와 짝.
+BOSS_SPECIES = ["킹 슬라임", "둔기 슬라임", "단검 슬라임", "방패 슬라임"]
 
 # 챕터 클리어 보상 장비. EquipItemAnimator 에 실제로 상태가 있는 id(0~4)만 쓴다.
 # ponytail: EquipData 의 스탯이 전부 0 이라 지금은 연출용이다.
@@ -267,7 +273,7 @@ def build_monsters(ptable, start_level):
 
         monsters.append(dict(
             id=mid, Chapter=ch, Ability=0,
-            Name=f"{theme[1]} {MOB_SUFFIX[idx % len(MOB_SUFFIX)]}",
+            Name=f"{theme[1]} {MOB_SPECIES[idx % len(MOB_SPECIES)]}",
             Attack=float(atk), Defence=float(dfn), MaxHP=float(hp),
             AttackSpeed=float(aspd), DefenceSpeed=0.1,
             Critical=99.0, CriticalAttack=200.0,
@@ -287,7 +293,7 @@ def build_monsters(ptable, start_level):
             bart = BOSS_ART[ch % len(BOSS_ART)]
             monsters.append(dict(
                 id=NEW_MONSTER_ID_BASE + 200 + ch, Chapter=ch, Ability=0,
-                Name=f"{theme[0]}의 주인",
+                Name=f"{theme[0]}의 {BOSS_SPECIES[ch % len(BOSS_SPECIES)]}",
                 Attack=float(batk), Defence=float(bdfn), MaxHP=float(bhp),
                 AttackSpeed=1.1, DefenceSpeed=0.15,
                 Critical=20.0, CriticalAttack=200.0,
