@@ -866,18 +866,6 @@ public class AutoPlayer : MonoBehaviour
                      ref best, ref bump, ref hasBump, ref bestScore);
         }
 
-        // 이 층에서 할 일이 다 떨어졌고 올라갈 데도 없으면 아래층으로 되돌아간다.
-        // 3층(00_002)은 위층 계단이 아예 없고, 진행 경로는 2층의 보스문이다.
-        if (bestScore == long.MaxValue && hasDown)
-        {
-            foreach (PortalController portal in map.GetComponentsInChildren<PortalController>(false))
-            {
-                if (portal._portalType != PortalController.Type.DownStairs)
-                    continue;
-                Bump(map, portal.transform, PriStairs, 0, ref best, ref bump, ref hasBump, ref bestScore);
-            }
-        }
-
         // 아무 목표도 없으면 아직 안 밟아 본 칸으로 간다.
         // 층에 따라서는 밟아야만 열리는 곳이 있다 (3층 킹슬라임).
         if (bestScore == long.MaxValue)
@@ -887,6 +875,20 @@ public class AutoPlayer : MonoBehaviour
                 if (pair.Value == 0 || _visited.Contains(pair.Key))
                     continue;
                 ConsiderCell(pair.Key, PriExplore, 0, ref best, ref bump, ref hasBump, ref bestScore);
+            }
+        }
+
+        // 여기까지 왔으면 이 층에서 볼 것도, 밟아 볼 칸도 없다. 그때만 내려간다.
+        // 탐색보다 먼저 두면 올라오자마자 되돌아 내려가서 두 층을 오간다
+        // (9층과 10층 사이를 2582번 오갔다).
+        // 3층(00_002)은 위층 계단이 아예 없어서 결국 여기로 내려간다.
+        if (bestScore == long.MaxValue && hasDown)
+        {
+            foreach (PortalController portal in map.GetComponentsInChildren<PortalController>(false))
+            {
+                if (portal._portalType != PortalController.Type.DownStairs)
+                    continue;
+                Bump(map, portal.transform, PriStairs, 0, ref best, ref bump, ref hasBump, ref bestScore);
             }
         }
 
@@ -945,7 +947,10 @@ public class AutoPlayer : MonoBehaviour
         }
         if (hasBump)
             _lastBump = bump;
-        _plan = $"{start}->{best}{(hasBump ? $"+{bump}" : "")} d={_dist[best]} {dir} flood={_dist.Count}";
+        // 어느 맵을 기준으로 잰 좌표인지 같이 남긴다. 층을 오갈 때 엉뚱한 맵을
+        // 잡으면 좌표가 격자 밖으로 나오는데, 이름이 없으면 그걸 알 수가 없다.
+        _plan = $"[{map.name}] {start}->{best}{(hasBump ? $"+{bump}" : "")} " +
+                $"d={_dist[best]} {dir} flood={_dist.Count}";
         return dir;
     }
 
