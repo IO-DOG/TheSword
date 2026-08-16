@@ -58,13 +58,17 @@ public class UI_StageNamePopup : UI_Popup
         GetImage((int)Images.StageNameEnd).DOFade(1f, 1f);
         yield return new WaitForSeconds(duration);
 
-        if (this == null && gameObject == null)
+        // && 가 아니라 || 여야 한다. this 가 이미 파괴됐는데 gameObject 를 만지면
+        // MissingReferenceException 이 나고, 이 코루틴을 돌리던 워프가 같이 죽는다.
+        if (this == null)
         {
 
         }
         else
         {
-            gameObject.GetComponentInChildren<TypewriterByCharacter>().StartDisappearingText();
+            TypewriterByCharacter writer = gameObject.GetComponentInChildren<TypewriterByCharacter>();
+            if (writer != null)
+                writer.StartDisappearingText();
             GetImage((int)Images.StageNameStart).DOFade(0f, 1f);
             GetImage((int)Images.StageNameLine).DOFade(0f, 1f);
             GetImage((int)Images.StageNameEnd).DOFade(0f, 1f);

@@ -1086,11 +1086,22 @@ public class AutoPlayer : MonoBehaviour
 
         Vector3 p = g.Player.transform.position;
 
-        // 맵은 100 유닛 간격으로 놓이고 한 장은 7 유닛 남짓이다.
-        // 지금 층의 맵 근처에 서 있다면 그게 맞다 — 굳이 다른 맵을 찾지 않는다.
-        // (가장 가까운 맵만 보다가 21층에서 세 칸 떨어진 맵을 골랐다.)
-        if (byStage != null && (byStage.transform.position - p).sqrMagnitude < 50f * 50f)
+        // 어느 맵의 벽 안에 서 있는지로 정한다. 위치가 가깝다는 것만으로는
+        // 틀린다 — 11층에서 엉뚱한 맵을 잡아 걸을 수 있는 칸이 27개뿐이었고,
+        // 문 좌표가 그 층 격자에 있지도 않은 자리로 찍혔다.
+        Bounds b;
+        if (byStage != null && TryWallBounds(byStage, out b) && InsideXZ(b, p))
             return byStage;
+
+        foreach (KeyValuePair<int, GameObject> pair in g.Maps)
+        {
+            if (pair.Value == null)
+                continue;
+            if (TryWallBounds(pair.Value, out b) && InsideXZ(b, p))
+                return pair.Value;
+        }
+
+        // 벽을 아직 못 잰 순간(층이 조립되는 중)에는 가장 가까운 맵으로 둔다.
         GameObject best = null;
         float bestDist = float.MaxValue;
         foreach (KeyValuePair<int, GameObject> pair in g.Maps)
@@ -1265,31 +1276,56 @@ public class AutoPlayer : MonoBehaviour
     /// 이 층이 실제로 차지하는 범위. 콜라이더를 전부 감싸서 잰다.
     /// 층마다 한 번만 계산한다 — 맵 오브젝트가 바뀔 때까지 그대로다.
     /// </summary>
+    readonly Dictionary<GameObject, Bounds> _wallBounds = new Dictionary<GameObject, Bounds>();
+
+    /// <summary>
+    /// 이 맵이 벽으로 두르는 범위. 맵마다 한 번만 재서 들고 있는다.
+    /// 벽만 센다 — 콜라이더를 전부 감싸면 연출용 트리거나 카메라 영역까지 들어와서
+    /// 상자가 던전보다 훨씬 커지고, 맵 밖 (24,-23) 에 서 있어도 안으로 쳤다.
+    /// </summary>
+    bool TryWallBounds(GameObject map, out Bounds bounds)
+    {
+        if (_wallBounds.TryGetValue(map, out bounds))
+            return true;
+
+        bool found = false;
+        Bounds acc = new Bounds();
+        foreach (Collider c in map.GetComponentsInChildren<Collider>(false))
+        {
+            if (c.gameObject.layer != (int)Define.Layer.Wall)
+                continue;
+            if (found == false)
+            {
+                acc = c.bounds;
+                found = true;
+            }
+            else
+            {
+                acc.Encapsulate(c.bounds);
+            }
+        }
+
+        if (found == false)
+            return false;   // 아직 조립 중이다. 다음 프레임에 다시 잰다.
+
+        _wallBounds[map] = acc;
+        bounds = acc;
+        return true;
+    }
+
+    static bool InsideXZ(Bounds b, Vector3 world)
+    {
+        return world.x >= b.min.x && world.x <= b.max.x
+               && world.z >= b.min.z && world.z <= b.max.z;
+    }
+
     void UpdateBounds(GameObject map)
     {
         if (ReferenceEquals(_boundsMap, map) && _hasBounds)
             return;
 
         _boundsMap = map;
-        _hasBounds = false;
-
-        // 벽만 센다. 콜라이더를 전부 감싸면 연출용 트리거나 카메라 영역까지 들어와서
-        // 상자가 던전보다 훨씬 커지고, 맵 밖 (24,-23) 에 서 있어도 안으로 쳤다.
-        // 벽은 던전의 테두리 그 자체다.
-        foreach (Collider c in map.GetComponentsInChildren<Collider>(false))
-        {
-            if (c.gameObject.layer != (int)Define.Layer.Wall)
-                continue;
-            if (_hasBounds == false)
-            {
-                _mapBounds = c.bounds;
-                _hasBounds = true;
-            }
-            else
-            {
-                _mapBounds.Encapsulate(c.bounds);
-            }
-        }
+        _hasBounds = TryWallBounds(map, out _mapBounds);
     }
 
     /// <summary>탐색이 볼 수 있는 범위. 벽 칸 자체는 안에 들어야 한다.</summary>
