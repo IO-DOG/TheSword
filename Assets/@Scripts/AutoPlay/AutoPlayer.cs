@@ -919,23 +919,11 @@ public class AutoPlayer : MonoBehaviour
         // 보스문/기둥/레버처럼 "부딪혀야" 열리는 것들이 있고, 방향도 가려 받는다.
         if (bestScore == long.MaxValue)
         {
-            // 갈 곳이 없다면 닿는 아이템은 무조건 줍는다. 피가 가득하다고 미뤄 둔
-            // 포션 하나가 한 칸 통로를 막고 있을 수 있다 — 9층 (23,-17) 이 그랬고,
-            // 2층 보스 통로의 포션도 같은 경우였다.
-            foreach (ConsumableItem item in map.GetComponentsInChildren<ConsumableItem>(false))
-                Bump(map, item.transform, PriTopUp, 0, ref best, ref bump, ref hasBump, ref bestScore);
-            foreach (Equip eq in map.GetComponentsInChildren<Equip>(false))
-                Bump(map, eq.transform, PriEquip, 0, ref best, ref bump, ref hasBump, ref bestScore);
-
-            if (bestScore != long.MaxValue)
-            {
-                Define.MoveDir grab = (hasBump && best == start)
-                    ? ToDir(bump - start)
-                    : FirstStep(start, best);
-                _plan = $"[{map.name}] 길을 막은 아이템을 줍는다 {best}+{bump} {grab}";
-                if (grab != Define.MoveDir.None)
-                    return grab;
-            }
+            // 갈 곳이 없다. 아이템 칸을 밟을 수 있다고 치고 다시 훑어서,
+            // 길을 막고 있는 아이템 쪽으로 한 발 뗀다.
+            Define.MoveDir through = StepThroughItems(start);
+            if (through != Define.MoveDir.None)
+                return through;
 
             Define.MoveDir push = TryPush(start);
             if (push != Define.MoveDir.None)
@@ -1469,7 +1457,15 @@ public class AutoPlayer : MonoBehaviour
         Vector3 world = CellCenter(cell);
         Vector3 half = ProbeHalf;
 
-        bool blocked = Physics.CheckBox(world, half, Quaternion.identity, BlockMask,
+        // 막혔을 때는 아이템과 몬스터 칸을 밟을 수 있다고 치고 다시 훑는다.
+        // 아이템은 밟으면 주워지고, 몬스터는 부딪히면 싸움이 시작된다 —
+        // 둘 다 그 자리를 비우는 길이다.
+        //  - 9층: 아이템 하나가 한 칸 통로를 봉해 27칸에 갇혔다.
+        //  - 20층: 보스의 큰 콜라이더가 제 주변 칸을 다 막아 아무도 못 다가갔다.
+        int mask = _passItems
+            ? (BlockMask & ~ItemMask & ~(1 << (int)Define.Layer.Monster))
+            : BlockMask;
+        bool blocked = Physics.CheckBox(world, half, Quaternion.identity, mask,
                                         QueryTriggerInteraction.Collide);
 
         if (blocked == false && Physics.CheckBox(world, half, Quaternion.identity, DoorMask,
@@ -1480,6 +1476,47 @@ public class AutoPlayer : MonoBehaviour
 
         _solid[cell] = blocked;
         return blocked;
+    }
+
+    /// <summary>
+    /// 아이템/몬스터 칸을 통과할 수 있다고 보고 다시 길을 찾는다.
+    /// 평소에는 지나가다 건드리지 않으려고 그 칸들을 막아 두는데,
+    /// 한 칸 통로의 아이템이나 제 주변을 다 덮는 보스 콜라이더 앞에서는
+    /// 그 규칙이 길을 완전히 봉해 버린다.
+    /// </summary>
+    Define.MoveDir StepThroughItems(Vector2Int start)
+    {
+        var walkable = new HashSet<Vector2Int>(_dist.Keys);
+
+        _passItems = true;
+        _solid.Clear();
+        Flood(start);
+        _passItems = false;
+
+        Vector2Int target = start;
+        int bestDist = int.MaxValue;
+        foreach (KeyValuePair<Vector2Int, int> pair in _dist)
+        {
+            if (pair.Value == 0 || walkable.Contains(pair.Key))
+                continue;   // 원래도 갈 수 있던 칸은 답이 아니다
+            if (pair.Value < bestDist)
+            {
+                bestDist = pair.Value;
+                target = pair.Key;
+            }
+        }
+
+        if (bestDist == int.MaxValue)
+        {
+            // 아이템을 치워도 갈 데가 없다. 원래 탐색으로 되돌려 놓는다.
+            _solid.Clear();
+            Flood(start);
+            return Define.MoveDir.None;
+        }
+
+        Define.MoveDir dir = FirstStep(start, target);
+        _plan = $"길 막은 것(아이템/몬스터) 넘어가기 {start}->{target} d={bestDist} {dir}";
+        return dir;
     }
 
     /// <summary>걸을 수 있는 구역의 바로 바깥 칸들이 무엇에 막혀 있는지 적는다.</summary>
@@ -1588,6 +1625,9 @@ public class AutoPlayer : MonoBehaviour
 
     /// <summary>이번 프레임에 일부러 손을 놓고 게임을 기다렸는가.</summary>
     bool _waitingForGame;
+
+    /// <summary>이번 탐색에서 아이템 칸을 밟을 수 있다고 볼 것인가.</summary>
+    bool _passItems;
 
     void TickStall()
     {
