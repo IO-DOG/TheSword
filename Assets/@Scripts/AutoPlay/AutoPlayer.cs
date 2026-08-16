@@ -1089,17 +1089,31 @@ public class AutoPlayer : MonoBehaviour
         // 어느 맵의 벽 안에 서 있는지로 정한다. 위치가 가깝다는 것만으로는
         // 틀린다 — 11층에서 엉뚱한 맵을 잡아 걸을 수 있는 칸이 27개뿐이었고,
         // 문 좌표가 그 층 격자에 있지도 않은 자리로 찍혔다.
+        // 벽 콜라이더가 하나라도 멀리 떨어져 있으면 경계 상자가 부풀어서
+        // 여러 맵이 동시에 플레이어를 "포함"한다. 11층에서 두 맵을 매 프레임
+        // 번갈아 잡으며 (21,-10)/flood=27 과 (2,-3)/flood=111 을 오갔다.
+        // 포함하는 것 중에서는 중심이 가장 가까운 맵이 진짜 서 있는 맵이다.
         Bounds b;
-        if (byStage != null && TryWallBounds(byStage, out b) && InsideXZ(b, p))
-            return byStage;
-
+        GameObject inside = null;
+        float insideDist = float.MaxValue;
         foreach (KeyValuePair<int, GameObject> pair in g.Maps)
         {
             if (pair.Value == null)
                 continue;
-            if (TryWallBounds(pair.Value, out b) && InsideXZ(b, p))
-                return pair.Value;
+            if (TryWallBounds(pair.Value, out b) == false || InsideXZ(b, p) == false)
+                continue;
+
+            float d = (b.center - p).sqrMagnitude;
+            if (ReferenceEquals(pair.Value, byStage))
+                d *= 0.25f;   // 같은 값이면 지금 층의 맵을 택한다
+            if (d < insideDist)
+            {
+                insideDist = d;
+                inside = pair.Value;
+            }
         }
+        if (inside != null)
+            return inside;
 
         // 벽을 아직 못 잰 순간(층이 조립되는 중)에는 가장 가까운 맵으로 둔다.
         GameObject best = null;
