@@ -1,4 +1,4 @@
-﻿using Coffee.UIExtensions;
+using Coffee.UIExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,6 +15,7 @@ public class UI_PlayerCard : UI_BaseCard
         //Managers.Game.OnBattlePlayerDamagedAction += StartDamagedMat;
 
         _creature.Name = Managers.GetString(Define.USER_NAME_INDEX);
+        FitCreatureImage(GetImage((int)Images.CreatureImage));
         Refresh();
         _creature.OnDefenceAction += ClearDefence;
         _creature.OnHitAction += Refresh;
@@ -58,7 +59,9 @@ public class UI_PlayerCard : UI_BaseCard
         base.Attack(attacker, target);
 
         Vector3 pos = GameObject.Find("UI_MonsterCard").GetComponent<UI_MonsterCard>().GetImage((int)Images.CreatureImage).gameObject.transform.position;
-        pos = new Vector3(pos.x, pos.y + 200, pos.z);
+        // 맞는 쪽 이미지 기준으로 살짝 아래. 몬스터가 때릴 때(UI_MonsterCard)와 같은 값이다.
+        // 예전에는 +200 이라 몬스터 그림 한참 위에 떠서 어디를 때렸는지 안 보였다.
+        pos = new Vector3(pos.x, pos.y - 100, pos.z);
 
         GameObject go = GameObject.Find("UI_BattlePopup");
         if (go != null)
@@ -312,5 +315,36 @@ public class UI_PlayerCard : UI_BaseCard
         _creature.OnHitAction -= StartDamagedMat;
         _creature.OnDeadAction -= Dead;
         _creature.OnDataRefreshAction -= Refresh;
+    }
+
+    /// <summary>
+    /// 전투창 그림을 카드 안에 맞춘다.
+    ///
+    /// 카드의 그림칸은 크기가 고정인데 보스처럼 큰 스프라이트는 그대로 들어가서
+    /// 비율이 찌그러지거나 마스크에 잘려 절반만 보였다.
+    /// 비율을 지키고, 칸보다 크면 칸에 맞춰 줄인다.
+    /// </summary>
+    protected void FitCreatureImage(Image img)
+    {
+        if (img == null)
+            return;
+
+        img.preserveAspect = true;
+
+        RectTransform rt = img.rectTransform;
+        RectTransform box = rt.parent as RectTransform;
+        if (box == null)
+            return;
+
+        Vector2 limit = box.rect.size;
+        Vector2 size = rt.sizeDelta;
+        if (limit.x <= 0f || limit.y <= 0f || size.x <= 0f || size.y <= 0f)
+            return;
+
+        if (size.x > limit.x || size.y > limit.y)
+        {
+            float k = Mathf.Min(limit.x / size.x, limit.y / size.y);
+            rt.sizeDelta = size * k;
+        }
     }
 }

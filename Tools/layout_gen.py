@@ -1,4 +1,4 @@
-"""층 레이아웃(미로) 생성기.
+"""층 레이아웃 생성기 — 매직 타워(魔塔) 방식.
 
 CSV 격자 규약은 DataManager.ResetActiveDic 의 파서와 일치해야 한다:
   "0"/빈칸 = 없음(Void), "1" = 바닥, "W_xx" = 벽,
@@ -6,22 +6,20 @@ CSV 격자 규약은 DataManager.ResetActiveDic 의 파서와 일치해야 한�
   "3".."8" = 문, "11" = 스폰, "12" = 레버, "13" = 기둥, "14".."16" = 포탈
 파서는 셀에서 숫자만 뽑아 id 로 쓴다: "W_03"->3, "M_004"->4.
 
-구조
-----
-격자를 재귀 백트래킹(recursive backtracker)으로 판다. 홀수 좌표를 방으로 보고
-사이 벽을 뚫는 고전적인 방식이라, 결과는 고리가 없는 나무(spanning tree)다.
-나무이므로 두 지점을 잇는 길이 정확히 하나뿐이고 — 그게 이 층의 "정답 경로"다.
+왜 미로가 아니라 방인가
+----------------------
+매직 타워는 길 찾기 게임이 아니라 자원 배분 게임이다. 길은 한눈에 보이고,
+문제는 "무엇을 어떤 순서로 살 것인가" 다. 몬스터는 지나가려면 HP 를 내야 하는
+관문이고, 열쇠와 물약은 한정된 예산이다. 그래서 구조를 이렇게 잡는다.
 
-그 위에 문 3개를 얹는다. 문은 스폰에서 계단까지 가는 유일한 경로 위,
-서로 다른 갈래가 갈라지는 지점에 놓아 층을 네 구역으로 자른다.
+  * 방을 격자로 늘어놓고 짧은 통로로 잇는다 — 길은 보인다
+  * 몬스터는 통로 목에 세운다 — 지나가려면 반드시 값을 치른다
+  * 열쇠/물약/장비는 방 안에 둔다 — 들를지 말지가 판단거리다
+  * 문 세 개가 층을 네 구역으로 잘라 큰 순서를 정한다
+  * 곁길을 한둘 남긴다 — 지금 이 몬스터를 잡을지 돌아갈지 고르게
 
-  스폰 ─(구역0)─[초록문]─(구역1)─[노랑문]─(구역2)─[빨강문]─(구역3: 계단/보스)
-
-각 구역에는 다음 문을 여는 열쇠가 하나씩 들어간다. 열쇠는 그 구역의
-막다른 길 끝에 둔다 — 미로를 실제로 헤매야 찾을 수 있게.
-
-몬스터는 구역 번호 순으로 약한 놈부터 배치한다. 순서를 어기면 레벨이
-따라오지 못해 죽는다(그 검증은 route_check.py 가 한다).
+몬스터는 벽이 아니라 통행료다. 그래서 도달 가능성 검사도 몬스터를 지나갈 수
+있는 것으로 보고 한다(validate_layout).
 """
 
 import random
@@ -43,102 +41,56 @@ POTION_20, POTION_30, POTION_50 = "I_03", "I_04", "I_06"
 
 NEIGHBORS = ((1, 0), (-1, 0), (0, 1), (0, -1))
 
-# 미로 칸은 홀수 좌표에만 놓는다. 27x23 격자 -> 13x11 칸.
-CELL_COLS = (GRID_W - 1) // 2
-CELL_ROWS = (GRID_H - 1) // 2
+# 방 격자 3x3, 방 하나는 7x5.
+ROOMS_X, ROOMS_Y = 3, 3
+ROOM_W, ROOM_H = 7, 5
+GAP_X = (GRID_W - 2 - ROOMS_X * ROOM_W) // (ROOMS_X - 1)
+GAP_Y = (GRID_H - 2 - ROOMS_Y * ROOM_H) // (ROOMS_Y - 1)
 
 
-def _cell_to_grid(cx, cy):
-    return 1 + cx * 2, 1 + cy * 2
+def room_origin(rx, ry):
+    return 1 + rx * (ROOM_W + GAP_X), 1 + ry * (ROOM_H + GAP_Y)
 
 
-def carve_maze(rng):
-    """재귀 백트래킹으로 미로를 판다. 판 격자와 칸 사이 연결 관계를 돌려준다."""
-    grid = [[VOID] * GRID_W for _ in range(GRID_H)]
-    linked = {}          # (cx,cy) -> 이웃 칸 집합
-
-    start = (rng.randrange(CELL_COLS), rng.randrange(CELL_ROWS))
-    stack = [start]
-    seen = {start}
-    gx, gy = _cell_to_grid(*start)
-    grid[gy][gx] = FLOOR
-
-    while stack:
-        cx, cy = stack[-1]
-        nbrs = []
-        for dx, dy in NEIGHBORS:
-            nx, ny = cx + dx, cy + dy
-            if 0 <= nx < CELL_COLS and 0 <= ny < CELL_ROWS and (nx, ny) not in seen:
-                nbrs.append((nx, ny))
-        if not nbrs:
-            stack.pop()
-            continue
-
-        nxt = rng.choice(nbrs)
-        # 두 칸 사이 벽을 뚫는다
-        ax, ay = _cell_to_grid(cx, cy)
-        bx, by = _cell_to_grid(*nxt)
-        grid[(ay + by) // 2][(ax + bx) // 2] = FLOOR
-        grid[by][bx] = FLOOR
-
-        linked.setdefault((cx, cy), set()).add(nxt)
-        linked.setdefault(nxt, set()).add((cx, cy))
-        seen.add(nxt)
-        stack.append(nxt)
-
-    return grid, linked
+def room_cells(rx, ry):
+    ox, oy = room_origin(rx, ry)
+    return [(x, y) for y in range(oy, oy + ROOM_H) for x in range(ox, ox + ROOM_W)]
 
 
-def _tree_path(linked, src, dst):
-    """나무에서 두 칸을 잇는 유일한 경로."""
-    prev = {src: None}
-    stack = [src]
-    while stack:
-        cur = stack.pop()
-        if cur == dst:
-            break
-        for nb in linked.get(cur, ()):
-            if nb not in prev:
-                prev[nb] = cur
-                stack.append(nb)
-    if dst not in prev:
-        return None
-    path, cur = [], dst
-    while cur is not None:
-        path.append(cur)
-        cur = prev[cur]
-    path.reverse()
-    return path
+def room_center(rx, ry):
+    ox, oy = room_origin(rx, ry)
+    return ox + ROOM_W // 2, oy + ROOM_H // 2
 
 
-def _regions(linked, path, gates):
-    """문(gates)으로 잘린 구역들. 구역 i = 문 i 를 열기 전에 갈 수 있는 칸들."""
-    cut = set()
-    for a, b in gates:
-        cut.add((a, b))
-        cut.add((b, a))
-
-    regions = []
-    blocked = set(cut)
-    seen_all = set()
-    for i in range(len(gates) + 1):
-        src = path[0] if i == 0 else gates[i - 1][1]
-        comp, stack = {src}, [src]
-        while stack:
-            cur = stack.pop()
-            for nb in linked.get(cur, ()):
-                if (cur, nb) in blocked or nb in comp:
-                    continue
-                comp.add(nb)
-                stack.append(nb)
-        regions.append(comp - seen_all)
-        seen_all |= comp
-    return regions
+def _carve_rooms(grid):
+    for ry in range(ROOMS_Y):
+        for rx in range(ROOMS_X):
+            for (x, y) in room_cells(rx, ry):
+                grid[y][x] = FLOOR
 
 
-def _dead_ends(linked, cells):
-    """구역 안에서 갈래가 하나뿐인 칸 = 막다른 길."""
-    return [c for c in cells if len(linked.get(c, ())) == 1]
+def _corridor(grid, a, b):
+    """두 방 중심을 잇는 곧은 통로. 판 칸 목록을 돌려준다."""
+    (ax, ay), (bx, by) = a, b
+    cells = []
+    if ay == by:
+        for x in range(min(ax, bx), max(ax, bx) + 1):
+            cells.append((x, ay))
+    else:
+        for y in range(min(ay, by), max(ay, by) + 1):
+            cells.append((ax, y))
+    for (x, y) in cells:
+        grid[y][x] = FLOOR
+    return cells
+
+
+def _outside_room(cell):
+    for ry in range(ROOMS_Y):
+        for rx in range(ROOMS_X):
+            ox, oy = room_origin(rx, ry)
+            if ox <= cell[0] < ox + ROOM_W and oy <= cell[1] < oy + ROOM_H:
+                return False
+    return True
 
 
 def _add_walls(grid, wall_tiles, rng):
@@ -160,163 +112,176 @@ def _add_walls(grid, wall_tiles, rng):
                 grid[y][x] = rng.choice(wall_tiles)
 
 
+def _room_order(rng):
+    """방 아홉 개를 인접하게 훑는 한붓그리기 순서."""
+    all_rooms = [(x, y) for y in range(ROOMS_Y) for x in range(ROOMS_X)]
+    for _ in range(400):
+        order = [rng.choice(all_rooms)]
+        seen = set(order)
+        while len(order) < len(all_rooms):
+            cx, cy = order[-1]
+            nbrs = [(cx + dx, cy + dy) for dx, dy in NEIGHBORS
+                    if 0 <= cx + dx < ROOMS_X and 0 <= cy + dy < ROOMS_Y
+                    and (cx + dx, cy + dy) not in seen]
+            if not nbrs:
+                break
+            nxt = rng.choice(nbrs)
+            order.append(nxt)
+            seen.add(nxt)
+        if len(order) == len(all_rooms):
+            return order
+    return all_rooms
+
+
 def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
                        with_down_stairs=True, equip_id=None, potions=None):
     """한 층의 격자를 만든다.
 
     mob_ids : 이 층의 몬스터 id 들. 약한 놈부터 정렬돼 있어야 한다.
-              구역 순서대로 배치되므로 이 순서가 곧 "잡아야 하는 순서"다.
-    potions : 구역별 회복 아이템 목록. 예) [None, POTION_20, POTION_30, POTION_50]
+    potions : 구역별 회복 아이템 목록. 예) [[], ["I_03"], ["I_04"], ["I_06"]]
 
-    (grid, 구역별 몬스터 좌표, 문 좌표들) 반환.
+    (grid, 구역별 방 목록, 문 좌표들) 반환.
     """
     rng = random.Random(seed)
 
-    if isinstance(mob_ids, int):          # 예전 호출 형태도 받아 준다
+    if isinstance(mob_ids, int):
         mob_ids = [mob_ids] * mobs_in_floor
     mob_ids = list(mob_ids)[:mobs_in_floor]
     while len(mob_ids) < mobs_in_floor:
         mob_ids.append(mob_ids[-1])
 
-    grid, linked = carve_maze(rng)
-    cells = list(linked.keys())
+    grid = [[VOID] * GRID_W for _ in range(GRID_H)]
+    _carve_rooms(grid)
 
-    # 스폰과 계단은 미로에서 가장 멀리 떨어진 두 칸으로 잡는다.
-    # 나무에서 지름(diameter)을 구하는 두 번 BFS 방식.
-    def farthest(src):
-        dist = {src: 0}
-        stack = [src]
-        while stack:
-            cur = stack.pop()
-            for nb in linked.get(cur, ()):
-                if nb not in dist:
-                    dist[nb] = dist[cur] + 1
-                    stack.append(nb)
-        far = max(dist, key=lambda c: dist[c])
-        return far, dist
+    order = _room_order(rng)
+    centers = [room_center(*r) for r in order]
 
-    a, _ = farthest(cells[0])
-    b, _ = farthest(a)
-    spawn_cell, stairs_cell = a, b
+    # 큰 줄기. 통로마다 방 밖 구간의 한가운데가 관문 자리다.
+    gates = []
+    for i in range(len(order) - 1):
+        cells = _corridor(grid, centers[i], centers[i + 1])
+        outside = [c for c in cells if _outside_room(c)]
+        gates.append(outside[len(outside) // 2] if outside else None)
 
-    path = _tree_path(linked, spawn_cell, stairs_cell)
-    if path is None or len(path) < 8:
+    # 곁길. 길이 한 줄이면 고를 것이 없다.
+    extra = 0
+    for _ in range(20):
+        if extra >= 2:
+            break
+        a, b = rng.sample(range(len(order)), 2)
+        if abs(a - b) < 3:
+            continue
+        (ax, ay), (bx, by) = order[a], order[b]
+        if abs(ax - bx) + abs(ay - by) != 1:
+            continue
+        _corridor(grid, centers[a], centers[b])
+        extra += 1
+
+    # 구역: 방 아홉 개를 3/2/2/2 로 끊고 경계에 문을 세운다.
+    doors = []
+    for c in (3, 5, 7):
+        g = gates[c - 1]
+        if g is None:
+            return None, None, None
+        doors.append(g)
+    if len(set(doors)) != 3:
         return None, None, None
 
-    # 문은 정답 경로를 네 토막으로 자르는 자리에 놓는다.
-    steps = [len(path) * (i + 1) // 4 for i in range(3)]
-    steps = sorted(set(max(1, min(len(path) - 2, s)) for s in steps))
-    if len(steps) < 3:
-        return None, None, None
-    gates = [(path[s - 1], path[s]) for s in steps]
-
-    regions = _regions(linked, path, gates)
-    if any(len(r) == 0 for r in regions):
-        return None, None, None
+    regions = [order[0:3], order[3:5], order[5:7], order[7:9]]
 
     place = {}
+    used = set()
 
-    def put(cell, value):
-        gx, gy = _cell_to_grid(*cell)
-        place[(gx, gy)] = value
+    def free_in(rooms):
+        pool = []
+        for r in rooms:
+            pool += [c for c in room_cells(*r)
+                     if c not in used and grid[c[1]][c[0]] == FLOOR]
+        rng.shuffle(pool)
+        return pool
 
-    # 문: 두 칸 사이 벽 자리에 놓는다
-    doors = []
-    for i, (u, v) in enumerate(gates):
-        ux, uy = _cell_to_grid(*u)
-        vx, vy = _cell_to_grid(*v)
-        dx, dy = (ux + vx) // 2, (uy + vy) // 2
-        grid[dy][dx] = DOOR_BY_ORDER[i]
-        doors.append((dx, dy))
-
-    put(spawn_cell, SPAWN)
-    used = {spawn_cell, stairs_cell}
+    spawn = room_center(*order[0])
+    place[spawn] = SPAWN
+    used.add(spawn)
 
     if with_down_stairs:
-        # 아래 계단은 스폰 구역의 막다른 길에 둔다.
-        # 미로는 통로가 한 칸이라, 길목에 놓으면 그 자체가 마개가 되어
-        # 뒤쪽이 통째로 막힌다(방 구조에서는 없던 문제다).
-        on_path_now = set(path)
-        near = [c for c in _dead_ends(linked, regions[0])
-                if c not in used and c not in on_path_now]
-        if not near:
-            near = [c for c in regions[0] if c not in used and c not in on_path_now]
-        if not near:
-            return None, None, None
-        near.sort(key=lambda c: abs(c[0] - spawn_cell[0]) + abs(c[1] - spawn_cell[1]))
-        put(near[0], STAIRS_DOWN)
-        used.add(near[0])
-
-    put(stairs_cell, STAIRS_UP)
-
-    # 열쇠는 그 구역의 막다른 길 끝에. 헤매야 찾도록.
-    for i in range(3):
-        pool = [c for c in _dead_ends(linked, regions[i]) if c not in used]
-        if not pool:
-            pool = [c for c in regions[i] if c not in used]
+        pool = free_in([order[0]])
         if not pool:
             return None, None, None
-        # 정답 경로에서 먼 막다른 길일수록 좋다
-        on_path = set(path)
-        pool.sort(key=lambda c: (c in on_path, rng.random()))
-        put(pool[0], KEY_ITEM[i])
+        place[pool[0]] = STAIRS_DOWN
         used.add(pool[0])
 
-    # 몬스터: 구역 순서대로, 약한 놈부터. 정답 경로 위에 놓아 반드시 마주치게 한다.
+    up = room_center(*order[-1])
+    if up in used:
+        return None, None, None
+    place[up] = STAIRS_UP
+    used.add(up)
+
+    # 열쇠는 그 구역의 방 안에. 문을 열려면 그 구역을 훑어야 한다.
+    for i in range(3):
+        pool = free_in(regions[i])
+        if not pool:
+            return None, None, None
+        place[pool[0]] = KEY_ITEM[i]
+        used.add(pool[0])
+
+    # 몬스터는 통로 목에. 지나가려면 값을 치른다. 약한 놈부터.
     per_region = [1, 2, mobs_in_floor - 3]
-    mob_cells = []
+    gates_by_region = [gates[0:2], gates[3:5], gates[5:7]]
     idx = 0
     for r in range(3):
-        on_path = [c for c in path if c in regions[r] and c not in used]
-        spare = [c for c in regions[r] if c not in used and c not in on_path]
-        rng.shuffle(spare)
-        slots = on_path + spare
+        spots = [g for g in gates_by_region[r]
+                 if g and g not in used and g not in doors]
         for _ in range(max(0, per_region[r])):
-            if not slots:
-                return None, None, None
-            cell = slots.pop(0)
-            put(cell, f"M_{mob_ids[idx]:03d}")
+            if spots:
+                cell = spots.pop(0)
+            else:
+                pool = free_in(regions[r])
+                if not pool:
+                    return None, None, None
+                cell = pool[0]
+            place[cell] = f"M_{mob_ids[idx]:03d}"
             used.add(cell)
-            mob_cells.append(cell)
             idx += 1
 
-    # 회복 아이템: 구역별로 지정된 것만. 없으면 그 구역엔 회복이 없다.
-    # 구역마다 여러 개 놓을 수 있다. 막다른 길 쪽을 먼저 쓴다 —
-    # 들르려면 돌아가야 하니, "지금 들를까" 가 판단거리가 된다.
     potions = potions or [[], [POTION_20], [POTION_30], [POTION_30]]
-    on_path_set = set(path)
     for r, pots in enumerate(potions[:4]):
         for pot in (pots or []):
-            pool = [c for c in regions[r] if c not in used]
+            pool = free_in(regions[r])
             if not pool:
                 continue
-            pool.sort(key=lambda c: (c in on_path_set, rng.random()))
-            put(pool[0], pot)
+            place[pool[0]] = pot
             used.add(pool[0])
 
     if boss_id is not None:
-        pool = [c for c in regions[3] if c not in used]
-        pool.sort(key=lambda c: abs(c[0] - stairs_cell[0]) + abs(c[1] - stairs_cell[1]))
+        pool = free_in([order[-1]])
+        pool.sort(key=lambda c: abs(c[0] - up[0]) + abs(c[1] - up[1]))
         if not pool:
             return None, None, None
-        put(pool[0], f"B_{boss_id:03d}")
+        place[pool[0]] = f"B_{boss_id:03d}"
         used.add(pool[0])
 
     if equip_id is not None:
-        pool = [c for c in regions[3] if c not in used]
+        pool = free_in(regions[3])
         if pool:
-            put(pool[0], f"E_{equip_id:02d}")
+            place[pool[0]] = f"E_{equip_id:02d}"
             used.add(pool[0])
 
     for (x, y), v in place.items():
         grid[y][x] = v
+    for i, (x, y) in enumerate(doors):
+        grid[y][x] = DOOR_BY_ORDER[i]
 
     _add_walls(grid, wall_tiles, rng)
     return grid, regions, doors
 
 
 def validate_layout(grid, regions, doors):
-    """문을 순서대로 열며 스폰 -> 각 구역 -> 계단 도달이 가능한지 검사."""
+    """문을 순서대로 열며 스폰 -> 열쇠 -> 계단 도달이 가능한지 검사.
+
+    몬스터가 선 칸도 지나갈 수 있는 것으로 본다 — 매직 타워에서 몬스터는
+    벽이 아니라 통행료다. 문만 열쇠를 얻기 전까지 벽이다.
+    """
     start = stairs = None
     for y in range(GRID_H):
         for x in range(GRID_W):
@@ -343,13 +308,12 @@ def validate_layout(grid, regions, doors):
                 if cell == VOID or cell.startswith("W"):
                     continue
                 if (nx, ny) in door_set and (nx, ny) not in open_doors:
-                    seen.add((nx, ny))   # 문 앞까지는 갈 수 있다
+                    seen.add((nx, ny))
                     continue
                 seen.add((nx, ny))
                 stack.append((nx, ny))
         return seen
 
-    # 열쇠를 순서대로 주우며 문을 연다. 각 열쇠는 그 시점에 닿아야 한다.
     opened = set()
     for i in range(3):
         reach = flood(opened)
