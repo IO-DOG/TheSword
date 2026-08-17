@@ -323,7 +323,16 @@ public class UI_GameScene : UI_Scene
         {
             if (hit.collider.gameObject.layer == (int)Define.Layer.Monster && Managers.Cursor._cursor == CursorType.Search)
             {
-                MonsterController monster = hit.collider.gameObject.GetComponent<MonsterController>();
+                // 콜라이더가 붙은 오브젝트에 컴포넌트가 없을 수 있다(생성된 층의
+                // 몬스터가 그렇다). 문에서 겪은 것과 같은 문제라 같은 방식으로 찾는다.
+                MonsterController monster = hit.collider.GetComponent<MonsterController>();
+                if (monster == null)
+                    monster = hit.collider.GetComponentInParent<MonsterController>();
+                if (monster == null)
+                    monster = hit.collider.GetComponentInChildren<MonsterController>();
+                if (monster == null)
+                    return;
+
                 int id = monster.id;
 
                 UI_MonsterInfo monsterInfo = Managers.UI.MakeSubItem<UI_MonsterInfo>(monster.transform);

@@ -23,7 +23,9 @@ public class UI_MonsterCard : UI_BaseCard
         GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play($"{_creature.IdleAnimStr}");
         FitCreatureImage(GetImage((int)Images.CreatureImage));
         // 맵에서 본 그 색 그대로 전투창에도 올린다. 둘이 다르면 같은 몬스터로 안 보인다.
-        GetImage((int)Images.CreatureImage).color = MonsterTint.Of(_creature.id);
+        GameManager.CurMonsterData mdata = _creature as GameManager.CurMonsterData;
+        if (mdata != null)
+            GetImage((int)Images.CreatureImage).color = MonsterTint.Of(mdata.id);
 
         Refresh();
         _creature.OnDefenceAction += ClearDefence;
