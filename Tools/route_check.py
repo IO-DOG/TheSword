@@ -86,7 +86,8 @@ def play(ptable, monsters, start, blunder_floors=(), skip_floors=(), waste_floor
                     probe.hp = min(cur_hp, stats["hp"])
                     pm = Creature(md["MaxHP"], md["Attack"], md["Defence"],
                                   md["AttackSpeed"], md["DefenceSpeed"],
-                                  md["Critical"], md["CriticalAttack"])
+                                  md["Critical"], md["CriticalAttack"],
+                                  md["Ability"])
                     if simulate_battle(probe, pm)[0]:
                         break
                     usable = [t for t in pots if t[1] <= i]
@@ -101,7 +102,8 @@ def play(ptable, monsters, start, blunder_floors=(), skip_floors=(), waste_floor
             p.hp = min(cur_hp, stats["hp"])
             m = Creature(md["MaxHP"], md["Attack"], md["Defence"],
                          md["AttackSpeed"], md["DefenceSpeed"],
-                         md["Critical"], md["CriticalAttack"])
+                         md["Critical"], md["CriticalAttack"],
+                         md["Ability"])
 
             won, _, _ = simulate_battle(p, m)
             cur_hp = p.hp

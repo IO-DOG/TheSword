@@ -18,11 +18,24 @@ FIXED_DT = 0.02  # WaitForFixedUpdate 기본값
 # ---------------------------------------------------------------- 플레이어 테이블
 
 
+# 특성 (Define.Trait 과 같은 순서여야 한다)
+NONE, BEAST, MAGIC, GUARDIAN, IMMORTAL, KNIGHT, TITAN, ASSASSIN, ARMOR, KINGSLIME = range(10)
+
+TRAIT_NAME = {
+    NONE: "없음", BEAST: "야수", MAGIC: "마법", GUARDIAN: "수호", IMMORTAL: "불사",
+    KNIGHT: "검사", TITAN: "거대", ASSASSIN: "암살", ARMOR: "갑옷", KINGSLIME: "분열",
+}
+
+ARMOR_SHIELD_RATIO = 0.3   # ArmorTrait.SHIELD_RATIO — 껍질 게이지는 체력에 비례
+TITAN_ROAR = 0.2           # TitanTrait.Roar — 포효는 공격력의 20%
+
+
 class Creature:
     __slots__ = ("hp", "max_hp", "atk", "dfn", "aspd", "dspd", "crit_period",
-                 "crit_atk", "shield", "atk_count")
+                 "crit_atk", "shield", "atk_count", "trait", "armor", "hit_count",
+                 "beast_done", "stealth")
 
-    def __init__(self, hp, atk, dfn, aspd, dspd, crit_period, crit_atk):
+    def __init__(self, hp, atk, dfn, aspd, dspd, crit_period, crit_atk, trait=NONE):
         self.max_hp = self.hp = float(hp)
         self.atk = float(atk)
         self.dfn = float(dfn)
@@ -32,10 +45,15 @@ class Creature:
         self.crit_atk = float(crit_atk)
         self.shield = False
         self.atk_count = 0
+        self.trait = int(trait)
+        self.armor = self.max_hp * ARMOR_SHIELD_RATIO
+        self.hit_count = 0
+        self.beast_done = False
+        self.stealth = True
 
 
-def compute_damage(attacker, target, is_crit):
-    """CreatureClass.DefaultTrait.ExecuteAttack 이식."""
+def _standard_damage(attacker, target, is_crit):
+    """대부분의 특성이 공유하는 공격식 (DefaultTrait.ExecuteAttack)."""
     num = float(int(max(0.0, attacker.atk)))
     if is_crit:
         num = num * (attacker.crit_atk / 100.0)
@@ -47,6 +65,80 @@ def compute_damage(attacker, target, is_crit):
     elif target.shield:
         damage = 1
     return damage
+
+
+def compute_damage(attacker, target, is_crit):
+    """공격자의 특성으로 피해를 구한다 (ITrait.ExecuteAttack).
+
+    ※ 여기 있는 것은 CreatureClass 에서 실제로 도는 코드다. 기획서와 코드가
+    어긋난 곳(암살의 은신 해제, 포효의 20%, 껍질 게이지)은 코드를 기획서에
+    맞춰 고쳐 놓고 그 결과를 옮겼다. 검사만 예외로, "50% 2회" 를 코드가 아니라
+    데이터(공속 2배)로 낸다 — 총량이 사실상 같고 공격 흐름을 건드리지 않는다.
+    """
+    if attacker.trait == BEAST:
+        # 야수만 식이 다르다: 1 로 바닥을 받치지 않고, 방어 중이면 0 이다.
+        damage = int(max(0.0, attacker.atk))
+        if is_crit:
+            damage *= int(attacker.crit_atk / 100.0)
+        damage -= int(target.dfn)
+        if target.shield and is_crit:
+            damage = int(damage * 0.25)
+        elif target.shield:
+            damage = 0
+        return damage
+
+    if attacker.trait == MAGIC:
+        # 마력: 마법은 100% 치명 공격.
+        return _standard_damage(attacker, target, True)
+
+    return _standard_damage(attacker, target, is_crit)
+
+
+def apply_hit(attacker, target, damage, is_crit):
+    """맞는 쪽의 특성으로 피해를 적용한다 (ITrait.ExcuteOnHit).
+
+    돌려주는 값은 공격자가 되받은 피해(거대의 포효)다. 없으면 0.
+    """
+    back = 0
+
+    if target.trait in (NONE, BEAST, KINGSLIME):
+        damage = max(0, damage)
+    elif target.trait == IMMORTAL:
+        # 면역: 일반 공격은 20% 만, 치명 공격은 그대로.
+        if not is_crit:
+            damage = int(damage * 0.2)
+    elif target.trait == ASSASSIN:
+        # 은신: 일반 공격을 회피하고, 치명 공격을 맞으면 은신이 풀린다.
+        if target.stealth and not is_crit:
+            damage = 0
+        elif is_crit:
+            target.stealth = False
+    elif target.trait == ARMOR:
+        # 껍질: 방어 게이지가 모든 공격을 흡수하고, 다 깎이면 넘친 만큼만 들어간다.
+        target.armor -= damage
+        if target.armor <= 0:
+            damage = -target.armor
+            target.armor = 0
+        else:
+            damage = 0
+
+    target.hp -= damage
+
+    if target.trait == BEAST and not target.beast_done:
+        # 광폭: HP 10% 이하가 되면 한 번, 최대 체력의 40% 를 즉시 회복.
+        if target.hp > 0 and target.hp / target.max_hp <= 0.1:
+            target.beast_done = True
+            target.hp += target.max_hp * 0.4
+
+    if target.trait == TITAN:
+        # 포효: 5회 맞을 때마다 때린 쪽에 되받아친다.
+        target.hit_count += 1
+        if target.hit_count >= 5:
+            target.hit_count = 0
+            back = int(round(_standard_damage(target, attacker, False) * TITAN_ROAR))
+            attacker.hp -= max(0, back)
+
+    return back
 
 
 def simulate_battle(player, monster, max_seconds=600.0):
@@ -62,8 +154,21 @@ def simulate_battle(player, monster, max_seconds=600.0):
     p_t = m_t = p_def_t = m_def_t = 0.0
     player.shield = monster.shield = False
     player.atk_count = monster.atk_count = 0
+    player.armor = player.max_hp * ARMOR_SHIELD_RATIO
+    monster.armor = monster.max_hp * ARMOR_SHIELD_RATIO
+    player.hit_count = monster.hit_count = 0
+    player.beast_done = monster.beast_done = False
+    player.stealth = monster.stealth = True
     start_hp = player.hp
     t = 0.0
+
+    # 철벽: 전투 시작 시 방어 상태로 시작한다 (GuardianTrait 생성자가 게이지를 채운다).
+    if player.trait == GUARDIAN:
+        player.shield = True
+        p_def_t = p_def_cd
+    if monster.trait == GUARDIAN:
+        monster.shield = True
+        m_def_t = m_def_cd
 
     while t < max_seconds:
         # --- 공격 판정 (원본: 쿨 도달 시 공격 후 0으로 리셋)
@@ -74,12 +179,16 @@ def simulate_battle(player, monster, max_seconds=600.0):
             if player.crit_period > 0 and player.atk_count >= player.crit_period:
                 is_crit = True
                 player.atk_count = 0
+            if player.trait == MAGIC:
+                is_crit = True          # 마력: 마법은 100% 치명 공격
             dmg = compute_damage(player, monster, is_crit)
             was_shielded = monster.shield
-            monster.hp -= dmg
+            apply_hit(player, monster, dmg, is_crit)
             if was_shielded:  # OnDefenceAction -> ClearDefence
                 monster.shield = False
                 m_def_t = 0.0
+            if player.hp <= 0:          # 거대의 포효에 되맞아 죽을 수 있다
+                return False, t, start_hp - player.hp
             if monster.hp <= 0:
                 return True, t, start_hp - player.hp
 
@@ -90,12 +199,16 @@ def simulate_battle(player, monster, max_seconds=600.0):
             if monster.crit_period > 0 and monster.atk_count >= monster.crit_period:
                 is_crit = True
                 monster.atk_count = 0
+            if monster.trait == MAGIC:
+                is_crit = True
             dmg = compute_damage(monster, player, is_crit)
             was_shielded = player.shield
-            player.hp -= dmg
+            apply_hit(monster, player, dmg, is_crit)
             if was_shielded:
                 player.shield = False
                 p_def_t = 0.0
+            if monster.hp <= 0:         # 플레이어가 거대라면 포효로 몬스터가 죽을 수 있다
+                return True, t, start_hp - player.hp
             if player.hp <= 0:
                 return False, t, start_hp - player.hp
 
@@ -199,7 +312,65 @@ def exp_to_next(rows, level):
     return rows[level + 1]["need_exp"]
 
 
+def _self_check():
+    """특성이 기획서대로 도는지 최소 확인. 이식이 조용히 어긋나는 것을 막는다."""
+    def mk(trait=NONE, hp=1000, atk=100, dfn=0, crit=99):
+        return Creature(hp, atk, dfn, 1.0, 0.1, crit, 200, trait)
+
+    # 없음: 방어 중이면 1 로 막힌다
+    a, b = mk(), mk()
+    b.shield = True
+    assert compute_damage(a, b, False) == 1
+
+    # 야수: 방어 중이면 0, 그리고 10% 이하에서 한 번 회복한다
+    a, b = mk(BEAST), mk()
+    b.shield = True
+    assert compute_damage(a, b, False) == 0
+    beast = mk(BEAST, hp=1000)
+    beast.hp = 60
+    apply_hit(mk(), beast, 20, False)
+    assert beast.hp > 400, beast.hp          # 40% 회복이 들어갔다
+    before = beast.hp
+    apply_hit(mk(), beast, 10, False)
+    assert beast.hp == before - 10           # 두 번은 없다
+
+    # 마법: 일반 공격이어도 치명 배율이 붙는다
+    assert compute_damage(mk(MAGIC), mk(), False) == compute_damage(mk(), mk(), True)
+
+    # 불사: 일반 공격은 20% 만, 치명은 그대로
+    t = mk(IMMORTAL); apply_hit(mk(), t, 100, False); assert t.max_hp - t.hp == 20
+    t = mk(IMMORTAL); apply_hit(mk(), t, 100, True);  assert t.max_hp - t.hp == 100
+
+    # 암살: 일반은 회피, 치명을 맞으면 은신이 풀리고 그 뒤로는 일반도 들어간다
+    t = mk(ASSASSIN)
+    apply_hit(mk(), t, 100, False); assert t.hp == t.max_hp
+    apply_hit(mk(), t, 100, True);  assert t.max_hp - t.hp == 100
+    apply_hit(mk(), t, 100, False); assert t.max_hp - t.hp == 200
+
+    # 갑옷: 체력의 30% 만큼 흡수하고 넘친 만큼만 들어간다
+    t = mk(ARMOR, hp=100)          # 껍질 30
+    apply_hit(mk(), t, 20, False); assert t.hp == 100
+    apply_hit(mk(), t, 25, False); assert t.hp == 85, t.hp   # 15 만 관통
+    apply_hit(mk(), t, 10, False); assert t.hp == 75
+
+    # 거대: 5회째 피격에 공격력 20% 로 되받아친다
+    atk = mk(); t = mk(TITAN, atk=100)
+    for _ in range(4):
+        assert apply_hit(atk, t, 10, False) == 0
+    back = apply_hit(atk, t, 10, False)
+    assert back == 20, back
+
+    # 수호: 전투 시작부터 방어 상태
+    p = mk(); g = mk(GUARDIAN, hp=10 ** 6)
+    simulate_battle(p, g, max_seconds=0.1)
+    assert g.shield
+
+    print("특성 자체 점검 통과")
+
+
 if __name__ == "__main__":
+    _self_check()
+
     here = os.path.dirname(os.path.abspath(__file__))
     tbl = load_player_table(os.path.join(
         here, "..", "Assets", "@Resources", "Data", "Excel", "PlayerData.csv"))

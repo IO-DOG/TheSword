@@ -20,7 +20,11 @@ public class UI_MonsterCard : UI_BaseCard
         if (base.Init() == false)
             return false;
 
-        GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>().Play($"{_creature.IdleAnimStr}");
+        Animator anim = GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>();
+        anim.Play($"{_creature.IdleAnimStr}");
+        // Play 만으로는 이 프레임에 스프라이트가 바뀌지 않는다. 그대로 크기를 재면
+        // 프리팹에 박혀 있던 기본 스프라이트를 재게 되고, 보스는 계속 잘린다.
+        anim.Update(0f);
         FitCreatureImage(GetImage((int)Images.CreatureImage));
         // 맵에서 본 그 색 그대로 전투창에도 올린다. 둘이 다르면 같은 몬스터로 안 보인다.
         GameManager.CurMonsterData mdata = _creature as GameManager.CurMonsterData;
@@ -284,12 +288,7 @@ public class UI_MonsterCard : UI_BaseCard
         Managers.Game.OnBattleAction.Invoke();
 
 
-        //if (Managers.Data.MonsterDic[Managers.Game.Monster.id].RewardItem != -1)
-        //{
-        //    GameObject item = Managers.Resource.Instantiate("EquipItem", Managers.Game.DropItems.transform);
-        //    item.transform.position = Managers.Game.Monster.transform.localPosition + Vector3.back * 0.1f;
-        //    item.GetComponent<Equip>()._id = Managers.Data.MonsterDic[Managers.Game.Monster.id].RewardItem;
-        //}
+        DropReward();
 
         if(Managers.Game.Monster.GetComponent<BossMonsterController>()!= null)
         {
@@ -304,6 +303,34 @@ public class UI_MonsterCard : UI_BaseCard
         }
 
         return;
+    }
+
+    /// <summary>
+    /// 잡은 몬스터가 보상 아이템을 떨군다.
+    ///
+    /// 기획서 34·107쪽 — 장비는 맵 바닥에 떨어진 상태로 남고, 지나가면 줍는다.
+    /// 원래 코드가 있었지만 주석 처리되어 있어서 아무것도 떨어지지 않았다.
+    /// </summary>
+    void DropReward()
+    {
+        CurMonsterData mdata = _creature as CurMonsterData;
+        if (mdata == null || mdata.RewardItem < 0)
+            return;
+        if (Managers.Data.EquipDic.ContainsKey(mdata.RewardItem) == false)
+            return;
+
+        MonsterController mon = Managers.Game.Monster;
+        if (mon == null)
+            return;
+
+        GameObject item = Managers.Resource.Instantiate("EquipItem", Managers.Game.DropItems.transform);
+        Equip equip = Util.Find<Equip>(item);
+        if (equip == null)
+            return;
+
+        item.transform.position = mon.transform.position + Vector3.back * 0.1f;
+        equip._id = mdata.RewardItem;
+        equip._itemIndex_forActive = -1;   // 맵 데이터에 없는 물건이라는 표시
     }
 
     IEnumerator CoDead()
@@ -338,34 +365,5 @@ public class UI_MonsterCard : UI_BaseCard
         _creature.OnDataRefreshAction -= Refresh;
     }
 
-    /// <summary>
-    /// 전투창 그림을 카드 안에 맞춘다.
-    ///
-    /// 카드의 그림칸은 크기가 고정인데 보스처럼 큰 스프라이트는 그대로 들어가서
-    /// 비율이 찌그러지거나 마스크에 잘려 절반만 보였다.
-    /// 비율을 지키고, 칸보다 크면 칸에 맞춰 줄인다.
-    /// </summary>
-    protected void FitCreatureImage(Image img)
-    {
-        if (img == null)
-            return;
-
-        img.preserveAspect = true;
-
-        RectTransform rt = img.rectTransform;
-        RectTransform box = rt.parent as RectTransform;
-        if (box == null)
-            return;
-
-        Vector2 limit = box.rect.size;
-        Vector2 size = rt.sizeDelta;
-        if (limit.x <= 0f || limit.y <= 0f || size.x <= 0f || size.y <= 0f)
-            return;
-
-        if (size.x > limit.x || size.y > limit.y)
-        {
-            float k = Mathf.Min(limit.x / size.x, limit.y / size.y);
-            rt.sizeDelta = size * k;
-        }
     }
 }

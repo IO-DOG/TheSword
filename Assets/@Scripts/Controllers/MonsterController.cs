@@ -19,6 +19,12 @@ public class MonsterController : MonoBehaviour
     public int _monsterIndex_forActive = 0;
     public void SetMonster()
     {
+        // 이미 죽어서 꺼진 몬스터로는 전투를 열 수 없다. 꺼진 오브젝트에서는
+        // 코루틴이 시작되지 않는데, OnBattle 만 먼저 켜지면 전투는 열리지 않고
+        // 그 플래그가 참인 채로 남아 플레이어가 영영 움직이지 못한다.
+        if (gameObject.activeInHierarchy == false)
+            return;
+
         Managers.Game.OnBattle = true;
         Managers.Game.Player.SetIdleState(Managers.Game.Player._moveDir);
         Managers.Game.MonsterData.Clear();

@@ -81,6 +81,47 @@ public class UI_BaseCard : UI_Base
         GetImage((int)Images.AbilityImage).sprite = Managers.Resource.Load<Sprite>(abilityImage);
     }
 
+    /// <summary>
+    /// 전투창 그림칸에 스프라이트를 통째로 넣는다.
+    ///
+    /// 칸은 크기가 고정인데 스프라이트는 86px 짜리 몹부터 288px 짜리 보스까지 섞여
+    /// 있다. 그대로 넣으면 칸 밖으로 넘쳐 아래쪽이 잘린다.
+    /// RectTransform 의 크기를 읽어 비교하는 것으로는 안 된다 — 앵커가 늘어나 있으면
+    /// sizeDelta 는 실제 크기가 아니라 여백이라, 큰 그림에서도 판정이 걸리지 않는다.
+    /// 그래서 스프라이트 비율에서 직접 칸에 맞는 크기를 구하고, 앵커와 피벗을
+    /// 가운데로 못박아 어떤 프리팹이 와도 잘리지 않게 한다.
+    /// </summary>
+    protected void FitCreatureImage(Image img)
+    {
+        if (img == null || img.sprite == null)
+            return;
+
+        RectTransform rt = img.rectTransform;
+        RectTransform box = rt.parent as RectTransform;
+        if (box == null)
+            return;
+
+        Vector2 limit = box.rect.size;
+        Rect sp = img.sprite.rect;
+        if (limit.x <= 0f || limit.y <= 0f || sp.width <= 0f || sp.height <= 0f)
+            return;
+
+        float aspect = sp.width / sp.height;
+        float w = limit.x;
+        float h = w / aspect;
+        if (h > limit.y)
+        {
+            h = limit.y;
+            w = h * aspect;
+        }
+
+        img.preserveAspect = true;
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = Vector2.zero;
+        rt.sizeDelta = new Vector2(w, h);
+    }
+
     public virtual void Refresh()
     {
         StartCoroutine(CoRefresh());

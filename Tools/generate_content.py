@@ -27,6 +27,8 @@ import random
 from thesword_balance import (
     Creature, extend_player_table, exp_to_next, load_player_table,
     make_player, player_stats_at, simulate_battle,
+    NONE, BEAST, MAGIC, GUARDIAN, IMMORTAL, KNIGHT, TITAN, ASSASSIN, ARMOR,
+    TRAIT_NAME,
 )
 from layout_gen import build_floor_layout, validate_layout
 
@@ -63,7 +65,9 @@ SCRIPT_MON_DESC_BASE = 20100   # 기존 20000~20008 뒤
 # 이 순서대로 만날 수밖에 없다 — 그게 이 층의 "정답 경로"다.
 MOB_LOSS_RAMP = [0.72, 0.88, 1.00, 1.16, 1.34]
 
-MOB_HP_LOSS = 0.040
+# 특성 8종을 넣으면서 다시 조율한 값. 0.040 은 실수 12회까지 봐줘서 헐렁하고,
+# 0.048 부터는 한 번도 못 봐준다. 0.044 가 설계 목표(실수 9회)에 맞는다.
+MOB_HP_LOSS = 0.044
 MOB_DURATION = 16.0
 BOSS_HP_LOSS = 0.28
 BOSS_DURATION = 45.0
@@ -107,6 +111,50 @@ MOB_SPECIES = ["슬라임", "슬라임", "크로우", "정령",
                "왕 슬라임", "둔기병", "단검병", "방패병"]
 # BOSS_ART(Boss_C0_I000~003)와 짝.
 BOSS_SPECIES = ["킹 슬라임", "둔기 슬라임", "단검 슬라임", "방패 슬라임"]
+
+# ---------------------------------------------------------------- 특성 (기획서 13·53·71쪽)
+#
+# 기획서 13쪽: "몬스터 단위 공략이 아닌, 챕터 별 유리한 특성과 공략 방법 고민."
+# 그래서 특성을 무작위로 흩지 않고 챕터마다 성격을 준다. 층 안에서는 서열이
+# 올라갈수록 까다로운 특성이 나온다(MOB_LOSS_RAMP 와 같은 순서).
+#
+#   챕터 0  도입      — 특성 없는 상대로 기본을 익힌다
+#   챕터 1  방어       — 수호·갑옷. 방어를 어떻게 뚫을지가 문제가 된다
+#   챕터 2  화력       — 마법·거대. 오래 끌면 죽는다, 빨리 끝내야 한다
+#   챕터 3  치명타     — 불사·암살. 치명 주기를 언제 쓸지가 문제가 된다
+#   챕터 4  총복습     — 앞의 것이 전부 섞여 나온다
+CHAPTER_TRAITS = [
+    [NONE,     NONE,     BEAST,    NONE,     GUARDIAN],
+    [NONE,     GUARDIAN, ARMOR,    GUARDIAN, KNIGHT],
+    [KNIGHT,   MAGIC,    TITAN,    MAGIC,    TITAN],
+    [IMMORTAL, ASSASSIN, IMMORTAL, ASSASSIN, BEAST],
+    [ARMOR,    MAGIC,    IMMORTAL, TITAN,    ASSASSIN],
+]
+# 챕터 보스의 특성. 챕터의 성격을 보스가 대표한다.
+BOSS_TRAITS = [BEAST, GUARDIAN, TITAN, IMMORTAL, MAGIC]
+
+# 챕터 보스가 떨구는 장비 (EquipData.csv 의 ID).
+# 1~4 = 부츠, 5~8 = 목걸이. 둘 다 능력치가 0 이고 유틸만 해금한다.
+BOSS_REWARD = [1, 5, 2, 6, 3]
+
+# 특성별 스탯 성격 (기획서 53쪽의 "능력치 특징"을 배수로 옮긴 것).
+# 절대값이 아니라 배수다 — 실제 수치는 특성을 켠 시뮬레이터로 역산하므로,
+# 여기서는 "어느 쪽으로 치우친 상대인가" 만 정한다.
+TRAIT_FLAVOR = {
+    NONE:     dict(aspd=1.00, dfn=1.0, dspd=1.00, dur=1.0),
+    BEAST:    dict(aspd=0.90, dfn=1.5, dspd=1.00, dur=1.2),  # 체력·방어 높음
+    MAGIC:    dict(aspd=0.70, dfn=0.6, dspd=1.00, dur=0.8),  # 낮은 체력, 느린 마법
+    GUARDIAN: dict(aspd=0.90, dfn=1.5, dspd=2.00, dur=1.0),  # 높은 방어, 빠른 방어속도
+    IMMORTAL: dict(aspd=0.60, dfn=0.6, dspd=0.60, dur=1.0),  # 낮은 스탯, 매우 느림
+    KNIGHT:   dict(aspd=2.00, dfn=0.8, dspd=1.00, dur=0.9),  # 쾌속 = 50%x2회를 공속으로
+    TITAN:    dict(aspd=0.80, dfn=1.0, dspd=0.80, dur=1.3),  # 많은 체력, 높은 공격
+    ASSASSIN: dict(aspd=1.30, dfn=0.5, dspd=0.50, dur=1.0),  # 은신, 빠른 공격속도
+    ARMOR:    dict(aspd=0.90, dfn=0.0, dspd=0.01, dur=1.0),  # 방어 불가, 방어력 0
+}
+
+
+def trait_of(chapter, order):
+    return CHAPTER_TRAITS[chapter % len(CHAPTER_TRAITS)][order % MOBS_PER_FLOOR]
 
 # 챕터 클리어 보상 장비. EquipItemAnimator 에 실제로 상태가 있는 id(0~4)만 쓴다.
 # ponytail: EquipData 의 스탯이 전부 0 이라 지금은 연출용이다.
@@ -228,18 +276,26 @@ def simulate_handmade(ptable):
 
 # ------------------------------------------------------------------ 밸런싱
 
-def solve_monster(ptable, level, hp_loss_target, duration_target, aspd):
+def solve_monster(ptable, level, hp_loss_target, duration_target, aspd, trait=NONE):
     """플레이어 레벨에 맞춰 몬스터 스탯을 역산한다.
 
     HP  -> 전투 지속시간이 목표가 되도록 (플레이어 DPS 기준)
     ATK -> 플레이어 HP 손실이 목표 비율이 되도록
     둘 다 시뮬레이터를 기준으로 이분 탐색한다.
+
+    특성을 켠 채로 역산한다. 이게 중요하다 — 암살은 치명타가 아닌 공격을 전부
+    회피하고 불사는 80% 를 흘리므로, 특성을 끄고 뽑은 수치는 실제와 몇 배씩
+    어긋난다. 이분 탐색이 특성까지 포함해서 답을 찾게 둔다.
     """
     ps = player_stats_at(ptable, level)
-    dfn_m = max(0, int(ps["atk"] * 0.30))
+    flavor = TRAIT_FLAVOR[trait]
+    aspd = round(aspd * flavor["aspd"], 2)
+    dspd = round(max(0.01, 0.1 * flavor["dspd"]), 3)
+    duration_target *= flavor["dur"]
+    dfn_m = max(0, int(ps["atk"] * 0.30 * flavor["dfn"]))
 
     def build(hp, atk):
-        return Creature(hp, atk, dfn_m, aspd, 0.1, 99, 200)
+        return Creature(hp, atk, dfn_m, aspd, dspd, 99, 200, trait)
 
     # 1) HP 이분 탐색: 지속시간 목표
     lo, hi = 1.0, max(50.0, ps["atk"] * duration_target)
@@ -255,7 +311,11 @@ def solve_monster(ptable, level, hp_loss_target, duration_target, aspd):
 
     # 2) ATK 이분 탐색: HP 손실 목표
     target_loss = ps["hp"] * hp_loss_target
-    lo, hi = float(int(ps["dfn"])), float(int(ps["dfn"])) + max(20.0, ps["hp"])
+    # 하한은 0 이어야 한다. 예전에는 "공격력이 방어력보다 작으면 피해가 없다" 는
+    # 셈으로 DEF 에서 시작했는데, 마법은 공격력에 치명 배율을 먼저 곱하므로
+    # 하한에서 이미 목표를 넘어 이분 탐색이 한 칸도 움직이지 못했다.
+    # 그 결과 마법 몬스터만 목표의 10배를 때렸다.
+    lo, hi = 0.0, float(int(ps["dfn"])) + max(20.0, ps["hp"])
     for _ in range(40):
         mid = (lo + hi) / 2
         p = make_player(ptable, level)
@@ -266,7 +326,9 @@ def solve_monster(ptable, level, hp_loss_target, duration_target, aspd):
             lo = mid
     atk_m = max(1.0, round(lo))
 
-    return hp_m, atk_m, dfn_m
+    # 특성이 속도까지 바꾸므로 실제로 쓴 값을 돌려준다. 데이터에 들어가는 값과
+    # 검증에 쓰인 값이 달라지면 검증이 의미가 없다.
+    return hp_m, atk_m, dfn_m, aspd, dspd
 
 
 def target_level(floor, start_level):
@@ -290,17 +352,15 @@ def build_monsters(ptable, start_level):
         ramp = 1.0 + 0.35 * (idx / (FLOORS_PER_CHAPTER - 1))
         aspd = round(0.9 + 0.4 * (idx / (FLOORS_PER_CHAPTER - 1)), 2)
 
-        hp, atk, dfn = solve_monster(
-            ptable, level, MOB_HP_LOSS * ramp, MOB_DURATION * ramp, aspd)
-
         theme = CHAPTER_THEMES[ch]
         # 층 몹 전부를 잡으면 정확히 1레벨
         reward = round(exp_to_next(ptable, level) / MOBS_PER_FLOOR)
 
         for k, ramp_k in enumerate(MOB_LOSS_RAMP[:MOBS_PER_FLOOR]):
-            hp_k, atk_k, dfn_k = solve_monster(
+            trait = trait_of(ch, k)
+            hp_k, atk_k, dfn_k, aspd_k, dspd_k = solve_monster(
                 ptable, level, MOB_HP_LOSS * ramp * ramp_k,
-                MOB_DURATION * ramp, aspd)
+                MOB_DURATION * ramp, aspd, trait)
             # 가장 센 놈은 정예(보스 그림)로. 층마다 눈에 띄는 상대가 하나씩 선다.
             if k == MOBS_PER_FLOOR - 1:
                 art_idx = 8 + ((idx + ch) % 4)
@@ -308,10 +368,10 @@ def build_monsters(ptable, start_level):
                 art_idx = (idx + k) % 8
             art = MOB_ART[art_idx]
             monsters.append(dict(
-                id=MOB_ID_BASE + floor * 8 + k, Chapter=ch, Ability=0,
+                id=MOB_ID_BASE + floor * 8 + k, Chapter=ch, Ability=trait,
                 Name=f"{theme[1]} {MOB_SPECIES[art_idx]}",
                 Attack=float(atk_k), Defence=float(dfn_k), MaxHP=float(hp_k),
-                AttackSpeed=float(aspd), DefenceSpeed=0.1,
+                AttackSpeed=float(aspd_k), DefenceSpeed=float(dspd_k),
                 Critical=99.0, CriticalAttack=200.0,
                 RewardExp=float(reward), RewardItem=-1,
                 IdleAnimStr=art[0], AttackAnimStr=art[1],
@@ -324,17 +384,21 @@ def build_monsters(ptable, start_level):
             ))
 
         if boss:
-            bhp, batk, bdfn = solve_monster(
-                ptable, level, BOSS_HP_LOSS, BOSS_DURATION, 1.1)
+            btrait = BOSS_TRAITS[ch % len(BOSS_TRAITS)]
+            bhp, batk, bdfn, baspd, bdspd = solve_monster(
+                ptable, level, BOSS_HP_LOSS, BOSS_DURATION, 1.1, btrait)
             bart = BOSS_ART[ch % len(BOSS_ART)]
             monsters.append(dict(
-                id=BOSS_ID_BASE + ch, Chapter=ch, Ability=0,
+                id=BOSS_ID_BASE + ch, Chapter=ch, Ability=btrait,
                 Name=f"{theme[0]}의 {BOSS_SPECIES[ch % len(BOSS_SPECIES)]}",
                 Attack=float(batk), Defence=float(bdfn), MaxHP=float(bhp),
-                AttackSpeed=1.1, DefenceSpeed=0.15,
+                AttackSpeed=float(baspd), DefenceSpeed=float(max(0.15, bdspd)),
                 Critical=20.0, CriticalAttack=200.0,
                 RewardExp=float(round(exp_to_next(ptable, level) * 0.6)),
-                RewardItem=-1,
+                # 기획서 107쪽 — 보스를 잡으면 보상 아이템을 떨군다.
+                # 능력치가 0 인 부츠·목걸이만 준다(기획서 34쪽의 "유틸 기능 해금").
+                # 공격력이 붙은 무기를 주면 그 뒤 층의 밸런스가 통째로 어긋난다.
+                RewardItem=BOSS_REWARD[ch % len(BOSS_REWARD)],
                 IdleAnimStr=bart[0], AttackAnimStr=bart[1],
                 BattleParticleAttack="FX_WeaponSlash_00",
                 BattleParticleHit="FX_WeaponHit_18",

@@ -43,7 +43,11 @@ public class Equip : MonoBehaviour
         Debug.Log("Pickup");
         Define.Types type = (Define.Types)Managers.Data.EquipDic[Id].Type;
         Managers.Game.PlayerData.Inventory[(int)type].Add(Id);
-        Managers.Data.EItemActiveDic[_itemIndex_forActive] = false;
+
+        // 몬스터가 떨군 것은 맵 데이터에 없다. 인덱스가 없는데 0 번을 지우면
+        // 그 층에 원래 있던 다른 장비가 이미 주운 것으로 기록된다.
+        if (_itemIndex_forActive >= 0)
+            Managers.Data.EItemActiveDic[_itemIndex_forActive] = false;
 
         gameObject.SetActive(false);
 

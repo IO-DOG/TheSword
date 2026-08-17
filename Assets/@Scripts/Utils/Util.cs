@@ -33,15 +33,25 @@ public static class Util
 
         // 부모로 한 칸씩 올라가며 그 아래를 통째로 뒤진다. 형제 자식에 붙어 있는
         // 경우(문·포탈이 그렇다)까지 잡으려면 위로만 올라가는 것으로는 모자란다.
+        //
+        // 꺼진 것도 뒤지되 켜진 것을 먼저 준다. 한 칸에는 죽어서 꺼진 몬스터와
+        // 살아 있는 것이 같이 있을 수 있는데, 꺼진 쪽을 집으면 열리지 않는 전투가
+        // 열린 것으로 처리된다.
+        T inactive = null;
         Transform t = go.transform;
         for (int depth = 0; depth < 4 && t != null; depth++)
         {
-            T found = t.GetComponentInChildren<T>(true);
-            if (found != null)
-                return found;
+            T[] found = t.GetComponentsInChildren<T>(true);
+            for (int i = 0; i < found.Length; i++)
+            {
+                if (found[i].gameObject.activeInHierarchy)
+                    return found[i];
+                if (inactive == null)
+                    inactive = found[i];
+            }
             t = t.parent;
         }
-        return null;
+        return inactive;
     }
 
     public static GameObject FindChild(GameObject go, string name = null, bool recursive = false)

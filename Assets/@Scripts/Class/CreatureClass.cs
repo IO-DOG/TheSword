@@ -289,7 +289,8 @@ public class CreatureClass : MonoBehaviour
 
         public int Roar(CreatureData attacker, CreatureData target)
         {
-            float num = (int)Mathf.Max(0, attacker.Attack);
+            // 기획서 53쪽: 포효는 공격력의 20%. 감쇠 없이 전탄으로 들어가고 있었다.
+            float num = (int)Mathf.Max(0, attacker.Attack) * 0.2f;
             if (attacker.IsCritical) num = num * (attacker.CriticalAttack / 100);
             int damage = Mathf.RoundToInt(num);
             damage -= (int)target.Defence;
@@ -313,8 +314,11 @@ public class CreatureClass : MonoBehaviour
 
         public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
-            if (!attacker.IsCritical) damage = 0;
-            else flag = false;
+            // 기획서 53쪽: 일반 공격은 회피하지만, 치명 공격을 맞으면 은신이 풀린다.
+            // flag 를 내려놓고 쓰지 않아서, 은신이 영영 풀리지 않고 있었다 —
+            // 치명 주기가 긴 후반에는 사실상 못 죽이는 상대가 된다.
+            if (flag && !attacker.IsCritical) damage = 0;
+            else if (attacker.IsCritical) flag = false;
 
             target.CurHP -= damage;
             if (target.CurHP <= 0)
@@ -341,7 +345,12 @@ public class CreatureClass : MonoBehaviour
 
     public class ArmorTrait : ITrait
     {
-        int shield = 10;
+        // 기획서 53쪽: 피격 시 방어 게이지가 깎이며 모든 공격을 흡수하고,
+        // 게이지가 다 사라지면 껍질이 해제된다.
+        // 10 으로 고정돼 있어서 후반에는 첫 공격에 그대로 뚫렸다 — 게이지가
+        // 체력에 비례해야 층이 올라가도 "껍질을 깨는" 상대로 남는다.
+        const float SHIELD_RATIO = 0.3f;
+        float shield = -1f;
 
         public void ExcuteOnDead(CreatureData creature)
         {
@@ -351,11 +360,14 @@ public class CreatureClass : MonoBehaviour
 
         public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
         {
+            if (shield < 0f)
+                shield = target.MaxHP * SHIELD_RATIO;
+
             shield -= damage;
-            if (shield <= 0)
+            if (shield <= 0f)
             {
-                damage = -shield;
-                shield = 0;
+                damage = (int)(-shield);
+                shield = 0f;
             }
             else
             {

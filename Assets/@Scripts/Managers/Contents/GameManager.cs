@@ -392,10 +392,11 @@ public class GameManager
 
         RefreshBossGates();
 
-        // 챕터별 분위기: 조명 색 + 파티클 (테마 프리팹이 없는 챕터는 조용히 넘어간다)
+        // 챕터별 분위기: 시간대(해의 각도·세기·색) + 안개 + 파티클.
+        // 기획서 118~123쪽이 테마를 그 두 가지로 정의한다 — 색만 바꾸면 같은 곳에
+        // 필터를 씌운 것으로 보이고, 그림자 방향과 안개가 같이 바뀌어야 다른 장소가 된다.
         int chapterIndex = MapBuilder.GetChapter(mapId);
-        if (DirectionalLight != null)
-            DirectionalLight.color = MapBuilder.GetChapterLight(chapterIndex);
+        ChapterTheme.Apply(chapterIndex, DirectionalLight);
 
         PlayChapterBGM(mapId);
 
