@@ -65,9 +65,10 @@ SCRIPT_MON_DESC_BASE = 20100   # 기존 20000~20008 뒤
 # 이 순서대로 만날 수밖에 없다 — 그게 이 층의 "정답 경로"다.
 MOB_LOSS_RAMP = [0.72, 0.88, 1.00, 1.16, 1.34]
 
-# 특성 8종을 넣으면서 다시 조율한 값. 0.040 은 실수 12회까지 봐줘서 헐렁하고,
-# 0.048 부터는 한 번도 못 봐준다. 0.044 가 설계 목표(실수 9회)에 맞는다.
-MOB_HP_LOSS = 0.044
+# 특성 8종 + 룬을 넣고 다시 조율한 값.
+# 룬이 자연 성장의 약 13% 를 맡으면서 헐렁해져 0.044 는 실수 13회까지 봐준다.
+# 0.0465 부터는 한 번도 못 봐주는 절벽이라, 그 앞인 0.046 을 쓴다 (실수 10회).
+MOB_HP_LOSS = 0.046
 MOB_DURATION = 16.0
 BOSS_HP_LOSS = 0.28
 BOSS_DURATION = 45.0
@@ -155,6 +156,54 @@ TRAIT_FLAVOR = {
 
 def trait_of(chapter, order):
     return CHAPTER_TRAITS[chapter % len(CHAPTER_TRAITS)][order % MOBS_PER_FLOOR]
+
+
+# ---------------------------------------------------------------- 룬 (기획서 65·81쪽)
+#
+# "능력치 증가 아이템 / 획득 시, 공방체 능력치 증가", "획득과 동시에 사용되며
+# 공방체 스텟을 영구히 증가시켜준다".
+#
+# 값은 새로 만들지 않고 ConsumableItemData 에 이미 있는 9/10/11 을 쓴다.
+# 공격력 +1 은 총량으로 보면 작아 보이지만, 플레이어가 한 레벨에 얻는 것이 +5 다.
+# 즉 룬 하나가 반 레벨의 5분의 1 — 세 층에 하나씩 같은 종류가 돌아오므로
+# 자연 성장의 약 13% 를 룬이 맡는다. 층이 올라가도 이 비율은 그대로다
+# (레벨당 증가치가 일정하므로 챕터별로 등급을 나눌 필요가 없다).
+RUNE_CYCLE = ["I_09", "I_10", "I_11"]
+RUNE_GAIN = {"I_09": ("atk", 1.0), "I_10": ("dfn", 1.0), "I_11": ("hp", 5.0)}
+
+
+def rune_of(floor):
+    return RUNE_CYCLE[(floor - HANDMADE_FLOORS - 1) % len(RUNE_CYCLE)]
+
+
+def rune_bonus(floor):
+    """그 층에서 싸울 때 이미 들고 있는 룬의 합.
+
+    룬은 층의 마지막 구역(계단 앞)에 있다. 그래서 F층의 룬은 F층 전투가 끝난
+    뒤에 얻고, 효과는 F+1층부터다. 이 한 칸 차이를 맞춰야 역산과 실제가 어긋나지 않는다.
+    """
+    bonus = {"atk": 0.0, "dfn": 0.0, "hp": 0.0}
+    for f in range(HANDMADE_FLOORS + 1, floor):
+        stat, amount = RUNE_GAIN[rune_of(f)]
+        bonus[stat] += amount
+    return bonus
+
+
+def stats_with_runes(ptable, level, floor):
+    """레벨 스탯 + 그 층까지 모은 룬."""
+    s = dict(player_stats_at(ptable, level))
+    for stat, amount in rune_bonus(floor).items():
+        s[stat] += amount
+    return s
+
+
+def player_with_runes(ptable, level, floor, cur_hp=None):
+    s = stats_with_runes(ptable, level, floor)
+    c = Creature(s["hp"], s["atk"], s["dfn"], s["aspd"], s["dspd"],
+                 s["crit"], s["crit_atk"])
+    if cur_hp is not None:
+        c.hp = cur_hp
+    return c
 
 # 챕터 클리어 보상 장비. EquipItemAnimator 에 실제로 상태가 있는 id(0~4)만 쓴다.
 # ponytail: EquipData 의 스탯이 전부 0 이라 지금은 연출용이다.
@@ -276,7 +325,8 @@ def simulate_handmade(ptable):
 
 # ------------------------------------------------------------------ 밸런싱
 
-def solve_monster(ptable, level, hp_loss_target, duration_target, aspd, trait=NONE):
+def solve_monster(ptable, level, hp_loss_target, duration_target, aspd, trait=NONE,
+                  floor=None):
     """플레이어 레벨에 맞춰 몬스터 스탯을 역산한다.
 
     HP  -> 전투 지속시간이 목표가 되도록 (플레이어 DPS 기준)
@@ -287,7 +337,7 @@ def solve_monster(ptable, level, hp_loss_target, duration_target, aspd, trait=NO
     회피하고 불사는 80% 를 흘리므로, 특성을 끄고 뽑은 수치는 실제와 몇 배씩
     어긋난다. 이분 탐색이 특성까지 포함해서 답을 찾게 둔다.
     """
-    ps = player_stats_at(ptable, level)
+    ps = player_stats_at(ptable, level) if floor is None else stats_with_runes(ptable, level, floor)
     flavor = TRAIT_FLAVOR[trait]
     aspd = round(aspd * flavor["aspd"], 2)
     dspd = round(max(0.01, 0.1 * flavor["dspd"]), 3)
@@ -301,7 +351,7 @@ def solve_monster(ptable, level, hp_loss_target, duration_target, aspd, trait=NO
     lo, hi = 1.0, max(50.0, ps["atk"] * duration_target)
     for _ in range(40):
         mid = (lo + hi) / 2
-        p = make_player(ptable, level)
+        p = make_player(ptable, level) if floor is None else player_with_runes(ptable, level, floor)
         won, dur, _ = simulate_battle(p, build(mid, 1))
         if not won or dur < duration_target:
             lo = mid
@@ -318,7 +368,7 @@ def solve_monster(ptable, level, hp_loss_target, duration_target, aspd, trait=NO
     lo, hi = 0.0, float(int(ps["dfn"])) + max(20.0, ps["hp"])
     for _ in range(40):
         mid = (lo + hi) / 2
-        p = make_player(ptable, level)
+        p = make_player(ptable, level) if floor is None else player_with_runes(ptable, level, floor)
         won, _, loss = simulate_battle(p, build(hp_m, mid))
         if not won or loss > target_loss:
             hi = mid
@@ -360,7 +410,7 @@ def build_monsters(ptable, start_level):
             trait = trait_of(ch, k)
             hp_k, atk_k, dfn_k, aspd_k, dspd_k = solve_monster(
                 ptable, level, MOB_HP_LOSS * ramp * ramp_k,
-                MOB_DURATION * ramp, aspd, trait)
+                MOB_DURATION * ramp, aspd, trait, floor)
             # 가장 센 놈은 정예(보스 그림)로. 층마다 눈에 띄는 상대가 하나씩 선다.
             if k == MOBS_PER_FLOOR - 1:
                 art_idx = 8 + ((idx + ch) % 4)
@@ -386,7 +436,7 @@ def build_monsters(ptable, start_level):
         if boss:
             btrait = BOSS_TRAITS[ch % len(BOSS_TRAITS)]
             bhp, batk, bdfn, baspd, bdspd = solve_monster(
-                ptable, level, BOSS_HP_LOSS, BOSS_DURATION, 1.1, btrait)
+                ptable, level, BOSS_HP_LOSS, BOSS_DURATION, 1.1, btrait, floor)
             bart = BOSS_ART[ch % len(BOSS_ART)]
             monsters.append(dict(
                 id=BOSS_ID_BASE + ch, Chapter=ch, Ability=btrait,
@@ -449,10 +499,10 @@ def simulate_run(ptable, monsters, start_state, verbose=True):
         potions.append((EXIT_POTION, len(fights)))
 
         for i, md in enumerate(fights):
-            stats = player_stats_at(ptable, level)
+            stats = stats_with_runes(ptable, level, floor)
             m = Creature(md["MaxHP"], md["Attack"], md["Defence"],
                          md["AttackSpeed"], md["DefenceSpeed"],
-                         md["Critical"], md["CriticalAttack"])
+                         md["Critical"], md["CriticalAttack"], md["Ability"])
 
             # 포션은 주우면 즉시 회복이고 최대치에서 잘린다(ConsumableItem.PickUp).
             # 그래서 넘치게 마시면 그만큼 버리는 것이고, 정답 경로는 "죽지 않을
@@ -464,7 +514,7 @@ def simulate_run(ptable, monsters, start_state, verbose=True):
                 probe.hp = min(cur_hp, stats["hp"])
                 probe_m = Creature(md["MaxHP"], md["Attack"], md["Defence"],
                                    md["AttackSpeed"], md["DefenceSpeed"],
-                                   md["Critical"], md["CriticalAttack"])
+                                   md["Critical"], md["CriticalAttack"], md["Ability"])
                 survives, _, _ = simulate_battle(probe, probe_m)
                 if survives:
                     break
@@ -495,9 +545,9 @@ def simulate_run(ptable, monsters, start_state, verbose=True):
                 level += 1
                 cur_hp += ptable[level]["hp"]  # LevelUp() 은 CurHP 도 같이 올린다
 
-        stats = player_stats_at(ptable, level)
         # 계단 앞 회복은 올라가기 직전에 든다. 이미 가득하면 그만큼 버린다.
-        stats_end = player_stats_at(ptable, level)
+        # 이 층의 룬도 계단 앞에 있으니 여기서 최대 체력이 올라간다.
+        stats_end = stats_with_runes(ptable, level, floor + 1)
         for heal, avail_at in list(potions):
             if avail_at >= len(fights):
                 cur_hp = min(stats_end["hp"], cur_hp + stats_end["hp"] * heal)
@@ -668,7 +718,8 @@ def emit_layouts(monsters, write=True):
             g, origins, doors = build_floor_layout(
                 [m["id"] for m in mobs], boss["id"] if boss else None, walls,
                 seed=floor * 1000 + attempt, mobs_in_floor=MOBS_PER_FLOOR,
-                equip_id=CHAPTER_EQUIP_REWARD.get(floor), potions=pots)
+                equip_id=CHAPTER_EQUIP_REWARD.get(floor), potions=pots,
+                rune=rune_of(floor))
             if g is None:
                 continue
             ok, err = validate_layout(g, origins, doors)

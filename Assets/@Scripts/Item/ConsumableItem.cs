@@ -114,6 +114,16 @@ public class ConsumableItem : MonoBehaviour
                     particle.transform.localScale = new Vector3(0.25f, 0.25f/3f, 0.25f);
                     break;
                 }
+            // 룬. 기획서 29쪽에 FX_RunStone_Red/Blue/Green 이 있는데 분기가 없어서
+            // 스탯만 조용히 오르고 아무 이펙트도 나지 않았다.
+            case 9:
+            case 10:
+            case 11:
+                {
+                    GameObject particle = Managers.Resource.Instantiate(Managers.Data.ConsumableItemDic[id].PrefabName, Managers.Game.Player.transform);
+                    particle.transform.localScale = new Vector3(0.2f, 0.2f, 0.1f);
+                    break;
+                }
         }
     }
 }

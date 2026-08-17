@@ -39,6 +39,10 @@ KEY_ITEM = {0: "I_00", 1: "I_01", 2: "I_02"}  # 초록/노랑/빨강 열쇠
 # 회복 아이템. 값은 ConsumableItemData 의 회복%와 짝이어야 한다.
 POTION_20, POTION_30, POTION_50 = "I_03", "I_04", "I_06"
 
+# 룬 = 스텟 영구 증가 (기획서 65·81쪽). ConsumableItemData 9/10/11 과 짝:
+# 공격력 +1 / 방어력 +1 / 최대 체력 +5. 한 층에 하나씩 돌려가며 놓는다.
+RUNE_ATK, RUNE_DEF, RUNE_HP = "I_09", "I_10", "I_11"
+
 NEIGHBORS = ((1, 0), (-1, 0), (0, 1), (0, -1))
 
 # 방 격자 3x3, 방 하나는 7x5.
@@ -147,11 +151,12 @@ def _off_corridor_cells(room):
 
 
 def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
-                       with_down_stairs=True, equip_id=None, potions=None):
+                       with_down_stairs=True, equip_id=None, potions=None, rune=None):
     """한 층의 격자를 만든다.
 
     mob_ids : 이 층의 몬스터 id 들. 약한 놈부터 정렬돼 있어야 한다.
     potions : 구역별 회복 아이템 목록. 예) [[], ["I_03"], ["I_04"], ["I_06"]]
+    rune    : 이 층에 놓을 룬 셀 코드. 마지막 구역(계단 앞)에 둔다.
 
     (grid, 구역별 방 목록, 문 좌표들) 반환.
     """
@@ -270,6 +275,14 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
             if not pool:
                 continue
             place[pool[0]] = pot
+            used.add(pool[0])
+
+    if rune is not None:
+        # 룬은 마지막 구역에 둔다. 층을 다 돌고 계단으로 가는 길에 반드시 지나므로
+        # 성장이 결정적이다 — 얻을지 말지가 흔들리면 완주 보장을 계산할 수 없다.
+        pool = free_in(regions[3])
+        if pool:
+            place[pool[0]] = rune
             used.add(pool[0])
 
     if boss_id is not None:

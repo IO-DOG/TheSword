@@ -70,7 +70,7 @@ def play(ptable, monsters, start, blunder_floors=(), skip_floors=(), waste_floor
                 pots.remove(small)
 
         for i, md in enumerate(fights):
-            stats = G.player_stats_at(ptable, level)
+            stats = G.stats_with_runes(ptable, level, floor)
 
             if floor in blunder:
                 # 보이면 바로 든다. 넘치면 그만큼 버린다.
@@ -117,7 +117,7 @@ def play(ptable, monsters, start, blunder_floors=(), skip_floors=(), waste_floor
                 cur_hp += ptable[level]["hp"]
 
         # 계단 앞 회복
-        stats_end = G.player_stats_at(ptable, level)
+        stats_end = G.stats_with_runes(ptable, level, floor + 1)
         for t in [t for t in pots if t[1] >= len(fights)]:
             cur_hp = min(stats_end["hp"], cur_hp + stats_end["hp"] * t[0])
             pots.remove(t)
