@@ -81,7 +81,11 @@ BOSS_FLOOR_POTIONS = [0.50]    # 보스층은 계단 앞 대신 이걸 둔다
 POTION_USE_THRESHOLD = 0.55  # 이 비율 밑으로 떨어지면 마신다 (실제 플레이 행동)
 
 # 실재하는 몬스터 아트만 사용한다 (Mob_C0_I000~I007 / Boss_C0_I000~I003)
-MOB_ART = [(f"Mob_C0_I{i:03d}", f"Mob_C0_A{i:03d}") for i in range(8)]
+# 이 프로젝트에 실재하는 몬스터 그림은 몹 8종 + 보스 4종이 전부다.
+# 보스 그림도 몹 풀에 넣어 "정예" 로 돌려쓴다. 층마다 가장 센 놈이 이걸 입는다.
+# 여기에 챕터별 색 변형(MonsterTint)이 곱해져서 실제로 보이는 종류는 12 x 5 다.
+MOB_ART = ([(f"Mob_C0_I{i:03d}", f"Mob_C0_A{i:03d}") for i in range(8)]
+           + [(f"Boss_C0_I{i:03d}", f"Boss_C0_A{i:03d}") for i in range(4)])
 BOSS_ART = [(f"Boss_C0_I{i:03d}", f"Boss_C0_A{i:03d}") for i in range(4)]
 
 # 벽 프리팹은 Tilemap_C00_W01 / W02 / W03 만 실재한다 (W00 은 없음).
@@ -98,7 +102,9 @@ CHAPTER_THEMES = [
 # "이끼 골렘" 이 숲의 정령 그림으로 나오는 식이었다.
 # MOB_ART 의 순서(Mob_C0_I000~007)와 한 줄씩 짝이다.
 MOB_SPECIES = ["슬라임", "슬라임", "크로우", "정령",
-               "늑대", "고블린 창병", "해골 전사", "고블린 방패병"]
+               "늑대", "고블린 창병", "해골 전사", "고블린 방패병",
+               # 보스 그림을 입은 정예들
+               "왕 슬라임", "둔기병", "단검병", "방패병"]
 # BOSS_ART(Boss_C0_I000~003)와 짝.
 BOSS_SPECIES = ["킹 슬라임", "둔기 슬라임", "단검 슬라임", "방패 슬라임"]
 
@@ -295,10 +301,15 @@ def build_monsters(ptable, start_level):
             hp_k, atk_k, dfn_k = solve_monster(
                 ptable, level, MOB_HP_LOSS * ramp * ramp_k,
                 MOB_DURATION * ramp, aspd)
-            art = MOB_ART[(idx + k) % len(MOB_ART)]
+            # 가장 센 놈은 정예(보스 그림)로. 층마다 눈에 띄는 상대가 하나씩 선다.
+            if k == MOBS_PER_FLOOR - 1:
+                art_idx = 8 + ((idx + ch) % 4)
+            else:
+                art_idx = (idx + k) % 8
+            art = MOB_ART[art_idx]
             monsters.append(dict(
                 id=MOB_ID_BASE + floor * 8 + k, Chapter=ch, Ability=0,
-                Name=f"{theme[1]} {MOB_SPECIES[(idx + k) % len(MOB_SPECIES)]}",
+                Name=f"{theme[1]} {MOB_SPECIES[art_idx]}",
                 Attack=float(atk_k), Defence=float(dfn_k), MaxHP=float(hp_k),
                 AttackSpeed=float(aspd), DefenceSpeed=0.1,
                 Critical=99.0, CriticalAttack=200.0,

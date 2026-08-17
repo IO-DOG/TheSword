@@ -396,6 +396,15 @@ public static class MapBuilder
         Animator anim = go.GetComponentInChildren<Animator>();
         if (anim != null)
             anim.Play(md.IdleAnimStr);
+
+        // 그림은 열두 종뿐이라 100층을 채우면 계속 같은 놈이 나온다.
+        // 색을 바꿔 다른 몬스터로 쓴다 — 챕터가 색조, 층 안 서열이 진하기다.
+        Color tint = MonsterTint.Of(id);
+        if (tint != Color.white)
+        {
+            foreach (SpriteRenderer sr in go.GetComponentsInChildren<SpriteRenderer>(true))
+                sr.color = tint;
+        }
     }
 
     static Transform NewContainer(GameObject root, string name)
