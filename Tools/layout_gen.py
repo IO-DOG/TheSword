@@ -133,6 +133,19 @@ def _room_order(rng):
     return all_rooms
 
 
+
+def _off_corridor_cells(room):
+    """방 안에서 통로가 지나지 않는 칸.
+
+    통로는 방 중심끼리 곧게 잇는다. 그래서 방의 가운데 가로줄/세로줄이
+    그대로 통로다. 포탈처럼 지나갈 수 없는 것을 그 줄에 놓으면 마개가 되어
+    방 뒤쪽이 통째로 막힌다(아래 계단이 실제로 그랬다).
+    아이템이나 몬스터는 주우거나 부딪혀 지나갈 수 있으니 상관없다.
+    """
+    cx, cy = room_center(*room)
+    return [c for c in room_cells(*room) if c[0] != cx and c[1] != cy]
+
+
 def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
                        with_down_stairs=True, equip_id=None, potions=None):
     """한 층의 격자를 만든다.
@@ -205,15 +218,21 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     used.add(spawn)
 
     if with_down_stairs:
-        pool = free_in([order[0]])
+        # 통로가 지나는 중앙선은 피한다 — 포탈은 지나갈 수 없어서 마개가 된다.
+        pool = [c for c in _off_corridor_cells(order[0]) if c not in used]
+        rng.shuffle(pool)
         if not pool:
             return None, None, None
         place[pool[0]] = STAIRS_DOWN
         used.add(pool[0])
 
-    up = room_center(*order[-1])
-    if up in used:
+    # 위 계단도 같은 이유로 중앙선을 피한다. 보스층에서는 보스가 그 뒤에 서므로
+    # 계단이 마개가 되면 보스에게 갈 수가 없다.
+    up_pool = [c for c in _off_corridor_cells(order[-1]) if c not in used]
+    rng.shuffle(up_pool)
+    if not up_pool:
         return None, None, None
+    up = up_pool[0]
     place[up] = STAIRS_UP
     used.add(up)
 
