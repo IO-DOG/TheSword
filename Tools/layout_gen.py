@@ -233,11 +233,17 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     used = {spawn_cell, stairs_cell}
 
     if with_down_stairs:
-        # 아래 계단은 스폰 구역 안, 스폰 옆 칸에 둔다.
-        near = [c for c in regions[0] if c not in used]
-        near.sort(key=lambda c: abs(c[0] - spawn_cell[0]) + abs(c[1] - spawn_cell[1]))
+        # 아래 계단은 스폰 구역의 막다른 길에 둔다.
+        # 미로는 통로가 한 칸이라, 길목에 놓으면 그 자체가 마개가 되어
+        # 뒤쪽이 통째로 막힌다(방 구조에서는 없던 문제다).
+        on_path_now = set(path)
+        near = [c for c in _dead_ends(linked, regions[0])
+                if c not in used and c not in on_path_now]
+        if not near:
+            near = [c for c in regions[0] if c not in used and c not in on_path_now]
         if not near:
             return None, None, None
+        near.sort(key=lambda c: abs(c[0] - spawn_cell[0]) + abs(c[1] - spawn_cell[1]))
         put(near[0], STAIRS_DOWN)
         used.add(near[0])
 
