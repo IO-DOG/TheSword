@@ -925,7 +925,10 @@ public class AutoPlayer : MonoBehaviour
         // 위층 계단이 잠겨 있고(보스를 잡아야 열린다) 그 보스에게 다가갈 자리가
         // 없다면, 이 층에서 할 수 있는 일은 보스에게 가는 것뿐이다.
         // 몬스터 칸을 밟을 수 있다고 치고 길을 뚫는다 — 밟으면 싸움이 시작된다.
-        if (unreachableMonster && hasUp == false)
+        // 단, 지금 할 수 있는 일이 하나도 없을 때만이다.
+        // 예전에는 이 검사가 없어서, 못 닿는 몬스터가 하나라도 있으면 바로
+        // 눈앞의 상대(피해 5)를 두고 못 닿는 쪽으로 계속 움직였다 (80층).
+        if (bestScore == long.MaxValue && unreachableMonster && hasUp == false)
         {
             Define.MoveDir toBoss = StepThroughItems(start);
             if (toBoss != Define.MoveDir.None)
