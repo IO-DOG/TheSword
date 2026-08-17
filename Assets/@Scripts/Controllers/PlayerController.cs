@@ -499,41 +499,50 @@ public class PlayerController : MonoBehaviour
             //Checking Monster
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Monster && !Managers.Game.OnBattle)
             {
-                Debug.Log(hit.collider.gameObject.name);
-                hit.collider.gameObject.GetComponent<MonsterController>().SetMonster();
+                MonsterController mc = Util.Find<MonsterController>(hit.collider.gameObject);
+                if (mc != null)
+                    mc.SetMonster();
                 somethingExist = true;
             }
             // Checking Item
             else if (hit.collider.gameObject.layer == (int)Define.Layer.CItem)
             {
-                hit.collider.gameObject.GetComponent<ConsumableItem>().PickUp();
+                ConsumableItem citem = Util.Find<ConsumableItem>(hit.collider.gameObject);
+                if (citem != null)
+                    citem.PickUp();
             }
             // Checking Item
             else if (hit.collider.gameObject.layer == (int)Define.Layer.EItem)
             {
-                hit.collider.gameObject.GetComponent<Equip>().PickUp();
+                Equip equip = Util.Find<Equip>(hit.collider.gameObject);
+                if (equip != null)
+                    equip.PickUp();
             }
             //Checking Door
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Door)
             {
                 if (Managers.Game.OnInteract)
                     return true;
+                Door door = Util.Find<Door>(hit.collider.gameObject);
+                if (door == null)
+                    return false;
+
                 if (Managers.Game.KeyInventory.TryUseKey(hit.collider.gameObject))
                 {
                     Managers.Game.OnInteract = true;
                     SetIdleState(_moveDir);
                     somethingExist = true;
-                    hit.collider.gameObject.GetComponentInChildren<Door>().CoDoorLockOpenAnim();
-                    hit.collider.gameObject.GetComponentInChildren<Door>().CoOpenDoor(1f);
-                    hit.collider.gameObject.GetComponentInChildren<Door>().FadeDoor().OnComplete(() =>
+                    door.CoDoorLockOpenAnim();
+                    door.CoOpenDoor(1f);
+                    door.FadeDoor().OnComplete(() =>
                     {
                         hit.collider.gameObject.SetActive(false);
                     });
                 }
-                else if (!Managers.Game.KeyInventory.TryUseKey(hit.collider.gameObject))
+                else
                 {
                     Managers.Game.OnInteract = true;
-                    hit.collider.gameObject.GetComponentInChildren<Door>().CoDoorLockLockedAnim();
+                    door.CoDoorLockLockedAnim();
                     somethingExist = true;
 
                     InteractAnim().OnComplete(() =>
@@ -554,12 +563,17 @@ public class PlayerController : MonoBehaviour
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Portal && !Managers.Game.OnFade && !Managers.Game.OnInteract)
             {
                 somethingExist = false;
-                hit.collider.gameObject.GetComponentInChildren<PortalController>().UsePortal();
-
+                PortalController portal = Util.Find<PortalController>(hit.collider.gameObject);
+                if (portal != null)
+                    portal.UsePortal();
             }
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Lever)
             {
                 somethingExist = true;
+
+                Lever lever = Util.Find<Lever>(hit.collider.gameObject);
+                if (lever == null)
+                    return true;
 
                 Vector3 originPos = _cellPos;
                 Vector3 movePos = new Vector3(hit.collider.transform.position.x, transform.position.y + 0.2f, hit.collider.transform.position.z - 0.1f);
@@ -571,12 +585,12 @@ public class PlayerController : MonoBehaviour
 
                     StartCoroutine(Managers.Sound.CoPlay(Define.Sound.Effect, "Gimic_leverOn_SFX", 1, 0.3f));
 
-                    hit.collider.gameObject.GetComponentInChildren<Lever>().Play(1.0f).OnComplete(() =>
+                    lever.Play(1.0f).OnComplete(() =>
                     {
 
                         _state = PlayerState.IdleFront;
-                        hit.collider.gameObject.GetComponentInChildren<Lever>().SetActive();
-                        hit.collider.gameObject.GetComponentInChildren<Lever>().Open();
+                        lever.SetActive();
+                        lever.Open();
                         _isEquiptShield = true;
                         _isEquiptWeapon = true;
                         transform.DOMove(originPos, 0.2f).OnComplete(() =>
@@ -616,9 +630,10 @@ public class PlayerController : MonoBehaviour
                 somethingExist = true;
                 if (GetTouchDirection(hit.collider.transform, Vector3.back) != TouchDir.None)
                 {
-                    InteractObjectController interactObejct = hit.collider.gameObject.GetComponent<InteractObjectController>();
+                    InteractObjectController interactObejct = Util.Find<InteractObjectController>(hit.collider.gameObject);
                     Managers.Game.CurInteractObject = hit.collider.gameObject;
-                    interactObejct.Interact();
+                    if (interactObejct != null)
+                        interactObejct.Interact();
                 }
             }
             else if (hit.collider.gameObject.layer == (int)Define.Layer.BossEventTrigger)
@@ -653,11 +668,7 @@ public class PlayerController : MonoBehaviour
                 ~0, QueryTriggerInteraction.Collide);
             for (int i = 0; i < found.Length; i++)
             {
-                MonsterController mc = found[i].GetComponent<MonsterController>();
-                if (mc == null)
-                    mc = found[i].GetComponentInParent<MonsterController>();
-                if (mc == null)
-                    mc = found[i].GetComponentInChildren<MonsterController>();
+                MonsterController mc = Util.Find<MonsterController>(found[i].gameObject);
                 if (mc == null)
                     continue;
                 Debug.Log($"{mc.gameObject.name} (광선 밖 — 칸 검사로 붙는다)");

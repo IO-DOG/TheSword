@@ -325,11 +325,7 @@ public class UI_GameScene : UI_Scene
             {
                 // 콜라이더가 붙은 오브젝트에 컴포넌트가 없을 수 있다(생성된 층의
                 // 몬스터가 그렇다). 문에서 겪은 것과 같은 문제라 같은 방식으로 찾는다.
-                MonsterController monster = hit.collider.GetComponent<MonsterController>();
-                if (monster == null)
-                    monster = hit.collider.GetComponentInParent<MonsterController>();
-                if (monster == null)
-                    monster = hit.collider.GetComponentInChildren<MonsterController>();
+                MonsterController monster = Util.Find<MonsterController>(hit.collider.gameObject);
                 if (monster == null)
                     return;
 
@@ -344,8 +340,9 @@ public class UI_GameScene : UI_Scene
             }
             else if (hit.collider.gameObject.layer == (int)Define.Layer.CItem && Managers.Cursor._cursor == CursorType.Search)
             {
-                ConsumableItem cItem = hit.collider.gameObject.GetComponent<ConsumableItem>();
-                int id = cItem.id;
+                ConsumableItem cItem = Util.Find<ConsumableItem>(hit.collider.gameObject);
+                if (cItem == null)
+                    return;
 
                 UI_CItemInfo cItemInfo = Managers.UI.MakeSubItem<UI_CItemInfo>(cItem.transform);
                 isOpenInfoPopup = true;

@@ -15,18 +15,7 @@ public class Door : MonoBehaviour
     /// </summary>
     public static Door Find(GameObject from)
     {
-        if (from == null)
-            return null;
-
-        Transform t = from.transform;
-        for (int depth = 0; depth < 4 && t != null; depth++)
-        {
-            Door found = t.GetComponentInChildren<Door>(true);
-            if (found != null)
-                return found;
-            t = t.parent;
-        }
-        return null;
+        return Util.Find<Door>(from);
     }
 
     public int _keyIndex = 0;

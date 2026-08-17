@@ -21,6 +21,29 @@ public static class Util
         return component;
     }
 
+    /// <summary>광선에 맞은 오브젝트에서 컴포넌트를 찾는다. 자신 → 자식 → 부모 순.
+    ///
+    /// 콜라이더가 붙은 깊이는 프리팹마다 다르다. 몬스터는 루트에, 문과 포탈은 자식에,
+    /// 생성된 층의 타일은 또 그 부모에 있다. GetComponent 하나로 집으면 어느 한쪽이
+    /// 반드시 null 이 되고, 그 자리에서 예외가 나 상호작용이 통째로 죽는다.</summary>
+    public static T Find<T>(GameObject go) where T : UnityEngine.Component
+    {
+        if (go == null)
+            return null;
+
+        // 부모로 한 칸씩 올라가며 그 아래를 통째로 뒤진다. 형제 자식에 붙어 있는
+        // 경우(문·포탈이 그렇다)까지 잡으려면 위로만 올라가는 것으로는 모자란다.
+        Transform t = go.transform;
+        for (int depth = 0; depth < 4 && t != null; depth++)
+        {
+            T found = t.GetComponentInChildren<T>(true);
+            if (found != null)
+                return found;
+            t = t.parent;
+        }
+        return null;
+    }
+
     public static GameObject FindChild(GameObject go, string name = null, bool recursive = false)
     {
         Transform transform = FindChild<Transform>(go, name, recursive);
