@@ -47,14 +47,27 @@ public static class MonsterArtSetup
         // 놀고 있던 시트 둘을 새 몬스터로 편입한다.
         map["Mob_C0_I008"] = $"{IdleDir}/Boss_C1_I000.png";
         map["Mob_C0_I009"] = $"{LegacyDir}/Monster_Idle.png";
+        map["Mob_C0_A009"] = $"{LegacyDir}/Monster_Attack.png";   // 위에서 잘라 준다
 
         return map;
     }
+
+    /// <summary>단일 스프라이트로 들어와 프레임을 못 꺼내는 시트. 먼저 잘라 준다.</summary>
+    static readonly string[] NeedSlicing =
+    {
+        LegacyDir + "/Monster_Attack.png",
+    };
 
     [MenuItem("TheSword/Build Monster Animations")]
     public static void Build()
     {
         Directory.CreateDirectory(ClipDir);
+
+        foreach (string path in NeedSlicing)
+        {
+            if (File.Exists(path) && LoadFrames(path).Length <= 1)
+                SliceHorizontally(path);
+        }
 
         var made = new List<string>();
         var missing = new List<string>();
@@ -83,12 +96,127 @@ public static class MonsterArtSetup
         AssetDatabase.Refresh();
 
         int added = Register(MapController) + Register(UIController);
+        added += BuildEquipDropClips();
 
         Debug.Log($"[MonsterArt] 클립 {made.Count}개 생성/갱신, 컨트롤러에 {added}개 상태 추가");
         foreach (string s in made)
             Debug.Log($"[MonsterArt]   + {s}");
         foreach (string s in missing)
             Debug.LogWarning($"[MonsterArt]   - {s}");
+    }
+
+
+    // ---------------------------------------------------------------- 떨군 장비
+    const string EquipClipDir = "Assets/@Resources/Animations/ItemAnimatios/Item";
+    const string EquipController = EquipClipDir + "/EquipItemAnimator.controller";
+    const string NecklaceSprite = "Assets/@Resources/Sprites/Equip/EquipSprite/Equip_Necklace_00.png";
+
+    /// <summary>맵에 떨어진 장비가 재생하는 EquipItem_{id} 상태를 채운다.
+    ///
+    /// Equip.Start 는 무조건 그 이름의 상태를 재생하는데, 0~4 밖에 없었다.
+    /// 없는 상태를 재생하면 경고만 찍히고 아무 그림도 안 나온다 — 즉 떨어진 장비가
+    /// 눈에 보이지 않는다. 챕터 보스가 목걸이(5~8)를 떨구므로 그 자리를 채운다.
+    /// 목걸이 그림은 한 장뿐이라 넷이 같은 그림을 쓴다.</summary>
+    static int BuildEquipDropClips()
+    {
+        Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(NecklaceSprite);
+        if (sprite == null)
+        {
+            Debug.LogWarning($"[MonsterArt] 목걸이 그림이 없다: {NecklaceSprite}");
+            return 0;
+        }
+
+        var names = new List<string>();
+        for (int id = 5; id <= 8; id++)
+        {
+            string clipName = $"EquipItem_{id}";
+            WriteClip($"{EquipClipDir}/{clipName}.anim", clipName, new[] { sprite });
+            names.Add(clipName);
+        }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        AnimatorController controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(EquipController);
+        if (controller == null)
+        {
+            Debug.LogWarning($"[MonsterArt] 컨트롤러가 없다: {EquipController}");
+            return 0;
+        }
+
+        var have = new HashSet<string>();
+        foreach (AnimatorControllerLayer layer in controller.layers)
+            foreach (ChildAnimatorState st in layer.stateMachine.states)
+                have.Add(st.state.name);
+
+        AnimatorStateMachine machine = controller.layers[0].stateMachine;
+        int added = 0;
+        foreach (string clipName in names)
+        {
+            if (have.Contains(clipName))
+                continue;
+            AnimationClip clip = AssetDatabase.LoadAssetAtPath<AnimationClip>($"{EquipClipDir}/{clipName}.anim");
+            if (clip == null)
+                continue;
+            machine.AddState(clip.name).motion = clip;
+            added++;
+        }
+
+        if (added > 0)
+        {
+            EditorUtility.SetDirty(controller);
+            AssetDatabase.SaveAssets();
+        }
+        Debug.Log($"[MonsterArt] 떨군 장비 상태 {added}개 추가 (EquipItem_5~8)");
+        return added;
+    }
+
+
+    /// <summary>가로로 이어 붙인 시트를 프레임 수만큼 잘라 준다.
+    ///
+    /// 예전 Monster_Attack.png 는 다른 공격 시트와 같은 258x86(86 짜리 세 장)인데
+    /// 단일 스프라이트로 들어와 있어서 프레임을 꺼낼 수가 없었다. 그래서 그 그림은
+    /// 공격 동작을 못 쓰고 대기만 반복했다.</summary>
+    static bool SliceHorizontally(string path)
+    {
+        var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+        if (importer == null)
+            return false;
+
+        Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        if (tex == null || tex.height <= 0)
+            return false;
+
+        int size = tex.height;                 // 프레임은 정사각형이다
+        int count = tex.width / size;
+        if (count <= 1 || tex.width % size != 0)
+            return false;
+
+        string baseName = Path.GetFileNameWithoutExtension(path);
+        var rects = new List<SpriteRect>();
+        for (int i = 0; i < count; i++)
+        {
+            rects.Add(new SpriteRect
+            {
+                name = $"{baseName}_{i}",
+                rect = new Rect(i * size, 0, size, size),
+                pivot = new Vector2(0.5f, 0.5f),
+                alignment = SpriteAlignment.Center,
+                spriteID = GUID.Generate(),
+            });
+        }
+
+        importer.spriteImportMode = SpriteImportMode.Multiple;
+        var factory = new UnityEditor.U2D.Sprites.SpriteDataProviderFactories();
+        factory.Init();
+        var provider = factory.GetSpriteEditorDataProviderFromObject(importer);
+        provider.InitSpriteEditorDataProvider();
+        provider.SetSpriteRects(rects.ToArray());
+        provider.Apply();
+
+        importer.SaveAndReimport();
+        Debug.Log($"[MonsterArt] {baseName} 를 {count}프레임으로 잘랐다");
+        return true;
     }
 
     /// <summary>시트에서 프레임을 이름 순서대로 꺼낸다 (_0, _1, _2 …).</summary>
