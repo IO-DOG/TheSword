@@ -46,9 +46,9 @@ public class UI_BossNamePopup : UI_Popup
 
     public IEnumerator HideBossNamePopup(float duration)
     {
-        GetImage((int)Images.BossNameStart).DOFade(1f, 1f);
-        GetImage((int)Images.BossNameLine).DOFade(1f, 1f);
-        GetImage((int)Images.BossNameEnd).DOFade(1f, 1f);
+        GetImage((int)Images.BossNameStart).DOFade(1f, 1f).SetLink(gameObject);
+        GetImage((int)Images.BossNameLine).DOFade(1f, 1f).SetLink(gameObject);
+        GetImage((int)Images.BossNameEnd).DOFade(1f, 1f).SetLink(gameObject);
         yield return new WaitForSeconds(duration);
 
         if (this == null && gameObject == null)
@@ -58,9 +58,9 @@ public class UI_BossNamePopup : UI_Popup
         else
         {
             gameObject.GetComponentInChildren<TypewriterByCharacter>().StartDisappearingText();
-            GetImage((int)Images.BossNameStart).DOFade(0f, 1f);
-            GetImage((int)Images.BossNameLine).DOFade(0f, 1f);
-            GetImage((int)Images.BossNameEnd).DOFade(0f, 1f);
+            GetImage((int)Images.BossNameStart).DOFade(0f, 1f).SetLink(gameObject);
+            GetImage((int)Images.BossNameLine).DOFade(0f, 1f).SetLink(gameObject);
+            GetImage((int)Images.BossNameEnd).DOFade(0f, 1f).SetLink(gameObject);
 
             yield return new WaitForSeconds(duration);
 

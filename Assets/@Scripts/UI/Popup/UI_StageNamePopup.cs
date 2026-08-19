@@ -53,9 +53,9 @@ public class UI_StageNamePopup : UI_Popup
 
     public IEnumerator HideStageNamePopup(float duration)
     {
-        GetImage((int)Images.StageNameStart).DOFade(1f, 1f);
-        GetImage((int)Images.StageNameLine).DOFade(1f, 1f);
-        GetImage((int)Images.StageNameEnd).DOFade(1f, 1f);
+        GetImage((int)Images.StageNameStart).DOFade(1f, 1f).SetLink(gameObject);
+        GetImage((int)Images.StageNameLine).DOFade(1f, 1f).SetLink(gameObject);
+        GetImage((int)Images.StageNameEnd).DOFade(1f, 1f).SetLink(gameObject);
         yield return new WaitForSeconds(duration);
 
         // && 가 아니라 || 여야 한다. this 가 이미 파괴됐는데 gameObject 를 만지면
@@ -69,9 +69,9 @@ public class UI_StageNamePopup : UI_Popup
             TypewriterByCharacter writer = gameObject.GetComponentInChildren<TypewriterByCharacter>();
             if (writer != null)
                 writer.StartDisappearingText();
-            GetImage((int)Images.StageNameStart).DOFade(0f, 1f);
-            GetImage((int)Images.StageNameLine).DOFade(0f, 1f);
-            GetImage((int)Images.StageNameEnd).DOFade(0f, 1f);
+            GetImage((int)Images.StageNameStart).DOFade(0f, 1f).SetLink(gameObject);
+            GetImage((int)Images.StageNameLine).DOFade(0f, 1f).SetLink(gameObject);
+            GetImage((int)Images.StageNameEnd).DOFade(0f, 1f).SetLink(gameObject);
 
             yield return new WaitForSeconds(duration);
 

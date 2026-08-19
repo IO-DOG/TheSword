@@ -63,7 +63,7 @@ public class UI_BossRoomCheckPopup : UI_Popup
 
     IEnumerator PopupAnimation()
     {
-        GetImage((int)Images.BossRoomCheckBox).DOFade(1f, 0.5f);
+        GetImage((int)Images.BossRoomCheckBox).DOFade(1f, 0.5f).SetLink(gameObject);
         yield return new WaitForSeconds(0.5f);
 
         GetText((int)Texts.BossRoomCheckText).gameObject.SetActive(true);

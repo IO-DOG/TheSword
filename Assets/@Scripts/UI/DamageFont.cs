@@ -76,7 +76,11 @@ public class DamageFont : UI_Base
         float firstMoveDistance = 100.5f;   // 첫 번째 애니메이션에서 이동할 거리
         float secondMoveDistance = 100.5f;  // 두 번째 애니메이션에서 추가로 이동할 거리
 
-        Sequence seq = DOTween.Sequence();
+        // 트윈 수명을 이 오브젝트에 묶는다.
+        // 전투가 끝나면 전투창과 함께 데미지 숫자도 사라지는데, 시퀀스는 계속 돌다가
+        // 완료 콜백에서 이미 파괴된 gameObject 를 만진다. DOTween 안전모드가 삼켜서
+        // 게임이 죽지는 않지만, 한 판에 널참조 경고가 수천 건씩 쌓였다.
+        Sequence seq = DOTween.Sequence().SetLink(gameObject);
 
         // 시작 전에 스케일을 0으로 초기화합니다.
         transform.localScale = Vector3.zero;
@@ -104,7 +108,7 @@ public class DamageFont : UI_Base
     {
         Color transparentColot = new Color(_damageText.color.r, _damageText.color.g, _damageText.color.b, 0);
 
-        Sequence seq = DOTween.Sequence();
+        Sequence seq = DOTween.Sequence().SetLink(gameObject);
 
         // 위로 올라가면서 투명해짐
         seq.Append(GetComponent<RectTransform>().DOLocalMoveY(25f, 1f));
