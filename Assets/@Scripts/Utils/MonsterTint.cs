@@ -29,10 +29,31 @@ public static class MonsterTint
     // 층 안에서의 서열(0=제일 약함). 뒤로 갈수록 진해진다.
     static readonly float[] Depth = { 1.15f, 1.05f, 0.95f, 0.85f, 0.72f };
 
-    /// <summary>그 몬스터가 입을 색. chapter 는 0~4, order 는 층 안 서열.</summary>
-    public static Color For(int chapter, int order)
+    // 챕터 안에서 다섯 층마다 색을 조금씩 돌린다.
+    //
+    // 한 챕터가 20층인데 색이 하나면, 같은 그림이 스무 층 내내 똑같은 놈으로 보인다.
+    // 챕터를 알아볼 수 있을 만큼만 돌려서 "같은 계열의 다른 종" 으로 읽히게 한다.
+    static readonly float[] VariantHue = { 0f, 0.055f, -0.055f, 0.11f };
+    static readonly float[] VariantSat = { 1.00f, 1.18f, 0.82f, 1.08f };
+
+    static Color Variant(Color baseColor, int variant)
     {
-        Color baseColor = Chapter[Mathf.Clamp(chapter, 0, Chapter.Length - 1)];
+        int i = ((variant % VariantHue.Length) + VariantHue.Length) % VariantHue.Length;
+        if (i == 0)
+            return baseColor;
+
+        float h, sat, v;
+        Color.RGBToHSV(baseColor, out h, out sat, out v);
+        h = Mathf.Repeat(h + VariantHue[i], 1f);
+        sat = Mathf.Clamp01(sat * VariantSat[i]);
+        return Color.HSVToRGB(h, sat, v);
+    }
+
+    /// <summary>그 몬스터가 입을 색. chapter 는 0~4, order 는 층 안 서열,
+    /// variant 는 챕터 안에서 몇 번째 색 갈래인가.</summary>
+    public static Color For(int chapter, int order, int variant = 0)
+    {
+        Color baseColor = Variant(Chapter[Mathf.Clamp(chapter, 0, Chapter.Length - 1)], variant);
         float k = Depth[Mathf.Clamp(order, 0, Depth.Length - 1)];
 
         // 곱하기만 하면 어두워지기만 한다. 1 보다 큰 값은 흰 쪽으로 끌어올린다.
@@ -62,7 +83,10 @@ public static class MonsterTint
         if (monsterId >= 900 && monsterId < 1000)
             return ForBoss(md.Chapter);
 
+        // 생성 몬스터 id = 1000 + 층*8 + 서열. 층을 되짚어 색 갈래를 정한다.
         int order = monsterId % 8;
-        return For(md.Chapter, order);
+        int floor = (monsterId - 1000) / 8;
+        int variant = (floor / 5) % VariantHue.Length;   // 다섯 층마다 갈린다
+        return For(md.Chapter, order, variant);
     }
 }
