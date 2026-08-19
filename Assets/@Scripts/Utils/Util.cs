@@ -21,37 +21,64 @@ public static class Util
         return component;
     }
 
-    /// <summary>광선에 맞은 오브젝트에서 컴포넌트를 찾는다. 자신 → 자식 → 부모 순.
+    /// <summary>광선에 맞은 오브젝트에서 컴포넌트를 찾는다. 자신 → 자식 → 조상 순.
     ///
-    /// 콜라이더가 붙은 깊이는 프리팹마다 다르다. 몬스터는 루트에, 문과 포탈은 자식에,
+    /// 콜라이더가 붙은 깊이는 프리팹마다 다르다. 몬스터는 루트에, 어떤 것은 자식에,
     /// 생성된 층의 타일은 또 그 부모에 있다. GetComponent 하나로 집으면 어느 한쪽이
-    /// 반드시 null 이 되고, 그 자리에서 예외가 나 상호작용이 통째로 죽는다.</summary>
+    /// 반드시 null 이 되고, 그 자리에서 예외가 나 상호작용이 통째로 죽는다.
+    ///
+    /// 조상은 "그 자신" 만 본다. 조상의 자식들까지 뒤지면 형제를 집는다 — 몬스터는
+    /// 한 부모(Monsters) 아래 모여 있어서, 밀친 슬라임 대신 옆 칸의 늑대와 전투가
+    /// 열렸다. 형제에 붙어 있는 경우가 필요한 곳은 Door.Find 가 따로 처리한다.</summary>
     public static T Find<T>(GameObject go) where T : UnityEngine.Component
     {
         if (go == null)
             return null;
 
-        // 부모로 한 칸씩 올라가며 그 아래를 통째로 뒤진다. 형제 자식에 붙어 있는
-        // 경우(문·포탈이 그렇다)까지 잡으려면 위로만 올라가는 것으로는 모자란다.
-        //
-        // 꺼진 것도 뒤지되 켜진 것을 먼저 준다. 한 칸에는 죽어서 꺼진 몬스터와
-        // 살아 있는 것이 같이 있을 수 있는데, 꺼진 쪽을 집으면 열리지 않는 전투가
-        // 열린 것으로 처리된다.
+        T found = go.GetComponent<T>();
+        if (found == null)
+            found = FindActiveFirst<T>(go.transform);
+        if (found == null)
+            found = go.GetComponentInParent<T>(true);
+        return found;
+    }
+
+    /// <summary>부모로 올라가며 그 아래를 통째로 뒤진다. 형제에 붙어 있는 것까지 잡는다.
+    ///
+    /// 같은 종류가 여럿 있을 수 있는 곳(몬스터·아이템)에는 쓰면 안 된다 — 엉뚱한
+    /// 형제를 집는다. 문이나 레버처럼 타일 하나에 하나씩만 있는 것에만 쓴다.</summary>
+    public static T FindInTile<T>(GameObject go, int maxDepth = 4) where T : UnityEngine.Component
+    {
+        if (go == null)
+            return null;
+
         T inactive = null;
         Transform t = go.transform;
-        for (int depth = 0; depth < 4 && t != null; depth++)
+        for (int depth = 0; depth < maxDepth && t != null; depth++)
         {
-            T[] found = t.GetComponentsInChildren<T>(true);
-            for (int i = 0; i < found.Length; i++)
-            {
-                if (found[i].gameObject.activeInHierarchy)
-                    return found[i];
-                if (inactive == null)
-                    inactive = found[i];
-            }
+            T hit = FindActiveFirst<T>(t);
+            if (hit != null)
+                return hit;
+            if (inactive == null)
+                inactive = t.GetComponentInChildren<T>(true);
             t = t.parent;
         }
         return inactive;
+    }
+
+    /// <summary>이 아래에서 켜진 것을 먼저 찾는다.
+    ///
+    /// 한 칸에 죽어서 꺼진 몬스터와 살아 있는 것이 같이 있을 수 있다. 꺼진 쪽을
+    /// 집으면 열리지 않는 전투가 열린 것으로 처리되고 그대로 이동이 막힌다.</summary>
+    static T FindActiveFirst<T>(Transform root) where T : UnityEngine.Component
+    {
+        T[] found = root.GetComponentsInChildren<T>(true);
+        for (int i = 0; i < found.Length; i++)
+        {
+            if (found[i].gameObject.activeInHierarchy)
+                return found[i];
+        }
+        return null;
     }
 
     public static GameObject FindChild(GameObject go, string name = null, bool recursive = false)

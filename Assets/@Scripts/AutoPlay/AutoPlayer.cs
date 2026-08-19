@@ -44,7 +44,9 @@ public class AutoPlayer : MonoBehaviour
     /// <summary>전투 배속. 게임 안에 있는 옵션 그대로다(1/2/4). 녹화 길이를 줄인다.</summary>
     public int GameSpeed = 8;
     /// <summary>이동 배속. 걷는 시간이 영상의 절반을 먹어서 줄인다.</summary>
-    public float MoveSpeedScale = 5f;
+    // 이동 배속. 100층 녹화가 30분을 넘으면 실행이 중간에 잘려 완주를 못 담는다.
+    // 이동은 전투 결과에 영향이 없으므로 여기를 올려 벽시계 시간을 줄인다.
+    public float MoveSpeedScale = 9f;
 
     const float Tile = 0.32f;
 
@@ -842,6 +844,13 @@ public class AutoPlayer : MonoBehaviour
                 Vector2Int c = Cell(map, ci.transform.position);
                 info.Append($" 아이템{ci.id}@{c}={(Reachable(c) ? "닿음" : "막힘")}");
             }
+            // 장비도 찍는다. 몬스터가 떨군 것은 맵 데이터에 없어서 여기에 안 나오면
+            // "줍지도 못하는데 길은 막는" 상태를 로그만 보고는 알 수가 없다.
+            foreach (Equip eq in map.GetComponentsInChildren<Equip>(false))
+            {
+                Vector2Int c = Cell(map, eq.transform.position);
+                info.Append($" 장비{eq._id}@{c}={(Reachable(c) ? "닿음" : "막힘")}");
+            }
             foreach (MonsterController mc in map.GetComponentsInChildren<MonsterController>(false))
             {
                 Vector2Int c = Cell(map, mc.transform.position);
@@ -1603,6 +1612,25 @@ public class AutoPlayer : MonoBehaviour
         return blocked;
     }
 
+    /// <summary>그 칸에 실제로 놓인 것들을 이름과 레이어로 적는다. 진단용.</summary>
+    string DescribeCell(Vector2Int cell)
+    {
+        Collider[] hits = Physics.OverlapBox(CellCenter(cell), ProbeHalf, Quaternion.identity,
+                                             ~0, QueryTriggerInteraction.Collide);
+        if (hits.Length == 0)
+            return "없음";
+
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        for (int i = 0; i < hits.Length && i < 6; i++)
+        {
+            if (i > 0)
+                sb.Append(", ");
+            GameObject go = hits[i].gameObject;
+            sb.Append($"{go.name}(L{go.layer}{(go.activeInHierarchy ? "" : ",꺼짐")})");
+        }
+        return sb.ToString();
+    }
+
     /// <summary>
     /// 아이템/몬스터 칸을 통과할 수 있다고 보고 다시 길을 찾는다.
     /// 평소에는 지나가다 건드리지 않으려고 그 칸들을 막아 두는데,
@@ -1640,7 +1668,10 @@ public class AutoPlayer : MonoBehaviour
         }
 
         Define.MoveDir dir = FirstStep(start, target);
-        _plan = $"길 막은 것(아이템/몬스터) 넘어가기 {start}->{target} d={bestDist} {dir}";
+        // 밟아도 사라지지 않는 것을 밀며 제자리를 왕복하는 일이 있었다. 그때
+        // 그 칸에 무엇이 있는지 이름과 레이어로 봐야 짐작을 그만둘 수 있다.
+        _plan = $"길 막은 것(아이템/몬스터) 넘어가기 {start}->{target} d={bestDist} {dir}"
+                + $" [{target} 에 있는 것: {DescribeCell(target)}]";
         return dir;
     }
 

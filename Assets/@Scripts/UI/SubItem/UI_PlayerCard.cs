@@ -274,8 +274,15 @@ public class UI_PlayerCard : UI_BaseCard
     {
         int swordId = Managers.Game.PlayerData.CurSword;
         string attackFX = Managers.Data.EquipDic[swordId].AttackFX;
-        GameObject player = GameObject.Find("CreatureImage");
         GameObject go = Managers.Resource.Instantiate(attackFX, GetImage((int)GameObjects.AttackFX).transform);
+
+        // 파티클이 없는 장비도 있다(EquipData 의 FX 칸이 "-"). 여기서 예외가 나면
+        // Attack() 을 부르는 CoDelayAttack 코루틴이 그대로 죽어서, 플레이어가 그
+        // 전투 내내 한 번도 공격하지 못하고 갈려 죽는다. 이펙트는 없어도 되지만
+        // 공격은 계속돼야 한다.
+        if (go == null)
+            return;
+
         go.transform.localPosition += new Vector3(-50, -50, 0);
         var uiParticle = go.GetOrAddComponent<UIParticle>();
         uiParticle.scale = 270;
@@ -289,7 +296,13 @@ public class UI_PlayerCard : UI_BaseCard
         int swordId = Managers.Game.PlayerData.CurSword;
         string hitFX = Managers.Data.EquipDic[swordId].HitFX;
         GameObject monster = GameObject.Find("UI_MonsterCard");
+        if (monster == null)
+            return;
+
         GameObject go = Managers.Resource.Instantiate(hitFX, monster.transform);
+        if (go == null)
+            return;
+
         var uiParticle = go.GetOrAddComponent<UIParticle>();
 
         uiParticle.scale = 50;
@@ -315,7 +328,5 @@ public class UI_PlayerCard : UI_BaseCard
         _creature.OnHitAction -= StartDamagedMat;
         _creature.OnDeadAction -= Dead;
         _creature.OnDataRefreshAction -= Refresh;
-    }
-
     }
 }

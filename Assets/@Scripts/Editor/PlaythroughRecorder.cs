@@ -24,9 +24,12 @@ public static class PlaythroughRecorder
     const string OutputDir = "Recordings";
     const string OutputName = "TheSword_Playthrough";
 
-    const int Width = 1280;
-    const int Height = 720;
-    const float Fps = 30f;
+    // 100층을 한 번에 담아야 하는데, 인코딩이 무거우면 그만큼 실제 시간이 늘어난다.
+    // 1280x720 30fps 로는 30분에 70층 언저리에서 끊겼다. 화면이 도트 그림이라
+    // 960x540 24fps 로 낮춰도 알아보는 데 지장이 없고, 처리량은 두 배 가까이 는다.
+    const int Width = 960;
+    const int Height = 540;
+    const float Fps = 24f;
 
     /// <summary>이 시간이 지나면 결과와 상관없이 녹화를 끊고 나온다.
     /// 봇이 어딘가에서 맴돌아도 mp4 는 정상적으로 마무리돼야 한다.</summary>
@@ -71,10 +74,30 @@ public static class PlaythroughRecorder
             return;
         }
 
+        ClearSaveData();
         SessionState.SetString(StateKey, mode);
         EditorSceneOpen();
         Debug.Log($"[Playthrough] 시작 ({mode}) — 플레이모드 진입");
         EditorApplication.EnterPlaymode();
+    }
+
+    /// <summary>지난 실행의 세이브를 지운다.
+    ///
+    /// 처음부터 끝까지를 담는 녹화인데, 세이브는 실행 사이에 남는다. 앞선 실행이
+    /// 중간에 죽거나 멈췄으면 문·레버·기둥·아이템의 "이미 썼음" 기록이 그대로
+    /// 남아서, 다음 실행은 열쇠가 사라진 층에서 시작한다. 데이터를 새로 뽑았을
+    /// 때는 인덱스까지 어긋나 더 나쁘다.</summary>
+    static void ClearSaveData()
+    {
+        int removed = 0;
+        foreach (string path in System.IO.Directory.GetFiles(Application.persistentDataPath, "*.json"))
+        {
+            System.IO.File.Delete(path);
+            removed++;
+        }
+        PlayerPrefs.DeleteAll();
+        PlayerPrefs.Save();
+        Debug.Log($"[Playthrough] 지난 세이브 삭제 — json {removed}개 + PlayerPrefs");
     }
 
     static void EditorSceneOpen()

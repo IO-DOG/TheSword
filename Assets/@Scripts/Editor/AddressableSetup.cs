@@ -25,6 +25,12 @@ public static class AddressableSetup
         { "Tilemap_C00_W01", "Assets/Resources/DecoTiles/Dungeon_00/Tilemap_C00_W01.prefab" },
         { "Tilemap_C00_W02", "Assets/Resources/DecoTiles/Dungeon_00/Tilemap_C00_W02.prefab" },
         { "Tilemap_C00_W03", "Assets/Resources/DecoTiles/Dungeon_00/Tilemap_C00_W03.prefab" },
+
+        // 룬 획득 이펙트 (기획서 29쪽). 프리팹은 있는데 등록이 안 돼 있어서
+        // ConsumableItemData 의 이름으로 찾으면 null 이 나왔다.
+        { "FX_RunStone_Red", "Assets/Retro Arsenal/FX_Particle/FX_RunStone_Red.prefab" },
+        { "FX_RunStone_Blue", "Assets/Retro Arsenal/FX_Particle/FX_RunStone_Blue.prefab" },
+        { "FX_RunStone_Green", "Assets/Retro Arsenal/FX_Particle/FX_RunStone_Green.prefab" },
     };
 
     [MenuItem("TheSword/Register Runtime Prefabs (Addressables)")]

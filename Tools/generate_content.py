@@ -65,10 +65,10 @@ SCRIPT_MON_DESC_BASE = 20100   # 기존 20000~20008 뒤
 # 이 순서대로 만날 수밖에 없다 — 그게 이 층의 "정답 경로"다.
 MOB_LOSS_RAMP = [0.72, 0.88, 1.00, 1.16, 1.34]
 
-# 특성 8종 + 룬을 넣고 다시 조율한 값.
-# 룬이 자연 성장의 약 13% 를 맡으면서 헐렁해져 0.044 는 실수 13회까지 봐준다.
-# 0.0465 부터는 한 번도 못 봐주는 절벽이라, 그 앞인 0.046 을 쓴다 (실수 10회).
-MOB_HP_LOSS = 0.046
+# 특성 8종 + 룬 + 도입부 경험치 정정까지 반영해 다시 조율한 값.
+# 도입부에서 실제로 얻는 경험치(스테이지 배율 포함)를 세기 시작하자 5층 진입이
+# Lv9 -> Lv15 로 올라가 그만큼 헐렁해졌다. 0.048 이 설계 목표(실수 9회)에 맞는다.
+MOB_HP_LOSS = 0.048
 MOB_DURATION = 16.0
 BOSS_HP_LOSS = 0.28
 BOSS_DURATION = 45.0
@@ -85,13 +85,18 @@ EXIT_POTION = 0.15             # 구역3(계단 앞) — 다음 층으로 들고
 BOSS_FLOOR_POTIONS = [0.50]    # 보스층은 계단 앞 대신 이걸 둔다
 POTION_USE_THRESHOLD = 0.55  # 이 비율 밑으로 떨어지면 마신다 (실제 플레이 행동)
 
-# 실재하는 몬스터 아트만 사용한다 (Mob_C0_I000~I007 / Boss_C0_I000~I003)
-# 이 프로젝트에 실재하는 몬스터 그림은 몹 8종 + 보스 4종이 전부다.
-# 보스 그림도 몹 풀에 넣어 "정예" 로 돌려쓴다. 층마다 가장 센 놈이 이걸 입는다.
-# 여기에 챕터별 색 변형(MonsterTint)이 곱해져서 실제로 보이는 종류는 12 x 5 다.
-MOB_ART = ([(f"Mob_C0_I{i:03d}", f"Mob_C0_A{i:03d}") for i in range(8)]
-           + [(f"Boss_C0_I{i:03d}", f"Boss_C0_A{i:03d}") for i in range(4)])
-BOSS_ART = [(f"Boss_C0_I{i:03d}", f"Boss_C0_A{i:03d}") for i in range(4)]
+# 실재하는 몬스터 아트만 사용한다.
+#
+# Boss_C0_I000~003 은 킹 슬라임과 분열 3종 전용이다. 그 연출에서만 쓰고
+# 다른 던전에는 내보내지 않는다 — 도입부의 상징이라 아무 층에서나 나오면
+# 그 장면이 싱거워진다.
+# 그래서 생성 층이 쓸 수 있는 것은 Mob_C0_I000~I007 여덟 종뿐이고,
+# 여기에 챕터별 색 변형(MonsterTint)이 곱해져 실제로 보이는 것은 8 x 5 다.
+# 정예와 보스는 그림이 아니라 크기와 색의 진하기로 구분한다.
+MOB_ART = [(f"Mob_C0_I{i:03d}", f"Mob_C0_A{i:03d}") for i in range(8)]
+
+# 챕터 보스가 입는 그림. 같은 몹 그림이라도 챕터마다 다른 놈이 서게 고른다.
+BOSS_ART_INDEX = [4, 6, 5, 7, 3]
 
 # 벽 프리팹은 Tilemap_C00_W01 / W02 / W03 만 실재한다 (W00 은 없음).
 # 챕터별 분위기는 MapBuilder 의 틴트 + 조명 + BGM 으로 낸다.
@@ -107,11 +112,7 @@ CHAPTER_THEMES = [
 # "이끼 골렘" 이 숲의 정령 그림으로 나오는 식이었다.
 # MOB_ART 의 순서(Mob_C0_I000~007)와 한 줄씩 짝이다.
 MOB_SPECIES = ["슬라임", "슬라임", "크로우", "정령",
-               "늑대", "고블린 창병", "해골 전사", "고블린 방패병",
-               # 보스 그림을 입은 정예들
-               "왕 슬라임", "둔기병", "단검병", "방패병"]
-# BOSS_ART(Boss_C0_I000~003)와 짝.
-BOSS_SPECIES = ["킹 슬라임", "둔기 슬라임", "단검 슬라임", "방패 슬라임"]
+               "늑대", "고블린 창병", "해골 전사", "고블린 방패병"]
 
 # ---------------------------------------------------------------- 특성 (기획서 13·53·71쪽)
 #
@@ -219,18 +220,24 @@ STARTING_SWORD_ATK = 3.0                 # Define.EQUIP_SOWRD_FIRST = 9 (블레�
 
 # 원본 StageInfoData 의 1~4층 행. 선형이 아니다:
 #   1층 -> 2층 -> 3층(막다른 마검방),  2층 -> [보스방] 4층 -> 5층
+# 경험치는 원본의 두 배다. 원본이 100 인데 200 을 주는 이유:
+# UI_MonsterCard.Dead 가 몬스터마다 두 번 돌고 있어서, 실제 게임은 늘 경험치를
+# 두 배로 주고 있었다. 도입부의 난이도가 그 두 배에 맞춰 손수 조정돼 있어서,
+# 중복 호출을 막자마자 1층에서 죽는다(단일 경험치로는 4층 종료 시 Lv8 HP21 —
+# 칼끝이다). 버그를 되돌리는 대신 같은 경험치를 데이터로 정직하게 준다.
+# 5층 목표 레벨은 이 값으로 다시 시뮬레이션해서 얻는다.
 ORIGINAL_STAGES = [
     dict(id=0, DungeonID="00_000", Type=0, UpStage="00_001", DownStage="-",
-         BossRoom="-", ATK=1, DEF=1, EXP=100, BGM="BGM_000",
+         BossRoom="-", ATK=1, DEF=1, EXP=200, BGM="BGM_000",
          DungeonNameScriptID=5000),
     dict(id=1, DungeonID="00_001", Type=0, UpStage="00_002", DownStage="00_000",
-         BossRoom="00_003", ATK=1, DEF=1, EXP=100, BGM="BGM_000",
+         BossRoom="00_003", ATK=1, DEF=1, EXP=200, BGM="BGM_000",
          DungeonNameScriptID=5001),
     dict(id=2, DungeonID="00_002", Type=0, UpStage="-", DownStage="00_001",
-         BossRoom="-", ATK=4, DEF=4, EXP=100, BGM="BGM_001",
+         BossRoom="-", ATK=4, DEF=4, EXP=200, BGM="BGM_001",
          DungeonNameScriptID=5002),
     dict(id=3, DungeonID="00_003", Type=2, UpStage="00_004", DownStage="-",
-         BossRoom="-", ATK=1, DEF=1, EXP=200, BGM="BGM_002",
+         BossRoom="-", ATK=1, DEF=1, EXP=400, BGM="BGM_002",
          DungeonNameScriptID=5003),
 ]
 
@@ -286,7 +293,13 @@ def simulate_handmade(ptable):
     level, exp = 1, 0.0
     cur_hp = player_stats_at(ptable, level)["hp"]
 
+    # 게임은 경험치에 스테이지 배율을 곱한다 (StageInfoData 의 EXP / 100).
+    # 그걸 빼고 몬스터 원값만 더하고 있어서, 도입부에서 실제로 얻는 경험치보다
+    # 적게 셌다 — 5층의 기준 레벨이 그만큼 낮게 잡혀 있었다.
+    exp_scale = {st["DungeonID"]: st["EXP"] / 100.0 for st in ORIGINAL_STAGES}
+
     for did, boss_id in HANDMADE_RUN:
+        scale = exp_scale.get(did, 1.0)
         mob_ids = [boss_id] if boss_id is not None else _cells(did, r"M_[0-9]+")
         # 순서가 곧 난이도. 약한 놈부터.
         mob_ids.sort(key=lambda i: monsters[i]["MaxHP"] * monsters[i]["Attack"])
@@ -306,7 +319,7 @@ def simulate_handmade(ptable):
             md = monsters[mid]
             m = Creature(md["MaxHP"], md["Attack"], md["Defence"], md["AttackSpeed"],
                          md["DefenceSpeed"] or 0.1, md["Critical"] or 99,
-                         md["CriticalAttack"] or 200)
+                         md["CriticalAttack"] or 200, md.get("Ability", 0))
 
             won, _, _ = simulate_battle(p, m)
             cur_hp = p.hp
@@ -314,7 +327,7 @@ def simulate_handmade(ptable):
                 return None, (f"손수 만든 {did} 층 {i + 1}번째 전투에서 사망 "
                               f"(Lv{level}, 몬스터 {md['Name']})")
 
-            exp += md["RewardExp"]
+            exp += md["RewardExp"] * scale
             while level + 1 in ptable and exp >= ptable[level + 1]["need_exp"]:
                 exp -= ptable[level + 1]["need_exp"]
                 level += 1
@@ -411,11 +424,9 @@ def build_monsters(ptable, start_level):
             hp_k, atk_k, dfn_k, aspd_k, dspd_k = solve_monster(
                 ptable, level, MOB_HP_LOSS * ramp * ramp_k,
                 MOB_DURATION * ramp, aspd, trait, floor)
-            # 가장 센 놈은 정예(보스 그림)로. 층마다 눈에 띄는 상대가 하나씩 선다.
-            if k == MOBS_PER_FLOOR - 1:
-                art_idx = 8 + ((idx + ch) % 4)
-            else:
-                art_idx = (idx + k) % 8
+            # 층마다 서로 다른 놈이 서게 고른다. 가장 센 놈(정예)은 그림이 아니라
+            # 색이 진하고 몸집이 커서 눈에 띈다 (MonsterTint / MapBuilder.SetupLook).
+            art_idx = (idx + k) % len(MOB_ART)
             art = MOB_ART[art_idx]
             monsters.append(dict(
                 id=MOB_ID_BASE + floor * 8 + k, Chapter=ch, Ability=trait,
@@ -437,10 +448,11 @@ def build_monsters(ptable, start_level):
             btrait = BOSS_TRAITS[ch % len(BOSS_TRAITS)]
             bhp, batk, bdfn, baspd, bdspd = solve_monster(
                 ptable, level, BOSS_HP_LOSS, BOSS_DURATION, 1.1, btrait, floor)
-            bart = BOSS_ART[ch % len(BOSS_ART)]
+            bart_idx = BOSS_ART_INDEX[ch % len(BOSS_ART_INDEX)]
+            bart = MOB_ART[bart_idx]
             monsters.append(dict(
                 id=BOSS_ID_BASE + ch, Chapter=ch, Ability=btrait,
-                Name=f"{theme[0]}의 {BOSS_SPECIES[ch % len(BOSS_SPECIES)]}",
+                Name=f"{theme[0]}의 {MOB_SPECIES[bart_idx]} 우두머리",
                 Attack=float(batk), Defence=float(bdfn), MaxHP=float(bhp),
                 AttackSpeed=float(baspd), DefenceSpeed=float(max(0.15, bdspd)),
                 Critical=20.0, CriticalAttack=200.0,

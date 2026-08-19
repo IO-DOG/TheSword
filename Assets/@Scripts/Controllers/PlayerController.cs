@@ -523,7 +523,7 @@ public class PlayerController : MonoBehaviour
             {
                 if (Managers.Game.OnInteract)
                     return true;
-                Door door = Util.Find<Door>(hit.collider.gameObject);
+                Door door = Door.Find(hit.collider.gameObject);
                 if (door == null)
                     return false;
 
@@ -563,7 +563,7 @@ public class PlayerController : MonoBehaviour
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Portal && !Managers.Game.OnFade && !Managers.Game.OnInteract)
             {
                 somethingExist = false;
-                PortalController portal = Util.Find<PortalController>(hit.collider.gameObject);
+                PortalController portal = Util.FindInTile<PortalController>(hit.collider.gameObject);
                 if (portal != null)
                     portal.UsePortal();
             }
@@ -571,7 +571,7 @@ public class PlayerController : MonoBehaviour
             {
                 somethingExist = true;
 
-                Lever lever = Util.Find<Lever>(hit.collider.gameObject);
+                Lever lever = Util.FindInTile<Lever>(hit.collider.gameObject);
                 if (lever == null)
                     return true;
 
@@ -630,7 +630,7 @@ public class PlayerController : MonoBehaviour
                 somethingExist = true;
                 if (GetTouchDirection(hit.collider.transform, Vector3.back) != TouchDir.None)
                 {
-                    InteractObjectController interactObejct = Util.Find<InteractObjectController>(hit.collider.gameObject);
+                    InteractObjectController interactObejct = Util.FindInTile<InteractObjectController>(hit.collider.gameObject);
                     Managers.Game.CurInteractObject = hit.collider.gameObject;
                     if (interactObejct != null)
                         interactObejct.Interact();
@@ -675,6 +675,23 @@ public class PlayerController : MonoBehaviour
                 mc.SetMonster();
                 somethingExist = true;
                 break;
+            }
+
+            // 아이템도 같은 이유로 광선을 벗어날 수 있다. 몬스터가 떨군 보상이
+            // 그랬다 — 밟고 지나가는데 줍히지 않아서, 치울 수 없는 장애물로 남아
+            // 그 칸에서 진행이 끝났다. 콜라이더 높이에 기대지 말고 칸으로 잡는다.
+            for (int i = 0; i < found.Length && somethingExist == false; i++)
+            {
+                Equip eq = Util.Find<Equip>(found[i].gameObject);
+                if (eq != null && eq.gameObject.activeInHierarchy)
+                {
+                    eq.PickUp();
+                    continue;
+                }
+
+                ConsumableItem ci = Util.Find<ConsumableItem>(found[i].gameObject);
+                if (ci != null && ci.gameObject.activeInHierarchy)
+                    ci.PickUp();
             }
         }
 

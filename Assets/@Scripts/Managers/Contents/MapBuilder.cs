@@ -382,7 +382,13 @@ public static class MapBuilder
     /// </summary>
     static void SetupLook(GameObject go, int id)
     {
-        go.transform.localScale = new Vector3(1f, 2f, 1f);
+        // 보스와 정예는 몸집으로 구분한다.
+        //
+        // 킹 슬라임과 분열 3종의 그림(Boss_C0_*)은 도입부 연출 전용이라 생성 층에
+        // 내보내지 않는다. 그래서 쓸 수 있는 그림은 몹 여덟 종뿐이고, 우두머리를
+        // 우두머리로 보이게 할 방법이 크기와 색밖에 없다.
+        float bulk = MonsterBulk(id);
+        go.transform.localScale = new Vector3(bulk, bulk * 2f, 1f);
 
         Data.MonsterData md;
         if (Managers.Data.MonsterDic.TryGetValue(id, out md) == false)
@@ -405,6 +411,22 @@ public static class MapBuilder
             foreach (SpriteRenderer sr in go.GetComponentsInChildren<SpriteRenderer>(true))
                 sr.color = tint;
         }
+    }
+
+    /// <summary>그 몬스터가 차지하는 몸집. 1 이 보통 몹이다.
+    ///
+    /// 한 칸을 넘기지는 않는다 — 넘기면 옆 칸까지 콜라이더가 걸쳐서 통로를 막는다.
+    /// (FitColliderToCell 이 콜라이더는 한 칸으로 다시 맞춘다.)</summary>
+    static float MonsterBulk(int id)
+    {
+        if (id >= 900 && id < 1000)
+            return 1.45f;                  // 챕터 보스
+
+        // 생성 몬스터 id = 1000 + 층*8 + 서열. 층에서 가장 센 놈이 정예다.
+        if (id >= 1000 && id % 8 == 4)
+            return 1.2f;
+
+        return 1f;
     }
 
     static Transform NewContainer(GameObject root, string name)

@@ -90,40 +90,33 @@ public class ConsumableItem : MonoBehaviour
         //Managers.Game.SaveGame();
     }
 
+    /// <summary>획득 이펙트.
+    ///
+    /// 파티클이 없어도 획득은 끝나야 한다. 어드레서블에 없는 키를 만나면
+    /// Instantiate 가 null 을 주는데, 그대로 transform 을 만지면 PickUp 이 중간에
+    /// 끊긴다 — 아이템이 꺼지지 않아 줍지도 못하는데 길은 막는 물건이 되고,
+    /// 그 칸에서 진행이 끝난다. 실제로 룬(FX_RunStone_*)이 그래서 5층을 막았다.</summary>
     private void PlayParticle()
     {
-        switch (id)
+        if (id < 0 || id >= ConsumableItem.NUM_OF_RUNES)
+            return;
+
+        GameObject particle = Managers.Resource.Instantiate(
+            Managers.Data.ConsumableItemDic[id].PrefabName, Managers.Game.Player.transform);
+        if (particle == null)
+            return;
+
+        if (id >= NUM_OF_KEYS && id < NUM_OF_POTIONS)
         {
-            case 0:
-            case 1:
-            case 2:
-                { 
-                    GameObject particle = Managers.Resource.Instantiate(Managers.Data.ConsumableItemDic[id].PrefabName, Managers.Game.Player.transform);
-                    particle.transform.localScale = new Vector3(0.2f, 0.2f, 0.1f);
-                    break;
-                }
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-                {
-                    GameObject particle = Managers.Resource.Instantiate(Managers.Data.ConsumableItemDic[id].PrefabName, Managers.Game.Player.transform);
-                    particle.transform.position = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z); ;
-                    particle.transform.localScale = new Vector3(0.25f, 0.25f/3f, 0.25f);
-                    break;
-                }
-            // 룬. 기획서 29쪽에 FX_RunStone_Red/Blue/Green 이 있는데 분기가 없어서
-            // 스탯만 조용히 오르고 아무 이펙트도 나지 않았다.
-            case 9:
-            case 10:
-            case 11:
-                {
-                    GameObject particle = Managers.Resource.Instantiate(Managers.Data.ConsumableItemDic[id].PrefabName, Managers.Game.Player.transform);
-                    particle.transform.localScale = new Vector3(0.2f, 0.2f, 0.1f);
-                    break;
-                }
+            // 물약은 아이템이 놓인 자리 위에서 터진다.
+            particle.transform.position = new Vector3(transform.position.x,
+                                                      transform.position.y + 0.5f,
+                                                      transform.position.z);
+            particle.transform.localScale = new Vector3(0.25f, 0.25f / 3f, 0.25f);
+            return;
         }
+
+        // 열쇠와 룬은 캐릭터에 붙어서 터진다.
+        particle.transform.localScale = new Vector3(0.2f, 0.2f, 0.1f);
     }
 }

@@ -15,7 +15,8 @@ public class Door : MonoBehaviour
     /// </summary>
     public static Door Find(GameObject from)
     {
-        return Util.Find<Door>(from);
+        // 문은 타일 하나에 하나뿐이라 형제까지 뒤져도 안전하다.
+        return Util.FindInTile<Door>(from);
     }
 
     public int _keyIndex = 0;

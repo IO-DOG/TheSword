@@ -273,8 +273,17 @@ public class UI_MonsterCard : UI_BaseCard
         GetImage((int)Images.CreatureImage).GetComponent<Animator>().Play(animStr);
     }
 
+    bool _deadHandled = false;
+
     public override void Dead()
     {
+        // OnDeadAction 이 두 번 들어온다. 그대로 두면 경험치가 두 배로 들어가고
+        // (1층만 돌아도 Lv4 가 됐다 — 층당 1레벨이라는 설계가 깨진다)
+        // 보상도 두 개씩 떨어져 한 칸에 쌓인다.
+        if (_deadHandled)
+            return;
+        _deadHandled = true;
+
         base.Dead();
 
         // add exp
@@ -314,7 +323,14 @@ public class UI_MonsterCard : UI_BaseCard
     void DropReward()
     {
         CurMonsterData mdata = _creature as CurMonsterData;
-        if (mdata == null || mdata.RewardItem < 0)
+        if (mdata == null)
+            return;
+
+        // EquipData 0 번은 아이템이 아니라 "빈 자리표"다 (이름 "-", 스탯 전부 0,
+        // 분류는 무기). 그걸 떨구면 줍는 순간 무기 칸이 자리표로 교체되고,
+        // 무기 파티클도 "-" 라서 공격 코루틴이 예외로 죽는다. 1층 라임 슬라임의
+        // 보상이 0 이라 실제로 1층에서 게임이 끝났다.
+        if (mdata.RewardItem <= 0)
             return;
         if (Managers.Data.EquipDic.ContainsKey(mdata.RewardItem) == false)
             return;
@@ -328,9 +344,28 @@ public class UI_MonsterCard : UI_BaseCard
         if (equip == null)
             return;
 
-        item.transform.position = mon.transform.position + Vector3.back * 0.1f;
+        // 죽은 몬스터가 서 있던 칸에 놓되, 높이는 맵에 원래 놓인 아이템에서 그대로
+        // 가져온다. 몬스터의 y(=0)에 두면 밀기 광선(타일 절반 높이에서 수평으로
+        // 나간다)이 스치지 못해서, 줍지도 못하는데 길은 막는 장애물이 된다.
+        Vector3 pos = mon.transform.position;
+        pos.y = ItemHeight(mon);
+        item.transform.position = pos;
+
         equip._id = mdata.RewardItem;
         equip._itemIndex_forActive = -1;   // 맵 데이터에 없는 물건이라는 표시
+    }
+
+    /// <summary>맵에 이미 놓인 아이템의 높이. 숫자를 박아 두지 않고 실물에서 가져온다.</summary>
+    static float ItemHeight(MonsterController mon)
+    {
+        GameObject map = Managers.Game.ParentMap;
+        if (map != null)
+        {
+            ConsumableItem sample = map.GetComponentInChildren<ConsumableItem>(true);
+            if (sample != null)
+                return sample.transform.position.y;
+        }
+        return mon.transform.position.y + Define.TILE_SIZE / 2f;
     }
 
     IEnumerator CoDead()
@@ -363,7 +398,5 @@ public class UI_MonsterCard : UI_BaseCard
         _creature.OnHitAction -= StartDamagedMat;
         _creature.OnDeadAction -= Dead;
         _creature.OnDataRefreshAction -= Refresh;
-    }
-
     }
 }
