@@ -1,0 +1,352 @@
+<title>매직타워 전략 분석</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  /* 팔레트는 이 게임에서 가져왔다 — 횃불의 놋빛, 그리고 열쇠 세 색.
+     장식이 아니라 본문에서 그 셋을 가리킬 때만 쓴다. */
+  :root {
+    --ground:      #f7f5f1;
+    --surface:     #ffffff;
+    --ink:         #23201b;
+    --ink-soft:    #5c554a;
+    --ink-faint:   #8d8579;
+    --rail:        #ded8cd;
+    --rail-soft:   #ebe6dc;
+    --brass:       #9a6d1f;
+    --brass-soft:  #f0e3c8;
+    --key-green:   #3f7f3a;
+    --key-yellow:  #a8811a;
+    --key-red:     #a63b32;
+    --shadow:      0 1px 2px rgba(35,32,27,.06), 0 8px 24px rgba(35,32,27,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:     #16150f;
+      --surface:    #1e1c15;
+      --ink:        #ece6d8;
+      --ink-soft:   #b0a795;
+      --ink-faint:  #7d7566;
+      --rail:       #363225;
+      --rail-soft:  #262318;
+      --brass:      #d9a441;
+      --brass-soft: #3a2f16;
+      --key-green:  #74c06a;
+      --key-yellow: #dcb33f;
+      --key-red:    #d8695c;
+      --shadow:     0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:     #16150f;
+    --surface:    #1e1c15;
+    --ink:        #ece6d8;
+    --ink-soft:   #b0a795;
+    --ink-faint:  #7d7566;
+    --rail:       #363225;
+    --rail-soft:  #262318;
+    --brass:      #d9a441;
+    --brass-soft: #3a2f16;
+    --key-green:  #74c06a;
+    --key-yellow: #dcb33f;
+    --key-red:    #d8695c;
+    --shadow:     0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+                 "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: clamp(2.5rem, 6vw, 5rem) clamp(1.25rem, 4vw, 2.5rem) 6rem;
+  }
+
+  /* ── 표제 ─────────────────────────────────────────── */
+  .masthead { border-bottom: 1px solid var(--rail); padding-bottom: 2rem; margin-bottom: 3.5rem; }
+  .eyebrow {
+    font-family: "Cascadia Code", Consolas, "D2Coding", monospace;
+    font-size: .72rem; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--brass); margin: 0 0 1rem;
+  }
+  h1 {
+    font-family: "Nanum Myeongjo", "Batang", "Times New Roman", serif;
+    font-size: clamp(2.1rem, 5.5vw, 3.3rem);
+    line-height: 1.15; font-weight: 700; margin: 0 0 1rem;
+    text-wrap: balance; letter-spacing: -.01em;
+  }
+  .standfirst { font-size: 1.05rem; color: var(--ink-soft); max-width: 62ch; margin: 0; }
+
+  /* ── 탑 모양 본문 레일 ───────────────────────────────
+     절 번호는 장식이 아니라 실제 순서다. 탑처럼 세로로 쌓는다. */
+  .floors { display: grid; gap: 3.5rem; }
+  section.floor { display: grid; grid-template-columns: 3.25rem minmax(0, 1fr); gap: 0 1.5rem; }
+  @media (max-width: 640px) { section.floor { grid-template-columns: 1fr; gap: .5rem; } }
+
+  .floor-no {
+    font-family: "Cascadia Code", Consolas, "D2Coding", monospace;
+    font-size: .8rem; color: var(--brass);
+    border-top: 2px solid var(--brass); padding-top: .5rem;
+    font-variant-numeric: tabular-nums;
+  }
+  h2 {
+    font-family: "Nanum Myeongjo", "Batang", serif;
+    font-size: clamp(1.4rem, 3vw, 1.9rem); line-height: 1.3;
+    margin: 0 0 1rem; text-wrap: balance;
+  }
+  h3 {
+    font-size: 1rem; margin: 2rem 0 .6rem; letter-spacing: .01em;
+    color: var(--ink);
+  }
+  p, li { max-width: 66ch; }
+  p { margin: 0 0 1rem; }
+  ul { margin: 0 0 1rem; padding-left: 1.15rem; }
+  li { margin-bottom: .35rem; }
+  strong { font-weight: 700; }
+  em { font-style: normal; color: var(--brass); font-weight: 600; }
+
+  /* ── 표 ──────────────────────────────────────────── */
+  .table-wrap { overflow-x: auto; margin: 1.25rem 0 1.5rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  th, td { text-align: left; padding: .7rem .9rem; border-bottom: 1px solid var(--rail-soft); vertical-align: top; }
+  thead th {
+    font-family: "Cascadia Code", Consolas, monospace;
+    font-size: .7rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-faint); border-bottom: 1px solid var(--rail); font-weight: 500;
+  }
+  td.num {
+    font-family: "Cascadia Code", Consolas, monospace;
+    color: var(--brass); font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+
+  /* ── 인용 ────────────────────────────────────────── */
+  .pull {
+    border-left: 3px solid var(--brass);
+    background: var(--brass-soft);
+    padding: 1.1rem 1.3rem; margin: 1.75rem 0; border-radius: 0 4px 4px 0;
+  }
+  .pull p { margin: 0; font-size: 1.05rem; }
+  .pull p + p { margin-top: .5rem; }
+
+  /* ── 층 유형 카드 ────────────────────────────────── */
+  .cycle { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: .75rem; margin: 1.5rem 0; }
+  .cycle .card {
+    background: var(--surface); border: 1px solid var(--rail);
+    border-radius: 5px; padding: .9rem 1rem; box-shadow: var(--shadow);
+  }
+  .cycle .tag {
+    font-family: "Cascadia Code", Consolas, monospace;
+    font-size: .68rem; letter-spacing: .1em; color: var(--ink-faint);
+    display: block; margin-bottom: .35rem;
+  }
+  .cycle .name { font-weight: 700; display: block; margin-bottom: .3rem; }
+  .cycle .ask { font-size: .87rem; color: var(--ink-soft); line-height: 1.6; }
+
+  /* ── 열쇠 세 색: 본문에서 그것을 가리킬 때만 ─────── */
+  .k { font-weight: 700; }
+  .k-g { color: var(--key-green); }
+  .k-y { color: var(--key-yellow); }
+  .k-r { color: var(--key-red); }
+
+  .ledger { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.25rem 0; }
+  .ledger > div { border-top: 2px solid var(--rail); padding-top: .7rem; }
+  .ledger dt { font-weight: 700; margin-bottom: .25rem; }
+  .ledger dd { margin: 0; color: var(--ink-soft); font-size: .92rem; }
+
+  .verdict {
+    margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--rail);
+    font-family: "Nanum Myeongjo", "Batang", serif;
+    font-size: clamp(1.15rem, 2.6vw, 1.5rem); line-height: 1.6; text-wrap: balance;
+  }
+  .verdict strong { color: var(--brass); }
+</style>
+
+<div class="page">
+  <header class="masthead">
+    <p class="eyebrow">TheSword · 설계 참고</p>
+    <h1>매직타워 전략 분석</h1>
+    <p class="standfirst">
+      우리가 참고하는 원형을 뜯어보고, 지금 우리 맵이 왜 단조로운지와
+      무엇을 바꿔야 하는지를 정리한다.
+    </p>
+  </header>
+
+  <div class="floors">
+
+    <section class="floor">
+      <div class="floor-no">01</div>
+      <div>
+        <h2>이 장르의 정체</h2>
+        <p>
+          Magic Tower 는 RPG 의 옷을 입은 <strong>자원 배분 퍼즐</strong>이다.
+          액션도 없고 운도 없다. 화면에 보이는 것이 전부이고, 답은 처음부터 정해져 있다.
+          플레이어가 하는 일은 “어떻게 싸울까”가 아니라
+          <em>무엇을 어떤 순서로 살까</em>다.
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>규칙</th><th>내용</th><th>그래서 생기는 것</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="num">1</td><td>완전 정보 — 능력치와 위치가 처음부터 다 보인다</td><td>실수는 정보 부족이 아니라 계산 착오다</td></tr>
+              <tr><td class="num">2</td><td>결정론적 전투 — 같은 상대는 언제 싸워도 같은 값</td><td>싸움이 가격표가 된다</td></tr>
+              <tr><td class="num">3</td><td>HP 가 화폐 — 죽지만 않으면 얼마든 써도 된다</td><td>몬스터는 적이 아니라 <strong>통행료</strong></td></tr>
+              <tr><td class="num">4</td><td>되돌아갈 수 있다 — 지난 층으로 내려간다</td><td>계획을 다시 짤 수 있다</td></tr>
+              <tr><td class="num">5</td><td>되돌릴 수 없는 선택 — 먹은 물약, 쓴 열쇠</td><td>순서가 곧 실력이다</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pull">
+          <p><strong>핵심은 3번이다.</strong> HP 가 목숨이 아니라 예산이 되는 순간,
+             모든 전투가 “이 길을 지나는 데 얼마”라는 계산으로 바뀐다.</p>
+          <p>몬스터를 피하는 게 아니라 <strong>어떤 통행료를 먼저 낼지 고르는 게임</strong>이 된다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="floor">
+      <div class="floor-no">02</div>
+      <div>
+        <h2>전략이 생기는 네 가지 장치</h2>
+
+        <h3>성장이 곧 할인</h3>
+        <p>
+          몬스터를 잡으면 강해지고, 강해지면 그 뒤의 모든 통행료가 싸진다.
+          그래서 “지금 이 몬스터를 잡을까”는 언제나 투자 판단이다.
+          같은 층을 어떤 순서로 도느냐에 따라 <strong>총 지출이 몇 배까지 갈린다.</strong>
+          이것이 이 장르에서 “잘한다”는 말의 의미다.
+        </p>
+
+        <h3>문과 열쇠는 순서를 강제하는 문법</h3>
+        <p>
+          문은 장애물이 아니다. <span class="k k-g">초록</span> ·
+          <span class="k k-y">노랑</span> · <span class="k k-r">빨강</span>
+          열쇠가 층을 앞뒤로 자르고, 그 경계가 “여기까지는 반드시 정리하고 넘어가라”는
+          뜻이 된다. 열쇠가 모자란 층에서는 <strong>어느 문을 열지</strong> 자체가 문제가 된다.
+        </p>
+
+        <h3>곁길과 막다른 길</h3>
+        <p>
+          보상을 큰길에 두면 아무 판단도 생기지 않는다. 막다른 길 끝에 두어야
+          “지금 갈까, 나중에 올까, 아예 버릴까”가 생긴다. 특히 물약은
+          <strong>가득 찬 상태로 먹으면 넘치는 만큼 영영 버리는</strong> 물건이라,
+          위치보다 타이밍이 중요하다.
+        </p>
+
+        <h3>상점과 교환</h3>
+        <p>
+          자원을 바꿀 수 있는 지점을 두면 HP · 열쇠 · 경험치가 서로 환전 가능한
+          화폐가 된다. 그러면 “무엇이 지금 가장 부족한가”를 계속 다시 판단하게 된다.
+        </p>
+      </div>
+    </section>
+
+    <section class="floor">
+      <div class="floor-no">03</div>
+      <div>
+        <h2>층을 설계하는 방법</h2>
+        <p>
+          좋은 층은 <strong>질문을 하나 던진다.</strong> 층마다 질문이 다르면 100층이
+          지루하지 않다. 같은 구조를 스무 번 반복하면, 방이 아무리 많아도
+          한 층을 백 번 도는 것과 같다.
+        </p>
+
+        <div class="cycle">
+          <div class="card">
+            <span class="tag">TYPE A</span>
+            <span class="name">기본</span>
+            <span class="ask">문 3 · 열쇠 3 · 물약 넉넉. 계산을 익힌다.</span>
+          </div>
+          <div class="card">
+            <span class="tag">TYPE B</span>
+            <span class="name">열쇠 부족</span>
+            <span class="ask">문 3 에 열쇠 2. 무엇을 포기할까.</span>
+          </div>
+          <div class="card">
+            <span class="tag">TYPE C</span>
+            <span class="name">정예 관문</span>
+            <span class="ask">비싼 하나가 지름길을 막는다. 투자할까.</span>
+          </div>
+          <div class="card">
+            <span class="tag">TYPE D</span>
+            <span class="name">물약 인색</span>
+            <span class="ask">물약 하나, 몬스터는 그대로. 순서가 전부.</span>
+          </div>
+          <div class="card">
+            <span class="tag">TYPE E</span>
+            <span class="name">보물 곁길</span>
+            <span class="ask">막다른 길에 룬과 장비. 돌아갈 가치가 있나.</span>
+          </div>
+        </div>
+
+        <p><strong>한 층에 질문은 하나면 충분하다.</strong> 둘 이상 겹치면 계산이 아니라 노동이 된다.</p>
+      </div>
+    </section>
+
+    <section class="floor">
+      <div class="floor-no">04</div>
+      <div>
+        <h2>우리 게임은 지금 어디에 있나</h2>
+
+        <h3>갖춘 것</h3>
+        <ul>
+          <li>완전 정보 — 몬스터 정보 조회(돋보기)</li>
+          <li>결정론적 전투 — 게이지 기반이지만 결과는 계산 가능</li>
+          <li>HP 가 화폐 — 물약이 즉시 회복이고 넘치면 버려진다</li>
+          <li>문 셋이 층을 네 구역으로 자르는 구조</li>
+          <li><strong>특성 8종</strong> — 원형에는 없는 우리 강점. 같은 통행료라도 지불 방식이 갈린다</li>
+        </ul>
+
+        <h3>모자란 것</h3>
+        <div class="ledger">
+          <div><dt>층마다 다른 질문</dt><dd>96개 층이 같은 3×3 방 구조에 수치만 다르다</dd></div>
+          <div><dt>곁길 보상</dt><dd>물약이 큰길 근처라 들를지 말지가 생기지 않는다</dd></div>
+          <div><dt>되돌아갈 이유</dt><dd>내려갈 수 있지만 내려갈 이유가 없다</dd></div>
+          <div><dt>상점 · 교환</dt><dd>자원이 한 방향으로만 흐른다</dd></div>
+          <div><dt>열쇠 부족 상황</dt><dd>열쇠와 문이 항상 1:1 이라 고민이 없다</dd></div>
+        </div>
+
+        <div class="pull">
+          <p><strong>단조로움의 진짜 원인은 방 배치가 아니라 질문이 하나뿐이라는 것이다.</strong></p>
+          <p>지금 모든 층이 묻는 것은 “물약을 언제 먹을까” 하나뿐이다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="floor">
+      <div class="floor-no">05</div>
+      <div>
+        <h2>무엇을 바꿀 것인가</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>순위</th><th>바꿀 것</th><th>어떻게</th></tr></thead>
+            <tbody>
+              <tr><td class="num">1</td><td>층마다 질문을 돌린다</td><td>다섯 층 주기로 A–E 유형을 순환시킨다</td></tr>
+              <tr><td class="num">2</td><td>보상을 막다른 길로</td><td>물약 · 룬을 곁길 끝으로 옮긴다</td></tr>
+              <tr><td class="num">3</td><td>되돌아갈 이유</td><td>아래층에 남긴 자원이 위층에서 필요해지게. 워프석 반지가 동선을 만든다</td></tr>
+              <tr><td class="num">4</td><td>특성으로 층의 성격</td><td>층 단위로 특성을 묶어 “이 층은 갑옷 층”을 만든다</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <p class="verdict">
+    Magic Tower 는 몬스터를 <strong>적이 아니라 가격표</strong>로 만들고,
+    HP 를 <strong>목숨이 아니라 예산</strong>으로 만든 게임이다.
+    층이 재미있으려면 방이 복잡할 게 아니라 <strong>질문이 달라야 한다.</strong>
+  </p>
+</div>

@@ -57,7 +57,10 @@ def play(ptable, monsters, start, blunder_floors=(), skip_floors=(), waste_floor
         boss = next((m for m in by_floor[floor] if m["_boss"]), None)
         fights = list(mons) + ([boss] if boss else [])
 
-        pots = [(G.FLOOR_POTIONS[0], 1), (G.FLOOR_POTIONS[1], 3)]
+        # 층 유형마다 예산이 다르다. 생성기와 같은 함수를 봐야 한다 —
+        # 한쪽만 바뀌면 여기서 나오는 "완주" 는 거짓이 된다.
+        heals = G.floor_potions(floor)
+        pots = [(heal, min(1 + i * 2, len(fights) - 1)) for i, heal in enumerate(heals)]
         if boss:
             pots.append((G.BOSS_FLOOR_POTIONS[0], len(fights) - 1))
         pots.append((G.EXIT_POTION, len(fights)))

@@ -94,6 +94,7 @@ public static class MapBuilder
         Transform levers = NewContainer(root, "Levers");
 
         PlaceFloorField(root, mapData, tint);
+        PlaceDeco(root, dungeonId);
 
         int doorCount = 0;
 
@@ -221,6 +222,30 @@ public static class MapBuilder
         return root;
     }
 
+    /// <summary>그 층의 장식 프리팹을 붙인다 (Deco_CC_FFF).
+    ///
+    /// 장식은 맵 데이터에 넣지 않는다. 놀이에 영향이 없는 것이 데이터에 섞이면
+    /// 밸런스·경로 검증에까지 딸려 다니고, 미술을 손보려면 생성기를 다시 돌려야 한다.
+    /// 층 이름과 짝지은 프리팹 하나만 열면 되게 둔다 —
+    /// 손수 만든 1~4층이 이미 그 규칙(Deco_00_000)을 쓰고 있다.
+    /// 없으면 조용히 넘어간다. 장식이 없다고 층이 안 만들어질 이유는 없다.</summary>
+    static void PlaceDeco(GameObject root, string dungeonId)
+    {
+        GameObject prefab = Managers.Resource.Load<GameObject>($"Deco_{dungeonId}");
+        if (prefab == null)
+            return;
+
+        // 바닥 필드가 이미 만든 "Decos" 를 같이 쓴다. 따로 만들면 같은 이름이 둘이 되고,
+        // CameraController 가 Find("Decos/BG") 로 찾는 바닥을 놓친다.
+        Transform decos = root.transform.Find("Decos");
+        if (decos == null)
+            decos = NewContainer(root, "Decos");
+
+        GameObject go = Object.Instantiate(prefab, decos);
+        go.name = prefab.name;
+        go.transform.localPosition = Vector3.zero;
+    }
+
     static void BuildDoor(Data.ObjectData obj, Transform doors, Vector3 pos, Color tint, int index)
     {
         // Door.Start() 가 transform.parent.GetChild(1) 을 자물쇠 위치로 쓴다.
@@ -239,8 +264,11 @@ public static class MapBuilder
         if (go == null)
             return;
 
-        // 문 셀 id 3/4/5 -> 초록/노랑/빨강 열쇠. 그 외(6~8)는 초록으로 둔다.
-        int keyIndex = Mathf.Clamp(obj.Id - 3, 0, ConsumableItem.NUM_OF_KEYS - 1);
+        // 문 셀 id 는 색과 방향 두 가지로 갈린다.
+        //   3/4/5 가로문(좌우가 벽), 6/7/8 세로문(위아래가 벽)
+        // 색은 3 으로 나눈 나머지다 — 3·6 초록, 4·7 노랑, 5·8 빨강.
+        // 예전에는 Clamp(id-3) 이라 6·7·8 이 전부 빨강을 달라고 했다.
+        int keyIndex = (obj.Id - 3) % ConsumableItem.NUM_OF_KEYS;
         foreach (Door door in Components<Door>(go))
         {
             door._doorIndex_forActive = obj.Count;

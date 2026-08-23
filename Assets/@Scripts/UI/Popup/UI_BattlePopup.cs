@@ -66,7 +66,27 @@ public class UI_BattlePopup : UI_Popup
         Managers.Game.OnBattleAction -= BattleEnd;
         Managers.Game.OnBattleAction += BattleEnd;
 
+        // 스킬은 전투마다 셋 다 새로 채운다.
+        BattleSkills.ResetForBattle();
+
         return true;
+    }
+
+    /// <summary>전투 중 액티브 스킬 입력. 1 강타 / 2 철벽 / 3 흡혈.
+    ///
+    /// 전투는 자동으로 굴러가므로 스킬은 "언제 끼어드느냐" 가 전부다.
+    /// 셋 다 전투당 한 번뿐이라, 아낄지 지금 쓸지가 유일한 판단거리가 된다.</summary>
+    void Update()
+    {
+        if (BattleSkills.Unlocked == false || Managers.Game.OnBattle == false)
+            return;
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            BattleSkills.Use((int)BattleSkills.Kind.Smash, playerCard, monsterCard);
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+            BattleSkills.Use((int)BattleSkills.Kind.Guard, playerCard, monsterCard);
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+            BattleSkills.Use((int)BattleSkills.Kind.Drain, playerCard, monsterCard);
     }
 
     public void BattleEnd()

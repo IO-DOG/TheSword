@@ -11,7 +11,6 @@ using System.Threading;
 using Unity.Burst.CompilerServices;
 using Unity.Mathematics;
 using Unity.VisualScripting;
-using UnityEditor;
 //using UnityEditor.Scripting;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;

@@ -33,7 +33,15 @@ SPAWN = "11"
 # 즉 F+1 층에 15 가 없으면 엔딩 처리가 되므로 1층을 뺀 모든 층에 15 가 필요하다.
 STAIRS_UP = "14"
 STAIRS_DOWN = "15"
-DOOR_BY_ORDER = {0: "3", 1: "4", 2: "5"}      # 문 셀 id (열쇠 0/1/2 에 대응)
+# 문 셀 id. 색(열쇠)과 방향 두 가지로 갈린다 — 손수 만든 맵에서 확인한 규칙이다.
+#
+#   3 / 4 / 5   가로문 : 문의 <b>좌우</b>가 벽이어야 한다. 세로로 지나간다.
+#   6 / 7 / 8   세로문 : 문의 <b>위아래</b>가 벽이어야 한다. 가로로 지나간다.
+#
+# 통로 방향과 문 방향이 어긋나면 벽이 없는 쪽으로 문틀이 떠 있게 되고, 옆으로
+# 돌아갈 수 있는 것처럼 보인다. 방향은 놓는 자리가 정한다.
+DOOR_H = {0: "3", 1: "4", 2: "5"}   # 좌우가 벽
+DOOR_V = {0: "6", 1: "7", 2: "8"}   # 위아래가 벽
 KEY_ITEM = {0: "I_00", 1: "I_01", 2: "I_02"}  # 초록/노랑/빨강 열쇠
 
 # 회복 아이템. 값은 ConsumableItemData 의 회복%와 짝이어야 한다.
@@ -301,11 +309,38 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
 
     for (x, y), v in place.items():
         grid[y][x] = v
+    # 통로가 어느 쪽으로 뻗어 있는지 보고 문 방향을 고른다.
+    # 좌우로 뻗은 통로라면 위아래가 벽이 되므로 세로문,
+    # 위아래로 뻗은 통로라면 좌우가 벽이 되므로 가로문이다.
     for i, (x, y) in enumerate(doors):
-        grid[y][x] = DOOR_BY_ORDER[i]
+        horizontal_corridor = (grid[y][x - 1] != VOID and grid[y][x + 1] != VOID)
+        grid[y][x] = (DOOR_V if horizontal_corridor else DOOR_H)[i]
 
     _add_walls(grid, wall_tiles, rng)
     return grid, regions, doors
+
+
+def check_doors(grid):
+    """문마다 방향에 맞는 벽이 있는지 본다. 어긋난 문 목록을 돌려준다."""
+    bad = []
+    for y in range(GRID_H):
+        for x in range(GRID_W):
+            cell = grid[y][x]
+            if cell not in ("3", "4", "5", "6", "7", "8"):
+                continue
+
+            def is_wall(cx, cy):
+                if not (0 <= cx < GRID_W and 0 <= cy < GRID_H):
+                    return True          # 격자 밖은 벽으로 친다
+                return grid[cy][cx].startswith("W")
+
+            if cell in ("3", "4", "5"):   # 가로문 — 좌우가 벽
+                ok = is_wall(x - 1, y) and is_wall(x + 1, y)
+            else:                          # 세로문 — 위아래가 벽
+                ok = is_wall(x, y - 1) and is_wall(x, y + 1)
+            if not ok:
+                bad.append((cell, x, y))
+    return bad
 
 
 def validate_layout(grid, regions, doors):

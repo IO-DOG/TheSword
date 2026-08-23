@@ -69,6 +69,29 @@ public static class MonsterArtSetup
                 SliceHorizontally(path);
         }
 
+        // 잘린 조각 수가 시트 크기와 안 맞으면 다시 자른다.
+        //
+        // 까마귀(Mob_002_Idle)가 그랬다. 프레임 넷짜리 시트에 "시트 전체" 를 가리키는
+        // 다섯 번째 조각이 하나 더 들어가 있어서, 그 프레임이 재생될 때 까마귀가
+        // 가로로 네 마리 늘어선 것처럼 보였다. 손으로 자르다 남은 조각으로 보인다.
+        foreach (string path in Wanted().Values)
+        {
+            if (File.Exists(path) == false)
+                continue;
+
+            Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            if (tex == null || tex.height <= 0 || tex.width % tex.height != 0)
+                continue;
+
+            int expected = tex.width / tex.height;
+            if (expected > 1 && LoadFrames(path).Length != expected)
+            {
+                Debug.LogWarning($"[MonsterArt] {Path.GetFileNameWithoutExtension(path)} 조각 수가 " +
+                                 $"{LoadFrames(path).Length}개다 ({expected}개여야 한다). 다시 자른다.");
+                SliceHorizontally(path);
+            }
+        }
+
         var made = new List<string>();
         var missing = new List<string>();
 

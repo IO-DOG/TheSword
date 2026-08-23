@@ -65,10 +65,10 @@ SCRIPT_MON_DESC_BASE = 20100   # 기존 20000~20008 뒤
 # 이 순서대로 만날 수밖에 없다 — 그게 이 층의 "정답 경로"다.
 MOB_LOSS_RAMP = [0.72, 0.88, 1.00, 1.16, 1.34]
 
-# 특성 8종 + 룬 + 도입부 경험치 정정까지 반영해 다시 조율한 값.
-# 도입부에서 실제로 얻는 경험치(스테이지 배율 포함)를 세기 시작하자 5층 진입이
-# Lv9 -> Lv15 로 올라가 그만큼 헐렁해졌다. 0.048 이 설계 목표(실수 9회)에 맞는다.
-MOB_HP_LOSS = 0.048
+# 층 유형(기본/인색/관문/넉넉/보물)을 넣고 다시 조율한 값.
+# 물약이 하나뿐인 "인색" 층이 생기면서 0.048 로는 11층에서 죽는다.
+# 0.040~0.046 이 모두 완주하고 그중 0.042 가 실수를 가장 많이 봐준다(8회).
+MOB_HP_LOSS = 0.042
 MOB_DURATION = 16.0
 BOSS_HP_LOSS = 0.28
 BOSS_DURATION = 45.0
@@ -190,6 +190,43 @@ def trait_of(chapter, order):
 # (레벨당 증가치가 일정하므로 챕터별로 등급을 나눌 필요가 없다).
 RUNE_CYCLE = ["I_09", "I_10", "I_11"]
 RUNE_GAIN = {"I_09": ("atk", 1.0), "I_10": ("dfn", 1.0), "I_11": ("hp", 5.0)}
+
+
+# ---------------------------------------------------------------- 층 유형 (매직타워 분석)
+#
+# 96개 층이 전부 같은 질문("물약을 언제 먹을까") 하나만 던져서 단조로웠다.
+# 다섯 층을 주기로 질문을 돌린다. 층 구조는 그대로 두고 <b>예산</b>만 바꾼다 —
+# 방을 복잡하게 만드는 것보다 이쪽이 판단을 만든다.
+#
+#   0 기본   물약 둘. 계산을 익힌다.
+#   1 인색   물약 하나. 순서가 전부다.
+#   2 관문   물약 둘. 대신 가장 센 놈이 길목에 선다(정예는 원래 통로 목에 있다).
+#   3 넉넉   물약 셋. 인색한 층을 지나온 보상이자 다음 인색을 위한 비축.
+#   4 보물   물약 둘 + 룬이 막다른 길로 간다.
+#
+# 생성기와 route_check 가 <b>같은 함수</b>를 봐야 한다. 한쪽만 바뀌면 완주 보장이
+# 거짓이 된다 — 예전에 도입부 경험치에서 그 사고가 났다.
+FLOOR_TYPES = ["기본", "인색", "관문", "넉넉", "보물"]
+GENEROUS_POTION = 0.30
+
+
+def floor_type(floor):
+    return (floor - HANDMADE_FLOORS - 1) % len(FLOOR_TYPES)
+
+
+def floor_potions(floor):
+    """그 층 구역에 놓는 회복 아이템 비율 목록 (계단 앞 물약은 따로다)."""
+    kind = floor_type(floor)
+    if kind == 1:                      # 인색
+        return [FLOOR_POTIONS[1]]
+    if kind == 3:                      # 넉넉
+        return [FLOOR_POTIONS[0], FLOOR_POTIONS[1], GENEROUS_POTION]
+    return list(FLOOR_POTIONS)
+
+
+def rune_in_dead_end(floor):
+    """보물 층에서는 룬을 막다른 길로 보낸다 — 들를지 말지가 판단거리가 된다."""
+    return floor_type(floor) == 4
 
 
 def rune_of(floor):
@@ -739,10 +776,11 @@ def emit_layouts(monsters, write=True):
         region3 = [POTION_BY_HEAL[EXIT_POTION]]
         if boss:
             region3.insert(0, POTION_BY_HEAL[BOSS_FLOOR_POTIONS[0]])
-        pots = [[],
-                [POTION_BY_HEAL[FLOOR_POTIONS[0]]],
-                [POTION_BY_HEAL[FLOOR_POTIONS[1]]],
-                region3]
+        # 층 유형이 예산을 정한다. 구역 1·2 에 나눠 놓고, 남으면 구역 2 에 겹쳐 둔다.
+        heals = floor_potions(floor)
+        region1 = [POTION_BY_HEAL[heals[0]]] if len(heals) > 0 else []
+        region2 = [POTION_BY_HEAL[h] for h in heals[1:]]
+        pots = [[], region1, region2, region3]
 
         grid = None
         for attempt in range(50):

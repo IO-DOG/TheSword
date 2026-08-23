@@ -141,6 +141,22 @@ def apply_hit(attacker, target, damage, is_crit):
     return back
 
 
+# ---------------------------------------------------------------- 액티브 스킬
+# BattleSkills 와 같은 값이어야 한다. 스킬은 플레이어만 쓰고 봇은 쓰지 않으므로
+# 완주 보장 계산에는 넣지 않는다 — 스킬은 게임을 쉽게만 만들 수 있으니,
+# 스킬 없이 잰 "실수 허용치" 는 그대로 하한으로 유효하다.
+SMASH_RATIO = 2.5
+DRAIN_RATIO = 1.5
+
+
+def skill_damage(player, monster, ratio):
+    """강타/흡혈이 넣는 피해. 상대 특성을 거친 실제 감소량을 돌려준다."""
+    dmg = int(round(max(1.0, player.atk * ratio - monster.dfn)))
+    before = monster.hp
+    apply_hit(player, monster, dmg, False)
+    return max(0.0, before - monster.hp)
+
+
 def simulate_battle(player, monster, max_seconds=600.0):
     """1:1 전투. (플레이어 생존여부, 소요시간, 플레이어 HP 손실) 반환.
 
@@ -364,6 +380,20 @@ def _self_check():
     p = mk(); g = mk(GUARDIAN, hp=10 ** 6)
     simulate_battle(p, g, max_seconds=0.1)
     assert g.shield
+
+    # 스킬은 상대 특성을 거쳐 들어가야 한다. 껍질이나 면역을 통째로 무시하면
+    # 챕터마다 다른 특성을 공략한다는 설계가 무너진다.
+    plain = mk(hp=1000, atk=100)
+    target = mk(hp=1000)
+    assert skill_damage(plain, target, SMASH_RATIO) == 250     # 100*2.5 - 0
+
+    armored = mk(ARMOR, hp=1000)                                # 껍질 300
+    dealt = skill_damage(mk(atk=100), armored, SMASH_RATIO)
+    assert dealt == 0, dealt                                    # 껍질이 통째로 흡수
+
+    immortal = mk(IMMORTAL, hp=1000)
+    dealt = skill_damage(mk(atk=100), immortal, SMASH_RATIO)
+    assert dealt == 50, dealt                                   # 일반 공격이라 20% 만
 
     print("특성 자체 점검 통과")
 
