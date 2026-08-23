@@ -1,4 +1,4 @@
-using Coffee.UIExtensions;
+﻿using Coffee.UIExtensions;
 using DG.Tweening;
 using System;
 using System.Collections;
@@ -299,11 +299,19 @@ public class UI_MonsterCard : UI_BaseCard
 
         DropReward();
 
-        if(Managers.Game.Monster.GetComponent<BossMonsterController>()!= null)
+        // 방금 잡은 놈을 표시해 둔다. 보스는 연출이 끝날 때까지 켜져 있어서
+        // 표시가 없으면 그 사이에 다시 부딪혀 두 번 싸운다.
+        // 파괴된 오브젝트일 수도 있어서 (연출이 이미 끝난 경우) 반드시 검사한다.
+        MonsterController fought = Managers.Game.Monster;
+        if (fought != null)
+            fought.MarkDead();
+
+        BossMonsterController boss = (fought != null) ? fought.GetComponent<BossMonsterController>() : null;
+        if (boss != null)
         {
             //Managers.Game.OnBattle = false;
             // Call specific Boss monster dead event
-            Managers.Game.Monster.GetComponent<BossMonsterController>().OnDeadEvent();
+            boss.OnDeadEvent();
         }
         else
         {
@@ -377,7 +385,9 @@ public class UI_MonsterCard : UI_BaseCard
         deathSoulPurple.transform.position = particlePos.position;
         deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
         Destroy(deathSoulPurple, 3);
-        Destroy(Managers.Game.Monster.gameObject.GetComponent<BoxCollider>());
+        // 콜라이더는 루트가 아니라 자식에 붙어 있다 (MapBuilder.FitColliderToCell 도
+        // GetComponentInChildren 으로 찾는다). 루트만 보면 못 찾아 그대로 남는다.
+        StripColliders(Managers.Game.Monster.gameObject);
         Managers.Game.Monster.gameObject.GetComponent<Animator>().Play("Stop");
         SpriteRenderer sr = Managers.Game.Monster.gameObject.GetOrAddComponent<SpriteRenderer>();
         sr.material = Managers.Resource.Load<Material>("PaintWhiteMat");
@@ -385,10 +395,25 @@ public class UI_MonsterCard : UI_BaseCard
         GameObject go = Instantiate(Managers.Game.Monster.gameObject);
         go.transform.position = Managers.Game.Monster.gameObject.transform.position;
         go.GetComponent<Animator>().Play("Stop");
-        Destroy(go.GetComponent<BoxCollider>());
+
+        // 이 복사본은 그림일 뿐인데 콜라이더와 MonsterController 가 그대로 복사된다.
+        // 그래서 1초 동안 "살아 있는 몬스터"로 보였고, 그 사이 그 칸을 다시 밟으면
+        // 같은 상대와 두 번 싸우고 경험치도 보상도 두 번 받았다 (60층·80층 보스).
+        StripColliders(go);
+        MonsterController copy = go.GetComponent<MonsterController>();
+        if (copy != null)
+            copy.MarkDead();
         Destroy(Managers.Game.Monster.gameObject);
         Destroy(go, 1);
         Destroy(sr, 1f);
+    }
+
+    /// <summary>자식까지 훑어 콜라이더를 전부 없앤다. 죽은 것은 길을 막지도 않는다.</summary>
+    static void StripColliders(GameObject go)
+    {
+        Collider[] cols = go.GetComponentsInChildren<Collider>(true);
+        for (int i = 0; i < cols.Length; i++)
+            Destroy(cols[i]);
     }
 
     private void OnDestroy()

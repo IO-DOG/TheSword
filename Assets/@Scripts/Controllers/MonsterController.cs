@@ -17,12 +17,32 @@ public class MonsterController : MonoBehaviour
     public int id = 0;
     [HideInInspector]
     public int _monsterIndex_forActive = 0;
+
+    /// <summary>이 자리의 몬스터가 이미 죽었는가. 죽는 연출이 도는 동안 다시 걸리지 않게.</summary>
+    bool _dead = false;
+
+    public void MarkDead()
+    {
+        _dead = true;
+    }
     public void SetMonster()
     {
         // 이미 죽어서 꺼진 몬스터로는 전투를 열 수 없다. 꺼진 오브젝트에서는
         // 코루틴이 시작되지 않는데, OnBattle 만 먼저 켜지면 전투는 열리지 않고
         // 그 플래그가 참인 채로 남아 플레이어가 영영 움직이지 못한다.
         if (gameObject.activeInHierarchy == false)
+            return;
+
+        // 방금 잡은 놈과는 다시 싸우지 않는다.
+        //
+        // 보통 몬스터는 죽으면 곧바로 꺼져서 위 검사에 걸리는데, 보스는
+        // 죽고 나서도 연출(폭발 -> 하얗게 -> 빛)이 끝날 때까지 몇 초 켜져 있다.
+        // 그 사이에 다시 부딪히면 같은 보스와 두 번 싸우고, 경험치도 보상도
+        // 두 번 받았다 (60층/80층에서 실제로 났다).
+        //
+        // MonsterActiveDic 으로 검사하면 안 된다 - 1~4층의 프리팹 몬스터는
+        // 그 인덱스를 나눠 쓰기 때문에, 하나가 죽으면 킹 슬라임까지 막힌다.
+        if (_dead)
             return;
 
         Managers.Game.OnBattle = true;
