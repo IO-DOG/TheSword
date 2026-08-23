@@ -1,4 +1,4 @@
-using Cinemachine;
+﻿using Cinemachine;
 using DG.Tweening;
 using Febucci.UI;
 using System;
@@ -904,7 +904,8 @@ public class Events : MonoBehaviour
 
         // 하얗게
         boss.GetOrAddComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>("PaintWhiteMat");
-        sr.DOColor(Color.white, 2f);
+        // 보스가 사라진 뒤에도 트윈이 살아 스프라이트 색을 만지면 널참조가 난다.
+        sr.DOColor(Color.white, 2f).SetLink(sr.gameObject);
 
         yield return new WaitForSeconds(0.5f);
 

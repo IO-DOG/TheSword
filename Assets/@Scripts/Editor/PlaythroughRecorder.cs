@@ -314,6 +314,30 @@ public static class PlaythroughRecorder
         }
     }
 
+    /// <summary>씬 백업을 치운다.
+    ///
+    /// Unity 는 도는 동안 열린 씬의 백업을 Temp/__Backupscenes 에 쓴다. 정상 종료하면
+    /// 스스로 지우지만 EditorApplication.Exit 로 끊고 나가면 남는 일이 있고, 그러면
+    /// 다음에 켤 때 "Recovering Scene Backups" 창이 뜬다. Yes 를 누를 때마다
+    /// Assets/_Recovery 에 복사본이 하나씩 쌓인다.
+    /// 자동 검증은 하루에도 몇 번씩 도니, 나가기 전에 우리가 치운다.</summary>
+    static void ClearSceneBackups()
+    {
+        try
+        {
+            string dir = Path.Combine(Directory.GetCurrentDirectory(), "Temp", "__Backupscenes");
+            if (Directory.Exists(dir))
+            {
+                Directory.Delete(dir, true);
+                Debug.Log("[Playthrough] 씬 백업 정리 (복구 창 방지)");
+            }
+        }
+        catch (IOException)
+        {
+            // 지우지 못해도 실행 결과와는 상관없다.
+        }
+    }
+
     static void Finish()
     {
         string state = SessionState.GetString(StateKey, "");
@@ -323,11 +347,13 @@ public static class PlaythroughRecorder
         if (state == "done")
         {
             Debug.Log($"[Playthrough] 완주: {msg}");
+            ClearSceneBackups();
             EditorApplication.Exit(0);
         }
         else if (state == "failed")
         {
             Debug.LogError($"[Playthrough] 실패: {msg}");
+            ClearSceneBackups();
             EditorApplication.Exit(1);
         }
         else

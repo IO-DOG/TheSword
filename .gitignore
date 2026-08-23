@@ -77,3 +77,9 @@ __pycache__/
 *.pyc
 Tools/*.log
 Recordings/
+
+# Unity 가 강제 종료되면 Temp/__Backupscenes 에 씬 백업이 남고,
+# 다음 실행 때 "Recovering Scene Backups" 창이 뜬다. Yes 를 누를 때마다
+# Assets/_Recovery 에 복사본이 하나씩 쌓인다. 둘 다 저장소에 들어갈 것이 아니다.
+/Assets/_Recovery/
+/Assets/_Recovery.meta

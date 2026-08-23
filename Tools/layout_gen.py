@@ -40,6 +40,10 @@ STAIRS_DOWN = "15"
 #
 # 통로 방향과 문 방향이 어긋나면 벽이 없는 쪽으로 문틀이 떠 있게 되고, 옆으로
 # 돌아갈 수 있는 것처럼 보인다. 방향은 놓는 자리가 정한다.
+# 층마다 반드시 치러야 하는 통행료의 최소 수. 이보다 적으면 한 마리도 안 잡고
+# 계단까지 갈 수 있게 되고, 그러면 레벨 곡선이 무너진다.
+MIN_TOLLS = 2
+
 DOOR_H = {0: "3", 1: "4", 2: "5"}   # 좌우가 벽
 DOOR_V = {0: "6", 1: "7", 2: "8"}   # 위아래가 벽
 KEY_ITEM = {0: "I_00", 1: "I_01", 2: "I_02"}  # 초록/노랑/빨강 열쇠
@@ -158,6 +162,39 @@ def _off_corridor_cells(room):
     return [c for c in room_cells(*room) if c[0] != cx and c[1] != cy]
 
 
+
+def _passable(grid, cell):
+    c = grid[cell[1]][cell[0]]
+    return c != VOID and not c.startswith("W")
+
+
+def _cuts_path(grid, start, goal, cell):
+    """그 칸을 막으면 start 에서 goal 로 갈 수 없게 되는가.
+
+    관문과 곁길을 가르는 유일한 기준이다. 예전에는 "통로 목" 이라는 눈대중으로
+    골랐는데, 재 보니 관문의 3분의 1은 그냥 돌아갈 수 있었다 — 통행료가 아니었다.
+    """
+    if start == goal:
+        return False
+
+    seen = {start}
+    stack = [start]
+    while stack:
+        x, y = stack.pop()
+        for dx, dy in NEIGHBORS:
+            n = (x + dx, y + dy)
+            if not (0 <= n[0] < GRID_W and 0 <= n[1] < GRID_H) or n in seen:
+                continue
+            if not _passable(grid, n):
+                continue
+            seen.add(n)
+            if n == cell:
+                continue          # 이 칸은 막힌 것으로 친다
+            stack.append(n)
+    return goal not in seen
+
+
+
 def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
                        with_down_stairs=True, equip_id=None, potions=None, rune=None):
     """한 층의 격자를 만든다.
@@ -190,6 +227,9 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
         gates.append(outside[len(outside) // 2] if outside else None)
 
     # 곁길. 길이 한 줄이면 고를 것이 없다.
+    # 여기 세운 몬스터는 <b>피해 갈 수 있는</b> 상대가 된다 — 값을 치르고 질러갈지,
+    # 그냥 먼 길로 돌아갈지. 매직 타워의 "쫄리면 도망간다" 가 이 자리에서 나온다.
+    shortcuts = []
     extra = 0
     for _ in range(20):
         if extra >= 2:
@@ -200,7 +240,10 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
         (ax, ay), (bx, by) = order[a], order[b]
         if abs(ax - bx) + abs(ay - by) != 1:
             continue
-        _corridor(grid, centers[a], centers[b])
+        cells = _corridor(grid, centers[a], centers[b])
+        outside = [c for c in cells if _outside_room(c)]
+        if outside:
+            shortcuts.append(outside[len(outside) // 2])
         extra += 1
 
     # 구역: 방 아홉 개를 3/2/2/2 로 끊고 경계에 문을 세운다.
@@ -257,24 +300,76 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
         place[pool[0]] = KEY_ITEM[i]
         used.add(pool[0])
 
-    # 몬스터는 통로 목에. 지나가려면 값을 치른다. 약한 놈부터.
-    per_region = [1, 2, mobs_in_floor - 3]
-    gates_by_region = [gates[0:2], gates[3:5], gates[5:7]]
+    # 몬스터는 두 갈래로 나눈다.
+    #
+    #   관문 : 큰길 목에 선다. 지나가려면 반드시 값을 치른다.
+    #   곁길 : 지름길에 선다. 피해 갈 수 있다 — 대신 먼 길을 돈다.
+    #
+    # 예전에는 다섯 마리를 전부 "통로 목" 에 세웠다. 그런데 재 보니 그중 78% 는
+    # 그냥 돌아갈 수 있었다 — 관문이라 부르면서 실은 관문이 아니었고, 어느 것이
+    # 강제인지는 아무도 몰랐다. 눈대중으로는 이 둘을 가를 수 없다.
+    # 그래서 자리마다 "막으면 계단까지 못 가는가" 를 직접 계산해서 가른다.
+    free_gates = [g for g in gates if g and g not in used and g not in doors]
+    free_short = [c for c in shortcuts if c not in used and c not in doors]
+
+    toll_spots = [g for g in free_gates if _cuts_path(grid, spawn, up, g)]
+
+    # 관문 자리가 모자라면 층 전체에서 찾는다.
+    #
+    # 통로 목이라고 다 통행료는 아니다. 재 보니 31/200 개 층은 강제 전투가
+    # 하나도 없어서, 한 마리도 안 잡고 계단까지 갈 수 있었다. 그러면
+    # "층의 몹을 다 잡으면 1레벨" 이라는 성장 곡선이 무너지고, 봇은 전부 잡으니
+    # 검증에서도 안 걸린다 — 사람만 조용히 약해진 채 위층에서 죽는다.
+    if len(toll_spots) < MIN_TOLLS:
+        for r in range(len(regions)):
+            for cell in free_in(regions[r]):
+                if len(toll_spots) >= MIN_TOLLS:
+                    break
+                if cell in used or cell in doors or cell in toll_spots:
+                    continue
+                if _cuts_path(grid, spawn, up, cell):
+                    toll_spots.append(cell)
+    open_spots = [c for c in free_short if not _cuts_path(grid, spawn, up, c)]
+    open_spots += [g for g in free_gates
+                   if g not in toll_spots and g not in open_spots]
+
+    # 그래도 관문을 못 만들면 이 층은 버린다.
+    #
+    # 곁길이 많아 <b>어떤 칸을 막아도 우회로가 있는</b> 층이 있다. 그런 층은
+    # 한 마리도 안 잡고 계단까지 갈 수 있어서 통행료라는 구조 자체가 없다.
+    # 여기서 억지로 배치하느니 다른 씨앗으로 다시 뽑는 편이 낫다
+    # (호출부가 50번까지 다시 시도한다).
+    if len(toll_spots) < MIN_TOLLS:
+        return None, None, None
+
+    forced = min(3, mobs_in_floor)
     idx = 0
-    for r in range(3):
-        spots = [g for g in gates_by_region[r]
-                 if g and g not in used and g not in doors]
-        for _ in range(max(0, per_region[r])):
-            if spots:
-                cell = spots.pop(0)
-            else:
-                pool = free_in(regions[r])
-                if not pool:
-                    return None, None, None
-                cell = pool[0]
-            place[cell] = f"M_{mob_ids[idx]:03d}"
-            used.add(cell)
-            idx += 1
+
+    # 관문 — 반드시 치러야 하는 통행료. 약한 놈부터 세운다.
+    for _ in range(forced):
+        if not toll_spots:
+            break
+        cell = toll_spots.pop(0)
+        place[cell] = f"M_{mob_ids[idx]:03d}"
+        used.add(cell)
+        idx += 1
+
+    # 곁길 — 피해 갈 수 있는 상대. 질러가려면 값을 치르고, 아니면 돌아간다.
+    while idx < mobs_in_floor and open_spots:
+        cell = open_spots.pop(0)
+        place[cell] = f"M_{mob_ids[idx]:03d}"
+        used.add(cell)
+        idx += 1
+
+    # 그래도 남으면 방 안에 둔다. 층마다 몹 수는 지켜야 레벨 곡선이 맞는다.
+    while idx < mobs_in_floor:
+        pool = free_in(regions[idx % 3])
+        if not pool:
+            return None, None, None
+        cell = pool[0]
+        place[cell] = f"M_{mob_ids[idx]:03d}"
+        used.add(cell)
+        idx += 1
 
     potions = potions or [[], [POTION_20], [POTION_30], [POTION_30]]
     for r, pots in enumerate(potions[:4]):

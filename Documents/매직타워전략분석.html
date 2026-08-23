@@ -161,6 +161,12 @@
   .ledger dt { font-weight: 700; margin-bottom: .25rem; }
   .ledger dd { margin: 0; color: var(--ink-soft); font-size: .92rem; }
 
+  .source {
+    font-size: .88rem; color: var(--ink-soft);
+    border-left: 2px solid var(--rail); padding-left: .9rem; margin: 0 0 1.25rem;
+  }
+  .caveat { color: var(--ink-faint); }
+
   .verdict {
     margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--rail);
     font-family: "Nanum Myeongjo", "Batang", serif;
@@ -338,6 +344,110 @@
               <tr><td class="num">4</td><td>특성으로 층의 성격</td><td>층 단위로 특성을 묶어 “이 층은 갑옷 층”을 만든다</td></tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="floor">
+      <div class="floor-no">06</div>
+      <div>
+        <h2>리뷰가 짚은 것 — “쫄리면 도망간다”</h2>
+
+        <p class="source">
+          메탈킴, 「🗼 쫄리면 도망가는 신개념 용사, 매직 타워에 대한 심플한 영상 리뷰」
+          (심플한 영상 리뷰 164화, 2018-11)
+          <br><span class="caveat">자막과 설명란이 열리지 않아 <strong>제목과 채널만 확인했다.</strong>
+          아래는 영상 내용을 옮긴 것이 아니라, 제목이 못박은 한 문장을 우리 게임에 비춰 본 것이다.</span>
+        </p>
+
+        <p>
+          제목 한 줄이 이 장르의 급소를 찌른다. <strong>“쫄리면 도망가는 신개념 용사.”</strong>
+          용사가 도망친다는 게 농담처럼 들리지만 실은 이 장르의 규칙이다.
+          싸움이 가격표라면 <em>비싼 물건은 안 사면 그만</em>이다.
+          사는 것만 고를 수 있는 게 아니라 <strong>안 사는 것도 고를 수 있어야</strong> 장사가 성립한다.
+        </p>
+
+        <h3>우리 게임에는 그 선택지가 없었다</h3>
+        <p>
+          층 레이아웃을 열어 재 보니 몬스터를 전부 <strong>큰길 목</strong>에 세우고 있었다.
+          지나가려면 반드시 싸운다. 우리 몬스터는 통행료가 아니라 관문이었고,
+          플레이어가 하는 일은 “언제 낼까” 뿐이었다. 도망칠 곳이 없으니 도망칠 이유도 없다.
+        </p>
+
+        <h3>고친 것</h3>
+        <p>
+          몬스터를 두 갈래로 나눴다. 눈대중이 아니라
+          <strong>그 칸을 막으면 계단까지 못 가는지 실제로 계산해서</strong> 가른다.
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>갈래</th><th>자리</th><th>뜻</th></tr></thead>
+            <tbody>
+              <tr><td><strong>관문</strong></td><td>막으면 길이 끊기는 칸</td><td>반드시 치른다. 층마다 최소 2마리</td></tr>
+              <tr><td><strong>곁길</strong></td><td>막아도 우회로가 있는 칸</td><td>값을 치르고 질러가거나, 돌아간다</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>단계</th><th>측정 결과</th></tr></thead>
+            <tbody>
+              <tr><td class="num">예전</td><td>78% 가 피해감 — 관문이라면서 대부분 돌아갈 수 있었다</td></tr>
+              <tr><td class="num">1차</td><td>곁길 85% / 관문 65% — 두 갈래가 섞여 있었다</td></tr>
+              <tr><td class="num">지금</td><td>곁길 <strong>100%</strong> · 층당 강제 2~4마리 · 전체 49% 강제 / 51% 피해감</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pull">
+          <p>중간에 한 번 헛짚었다. “통로 목”이라는 눈대중으로 관문을 골랐더니
+             <strong>그 3분의 1이 그냥 돌아갈 수 있었다</strong> — 통행료가 아니었다.</p>
+          <p>연결성을 직접 계산하고 나서야 두 갈래가 깔끔하게 갈렸다.</p>
+        </div>
+
+        <p>
+          또 하나: 곁길이 너무 많아 <strong>어떤 칸을 막아도 우회로가 있는</strong> 층이
+          200개 중 31개 있었다. 그런 층은 한 마리도 안 잡고 계단까지 갈 수 있어
+          성장 곡선이 조용히 무너진다 — 봇은 전부 잡으니 검증에도 안 걸리고,
+          사람만 약해진 채 위층에서 죽는다. 그런 층은 채택하지 않고 다시 뽑는다.
+        </p>
+
+        <h3>남은 것 — 그리고 실패한 실험 하나</h3>
+        <p>
+          이 장르에서 <strong>걷는 데는 비용이 없다.</strong> 그래서 “질러갈까 돌아갈까”는
+          사실 공짜 선택이고, 진짜 판단은 <em>잡을까 말까</em>(투자)다.
+          그러려면 안 잡았을 때 <strong>잃는 것이 구체적</strong>이어야 한다.
+        </p>
+        <p>그래서 “지키는 몬스터 뒤에 덤을 둔다”를 해 봤다. <strong>안 됐다.</strong></p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>지표</th><th>결과</th></tr></thead>
+            <tbody>
+              <tr><td>레이아웃 성공률</td><td>200/200 → <strong>126/150</strong> (16% 하락)</td></tr>
+              <tr><td>덤이 실제로 놓인 층</td><td>150개 중 <strong>16개</strong> (10%)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          이유는 구조에 있다. 우리 방은 <strong>7×5 열린 홀</strong>이라 어떤 칸도
+          보물로 가는 길을 끊지 못한다 — 항상 돌아서 접근할 수 있다.
+          보물을 지키려면 <strong>막다른 골방</strong>이 필요하다.
+          10%만 작동하면서 생성 신뢰도를 깎는 기능이라 되돌렸다.
+        </p>
+        <p>
+          다음 차례는 그 골방이다. 방 가장자리에 한 칸짜리 곁방을 파고 입구를 한 칸으로
+          두면 그 입구가 자연스러운 관문이 된다. 그때 비로소
+          “저 룬을 가지려면 이놈을 잡아야 한다”가 성립한다.
+        </p>
+
+        <div class="pull">
+          <p><strong>배치로 못 만드는 판단은 구조로만 만들 수 있다.</strong></p>
+          <p>열린 방에 보물과 파수꾼을 아무리 잘 놓아도 지켜지지 않는다.</p>
         </div>
       </div>
     </section>
