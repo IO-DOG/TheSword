@@ -195,6 +195,69 @@ def _cuts_path(grid, start, goal, cell):
 
 
 
+def _inside(cell):
+    return 0 <= cell[0] < GRID_W and 0 <= cell[1] < GRID_H
+
+
+def _touches_floor(grid, cell, allow):
+    """그 칸이 허용된 칸 말고 다른 바닥과 맞닿아 있는가."""
+    for dx, dy in NEIGHBORS:
+        n = (cell[0] + dx, cell[1] + dy)
+        if not _inside(n) or n in allow:
+            continue
+        if grid[n[1]][n[0]] != VOID:
+            return True
+    return False
+
+
+def _carve_alcove(grid, rooms, rng):
+    """방 가장자리에서 밖으로 두 칸을 파 <b>막다른 골방</b>을 만든다.
+
+    왜 필요한가
+    -----------
+    "지키는 몬스터 뒤에 덤을 둔다" 를 배치만으로 해 봤다가 실패했다. 우리 방은
+    7x5 열린 홀이라 어떤 칸도 보물로 가는 길을 끊지 못한다 — 항상 돌아서 접근할
+    수 있어서, 파수꾼을 아무리 잘 놓아도 "잡아야 얻는다" 가 성립하지 않았다
+    (150개 층 중 10% 만 실제로 지켜졌다).
+
+    골방은 그 판단을 <b>구조로</b> 만든다. 입구가 한 칸뿐이라 그 칸을 막으면
+    안쪽에 갈 수 없다. 그래서 입구에 선 몬스터는 처음으로 진짜 파수꾼이 되고,
+    "이놈을 잡고 덤을 가질까, 그냥 지나갈까" 가 생긴다.
+
+    가로 간격은 2칸이라 팔 수 없다 — 안쪽 칸이 옆방과 맞닿아 입구가 둘이 된다.
+    세로 간격이 3칸이라 위아래로만 판다.
+
+    (입구, 안쪽) 또는 (None, None).
+    """
+    cands = []
+    for room in rooms:
+        ox, oy = room_origin(*room)
+        cx, _ = room_center(*room)
+        for x in range(ox, ox + ROOM_W):
+            if x == cx:
+                continue                       # 통로가 지나는 줄은 피한다
+            cands.append(((x, oy), (0, -1)))                 # 위로
+            cands.append(((x, oy + ROOM_H - 1), (0, 1)))     # 아래로
+    rng.shuffle(cands)
+
+    for (bx, by), (dx, dy) in cands:
+        gate = (bx + dx, by + dy)
+        prize = (bx + 2 * dx, by + 2 * dy)
+        if not _inside(gate) or not _inside(prize):
+            continue
+        if grid[gate[1]][gate[0]] != VOID or grid[prize[1]][prize[0]] != VOID:
+            continue
+        # 입구는 방과 안쪽에만, 안쪽은 입구에만 맞닿아야 한다. 아니면 뒷문이 생긴다.
+        if _touches_floor(grid, gate, {(bx, by), prize}):
+            continue
+        if _touches_floor(grid, prize, {gate}):
+            continue
+        grid[gate[1]][gate[0]] = FLOOR
+        grid[prize[1]][prize[0]] = FLOOR
+        return gate, prize
+    return None, None
+
+
 def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
                        with_down_stairs=True, equip_id=None, potions=None, rune=None):
     """한 층의 격자를 만든다.
@@ -245,6 +308,10 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
         if outside:
             shortcuts.append(outside[len(outside) // 2])
         extra += 1
+
+    # 막다른 골방. 입구 한 칸에 파수꾼을 세우고 안쪽에 덤을 둔다.
+    # 통로와 지름길을 다 판 뒤라야 뒷문이 생기지 않는다.
+    alcove_gate, alcove_prize = _carve_alcove(grid, order, rng)
 
     # 구역: 방 아홉 개를 3/2/2/2 로 끊고 경계에 문을 세운다.
     doors = []
@@ -309,8 +376,19 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     # 그냥 돌아갈 수 있었다 — 관문이라 부르면서 실은 관문이 아니었고, 어느 것이
     # 강제인지는 아무도 몰랐다. 눈대중으로는 이 둘을 가를 수 없다.
     # 그래서 자리마다 "막으면 계단까지 못 가는가" 를 직접 계산해서 가른다.
-    free_gates = [g for g in gates if g and g not in used and g not in doors]
-    free_short = [c for c in shortcuts if c not in used and c not in doors]
+    # 통로 둘이 한 칸을 공유하면 그 칸이 목록에 두 번 들어온다. 그대로 두면
+    # 몬스터 둘이 같은 칸에 놓이고 뒤엣것이 앞엣것을 덮어써서, 그 층은 몹이
+    # 넷뿐인 층이 된다 — "층의 몹을 다 잡으면 1레벨" 이 그만큼 어긋난다.
+    # 96개 층 중 20개가 그랬다.
+    def _unique(cells):
+        out = []
+        for c in cells:
+            if c not in out:
+                out.append(c)
+        return out
+
+    free_gates = _unique([g for g in gates if g and g not in used and g not in doors])
+    free_short = _unique([c for c in shortcuts if c not in used and c not in doors])
 
     toll_spots = [g for g in free_gates if _cuts_path(grid, spawn, up, g)]
 
@@ -350,13 +428,22 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
         if not toll_spots:
             break
         cell = toll_spots.pop(0)
+        if cell in used:
+            continue
         place[cell] = f"M_{mob_ids[idx]:03d}"
         used.add(cell)
         idx += 1
 
+    # 골방 파수꾼도 곁길이다 — 지나가는 데는 필요 없고, 덤을 가지려면 잡아야 한다.
+    # 층의 몹 수는 그대로 둔다 (다섯 마리를 다 잡아야 1레벨이라는 설계).
+    if alcove_gate is not None and alcove_gate not in used:
+        open_spots.insert(0, alcove_gate)
+
     # 곁길 — 피해 갈 수 있는 상대. 질러가려면 값을 치르고, 아니면 돌아간다.
     while idx < mobs_in_floor and open_spots:
         cell = open_spots.pop(0)
+        if cell in used:
+            continue
         place[cell] = f"M_{mob_ids[idx]:03d}"
         used.add(cell)
         idx += 1
@@ -387,6 +474,12 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
         if pool:
             place[pool[0]] = rune
             used.add(pool[0])
+
+    # 골방 안쪽의 덤. 완주 계산에는 넣지 않는다 — 안 잡고 지나갈 수 있으니
+    # 이걸 셈에 넣으면 보장이 거짓말이 된다. 계산은 그대로 두고 덤만 얹는다.
+    if alcove_prize is not None and alcove_prize not in used:
+        place[alcove_prize] = POTION_20
+        used.add(alcove_prize)
 
     if boss_id is not None:
         pool = free_in([order[-1]])

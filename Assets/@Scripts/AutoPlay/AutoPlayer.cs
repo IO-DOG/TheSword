@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -46,7 +46,10 @@ public class AutoPlayer : MonoBehaviour
     /// <summary>이동 배속. 걷는 시간이 영상의 절반을 먹어서 줄인다.</summary>
     // 이동 배속. 100층 녹화가 30분을 넘으면 실행이 중간에 잘려 완주를 못 담는다.
     // 이동은 전투 결과에 영향이 없으므로 여기를 올려 벽시계 시간을 줄인다.
-    public float MoveSpeedScale = 9f;
+    // 골방이 생기면서 층마다 덤을 주우러 도는 만큼 실행이 길어졌다.
+    // 100층 검증이 시간 제한에 걸려 72층에서 잘렸다 — 이동으로 상쇄한다.
+    // 검증/녹화 전용 값이다. 게임의 이동 속도는 건드리지 않는다.
+    public float MoveSpeedScale = 12f;
 
     const float Tile = 0.32f;
 
