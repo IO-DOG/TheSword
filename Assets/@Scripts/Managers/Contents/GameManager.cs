@@ -559,19 +559,24 @@ public class GameManager
                 curIdx = Managers.Game.PlayerData.CurShield;
                 Managers.Game.PlayerData.CurShield = idx;
                 break;
+            // Define.Types 와 어긋나 있었다. 3 은 목걸이인데 반지 칸에 넣고 있어서
+            // 목걸이 칸은 영원히 비어 있었고(인벤토리는 CurNecklace 를 그린다),
+            // 반지와 책은 분기가 비어 있어 주워도 장착이 되지 않았다.
             case 3:
-                curIdx = Managers.Game.PlayerData.CurRing;
-                Managers.Game.PlayerData.CurRing = idx;
+                curIdx = Managers.Game.PlayerData.CurNecklace;
+                Managers.Game.PlayerData.CurNecklace = idx;
                 break;
             case 4:
-                //curIdx = Managers.Game.CurPlayerData.CurSword;
+                curIdx = Managers.Game.PlayerData.CurRing;
+                Managers.Game.PlayerData.CurRing = idx;
                 break;
             case 5:
                 curIdx = Managers.Game.PlayerData.CurShoes;
                 Managers.Game.PlayerData.CurShoes = idx;
                 break;
             case 6:
-                //curIdx = Managers.Game.CurPlayerData.CurSword;
+                curIdx = Managers.Game.PlayerData.CurBook;
+                Managers.Game.PlayerData.CurBook = idx;
                 break;
             default:
                 break;
@@ -610,8 +615,131 @@ public class GameManager
             Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[idx].MSPD;
         }
 
+        // 착용한 것이 바뀌었으니 유틸(이동 속도·전투 배속)을 다시 계산한다.
+        EquipUtility.Apply();
+
         if (Managers.Game.GameScene != null)
             Managers.Game.GameScene.Refresh();
+    }
+
+    /// <summary>이미 다녀온 층으로 곧장 이동한다 (기획서 65쪽의 워프).
+    ///
+    /// 등록부를 따로 두지 않는다 — FirstEnterMapCheck 가 이미 "처음 밟은 층" 을
+    /// 기록하고 있어서 그게 곧 다녀온 층 목록이다.
+    /// 계단으로 오르내리는 것과 같은 절차를 밟는다: 맵을 만들고, 스폰 지점에 세우고,
+    /// 카메라 경계를 다시 잡는다. 하나라도 빠지면 플레이어가 다른 층 벽에 파묻힌다.</summary>
+    public bool WarpToStage(int stageId)
+    {
+        if (EquipUtility.WarpUnlocked == false)
+            return false;
+        if (CanWarpTo(stageId) == false)
+            return false;
+        if (OnBattle || OnFade || OnDirect || OnInteract)
+            return false;
+
+        GenerateMap(stageId);
+
+        Vector3 pos = Player.transform.position;
+        if (SpawnPoints != null && SpawnPoints.Length > 0 && SpawnPoints[0] != null)
+            pos = SpawnPoints[0].transform.position;
+
+        if (MainCamera != null)
+        {
+            CameraController cam = MainCamera.GetComponentInChildren<CameraController>();
+            if (cam != null)
+                cam.SetupCameraConfiner();
+        }
+
+        Player.transform.position = pos;
+        Player._cellPos = pos;
+        PlayerData.CurStageid = stageId;
+
+        if (OnPortalAction != null)
+            OnPortalAction.Invoke();
+        if (GameScene != null)
+            GameScene.Refresh();
+        return true;
+    }
+
+    /// <summary>그 층으로 워프할 수 있는가. 다녀온 층이어야 한다.</summary>
+    public bool CanWarpTo(int stageId)
+    {
+        if (stageId == PlayerData.CurStageid)
+            return false;
+        if (Managers.Data.StageInfoDic.ContainsKey(stageId) == false)
+            return false;
+
+        List<bool> visited = PlayerData.FirstEnterMapCheck;
+        return visited != null && stageId >= 0 && stageId < visited.Count && visited[stageId];
+    }
+
+    /// <summary>다녀온 층 목록. 워프 UI 가 이걸 그린다.</summary>
+    public List<int> WarpableStages()
+    {
+        List<int> found = new List<int>();
+        List<bool> visited = PlayerData.FirstEnterMapCheck;
+        if (visited == null)
+            return found;
+
+        for (int i = 0; i < visited.Count; i++)
+        {
+            if (visited[i] && i != PlayerData.CurStageid && Managers.Data.StageInfoDic.ContainsKey(i))
+                found.Add(i);
+        }
+        return found;
+    }
+
+    /// <summary>주운 장비를 지금 낀 것과 견줘 더 나으면 갈아입는다.
+    ///
+    /// 예전에는 주우면 무조건 장착했다. 그래서 더 나쁜 것을 밟기만 해도 손해였고,
+    /// 실제로 스탯이 0 인 자리표 장비를 주워 무기가 바뀌는 바람에 1층에서 게임이
+    /// 끝난 적이 있다. 줍는 것 자체는 이득이어야 한다 — 갈아입을지는 판단이다.</summary>
+    public bool EquipIfBetter(int idx)
+    {
+        Data.EquipData incoming;
+        if (Managers.Data.EquipDic.TryGetValue(idx, out incoming) == false)
+            return false;
+
+        int cur = CurrentOfType(incoming.Type);
+        if (cur == idx)
+            return false;
+
+        if (cur > 0 && EquipScore(idx) <= EquipScore(cur))
+            return false;   // 지금 낀 것이 더 낫거나 같다. 인벤토리에 넣어만 둔다.
+
+        SwapEquip(idx);
+        return true;
+    }
+
+    /// <summary>그 부위에 지금 낀 장비 id.</summary>
+    public int CurrentOfType(int type)
+    {
+        switch (type)
+        {
+            case (int)Define.Types.Sword: return PlayerData.CurSword;
+            case (int)Define.Types.Shield: return PlayerData.CurShield;
+            case (int)Define.Types.Necklace: return PlayerData.CurNecklace;
+            case (int)Define.Types.Ring: return PlayerData.CurRing;
+            case (int)Define.Types.Shoes: return PlayerData.CurShoes;
+            case (int)Define.Types.Book: return PlayerData.CurBook;
+            default: return 0;
+        }
+    }
+
+    /// <summary>장비의 좋고 나쁨. 스탯 합에, 유틸 장비는 어빌리티 등급을 얹는다.</summary>
+    public static float EquipScore(int idx)
+    {
+        Data.EquipData eq;
+        if (idx <= 0 || Managers.Data.EquipDic.TryGetValue(idx, out eq) == false)
+            return -1f;
+
+        float score = eq.ATK + eq.DEF + eq.HP * 0.2f + (eq.ASPD + eq.DSPD) * 10f
+                      + eq.CRI + eq.CRIATK * 0.1f + eq.MSPD * 10f;
+
+        // 부츠·목걸이는 스탯이 0 이고 어빌리티 등급이 곧 성능이다.
+        if (eq.AbilityId > 0)
+            score += eq.AbilityId;
+        return score;
     }
 
     #endregion

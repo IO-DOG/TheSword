@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-08-15 | Updated: 2026-08-15 -->
+<!-- Generated: 2026-08-15 | Updated: 2026-08-20 -->
 
 # @Resources
 
@@ -24,6 +24,10 @@
 - 에셋 추가만으로는 로드되지 않는다 — **Addressables 그룹 등록 + "PreLoad" 라벨** 필수
 - 스프라이트의 Addressables 키는 `이름.sprite` 형식 (`ResourceManager`가 접미사를 자동 보정 시도)
 - 데이터 수정 시 CSV(원본)와 JsonData(런타임 로드 대상) **둘 다** 갱신해야 한다 — 런타임은 JSON만 읽는다
+- **PlayerData/MonsterData/StageInfoData/ScriptData는 `Tools/`의 생성기가 덮어쓴다.**
+  손으로 고치면 다음 `generate_content.py --write`에 지워진다 — 생성기 쪽을 고칠 것
+- 몬스터 애니메이션 클립은 손으로 만들지 말고 `Editor/MonsterArtSetup.Build`로 생성한다
+  (`Assets/@Scripts/Editor/AGENTS.md` 참조)
 - 던전 맵 그리드 CSV는 여기가 아니라 `Assets/StreamingAssets/Data/Excel/`에 있음 (셀 코드는 루트 `CLAUDE.md` 참조)
 - `ScriptData`(로컬라이즈 시트) 이스케이프: `\n`=줄바꿈, `^`=쉼표
 

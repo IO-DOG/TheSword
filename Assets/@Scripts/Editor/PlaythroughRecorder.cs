@@ -29,7 +29,7 @@ public static class PlaythroughRecorder
     // 960x540 24fps 로 낮춰도 알아보는 데 지장이 없고, 처리량은 두 배 가까이 는다.
     const int Width = 960;
     const int Height = 540;
-    const float Fps = 24f;
+    const float Fps = 20f;
 
     /// <summary>이 시간이 지나면 결과와 상관없이 녹화를 끊고 나온다.
     /// 봇이 어딘가에서 맴돌아도 mp4 는 정상적으로 마무리돼야 한다.</summary>
@@ -167,7 +167,9 @@ public static class PlaythroughRecorder
         movie.EncoderSettings = new CoreEncoderSettings
         {
             Codec = CoreEncoderSettings.OutputCodec.MP4,
-            EncodingQuality = CoreEncoderSettings.VideoEncodingQuality.Medium,
+            // 인코딩이 병목이라 화질을 낮추면 그만큼 실제 시간이 줄어든다.
+            // 100층을 한 번에 담는 것이 화질보다 중요하다.
+            EncodingQuality = CoreEncoderSettings.VideoEncodingQuality.Low,
         };
         movie.ImageInputSettings = new GameViewInputSettings
         {

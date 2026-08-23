@@ -361,8 +361,15 @@ public class UI_InvenPopup : UI_Popup
         GetObject((int)GameObjects.EquipInfo).gameObject.SetActive(true);
     }
 
+    /// <summary>지금 목록에 띄운 부위. 목록을 클릭하면 이 부위를 갈아입는다.
+    ///
+    /// 예전에는 검이냐 방패냐로만 갈라져 있어서, 목걸이·반지·부츠·책은 칸을 눌러도
+    /// 목록이 열리지 않았다 — 바꿀 방법이 아예 없었다.</summary>
+    Define.Types _listType = Define.Types.Sword;
+
     void OnClickSword()
     {
+        _listType = Define.Types.Sword;
         Refresh();
         OffInventory_MyInfo_On();
         SetSwordListImage();
@@ -435,6 +442,7 @@ public class UI_InvenPopup : UI_Popup
 
     void OnClickShield()
     {
+        _listType = Define.Types.Shield;
         Refresh();
         OffInventory_MyInfo_On();
         SetShieldListImage();
@@ -473,6 +481,7 @@ public class UI_InvenPopup : UI_Popup
 
     void OnClickNecklace()
     {
+        _listType = Define.Types.Necklace;
         Refresh();
         OffInventory_MyInfo_On();
         GetImage((int)Images.Inventory_accessory_necklace_Get).gameObject.SetActive(true);
@@ -480,10 +489,14 @@ public class UI_InvenPopup : UI_Popup
 
         int idx = Managers.Game.PlayerData.CurNecklace;
         PrintEquipAbilityAndDesc(idx);
+
+        SetTypeListImage(_listType);
+        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
     }
 
     void OnClickRing()
     {
+        _listType = Define.Types.Ring;
         Refresh();
         OffInventory_MyInfo_On();
         GetImage((int)Images.Inventory_accessory_ring_Get).gameObject.SetActive(true);
@@ -491,10 +504,14 @@ public class UI_InvenPopup : UI_Popup
 
         int idx = Managers.Game.PlayerData.CurRing;
         PrintEquipAbilityAndDesc(idx);
+
+        SetTypeListImage(_listType);
+        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
     }
 
     void OnClickShoes()
     {
+        _listType = Define.Types.Shoes;
         Refresh();
         OffInventory_MyInfo_On();
         GetImage((int)Images.Inventory_accessory_shoes_Get).gameObject.SetActive(true);
@@ -502,10 +519,14 @@ public class UI_InvenPopup : UI_Popup
 
         int idx = Managers.Game.PlayerData.CurShoes;
         PrintEquipAbilityAndDesc(idx);
+
+        SetTypeListImage(_listType);
+        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
     }
 
     void OnClickBook()
     {
+        _listType = Define.Types.Book;
         Refresh();
         OffInventory_MyInfo_On();
         GetImage((int)Images.Inventory_accessory_book_Get).gameObject.SetActive(true);
@@ -513,78 +534,108 @@ public class UI_InvenPopup : UI_Popup
 
         int idx = Managers.Game.PlayerData.CurBook;
         PrintEquipAbilityAndDesc(idx);
+
+        SetTypeListImage(_listType);
+        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
+    }
+
+
+    /// <summary>그 부위의 인벤토리를 목록 칸에 그린다. 검·방패 전용이던 것을 부위 공통으로.</summary>
+    void SetTypeListImage(Define.Types type)
+    {
+        UnityEngine.UI.Image[] equipList =
+        {
+            GetImage((int)Images.EquipList1), GetImage((int)Images.EquipList2), GetImage((int)Images.EquipList3),
+            GetImage((int)Images.EquipList4), GetImage((int)Images.EquipList5), GetImage((int)Images.EquipList6),
+            GetImage((int)Images.EquipList7), GetImage((int)Images.EquipList8), GetImage((int)Images.EquipList9),
+            GetImage((int)Images.EquipList10)
+        };
+        UnityEngine.UI.Image[] getMark =
+        {
+            GetImage((int)Images.Inventory_EquipList1_Get), GetImage((int)Images.Inventory_EquipList2_Get),
+            GetImage((int)Images.Inventory_EquipList3_Get), GetImage((int)Images.Inventory_EquipList4_Get),
+            GetImage((int)Images.Inventory_EquipList5_Get), GetImage((int)Images.Inventory_EquipList6_Get),
+            GetImage((int)Images.Inventory_EquipList7_Get), GetImage((int)Images.Inventory_EquipList8_Get),
+            GetImage((int)Images.Inventory_EquipList9_Get), GetImage((int)Images.Inventory_EquipList10_Get)
+        };
+
+        System.Collections.Generic.List<int> owned = OwnedOf(type);
+        for (int i = 0; i < equipList.Length; ++i)
+        {
+            bool has = i < owned.Count;
+            getMark[i].gameObject.SetActive(has);
+            if (has == false)
+            {
+                equipList[i].color = new Color(1, 1, 1, 0);
+                continue;
+            }
+            equipList[i].color = Color.white;
+            equipList[i].sprite = Managers.Resource.Load<Sprite>(
+                $"{Managers.Data.EquipDic[owned[i]].ImageName}");
+        }
+    }
+
+    /// <summary>그 부위로 가진 장비 목록. 범위를 벗어나면 빈 목록을 준다.</summary>
+    System.Collections.Generic.List<int> OwnedOf(Define.Types type)
+    {
+        System.Collections.Generic.List<System.Collections.Generic.List<int>> inv =
+            Managers.Game.PlayerData.Inventory;
+        int i = (int)type;
+        if (inv == null || i < 0 || i >= inv.Count || inv[i] == null)
+            return new System.Collections.Generic.List<int>();
+        return inv[i];
     }
 
     void OnClickEquipList(int idx)
     {
-        Debug.Log($"OnClickEquipList 실행. idx : {idx}");
+        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
 
-        UnityEngine.UI.Image[] equipList =
+        UnityEngine.UI.Image[] onMark =
         {
-            GetImage((int)Images.EquipList1), GetImage((int)Images.EquipList2), GetImage((int)Images.EquipList3), GetImage((int)Images.EquipList4), GetImage((int)Images.EquipList5),
-            GetImage((int)Images.EquipList6), GetImage((int)Images.EquipList7), GetImage((int)Images.EquipList8), GetImage((int)Images.EquipList9), GetImage((int)Images.EquipList10)
-        };
-        UnityEngine.UI.Image[] inventory_equipList_get =
-        {
-            GetImage((int)Images.Inventory_EquipList1_Get), GetImage((int)Images.Inventory_EquipList2_Get), GetImage((int)Images.Inventory_EquipList3_Get), GetImage((int)Images.Inventory_EquipList4_Get),
-            GetImage((int)Images.Inventory_EquipList5_Get), GetImage((int)Images.Inventory_EquipList6_Get), GetImage((int)Images.Inventory_EquipList7_Get), GetImage((int)Images.Inventory_EquipList8_Get),
-            GetImage((int)Images.Inventory_EquipList9_Get), GetImage((int)Images.Inventory_EquipList10_Get)
-        };
-        UnityEngine.UI.Image[] inventory_equipList_on =
-        {
-            GetImage((int)Images.Inventory_EquipList1_On), GetImage((int)Images.Inventory_EquipList2_On), GetImage((int)Images.Inventory_EquipList3_On), GetImage((int)Images.Inventory_EquipList4_On),
-            GetImage((int)Images.Inventory_EquipList5_On), GetImage((int)Images.Inventory_EquipList6_On), GetImage((int)Images.Inventory_EquipList7_On), GetImage((int)Images.Inventory_EquipList8_On),
+            GetImage((int)Images.Inventory_EquipList1_On), GetImage((int)Images.Inventory_EquipList2_On),
+            GetImage((int)Images.Inventory_EquipList3_On), GetImage((int)Images.Inventory_EquipList4_On),
+            GetImage((int)Images.Inventory_EquipList5_On), GetImage((int)Images.Inventory_EquipList6_On),
+            GetImage((int)Images.Inventory_EquipList7_On), GetImage((int)Images.Inventory_EquipList8_On),
             GetImage((int)Images.Inventory_EquipList9_On), GetImage((int)Images.Inventory_EquipList10_On)
         };
+        for (int i = 0; i < onMark.Length; ++i)
+            onMark[i].gameObject.SetActive(false);
 
-        //Refresh();
-        GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
-        //int swordCount = Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Count;
+        System.Collections.Generic.List<int> owned = OwnedOf(_listType);
+        int slot = idx - 1;                       // 목록 칸은 1 부터 온다
+        if (slot < 0 || slot >= owned.Count)
+            return;
 
-        //if (idx - 1 >= swordCount) return;
-        //int equipIdx = Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword][idx - 1];
+        int equipId = owned[slot];
+        onMark[slot].gameObject.SetActive(true);
+        PrintEquipAbilityAndDesc(equipId);
 
-        // 검 리스트를 보여줘야 할 때
-        if (GetImage((int)Images.Inventory_Sword_On).gameObject.activeSelf)
+        // 스탯 더하고 빼기와 슬롯 기록을 한 곳에서 한다. 예전에는 여기서 따로
+        // 계산하고 CurSword 를 직접 대입해서, 부위마다 규칙이 갈라져 있었다.
+        Managers.Game.SwapEquip(equipId);
+
+        SetTypeListImage(_listType);
+        RefreshSlotIcon(_listType, equipId);
+        if (_listType == Define.Types.Sword)
+            ShowSwordIllust();
+        Refresh();
+    }
+
+    /// <summary>부위 칸의 그림을 지금 낀 것으로 바꾼다.</summary>
+    void RefreshSlotIcon(Define.Types type, int equipId)
+    {
+        Sprite sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[equipId].ImageName}");
+        if (sprite == null)
+            return;
+
+        switch (type)
         {
-            //Refresh();
-
-            for (int i = 0; i < inventory_equipList_on.Length; ++i)
-            {
-                inventory_equipList_on[i].gameObject.SetActive(false);
-            }
-
-            Debug.Log($"검 인덱스");
-            SetSwordListImage();
-            if (Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Count >= idx)
-            {
-                inventory_equipList_get[idx - 1].gameObject.SetActive(true);
-                inventory_equipList_on[idx - 1].gameObject.SetActive(true);
-                int temp = Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword][idx - 1];
-                Debug.Log($"검 인덱스 {temp}");
-                PrintEquipAbilityAndDesc(temp);
-                int curSwordIdx = Managers.Game.PlayerData.CurSword;
-                SwapSword(curSwordIdx, temp);
-                Managers.Game.PlayerData.CurSword = temp;
-                ShowSwordIllust();
-                GetImage((int)Images.sword).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[temp].ImageName}");
-            }
-        }
-        else // 방패 리스트를 보여줘야 할 때
-        {
-            //Refresh();
-
-            if (Managers.Game.PlayerData.Inventory[(int)Define.Types.Shield].Count >= idx)
-            {
-                inventory_equipList_get[idx].gameObject.SetActive(true);
-                inventory_equipList_on[idx].gameObject.SetActive(true);
-                int temp = Managers.Game.PlayerData.Inventory[(int)Define.Types.Shield][idx];
-                PrintEquipAbilityAndDesc(temp);
-                int curShieldIdx = Managers.Game.PlayerData.CurShield;
-                SwapShield(curShieldIdx, temp);
-                Managers.Game.PlayerData.CurShield = temp;
-                GetImage((int)Images.shield).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[temp].ImageName}");
-            }
+            case Define.Types.Sword: GetImage((int)Images.sword).sprite = sprite; break;
+            case Define.Types.Shield: GetImage((int)Images.shield).sprite = sprite; break;
+            case Define.Types.Necklace: GetImage((int)Images.necklace).sprite = sprite; break;
+            case Define.Types.Ring: GetImage((int)Images.ring).sprite = sprite; break;
+            case Define.Types.Shoes: GetImage((int)Images.shoes).sprite = sprite; break;
+            case Define.Types.Book: GetImage((int)Images.book).sprite = sprite; break;
         }
     }
 

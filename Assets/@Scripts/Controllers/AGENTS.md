@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-08-15 | Updated: 2026-08-15 -->
+<!-- Generated: 2026-08-15 | Updated: 2026-08-20 -->
 
 # Controllers
 
@@ -30,8 +30,15 @@
 - 충돌 판정은 `Define.Layer`의 레이어 번호에 의존 — 레이어 변경 시 Define과 Unity 설정 동시 수정
 - 스폰/제거는 `Managers.Object`와 활성화 딕셔너리(`MonsterActiveDic` 등)를 경유해야 세이브에 반영된다
 
+- 광선/트리거가 맞힌 오브젝트에서 컴포넌트를 찾을 때는 `Util.Find<T>`(자신→자식→조상 자신)를 쓴다.
+  몬스터는 **여럿인 것**이라 넓은 탐색을 쓰면 형제를 집는다 — 슬라임을 밀었는데 옆 칸 늑대와 전투가 열렸다
+- **이펙트가 없어도 공격은 계속돼야 한다.** 무기 FX의 `Instantiate`가 null을 주는데 그대로
+  `transform`을 만지면 공격 코루틴이 죽어 **그 전투 내내 한 번도 공격하지 못한다**. null 확인 후 건너뛸 것
+- 파괴된 오브젝트를 붙잡은 트윈은 남지 않게 정리한다(`DOTween.Kill` 또는 `SetLink`)
+
 ### Common Patterns
 - 연출(카메라 셰이크, 컷신)은 직접 구현하지 말고 `Managers.Directing` 호출
+- 몬스터 특성 패시브는 컨트롤러가 아니라 `Class/CreatureClass.cs`의 `ITrait` 구현에 있다
 
 ## Dependencies
 

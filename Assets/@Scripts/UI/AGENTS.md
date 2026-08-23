@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-08-15 | Updated: 2026-08-15 -->
+<!-- Generated: 2026-08-15 | Updated: 2026-08-20 -->
 
 # UI
 
@@ -30,6 +30,11 @@ enum 기반 자동 바인딩(`UI_Base.Bind`)을 쓰는 UI 계층. `UI_Popup`은 
 - 새 팝업: `UI_Popup` 파생 클래스 + 동명 프리팹(Addressables "PreLoad" 라벨) → `Managers.UI.ShowPopupUI<T>()`
 - `Init()`은 중복 호출 가드(`_init`)가 있는 lazy 초기화 — `Start()`보다 먼저 접근하면 직접 `Init()` 호출
 - 노출 문자열은 `Managers.GetString(scriptId)` 사용 (하드코딩 금지)
+
+- **전투 결말은 `UI_MonsterCard.Dead()` 하나뿐이다.** 일반 몬스터와 보스가 같은
+  `MonsterActiveDic`을 쓰는 이유이자, 처치 기록·보상 지급이 지나가는 유일한 지점이다
+- 전투창의 아이콘·배경·무기 애니메이션은 `MonsterClassData`를 특성 id로 물어온다 —
+  **특성 id는 그 표의 행 번호와 같아야 한다**
 
 ### Common Patterns
 - 버튼 이벤트: `GetButton((int)Buttons.Xxx).gameObject.BindEvent(액션)` 또는 `BindEvent(go, action, type)`

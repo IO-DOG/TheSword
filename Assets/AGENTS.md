@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-08-15 | Updated: 2026-08-15 -->
+<!-- Generated: 2026-08-15 | Updated: 2026-08-20 -->
 
 # Assets
 
@@ -17,6 +17,7 @@ Unity 에셋 루트. **`@` 접두사 폴더(`@Scripts`, `@Resources`, `@Scenes`,
 | `AddressableAssetsData/` | Addressables 그룹/설정 (에디터에서 관리) |
 | `StreamingAssets/Data/` | 던전 맵 CSV 그리드(`Excel/Dungeon_*.csv`)와 변환 산출물 `JsonData/MapData.json` |
 | `Resources/` | (레거시) Unity Resources 폴더 — 신규 에셋은 넣지 말 것 |
+| `_Recovery/` | 에디터 크래시 복구 씬 사본 — 작업물 아님, 참조 금지 |
 | 그 외 (`BroAudio/`, `Plugins/`, `Retro Arsenal/`, `AssetPacks/`, `UniGLTF/` 등) | 서드파티 — 수정 금지 |
 
 ## For AI Agents
@@ -25,5 +26,7 @@ Unity 에셋 루트. **`@` 접두사 폴더(`@Scripts`, `@Resources`, `@Scenes`,
 - 새 프리팹/에셋은 Addressables에 등록하고 **"PreLoad" 라벨**을 붙여야 런타임에 로드된다
 - 씬 추가 시 `Define.Scene` enum과 `BaseScene` 파생 클래스도 함께 추가
 - 서드파티 폴더의 버그는 우회(래핑)하고 원본을 고치지 않는다
+- `StreamingAssets/Data/Excel/Dungeon_*.csv`와 `@Resources/Data/`의 테이블은 5층 이후분이
+  `Tools/`의 생성기 산출물이다 — 손으로 고치지 말고 생성기를 고친다 (see `../Tools/AGENTS.md`)
 
 <!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

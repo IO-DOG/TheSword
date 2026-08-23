@@ -110,6 +110,7 @@ public static class MonsterArtSetup
     const string EquipClipDir = "Assets/@Resources/Animations/ItemAnimatios/Item";
     const string EquipController = EquipClipDir + "/EquipItemAnimator.controller";
     const string NecklaceSprite = "Assets/@Resources/Sprites/Equip/EquipSprite/Equip_Necklace_00.png";
+    const string RingSprite = "Assets/@Resources/Sprites/Equip/EquipSprite/Equip_Ring_00.png";
 
     /// <summary>맵에 떨어진 장비가 재생하는 EquipItem_{id} 상태를 채운다.
     ///
@@ -132,6 +133,14 @@ public static class MonsterArtSetup
             string clipName = $"EquipItem_{id}";
             WriteClip($"{EquipClipDir}/{clipName}.anim", clipName, new[] { sprite });
             names.Add(clipName);
+        }
+
+        // 워프석 반지(32). 챕터 보스가 떨구므로 바닥에 보여야 한다.
+        Sprite ring = AssetDatabase.LoadAssetAtPath<Sprite>(RingSprite);
+        if (ring != null)
+        {
+            WriteClip($"{EquipClipDir}/EquipItem_32.anim", "EquipItem_32", new[] { ring });
+            names.Add("EquipItem_32");
         }
 
         AssetDatabase.SaveAssets();

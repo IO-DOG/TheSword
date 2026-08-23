@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-08-15 | Updated: 2026-08-15 -->
+<!-- Generated: 2026-08-15 | Updated: 2026-08-20 -->
 
 # Managers
 
@@ -24,7 +24,7 @@
 | `Contents/DirectingManager.cs` | 컷신·연출 시퀀스 (내부에 `Events` MonoBehaviour 포함) |
 | `Contents/EventManager.cs` | `EventData` 테이블 기반 게임 이벤트 트리거 |
 | `Contents/CoroutineManager.cs` | 비-MonoBehaviour에서 코루틴 실행 대행 |
-| `Contents/MapBuilder.cs` | MapData(CSV 파생)로 던전 한 층을 런타임 조립. 100층 대부분이 이 경로 |
+| `Contents/MapBuilder.cs` | MapData(CSV 파생)로 던전 한 층을 런타임 조립. 96개 층이 이 경로 (1~4층만 프리팹) |
 
 ## For AI Agents
 
@@ -42,6 +42,21 @@
   Unity는 MonoBehaviour의 `new`를 거부해 인스턴스가 null이 된다 (과거 `EventManager`가 이 버그였다).
   Unity 기능이 필요하면 `@Managers` GameObject에 컴포넌트로 붙이고 지연 조회할 것 —
   `DirectingManager.Events`가 그 방식이다.
+
+### MapBuilder 주의
+- 타일 프리팹의 `PortalController`/`Door`는 **루트가 아니라 자식**에 붙어 있다.
+  `GetOrAddComponent`로 루트에 새로 붙이면 설정 안 된 원본이 남아 계단이 죽는다 →
+  `MapBuilder.Components<T>()`로 **전부** 설정할 것
+- 보스는 `MonsterActiveDic`을 일반 몬스터와 **공유**한다. 전투 결말이 `UI_MonsterCard.Dead()`
+  하나뿐이고 거기서 항상 그 딕셔너리에 쓰기 때문이다. 별도 인덱스를 주면 엉뚱한 층의
+  몬스터가 죽은 것으로 기록된다
+- 1~4층은 손수 만든 도입부라 `MapBuilder.IsHandAuthored`가 건너뛴다.
+  `DirectingManager`가 그 층의 오브젝트를 **이름으로 직접** 찾으므로(`Items/CItem13`,
+  `SpawnKingSlime`, `YellowSlimePos` …) 레이아웃을 새로 생성하면 인트로가 통째로 깨진다
+- 우두머리는 그림이 아니라 **덩치**(`MonsterBulk`: 정예 1.2, 보스 1.45)와 색으로 구분한다.
+  `Boss_C0_*` 애니메이션은 킹슬라임/분열 전용 — 생성 층에 내보내지 않는다
+- 챕터 분위기는 타일 틴트 + `DirectionalLight` 색 + BGM. **벽 아트와 BGM은 챕터 00 세트만 실재**한다.
+  음악을 추가하면 `StageInfoData`의 BGM 열에 맞춰 어드레서블만 등록하면 `GameManager.PlayChapterBGM`이 집어간다
 
 ## Dependencies
 

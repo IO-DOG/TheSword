@@ -52,7 +52,8 @@ public class Equip : MonoBehaviour
         gameObject.SetActive(false);
 
         //Managers.Game.SaveGame();
-        Managers.Game.SwapEquip(Id);
+        // 무조건 갈아입지 않는다. 더 나을 때만 착용하고, 아니면 인벤토리에 남는다.
+        Managers.Game.EquipIfBetter(Id);
         Managers.Game.GameScene.Refresh();
     }
 }

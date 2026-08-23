@@ -59,6 +59,9 @@ public class UI_GameScene : UI_Scene
         if (base.Init() == false)
             return false;
 
+        // 워프 창(Tab). 프리팹이 없어 코드로 세우는 창이라 여기서 한 번 붙여 둔다.
+        WarpUI.Spawn();
+
         #region Bind
         //BindButton(typeof(Buttons));
         BindObject(typeof(GameObjects));
@@ -134,6 +137,13 @@ public class UI_GameScene : UI_Scene
                 go.GetComponent<UI_MenuPopup>().OpenOtherUI();
         });
         GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(OnClickMainUIInventoryAImage);
+
+        // HUD 에 워프 버튼과 그림은 진작 있었는데 아무 데도 연결돼 있지 않았다.
+        GetImage((int)Images.MainUIWarpAImage).gameObject.BindEvent(() =>
+        {
+            if (WarpUI.Instance != null)
+                WarpUI.Instance.Open();
+        });
 
         //GetButton((int)Buttons.PlayConversation).gameObject.BindEvent(() =>
         //{
@@ -211,6 +221,7 @@ public class UI_GameScene : UI_Scene
 
     public void Refresh()
     {
+        RefreshWarpButton();
         GetText((int)Texts.MainUIMapNameText).text = Managers.GetString(Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].DungeonNameScriptID);
         GetText((int)Texts.PlayerLevelText).text = Managers.Game.PlayerData.Level.ToString();
         int level = Managers.Game.PlayerData.Level;
@@ -442,6 +453,15 @@ public class UI_GameScene : UI_Scene
     {
         GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(false);
         GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false);
+    }
+
+    /// <summary>워프 버튼은 워프석 반지를 끼고 있을 때만 보인다.</summary>
+    public void RefreshWarpButton()
+    {
+        bool on = EquipUtility.WarpUnlocked;
+        GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(on);
+        if (on == false)
+            GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false);
     }
 
     public void OffUIWarp()
