@@ -177,6 +177,13 @@ Unity.exe -projectPath . -executeMethod MapDecoSetup.Build
 여럿인 것에 넓은 탐색을 쓰면 형제를 집는다 — 실제로 슬라임을 밀었는데 옆 칸 늑대와
 전투가 열렸다.
 
+**콜라이더는 루트가 아니라 자식에 붙어 있다.** 그래서 `GetComponent<BoxCollider>()`
+는 조용히 null 을 주고, `Destroy(null)` 은 아무 일도 하지 않는다. 죽는 연출용
+복사본(`UI_MonsterCard.CoDead` 가 몬스터를 통째로 복사한다)의 콜라이더를 그렇게
+지우려다 실패해서, 복사본이 1초 동안 살아 있는 몬스터로 남았고 그 칸을 다시 밟으면
+**같은 보스와 두 번 싸웠다**. 콜라이더를 없앨 때는 `GetComponentsInChildren<Collider>`
+로 훑는다.
+
 ### 100층 콘텐츠 생성 (`Tools/`)
 
 던전 100층(20층마다 테마가 바뀌는 챕터 00~04)은 손으로 만들지 않고 **파이썬 생성기**로 만든다.
