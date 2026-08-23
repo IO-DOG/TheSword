@@ -1,5 +1,6 @@
 ﻿using Data;
 using System.Collections;
+using TMPro;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -69,7 +70,7 @@ public class UI_BaseCard : UI_Base
 
     protected void SetUI()
     {
-        GetText((int)Texts.CreatureName).text = _creature.Name;
+        SetName(GetText((int)Texts.CreatureName), _creature.Name);
         GetText((int)Texts.HPBarText).text = _creature.CurHP.ToString();
         GetText((int)Texts.AttackStatusText).text = _creature.Attack.ToString();
         GetText((int)Texts.DefenceStatusText).text = _creature.Defence.ToString();
@@ -79,6 +80,29 @@ public class UI_BaseCard : UI_Base
         string abilityImage = Managers.Data.MonsterClassDic[abilityIndex].AbilityImage;
         GetImage((int)Images.BattleBGImage).sprite = Managers.Resource.Load<Sprite>(battleBGImage);
         GetImage((int)Images.AbilityImage).sprite = Managers.Resource.Load<Sprite>(abilityImage);
+    }
+
+    /// <summary>
+    /// 이름을 한 줄로 넣는다. 넘치면 글자를 줄인다.
+    ///
+    /// 이름표는 줄바꿈이 켜져 있고 넘침을 허용해서, 생성 층의 긴 이름
+    /// ("이끼 낀 지하 묘소의 잿빛 파수꾼 우두머리")이 두 줄로 접히면 두 번째 줄이
+    /// 위로 넘쳐 공격력·방어력 숫자를 덮었다 — 다섯 보스 전부 그랬다.
+    /// 칸을 키우면 카드 그림이 밀리므로, 한 줄로 두고 폭에 맞춰 줄인다.
+    /// </summary>
+    static void SetName(TMP_Text label, string name)
+    {
+        if (label == null)
+            return;
+
+        float designed = label.fontSize;      // 자동 축소를 켜면 이 값이 바뀐다. 먼저 잡아 둔다.
+
+        label.text = name;
+        label.enableWordWrapping = false;
+        label.overflowMode = TextOverflowModes.Ellipsis;
+        label.fontSizeMin = 6f;
+        label.fontSizeMax = designed;
+        label.enableAutoSizing = true;
     }
 
     /// <summary>

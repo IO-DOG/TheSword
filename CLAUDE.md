@@ -253,6 +253,12 @@ Lv17 로 관측됐다 (예측보다 3 높다). 완주 판정이 그만큼 보수
 
 ### 데이터 파이프라인
 
+- **이름은 `ScriptData` 가 이긴다.** `MonsterData.Name` 은 화면에 안 쓰인다 —
+  UI 는 `MonsterNameId` 로 `ScriptData` 를 찾는다. 생성기의 `emit_scripts` 는 손으로 쓴
+  번역을 지키려고 **이미 있는 ID 를 건너뛰었는데**, 그 바람에 생성한 몬스터의 이름이
+  옛 문자열로 남았다: 데이터는 "…잿빛 파수꾼 우두머리" 인데 화면은 "…킹 슬라임" 이었고,
+  일반 몹도 슬라임이 늑대로 불렸다. 그림에 맞춰 이름을 고쳐도 화면은 안 바뀐다는 뜻이다.
+  지금은 **생성 구간(5100~, 10900~, 11000~, 20900~, 21000~)만 덮어쓴다.**
 - 테이블 원본: `Assets/@Resources/Data/Excel/*.csv` → 변환된 `Assets/@Resources/Data/JsonData/*.json`(Addressable TextAsset)을 `DataManager.Init()`이 Newtonsoft.Json + `ILoader<Key,Value>` 패턴으로 로드. 새 테이블 추가 시 `Data.Contents.cs`에 Data 클래스+Loader 정의 후 `DataManager`에 딕셔너리·로드 라인 추가.
 - 던전 맵: `Assets/StreamingAssets/Data/Excel/Dungeon_*.csv` 그리드를 `DataManager.ResetActiveDic()`이 파싱해 `MapData.json` 생성. 셀 코드: `I`=소비 아이템, `E`=장비, `M`=몬스터, `B`=보스, `W`=벽, 숫자 3~8=문, 11=스폰 지점, 12=레버, 13=기둥, 14~16=포탈.
 - 세이브: 오브젝트별 활성화 상태 딕셔너리들을 `Application.persistentDataPath/*.json`으로 저장/로드 (`UpdateActiveDic`/`LoadActiveDic`).

@@ -729,17 +729,42 @@ def emit_stage_info():
 
 
 def emit_scripts(monsters):
-    """기존 번역은 그대로 두고 새 ID만 추가한다."""
+    """손으로 쓴 번역은 지키고, 생성한 이름은 덮어쓴다.
+
+    예전에는 있는 ID 를 전부 건너뛰었다. 번역을 지키려던 것인데, 생성한 몬스터의
+    이름까지 옛 문자열이 남았다 — 데이터에는 "이끼 낀 지하 묘소의 잿빛 파수꾼
+    우두머리" 인데 화면에는 "이끼 낀 지하 묘소의 킹 슬라임" 이 떴다.
+    그림에 맞춰 이름을 고쳐도 화면은 그대로였다는 뜻이다.
+
+    그래서 생성 구간(층 이름 / 몹 이름·설명 / 보스 이름·설명)만 덮어쓴다.
+    1~4층과 UI 문자열은 그 구간 밖이라 손대지 않는다.
+    """
     path = os.path.join(JSOND, "ScriptData.json")
     with open(path, "r", encoding="utf-8") as f:
         scripts = json.load(f)["scripts"]
-    known = {s["id"] for s in scripts}
+    by_id = {s["id"]: s for s in scripts}
+
+    generated = [
+        (SCRIPT_STAGE_NAME_BASE, SCRIPT_STAGE_NAME_BASE + TOTAL_FLOORS),
+        (BOSS_NAME_BASE, BOSS_NAME_BASE + len(CHAPTER_THEMES)),
+        (BOSS_DESC_BASE, BOSS_DESC_BASE + len(CHAPTER_THEMES)),
+        (MOB_NAME_BASE, MOB_NAME_BASE + (TOTAL_FLOORS + 1) * 8),
+        (MOB_DESC_BASE, MOB_DESC_BASE + (TOTAL_FLOORS + 1) * 8),
+    ]
+
+    def is_generated(sid):
+        return any(lo <= sid <= hi for lo, hi in generated)
 
     def add(sid, kr, en):
-        if sid in known:
+        row = by_id.get(sid)
+        if row is not None:
+            if not is_generated(sid):
+                return                      # 손으로 쓴 번역은 건드리지 않는다
+            row.update(ScriptKr=kr, ScriptEn=en, ScriptJp=kr, ScriptCn=kr)
             return
-        scripts.append(dict(id=sid, ScriptKr=kr, ScriptEn=en, ScriptJp=kr, ScriptCn=kr))
-        known.add(sid)
+        row = dict(id=sid, ScriptKr=kr, ScriptEn=en, ScriptJp=kr, ScriptCn=kr)
+        scripts.append(row)
+        by_id[sid] = row
 
     # 1~4층 이름(5000~5003)은 원본 번역이 이미 있다.
     for floor in range(HANDMADE_FLOORS + 1, TOTAL_FLOORS + 1):
