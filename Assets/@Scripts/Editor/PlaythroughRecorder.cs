@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using UnityEditor;
 using UnityEditor.Recorder;
@@ -29,7 +29,11 @@ public static class PlaythroughRecorder
     // 960x540 24fps 로 낮춰도 알아보는 데 지장이 없고, 처리량은 두 배 가까이 는다.
     const int Width = 960;
     const int Height = 540;
-    const float Fps = 20f;
+    // 프레임 상한을 풀어 두었으므로(CapFrameRate=false) 인코딩 비용이 곧 실행 시간이다.
+    // 20fps 로는 100층이 38분쯤 걸려 배경 실행 예산(약 29분)을 넘겨 77층에서 잘렸다.
+    // 15 로 내리면 인코딩할 프레임이 4분의 1 줄어든다. 해상도는 그대로 둔다 —
+    // 보스전 클립에서 카드의 이름과 숫자를 읽어야 하기 때문이다.
+    const float Fps = 15f;
 
     /// <summary>이 시간이 지나면 결과와 상관없이 녹화를 끊고 나온다.
     /// 봇이 어딘가에서 맴돌아도 mp4 는 정상적으로 마무리돼야 한다.</summary>
@@ -125,7 +129,20 @@ public static class PlaythroughRecorder
 
             AutoPlayer.Spawn();
             if (mode == "record")
+            {
                 StartRecording();
+            }
+            else
+            {
+                // 검증만 할 때는 그릴 수 있는 만큼 빨리 돈다.
+                //
+                // 실시간에 묶어 두는 것은 vSync 다. 녹화는 CapFrameRate=false 로 그걸
+                // 풀어 주는데, 드라이런에는 그 설정이 없어서 <b>녹화보다 느렸다</b>
+                // (같은 시간에 녹화 80층 / 드라이런 25층). 검증이 목적이면 그림을
+                // 파일로 뽑을 일이 없으니 상한을 여기서 직접 푼다.
+                QualitySettings.vSyncCount = 0;
+                Application.targetFrameRate = -1;
+            }
             _nextLog = 0;
             _startedAt = EditorApplication.timeSinceStartup;
             _lockedTime = 0.0;

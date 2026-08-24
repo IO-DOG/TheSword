@@ -185,7 +185,10 @@ public static class ContentValidator
         }
 
         foreach (string key in new[] { "Tilemap_1", "Tilemap_14", "Tilemap_15",
+                                       // 문은 색x방향 여섯 종이 다 있어야 한다.
+                                       // 하나라도 없으면 폴백이 걸려 그 문만 방향이 어긋난다.
                                        "Tilemap_3", "Tilemap_4", "Tilemap_5",
+                                       "Tilemap_6", "Tilemap_7", "Tilemap_8",
                                        "Monster", "BossMonster", "ConsumableItem" })
             RequirePrefab(key, "공통", prefabCache);
     }

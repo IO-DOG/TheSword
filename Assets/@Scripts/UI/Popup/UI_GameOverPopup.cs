@@ -60,10 +60,14 @@ public class UI_GameOverPopup : UI_Popup
 
         // player 죽는 파티클 생성
         Vector3 particlePos = Managers.Game.Player.gameObject.transform.position;
+        // 이 파티클이 null 이면 아래 SetState(Death) 와 CoDeadAni 가 통째로 날아가
+        // 게임오버 화면이 영영 안 뜬다. 없으면 연출만 건너뛴다.
         GameObject deathSoulPurple = Managers.Resource.Instantiate("FX_UserDeath");
-        deathSoulPurple.transform.position = particlePos;
-        //deathSoulPurple.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-        Destroy(deathSoulPurple, 3);
+        if (deathSoulPurple != null)
+        {
+            deathSoulPurple.transform.position = particlePos;
+            Destroy(deathSoulPurple, 3);
+        }
 
         Managers.Game.Player.SetState(Define.PlayerState.Death);
         //Destroy(Managers.Game.Player.gameObject);
@@ -81,8 +85,8 @@ public class UI_GameOverPopup : UI_Popup
         GetImage((int)Images.BG).gameObject.SetActive(true);
         GetImage((int)Images.GameOverIllust).gameObject.SetActive(true);
 
-        // todo
-        // 죽음 인겜 연출 재생 (1.5초)
+        // 인겜 죽음 연출(FX_UserDeath + PlayerState.Death)은 DeadAni 가 이미 재생한다.
+        // 여기에 1.5초짜리 비트를 더 끼울지는 기획 판단이라 비워 둔다.
 
         StartCoroutine(Util.CoFade(GetImage((int)Images.BG), 0.2f));
         yield return new WaitForSeconds(0.2f);

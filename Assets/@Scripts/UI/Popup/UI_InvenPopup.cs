@@ -284,8 +284,11 @@ public class UI_InvenPopup : UI_Popup
                 $"{Managers.Data.EquipDic[idx].ImageName}");
         }
 
-        // todo check curplayer's sowrd
-        if (Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Count == 0)
+        // 이 칸이 그리는 것은 "가진 것"이 아니라 "낀 것"이다. 둘이 어긋나면
+        // EquipDic[0] 을 그리는데, 0 번은 이름이 "-" 인 빈 칸이면서 그림만
+        // Equip_Ring_00 이라 검 칸에 반지가 뜬다. 안 낀 상태는 비워 둔다.
+        if (Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Count == 0
+            || Managers.Game.PlayerData.CurSword == Define.NOT_EQUIP)
             GetImage((int)Images.sword).color = new Color(1, 1, 1, 0);
         else
         {
@@ -298,7 +301,9 @@ public class UI_InvenPopup : UI_Popup
         // to check player class
         GetImage((int)Images.Class).color = new Color(1, 1, 1, 0);
 
-        if (Managers.Game.PlayerData.Inventory[(int)Define.Types.Shield].Count == 0)
+        // 검 칸과 같은 이유로 낀 것이 없으면 비운다.
+        if (Managers.Game.PlayerData.Inventory[(int)Define.Types.Shield].Count == 0
+            || Managers.Game.PlayerData.CurShield == Define.NOT_EQUIP)
             GetImage((int)Images.shield).color = new Color(1, 1, 1, 0);
         else
         {
@@ -340,7 +345,9 @@ public class UI_InvenPopup : UI_Popup
             GetImage((int)Images.Inventory_InfoFrame).gameObject.SetActive(true);
             GetImage((int)Images.Inventory_MyInfo).gameObject.SetActive(true);
             GetObject((int)GameObjects.EquipInfo).gameObject.SetActive(false);
-            // TODO Add status
+            // 숫자는 Init 에서 한 번만 찍혔다. 팝업을 연 채 장비를 갈아입으면
+            // 옛 값이 그대로 남아서, 켤 때마다 지금 값으로 다시 그린다.
+            SetPlayerStatusInfo();
         }
         else
         {
@@ -453,7 +460,9 @@ public class UI_InvenPopup : UI_Popup
 
         GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
 
-        // TODO Check get shield
+        // TODO 여섯 부위(검·방패·목걸이·반지·신발·책) 핸들러가 전부 _Get 을 무조건
+        // 켠다. 이것이 "보유 표시"인지 "선택된 탭 표시"인지 프리팹에서 확인한 뒤
+        // 여섯 곳을 함께 고쳐야 한다. 한 곳만 바꾸면 부위마다 규칙이 갈라진다.
     }
 
     void SetShieldListImage()
@@ -639,120 +648,6 @@ public class UI_InvenPopup : UI_Popup
         }
     }
 
-    void SwapSword(int curSwordIdx, int swordIdx)
-    {
-        if (curSwordIdx == 0)
-        {
-            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[swordIdx].ATK;
-            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[swordIdx].DEF;
-            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[swordIdx].HP;
-            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[swordIdx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[swordIdx].DSPD;
-            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[swordIdx].CRI;
-            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[swordIdx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[swordIdx].MSPD;
-            return;
-        }
-        else
-        {
-            Managers.Game.PlayerData.Attack -= Managers.Data.EquipDic[curSwordIdx].ATK;
-            Managers.Game.PlayerData.Defence -= Managers.Data.EquipDic[curSwordIdx].DEF;
-            Managers.Game.PlayerData.MaxHP -= Managers.Data.EquipDic[curSwordIdx].HP;
-            Managers.Game.PlayerData.AttackSpeed -= Managers.Data.EquipDic[curSwordIdx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed -= Managers.Data.EquipDic[curSwordIdx].DSPD;
-            Managers.Game.PlayerData.Critical -= Managers.Data.EquipDic[curSwordIdx].CRI;
-            Managers.Game.PlayerData.CriticalAttack -= Managers.Data.EquipDic[curSwordIdx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed -= Managers.Data.EquipDic[curSwordIdx].MSPD;
-
-            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[swordIdx].ATK;
-            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[swordIdx].DEF;
-            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[swordIdx].HP;
-            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[swordIdx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[swordIdx].DSPD;
-            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[swordIdx].CRI;
-            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[swordIdx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[swordIdx].MSPD;
-        }
-
-        Managers.Game.GameScene.Refresh();
-    }
-
-    void SwapShield(int curShieldIdx, int shieldIdx)
-    {
-        if (curShieldIdx == 0)
-        {
-            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[shieldIdx].ATK;
-            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[shieldIdx].DEF;
-            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[shieldIdx].HP;
-            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[shieldIdx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[shieldIdx].DSPD;
-            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[shieldIdx].CRI;
-            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[shieldIdx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[shieldIdx].MSPD;
-            return;
-        }
-        else
-        {
-            Managers.Game.PlayerData.Attack -= Managers.Data.EquipDic[curShieldIdx].ATK;
-            Managers.Game.PlayerData.Defence -= Managers.Data.EquipDic[curShieldIdx].DEF;
-            Managers.Game.PlayerData.MaxHP -= Managers.Data.EquipDic[curShieldIdx].HP;
-            Managers.Game.PlayerData.AttackSpeed -= Managers.Data.EquipDic[curShieldIdx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed -= Managers.Data.EquipDic[curShieldIdx].DSPD;
-            Managers.Game.PlayerData.Critical -= Managers.Data.EquipDic[curShieldIdx].CRI;
-            Managers.Game.PlayerData.CriticalAttack -= Managers.Data.EquipDic[curShieldIdx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed -= Managers.Data.EquipDic[curShieldIdx].MSPD;
-
-            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[shieldIdx].ATK;
-            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[shieldIdx].DEF;
-            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[shieldIdx].HP;
-            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[shieldIdx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[shieldIdx].DSPD;
-            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[shieldIdx].CRI;
-            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[shieldIdx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[shieldIdx].MSPD;
-        }
-
-        Managers.Game.GameScene.Refresh();
-    }
-
-    public void SwapEquip(int curIdx, int idx)
-    {
-        if (curIdx == 0)
-        {
-            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[curIdx].ATK;
-            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[curIdx].DEF;
-            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[curIdx].HP;
-            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[curIdx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[curIdx].DSPD;
-            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[curIdx].CRI;
-            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[curIdx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[curIdx].MSPD;
-            return;
-        }
-        else
-        {
-            Managers.Game.PlayerData.Attack -= Managers.Data.EquipDic[curIdx].ATK;
-            Managers.Game.PlayerData.Defence -= Managers.Data.EquipDic[curIdx].DEF;
-            Managers.Game.PlayerData.MaxHP -= Managers.Data.EquipDic[curIdx].HP;
-            Managers.Game.PlayerData.AttackSpeed -= Managers.Data.EquipDic[curIdx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed -= Managers.Data.EquipDic[curIdx].DSPD;
-            Managers.Game.PlayerData.Critical -= Managers.Data.EquipDic[curIdx].CRI;
-            Managers.Game.PlayerData.CriticalAttack -= Managers.Data.EquipDic[curIdx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed -= Managers.Data.EquipDic[curIdx].MSPD;
-
-            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[idx].ATK;
-            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[idx].DEF;
-            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[idx].HP;
-            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[idx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[idx].DSPD;
-            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[idx].CRI;
-            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[idx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[idx].MSPD;
-        }
-
-        Managers.Game.GameScene.Refresh();
-    }
-
     /// <summary>
     /// 인덱스에 맞는 장비에 대한 능력치와 설명을 보여준다.
     ///         public float ATK { get; set; }
@@ -773,17 +668,9 @@ public class UI_InvenPopup : UI_Popup
         GetImage((int)Images.Inventory_MyInfo).gameObject.SetActive(false);
         GetObject((int)GameObjects.EquipInfo).gameObject.SetActive(true);
 
-        // todo script dic to script
-        //GetText((int)Texts.EquipInfo).text = Managers.Data.ScriptDic[descId].ToString();
-
-        // todo for scriptDic
-        //GetText((int)Texts.EquipName).text = Managers.Data.EquipDic[equipId].NameId.ToString();
         int nameId = Managers.Data.EquipDic[equipId].NameId;
-        Debug.Log(nameId);
         GetText((int)Texts.EquipName).text = Managers.GetString(nameId);
 
-        // todo for scriptDic
-        //GetText((int)Texts.InfoText).text = Managers.Data.EquipDic[equipId].DescId.ToString();
         int descId = Managers.Data.EquipDic[equipId].DescId;
         GetText((int)Texts.InfoText).text = Managers.GetString(descId);
 
@@ -811,7 +698,6 @@ public class UI_InvenPopup : UI_Popup
             {
                 UI_StatusInfo statusInfo = Managers.UI.MakeSubItem<UI_StatusInfo>(GetObject((int)GameObjects.StatusInfoList).transform);
                 statusInfo.Init();
-                Debug.Log($"equipId : {equipId}, i : {i}");
                 statusInfo.Refresh(equipId, i);
             }
         }
@@ -935,75 +821,6 @@ public class UI_InvenPopup : UI_Popup
         {
             GetImage((int)Images.MOVESPEEDInfoImage).gameObject.SetActive(false);
         }, null, Define.UIEvent.PointerExit);
-    }
-
-    public void SetPlayerStatByEquip()
-    {
-        if (Managers.Game.PlayerData.CurSword != Define.NOT_EQUIP)
-        {
-            int swordIdx = Managers.Game.PlayerData.CurSword;
-            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[swordIdx].ATK;
-            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[swordIdx].DEF;
-            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[swordIdx].HP;
-            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[swordIdx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[swordIdx].DSPD;
-            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[swordIdx].CRI;
-            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[swordIdx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[swordIdx].MSPD;
-            // TODO ADD AbilityID
-        }
-        if (Managers.Game.PlayerData.CurShield != Define.NOT_EQUIP)
-        {
-            int shieldIdx = Managers.Game.PlayerData.CurShield;
-            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[shieldIdx].ATK;
-            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[shieldIdx].DEF;
-            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[shieldIdx].HP;
-            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[shieldIdx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[shieldIdx].DSPD;
-            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[shieldIdx].CRI;
-            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[shieldIdx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[shieldIdx].MSPD;
-            // TODO ADD AbilityID
-        }
-        if (Managers.Game.PlayerData.CurShoes != 0)
-        {
-            int shoesIdx = Managers.Game.PlayerData.CurShoes;
-            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[shoesIdx].ATK;
-            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[shoesIdx].DEF;
-            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[shoesIdx].HP;
-            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[shoesIdx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[shoesIdx].DSPD;
-            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[shoesIdx].CRI;
-            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[shoesIdx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[shoesIdx].MSPD;
-            // TODO ADD AbilityID
-        }
-        if (Managers.Game.PlayerData.CurNecklace != 0)
-        {
-            int necklaceIdx = Managers.Game.PlayerData.CurNecklace;
-            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[necklaceIdx].ATK;
-            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[necklaceIdx].DEF;
-            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[necklaceIdx].HP;
-            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[necklaceIdx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[necklaceIdx].DSPD;
-            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[necklaceIdx].CRI;
-            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[necklaceIdx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[necklaceIdx].MSPD;
-            // TODO ADD AbilityID
-        }
-        if (Managers.Game.PlayerData.CurRing != 0)
-        {
-            int ringIdx = Managers.Game.PlayerData.CurRing;
-            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[ringIdx].ATK;
-            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[ringIdx].DEF;
-            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[ringIdx].HP;
-            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[ringIdx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[ringIdx].DSPD;
-            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[ringIdx].CRI;
-            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[ringIdx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[ringIdx].MSPD;
-            // TODO ADD AbilityID
-        }
     }
 
 

@@ -80,28 +80,36 @@ public static class BattleSkills
         switch ((Kind)index)
         {
             case Kind.Smash:
-                Strike(player, monster, SmashRatio, 0f, monsterCard);
+                Strike(player, monster, SmashRatio, 0f, playerCard, monsterCard);
                 break;
 
             case Kind.Guard:
                 // 방어 게이지를 채운 것과 같은 상태로 만든다. 다음 한 대를 막는다.
-                playerCard.FillDefenceGague();
+                // FillDefenceGague 가 아니라 Defence 를 부른다 — 만드는 상태는 똑같은데
+                // (게이지 가득 + IsDefence), UI_PlayerCard 의 override 가 방패 애니메이션까지
+                // 재생한다. 안 그러면 화면에서는 아무 일도 안 일어난 것으로 보인다.
+                playerCard.Defence();
                 break;
 
             case Kind.Drain:
-                Strike(player, monster, DrainRatio, 1f, monsterCard);
+                Strike(player, monster, DrainRatio, 1f, playerCard, monsterCard);
                 break;
         }
 
         _used[index] = true;
-        Managers.Sound.Play(Define.Sound.Effect, "PlayerAttack0_SFX");
+        // 어드레서블에 실재하는 키여야 한다. 없는 키를 주면 ResourceManager 가 null 을
+        // 돌려주고 SoundManager 가 그 null 의 .length 를 읽어 예외를 던진다 —
+        // 스킬을 부른 쪽(봇의 코루틴)이 통째로 죽는다.
+        Managers.Sound.Play(Define.Sound.Effect, "HeroAttack0_SFX");
         return true;
     }
 
     /// <summary>스킬 피해를 넣는다. 회복 비율이 있으면 들어간 만큼 되돌려 받는다.</summary>
     static void Strike(GameManager.CurPlayerData player, GameManager.CurMonsterData monster,
-                       float ratio, float drain, UI_MonsterCard monsterCard)
+                       float ratio, float drain, UI_PlayerCard playerCard, UI_MonsterCard monsterCard)
     {
+        Swing(playerCard);
+
         int damage = Mathf.RoundToInt(Mathf.Max(1f, player.Attack * ratio - monster.Defence));
 
         float before = monster.CurHP;
@@ -117,11 +125,45 @@ public static class BattleSkills
             player.CurHP = Mathf.Min(player.MaxHP, player.CurHP + heal);
             if (player.OnDataRefreshAction != null)
                 player.OnDataRefreshAction.Invoke();
-            ShowFont(null, 0f, heal);
+            // 회복 숫자는 회복되는 쪽, 곧 플레이어 카드 위에 띄운다.
+            // null 을 넘기면 전투창 원점(화면 구석)에 떠서 무엇이 회복됐는지 안 보였다.
+            ShowFont(playerCard, 0f, heal);
         }
     }
 
-    static void ShowFont(UI_MonsterCard card, float damage, float heal)
+    /// <summary>
+    /// 때리는 시늉을 보여 준다. 평타(UI_PlayerCard.Attack)가 재생하는 것과 같은 클립이다.
+    ///
+    /// 이게 없으면 강타/흡혈은 숫자만 뜨고 플레이어 쪽은 가만히 서 있다 —
+    /// 녹화에서 무엇이 일어났는지 알아볼 수가 없다.
+    /// 애니메이터가 없거나 상태가 없어도 게임은 굴러가야 하니 전부 조용히 건너뛴다.
+    /// (Images.CreatureImage = 0, Images.CreatureSwordImage = 7 — 그 enum 이 protected 라 숫자로 쓴다.)
+    /// </summary>
+    static void Swing(UI_PlayerCard playerCard)
+    {
+        if (playerCard == null)
+            return;
+
+        Play(playerCard.GetImage(0), "UIPlayerAttackAnim");
+
+        int sword = Managers.Game.PlayerData.CurSword - Define.EQUIP_SOWRD_FIRST;
+        if (sword >= 0)
+            Play(playerCard.GetImage(7), $"UISword{sword}AttackAnim");
+    }
+
+    static void Play(UnityEngine.UI.Image image, string state)
+    {
+        if (image == null)
+            return;
+
+        Animator animator = image.gameObject.GetComponent<Animator>();
+        if (animator == null)
+            return;
+
+        animator.Play(state);
+    }
+
+    static void ShowFont(Component card, float damage, float heal)
     {
         GameObject popup = GameObject.Find("UI_BattlePopup");
         if (popup == null)

@@ -19,6 +19,7 @@
     생성은 5층부터. 5층의 목표 레벨은 1~4층을 실제로 시뮬레이션해서 얻는다.
 """
 
+import collections
 import csv
 import json
 import os
@@ -30,7 +31,13 @@ from thesword_balance import (
     NONE, BEAST, MAGIC, GUARDIAN, IMMORTAL, KNIGHT, TITAN, ASSASSIN, ARMOR,
     TRAIT_NAME,
 )
-from layout_gen import build_floor_layout, validate_layout
+from layout_gen import (build_floor_layout, validate_layout, check_doors,
+                        floor_choices, MIN_TOLLS)
+
+# 층마다 반드시 치러야 하는 전투의 수. layout_gen 이 배치로 보장하는 값이고,
+# 여기서는 "곁길을 전부 건너뛴다" 는 나쁜 선택을 재현할 때 쓴다 — 관문 셋만
+# 잡고 나머지를 지나치면 층당 경험치의 5분의 2 를 버리는 셈이다.
+FORCED_PER_FLOOR = MIN_TOLLS
 
 # ConsumableItemData 의 회복% 와 짝. 여기 값을 바꾸면 그 표도 같이 봐야 한다.
 POTION_BY_HEAL = {0.15: "I_03", 0.20: "I_03", 0.30: "I_04", 0.50: "I_06"}
@@ -530,12 +537,24 @@ def build_monsters(ptable, start_level):
 
 # ------------------------------------------------------------------ 완주 검증
 
-def simulate_run(ptable, monsters, start_state, verbose=True):
+def simulate_run(ptable, monsters, start_state, verbose=True,
+                 skip_optional=False, skip_runes=False, greedy=False):
     """5층부터 100층까지 실제 전투 공식으로 완주 시뮬레이션.
 
     1~4층(손수 만든 구간)은 simulate_handmade 가 이미 돌린 뒤라,
     그 결과 상태(start_state)를 이어받아 시작한다.
     포션은 층마다 배치된 것만 사용한다. 죽으면 즉시 실패로 보고한다.
+
+    세 가지 <b>나쁜 선택</b>을 그대로 재현할 수 있다. 정답 경로만 돌려 보면
+    "고를 것이 있다" 는 말을 증명할 수 없다 — 잘못 골랐을 때 실제로 죽는지도
+    같은 공식으로 재야 한다.
+
+      skip_optional  곁길 몬스터를 지나친다. 관문 셋만 잡으므로 층당 경험치의
+                     5분의 2를 버린다. True 면 전 층, 층 번호 목록이면 그 층만.
+      skip_runes     룬을 전부 지나친다 (계단 방 입구에 있으니 실제로는
+                     밟게 되지만, 안 주웠을 때의 값을 재기 위한 것이다).
+      greedy         물약을 보이는 대로 마신다. 가득 찬 채로 마시면 넘치는
+                     만큼 그냥 버린다(ConsumableItem.PickUp 이 최대치에서 자른다).
 
     ponytail: 장비 보너스는 계산에 넣지 않는다. 실제 플레이어는 마검(+10 ATK)을
               들고 있으므로 여기 결과보다 항상 강하다 — 안전한 방향의 오차다.
@@ -544,6 +563,10 @@ def simulate_run(ptable, monsters, start_state, verbose=True):
     for m in monsters:
         by_floor.setdefault(m["_floor"], []).append(m)
 
+    def stats_at(level, floor):
+        return (player_stats_at(ptable, level) if skip_runes
+                else stats_with_runes(ptable, level, floor))
+
     level, exp, cur_hp = start_state
     log = []
 
@@ -551,6 +574,10 @@ def simulate_run(ptable, monsters, start_state, verbose=True):
         floor_mons = by_floor[floor]
         mobs = sorted((m for m in floor_mons if not m["_boss"]),
                       key=lambda m: m["_order"])
+        if skip_optional is True or (skip_optional and floor in skip_optional):
+            # 관문에는 약한 놈부터 선다(layout_gen 의 배치 순서와 같다).
+            # 보스는 계단 방 입구에 서 있으므로 지나칠 수 없다.
+            mobs = mobs[:FORCED_PER_FLOOR]
         boss = next((m for m in floor_mons if m["_boss"]), None)
 
         entry_level, entry_hp = level, cur_hp
@@ -559,7 +586,15 @@ def simulate_run(ptable, monsters, start_state, verbose=True):
 
         # 구역별 포션. (회복비율, 쓸 수 있게 되는 전투 인덱스)
         # 구역1 포션은 두 번째 전투부터, 구역2 포션은 네 번째 전투부터 닿는다.
-        potions = [(FLOOR_POTIONS[0], 1), (FLOOR_POTIONS[1], 3)]
+        #
+        # <b>층 유형이 정한 예산을 그대로 써야 한다.</b> 예전에는 여기만 늘
+        # 두 개(0.15+0.20)로 셌는데, 실제로 놓이는 것은 「인색」 층이 하나뿐이고
+        # 「넉넉」 층이 셋이다 — 물약이 하나뿐인 19개 층을 두 개로 셈하고
+        # "완주 보장" 이라 부르고 있었다. emit_layouts·route_check 와 같은
+        # floor_potions 를 본다.
+        heals = floor_potions(floor)
+        potions = [(h, min(1 + k * 2, len(fights) - 1))
+                   for k, h in enumerate(heals)]
         # 보스층은 보스 직전에 쓸 큰 물약과, 올라가기 전에 채울 물약을 따로 둔다.
         # 큰 것 하나만 두면 보스를 잡고 빈사로 다음 층에 올라가 그대로 죽는다.
         if boss:
@@ -567,7 +602,7 @@ def simulate_run(ptable, monsters, start_state, verbose=True):
         potions.append((EXIT_POTION, len(fights)))
 
         for i, md in enumerate(fights):
-            stats = stats_with_runes(ptable, level, floor)
+            stats = stats_at(level, floor)
             m = Creature(md["MaxHP"], md["Attack"], md["Defence"],
                          md["AttackSpeed"], md["DefenceSpeed"],
                          md["Critical"], md["CriticalAttack"], md["Ability"])
@@ -575,7 +610,12 @@ def simulate_run(ptable, monsters, start_state, verbose=True):
             # 포션은 주우면 즉시 회복이고 최대치에서 잘린다(ConsumableItem.PickUp).
             # 그래서 넘치게 마시면 그만큼 버리는 것이고, 정답 경로는 "죽지 않을
             # 만큼만, 가장 늦게" 든다. 이 전투를 그냥 치러 보고 죽을 때만 마신다.
-            while True:
+            if greedy:
+                # 나쁜 선택: 보이면 바로 마신다. 넘치는 만큼은 그대로 버린다.
+                for t in [t for t in potions if t[1] <= i]:
+                    cur_hp = min(stats["hp"], cur_hp + stats["hp"] * t[0])
+                    potions.remove(t)
+            while not greedy:
                 probe = Creature(stats["hp"], stats["atk"], stats["dfn"],
                                  stats["aspd"], stats["dspd"], stats["crit"],
                                  stats["crit_atk"])
@@ -615,7 +655,7 @@ def simulate_run(ptable, monsters, start_state, verbose=True):
 
         # 계단 앞 회복은 올라가기 직전에 든다. 이미 가득하면 그만큼 버린다.
         # 이 층의 룬도 계단 앞에 있으니 여기서 최대 체력이 올라간다.
-        stats_end = stats_with_runes(ptable, level, floor + 1)
+        stats_end = stats_at(level, floor + 1)
         for heal, avail_at in list(potions):
             if avail_at >= len(fights):
                 cur_hp = min(stats_end["hp"], cur_hp + stats_end["hp"] * heal)
@@ -631,6 +671,68 @@ def simulate_run(ptable, monsters, start_state, verbose=True):
                   f"HP {cur_hp:>6.0f}/{stats['hp']:>6.0f} ({100.0 * cur_hp / stats['hp']:>5.1f}%)")
 
     return True, log, None
+
+
+# ------------------------------------------------------------------ 나쁜 선택
+#
+# 고를 것이 있다는 말은 <b>잘못 골랐을 때 값을 치른다</b>는 뜻이다. 값이 없으면
+# 그건 선택이 아니라 장식이다. 그래서 정답 경로만 돌리지 않고 나쁜 선택도 같은
+# 공식으로 돌려 어느 층에서 죽는지 잰다.
+#
+# (이름, simulate_run 인자, 죽어야 하는가, 완주했을 때 붙일 말)
+BAD_ROUTES = [
+    ("곁길 몬스터를 전부 지나친다", dict(skip_optional=True), True, ""),
+    ("룬을 전부 지나친다", dict(skip_runes=True), True, ""),
+    ("물약을 보이는 대로 마셔 넘친다", dict(greedy=True), False,
+     "층 물약 예산이 층 손실보다 커서 넘쳐도 남는다 — 구조가 아니라 "
+     "예산(MOB_HP_LOSS·FLOOR_POTIONS) 쪽이다"),
+]
+
+
+def optional_slack(ptable, monsters, start_state):
+    """<b>몇 층부터</b> 곁길을 전부 지나쳐도 완주하는가.
+
+    "다 지나치면 11층에서 죽는다" 만으로는 선택의 폭을 모른다. 재 보면 빡빡한
+    곳은 아래쪽이다 — 5층의 곁길을 지나치면 10층에서 죽지만 50층·95층은
+    지나쳐도 완주한다. 그래서 F층부터 위로 전부 지나쳐 보며 완주하는 가장 낮은
+    F 를 찾는다.
+
+    슬랙이 층수에 대해 단조롭다고 보고 이분 탐색한다 — 정확한 경계가 아니라
+    폭을 대략 재는 것이다(전 층을 따로 재면 96번 돌려야 한다).
+    """
+    lo, hi = HANDMADE_FLOORS + 1, TOTAL_FLOORS + 1
+    while lo < hi:
+        mid = (lo + hi) // 2
+        ok, _, _ = simulate_run(ptable, monsters, start_state, verbose=False,
+                                skip_optional=range(mid, TOTAL_FLOORS + 1))
+        if ok:
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo
+
+
+def check_bad_routes(ptable, monsters, start_state):
+    """나쁜 선택마다 어디서 죽는지 찍는다. 죽어야 할 것이 살아남으면 실패."""
+    ok_all = True
+    for name, kwargs, must_die, note in BAD_ROUTES:
+        ok, _, err = simulate_run(ptable, monsters, start_state, verbose=False,
+                                  **kwargs)
+        if ok and must_die:
+            ok_all = False
+        head = "[실패]" if (ok and must_die) else "      "
+        tail = ("완주 — 벌이 없다" if ok else err.split(" (")[0])
+        print(f"      {head} {name} … {tail}")
+        if ok and note:
+            print(f"              {note}")
+
+    f = optional_slack(ptable, monsters, start_state)
+    if f > TOTAL_FLOORS:
+        print("             곁길에 여유가 생기는 층 … 없다 (끝까지 다 잡아야 한다)")
+    else:
+        print(f"             곁길에 여유가 생기는 층 … {f}층부터는 전부 "
+              f"지나쳐도 완주 (그 아래는 못 지나친다)")
+    return ok_all
 
 
 # ------------------------------------------------------------------ 파일 출력
@@ -789,7 +891,8 @@ def emit_layouts(monsters, write=True):
     for m in monsters:
         by_floor.setdefault(m["_floor"], []).append(m)
 
-    written, failures = 0, []
+    written, failures, bad_doors = 0, [], []
+    choices = {}
     for floor in range(HANDMADE_FLOORS + 1, TOTAL_FLOORS + 1):
         did, ch, _ = dungeon_id(floor)
         mobs = sorted((m for m in by_floor[floor] if not m["_boss"]),
@@ -824,13 +927,58 @@ def emit_layouts(monsters, write=True):
             failures.append(f"Dungeon_{did}")
             continue
 
+        # 문이 자리·그림·색까지 맞는지. 씨앗을 다시 뽑지 않고 알리기만 한다 —
+        # 여기서 걸린다는 것은 규칙이 아니라 <b>번역표</b>가 어긋났다는 뜻이라
+        # 다른 씨앗으로 다시 뽑아도 똑같이 어긋난다.
+        for cell, x, y, why in check_doors(grid):
+            bad_doors.append(f"Dungeon_{did} 셀 {cell} (행{y}, 열{x}) — {why}")
+
+        # 강제/선택은 배치 <b>의도</b>가 아니라 완성된 격자에서 다시 잰다.
+        # 곁길 통로 하나가 우회로를 만들면 관문이 조용히 곁길이 된다.
+        choices[floor] = floor_choices(grid, doors)
+
         if write:
             path = os.path.join(STREAM, f"Dungeon_{did}.csv")
             with open(path, "w", encoding="utf-8", newline="") as f:
                 for row in grid:
                     f.write(",".join(row) + "\n")
         written += 1
-    return written, failures
+    return written, failures, bad_doors, choices
+
+
+def report_choices(choices):
+    """강제/선택 구조를 층수로 찍는다. 규칙이 깨진 층 목록을 돌려준다.
+
+    말이 아니라 수로 확인해야 한다 — 예전에 "보스는 계단 앞에 선다" 고 적어
+    두고서 다섯 챕터 보스가 전부 지나칠 수 있는 상대였다.
+    """
+    hist = collections.Counter(c["forced_mobs"] for c in choices.values())
+    n = len(choices)
+    tot = collections.Counter()
+    for c in choices.values():
+        tot.update(c)
+    boss_floors = tot["boss"]
+
+    print("      [강제] 관문 몬스터 %d마리 — 층당 %s" %
+          (tot["forced_mobs"],
+           " / ".join(f"{k}마리 {v}층" for k, v in sorted(hist.items()))))
+    print("      [강제] 열쇠 %d개(층당 %.2f) · 반드시 밟는 룬 %d/%d" %
+          (tot["keys"], tot["keys"] / n, tot["forced_runes"], tot["runes"]))
+    print("      [강제] 보스 %d층 중 관문인 보스 %d" % (boss_floors, tot["boss_forced"]))
+    print("      [선택] 곁길 몬스터 %d마리(층당 %.2f) · 지나칠 수 있는 아이템 %d개" %
+          (tot["optional_mobs"], tot["optional_mobs"] / n, tot["optional_items"]))
+    print("      [선택] 막다른 골방 %d개 (층당 %.2f)" %
+          (tot["dead_ends"], tot["dead_ends"] / n))
+
+    broken = []
+    for floor, c in sorted(choices.items()):
+        if c["forced_mobs"] < FORCED_PER_FLOOR:
+            broken.append(f"{floor}층 관문 {c['forced_mobs']}마리 (< {FORCED_PER_FLOOR})")
+        if c["boss"] and not c["boss_forced"]:
+            broken.append(f"{floor}층 보스를 지나칠 수 있다")
+        if c["forced_runes"] < c["runes"]:
+            broken.append(f"{floor}층 룬을 지나칠 수 있다")
+    return broken
 
 
 # ------------------------------------------------------------------ 진입점
@@ -861,19 +1009,37 @@ def build_all(dry_run=False):
     print(f"      완주 성공. 최저 HP 구간: {worst['floor']}층 {worst['hp_pct']:.1f}%")
     print(f"      최종 레벨: {log[-1]['exit_level']}")
 
-    print("[4/5] 층 레이아웃 생성 + 도달 가능성 검사")
-    written, failures = emit_layouts(monsters, write=not dry_run)
+    print("[4/6] 층 레이아웃 생성 + 도달 가능성 검사")
+    written, failures, bad_doors, choices = emit_layouts(monsters, write=not dry_run)
     print(f"      {written}/{TOTAL_FLOORS - HANDMADE_FLOORS} 층 생성 "
           f"(1~{HANDMADE_FLOORS}층은 원본 유지)")
     if failures:
         print(f"  [실패] 레이아웃 생성 불가: {', '.join(failures)}")
+        return False
+    if bad_doors:
+        for line in bad_doors[:10]:
+            print(f"  [실패] {line}")
+        print(f"      문 규칙 위반 {len(bad_doors)}건")
+        return False
+    print("      문 자리/그림/색 위반 0건")
+
+    print("[5/6] 강제와 선택 세기")
+    broken = report_choices(choices)
+    if broken:
+        for line in broken[:10]:
+            print(f"  [실패] {line}")
+        print(f"      구조 위반 {len(broken)}건")
+        return False
+
+    print("[6/6] 나쁜 선택 재현 — 잘못 고르면 죽는가")
+    if not check_bad_routes(ptable, monsters, start_state):
         return False
 
     if dry_run:
         print("      dry-run 이므로 파일은 쓰지 않음")
         return True
 
-    print("[5/5] 데이터 파일 출력")
+    print("      데이터 파일 출력")
     emit_player_data(ptable)
     emit_monster_data(monsters)
     emit_stage_info()

@@ -36,8 +36,6 @@ public class UI_BattlePopup : UI_Popup
 
         Managers.Sound.Play(Define.Sound.Effect, "BattleStart_SFX");
 
-        // TODO
-        // show Creature Card
         playerCard = Managers.UI.SetBattleCard<UI_PlayerCard>(gameObject.transform, Managers.Game.PlayerData);
 
         float width = Screen.width;

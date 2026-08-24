@@ -234,9 +234,6 @@ public class CreatureClass : MonoBehaviour
             if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);
             else if (target.IsDefence) damage = 1;
 
-            // todo
-            /// add attack effect
-
             return damage;
         }
     }
@@ -470,44 +467,6 @@ public class CreatureClass : MonoBehaviour
         //    }
         //    creature.OnDeadAction.Invoke();
         //}
-    }
-
-    // 물약 특성
-    public class PotionTrait : ITrait
-    {
-        public void ExcuteOnDead(CreatureData creature)
-        {
-            creature.CurHP = 0;
-            // todo
-            // 물약 생성해야 함
-
-            creature.OnDeadAction.Invoke();
-        }
-
-        public void ExcuteOnHit(CreatureData attacker, CreatureData target, int damage)
-        {
-            damage = Mathf.Max(0, damage);
-            target.CurHP -= damage;
-            if (target.CurHP <= 0)
-            {
-                ExcuteOnDead(target);
-            }
-
-            target.OnHitAction.Invoke();
-        }
-
-        public int ExecuteAttack(CreatureData attacker, CreatureData target)
-        {
-            float num = (int)Mathf.Max(0, attacker.Attack);
-            if (attacker.IsCritical) num = num * (attacker.CriticalAttack / 100);
-            int damage = Mathf.RoundToInt(num);
-            damage -= (int)target.Defence;
-            damage = (int)Mathf.Max(1, damage);
-            if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);
-            else if (target.IsDefence) damage = 1;
-
-            return damage;
-        }
     }
 
     // 기본 공격 효과 (특정 클래스가 아닐 경우)

@@ -58,7 +58,6 @@ public class PortalController : MonoBehaviour
                 yield break;
 
             bool ch = true;
-            // todo 최초 진입인지 확인
             if (Managers.Game.PlayerData.FirstEnterMapCheck[_mapId + 1] == false)
             {
                 ch = false;

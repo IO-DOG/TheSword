@@ -254,9 +254,23 @@ public static class MapBuilder
         holder.transform.SetParent(doors, false);
         holder.transform.localPosition = pos;
 
-        GameObject go = Place($"Tilemap_{obj.Id}", holder.transform, Vector3.zero, tint);
+        // 문 셀 id 는 색과 방향 두 가지로 갈린다.
+        //   3/4/5 가로문(좌우가 벽), 6/7/8 세로문(위아래가 벽)
+        // 색은 3 으로 나눈 나머지다 — 3·6 초록, 4·7 노랑, 5·8 빨강.
+        // 예전에는 Clamp(id-3) 이라 6·7·8 이 전부 빨강을 달라고 했다.
+        int keyIndex = (obj.Id - 3) % ConsumableItem.NUM_OF_KEYS;
+        bool vertical = obj.Id >= 3 + ConsumableItem.NUM_OF_KEYS;
+
+        // 프리팹 이름은 셀 코드와 순서가 다르다 — <b>색이 먼저, 방향이 나중</b>이다.
+        //   Tilemap_3/4 초록, 5/6 노랑, 7/8 빨강. 짝의 뒤쪽(4·6·8)만 Y 90° 로 돌아 있다.
+        // 회전은 프리팹에 구워져 있고 여기서는 주지 않으므로, 이름을 그대로 쓰면
+        // (셀 4 -> Tilemap_4 처럼) 그림이 통째로 90° 어긋난다. 매 층 두 번째 문이
+        // 그랬다. 번역은 여기와 layout_gen.door_art 두 곳뿐이고 서로 같아야 한다.
+        int artId = 3 + keyIndex * 2 + (vertical ? 1 : 0);
+
+        GameObject go = Place($"Tilemap_{artId}", holder.transform, Vector3.zero, tint);
         if (go == null)
-            go = Place("Tilemap_3", holder.transform, Vector3.zero, tint);
+            go = Place(vertical ? "Tilemap_4" : "Tilemap_3", holder.transform, Vector3.zero, tint);
 
         GameObject lockPos = new GameObject("DoorLockPos");
         lockPos.transform.SetParent(holder.transform, false);
@@ -264,11 +278,6 @@ public static class MapBuilder
         if (go == null)
             return;
 
-        // 문 셀 id 는 색과 방향 두 가지로 갈린다.
-        //   3/4/5 가로문(좌우가 벽), 6/7/8 세로문(위아래가 벽)
-        // 색은 3 으로 나눈 나머지다 — 3·6 초록, 4·7 노랑, 5·8 빨강.
-        // 예전에는 Clamp(id-3) 이라 6·7·8 이 전부 빨강을 달라고 했다.
-        int keyIndex = (obj.Id - 3) % ConsumableItem.NUM_OF_KEYS;
         foreach (Door door in Components<Door>(go))
         {
             door._doorIndex_forActive = obj.Count;
@@ -323,19 +332,35 @@ public static class MapBuilder
     /// <summary>
     /// 바닥 그림(Decos/BG).
     ///
-    /// 손으로 만든 층은 층마다 그린 FloorField 스프라이트를 깔아 두는데,
-    /// 100층을 손으로 그릴 수 없어 공용 그림 하나를 층 크기에 맞춰 깐다.
-    /// 없으면 두 가지가 같이 망가진다 —
-    ///   1) 바닥이 비어 보인다.
-    ///   2) CameraController.SetupCameraConfiner 가 Decos/BG 로 범위를 잡는데
-    ///      그게 없으면 이전 층 경계가 남아 카메라가 플레이어를 못 따라간다.
+    /// 손으로 만든 층은 층마다 그린 FloorField 통그림을 깔아 두는데, 100층을 손으로
+    /// 그릴 수 없어 **한 칸짜리 바닥 타일을 층 크기만큼 타일링**한다.
+    ///
+    /// 예전에는 32x32 자리표(FloorField_99_999)를 층 크기로 늘려 깔았다. 그 그림이
+    /// 순수 검정이라 생성 층은 바닥이 통째로 검은 사각형이었다 — 셰이더도 정렬순서도
+    /// 아니고 그냥 깔 그림이 없었던 것이다.
+    ///
+    /// 칸마다 타일 오브젝트를 놓지 않는 이유: 생성 층은 걸어다니는 칸이 층당 340개라
+    /// (23x27 격자 중 벽이 아닌 칸) 그만큼 오브젝트가 늘고, 100층 녹화 시간에 그대로
+    /// 얹힌다. 타일링은 오브젝트가 0개 늘고 드로우콜도 하나다.
+    /// 격자에 빈 칸이 없어서(모든 칸이 벽 아니면 바닥) 통째로 깔아도 남는 데가 없고,
+    /// 벽 프리팹이 제 칸을 정확히 덮으므로 벽 밑에 깔린 바닥은 보이지 않는다.
+    ///
+    /// **여기서 축척은 1 이다.** 벽·장식이 0.1 인 것은 3.2유닛으로 그린 3D 모델이라
+    /// 그렇고, 이 타일은 32px / PPU 100 = 0.32유닛 = Define.TILE_SIZE 로 이미 한 칸이다.
+    /// 게다가 SpriteDrawMode.Tiled 는 넓이를 localScale 이 아니라 sr.size(월드 단위)로
+    /// 받는다 — 스케일을 건드리면 층이 아니라 타일 한 칸이 커지거나 작아진다.
+    ///
+    /// BG 를 없애면 안 된다 — CameraController.SetupCameraConfiner 가 Decos/BG 로
+    /// 카메라 범위를 잡는다. 그림을 못 찾으면 BG 도 만들지 않는데, 그건 의도한 것이다.
+    /// 스프라이트 없는 SpriteRenderer 는 bounds 가 0 이라 카메라가 한 점에 갇힌다.
+    /// 없으면 카메라가 벽으로 범위를 재는 폴백(TryWallBounds)으로 넘어간다.
     /// </summary>
     static void PlaceFloorField(GameObject root, Data.MapData mapData, Color tint)
     {
-        Sprite sprite = Resources.Load<Sprite>("Sprites/00/FloorField_99_999");
+        Sprite sprite = Resources.Load<Sprite>("Sprites/00/FloorTile_99_999");
         if (sprite == null)
         {
-            Debug.LogWarning("[MapBuilder] 공용 바닥 그림을 못 찾았다");
+            Debug.LogWarning("[MapBuilder] 공용 바닥 타일을 못 찾았다");
             return;
         }
 
@@ -344,6 +369,12 @@ public static class MapBuilder
         float minZ = float.MaxValue, maxZ = float.MinValue;
         foreach (Data.ObjectData obj in mapData.Objects)
         {
+            // 빈 칸(Void)은 층에 속하지 않는다. CSV 끝의 빈 줄이 24번째 행에
+            // Void 하나를 만드는데, 그걸 세면 격자가 23행인 층에 바닥 한 줄이
+            // 벽 바깥으로 삐져나온다 (검은 자리표일 때는 안 보였다).
+            if ((Define.ObjectType)obj.ObjectType == Define.ObjectType.Void)
+                continue;
+
             if (obj.Position.X < minX) minX = obj.Position.X;
             if (obj.Position.X > maxX) maxX = obj.Position.X;
             if (obj.Position.Z < minZ) minZ = obj.Position.Z;
@@ -367,9 +398,14 @@ public static class MapBuilder
         sr.color = tint;
         sr.sortingOrder = -100;   // 타일보다 아래
 
-        Vector2 native = sprite.bounds.size;
-        if (native.x > 0.0001f && native.y > 0.0001f)
-            bg.transform.localScale = new Vector3(width / native.x, height / native.y, 1f);
+        // 한 칸 그림을 층 크기만큼 반복해서 채운다. 층은 항상 칸 수의 정수배라
+        // (23 x 27 칸) 잘리는 타일 없이 딱 맞는다.
+        // 타일 스프라이트는 Full Rect 여야 한다 — Tight 메시면 Unity 가 경고를 찍고
+        // Simple 로 되돌려서 그림 한 장이 늘어난다(예전 모습). 임포트 설정에
+        // spriteMeshType: 0 을 박아 두었다.
+        sr.drawMode = SpriteDrawMode.Tiled;
+        sr.tileMode = SpriteTileMode.Continuous;
+        sr.size = new Vector2(width, height);
     }
 
     /// <summary>

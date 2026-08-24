@@ -25,7 +25,8 @@ public static class MapBuilderSmokeTest
     static readonly string[] PrefabKeys =
     {
         "Tilemap_1", "Tilemap_C00_W01", "Tilemap_C00_W02", "Tilemap_C00_W03",
-        "Tilemap_3", "Tilemap_4", "Tilemap_5",
+        // 문 여섯 종 (3/5/7 가로, 4/6/8 세로). 빠지면 폴백이 걸려 방향이 어긋난다.
+        "Tilemap_3", "Tilemap_4", "Tilemap_5", "Tilemap_6", "Tilemap_7", "Tilemap_8",
         "Tilemap_12", "Tilemap_13", "Tilemap_14", "Tilemap_15", "Tilemap_16",
         "Monster", "BossMonster", "ConsumableItem", "EquipItem",
     };

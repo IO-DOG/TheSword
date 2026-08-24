@@ -137,8 +137,12 @@ def main():
             errors.append(f"{did}: 문 {n['door']}개 > 열쇠 {n['key']}개 -> 진행 불가")
 
     # ---- 공통 프리팹
-    for key in ("Tilemap_1", "Tilemap_14", "Tilemap_15", "Tilemap_3", "Tilemap_4",
-                "Tilemap_5", "Monster", "BossMonster", "ConsumableItem"):
+    # 문은 색x방향 여섯 종이 다 있어야 한다 — 하나라도 없으면 BuildDoor 가
+    # 폴백을 쓰고, 그 문만 그림이 어긋난다.
+    for key in ("Tilemap_1", "Tilemap_14", "Tilemap_15",
+                "Tilemap_3", "Tilemap_4", "Tilemap_5",
+                "Tilemap_6", "Tilemap_7", "Tilemap_8",
+                "Monster", "BossMonster", "ConsumableItem"):
         if key not in prefabs:
             errors.append(f"공통 프리팹 없음 '{key}'")
 

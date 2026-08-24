@@ -86,8 +86,7 @@ public class MonsterController : MonoBehaviour
             Managers.Game._screenShot2 = screenShot;
             if (gameObject.GetComponent<BossMonsterController>() != null)
             {
-                // todo
-                // 보스면 연출 있다가 배틀로
+                // 보스는 전투창을 바로 열지 않고 등장 연출을 거친다.
                 StartCoroutine(CoBossEnter());
             }
             else

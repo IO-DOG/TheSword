@@ -637,11 +637,16 @@ public class Events : MonoBehaviour
         // 보스 층 잠금은 GameManager.RefreshBossGates 가 층별로 처리한다.
         Managers.Game.RefreshBossGates();
         yield return new WaitForSeconds(10f);
-        // todo
-        // path particle
-        // open 4floor
+        // 보스를 잡은 뒤 계단까지 이어지는 빛줄기. 관문 자체는 위의 RefreshBossGates
+        // 가 이미 열었으니, 층을 못 찾거나 이펙트가 없으면 조용히 건너뛴다.
         GameObject parent = GameObject.Find("Dungeon_00_003");
+        if (parent == null)
+            yield break;
+
         GameObject go = Managers.Resource.Instantiate("FX_BossClearLine", parent.transform);
+        if (go == null)
+            yield break;
+
         go.transform.localPosition = new Vector3(3.83f, 0.033f, -3.032f);
         go.transform.localScale = new Vector3(0.3f, 0.4f, 0.4f);
     }

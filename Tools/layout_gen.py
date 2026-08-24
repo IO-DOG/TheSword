@@ -22,7 +22,10 @@ CSV 격자 규약은 DataManager.ResetActiveDic 의 파서와 일치해야 한�
 있는 것으로 보고 한다(validate_layout).
 """
 
+import os
 import random
+import re
+import sys
 
 GRID_W, GRID_H = 27, 23
 
@@ -40,13 +43,21 @@ STAIRS_DOWN = "15"
 #
 # 통로 방향과 문 방향이 어긋나면 벽이 없는 쪽으로 문틀이 떠 있게 되고, 옆으로
 # 돌아갈 수 있는 것처럼 보인다. 방향은 놓는 자리가 정한다.
-# 층마다 반드시 치러야 하는 통행료의 최소 수. 이보다 적으면 한 마리도 안 잡고
-# 계단까지 갈 수 있게 되고, 그러면 레벨 곡선이 무너진다.
-MIN_TOLLS = 2
+# 층마다 반드시 치러야 하는 통행료의 <b>정확한</b> 수. 다섯 마리 중 셋은 관문,
+# 둘은 곁길이다 — 이 갈림이 곧 "강제와 선택" 이고, generate_content 의 나쁜 선택
+# 재현("곁길을 전부 건너뛴다")이 이 수를 그대로 쓴다. 한쪽만 바꾸면 재현이 거짓이 된다.
+#
+# 예전에는 2 였다. 재 보니 96개 층 중 33개가 관문 둘뿐이라 층마다 강제의 양이
+# 달랐고, 그러면 "곁길을 건너뛰면 몇 레벨이 모자란가" 를 셀 수가 없다.
+MIN_TOLLS = 3
 
 DOOR_H = {0: "3", 1: "4", 2: "5"}   # 좌우가 벽
 DOOR_V = {0: "6", 1: "7", 2: "8"}   # 위아래가 벽
 KEY_ITEM = {0: "I_00", 1: "I_01", 2: "I_02"}  # 초록/노랑/빨강 열쇠
+
+# 손수 만든 도입부. CSV 는 세이브 인덱스용이고 실물은 프리팹이라, 문도 여기서
+# 만든 규칙이 아니라 프리팹에 이미 구워져 있다.
+HAND_AUTHORED = ("00_000", "00_001", "00_002", "00_003")
 
 # 회복 아이템. 값은 ConsumableItemData 의 회복%와 짝이어야 한다.
 POTION_20, POTION_30, POTION_50 = "I_03", "I_04", "I_06"
@@ -283,10 +294,14 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     centers = [room_center(*r) for r in order]
 
     # 큰 줄기. 통로마다 방 밖 구간의 한가운데가 관문 자리다.
+    # necks[i] 는 그 통로에서 방 밖으로 난 구간 전체 — 곁길이 없다면 이 칸들은
+    # 전부 절단점이다. 마지막 통로(계단 방 입구)를 보스와 룬 자리로 쓴다.
     gates = []
+    necks = []
     for i in range(len(order) - 1):
         cells = _corridor(grid, centers[i], centers[i + 1])
         outside = [c for c in cells if _outside_room(c)]
+        necks.append(outside)
         gates.append(outside[len(outside) // 2] if outside else None)
 
     # 곁길. 길이 한 줄이면 고를 것이 없다.
@@ -299,6 +314,12 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
             break
         a, b = rng.sample(range(len(order)), 2)
         if abs(a - b) < 3:
+            continue
+        # <b>계단이 있는 마지막 방으로는 곁길을 내지 않는다.</b>
+        # 곁길이 하나라도 닿으면 입구가 둘이 되어 마지막 통로가 절단점을 잃는다.
+        # 재 보니 그래서 챕터 보스 다섯이 전부 피해 갈 수 있는 상대였다 — 보스를
+        # 안 잡고 계단으로 올라갈 수 있었고, 아무도 그걸 세지 않았다.
+        if len(order) - 1 in (a, b):
             continue
         (ax, ay), (bx, by) = order[a], order[b]
         if abs(ax - bx) + abs(ay - by) != 1:
@@ -358,6 +379,34 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     up = up_pool[0]
     place[up] = STAIRS_UP
     used.add(up)
+
+    # 계단 방 입구 — 이 층에서 <b>반드시 밟는</b> 자리. 곁길을 내지 않았으므로
+    # 여기 놓인 것은 무엇이든 강제가 된다. 보스와 룬이 이 자리를 먼저 가져간다
+    # (몬스터 배치보다 먼저 잡아 둬야 통행료 몬스터에게 뺏기지 않는다).
+    last_neck = [c for c in necks[-1]
+                 if c not in used and _cuts_path(grid, spawn, up, c)]
+    last_neck.sort(key=lambda c: abs(c[0] - up[0]) + abs(c[1] - up[1]))
+
+    # 챕터 보스는 계단 방 입구에 세운다.
+    # 예전에는 "계단에서 가장 가까운 빈 칸" 이었는데, 방이 7x5 열린 홀이라 어떤
+    # 칸도 길을 끊지 못했다 — 재 보니 챕터 보스 다섯이 전부 그냥 지나칠 수 있는
+    # 상대였다(관문인 보스 0/5). 보스를 안 잡고 다음 챕터로 올라갈 수 있었다.
+    if boss_id is not None:
+        if not last_neck:
+            return None, None, None
+        cell = last_neck.pop(0)
+        place[cell] = f"B_{boss_id:03d}"
+        used.add(cell)
+
+    # 룬도 같은 자리에. 룬은 얻을지 말지가 흔들리면 완주 보장을 계산할 수 없다
+    # (기획서 65·81쪽, CLAUDE.md "계단 앞 구역에 둔다").
+    # 예전에는 마지막 구역의 아무 빈 칸이었고, 재 보니 96개 층 중 94개에서 그냥
+    # 지나칠 수 있었다 — 그런데 완주 시뮬레이션은 룬을 늘 주운 것으로 셈하고
+    # 있었으니 "완주 보장" 이 그만큼 거짓이었다.
+    rune_cell = last_neck.pop(0) if last_neck else None
+    if rune is not None and rune_cell is not None:
+        place[rune_cell] = rune
+        used.add(rune_cell)
 
     # 열쇠는 그 구역의 방 안에. 문을 열려면 그 구역을 훑어야 한다.
     for i in range(3):
@@ -467,9 +516,9 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
             place[pool[0]] = pot
             used.add(pool[0])
 
-    if rune is not None:
-        # 룬은 마지막 구역에 둔다. 층을 다 돌고 계단으로 가는 길에 반드시 지나므로
-        # 성장이 결정적이다 — 얻을지 말지가 흔들리면 완주 보장을 계산할 수 없다.
+    if rune is not None and rune_cell is None:
+        # 계단 방 입구를 못 잡은 층의 폴백. 마지막 구역 안에는 두되, 이 층의 룬은
+        # 강제가 아니다 — floor_choices 가 "지나칠 수 있는 아이템" 으로 센다.
         pool = free_in(regions[3])
         if pool:
             place[pool[0]] = rune
@@ -480,14 +529,6 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     if alcove_prize is not None and alcove_prize not in used:
         place[alcove_prize] = POTION_20
         used.add(alcove_prize)
-
-    if boss_id is not None:
-        pool = free_in([order[-1]])
-        pool.sort(key=lambda c: abs(c[0] - up[0]) + abs(c[1] - up[1]))
-        if not pool:
-            return None, None, None
-        place[pool[0]] = f"B_{boss_id:03d}"
-        used.add(pool[0])
 
     if equip_id is not None:
         pool = free_in(regions[3])
@@ -508,26 +549,107 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     return grid, regions, doors
 
 
-def check_doors(grid):
-    """문마다 방향에 맞는 벽이 있는지 본다. 어긋난 문 목록을 돌려준다."""
+# ---------------------------------------------------------------------------
+# 실제로 놓이는 문 그림
+#
+# 문의 회전은 <b>프리팹에 구워져 있다</b> — MapBuilder.BuildDoor 는 회전을 주지
+# 않고 이름으로 프리팹을 고를 뿐이다. 그런데 프리팹 이름은 셀 코드와 순서가
+# 다르다. 셀 코드는 방향이 먼저(3/4/5 가로, 6/7/8 세로)인데, 프리팹은
+# <b>색이 먼저고 방향이 나중</b>이다:
+#
+#   Tilemap_3/4 초록, 5/6 노랑, 7/8 빨강.  짝의 뒤쪽(4·6·8)만 Y 90° 로 돌아 있다.
+#
+# 그래서 셀 코드를 그대로 프리팹 이름으로 쓰면 두 규약이 3 과 8 에서만 겹치고
+# 나머지는 어긋난다. 손수 만든 1~4층이 3 과 6 만 쓰는데 6 은 두 규약에서 방향이
+# 같아서, 이 어긋남이 96개 생성 층에만 나타나 오래 안 보였다.
+# 번역은 여기와 BuildDoor 두 곳뿐이고 서로 같아야 한다.
+
+
+def door_art(cell):
+    """문 셀 코드 -> 런타임에 실제로 놓이는 프리팹 이름."""
+    n = int(cell)
+    return "Tilemap_%d" % (3 + ((n - 3) % 3) * 2 + (1 if n >= 6 else 0))
+
+
+def door_prefab_facts():
+    """문 프리팹 6종에서 {이름: (색, 세로문인가)} 를 읽는다.
+
+    표를 파이썬에도 적어 두면 두 벌이 되어 같은 방식으로 다시 어긋난다. 그래서
+    <b>디스크의 프리팹에서 직접</b> 읽는다 — 색은 소스 모델(Tilemap_Door_G/Y/R),
+    방향은 문 노드에 구워진 Y 90° 회전으로 본다.
+    프리팹을 못 읽으면 빈 dict 를 주고, 검사는 벽 규칙만 보고 넘어간다.
+    """
+    root = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+    colors = {}
+    for i, c in enumerate("GYR"):
+        meta = os.path.join(root, "Assets", "Resources", "Tilemap_Door_%s.obj.meta" % c)
+        if not os.path.exists(meta):
+            return {}
+        with open(meta, encoding="utf-8") as f:
+            m = re.search(r"guid: (\w+)", f.read())
+        if not m:
+            return {}
+        colors[m.group(1)] = i
+
+    facts = {}
+    for i in range(3, 9):
+        path = os.path.join(root, "Assets", "@Resources", "Prefabs", "Map",
+                            "Tilemap_%d.prefab" % i)
+        if not os.path.exists(path):
+            return {}
+        with open(path, encoding="utf-8") as f:
+            t = f.read()
+        m = re.search(r"m_SourcePrefab: \{fileID: \d+, guid: (\w+)", t)
+        if not m or m.group(1) not in colors:
+            return {}
+        vertical = re.search(r"m_LocalEulerAnglesHint\.y\s+value: 90\b", t) is not None
+        facts["Tilemap_%d" % i] = (colors[m.group(1)], vertical)
+    return facts
+
+
+def check_doors(grid, art=None):
+    """문마다 <b>자리·그림·색</b>이 다 맞는지 본다. 어긋난 것 목록을 돌려준다.
+
+    항목은 (셀코드, x, y, 사유).
+
+    예전에는 셀 코드의 문서상 의미(좌우가 벽인가)만 봤다. 그래서 CSV 는 전부
+    규칙에 맞는데 화면의 문은 90° 돌아 있는 상태를 그대로 통과시켰다 — 셀 코드에서
+    프리팹 이름으로 가는 번역이 어긋나 있었고, 그 번역은 아무도 안 봤기 때문이다.
+    이제 실제로 놓일 프리팹까지 같이 본다.
+    """
+    if art is None:
+        art = door_prefab_facts()
+
+    def is_wall(cx, cy):
+        if not (0 <= cy < len(grid) and 0 <= cx < len(grid[cy])):
+            return True                    # 격자 밖은 벽으로 친다
+        return grid[cy][cx].startswith("W")
+
     bad = []
-    for y in range(GRID_H):
-        for x in range(GRID_W):
-            cell = grid[y][x]
+    for y in range(len(grid)):
+        for x in range(len(grid[y])):
+            cell = grid[y][x].strip()
             if cell not in ("3", "4", "5", "6", "7", "8"):
                 continue
 
-            def is_wall(cx, cy):
-                if not (0 <= cx < GRID_W and 0 <= cy < GRID_H):
-                    return True          # 격자 밖은 벽으로 친다
-                return grid[cy][cx].startswith("W")
-
-            if cell in ("3", "4", "5"):   # 가로문 — 좌우가 벽
-                ok = is_wall(x - 1, y) and is_wall(x + 1, y)
-            else:                          # 세로문 — 위아래가 벽
+            vertical = int(cell) >= 6
+            if vertical:                   # 세로문 — 위아래가 벽
                 ok = is_wall(x, y - 1) and is_wall(x, y + 1)
+            else:                          # 가로문 — 좌우가 벽
+                ok = is_wall(x - 1, y) and is_wall(x + 1, y)
             if not ok:
-                bad.append((cell, x, y))
+                bad.append((cell, x, y, "벽이 없는 쪽으로 문틀이 뜬다"))
+
+            name = door_art(cell)
+            if name not in art:
+                continue
+            color, art_vertical = art[name]
+            if art_vertical != vertical:
+                bad.append((cell, x, y, "%s 은 %s문 그림이다" %
+                            (name, "세로" if art_vertical else "가로")))
+            if color != (int(cell) - 3) % 3:
+                bad.append((cell, x, y, "%s 색이 열쇠 색(%d)과 다르다" %
+                            (name, (int(cell) - 3) % 3)))
     return bad
 
 
@@ -589,3 +711,141 @@ def validate_layout(grid, regions, doors):
     if stairs not in flood(opened):
         return False, "계단 도달 불가"
     return True, ""
+
+
+# ---------------------------------------------------------------------------
+# 강제와 선택을 <b>센다</b>
+#
+# "관문" 과 "곁길" 은 배치할 때 이미 갈라 놓지만, 그건 <b>의도</b>다. 완성된
+# 격자에서 실제로 그런지는 다시 재야 한다 — 곁길 통로 하나가 우회로를 만들면
+# 관문이 조용히 곁길이 되고, 그러면 "다 잡으면 1레벨" 도 "완주 보장" 도 같이
+# 거짓이 된다. 실제로 챕터 보스 다섯이 그렇게 전부 곁길이 돼 있었다.
+
+
+def _endpoints(grid):
+    spawn = up = None
+    for y in range(len(grid)):
+        for x in range(len(grid[y])):
+            if grid[y][x] == SPAWN:
+                spawn = (x, y)
+            elif grid[y][x] == STAIRS_UP:
+                up = (x, y)
+    return spawn, up
+
+
+def _unavoidable_mob(grid, doors, cell):
+    """그 몬스터를 안 잡으면 정답 경로가 끊기는가.
+
+    그 칸을 벽으로 막고 validate_layout 을 <b>그대로</b> 다시 돌린다. 열쇠가
+    닿지 않게 되는 것까지 잡히므로, "지나가는 데는 필요 없지만 열쇠를 지키고
+    있는" 놈도 관문으로 센다. 눈대중으로는 이 둘을 가를 수 없다.
+    """
+    blocked = [list(row) for row in grid]
+    blocked[cell[1]][cell[0]] = "W_00"
+    return not validate_layout(blocked, None, doors)[0]
+
+
+def floor_choices(grid, doors):
+    """한 층의 <b>강제</b>와 <b>선택</b>을 센다.
+
+    돌려주는 dict:
+      forced_mobs / optional_mobs   관문 / 곁길 몬스터 (보스 제외)
+      boss / boss_forced            보스가 있는가 / 그 보스가 관문인가
+      forced_items / optional_items 반드시 밟는 / 지나칠 수 있는 아이템 (열쇠 제외)
+      runes / forced_runes          룬 / 그중 반드시 밟는 것
+      keys                          열쇠 (문이 강제하므로 늘 필수다)
+      dead_ends                     막다른 자리 수 = 골방 덤이 놓일 수 있는 곳
+
+    몬스터는 "막으면 경로가 끊기는가"(validate_layout), 아이템은 "계단까지 가는
+    모든 길이 이 칸을 지나는가"(_cuts_path)로 잰다. 아이템은 밟으면 바로 줍기
+    때문이다. 열쇠는 연결성이 아니라 문이 강제하므로 따로 센다.
+    """
+    spawn, up = _endpoints(grid)
+    out = dict(forced_mobs=0, optional_mobs=0, boss=0, boss_forced=0,
+               forced_items=0, optional_items=0, runes=0, forced_runes=0,
+               keys=0, dead_ends=0)
+    if spawn is None or up is None:
+        return out
+
+    for y in range(len(grid)):
+        for x in range(len(grid[y])):
+            cell = grid[y][x]
+            if cell.startswith("M_"):
+                if _unavoidable_mob(grid, doors, (x, y)):
+                    out["forced_mobs"] += 1
+                else:
+                    out["optional_mobs"] += 1
+            elif cell.startswith("B_"):
+                out["boss"] += 1
+                if _unavoidable_mob(grid, doors, (x, y)):
+                    out["boss_forced"] += 1
+            elif cell in KEY_ITEM.values():
+                out["keys"] += 1
+            elif cell.startswith(("I_", "E_")):
+                forced = _cuts_path(grid, spawn, up, (x, y))
+                out["forced_items" if forced else "optional_items"] += 1
+                if cell in (RUNE_ATK, RUNE_DEF, RUNE_HP):
+                    out["runes"] += 1
+                    out["forced_runes"] += 1 if forced else 0
+            if cell != VOID and not cell.startswith("W"):
+                nbr = sum(1 for dx, dy in NEIGHBORS
+                          if _inside((x + dx, y + dy)) and _passable(grid, (x + dx, y + dy)))
+                if nbr == 1:
+                    out["dead_ends"] += 1
+    return out
+
+
+def check_all_floors(verbose=True):
+    """StreamingAssets 의 던전 CSV 를 전부 훑어 문 규칙을 검사한다.
+
+        python layout_gen.py
+
+    생성 층에서 어긋난 문의 수를 돌려준다(0 이면 통과). 손수 만든 1~4층은
+    실물이 프리팹이라 따로 세어 참고로만 찍는다.
+    """
+    root = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+    excel = os.path.join(root, "Assets", "StreamingAssets", "Data", "Excel")
+    art = door_prefab_facts()
+    if verbose:
+        if art:
+            for name in sorted(art, key=lambda k: int(k.split("_")[1])):
+                color, vertical = art[name]
+                print("  프리팹 %-11s %s / %s문" %
+                      (name, "초록노랑빨강"[color * 2:color * 2 + 2],
+                       "세로" if vertical else "가로"))
+        else:
+            print("  [경고] 문 프리팹을 못 읽었다 — 벽 규칙만 검사한다")
+
+    gen_doors = gen_bad = hand_doors = hand_bad = 0
+    floors = 0
+    for fn in sorted(os.listdir(excel)):
+        if not fn.startswith("Dungeon_") or not fn.endswith(".csv"):
+            continue
+        did = fn[len("Dungeon_"):-len(".csv")]
+        with open(os.path.join(excel, fn), encoding="utf-8-sig") as f:
+            grid = [[c.strip() for c in line.split(",")] for line in f.read().splitlines()]
+        doors = sum(1 for row in grid for c in row if c.strip() in ("3", "4", "5", "6", "7", "8"))
+        bad = check_doors(grid, art)
+        if did in HAND_AUTHORED:
+            hand_doors += doors
+            hand_bad += len(bad)
+            continue
+        floors += 1
+        gen_doors += doors
+        gen_bad += len(bad)
+        if bad and verbose:
+            for cell, x, y, why in bad:
+                print("  [위반] %s 셀 %s (행%d, 열%d) — %s" % (did, cell, y, x, why))
+
+    if verbose:
+        print("  생성 층 %d개 / 문 %d개 — 위반 %d건" % (floors, gen_doors, gen_bad))
+        print("  (참고) 손수 만든 층 문 %d개 — 위반 %d건" % (hand_doors, hand_bad))
+    return gen_bad
+
+
+if __name__ == "__main__":
+    # 번역표 자기검사. 이게 깨지면 화면의 문이 90° 돌아간다.
+    assert [door_art(c) for c in "345678"] == \
+        ["Tilemap_3", "Tilemap_5", "Tilemap_7", "Tilemap_4", "Tilemap_6", "Tilemap_8"]
+    print("===== 문 배치 검사 =====")
+    sys.exit(1 if check_all_floors() else 0)

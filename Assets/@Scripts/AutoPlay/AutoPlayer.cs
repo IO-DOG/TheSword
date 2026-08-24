@@ -41,7 +41,32 @@ public class AutoPlayer : MonoBehaviour
     /// 위층은 언제나 더 세다 — 반피로 올라가면 그 층에서 죽는다.</summary>
     public float AscendHpRatio = 0.75f;
 
+    /// <summary>스킬을 다시 살펴보기까지의 간격(실시간 초). Use 는 조용히 실패하므로
+    /// 매 프레임 부르면 같은 판단을 초당 수십 번 되풀이한다.
+    /// 그렇다고 넉넉히 잡으면 안 된다 — GameSpeed 8 에서 공격 한 사이클이 실시간 0.4초쯤이라
+    /// 0.3초 간격으로 보면 게이지 꼭대기(철벽 타이밍)를 그냥 지나친다.</summary>
+    // GameSpeed 를 16 으로 올리면 공격 한 사이클이 실시간 0.2초쯤이라
+    // 0.1초 간격으로는 철벽 타이밍(게이지 0.85)을 놓친다.
+    public float SkillInterval = 0.05f;
+
+    // 전투 한 번 동안 들고 있는 전투창과 카드 두 장. 매 점검마다 씬을 훑지 않기 위해서다.
+    UI_BattlePopup _skillPopup;
+    UI_PlayerCard _skillPlayerCard;
+    UI_MonsterCard _skillMonsterCard;
+    /// <summary>상대 공격 게이지가 이 위 = 한 대 맞기 직전. 철벽을 쓸 순간이다.</summary>
+    public float SkillGuardGauge = 0.85f;
+    /// <summary>내 HP 가 이 아래면 흡혈. 가득 찬 채로 쓰면 회복이 그대로 버려진다.</summary>
+    public float SkillDrainHp = 0.6f;
+    /// <summary>상대 HP 가 이 위일 때만 강타 = 전투 초반.</summary>
+    public float SkillSmashHp = 0.8f;
+    /// <summary>일반 층에서 스킬을 푸는 선. 이 아래면 아끼다 죽는 것보다 쓰는 게 낫다.</summary>
+    public float SkillEmergencyHp = 0.35f;
+
     /// <summary>전투 배속. 게임 안에 있는 옵션 그대로다(1/2/4). 녹화 길이를 줄인다.</summary>
+    // 8 을 넘기지 마라. 16 으로 올려 봤더니 <b>2층에서 죽었다.</b>
+    // 쿨타임만 곱해지니 승패는 무관할 거라 적혀 있었지만 아니었다 —
+    // 한 프레임이 문턱을 훌쩍 넘어 버리면 공격 횟수가 양쪽에서 다르게 깎인다.
+    // 실행이 길면 배속이 아니라 이동 속도(MoveSpeedScale)로 줄인다.
     public int GameSpeed = 8;
     /// <summary>이동 배속. 걷는 시간이 영상의 절반을 먹어서 줄인다.</summary>
     // 이동 배속. 100층 녹화가 30분을 넘으면 실행이 중간에 잘려 완주를 못 담는다.
@@ -49,6 +74,8 @@ public class AutoPlayer : MonoBehaviour
     // 골방이 생기면서 층마다 덤을 주우러 도는 만큼 실행이 길어졌다.
     // 100층 검증이 시간 제한에 걸려 72층에서 잘렸다 — 이동으로 상쇄한다.
     // 검증/녹화 전용 값이다. 게임의 이동 속도는 건드리지 않는다.
+    // 18 도 해 봤지만 더 짧아졌다 — 병목은 걸음이 아니었다. 완주가 확인된 값이다.
+    // 전투 배속은 결과를 바꾸므로 손대면 안 되고, 이동만 올린다.
     public float MoveSpeedScale = 12f;
 
     const float Tile = 0.32f;
@@ -66,6 +93,7 @@ public class AutoPlayer : MonoBehaviour
     const int PriExplore = 9;   // 목표가 없을 때 안 밟아 본 칸으로
 
     float _nextStep;
+    float _nextSkill;
     float _baseMove;
     float _nextUi;
     float _lastProgress;
@@ -183,6 +211,9 @@ public class AutoPlayer : MonoBehaviour
             {
                 TrackRealProgress();
                 TickBattleLog();
+                // 스킬은 여기서 본다. TickPlay 안에 두면 안 된다 — 그쪽은 전투가 열리면
+                // 맨 앞에서 return 해 버려서 전투 중에는 한 번도 도달하지 않는다.
+                TickSkills();
                 TickUI();
                 TickPlay();
             }
@@ -253,6 +284,130 @@ public class AutoPlayer : MonoBehaviour
             Debug.Log($"[AutoPlayer] 전투 끝 HP {_hpBefore:0} -> {g.PlayerData.CurHP:0}");
         }
     }
+
+    #region 액티브 스킬
+    /// <summary>
+    /// 스킬을 쓸지 본다. 무작위가 아니라 아래 규칙 그대로다.
+    ///
+    /// 어디서 쓰나
+    ///   보스 전투에서는 항상 쓴다. 오래 끄는 전투라 셋이 다 들어갈 자리가 있고,
+    ///   녹화에서 스킬을 보여 줄 자리도 여기다.
+    ///   일반 층에서는 HP 가 SkillEmergencyHp 아래로 떨어졌을 때만 쓴다 — 지금까지
+    ///   기록(record46)에서 509 전투 중 HP 를 30% 넘게 잃은 전투가 2 건이라
+    ///   사실상 거의 안 뜬다. 96 개 층을 스킬 없이 두어야 "스킬 없이도 완주" 라는
+    ///   기존 측정이 그대로 남는다 (Tools/thesword_balance.py 도 완주 계산에는
+    ///   스킬을 넣지 않는다 — 스킬은 게임을 쉽게만 만드니 그 수치는 하한으로 유효하다).
+    ///
+    /// 무엇을 언제 (한 번에 하나, SkillInterval 간격, 위에서부터 먼저)
+    ///   철벽  상대 공격 게이지가 SkillGuardGauge 를 넘겼을 때. 맞고 나서 쓰면
+    ///         그 대는 이미 지나간 뒤라 아무것도 막지 못한다.
+    ///   흡혈  내 HP 가 SkillDrainHp 아래. 가득 찬 채로 쓰면 회복이 그대로 버려진다.
+    ///   강타  상대 HP 가 SkillSmashHp 위 = 전투 초반. 마무리로 아껴 두면 안 된다 —
+    ///         야수는 HP 10% 아래로 떨어지면 한 번 40% 회복한다. 끝내려고 쓴 강타가
+    ///         오히려 상대를 살린다.
+    ///
+    /// 암살 상대에게는 강타/흡혈을 쓰지 않는다. 스킬은 IsCritical 을 세우지 않아서
+    /// 은신이 안 풀린 동안은 피해가 통째로 0 이 된다(AssassinTrait.ExcuteOnHit).
+    /// 은신이 풀렸는지는 밖에서 볼 수 없으니 아끼고 철벽만 쓴다.
+    ///
+    /// 전투당 1회 제한과 마검 계약 해금은 BattleSkills 가 지킨다 — 여기서 다시 세지 않는다.
+    /// </summary>
+    void TickSkills()
+    {
+        GameManager g = Managers.Game;
+        if (g == null || g.OnBattle == false || g.PlayerData == null)
+        {
+            // 전투가 끝나면 놓는다. 다음 전투는 새 팝업이라 그대로 들고 있으면 안 된다.
+            _skillPopup = null;
+            _skillPlayerCard = null;
+            _skillMonsterCard = null;
+            return;
+        }
+        if (BattleSkills.Unlocked == false)
+            return;
+
+        if (Time.unscaledTime < _nextSkill)
+            return;
+        _nextSkill = Time.unscaledTime + SkillInterval;
+
+        if (g.MonsterData == null || g.MonsterData.Count == 0)
+            return;
+        GameManager.CurMonsterData monster = g.MonsterData[0];
+        if (monster.MaxHP <= 0 || monster.CurHP <= 0 || g.PlayerData.CurHP <= 0)
+            return;
+
+        // 카드 두 장은 전투창의 private 필드다. 사람은 키로 누르지만(레거시 Input 이라
+        // 코드로 키를 흉내 낼 수단이 없다) 봇은 BattleSkills.Use 를 직접 부른다.
+        //
+        // <b>전투창은 전투가 열릴 때 한 번만 찾는다.</b> 매번 FindFirstObjectByType 을
+        // 부르면 씬의 타일 수천 개를 그때마다 훑는다 — 초당 20번씩 그랬더니 100층
+        // 검증이 64층에서 59층으로 더 짧아졌다. 전투 수도 충돌도 그대로였으니
+        // 게임이 하는 일이 아니라 이 탐색이 값을 치르고 있었다.
+        if (_skillPopup == null || _skillPlayerCard == null || _skillMonsterCard == null)
+        {
+            _skillPopup = FindFirstObjectByType<UI_BattlePopup>();
+            if (_skillPopup == null)
+                return;
+            _skillPlayerCard = Field<UI_PlayerCard>(_skillPopup, "playerCard");
+            _skillMonsterCard = Field<UI_MonsterCard>(_skillPopup, "monsterCard");
+        }
+        UI_BattlePopup popup = _skillPopup;
+        UI_PlayerCard playerCard = _skillPlayerCard;
+        UI_MonsterCard monsterCard = _skillMonsterCard;
+        if (playerCard == null || monsterCard == null)
+            return;
+
+        float myHp = g.PlayerData.MaxHP > 0 ? g.PlayerData.CurHP / g.PlayerData.MaxHP : 1f;
+
+        // 보스는 층 번호로 세지 않는다. 4층 킹 슬라임처럼 손수 만든 층도 섞여 있고,
+        // 전투를 연 놈이 무엇인지는 컨트롤러가 그대로 말해 준다.
+        //
+        // 다만 <b>컴포넌트만 보면 안 된다</b> — BossMonsterController 는 손수 만든 층의
+        // 보스에만 붙어 있고, 생성 층의 챕터 보스는 태그가 "Boss" 인 평범한
+        // MonsterController 다 (MapBuilder 가 "BossMonster" 프리팹을 그렇게 놓는다).
+        // 컴포넌트만 봤더니 4층에서만 스킬이 나오고 20·40·60층 보스에서는 한 번도
+        // 안 나왔다. 같은 함정이 UI_MonsterCard.Dead() 에서도 한 번 났다.
+        bool boss = g.Monster != null
+                    && (g.Monster.GetComponent<BossMonsterController>() != null
+                        || g.Monster.CompareTag("Boss"));
+        if (boss == false && myHp >= SkillEmergencyHp)
+            return;
+
+        bool assassin = monster.Ability == (int)Define.Trait.Assassin;
+
+        // 상대의 공격 게이지. UI_BaseCard.Images.AttackDelayGauge = 3
+        // (그 enum 이 protected 라 숫자로 쓴다. GetImage 는 public 이다.)
+        var gauge = monsterCard.GetImage(3);
+        float charged = gauge == null ? 0f : gauge.fillAmount;
+
+        if (charged >= SkillGuardGauge
+            && UseSkill(BattleSkills.Kind.Guard, playerCard, monsterCard, g, monster))
+            return;
+
+        if (assassin == false && myHp < SkillDrainHp
+            && UseSkill(BattleSkills.Kind.Drain, playerCard, monsterCard, g, monster))
+            return;
+
+        if (assassin == false && monster.CurHP / monster.MaxHP > SkillSmashHp)
+            UseSkill(BattleSkills.Kind.Smash, playerCard, monsterCard, g, monster);
+    }
+
+    /// <summary>스킬 하나를 쓴다. 실제로 발동했을 때만 true 이고 그때만 로그를 남긴다.</summary>
+    bool UseSkill(BattleSkills.Kind kind, UI_PlayerCard playerCard, UI_MonsterCard monsterCard,
+                  GameManager g, GameManager.CurMonsterData monster)
+    {
+        int index = (int)kind;
+        if (BattleSkills.IsUsed(index))
+            return false;
+        if (BattleSkills.Use(index, playerCard, monsterCard) == false)
+            return false;
+
+        // 나중에 이 줄로 녹화 구간을 찾아 자른다. 형식을 바꾸지 말 것.
+        Debug.Log($"[AutoPlayer] 스킬 {BattleSkills.NameOf(index)} 사용 " +
+                  $"({g.PlayerData.CurStageid + 1}층 몬스터{monster.id})");
+        return true;
+    }
+    #endregion
 
     #region UI — 사람이 눌러야만 넘어가는 지점들
     void TickUI()
