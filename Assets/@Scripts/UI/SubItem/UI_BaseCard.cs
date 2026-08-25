@@ -75,6 +75,16 @@ public class UI_BaseCard : UI_Base
         GetText((int)Texts.AttackStatusText).text = _creature.Attack.ToString();
         GetText((int)Texts.DefenceStatusText).text = _creature.Defence.ToString();
 
+        // 체력바를 몬스터 그림보다 위에 그린다.
+        //
+        // 카드의 자식 순서가 [... CreatureName, BattleHPBar, Attack, Defence,
+        // CreatureImage] 라 그림이 <b>맨 마지막</b>이다. uGUI 는 뒤에 있는 자식을
+        // 위에 그리므로, 몸집이 큰 몬스터(정예 1.2배·보스 1.45배)가 올라오면
+        // 체력바를 덮었다. 바를 맨 뒤로 옮겨 그림보다 위에 두게 한다.
+        Image hpBar = GetImage((int)Images.HPHar);
+        if (hpBar != null && hpBar.transform.parent != null)
+            hpBar.transform.parent.SetAsLastSibling();
+
         int abilityIndex = _creature.Ability;
         string battleBGImage = Managers.Data.MonsterClassDic[abilityIndex].BattleBGImage;
         string abilityImage = Managers.Data.MonsterClassDic[abilityIndex].AbilityImage;

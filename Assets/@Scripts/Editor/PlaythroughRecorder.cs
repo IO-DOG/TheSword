@@ -22,7 +22,16 @@ public static class PlaythroughRecorder
 {
     const string StateKey = "TheSword.Playthrough";   // "record" | "dry" | ""
     const string OutputDir = "Recordings";
-    const string OutputName = "TheSword_Playthrough";
+    /// <summary>녹화 파일 이름. THESWORD_RECORD_NAME 으로 바꾼다 —
+    /// 조각으로 나눠 뽑을 때 서로 덮어쓰지 않게.</summary>
+    static string OutputName
+    {
+        get
+        {
+            string v = System.Environment.GetEnvironmentVariable("THESWORD_RECORD_NAME");
+            return string.IsNullOrEmpty(v) ? "TheSword_Playthrough" : v;
+        }
+    }
 
     // 100층을 한 번에 담아야 하는데, 인코딩이 무거우면 그만큼 실제 시간이 늘어난다.
     // 1280x720 30fps 로는 30분에 70층 언저리에서 끊겼다. 화면이 도트 그림이라
@@ -96,7 +105,15 @@ public static class PlaythroughRecorder
             return;
         }
 
-        ClearSaveData();
+        // THESWORD_RECORD_RESUME=1 이면 지난 조각의 세이브에서 이어 간다.
+        //
+        // 100층 한 번이 40분 가까이라 실행 예산에 안 들어갈 때가 있다. 그럴 때
+        // 12분씩 끊어 뽑고 이어 붙인다 — 봇은 늘 1층부터 시작하므로, 이어받기가
+        // 없으면 같은 구간만 반복해서 찍힌다.
+        if (System.Environment.GetEnvironmentVariable("THESWORD_RECORD_RESUME") == "1")
+            Debug.Log("[Playthrough] 이어받기 — 세이브를 지우지 않는다");
+        else
+            ClearSaveData();
         SessionState.SetString(StateKey, mode);
         EditorSceneOpen();
         Debug.Log($"[Playthrough] 시작 ({mode}) — 플레이모드 진입");
@@ -260,6 +277,15 @@ public static class PlaythroughRecorder
         string msg = bot.Result;
         if (timeUp && bot.Finished == false && bot.Failed == false)
             msg = $"{MaxMinutes:0}분 제한에 걸려 녹화를 끊었다";
+
+        // 시간 제한으로 끊는 것이라면 다음 조각이 이어받을 수 있게 저장한다.
+        // 죽어서 끝난 것이면 저장하지 않는다 — 그 상태를 이어받을 이유가 없다.
+        if (timeUp && bot.Finished == false && bot.Failed == false
+            && Managers.Game != null && Managers.Game.PlayerData != null)
+        {
+            Managers.Game.SaveGame();
+            Debug.Log($"[Playthrough] 이어받기용 저장 — {Managers.Game.PlayerData.CurStageid + 1}층");
+        }
 
         SessionState.SetString(StateKey, (bot.Failed || timeUp) && bot.Finished == false
             ? "failed" : "done");

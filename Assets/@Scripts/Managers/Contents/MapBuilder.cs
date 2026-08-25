@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -156,6 +156,7 @@ public static class MapBuilder
                             ConsumableItem ci = Bind<ConsumableItem>(go);
                             ci.id = obj.Id;
                             ci._itemIndex_forActive = obj.Count;
+                            StretchBillboard(go);   // 물약도 그대로 두면 눌려 보인다
                         }
                         break;
                     }
@@ -168,6 +169,7 @@ public static class MapBuilder
                             Equip eq = Bind<Equip>(go);
                             eq._id = obj.Id;
                             eq._itemIndex_forActive = obj.Count;
+                            StretchBillboard(go);
                         }
                         break;
                     }
@@ -435,6 +437,36 @@ public static class MapBuilder
     }
 
     /// <summary>
+    /// 바닥에 세워 두는 2D 그림의 세로 비율을 맞춘다.
+    ///
+    /// 이 프로젝트의 스프라이트 프리팹은 (1,1,1) 로 만들어져 있어서 그대로 놓으면
+    /// 화면에서 <b>납작하게 눌려</b> 보인다. 세로를 두 배로 늘려야 제 모양이다.
+    ///
+    /// 그런데 <b>보스 프리팹은 자식이 이미 (1,2,1)</b> 이다. 거기에 또 곱하면 네 배가
+    /// 되어 아래쪽 절반이 바닥에 박힌다 — "몬스터가 땅에 박혀 있다" 가 이것이었다.
+    /// 그래서 이미 늘어나 있는 프리팹은 크기(bulk)만 곱한다.
+    /// </summary>
+    static void StretchBillboard(GameObject go, float bulk = 1f)
+    {
+        if (go == null)
+            return;
+
+        bool alreadyTall = false;
+        foreach (Transform tr in go.GetComponentsInChildren<Transform>(true))
+        {
+            if (tr.localScale.y > tr.localScale.x * 1.5f)
+            {
+                alreadyTall = true;
+                break;
+            }
+        }
+
+        go.transform.localScale = alreadyTall
+            ? new Vector3(bulk, bulk, 1f)
+            : new Vector3(bulk, bulk * 2f, 1f);
+    }
+
+    /// <summary>
     /// 몬스터의 겉모습을 그 몬스터 데이터에 맞춘다.
     ///
     ///  - 세로 비율: 플레이어와 보스 프리팹은 (1,2,1) 인데 일반 몬스터 프리팹만
@@ -452,7 +484,7 @@ public static class MapBuilder
         // 내보내지 않는다. 그래서 쓸 수 있는 그림은 몹 여덟 종뿐이고, 우두머리를
         // 우두머리로 보이게 할 방법이 크기와 색밖에 없다.
         float bulk = MonsterBulk(id);
-        go.transform.localScale = new Vector3(bulk, bulk * 2f, 1f);
+        StretchBillboard(go, bulk);
 
         Data.MonsterData md;
         if (Managers.Data.MonsterDic.TryGetValue(id, out md) == false)
