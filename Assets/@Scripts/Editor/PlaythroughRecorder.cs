@@ -37,7 +37,25 @@ public static class PlaythroughRecorder
 
     /// <summary>이 시간이 지나면 결과와 상관없이 녹화를 끊고 나온다.
     /// 봇이 어딘가에서 맴돌아도 mp4 는 정상적으로 마무리돼야 한다.</summary>
-    const double MaxMinutes = 60.0;
+    /// <summary>
+    /// 이 시간이 지나면 스스로 끊는다. <b>끊긴 파일과 다르다</b> — 여기서 끊으면
+    /// 녹화기가 정상 종료해서 mp4 가 재생 가능하다. 밖에서 강제로 죽이면
+    /// moov 가 안 쓰여 통째로 못 읽는다.
+    ///
+    /// 환경변수 THESWORD_RECORD_MINUTES 로 덮어쓸 수 있다. 100층 전체가 아니라
+    /// 앞부분만 필요할 때 쓴다 (예: 액티브 스킬은 4·20층에서 나온다).
+    /// </summary>
+    static double MaxMinutes
+    {
+        get
+        {
+            string v = System.Environment.GetEnvironmentVariable("THESWORD_RECORD_MINUTES");
+            double m;
+            if (string.IsNullOrEmpty(v) == false && double.TryParse(v, out m) && m > 0)
+                return m;
+            return 60.0;
+        }
+    }
 
     /// <summary>이만큼 아무 진전이 없으면 잠긴 연출을 에디터 쪽에서 직접 푼다.</summary>
     const double StuckSeconds = 20.0;
