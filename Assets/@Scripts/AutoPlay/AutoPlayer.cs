@@ -505,13 +505,29 @@ public class AutoPlayer : MonoBehaviour
         return true;
     }
 
-    /// <summary>타이틀은 프리로드가 끝나야 시작할 수 있다. 끝나면 새 게임으로 들어간다.</summary>
+    /// <summary>이어받기로 시작하는가. 녹화기가 조각으로 나눠 뽑을 때 켠다.</summary>
+    public static bool ResumeFromSave = false;
+
+    /// <summary>타이틀은 프리로드가 끝나야 시작할 수 있다.
+    ///
+    /// 보통은 새 게임으로 들어간다. 이어받기라면 <b>이어하기</b>를 누른다 —
+    /// 새 게임은 DeleteGameData 로 저장을 지워 버려서, 조각으로 나눠 뽑을 때
+    /// 다음 조각이 1층부터 다시 시작한다.
+    /// </summary>
     void TitleStart(UI_TitleScene title)
     {
         if (Field<bool>(title, "isPreload") == false)
             return;
         if (Field<bool>(title, "_lock"))
             return;
+
+        if (ResumeFromSave && PlayerPrefs.GetInt("ISFIRST", 1) != 1)
+        {
+            Debug.Log("[AutoPlayer] 이어하기로 들어간다");
+            Method(title, "OnClickLoadGameButton").Invoke(title, null);
+            return;
+        }
+
         title.StartCoroutine((IEnumerator)Method(title, "CoOnClickNewGameButton").Invoke(title, null));
     }
 

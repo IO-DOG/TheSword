@@ -132,7 +132,6 @@ public class UI_TitleScene : UI_Scene
                 // cursor 시작
                 Managers.Cursor = GameObject.Find("@Cursor").GetOrAddComponent<CursorManager>();
                 Managers.Cursor.Init();
-                // continueData로 플레이어 적용시키기. TODO
             }
         });
     }
@@ -243,7 +242,20 @@ public class UI_TitleScene : UI_Scene
         }
         else
         {
-            Debug.Log("Cllck OnClickLoadGameButton");
+            // 저장된 것을 <b>실제로 불러온 뒤에</b> 들어간다.
+            //
+            // 예전에는 씬만 바꿨다. 앱을 새로 켠 직후라면 GameManager.Init 이 이미
+            // 불러 둬서 우연히 맞았지만, 같은 실행에서 새 게임을 한 번 누른 뒤라면
+            // 그 초기화된 데이터가 그대로 딸려 들어갔다 — 이어하기인데 1층부터
+            // 시작하고, 오브젝트 상태만 남아 먹은 아이템이 없는 맵을 돌게 된다.
+            if (Managers.Game.LoadGame() == false)
+            {
+                Debug.LogWarning("[Title] 불러올 저장이 없다 — 새 게임으로 간다");
+                StartCoroutine(CoOnClickNewGameButton());
+                return;
+            }
+
+            Debug.Log($"[Title] 이어하기 — {Managers.Game.PlayerData.CurStageid + 1}층 Lv{Managers.Game.PlayerData.Level}");
             Managers.Scene.LoadScene(Define.Scene.GameScene);
         }
     }

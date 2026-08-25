@@ -162,6 +162,8 @@ public static class PlaythroughRecorder
             Application.logMessageReceived -= OnLog;
             Application.logMessageReceived += OnLog;
 
+            AutoPlayer.ResumeFromSave =
+                System.Environment.GetEnvironmentVariable("THESWORD_RECORD_RESUME") == "1";
             AutoPlayer.Spawn();
             if (mode == "record")
             {
