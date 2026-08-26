@@ -77,6 +77,22 @@ Unity.exe -projectPath . -executeMethod MonsterArtSetup.Build
 떨군 장비가 재생하는 `EquipItem_{id}` 상태도 같은 도구가 채운다 —
 **없는 상태를 재생하면 경고만 찍히고 그림이 안 나온다. 즉 떨어진 장비가 보이지 않는다.**
 
+### 완주 녹화를 조각으로 나눠 뽑기
+
+100층 한 번이 40분 가까이라 실행 시간 제한에 걸릴 때가 있다. 그럴 때 나눠 뽑는다.
+
+```bash
+THESWORD_RECORD_MINUTES=11 THESWORD_RECORD_NAME=New_01   Unity.exe -projectPath . -executeMethod PlaythroughRecorder.Record
+THESWORD_RECORD_MINUTES=11 THESWORD_RECORD_NAME=New_02 THESWORD_RECORD_RESUME=1   Unity.exe -projectPath . -executeMethod PlaythroughRecorder.Record
+```
+
+- 제한 시간에 걸리면 녹화기가 **스스로 끊어 파일을 정상 종료**하고 세이브를 남긴다.
+  밖에서 강제로 죽이면 `moov` 가 안 쓰여 mp4 를 통째로 못 읽는다.
+- `RESUME=1` 이면 봇이 타이틀에서 **이어하기**를 누른다. 새 게임은 `DeleteGameData`
+  로 저장을 지우므로 그대로 두면 다음 조각이 1층부터 다시 시작한다.
+- 조각들은 코덱·해상도·프레임률이 같으니 `ffmpeg -f concat -c copy` 로 재인코딩
+  없이 붙는다. 붙인 뒤 경계의 층수 표시를 확인할 것.
+
 ### 에디터가 바로 안 켜질 때
 
 두 가지 창이 뜬다. 둘 다 **지난번에 에디터가 제대로 안 닫혔다는 표시**지 고장이 아니다.
@@ -198,6 +214,19 @@ Unity.exe -projectPath . -executeMethod MapDecoSetup.Build
 지우려다 실패해서, 복사본이 1초 동안 살아 있는 몬스터로 남았고 그 칸을 다시 밟으면
 **같은 보스와 두 번 싸웠다**. 콜라이더를 없앨 때는 `GetComponentsInChildren<Collider>`
 로 훑는다.
+
+### 포탈은 지나갈 수 없다
+
+계단·보스 포탈은 **밟고 지나갈 수 없는 마개**다. 그래서 놓는 자리가 통행을 끊는다.
+
+- 방 중앙선(통로가 지나는 줄)을 피한다 — `_off_corridor_cells`
+- **골방이 붙은 방 칸도 피한다.** 그 칸이 골방으로 들어가는 유일한 길이라
+  계단이 앉으면 골방이 통째로 막힌다. 98층이 실제로 그랬고, 자동 플레이는
+  닿지도 못하는 목표를 잡고 8분을 헤맸다 (도달 칸 340 -> 336).
+  사람이 해도 그 물약은 못 먹는다.
+
+`layout_gen.check_sealed_by_portal()` 이 포탈을 못 지나가는 것으로 놓고 두 번 훑어
+그 뒤에 갇히는 몬스터·아이템을 찾는다. 생성기 검사에 물려 있으니 0건이어야 한다.
 
 ### 100층 콘텐츠 생성 (`Tools/`)
 
