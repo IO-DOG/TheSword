@@ -32,7 +32,7 @@ from thesword_balance import (
     TRAIT_NAME,
 )
 from layout_gen import (build_floor_layout, validate_layout, check_doors,
-                        floor_choices, MIN_TOLLS)
+                        check_sealed_by_portal, floor_choices, MIN_TOLLS)
 
 # 층마다 반드시 치러야 하는 전투의 수. layout_gen 이 배치로 보장하는 값이고,
 # 여기서는 "곁길을 전부 건너뛴다" 는 나쁜 선택을 재현할 때 쓴다 — 관문 셋만
@@ -891,7 +891,7 @@ def emit_layouts(monsters, write=True):
     for m in monsters:
         by_floor.setdefault(m["_floor"], []).append(m)
 
-    written, failures, bad_doors = 0, [], []
+    written, failures, bad_doors, sealed_off = 0, [], [], []
     choices = {}
     for floor in range(HANDMADE_FLOORS + 1, TOTAL_FLOORS + 1):
         did, ch, _ = dungeon_id(floor)
@@ -933,6 +933,11 @@ def emit_layouts(monsters, write=True):
         for cell, x, y, why in check_doors(grid):
             bad_doors.append(f"Dungeon_{did} 셀 {cell} (행{y}, 열{x}) — {why}")
 
+        # 포탈은 지나갈 수 없다. 그것이 어느 구역의 유일한 입구에 앉으면 그 뒤가
+        # 통째로 막힌다 — 98층에서 골방이 위 계단에 막혀 있었다.
+        for (cx, cy), what in check_sealed_by_portal(grid):
+            sealed_off.append(f"Dungeon_{did} ({cx}, {cy}) {what} — 포탈에 막혀 못 간다")
+
         # 강제/선택은 배치 <b>의도</b>가 아니라 완성된 격자에서 다시 잰다.
         # 곁길 통로 하나가 우회로를 만들면 관문이 조용히 곁길이 된다.
         choices[floor] = floor_choices(grid, doors)
@@ -943,7 +948,7 @@ def emit_layouts(monsters, write=True):
                 for row in grid:
                     f.write(",".join(row) + "\n")
         written += 1
-    return written, failures, bad_doors, choices
+    return written, failures, bad_doors, choices, sealed_off
 
 
 def report_choices(choices):
@@ -1010,7 +1015,7 @@ def build_all(dry_run=False):
     print(f"      최종 레벨: {log[-1]['exit_level']}")
 
     print("[4/6] 층 레이아웃 생성 + 도달 가능성 검사")
-    written, failures, bad_doors, choices = emit_layouts(monsters, write=not dry_run)
+    written, failures, bad_doors, choices, sealed_off = emit_layouts(monsters, write=not dry_run)
     print(f"      {written}/{TOTAL_FLOORS - HANDMADE_FLOORS} 층 생성 "
           f"(1~{HANDMADE_FLOORS}층은 원본 유지)")
     if failures:
@@ -1022,6 +1027,12 @@ def build_all(dry_run=False):
         print(f"      문 규칙 위반 {len(bad_doors)}건")
         return False
     print("      문 자리/그림/색 위반 0건")
+    if sealed_off:
+        for line in sealed_off[:10]:
+            print(f"  [실패] {line}")
+        print(f"      포탈에 막혀 못 가는 것 {len(sealed_off)}건")
+        return False
+    print("      포탈에 막힌 몬스터·아이템 0건")
 
     print("[5/6] 강제와 선택 세기")
     broken = report_choices(choices)

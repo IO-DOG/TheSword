@@ -238,7 +238,7 @@ def _carve_alcove(grid, rooms, rng):
     가로 간격은 2칸이라 팔 수 없다 — 안쪽 칸이 옆방과 맞닿아 입구가 둘이 된다.
     세로 간격이 3칸이라 위아래로만 판다.
 
-    (입구, 안쪽) 또는 (None, None).
+    (입구, 안쪽, 붙은 방 칸) 또는 (None, None, None).
     """
     cands = []
     for room in rooms:
@@ -265,8 +265,8 @@ def _carve_alcove(grid, rooms, rng):
             continue
         grid[gate[1]][gate[0]] = FLOOR
         grid[prize[1]][prize[0]] = FLOOR
-        return gate, prize
-    return None, None
+        return gate, prize, (bx, by)
+    return None, None, None
 
 
 def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
@@ -332,7 +332,7 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
 
     # 막다른 골방. 입구 한 칸에 파수꾼을 세우고 안쪽에 덤을 둔다.
     # 통로와 지름길을 다 판 뒤라야 뒷문이 생기지 않는다.
-    alcove_gate, alcove_prize = _carve_alcove(grid, order, rng)
+    alcove_gate, alcove_prize, alcove_base = _carve_alcove(grid, order, rng)
 
     # 구역: 방 아홉 개를 3/2/2/2 로 끊고 경계에 문을 세운다.
     doors = []
@@ -348,6 +348,14 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
 
     place = {}
     used = set()
+
+    # 골방이 붙은 방 칸은 비워 둔다.
+    #
+    # 포탈(계단)은 <b>지나갈 수 없다</b>. 그 칸이 골방으로 들어가는 유일한 길이면
+    # 골방이 통째로 막혀 안의 덤을 영영 못 먹는다 — 98층이 실제로 그랬고,
+    # 자동 플레이 봇은 닿지도 못하는 목표를 잡고 8분을 헤맸다.
+    if alcove_base is not None:
+        used.add(alcove_base)
 
     def free_in(rooms):
         pool = []
@@ -563,6 +571,58 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
 # 나머지는 어긋난다. 손수 만든 1~4층이 3 과 6 만 쓰는데 6 은 두 규약에서 방향이
 # 같아서, 이 어긋남이 96개 생성 층에만 나타나 오래 안 보였다.
 # 번역은 여기와 BuildDoor 두 곳뿐이고 서로 같아야 한다.
+
+
+def check_sealed_by_portal(grid):
+    """포탈이 막아서 못 가게 되는 몬스터·아이템을 찾는다.
+
+    데이터에서는 이어져 있어도 <b>런타임에서는 포탈을 통과할 수 없다.</b>
+    포탈이 어느 구역의 유일한 입구에 앉으면 그 뒤가 통째로 막힌다 —
+    98층에서 골방 입구가 위 계단에 막혀 물약과 파수꾼에 닿을 수 없었고,
+    봇은 닿지도 못하는 목표를 잡고 8분을 헤맸다.
+
+    막힌 (좌표, 셀) 목록. 빈 목록이면 정상이다.
+    """
+    portals = {STAIRS_UP, STAIRS_DOWN, "16"}
+
+    def cell_at(c):
+        return grid[c[1]][c[0]].strip()
+
+    start = None
+    for y in range(len(grid)):
+        for x in range(len(grid[y])):
+            if cell_at((x, y)) == SPAWN:
+                start = (x, y)
+    if start is None:
+        return []
+
+    def flood(block_portals):
+        seen = {start}
+        stack = [start]
+        while stack:
+            x, y = stack.pop()
+            for dx, dy in NEIGHBORS:
+                n = (x + dx, y + dy)
+                if not _inside(n) or n in seen:
+                    continue
+                v = cell_at(n)
+                if v == VOID or v == "" or v.startswith("W"):
+                    continue
+                if block_portals and v in portals:
+                    continue
+                seen.add(n)
+                stack.append(n)
+        return seen
+
+    reachable = flood(True)
+    sealed = []
+    for c in flood(False):
+        if c in reachable:
+            continue
+        v = cell_at(c)
+        if v[:1] in ("M", "I", "E", "B"):
+            sealed.append((c, v))
+    return sealed
 
 
 def door_art(cell):
