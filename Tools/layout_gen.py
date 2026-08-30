@@ -16,7 +16,7 @@ CSV 격자 규약은 DataManager.ResetActiveDic 의 파서와 일치해야 한�
   * 몬스터는 통로 목에 세운다 — 지나가려면 반드시 값을 치른다
   * 열쇠/물약/장비는 방 안에 둔다 — 들를지 말지가 판단거리다
   * 문 세 개가 층을 네 구역으로 잘라 큰 순서를 정한다
-  * 곁길을 한둘 남긴다 — 지금 이 몬스터를 잡을지 돌아갈지 고르게
+  * 곁길 몬스터를 남긴다 — 지나가는 데는 필요 없고, 덤을 가지려면 잡아야 한다
 
 몬스터는 벽이 아니라 통행료다. 그래서 도달 가능성 검사도 몬스터를 지나갈 수
 있는 것으로 보고 한다(validate_layout).
@@ -68,25 +68,56 @@ RUNE_ATK, RUNE_DEF, RUNE_HP = "I_09", "I_10", "I_11"
 
 NEIGHBORS = ((1, 0), (-1, 0), (0, 1), (0, -1))
 
-# 방 격자 3x3, 방 하나는 7x5.
+# 방 격자 3x3. 방 하나는 최대 7x5 이고, <b>크기는 층마다 다르다.</b>
 ROOMS_X, ROOMS_Y = 3, 3
-ROOM_W, ROOM_H = 7, 5
+ROOM_W, ROOM_H = 7, 5                       # 가장 큰 방 = 방 사이 간격의 기준
 GAP_X = (GRID_W - 2 - ROOMS_X * ROOM_W) // (ROOMS_X - 1)
 GAP_Y = (GRID_H - 2 - ROOMS_Y * ROOM_H) // (ROOMS_Y - 1)
+STRIDE_X, STRIDE_Y = ROOM_W + GAP_X, ROOM_H + GAP_Y
+
+# 방 반지름 후보. 방 크기는 (2*hw+1) x (2*hh+1) — 5x3 / 5x5 / 7x3 / 7x5 넷이다.
+#
+# 왜 방 크기가 층마다 달라야 하는가
+# ------------------------------
+# 방 아홉 개가 고정 좌표에 7x5 로 파이면 격자 621칸 중 515칸이 <b>모든 층에서
+# 같은 값</b>이 된다(82.9%). 그래서 두 층의 벽/바닥이 평균 97.7% 같았고, 문은
+# 통로 밖 구간의 한가운데에만 앉아 96개 층이 단 12칸을 나눠 썼다.
+# 방 크기를 흔들면 그 515칸이 통째로 흔들린다.
+#
+# <b>줄이는 쪽으로만</b> 흔든다. 방을 키우면 마지막 통로의 방 밖 구간이 짧아져
+# last_neck 이 보스에게 한 칸 주고 나면 바닥나고, 룬이 폴백 가지로 떨어져 여덟
+# 개 층에서 <b>그냥 지나칠 수 있는 룬</b>이 됐다 — 완주 보장이 거짓이 된다.
+# 반대로 hw=1(3칸 방)까지 줄이면 방이 방으로 안 보이고 밟을 칸이 36% 줄어든다.
+# 단조로움은 hw 2~3 만으로도 97.6% -> 85.3% 로 떨어진다(hw 1~3 은 83.0%).
+HALF_W, HALF_H = (2, 3), (1, 2)
+
+# 이 층의 방 반지름. build_floor_layout 이 씨앗으로 굴려 채운다.
+# 방 기하 함수 넷이 층수도 씨앗도 받지 않는 순수 함수라 여기 둔다 — 단조로움의
+# 뿌리가 바로 그것이었다. 한 층을 뽑고 나면 그 층의 값이 남으므로, 밖에서
+# room_cells 를 부르려면 그 층을 뽑은 <b>직후</b>여야 한다.
+_SHAPE = {}
+
+
+def room_half(rx, ry):
+    return _SHAPE.get((rx, ry), (ROOM_W // 2, ROOM_H // 2))
+
+
+def room_center(rx, ry):
+    """방 중심은 <b>격자에 고정</b>이다 — 흔들면 통로가 상대 방에 안 닿는다."""
+    return 1 + rx * STRIDE_X + ROOM_W // 2, 1 + ry * STRIDE_Y + ROOM_H // 2
 
 
 def room_origin(rx, ry):
-    return 1 + rx * (ROOM_W + GAP_X), 1 + ry * (ROOM_H + GAP_Y)
+    cx, cy = room_center(rx, ry)
+    hw, hh = room_half(rx, ry)
+    return cx - hw, cy - hh
 
 
 def room_cells(rx, ry):
     ox, oy = room_origin(rx, ry)
-    return [(x, y) for y in range(oy, oy + ROOM_H) for x in range(ox, ox + ROOM_W)]
-
-
-def room_center(rx, ry):
-    ox, oy = room_origin(rx, ry)
-    return ox + ROOM_W // 2, oy + ROOM_H // 2
+    hw, hh = room_half(rx, ry)
+    return [(x, y) for y in range(oy, oy + 2 * hh + 1)
+            for x in range(ox, ox + 2 * hw + 1)]
 
 
 def _carve_rooms(grid):
@@ -112,10 +143,13 @@ def _corridor(grid, a, b):
 
 
 def _outside_room(cell):
+    """방 크기를 <b>그 방에서</b> 읽는다. 고정값으로 재면 통로의 방 밖 구간이
+    잘못 잡혀 문이 방 안에 앉고, check_doors 가 전량 위반으로 뜬다."""
     for ry in range(ROOMS_Y):
         for rx in range(ROOMS_X):
             ox, oy = room_origin(rx, ry)
-            if ox <= cell[0] < ox + ROOM_W and oy <= cell[1] < oy + ROOM_H:
+            hw, hh = room_half(rx, ry)
+            if ox <= cell[0] <= ox + 2 * hw and oy <= cell[1] <= oy + 2 * hh:
                 return False
     return True
 
@@ -235,20 +269,22 @@ def _carve_alcove(grid, rooms, rng):
     안쪽에 갈 수 없다. 그래서 입구에 선 몬스터는 처음으로 진짜 파수꾼이 되고,
     "이놈을 잡고 덤을 가질까, 그냥 지나갈까" 가 생긴다.
 
-    가로 간격은 2칸이라 팔 수 없다 — 안쪽 칸이 옆방과 맞닿아 입구가 둘이 된다.
-    세로 간격이 3칸이라 위아래로만 판다.
+    <b>세로로만 판다.</b> 방 크기가 층마다 달라 간격이 2~6칸으로 오락가락하는데,
+    가로로 파면 좁은 층에서 안쪽 칸이 옆방과 맞닿아 입구가 둘이 된다. 세로는
+    가장 큰 방(7x5)에서도 3칸이 남아 어느 층에서나 두 칸을 팔 수 있다.
 
     (입구, 안쪽, 붙은 방 칸) 또는 (None, None, None).
     """
     cands = []
     for room in rooms:
         ox, oy = room_origin(*room)
+        hw, hh = room_half(*room)
         cx, _ = room_center(*room)
-        for x in range(ox, ox + ROOM_W):
+        for x in range(ox, ox + 2 * hw + 1):
             if x == cx:
                 continue                       # 통로가 지나는 줄은 피한다
             cands.append(((x, oy), (0, -1)))                 # 위로
-            cands.append(((x, oy + ROOM_H - 1), (0, 1)))     # 아래로
+            cands.append(((x, oy + 2 * hh), (0, 1)))         # 아래로
     rng.shuffle(cands)
 
     for (bx, by), (dx, dy) in cands:
@@ -281,6 +317,12 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     """
     rng = random.Random(seed)
 
+    # 이 층의 방 크기. 중심은 고정이므로 통로는 그대로 곧게 남는다.
+    _SHAPE.clear()
+    for ry in range(ROOMS_Y):
+        for rx in range(ROOMS_X):
+            _SHAPE[(rx, ry)] = (rng.choice(HALF_W), rng.choice(HALF_H))
+
     if isinstance(mob_ids, int):
         mob_ids = [mob_ids] * mobs_in_floor
     mob_ids = list(mob_ids)[:mobs_in_floor]
@@ -302,36 +344,29 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
         cells = _corridor(grid, centers[i], centers[i + 1])
         outside = [c for c in cells if _outside_room(c)]
         necks.append(outside)
-        gates.append(outside[len(outside) // 2] if outside else None)
+        # 한가운데가 아니라 <b>아무 데나</b>. 한가운데로 고정하면 96개 층의 문이
+        # 통로마다 한 칸씩, 다 합쳐 12칸만 쓴다 — 그리고 몬스터의 62%가 그
+        # 12칸 위에 선다. 통로 안이면 어디든 좌우(또는 위아래)가 벽이라 문 규칙은
+        # 그대로 지켜진다.
+        gates.append(rng.choice(outside) if outside else None)
 
-    # 곁길. 길이 한 줄이면 고를 것이 없다.
-    # 여기 세운 몬스터는 <b>피해 갈 수 있는</b> 상대가 된다 — 값을 치르고 질러갈지,
-    # 그냥 먼 길로 돌아갈지. 매직 타워의 "쫄리면 도망간다" 가 이 자리에서 나온다.
-    shortcuts = []
-    extra = 0
-    for _ in range(20):
-        if extra >= 2:
-            break
-        a, b = rng.sample(range(len(order)), 2)
-        if abs(a - b) < 3:
-            continue
-        # <b>계단이 있는 마지막 방으로는 곁길을 내지 않는다.</b>
-        # 곁길이 하나라도 닿으면 입구가 둘이 되어 마지막 통로가 절단점을 잃는다.
-        # 재 보니 그래서 챕터 보스 다섯이 전부 피해 갈 수 있는 상대였다 — 보스를
-        # 안 잡고 계단으로 올라갈 수 있었고, 아무도 그걸 세지 않았다.
-        if len(order) - 1 in (a, b):
-            continue
-        (ax, ay), (bx, by) = order[a], order[b]
-        if abs(ax - bx) + abs(ay - by) != 1:
-            continue
-        cells = _corridor(grid, centers[a], centers[b])
-        outside = [c for c in cells if _outside_room(c)]
-        if outside:
-            shortcuts.append(outside[len(outside) // 2])
-        extra += 1
+    # <b>곁길 통로는 내지 않는다.</b> 문법을 깨고 있었다.
+    #
+    # 곁길은 순서상 세 칸 이상 떨어진 방 쌍에만 팠는데, 구역이 3/2/2/2 로 끊겨
+    # 있어서 그 조건을 만족하는 쌍은 <b>반드시 구역 경계를 넘는다</b>. 그래서
+    # 곁길이 뚫릴 때마다 문을 우회하는 길이 같이 생겼다 — 재 보니 96개 층 중
+    # 67개가 문을 하나도 안 열고 뒤 구역 방에 닿았고, 48개 층은 열쇠를 둘 이상,
+    # 9개 층은 셋 다 가질 수 있었다. "각 방에 열쇠를 둬서 잡는 순서를 강제한다"
+    # 가 절반의 층에서 거짓이었던 것이다. 곁길을 0으로 두면 누수도 0이 된다.
+    #
+    # 지우고 잃는 것은 거의 없다. 곁길 몬스터는 191 -> 187 마리(층당 0.04마리)뿐
+    # 줄었다 — 곁길 몬스터 수를 정하는 것은 통로가 아니라 forced = min(MIN_TOLLS,
+    # mobs) = 3 이기 때문이다(다섯 중 셋이 관문, 둘은 곁길). 곁길 통로는 고를
+    # 것을 못 늘리면서 문법만 깨고 생성 재시도만 늘리고 있었다(시도 107 -> 96).
+    # 골방 파수꾼과 방 안의 남는 한 마리가 "피해 갈 수 있는 상대" 자리를 잇는다.
 
     # 막다른 골방. 입구 한 칸에 파수꾼을 세우고 안쪽에 덤을 둔다.
-    # 통로와 지름길을 다 판 뒤라야 뒷문이 생기지 않는다.
+    # 통로를 다 판 뒤라야 뒷문이 생기지 않는다.
     alcove_gate, alcove_prize, alcove_base = _carve_alcove(grid, order, rng)
 
     # 구역: 방 아홉 개를 3/2/2/2 로 끊고 경계에 문을 세운다.
@@ -427,7 +462,8 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     # 몬스터는 두 갈래로 나눈다.
     #
     #   관문 : 큰길 목에 선다. 지나가려면 반드시 값을 치른다.
-    #   곁길 : 지름길에 선다. 피해 갈 수 있다 — 대신 먼 길을 돈다.
+    #   곁길 : 골방 입구와 방 안에 선다. 지나가는 데는 필요 없다 —
+    #          잡으면 골방의 덤을 갖고, 안 잡으면 경험치를 버린다.
     #
     # 예전에는 다섯 마리를 전부 "통로 목" 에 세웠다. 그런데 재 보니 그중 78% 는
     # 그냥 돌아갈 수 있었다 — 관문이라 부르면서 실은 관문이 아니었고, 어느 것이
@@ -445,7 +481,6 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
         return out
 
     free_gates = _unique([g for g in gates if g and g not in used and g not in doors])
-    free_short = _unique([c for c in shortcuts if c not in used and c not in doors])
 
     toll_spots = [g for g in free_gates if _cuts_path(grid, spawn, up, g)]
 
@@ -464,16 +499,15 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
                     continue
                 if _cuts_path(grid, spawn, up, cell):
                     toll_spots.append(cell)
-    open_spots = [c for c in free_short if not _cuts_path(grid, spawn, up, c)]
-    open_spots += [g for g in free_gates
-                   if g not in toll_spots and g not in open_spots]
+    open_spots = [g for g in free_gates if g not in toll_spots]
 
     # 그래도 관문을 못 만들면 이 층은 버린다.
     #
-    # 곁길이 많아 <b>어떤 칸을 막아도 우회로가 있는</b> 층이 있다. 그런 층은
-    # 한 마리도 안 잡고 계단까지 갈 수 있어서 통행료라는 구조 자체가 없다.
-    # 여기서 억지로 배치하느니 다른 씨앗으로 다시 뽑는 편이 낫다
-    # (호출부가 50번까지 다시 시도한다).
+    # 곁길 통로가 있던 시절에는 <b>어떤 칸을 막아도 우회로가 있는</b> 층이 있었다.
+    # 그런 층은 한 마리도 안 잡고 계단까지 갈 수 있어 통행료라는 구조 자체가 없다.
+    # 곁길을 없앤 지금은 96개 층이 전부 첫 시도에 통과해 이 가지가 돌지 않는다.
+    # 그래도 남겨 둔다 — 배치 규칙을 손대면 다시 걸릴 수 있고, 억지로 배치하느니
+    # 다른 씨앗으로 다시 뽑는 편이 낫다 (호출부가 50번까지 다시 시도한다).
     if len(toll_spots) < MIN_TOLLS:
         return None, None, None
 
@@ -777,9 +811,9 @@ def validate_layout(grid, regions, doors):
 # 강제와 선택을 <b>센다</b>
 #
 # "관문" 과 "곁길" 은 배치할 때 이미 갈라 놓지만, 그건 <b>의도</b>다. 완성된
-# 격자에서 실제로 그런지는 다시 재야 한다 — 곁길 통로 하나가 우회로를 만들면
-# 관문이 조용히 곁길이 되고, 그러면 "다 잡으면 1레벨" 도 "완주 보장" 도 같이
-# 거짓이 된다. 실제로 챕터 보스 다섯이 그렇게 전부 곁길이 돼 있었다.
+# 격자에서 실제로 그런지는 다시 재야 한다 — 우회로가 하나라도 생기면 관문이
+# 조용히 곁길이 되고, 그러면 "다 잡으면 1레벨" 도 "완주 보장" 도 같이 거짓이
+# 된다. 곁길 통로가 있던 시절에 챕터 보스 다섯이 그렇게 전부 곁길이 돼 있었다.
 
 
 def _endpoints(grid):
@@ -903,9 +937,35 @@ def check_all_floors(verbose=True):
     return gen_bad
 
 
+def _shape_self_check(seeds=40):
+    """방 크기를 흔들어도 규칙이 지켜지는지 씨앗 몇 개로 <b>지금</b> 확인한다.
+
+    check_all_floors 는 디스크의 CSV 를 읽는다 — 생성기를 고쳐도 --write 를
+    돌리기 전에는 아무것도 안 보인다. 특히 _outside_room 이 방 크기를 고정값으로
+    재면 통로의 방 밖 구간이 잘못 잡혀 <b>문이 방 안에 앉는다.</b>
+    돌려주는 값은 씨앗들이 만든 서로 다른 방 모양 조합의 수다.
+    """
+    art = door_prefab_facts()
+    shapes = set()
+    for seed in range(seeds):
+        grid, regions, doors = build_floor_layout(
+            [1, 2, 3, 4, 5], 9, ["W_01", "W_02"], seed=seed, rune=RUNE_ATK)
+        assert grid is not None, f"씨앗 {seed} 층 생성 실패"
+        ok, why = validate_layout(grid, regions, doors)
+        assert ok, f"씨앗 {seed} {why}"
+        bad = check_doors(grid, art)
+        assert not bad, f"씨앗 {seed} 문 위반 {bad}"
+        assert not check_sealed_by_portal(grid), f"씨앗 {seed} 포탈이 막았다"
+        shapes.add(tuple(sorted(_SHAPE.items())))
+    assert len(shapes) > seeds // 2, f"방 모양이 {len(shapes)}가지뿐이다"
+    return len(shapes)
+
+
 if __name__ == "__main__":
     # 번역표 자기검사. 이게 깨지면 화면의 문이 90° 돌아간다.
     assert [door_art(c) for c in "345678"] == \
         ["Tilemap_3", "Tilemap_5", "Tilemap_7", "Tilemap_4", "Tilemap_6", "Tilemap_8"]
     print("===== 문 배치 검사 =====")
+    print("  갓 뽑은 층 40개 — 방 모양 %d가지, 문 위반 0건"
+          % _shape_self_check())
     sys.exit(1 if check_all_floors() else 0)

@@ -156,7 +156,8 @@ public static class MapBuilder
                             ConsumableItem ci = Bind<ConsumableItem>(go);
                             ci.id = obj.Id;
                             ci._itemIndex_forActive = obj.Count;
-                            StretchBillboard(go);   // 물약도 그대로 두면 눌려 보인다
+                            StretchBillboard(go);   // 그대로 두면 눌려 보인다
+                            SitOnFloor(go);
                         }
                         break;
                     }
@@ -170,6 +171,7 @@ public static class MapBuilder
                             eq._id = obj.Id;
                             eq._itemIndex_forActive = obj.Count;
                             StretchBillboard(go);
+                            SitOnFloor(go);
                         }
                         break;
                     }
@@ -437,33 +439,78 @@ public static class MapBuilder
     }
 
     /// <summary>
-    /// 바닥에 세워 두는 2D 그림의 세로 비율을 맞춘다.
+    /// 카메라가 내려다보는 만큼 세로가 눌린다. 그만큼 늘려 세운다.
     ///
-    /// 이 프로젝트의 스프라이트 프리팹은 (1,1,1) 로 만들어져 있어서 그대로 놓으면
-    /// 화면에서 <b>납작하게 눌려</b> 보인다. 세로를 두 배로 늘려야 제 모양이다.
+    /// 그림은 전부 X회전 0 으로 <b>서 있다</b>. 카메라가 각도 t 로 내려다보면 그 세로가
+    /// cos(t) 로 줄어드니 1/cos(t) 를 곱해야 제 비율로 보인다.
+    /// 60도면 2.00 인데 <b>이 게임의 카메라는 50도</b>라 1.56 이다 — 2.0 을 박아 두었더니
+    /// 물약이 29% 길쭉했다 (화면에서 잰 세로/가로 1.17~1.29, 제 비율이면 1.00).
+    /// </summary>
+    static float BillboardStretch()
+    {
+        Camera cam = Managers.Game != null ? Managers.Game.MainCamera : null;
+        if (cam == null)
+            cam = Camera.main;
+
+        float pitch = cam != null ? cam.transform.eulerAngles.x : 50f;
+        pitch = Mathf.Repeat(pitch, 360f);
+        if (pitch > 180f)
+            pitch = 360f - pitch;
+        pitch = Mathf.Clamp(pitch, 1f, 89f);
+        return 1f / Mathf.Cos(pitch * Mathf.Deg2Rad);
+    }
+
+    /// <summary>
+    /// 바닥에 세워 두는 2D 그림의 비율과 크기를 맞춘다.
     ///
-    /// 그런데 <b>보스 프리팹은 자식이 이미 (1,2,1)</b> 이다. 거기에 또 곱하면 네 배가
-    /// 되어 아래쪽 절반이 바닥에 박힌다 — "몬스터가 땅에 박혀 있다" 가 이것이었다.
-    /// 그래서 이미 늘어나 있는 프리팹은 크기(bulk)만 곱한다.
+    /// 프리팹마다 이미 늘어난 정도가 다르다 — 몬스터는 (1,1,1) 인데 보스는 자식이
+    /// (1,2,1) 이다. 그래서 무조건 곱하지 않고, <b>합쳐서</b> 목표 배율이 되게 맞춘다.
+    /// 예전에 그냥 곱했더니 보스가 네 배가 되어 아래쪽 절반이 바닥에 묻혔다.
     /// </summary>
     static void StretchBillboard(GameObject go, float bulk = 1f)
     {
         if (go == null)
             return;
 
-        bool alreadyTall = false;
+        float ratio = 1f;
         foreach (Transform tr in go.GetComponentsInChildren<Transform>(true))
         {
-            if (tr.localScale.y > tr.localScale.x * 1.5f)
-            {
-                alreadyTall = true;
-                break;
-            }
+            if (tr == go.transform || tr.localScale.x <= 0.0001f)
+                continue;
+            ratio = Mathf.Max(ratio, tr.localScale.y / tr.localScale.x);
         }
 
-        go.transform.localScale = alreadyTall
-            ? new Vector3(bulk, bulk, 1f)
-            : new Vector3(bulk, bulk * 2f, 1f);
+        float stretch = BillboardStretch() / ratio;
+        go.transform.localScale = new Vector3(bulk, bulk * stretch, 1f);
+    }
+
+    /// <summary>
+    /// 그림의 아래끝을 바닥에 앉힌다.
+    ///
+    /// 스프라이트의 피벗이 가운데라 그대로 놓으면 절반이 바닥에 묻힌다. 그림마다
+    /// 세로가 달라(잿빛 파수꾼 48x36, 심연의 거수 86x68) 같은 값으로 올릴 수 없으니
+    /// 실제 스프라이트 아래끝을 재서 그만큼 올린다.
+    ///
+    /// 애니메이터는 Play 만으로는 그 프레임에 그림을 넣지 않는다. Update(0) 로
+    /// 한 번 돌려야 bounds 가 실제 그림을 가리킨다 — 전투창에서 같은 함정을 겪었다.
+    /// </summary>
+    static void SitOnFloor(GameObject go)
+    {
+        if (go == null)
+            return;
+
+        Animator anim = go.GetComponentInChildren<Animator>();
+        if (anim != null && anim.isActiveAndEnabled)
+            anim.Update(0f);
+
+        SpriteRenderer sr = go.GetComponentInChildren<SpriteRenderer>();
+        if (sr == null || sr.sprite == null)
+            return;
+
+        float floor = go.transform.position.y;
+        float bottom = sr.bounds.min.y;
+        if (bottom < floor - 0.0001f)
+            go.transform.position += new Vector3(0f, floor - bottom, 0f);
     }
 
     /// <summary>
@@ -507,6 +554,9 @@ public static class MapBuilder
             foreach (SpriteRenderer sr in go.GetComponentsInChildren<SpriteRenderer>(true))
                 sr.color = tint;
         }
+
+        // 그림을 정한 뒤라야 아래끝을 잴 수 있다. 여기서 바닥에 앉힌다.
+        SitOnFloor(go);
     }
 
     /// <summary>그 몬스터가 차지하는 몸집. 1 이 보통 몹이다.

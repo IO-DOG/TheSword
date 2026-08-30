@@ -939,7 +939,8 @@ def emit_layouts(monsters, write=True):
             sealed_off.append(f"Dungeon_{did} ({cx}, {cy}) {what} — 포탈에 막혀 못 간다")
 
         # 강제/선택은 배치 <b>의도</b>가 아니라 완성된 격자에서 다시 잰다.
-        # 곁길 통로 하나가 우회로를 만들면 관문이 조용히 곁길이 된다.
+        # 우회로가 하나라도 생기면 관문이 조용히 곁길이 되기 때문이다 —
+        # 곁길 통로를 내던 시절에 챕터 보스 다섯이 전부 그렇게 곁길이었다.
         choices[floor] = floor_choices(grid, doors)
 
         if write:
