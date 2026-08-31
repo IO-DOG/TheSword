@@ -17,6 +17,7 @@ ASSETS = os.path.join(ROOT, "Assets")
 
 EXPECTED_FLOORS = 100
 NUM_OF_KEYS = 3
+KEY_COLOR = ("초록", "노랑", "빨강")
 
 # 손수 만든 도입부. 프리팹을 그대로 쓰므로 CSV 는 세이브 인덱스 계산용일 뿐이다.
 # 구조(계단/스폰/벽 타일)를 생성 규칙으로 재단하면 안 된다 — 예컨대 00_002 는
@@ -53,6 +54,8 @@ def main():
     items = {i["id"]: i for i in load("ConsumableItemData", "consumableItems")}
     maps = {m["Key"]: m for m in load("MapData", "maps")}
     prefabs = prefab_names()
+    tower = dict(doors=[0] * NUM_OF_KEYS, keys=[0] * NUM_OF_KEYS,
+                 vaults=[0] * NUM_OF_KEYS, spares=[0] * NUM_OF_KEYS)
 
     # ---- 스테이지 그래프
     if len(stages) != EXPECTED_FLOORS:
@@ -93,7 +96,8 @@ def main():
         if did in HAND_AUTHORED:
             continue
 
-        n = dict(floor=0, spawn=0, up=0, down=0, mob=0, door=0, key=0, potion=0)
+        n = dict(floor=0, spawn=0, up=0, down=0, mob=0, potion=0)
+        keys, doors = [0] * NUM_OF_KEYS, [0] * NUM_OF_KEYS
         for o in m["Objects"]:
             t, oid = o["ObjectType"], o["Id"]
             if t == FLOOR:
@@ -101,7 +105,7 @@ def main():
             elif t == SPAWN:
                 n["spawn"] += 1
             elif t == DOOR:
-                n["door"] += 1
+                doors[(oid - 3) % NUM_OF_KEYS] += 1
             elif t == PORTAL:
                 if oid == 14:
                     n["up"] += 1
@@ -115,7 +119,7 @@ def main():
                 if oid not in items:
                     errors.append(f"{did}: 없는 아이템 ID {oid}")
                 elif oid < NUM_OF_KEYS:
-                    n["key"] += 1
+                    keys[oid] += 1
                 else:
                     n["potion"] += 1
             elif t == WALL:
@@ -133,8 +137,24 @@ def main():
             errors.append(f"{did}: 위층 계단(14) 없음")
         if n["down"] == 0 and sid > 0:
             errors.append(f"{did}: 아래층 계단(15) 없음 -> 아랫층에서 못 올라온다")
-        if n["door"] > n["key"]:
-            errors.append(f"{did}: 문 {n['door']}개 > 열쇠 {n['key']}개 -> 진행 불가")
+        # 열쇠는 <b>탑 전체에서 모자라다</b>. 예전에는 층마다 문:열쇠가 1:1 이라
+        # "문 > 열쇠면 진행 불가" 로 충분했는데, 지금은 큰길 문 셋(색깔별 하나)
+        # 말고 <b>금고 문</b>이 더 붙는 층이 있다. 금고는 앞 층에서 들고 온
+        # 여분으로만 열리고 안 열어도 진행은 된다. 그래서 층 단위로 볼 것은
+        # "큰길 몫이 있는가" 와 "금고가 층당 하나를 넘지 않는가" 다.
+        for c in range(NUM_OF_KEYS):
+            if doors[c] and keys[c] == 0:
+                errors.append(f"{did}: {KEY_COLOR[c]} 문 {doors[c]}개인데 "
+                              f"그 색 열쇠가 없다 -> 진행 불가")
+            elif doors[c] > keys[c] + 1:
+                errors.append(f"{did}: {KEY_COLOR[c]} 문 {doors[c]}개 / 열쇠 "
+                              f"{keys[c]}개 -> 층당 금고가 둘 이상이다")
+        tower["doors"] = [a + b for a, b in zip(tower["doors"], doors)]
+        tower["keys"] = [a + b for a, b in zip(tower["keys"], keys)]
+        # 큰길 몫(색깔별 하나씩)을 뺀 나머지 = 실제로 고를 수 있는 부분.
+        # 전체 비율은 큰길 1:1 에 희석돼 늘 90%대로 보인다 — 볼 것은 이쪽이다.
+        tower["vaults"] = [a + max(0, b - 1) for a, b in zip(tower["vaults"], doors)]
+        tower["spares"] = [a + max(0, b - 1) for a, b in zip(tower["spares"], keys)]
 
     # ---- 공통 프리팹
     # 문은 색x방향 여섯 종이 다 있어야 한다 — 하나라도 없으면 BuildDoor 가
@@ -165,7 +185,23 @@ def main():
             if mon[field] and mon[field] not in anims:
                 warnings.append(f"몬스터 {mid}: 애니메이션 '{mon[field]}' 없음")
 
+    # 탑 전체의 결핍. 이것이 0 이면 "어느 문을 열까" 가 질문이 아니게 된다.
+    # <b>오류가 아니라 경고다.</b> 여기는 산출물이 깨졌는지 보는 곳이고,
+    # 결핍은 설계 값이라 generate_content 의 [6/7] 이 하드 게이트로 막는다.
+    # 여기서 오류로 올리면 아직 --write 를 안 돌린 트리가 통째로 실패한다.
+    if sum(tower["keys"]) >= sum(tower["doors"]):
+        warnings.append(f"열쇠 {sum(tower['keys'])} >= 문 {sum(tower['doors'])} "
+                        "-> 탑 전체에서 모자라지 않다 (generate_content --write 필요)")
+
     print("===== TheSword 100층 콘텐츠 검증 =====")
+    print("  문:열쇠 " + " / ".join(
+        f"{KEY_COLOR[c]} {tower['doors'][c]}:{tower['keys'][c]}"
+        for c in range(NUM_OF_KEYS) if tower["doors"][c]))
+    if sum(tower["vaults"]):
+        print("  그중 고를 수 있는 몫(금고:여분 열쇠) " + " / ".join(
+            f"{KEY_COLOR[c]} {tower['vaults'][c]}:{tower['spares'][c]}"
+            f"({round(100 * tower['spares'][c] / tower['vaults'][c])}%)"
+            for c in range(NUM_OF_KEYS) if tower["vaults"][c]))
     for w in warnings[:10]:
         print("  [경고]", w)
     if len(warnings) > 10:

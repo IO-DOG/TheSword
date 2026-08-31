@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -86,7 +87,102 @@ public class UI_MonsterInfo : UI_Base
         GetText((int)Texts.MonsterDefenseText).text = (Managers.Data.StageInfoDic[stageId].DEF * Managers.Data.MonsterDic[id].Defence).ToString();
         GetText((int)Texts.MonsterHPText).text = Managers.Data.MonsterDic[id].MaxHP.ToString();
         GetText((int)Texts.MonsterDescText).text = Managers.GetString(Managers.Data.MonsterDic[id].MonsterDescId);
+
+        ShowForecast(id, stageId);
     }
+
+    #region 전투 비용
+    // 아직 ScriptData 에 없는 줄들. 표에 들어오면 자동으로 번역이 쓰인다.
+    // (133 "예상 피해" / 134 "쓰러진다" / 135 "못 이긴다". 102 "체력" 은 이미 있다.)
+    const int SCRIPT_COST = 133;
+    const int SCRIPT_DIE = 134;
+    const int SCRIPT_NO_WIN = 135;
+    const int SCRIPT_HP = 102;
+
+    /// <summary>
+    /// "이놈을 잡으면 체력이 얼마 줄어드는가" 한 줄. 이 창이 있어야 하는 이유다.
+    ///
+    /// 공격력·방어력·체력만 보여 주는 것으로는 판단할 수 없다 — 게이지식 전투라
+    /// 공격 주기와 특성이 얽히기 때문이다. 그래서 숫자를 늘어놓는 대신 결과를 적는다.
+    /// 셈은 BattleForecast 가 진짜 전투 코드를 그대로 돌려서 한다.
+    ///
+    /// 프리팹은 에디터에서만 고칠 수 있으니 새 오브젝트를 만들지 않고, 특성 표시를
+    /// 접으면서 꺼 둔 채 남아 있던 MonsterClassText 를 되살려 쓴다(위 Texts enum 의
+    /// 주석 처리된 줄이 그것이다). 자리는 설명 칸을 그만큼 줄여서 낸다.
+    /// </summary>
+    void ShowForecast(int id, int stageId)
+    {
+        TMP_Text line = null;
+        // 꺼져 있는 오브젝트라 Util.FindChild 로는 못 찾는다(비활성 자식을 훑지 않는다).
+        foreach (TMP_Text text in GetComponentsInChildren<TMP_Text>(true))
+        {
+            if (text.name == "MonsterClassText")
+            {
+                line = text;
+                break;
+            }
+        }
+
+        if (line == null)
+        {
+            Debug.LogWarning("[MonsterInfo] 전투 비용을 적을 자리(MonsterClassText)가 없다");
+            return;
+        }
+
+        BattleForecast.Result forecast = BattleForecast.Of(id, stageId);
+        if (forecast.Ok == false)
+            return;
+
+        const float lineHeight = 22f;
+        RectTransform scroll = GetObject((int)Objects.ScrollView).GetComponent<RectTransform>();
+        scroll.sizeDelta = new Vector2(scroll.sizeDelta.x, scroll.sizeDelta.y - lineHeight);
+
+        RectTransform rt = line.rectTransform;
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0f);   // 창 아래쪽, 설명 칸 밑
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = new Vector2(0f, lineHeight * 0.7f);
+        rt.sizeDelta = new Vector2(scroll.sizeDelta.x, lineHeight);
+
+        string cost = Str(SCRIPT_COST, "예상 피해");
+        string hp = Str(SCRIPT_HP, "체력");
+        if (forecast.Win)
+        {
+            line.text = $"{cost} -{forecast.Damage} ▶ {hp} {forecast.RemainHP}";
+            // 이기긴 하는데 남는 게 1/4 도 안 되면 그것도 알려야 한다. 다음 층이 있다.
+            float left = Managers.Game.PlayerData.MaxHP > 0f
+                ? forecast.RemainHP / Managers.Game.PlayerData.MaxHP : 1f;
+            line.color = (left <= 0.25f) ? new Color32(255, 190, 60, 255) : new Color32(160, 230, 160, 255);
+        }
+        else
+        {
+            // 죽는 싸움. 이 표시의 존재 이유이므로 눈에 띄어야 한다.
+            string end = (forecast.RemainHP <= 0) ? Str(SCRIPT_DIE, "쓰러진다") : Str(SCRIPT_NO_WIN, "못 이긴다");
+            line.text = $"{cost} -{forecast.Damage} ▶ {end}";
+            line.color = new Color32(255, 70, 70, 255);
+            line.fontStyle = FontStyles.Bold;
+        }
+
+        // 창 폭이 200 이라 긴 숫자는 넘친다. 이름표(UI_BaseCard.SetName)와 같은 방식으로
+        // 한 줄에 맞춰 줄인다 — 접히면 아래 칸으로 넘쳐 나간다.
+        line.alignment = TextAlignmentOptions.Center;
+        line.enableWordWrapping = false;
+        line.overflowMode = TextOverflowModes.Ellipsis;
+        line.fontSizeMin = 7f;
+        line.fontSizeMax = line.fontSize;
+        line.enableAutoSizing = true;
+        line.gameObject.SetActive(true);
+    }
+
+    /// <summary>
+    /// ScriptData 에 줄이 있으면 그 번역을, 아직 없으면 한국어를 쓴다.
+    /// 표에 넣는 것은 데이터 쪽 일이고, 그때까지 이 줄이 비어 있으면 안 된다.
+    /// </summary>
+    static string Str(int id, string kr)
+    {
+        string script = Managers.Data.ScriptDic.ContainsKey(id) ? Managers.GetString(id) : "";
+        return string.IsNullOrEmpty(script) ? kr : script;
+    }
+    #endregion
 
     private void Update()
     {

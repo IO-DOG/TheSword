@@ -395,6 +395,18 @@ def _self_check():
     dealt = skill_damage(mk(atk=100), immortal, SMASH_RATIO)
     assert dealt == 50, dealt                                   # 일반 공격이라 20% 만
 
+    # <b>전투에서 잃는 HP 는 시작 HP 와 무관하다.</b> 플레이어의 공격력·공속이
+    # HP 에 안 걸리고 몬스터 HP 도 고정이라 전투 길이가 고정이기 때문이다.
+    # generate_content 의 "물약을 늦게 마셔도 이득이 없다" 는 결론이 이 성질
+    # 하나에 걸려 있다 — 여기가 깨지면 그 결론부터 다시 재야 한다.
+    def loss_from(hp0):
+        p = mk(hp=1000, atk=50, crit=5)
+        p.hp = hp0
+        won, _, lost = simulate_battle(p, mk(hp=400, atk=30, crit=7))
+        assert won
+        return lost
+    assert loss_from(1000) == loss_from(600) == loss_from(400)
+
     print("특성 자체 점검 통과")
 
 

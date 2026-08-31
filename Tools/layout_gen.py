@@ -53,6 +53,7 @@ MIN_TOLLS = 3
 
 DOOR_H = {0: "3", 1: "4", 2: "5"}   # 좌우가 벽
 DOOR_V = {0: "6", 1: "7", 2: "8"}   # 위아래가 벽
+DOOR_CELLS = frozenset("345678")
 KEY_ITEM = {0: "I_00", 1: "I_01", 2: "I_02"}  # 초록/노랑/빨강 열쇠
 
 # 손수 만든 도입부. CSV 는 세이브 인덱스용이고 실물은 프리팹이라, 문도 여기서
@@ -306,14 +307,19 @@ def _carve_alcove(grid, rooms, rng):
 
 
 def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
-                       with_down_stairs=True, equip_id=None, potions=None, rune=None):
+                       with_down_stairs=True, equip_id=None, potions=None, rune=None,
+                       alcove=None):
     """한 층의 격자를 만든다.
 
     mob_ids : 이 층의 몬스터 id 들. 약한 놈부터 정렬돼 있어야 한다.
     potions : 구역별 회복 아이템 목록. 예) [[], ["I_03"], ["I_04"], ["I_06"]]
     rune    : 이 층에 놓을 룬 셀 코드. 마지막 구역(계단 앞)에 둔다.
+    alcove  : 골방의 쓰임새 (종류, 색, 놓을 셀코드). None 이면 파수꾼 + 물약.
+              "key"   파수꾼 뒤에 <b>여분 열쇠</b>를 둔다 — 잡아야 얻는다.
+              "vault" 골방 입구가 <b>네 번째 문</b>이 되고 안에 보상이 있다.
 
-    (grid, 구역별 방 목록, 문 좌표들) 반환.
+    (grid, 구역별 방 목록, 문 좌표들) 반환. 문 좌표는 큰길 문 셋뿐이다 —
+    금고 문은 진행을 강제하지 않으므로 도달 가능성 검사에 넣지 않는다.
     """
     rng = random.Random(seed)
 
@@ -367,7 +373,17 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
 
     # 막다른 골방. 입구 한 칸에 파수꾼을 세우고 안쪽에 덤을 둔다.
     # 통로를 다 판 뒤라야 뒷문이 생기지 않는다.
-    alcove_gate, alcove_prize, alcove_base = _carve_alcove(grid, order, rng)
+    #
+    # 금고 층은 <b>마지막 구역에서만</b> 판다(order[7:]). 골방 입구가 네 번째
+    # 문이 되는데, 그 문이 앞 구역에 있으면 <b>이 층의 열쇠로 열린다</b> —
+    # 그러면 큰길 문을 열 열쇠가 사라져 층이 통째로 막힌다. 세 문을 다 연
+    # 뒤라야 손에 남은 것이 진짜 여분이고, 잘못 써서 갇히는 수가 없어진다.
+    # check_vault_safe 가 완성된 격자에서 그걸 다시 잰다.
+    vault_color = alcove[1] if alcove and alcove[0] == "vault" else None
+    alcove_gate, alcove_prize, alcove_base = _carve_alcove(
+        grid, order[7:] if vault_color is not None else order, rng)
+    if vault_color is not None and alcove_gate is None:
+        return None, None, None
 
     # 구역: 방 아홉 개를 3/2/2/2 로 끊고 경계에 문을 세운다.
     doors = []
@@ -528,7 +544,10 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     # 골방 파수꾼도 곁길이다 — 지나가는 데는 필요 없고, 덤을 가지려면 잡아야 한다.
     # 층의 몹 수는 그대로 둔다 (다섯 마리를 다 잡아야 1레벨이라는 설계).
     if alcove_gate is not None and alcove_gate not in used:
-        open_spots.insert(0, alcove_gate)
+        if vault_color is None:
+            open_spots.insert(0, alcove_gate)
+        else:
+            used.add(alcove_gate)        # 여기엔 파수꾼이 아니라 문이 선다
 
     # 곁길 — 피해 갈 수 있는 상대. 질러가려면 값을 치르고, 아니면 돌아간다.
     while idx < mobs_in_floor and open_spots:
@@ -568,8 +587,10 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
 
     # 골방 안쪽의 덤. 완주 계산에는 넣지 않는다 — 안 잡고 지나갈 수 있으니
     # 이걸 셈에 넣으면 보장이 거짓말이 된다. 계산은 그대로 두고 덤만 얹는다.
+    # 열쇠 경제도 전부 여기 얹힌다(여분 열쇠 / 금고 속 룬) — 그래서 완주
+    # 보장은 이 변경 전과 <b>한 칸도</b> 달라지지 않는다.
     if alcove_prize is not None and alcove_prize not in used:
-        place[alcove_prize] = POTION_20
+        place[alcove_prize] = alcove[2] if alcove else POTION_20
         used.add(alcove_prize)
 
     if equip_id is not None:
@@ -586,6 +607,13 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     for i, (x, y) in enumerate(doors):
         horizontal_corridor = (grid[y][x - 1] != VOID and grid[y][x + 1] != VOID)
         grid[y][x] = (DOOR_V if horizontal_corridor else DOOR_H)[i]
+
+    # 네 번째 문 — 금고. 골방은 세로로만 파므로 입구의 좌우가 곧 벽이 된다.
+    # 방향 판정은 큰길 문과 <b>같은 줄</b>을 쓴다. 규칙이 두 벌이 되면 어긋난다.
+    if vault_color is not None:
+        x, y = alcove_gate
+        horizontal_corridor = (grid[y][x - 1] != VOID and grid[y][x + 1] != VOID)
+        grid[y][x] = (DOOR_V if horizontal_corridor else DOOR_H)[vault_color]
 
     _add_walls(grid, wall_tiles, rng)
     return grid, regions, doors
@@ -747,6 +775,29 @@ def check_doors(grid, art=None):
     return bad
 
 
+def _flood_locked(grid, start, locked):
+    """locked 에 든 문을 벽으로 치고 스폰에서 훑는다. 문 칸 자체는 닿는다.
+
+    validate_layout 과 check_vault_safe 가 같은 훑기를 쓴다 — 두 벌이 되면
+    "여기까지는 열쇠 없이 갈 수 있다" 의 뜻이 둘로 갈린다.
+    """
+    seen, stack = {start}, [start]
+    while stack:
+        x, y = stack.pop()
+        for dx, dy in NEIGHBORS:
+            n = (x + dx, y + dy)
+            if not _inside(n) or n in seen:
+                continue
+            cell = grid[n[1]][n[0]]
+            if cell == VOID or cell.startswith("W"):
+                continue
+            seen.add(n)
+            if n in locked:
+                continue                  # 문 앞까지는 가지만 넘어가진 못한다
+            stack.append(n)
+    return seen
+
+
 def validate_layout(grid, regions, doors):
     """문을 순서대로 열며 스폰 -> 열쇠 -> 계단 도달이 가능한지 검사.
 
@@ -767,44 +818,72 @@ def validate_layout(grid, regions, doors):
 
     door_set = set(doors)
 
-    def flood(open_doors):
-        seen, stack = {start}, [start]
-        while stack:
-            x, y = stack.pop()
-            for dx, dy in NEIGHBORS:
-                nx, ny = x + dx, y + dy
-                if not (0 <= nx < GRID_W and 0 <= ny < GRID_H) or (nx, ny) in seen:
-                    continue
-                cell = grid[ny][nx]
-                if cell == VOID or cell.startswith("W"):
-                    continue
-                if (nx, ny) in door_set and (nx, ny) not in open_doors:
-                    seen.add((nx, ny))
-                    continue
-                seen.add((nx, ny))
-                stack.append((nx, ny))
-        return seen
-
     opened = set()
     for i in range(3):
-        reach = flood(opened)
+        reach = _flood_locked(grid, start, door_set - opened)
         key = KEY_ITEM[i]
-        spot = None
-        for y in range(GRID_H):
-            for x in range(GRID_W):
-                if grid[y][x] == key:
-                    spot = (x, y)
-        if spot is None:
+        # <b>같은 색 열쇠가 둘일 수 있다</b> — 여분 열쇠를 골방에 두는 층이
+        # 있어서다. 마지막에 찾은 하나만 보면 엉뚱한 쪽의 도달 여부를 재게
+        # 되므로, 그 색 열쇠 <b>아무거나</b> 하나라도 닿으면 된 것으로 친다.
+        spots = [(x, y) for y in range(GRID_H) for x in range(GRID_W)
+                 if grid[y][x] == key]
+        if not spots:
             return False, f"열쇠{i} 없음"
-        if spot not in reach:
+        if not any(c in reach for c in spots):
             return False, f"열쇠{i} 도달 불가"
         if doors[i] not in reach:
             return False, f"문{i} 도달 불가"
         opened.add(doors[i])
 
-    if stairs not in flood(opened):
+    if stairs not in _flood_locked(grid, start, door_set - opened):
         return False, "계단 도달 불가"
     return True, ""
+
+
+def vault_doors(grid, doors):
+    """큰길 문이 아닌 문 = 금고 문. 격자에서 직접 찾는다."""
+    main = set(doors or ())
+    return [(x, y) for y in range(len(grid)) for x in range(len(grid[y]))
+            if grid[y][x].strip() in DOOR_CELLS and (x, y) not in main]
+
+
+def check_vault_safe(grid, doors):
+    """금고 문이 <b>세 문을 다 연 뒤</b>에야 닿는 자리인가.
+
+    아니면 이 층에서 주운 열쇠를 금고에 써 버리고 큰길 문 앞에서 갇힌다.
+    되돌릴 수단이 없는 게임이라 그건 버그지 선택이 아니다.
+    어긋난 (좌표, 셀) 목록. 빈 목록이면 정상이다.
+    """
+    spawn, _ = _endpoints(grid)
+    extra = vault_doors(grid, doors)
+    if spawn is None or not extra:
+        return []
+    # 마지막 문 하나만 잠가 둔다 = "세 번째 구역까지는 다 열어 본 상태".
+    reach = _flood_locked(grid, spawn, {doors[2]})
+    return [(c, grid[c[1]][c[0]]) for c in extra if c in reach]
+
+
+def key_economy(grid, doors):
+    """격자에서 직접 센다. (색깔별 열쇠, 큰길 문, 금고 문, 파수꾼 뒤의 열쇠).
+
+    마지막 값은 <b>막다른 칸에 놓였고 그 유일한 이웃이 몬스터인</b> 열쇠의 수다.
+    여분 열쇠는 골방 안쪽에 두므로 여기 잡힌다 — "곁길을 지나치면 여분이 없다"
+    는 말이 참인지 배치를 믿지 않고 격자에서 재기 위한 것이다.
+    """
+    keys, main, vault, guarded = [0, 0, 0], [0, 0, 0], [0, 0, 0], 0
+    dset = set(doors or ())
+    for y in range(len(grid)):
+        for x in range(len(grid[y])):
+            cell = grid[y][x].strip()
+            if cell in KEY_ITEM.values():
+                keys[[k for k in KEY_ITEM if KEY_ITEM[k] == cell][0]] += 1
+                nbr = [(x + dx, y + dy) for dx, dy in NEIGHBORS
+                       if _inside((x + dx, y + dy)) and _passable(grid, (x + dx, y + dy))]
+                if len(nbr) == 1 and grid[nbr[0][1]][nbr[0][0]].startswith("M_"):
+                    guarded += 1
+            if cell in DOOR_CELLS:
+                (main if (x, y) in dset else vault)[(int(cell) - 3) % 3] += 1
+    return keys, main, vault, guarded
 
 
 # ---------------------------------------------------------------------------
@@ -849,22 +928,41 @@ def floor_choices(grid, doors):
       runes / forced_runes          룬 / 그중 반드시 밟는 것
       keys                          열쇠 (문이 강제하므로 늘 필수다)
       dead_ends                     막다른 자리 수 = 골방 덤이 놓일 수 있는 곳
+      vaults / vault_items          금고 문 / 그 안에 갇힌 것
 
     몬스터는 "막으면 경로가 끊기는가"(validate_layout), 아이템은 "계단까지 가는
     모든 길이 이 칸을 지나는가"(_cuts_path)로 잰다. 아이템은 밟으면 바로 줍기
     때문이다. 열쇠는 연결성이 아니라 문이 강제하므로 따로 센다.
+
+    <b>금고 안은 따로 센다.</b> 거기 있는 룬은 "지나칠 수 있는 룬" 이 아니라
+    "값을 치르면 얻는 룬" 이다. 섞어 세면 "룬은 전부 강제" 라는 완주 보장이
+    거짓으로 보이고, 반대로 강제 쪽에 넣으면 진짜로 거짓이 된다.
     """
     spawn, up = _endpoints(grid)
     out = dict(forced_mobs=0, optional_mobs=0, boss=0, boss_forced=0,
                forced_items=0, optional_items=0, runes=0, forced_runes=0,
-               keys=0, dead_ends=0)
+               keys=0, dead_ends=0, vaults=0, vault_items=0)
     if spawn is None or up is None:
         return out
+
+    # 금고 뒤에 갇힌 칸 — 문을 벽으로 놓고 훑으면 남는 것들이다.
+    extra = vault_doors(grid, doors)
+    out["vaults"] = len(extra)
+    inside = set()
+    if extra:
+        reach = _flood_locked(grid, spawn, set(extra))
+        inside = {(x, y) for y in range(len(grid)) for x in range(len(grid[y]))
+                  if _passable(grid, (x, y)) and (x, y) not in reach}
 
     for y in range(len(grid)):
         for x in range(len(grid[y])):
             cell = grid[y][x]
-            if cell.startswith("M_"):
+            if (x, y) in inside:
+                # 금고 안. 막다른 자리 셈에는 그대로 들어간다 — 잠겼을 뿐
+                # 골방은 여전히 골방이다.
+                if cell.startswith(("I_", "E_")):
+                    out["vault_items"] += 1
+            elif cell.startswith("M_"):
                 if _unavoidable_mob(grid, doors, (x, y)):
                     out["forced_mobs"] += 1
                 else:
@@ -948,14 +1046,36 @@ def _shape_self_check(seeds=40):
     art = door_prefab_facts()
     shapes = set()
     for seed in range(seeds):
-        grid, regions, doors = build_floor_layout(
-            [1, 2, 3, 4, 5], 9, ["W_01", "W_02"], seed=seed, rune=RUNE_ATK)
+        # 씨앗을 셋으로 갈라 골방의 세 쓰임새를 다 돌린다. 금고 층은 골방을
+        # 마지막 구역에서만 파므로 <b>생성이 더 자주 실패한다</b> — 그 실패율을
+        # 여기서 먼저 보게 해 둔다(호출부는 씨앗을 50번까지 다시 뽑는다).
+        alcove = [None, ("key", 2, KEY_ITEM[2]), ("vault", 1, RUNE_DEF)][seed % 3]
+        grid = None
+        for retry in range(50):
+            grid, regions, doors = build_floor_layout(
+                [1, 2, 3, 4, 5], 9, ["W_01", "W_02"], seed=seed * 100 + retry,
+                rune=RUNE_ATK, alcove=alcove)
+            if grid is not None:
+                break
         assert grid is not None, f"씨앗 {seed} 층 생성 실패"
         ok, why = validate_layout(grid, regions, doors)
         assert ok, f"씨앗 {seed} {why}"
         bad = check_doors(grid, art)
         assert not bad, f"씨앗 {seed} 문 위반 {bad}"
         assert not check_sealed_by_portal(grid), f"씨앗 {seed} 포탈이 막았다"
+        unsafe = check_vault_safe(grid, doors)
+        assert not unsafe, f"씨앗 {seed} 금고가 앞 구역에 있다 {unsafe}"
+        keys, main, vault, guarded = key_economy(grid, doors)
+        assert main == [1, 1, 1], f"씨앗 {seed} 큰길 문 {main}"
+        if alcove is None:
+            assert (keys, vault) == ([1, 1, 1], [0, 0, 0]), f"씨앗 {seed} {keys} {vault}"
+        elif alcove[0] == "key":
+            assert keys == [1, 1, 2], f"씨앗 {seed} 여분 열쇠가 없다 {keys}"
+            assert guarded == 1, f"씨앗 {seed} 여분 열쇠가 파수꾼 뒤가 아니다"
+        else:
+            assert vault == [0, 1, 0], f"씨앗 {seed} 금고 문이 없다 {vault}"
+            c = floor_choices(grid, doors)
+            assert c["vault_items"] == 1 and c["runes"] == 1, f"씨앗 {seed} {c}"
         shapes.add(tuple(sorted(_SHAPE.items())))
     assert len(shapes) > seeds // 2, f"방 모양이 {len(shapes)}가지뿐이다"
     return len(shapes)

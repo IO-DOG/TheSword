@@ -243,9 +243,14 @@ public class UI_MonsterCard : UI_BaseCard
 
     void CreatePlayerDeathParticle()
     {
-        Transform particlePos = Managers.Game.Player.gameObject.transform;
+        // 이 키는 어드레서블에 없다 — Instantiate 가 null 을 준다.
+        // 그대로 .transform 을 만지면 여기서 널참조가 나고, <b>플레이어가 죽는
+        // 연출이 통째로 끊긴다.</b> 이펙트가 없어도 게임은 굴러가야 한다.
         GameObject deathSoulPurple = Managers.Resource.Instantiate("BoneHeadBloodExplosion");
-        deathSoulPurple.transform.position = particlePos.position;
+        if (deathSoulPurple == null)
+            return;
+
+        deathSoulPurple.transform.position = Managers.Game.Player.gameObject.transform.position;
         Destroy(deathSoulPurple, 10);
     }
 

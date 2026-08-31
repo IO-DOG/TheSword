@@ -16,6 +16,13 @@
 
   python route_check.py            정답 경로 + 실수 허용치
   python route_check.py --sweep    난이도별 허용치 표
+  python route_check.py --budget   물약 예산 배율별로 <b>누가 먼저 죽는지</b>
+
+<b>1) 은 사실 실수가 아니다.</b> 물약은 밟으면 즉시 회복이고(최대치에서 절삭)
+층을 넘겨 들고 갈 수 없다. 그래서 아껴 둘 이득이 없고, 일찍 마신 쪽의 HP 가
+늦게 마신 쪽보다 낮아지는 순간이 존재하지 않는다 — 보이는 대로 마시는 것이
+지배 전략이다. --budget 이 그것을 배율별로 보여 준다: 예산을 깎으면 넘침이
+줄어드는 만큼 <b>정답 경로가 먼저 죽는다.</b> 값을 치르는 것은 2) 뿐이다.
 """
 import os
 import sys
@@ -162,14 +169,53 @@ def main():
 
     ok_all, err_all = play(ptable, monsters, start,
                            blunder_floors=range(G.HANDMADE_FLOORS + 1, G.TOTAL_FLOORS + 1))
-    print(f"  매 층 성급히 마시면 : {'완주(너무 헐렁하다)' if ok_all else '실패 — ' + err_all}")
+    print(f"  매 층 성급히 마시면 : "
+          f"{'완주(지배 전략이라 당연하다 — --budget 참조)' if ok_all else '실패 — ' + err_all}")
 
     n = tolerance(ptable, monsters, start)
     print(f"  버티는 실수 횟수      : {n}회  (물약 하나를 버리는 실수 기준)")
     return 0
 
 
+def budget_sweep():
+    """물약 예산을 배율로 깎으며 정답 경로와 탐욕 경로가 각각 어디서 죽는지 잰다.
+
+    "넘치게 마시는 것을 벌준다" 가 예산으로 가능한지 재는 도구다. 가능하려면
+    어떤 배율에서 <b>탐욕이 먼저 죽어야</b> 한다. 그런 배율은 없다 — 그것이
+    지배 전략의 정의다.
+    """
+    ptable, monsters, start = _tables()
+    base = (list(G.FLOOR_POTIONS), G.EXIT_POTION,
+            list(G.BOSS_FLOOR_POTIONS), G.GENEROUS_POTION)
+
+    def where(ok, err, log):
+        if ok:
+            lo = min(log, key=lambda r: r["hp_pct"])
+            return f"완주(최저 {lo['floor']}층 {lo['hp_pct']:.1f}%)"
+        return err.split("층")[0] + "층 사망"
+
+    print("물약 예산을 깎으면 누가 먼저 죽는가")
+    print("  배율   정답 경로               탐욕(보이면 마신다)      탐욕이 버린 회복")
+    for k in [1.0, 0.9, 0.8, 0.7, 0.6, 0.55, 0.5, 0.4]:
+        G.FLOOR_POTIONS = [v * k for v in base[0]]
+        G.EXIT_POTION = base[1] * k
+        G.BOSS_FLOOR_POTIONS = [v * k for v in base[2]]
+        G.GENEROUS_POTION = base[3] * k
+        okA, logA, errA = G.simulate_run(ptable, monsters, start, verbose=False)
+        okB, logB, errB = G.simulate_run(ptable, monsters, start, verbose=False,
+                                         greedy=True)
+        spill = logB[-1]["spill_total"] if logB else 0.0
+        print(f"  {k:>4.2f}   {where(okA, errA, logA):<22}  "
+              f"{where(okB, errB, logB):<22}  {spill:>10,.0f}")
+    G.FLOOR_POTIONS, G.EXIT_POTION, G.BOSS_FLOOR_POTIONS, G.GENEROUS_POTION = (
+        base[0], base[1], base[2], base[3])
+    print("  탐욕이 먼저 죽는 배율은 없다 — 예산으로는 넘침에 벌을 줄 수 없다.")
+
+
 if __name__ == "__main__":
+    if "--budget" in sys.argv:
+        budget_sweep()
+        raise SystemExit(0)
     if "--sweep" in sys.argv:
         ptable0, _, start0 = _tables()
         print("MOB_HP_LOSS   정답경로   실수허용")

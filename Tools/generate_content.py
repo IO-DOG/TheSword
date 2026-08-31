@@ -32,15 +32,19 @@ from thesword_balance import (
     TRAIT_NAME,
 )
 from layout_gen import (build_floor_layout, validate_layout, check_doors,
-                        check_sealed_by_portal, floor_choices, MIN_TOLLS)
+                        check_sealed_by_portal, check_vault_safe, floor_choices,
+                        key_economy, KEY_ITEM, MIN_TOLLS)
 
 # 층마다 반드시 치러야 하는 전투의 수. layout_gen 이 배치로 보장하는 값이고,
 # 여기서는 "곁길을 전부 건너뛴다" 는 나쁜 선택을 재현할 때 쓴다 — 관문 셋만
 # 잡고 나머지를 지나치면 층당 경험치의 5분의 2 를 버리는 셈이다.
 FORCED_PER_FLOOR = MIN_TOLLS
 
-# ConsumableItemData 의 회복% 와 짝. 여기 값을 바꾸면 그 표도 같이 봐야 한다.
-POTION_BY_HEAL = {0.15: "I_03", 0.20: "I_03", 0.30: "I_04", 0.50: "I_06"}
+# ConsumableItemData 의 회복% 와 짝. <b>여기 있는 값만 쓸 수 있다</b> —
+# 표에 없는 비율을 예산에 적으면 시뮬레이터와 실제가 어긋난다. 실제로 0.15 가
+# I_03(20%) 로 놓이고 있었고, 그래서 층당 예산을 10%p 낮게 세고 있었다.
+POTION_BY_HEAL = {0.20: "I_03", 0.30: "I_04", 0.40: "I_05",
+                  0.50: "I_06", 0.60: "I_07"}
 from mapdata_gen import emit_mapdata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -82,13 +86,15 @@ BOSS_DURATION = 45.0
 
 # 층에 배치되는 포션 (ConsumableItemData 의 회복 % 와 대응)
 # 구역별 회복 아이템. 미로의 막다른 길에 하나씩 둔다.
-#   구역0 없음 / 구역1 20% / 구역2 30% / (보스층) 구역3 50%
-# 넘치게 마시면 그만큼 버리는 것이라, 언제 들르느냐가 곧 실력이다.
-# 한 층에서 얻는 회복은 그 층에서 잃는 양과 거의 같게 잡는다.
-# 남아돌면 물약을 아무 때나 마셔도 되니 판단이 사라지고,
-# 모자라면 정답 경로로도 못 간다. 넘치게 마셔 버린 몫이 그대로 빚이 되게 한다.
-FLOOR_POTIONS = [0.15, 0.20]   # 구역1 / 구역2
-EXIT_POTION = 0.15             # 구역3(계단 앞) — 다음 층으로 들고 가는 몫
+#   구역0 없음 / 구역1 20% / 구역2 20% / (보스층) 구역3 50%
+#
+# <b>넘치게 마시는 것은 벌줄 수 없다.</b> 물약은 밟으면 즉시 회복이고
+# (ConsumableItem.PickUp) 층을 넘겨 들고 갈 수 없다. 그래서 "아껴 두는" 이득이
+# 없고, 일찍 마신 쪽의 HP 가 늦게 마신 쪽보다 낮아지는 순간이 존재하지 않는다.
+# 예산을 어떻게 깎아도 정답 경로가 먼저 죽는다 — route_check.py --budget 참조.
+# 물약 판단에 값을 매기는 것은 "언제 마시나" 가 아니라 "어디까지 들르나" 다.
+FLOOR_POTIONS = [0.20, 0.20]   # 구역1 / 구역2
+EXIT_POTION = 0.20             # 구역3(계단 앞) — 다음 층으로 들고 가는 몫
 BOSS_FLOOR_POTIONS = [0.50]    # 보스층은 계단 앞 대신 이걸 둔다
 POTION_USE_THRESHOLD = 0.55  # 이 비율 밑으로 떨어지면 마신다 (실제 플레이 행동)
 
@@ -197,6 +203,61 @@ def trait_of(chapter, order):
 # (레벨당 증가치가 일정하므로 챕터별로 등급을 나눌 필요가 없다).
 RUNE_CYCLE = ["I_09", "I_10", "I_11"]
 RUNE_GAIN = {"I_09": ("atk", 1.0), "I_10": ("dfn", 1.0), "I_11": ("hp", 5.0)}
+
+
+# ---------------------------------------------------------------- 열쇠 (魔塔 분석)
+#
+# 원형의 50층을 재 보니 문:열쇠가 <b>1:1 이 아니다</b> — 노랑 239:169(71%),
+# 파랑 39:20(51%), 빨강 11:3(27%). 색이 귀할수록 결핍이 가파르다. 그래야
+# "어느 문을 열까" 가 질문이 된다. 우리는 초록·노랑·빨강 문 96개에 열쇠도
+# 정확히 96개씩이라 고민할 일이 없었다.
+#
+# 그런데 <b>그냥 줄이면 진행이 막힌다.</b> 우리 층은 문 셋이 구역을 잘라
+# 순서를 강제하고 각 구역에 그 다음 문의 열쇠가 하나씩 있다 — 큰길 열쇠는
+# 한 개도 남는 것이 아니다. 그래서 줄이지 않고 <b>늘려서 모자라게</b> 한다.
+#
+#   여분 열쇠 층 : 골방 안쪽에 열쇠를 하나 더 둔다. 파수꾼을 잡아야 얻고,
+#                  안 쓰면 다음 층으로 들고 간다(KeyInventory 는 층을 넘어
+#                  유지된다 — 새 게임에서만 지워진다).
+#   금고 층      : 골방 입구가 <b>네 번째 문</b>이 되고 안에 룬이 있다.
+#                  큰길에는 걸리지 않으니 완주 보장은 그대로다.
+#
+# 금고가 여분 열쇠보다 많다. 색이 귀할수록 더 많다 — 초록 20:12, 노랑 16:8,
+# 빨강 12:4. 전부 열 수는 없고, 무엇을 포기할지가 층을 넘는 판단이 된다.
+#
+# 24층 한 바퀴 x 4 = 96층. 열쇠가 먼저 나오고 금고가 뒤따르게 늘어놓았다.
+# 보스층(20·40·60·80·100)에는 금고가 걸리지 않는다 — 그 층 마지막 구역은
+# 보스와 룬이 이미 자리를 다투는 곳이라 골방까지 밀어 넣을 이유가 없다.
+_ALCOVE_CYCLE = [
+    ("key", 0),   None,         ("vault", 0), ("key", 1),
+    ("vault", 0), None,         ("vault", 1), ("key", 0),
+    ("vault", 2), None,         ("vault", 1), ("key", 2),
+    ("vault", 0), None,         ("vault", 2), ("key", 1),
+    ("vault", 1), ("vault", 0), None,         ("key", 0),
+    ("vault", 2), ("vault", 1), ("vault", 0), None,
+]
+
+
+def _cycle_at(floor):
+    return _ALCOVE_CYCLE[(floor - HANDMADE_FLOORS - 1) % len(_ALCOVE_CYCLE)]
+
+
+def alcove_plan(floor):
+    """그 층 골방의 쓰임새. (종류, 색, 놓을 셀코드) 또는 None(파수꾼 + 물약).
+
+    금고마다 <b>다른 룬</b>을 넣는다. 같은 것만 나오면 "지금 열까 아껴 둘까"
+    가 아니라 "빨리 열수록 이득" 뿐이라 고를 것이 없어진다 — 물약에서 이미
+    겪은 일이다(즉시 회복이라 일찍 마시는 쪽이 지배 전략이었다).
+    """
+    plan = _cycle_at(floor)
+    if plan is None:
+        return None
+    kind, color = plan
+    if kind == "key":
+        return ("key", color, KEY_ITEM[color])
+    seq = sum(1 for f in range(HANDMADE_FLOORS + 1, floor)
+              if (_cycle_at(f) or (None,))[0] == "vault")
+    return ("vault", color, RUNE_CYCLE[seq % len(RUNE_CYCLE)])
 
 
 # ---------------------------------------------------------------- 층 유형 (매직타워 분석)
@@ -538,7 +599,8 @@ def build_monsters(ptable, start_level):
 # ------------------------------------------------------------------ 완주 검증
 
 def simulate_run(ptable, monsters, start_state, verbose=True,
-                 skip_optional=False, skip_runes=False, greedy=False):
+                 skip_optional=False, skip_runes=False, greedy=False,
+                 skip_potions=False):
     """5층부터 100층까지 실제 전투 공식으로 완주 시뮬레이션.
 
     1~4층(손수 만든 구간)은 simulate_handmade 가 이미 돌린 뒤라,
@@ -555,6 +617,9 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
                      밟게 되지만, 안 주웠을 때의 값을 재기 위한 것이다).
       greedy         물약을 보이는 대로 마신다. 가득 찬 채로 마시면 넘치는
                      만큼 그냥 버린다(ConsumableItem.PickUp 이 최대치에서 자른다).
+                     <b>이것은 나쁜 선택이 아니다</b> — 아래 dominance 주석 참조.
+      skip_potions   막다른 길의 구역 물약을 안 들른다. 계단 앞 물약만 밟는다.
+                     이쪽이 진짜 나쁜 선택이다.
 
     ponytail: 장비 보너스는 계산에 넣지 않는다. 실제 플레이어는 마검(+10 ATK)을
               들고 있으므로 여기 결과보다 항상 강하다 — 안전한 방향의 오차다.
@@ -569,6 +634,9 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
 
     level, exp, cur_hp = start_state
     log = []
+    spilled = 0.0   # 최대치에 잘려 버려진 회복량 누계 (HP)
+    served = 0.0    # 실제로 몸에 들어간 회복량 누계 (HP)
+    budget = 0.0    # 층에 놓인 회복량 누계 (HP)
 
     for floor in range(HANDMADE_FLOORS + 1, TOTAL_FLOORS + 1):
         floor_mons = by_floor[floor]
@@ -581,6 +649,7 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
         boss = next((m for m in floor_mons if m["_boss"]), None)
 
         entry_level, entry_hp = level, cur_hp
+        floor_spill = 0.0
         # 미로가 강제하는 순서 그대로. 약한 놈부터, 마지막에 보스.
         fights = list(mobs) + ([boss] if boss else [])
 
@@ -588,15 +657,16 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
         # 구역1 포션은 두 번째 전투부터, 구역2 포션은 네 번째 전투부터 닿는다.
         #
         # <b>층 유형이 정한 예산을 그대로 써야 한다.</b> 예전에는 여기만 늘
-        # 두 개(0.15+0.20)로 셌는데, 실제로 놓이는 것은 「인색」 층이 하나뿐이고
+        # 두 개로 셌는데, 실제로 놓이는 것은 「인색」 층이 하나뿐이고
         # 「넉넉」 층이 셋이다 — 물약이 하나뿐인 19개 층을 두 개로 셈하고
         # "완주 보장" 이라 부르고 있었다. emit_layouts·route_check 와 같은
         # floor_potions 를 본다.
         heals = floor_potions(floor)
-        potions = [(h, min(1 + k * 2, len(fights) - 1))
-                   for k, h in enumerate(heals)]
+        potions = [] if skip_potions else [
+            (h, min(1 + k * 2, len(fights) - 1)) for k, h in enumerate(heals)]
         # 보스층은 보스 직전에 쓸 큰 물약과, 올라가기 전에 채울 물약을 따로 둔다.
         # 큰 것 하나만 두면 보스를 잡고 빈사로 다음 층에 올라가 그대로 죽는다.
+        # 이 둘은 구역3(계단 앞)이라 <b>반드시 밟는다</b> — skip_potions 로도 안 빠진다.
         if boss:
             potions.append((BOSS_FLOOR_POTIONS[0], len(fights) - 1))
         potions.append((EXIT_POTION, len(fights)))
@@ -613,7 +683,10 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
             if greedy:
                 # 나쁜 선택: 보이면 바로 마신다. 넘치는 만큼은 그대로 버린다.
                 for t in [t for t in potions if t[1] <= i]:
-                    cur_hp = min(stats["hp"], cur_hp + stats["hp"] * t[0])
+                    heal = stats["hp"] * t[0]
+                    floor_spill += max(0.0, cur_hp + heal - stats["hp"])
+                    served += min(heal, stats["hp"] - cur_hp)
+                    cur_hp = min(stats["hp"], cur_hp + heal)
                     potions.remove(t)
             while not greedy:
                 probe = Creature(stats["hp"], stats["atk"], stats["dfn"],
@@ -631,6 +704,8 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
                     break
                 heal, _ = usable[0]
                 potions.remove(usable[0])
+                floor_spill += max(0.0, cur_hp + stats["hp"] * heal - stats["hp"])
+                served += min(stats["hp"] * heal, stats["hp"] - cur_hp)
                 cur_hp = min(stats["hp"], cur_hp + stats["hp"] * heal)
 
             p = Creature(stats["hp"], stats["atk"], stats["dfn"],
@@ -658,11 +733,17 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
         stats_end = stats_at(level, floor + 1)
         for heal, avail_at in list(potions):
             if avail_at >= len(fights):
+                floor_spill += max(0.0, cur_hp + stats_end["hp"] * heal - stats_end["hp"])
+                served += min(stats_end["hp"] * heal, stats_end["hp"] - cur_hp)
                 cur_hp = min(stats_end["hp"], cur_hp + stats_end["hp"] * heal)
                 potions.remove((heal, avail_at))
+        spilled += floor_spill
+        budget += stats_end["hp"] * (sum(heals) + EXIT_POTION
+                                     + (BOSS_FLOOR_POTIONS[0] if boss else 0.0))
 
         log.append(dict(floor=floor, entry_level=entry_level, exit_level=level,
-                        hp=cur_hp, max_hp=stats["hp"],
+                        hp=cur_hp, max_hp=stats["hp"], spill=floor_spill,
+                        spill_total=spilled, served=served, budget=budget,
                         hp_pct=100.0 * cur_hp / stats["hp"]))
         if verbose and (floor % 10 == 0 or floor == HANDMADE_FLOORS + 1
                         or is_boss_floor(floor)):
@@ -679,13 +760,30 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
 # 그건 선택이 아니라 장식이다. 그래서 정답 경로만 돌리지 않고 나쁜 선택도 같은
 # 공식으로 돌려 어느 층에서 죽는지 잰다.
 #
+# <b>물약을 넘치게 마시는 것은 벌줄 수 없다.</b> 예산 문제가 아니라 규칙 문제다.
+#
+#   1) 전투에서 잃는 HP 는 시작 HP 와 무관하다 (플레이어 공격력·공속이 HP 에
+#      안 걸리고 몬스터 HP 도 고정이라 전투 길이가 고정이다).
+#      thesword_balance._self_check() 가 이 전제를 붙들고 있다.
+#   2) 물약은 min(maxHP, hp + heal) 로 들어간다. 이 식은 hp 에 대해 단조 증가다.
+#   3) 물약은 층을 넘겨 들고 갈 수 없다 — 안 마시면 그 층에서 그냥 사라진다.
+#
+# 셋을 합치면 "같은 물약을 더 일찍 마신 쪽" 의 HP 는 어느 시점에서도 늦게 마신
+# 쪽보다 낮을 수 없다. 즉 <b>보이는 대로 마시는 것이 지배 전략</b>이다.
+# 예산을 깎으면 넘침이 줄어드는 만큼 정답 경로가 먼저 죽는다 (route_check.py
+# --budget 이 배율별로 찍는다: 0.7배에서 정답 11층 사망, 탐욕은 완주).
+#
+# 그래서 물약에서 값을 치르는 선택은 "언제 마시나" 가 아니라
+# <b>"어디까지 들르나"</b> 다. 그쪽(skip_potions)은 실제로 문다.
+#
 # (이름, simulate_run 인자, 죽어야 하는가, 완주했을 때 붙일 말)
 BAD_ROUTES = [
     ("곁길 몬스터를 전부 지나친다", dict(skip_optional=True), True, ""),
     ("룬을 전부 지나친다", dict(skip_runes=True), True, ""),
+    ("막다른 길의 물약을 안 들른다", dict(skip_potions=True), True, ""),
     ("물약을 보이는 대로 마셔 넘친다", dict(greedy=True), False,
-     "층 물약 예산이 층 손실보다 커서 넘쳐도 남는다 — 구조가 아니라 "
-     "예산(MOB_HP_LOSS·FLOOR_POTIONS) 쪽이다"),
+     "벌이 없는 것이 맞다 — 즉시 회복 + 최대치 절삭 + 이월 불가 라서 "
+     "일찍 마시는 쪽이 지배 전략이다 (위 주석)"),
 ]
 
 
@@ -712,12 +810,22 @@ def optional_slack(ptable, monsters, start_state):
     return lo
 
 
+def potion_ledger(log):
+    """물약 장부 한 줄. (놓인 예산, 마신 것, 넘쳐 버린 것, 손도 안 댄 것)"""
+    if not log:
+        return 0.0, 0.0, 0.0, 0.0
+    r = log[-1]
+    return (r["budget"], r["served"], r["spill_total"],
+            r["budget"] - r["served"] - r["spill_total"])
+
+
 def check_bad_routes(ptable, monsters, start_state):
     """나쁜 선택마다 어디서 죽는지 찍는다. 죽어야 할 것이 살아남으면 실패."""
     ok_all = True
+    base_log = None
     for name, kwargs, must_die, note in BAD_ROUTES:
-        ok, _, err = simulate_run(ptable, monsters, start_state, verbose=False,
-                                  **kwargs)
+        ok, log, err = simulate_run(ptable, monsters, start_state, verbose=False,
+                                    **kwargs)
         if ok and must_die:
             ok_all = False
         head = "[실패]" if (ok and must_die) else "      "
@@ -725,6 +833,24 @@ def check_bad_routes(ptable, monsters, start_state):
         print(f"      {head} {name} … {tail}")
         if ok and note:
             print(f"              {note}")
+        if kwargs.get("greedy") and ok:
+            # 넘침의 값을 숫자로 찍는다. 정답 경로와 나란히 놓아야 "손해가 없다" 가
+            # 인상이 아니라 계산이 된다.
+            if base_log is None:
+                _, base_log, _ = simulate_run(ptable, monsters, start_state,
+                                              verbose=False)
+            bud, srv, spl, idle = potion_ledger(log)
+            _, bsrv, _, bidle = potion_ledger(base_log)
+            lo = min(log, key=lambda r: r["hp_pct"])
+            blo = min(base_log, key=lambda r: r["hp_pct"])
+            print(f"              놓인 회복 예산 {bud:,.0f} HP 중 "
+                  f"넘쳐 버림 {spl:,.0f} ({100.0 * spl / bud:.0f}%)")
+            print(f"              그런데도 몸에 들어간 양은 정답 경로보다 많다 — "
+                  f"{srv:,.0f} vs {bsrv:,.0f} HP")
+            print(f"              (정답 경로는 예산의 {100.0 * bidle / bud:.0f}% 를 "
+                  f"손도 안 대고 두고 간다)")
+            print(f"              최저 HP  탐욕 {lo['floor']}층 {lo['hp_pct']:.1f}% "
+                  f"vs 정답 {blo['floor']}층 {blo['hp_pct']:.1f}%")
 
     f = optional_slack(ptable, monsters, start_state)
     if f > TOTAL_FLOORS:
@@ -891,8 +1017,8 @@ def emit_layouts(monsters, write=True):
     for m in monsters:
         by_floor.setdefault(m["_floor"], []).append(m)
 
-    written, failures, bad_doors, sealed_off = 0, [], [], []
-    choices = {}
+    written, failures, bad_doors, sealed_off, unsafe_vaults = 0, [], [], [], []
+    choices, econ = {}, {}
     for floor in range(HANDMADE_FLOORS + 1, TOTAL_FLOORS + 1):
         did, ch, _ = dungeon_id(floor)
         mobs = sorted((m for m in by_floor[floor] if not m["_boss"]),
@@ -916,7 +1042,7 @@ def emit_layouts(monsters, write=True):
                 [m["id"] for m in mobs], boss["id"] if boss else None, walls,
                 seed=floor * 1000 + attempt, mobs_in_floor=MOBS_PER_FLOOR,
                 equip_id=CHAPTER_EQUIP_REWARD.get(floor), potions=pots,
-                rune=rune_of(floor))
+                rune=rune_of(floor), alcove=alcove_plan(floor))
             if g is None:
                 continue
             ok, err = validate_layout(g, origins, doors)
@@ -938,6 +1064,15 @@ def emit_layouts(monsters, write=True):
         for (cx, cy), what in check_sealed_by_portal(grid):
             sealed_off.append(f"Dungeon_{did} ({cx}, {cy}) {what} — 포탈에 막혀 못 간다")
 
+        # 금고 문이 앞 구역에 앉으면 <b>이 층의 열쇠로 열린다</b> — 그러면
+        # 큰길 문을 열 열쇠가 사라져 되돌릴 수 없이 갇힌다. 배치에서 이미
+        # 막아 두지만, 그건 의도다. 완성된 격자에서 다시 잰다.
+        for (cx, cy), what in check_vault_safe(grid, doors):
+            unsafe_vaults.append(
+                f"Dungeon_{did} ({cx}, {cy}) 금고 {what} — 세 문을 열기 전에 닿는다")
+
+        econ[floor] = key_economy(grid, doors)
+
         # 강제/선택은 배치 <b>의도</b>가 아니라 완성된 격자에서 다시 잰다.
         # 우회로가 하나라도 생기면 관문이 조용히 곁길이 되기 때문이다 —
         # 곁길 통로를 내던 시절에 챕터 보스 다섯이 전부 그렇게 곁길이었다.
@@ -949,7 +1084,7 @@ def emit_layouts(monsters, write=True):
                 for row in grid:
                     f.write(",".join(row) + "\n")
         written += 1
-    return written, failures, bad_doors, choices, sealed_off
+    return written, failures, bad_doors, choices, sealed_off, unsafe_vaults, econ
 
 
 def report_choices(choices):
@@ -968,8 +1103,11 @@ def report_choices(choices):
     print("      [강제] 관문 몬스터 %d마리 — 층당 %s" %
           (tot["forced_mobs"],
            " / ".join(f"{k}마리 {v}층" for k, v in sorted(hist.items()))))
-    print("      [강제] 열쇠 %d개(층당 %.2f) · 반드시 밟는 룬 %d/%d" %
-          (tot["keys"], tot["keys"] / n, tot["forced_runes"], tot["runes"]))
+    print("      [강제] 열쇠 %d개(큰길 %d + 여분 %d) · 반드시 밟는 룬 %d/%d" %
+          (tot["keys"], n * 3, tot["keys"] - n * 3,
+           tot["forced_runes"], tot["runes"]))
+    print("      [선택] 금고 %d개 · 그 안에 잠긴 룬 %d개 (완주 계산에는 없다)" %
+          (tot["vaults"], tot["vault_items"]))
     print("      [강제] 보스 %d층 중 관문인 보스 %d" % (boss_floors, tot["boss_forced"]))
     print("      [선택] 곁길 몬스터 %d마리(층당 %.2f) · 지나칠 수 있는 아이템 %d개" %
           (tot["optional_mobs"], tot["optional_mobs"] / n, tot["optional_items"]))
@@ -987,13 +1125,111 @@ def report_choices(choices):
     return broken
 
 
+COLOR_NAME = ("초록", "노랑", "빨강")
+
+
+def report_keys(econ):
+    """열쇠 경제를 <b>수로</b> 찍는다. 규칙이 깨진 항목 목록을 돌려준다.
+
+    "모자라게 했다" 는 말은 세어 보기 전까지 아무 뜻이 없다. 원형이 그랬듯
+    <b>색마다</b> 결핍의 기울기가 달라야 하고, 그 결핍이 실제로 "못 여는 금고"
+    로 나타나야 한다. 아래는 층을 순서대로 오르며 그것을 세어 본 것이다.
+
+    가정 하나: 여분 열쇠는 골방 파수꾼 뒤에 있으므로 <b>그 곁길 전투를
+    치른다</b>고 본다. 안 치르면 금고는 하나도 열 수 없다 — 그 수도 같이 찍는다.
+    """
+    floors = sorted(econ)
+    main = [0, 0, 0]
+    spare_total = [0, 0, 0]
+    vault_total = [0, 0, 0]
+    guarded = 0
+    for f in floors:
+        keys, m, v, g = econ[f]
+        guarded += g
+        for c in range(3):
+            main[c] += m[c]
+            spare_total[c] += keys[c] - 1          # 큰길 몫 하나를 뺀 나머지
+            vault_total[c] += v[c]
+
+    # 층을 순서대로 오른다. "보이면 연다" 와 "곁길을 전부 지나친다" 둘.
+    spare = [0, 0, 0]
+    opened = [0, 0, 0]
+    locked = [0, 0, 0]
+    surplus_floors = shortage_floors = decision_floors = 0
+    for i, f in enumerate(floors):
+        keys, _, v, _g = econ[f]
+        for c in range(3):
+            spare[c] += keys[c] - 1
+        shortage = False
+        for c in range(3):
+            for _ in range(v[c]):
+                # 뒤에 같은 색 금고가 또 있는가 = 아껴 둘 데가 있는가
+                ahead = sum(econ[g][2][c] for g in floors[i + 1:])
+                if spare[c] > 0:
+                    if ahead > 0:
+                        decision_floors += 1
+                    spare[c] -= 1
+                    opened[c] += 1
+                else:
+                    locked[c] += 1
+                    shortage = True
+        if shortage:
+            shortage_floors += 1
+        if sum(spare) > 0:
+            surplus_floors += 1
+
+    print("      색     큰길 문:열쇠   금고 문   여분 열쇠   열 수 있는 비율")
+    for c in range(3):
+        v, k = vault_total[c], spare_total[c]
+        print("      %s   %3d:%-3d       %3d       %3d         %3d%%" %
+              (COLOR_NAME[c], main[c], main[c], v, k,
+               round(100 * min(k, v) / v) if v else 100))
+    print("      전체   %3d:%-3d       %3d       %3d         %3d%%" %
+          (sum(main), sum(main), sum(vault_total), sum(spare_total),
+           round(100 * sum(spare_total) / sum(vault_total))))
+    print("      보이는 대로 열면 금고 %d개를 열고 %d개를 영영 못 연다"
+          % (sum(opened), sum(locked)))
+    print("      열쇠가 남은 채 끝나는 층 %d / 열쇠가 모자란 층 %d (전체 %d층)"
+          % (surplus_floors, shortage_floors, len(floors)))
+    print("      '여기 쓸까 아껴 둘까' 가 실제로 갈리는 층 %d개"
+          " — 열 수 있는데 같은 색 금고가 뒤에 또 있다" % decision_floors)
+    print("       다만 아껴 두는 값은 룬의 크기가 아니라 종류다 —"
+          " 급한 능력치가 아니면 먼저 여는 쪽이 대체로 낫다")
+    print("      여분 열쇠 %d개 중 파수꾼 뒤에 있는 것 %d개"
+          " — 곁길을 전부 지나치면 금고 %d개가 전부 잠긴다"
+          % (sum(spare_total), guarded, sum(vault_total)))
+
+    broken = []
+    for c in range(3):
+        if spare_total[c] >= vault_total[c]:
+            broken.append(f"{COLOR_NAME[c]} 여분 열쇠 {spare_total[c]} >= 금고 "
+                          f"{vault_total[c]} — 모자라지 않으니 고를 것이 없다")
+    for c in range(1, 3):
+        if vault_total[c] and vault_total[c - 1]:
+            prev = spare_total[c - 1] / vault_total[c - 1]
+            cur = spare_total[c] / vault_total[c]
+            if cur >= prev:
+                broken.append(f"{COLOR_NAME[c]} 가 {COLOR_NAME[c - 1]} 보다 안 귀하다 "
+                              f"({cur:.0%} >= {prev:.0%})")
+    if guarded < sum(spare_total):
+        broken.append(f"여분 열쇠 {sum(spare_total)}개 중 {guarded}개만 파수꾼 뒤에 있다"
+                      " — 나머지는 그냥 주워지므로 곁길 판단이 되지 않는다")
+    for f in floors:
+        keys, m, _v, _g = econ[f]
+        if m != [1, 1, 1]:
+            broken.append(f"{f}층 큰길 문 {m} — 층마다 색깔별로 하나여야 한다")
+        if min(keys) < 1:
+            broken.append(f"{f}층 열쇠 {keys} — 큰길 몫이 빈다")
+    return broken
+
+
 # ------------------------------------------------------------------ 진입점
 
 def build_all(dry_run=False):
     ptable = load_player_table(os.path.join(EXCEL, "PlayerData.csv"))
     ptable = extend_player_table(ptable, MAX_LEVEL_TABLE)
 
-    print(f"[1/5] 손수 만든 1~{HANDMADE_FLOORS}층 완주 시뮬레이션")
+    print(f"[1/7] 손수 만든 1~{HANDMADE_FLOORS}층 완주 시뮬레이션")
     start_state, err = simulate_handmade(ptable)
     if start_state is None:
         print(f"  [실패] {err}")
@@ -1002,11 +1238,11 @@ def build_all(dry_run=False):
     print(f"      {HANDMADE_FLOORS}층 종료 시 Lv{start_level}, HP {start_hp:.0f} "
           f"-> {HANDMADE_FLOORS + 1}층 목표 레벨 {target_level(HANDMADE_FLOORS + 1, start_level)}")
 
-    print(f"[2/5] {HANDMADE_FLOORS + 1}~{TOTAL_FLOORS}층 몬스터 스탯 역산 중...")
+    print(f"[2/7] {HANDMADE_FLOORS + 1}~{TOTAL_FLOORS}층 몬스터 스탯 역산 중...")
     monsters = build_monsters(ptable, start_level)
     print(f"      몬스터 {len(monsters)}종 생성")
 
-    print(f"[3/5] {HANDMADE_FLOORS + 1}~{TOTAL_FLOORS}층 완주 시뮬레이션")
+    print(f"[3/7] {HANDMADE_FLOORS + 1}~{TOTAL_FLOORS}층 완주 시뮬레이션")
     ok, log, err = simulate_run(ptable, monsters, start_state)
     if not ok:
         print(f"  [실패] {err}")
@@ -1015,8 +1251,9 @@ def build_all(dry_run=False):
     print(f"      완주 성공. 최저 HP 구간: {worst['floor']}층 {worst['hp_pct']:.1f}%")
     print(f"      최종 레벨: {log[-1]['exit_level']}")
 
-    print("[4/6] 층 레이아웃 생성 + 도달 가능성 검사")
-    written, failures, bad_doors, choices, sealed_off = emit_layouts(monsters, write=not dry_run)
+    print("[4/7] 층 레이아웃 생성 + 도달 가능성 검사")
+    (written, failures, bad_doors, choices, sealed_off,
+     unsafe_vaults, econ) = emit_layouts(monsters, write=not dry_run)
     print(f"      {written}/{TOTAL_FLOORS - HANDMADE_FLOORS} 층 생성 "
           f"(1~{HANDMADE_FLOORS}층은 원본 유지)")
     if failures:
@@ -1034,8 +1271,14 @@ def build_all(dry_run=False):
         print(f"      포탈에 막혀 못 가는 것 {len(sealed_off)}건")
         return False
     print("      포탈에 막힌 몬스터·아이템 0건")
+    if unsafe_vaults:
+        for line in unsafe_vaults[:10]:
+            print(f"  [실패] {line}")
+        print(f"      열쇠를 잘못 써서 갇힐 수 있는 금고 {len(unsafe_vaults)}건")
+        return False
+    print("      앞 구역에 앉은 금고 0건 (열쇠를 잘못 써서 갇히는 수가 없다)")
 
-    print("[5/6] 강제와 선택 세기")
+    print("[5/7] 강제와 선택 세기")
     broken = report_choices(choices)
     if broken:
         for line in broken[:10]:
@@ -1043,7 +1286,15 @@ def build_all(dry_run=False):
         print(f"      구조 위반 {len(broken)}건")
         return False
 
-    print("[6/6] 나쁜 선택 재현 — 잘못 고르면 죽는가")
+    print("[6/7] 열쇠는 탑 전체에서 모자란가")
+    broken = report_keys(econ)
+    if broken:
+        for line in broken[:10]:
+            print(f"  [실패] {line}")
+        print(f"      열쇠 경제 위반 {len(broken)}건")
+        return False
+
+    print("[7/7] 나쁜 선택 재현 — 잘못 고르면 죽는가")
     if not check_bad_routes(ptable, monsters, start_state):
         return False
 
