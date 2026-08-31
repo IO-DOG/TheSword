@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -107,6 +107,19 @@ public static class FastChecks
         CheckPortalSeal(sb, mapDic, stageDic);
         // 씬에 오브젝트를 만드는 것은 이것뿐이라 맨 뒤에 둔다.
         CheckDoorArt(sb, mapDic, stageDic);
+    }
+
+    /// <summary>
+    /// 에디터에서 데이터 표를 올린다.
+    ///
+    /// 게임은 타이틀에서 어드레서블 "PreLoad" 라벨을 통째로 선로드한 뒤에야
+    /// DataManager.Init 이 돈다. 에디터에는 그 단계가 없어서 표가 빈 채로 남는다.
+    /// 다른 에디터 도구나 임시 검증에서도 쓸 수 있게 열어 둔다.
+    /// </summary>
+    public static void EditorBootData()
+    {
+        BuildAddressIndex();
+        Setup();
     }
 
     // ------------------------------------------------------------------ 어드레서블 색인

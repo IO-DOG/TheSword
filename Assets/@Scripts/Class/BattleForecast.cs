@@ -117,11 +117,12 @@ public static class BattleForecast
 
                 if (Swing(player, monster))
                 {
+                    // 상대의 방패를 깼다. 되돌아가는 것은 <b>상대 게이지뿐</b>이다.
+                    //
+                    // 예전에는 여기서 플레이어 게이지도 0 으로 만들었다 —
+                    // UI_BaseCard.ClearDefence 가 Managers.Game.DefenceCoolTime(플레이어 몫)
+                    // 까지 지우고 있었기 때문이다. 그건 버그였고 고쳤으므로 여기서도 뺀다.
                     monsterDefCool = 0f;
-                    // ClearDefence 는 자기 게이지와 함께 Managers.Game.DefenceCoolTime,
-                    // 곧 플레이어의 방어 게이지까지 0 으로 만든다(UI_BaseCard.ClearDefence).
-                    // 몬스터의 방어를 깨면 내 방어도 되돌아간다 — 진짜 전투가 그렇게 돈다.
-                    playerDefCool = 0f;
                 }
                 if (playerDead || monsterDead)
                     break;

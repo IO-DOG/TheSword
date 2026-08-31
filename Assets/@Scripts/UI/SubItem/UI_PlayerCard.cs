@@ -1,4 +1,4 @@
-using Coffee.UIExtensions;
+﻿using Coffee.UIExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -145,6 +145,10 @@ public class UI_PlayerCard : UI_BaseCard
 
         StartCoroutine(CoStartShieldFX());
         StartCoroutine(CoDefenceMat());
+
+        // 플레이어의 방어 게이지는 GameManager 에 있다 (전투 사이에 이어진다).
+        // 부모는 자기 게이지만 지우므로 이 몫은 여기서 지운다.
+        Managers.Game.DefenceCoolTime = 0f;
         base.ClearDefence();
     }
 

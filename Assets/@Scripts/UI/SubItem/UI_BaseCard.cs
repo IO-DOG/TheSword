@@ -169,10 +169,17 @@ public class UI_BaseCard : UI_Base
         GetImage((int)Images.HPHarGauge).fillAmount = _creature.CurHP / _creature.MaxHP;
     }
 
+    /// <summary>
+    /// 방어를 한 대 막고 풀린다. <b>자기 게이지만</b> 되돌린다.
+    ///
+    /// 예전에는 여기서 Managers.Game.DefenceCoolTime 까지 0 으로 만들었다.
+    /// 그 값은 <b>플레이어 전용</b>이라(UI_PlayerCard 만 누적한다), 몬스터의 방어가
+    /// 깨질 때마다 플레이어의 방어 게이지가 같이 되돌아갔다 — 즉 상대의 방패를
+    /// 부술수록 내 방패가 늦게 올라왔다. 플레이어 몫은 UI_PlayerCard 가 지운다.
+    /// </summary>
     public virtual void ClearDefence()
     {
         _defenceCoolTime = 0f;
-        Managers.Game.DefenceCoolTime = 0f;
         _creature.IsDefence = false;
         if (GetImage((int)Images.DefenceIcon) != null)
             GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play("UIIdleDefense");
