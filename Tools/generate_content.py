@@ -71,10 +71,30 @@ SCRIPT_MON_DESC_BASE = 20100   # 기존 20000~20008 뒤
 
 # 층당 전투 목표치 (플레이어 최대 HP 대비 손실 비율, 전투 지속 시간 초)
 # 몹 5마리 * 최대 9.5% = 약 47%, 여기에 포션 2개(각 30%)로 층당 순회복이 되게 잡는다.
-# 층의 몹 5마리는 서로 다른 종이고, 뒤로 갈수록 아프다.
-# 미로가 나무 구조라 경로가 유일하고 문·열쇠가 구역을 자르므로,
-# 이 순서대로 만날 수밖에 없다 — 그게 이 층의 "정답 경로"다.
-MOB_LOSS_RAMP = [0.72, 0.88, 1.00, 1.16, 1.34]
+# 층의 몹은 뒤로 갈수록 아프다. 미로가 나무 구조라 경로가 유일하고 문·열쇠가
+# 구역을 자르므로, 이 순서대로 만날 수밖에 없다 — 그게 이 층의 "정답 경로"다.
+#
+# 다섯 자리가 전부 다른 종이면 "이 놈에겐 공격 1점이 몇 대 값이다" 를 셀 수가
+# 없다. 한 번 싸우고 마는 상대의 값은 계산할 이유가 없기 때문이다. 그래서
+# 앞의 세 자리를 한 종으로 묶는다 — 같은 놈을 세 번 만나니 공격 +1 이 세 번
+# 값을 하고, 거기서 "몇 점을 올리면 한 대가 준다" 는 임계가 생긴다.
+# (원형인 매직 타워도 한 종을 평균 2.85 마리씩 세운다.)
+#
+# 묶인 자리는 손실 배수가 같아야 한다 — 스탯이 다르면 같은 놈이 아니다.
+# 총합 5.10 은 예전(0.72+0.88+1.00+1.16+1.34)과 같아서 층당 1레벨은 그대로다.
+MOB_LOSS_RAMP = [0.85, 0.85, 0.85, 1.05, 1.50]
+
+# 같은 종이 몇 마리씩 연달아 서는가. 합은 MOBS_PER_FLOOR.
+# 마지막 한 자리는 정예다 — 색이 진하고 몸집이 크므로(MapBuilder.MonsterBulk)
+# 혼자 세워야 그 표시가 거짓말이 되지 않는다.
+MOB_SPECIES_RUN = [3, 1, 1]
+assert sum(MOB_SPECIES_RUN) == MOBS_PER_FLOOR
+assert len(MOB_LOSS_RAMP) == MOBS_PER_FLOOR
+# 묶인 자리끼리는 배수가 같아야 같은 놈이 된다.
+_i = 0
+for _run in MOB_SPECIES_RUN:
+    assert len(set(MOB_LOSS_RAMP[_i:_i + _run])) == 1, MOB_LOSS_RAMP
+    _i += _run
 
 # 층 유형(기본/인색/관문/넉넉/보물)을 넣고 다시 조율한 값.
 # 물약이 하나뿐인 "인색" 층이 생기면서 0.048 로는 11층에서 죽는다.
@@ -496,6 +516,13 @@ def solve_monster(ptable, level, hp_loss_target, duration_target, aspd, trait=NO
             hi = mid
     hp_m = max(1.0, round(hi))
 
+    # 암살은 치명타가 아닌 공격을 전부 흘린다. 그래서 HP 를 아무리 낮춰도
+    # 전투가 "치명타를 기다리는 시간" 만큼은 걸리고, 지속시간 목표 밑으로
+    # 내려가질 않는다 — 이분 탐색이 바닥까지 내려가 HP 1 짜리가 40마리 나왔다.
+    # 지속시간을 HP 로 맞출 수 없는 상대라는 뜻이니, 눈에 거슬리지 않을 만큼만
+    # 세워 두고 손실 목표는 아래 ATK 탐색이 맡게 한다.
+    hp_m = max(hp_m, float(round(0.25 * ps["atk"] * duration_target)))
+
     # 2) ATK 이분 탐색: HP 손실 목표
     target_loss = ps["hp"] * hp_loss_target
     # 하한은 0 이어야 한다. 예전에는 "공격력이 방어력보다 작으면 피해가 없다" 는
@@ -543,30 +570,35 @@ def build_monsters(ptable, start_level):
         # 층 몹 전부를 잡으면 정확히 1레벨
         reward = round(exp_to_next(ptable, level) / MOBS_PER_FLOOR)
 
-        for k, ramp_k in enumerate(MOB_LOSS_RAMP[:MOBS_PER_FLOOR]):
-            trait = trait_of(ch, k)
+        k = 0
+        for run in MOB_SPECIES_RUN:
+            # 묶음의 첫 자리로 한 번만 푼다 — 같은 종은 스탯도 특성도 같아야 한다.
+            slot = k
+            trait = trait_of(ch, slot)
             hp_k, atk_k, dfn_k, aspd_k, dspd_k = solve_monster(
-                ptable, level, MOB_HP_LOSS * ramp * ramp_k,
+                ptable, level, MOB_HP_LOSS * ramp * MOB_LOSS_RAMP[slot],
                 MOB_DURATION * ramp, aspd, trait, floor)
-            # 층마다 서로 다른 놈이 서게 고른다. 가장 센 놈(정예)은 그림이 아니라
+            # 층마다 다른 종이 서게 고른다. 가장 센 놈(정예)은 그림이 아니라
             # 색이 진하고 몸집이 커서 눈에 띈다 (MonsterTint / MapBuilder.SetupLook).
-            art_idx = (idx + k) % len(MOB_ART)
+            art_idx = (idx + slot) % len(MOB_ART)
             art = MOB_ART[art_idx]
-            monsters.append(dict(
-                id=MOB_ID_BASE + floor * 8 + k, Chapter=ch, Ability=trait,
-                Name=f"{theme[1]} {MOB_SPECIES[art_idx]}",
-                Attack=float(atk_k), Defence=float(dfn_k), MaxHP=float(hp_k),
-                AttackSpeed=float(aspd_k), DefenceSpeed=float(dspd_k),
-                Critical=99.0, CriticalAttack=200.0,
-                RewardExp=float(reward), RewardItem=-1,
-                IdleAnimStr=art[0], AttackAnimStr=art[1],
-                BattleParticleAttack="FX_WeaponSlash_00",
-                BattleParticleHit="FX_WeaponHit_14",
-                Shadow="Mob_Shadow_000",
-                MonsterNameId=MOB_NAME_BASE + floor * 8 + k,
-                MonsterDescId=MOB_DESC_BASE + floor * 8 + k,
-                _floor=floor, _boss=False, _order=k,
-            ))
+            for _ in range(run):
+                monsters.append(dict(
+                    id=MOB_ID_BASE + floor * 8 + k, Chapter=ch, Ability=trait,
+                    Name=f"{theme[1]} {MOB_SPECIES[art_idx]}",
+                    Attack=float(atk_k), Defence=float(dfn_k), MaxHP=float(hp_k),
+                    AttackSpeed=float(aspd_k), DefenceSpeed=float(dspd_k),
+                    Critical=99.0, CriticalAttack=200.0,
+                    RewardExp=float(reward), RewardItem=-1,
+                    IdleAnimStr=art[0], AttackAnimStr=art[1],
+                    BattleParticleAttack="FX_WeaponSlash_00",
+                    BattleParticleHit="FX_WeaponHit_14",
+                    Shadow="Mob_Shadow_000",
+                    MonsterNameId=MOB_NAME_BASE + floor * 8 + k,
+                    MonsterDescId=MOB_DESC_BASE + floor * 8 + k,
+                    _floor=floor, _boss=False, _order=k,
+                ))
+                k += 1
 
         if boss:
             btrait = BOSS_TRAITS[ch % len(BOSS_TRAITS)]

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// 몬스터 색 변형.
@@ -28,6 +28,12 @@ public static class MonsterTint
 
     // 층 안에서의 서열(0=제일 약함). 뒤로 갈수록 진해진다.
     static readonly float[] Depth = { 1.15f, 1.05f, 0.95f, 0.85f, 0.72f };
+
+    // 층의 다섯 자리 중 앞 셋은 같은 종이다 (generate_content.MOB_SPECIES_RUN).
+    // 자리를 그대로 서열로 쓰면 같은 놈 셋이 서로 다른 진하기로 나와 다른
+    // 종으로 읽힌다 — 그러면 "같은 놈을 세 번 만난다" 는 임계가 사라진다.
+    // 묶음의 첫 자리로 되돌려 셋이 같은 색을 입게 한다.
+    static readonly int[] SpeciesRank = { 0, 0, 0, 3, 4 };
 
     // 챕터 안에서 다섯 층마다 색을 조금씩 돌린다.
     //
@@ -84,7 +90,7 @@ public static class MonsterTint
             return ForBoss(md.Chapter);
 
         // 생성 몬스터 id = 1000 + 층*8 + 서열. 층을 되짚어 색 갈래를 정한다.
-        int order = monsterId % 8;
+        int order = SpeciesRank[Mathf.Clamp(monsterId % 8, 0, SpeciesRank.Length - 1)];
         int floor = (monsterId - 1000) / 8;
         int variant = (floor / 5) % VariantHue.Length;   // 다섯 층마다 갈린다
         return For(md.Chapter, order, variant);
