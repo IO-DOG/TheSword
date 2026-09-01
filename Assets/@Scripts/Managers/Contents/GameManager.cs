@@ -468,7 +468,7 @@ public class GameManager
         if (string.IsNullOrEmpty(key) || Managers.Resource.Load<AudioClip>(key) == null)
             key = "Chapter0_BGM";
 
-        Managers.Sound.FadeAndPlayBGM(key, 2f);
+        Managers.Sound.FadeAndPlayBGM(key, 2f, ChapterTheme.Get(MapBuilder.GetChapter(mapId)).BgmPitch);
     }
 
     public MonsterController GetBoss()
