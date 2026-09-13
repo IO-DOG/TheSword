@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,6 +19,8 @@ public class UI_BattlePopup : UI_Popup
 
     #endregion
 
+    BattleStepper _battle;
+    bool _ending;
     UI_PlayerCard playerCard = null;
     UI_MonsterCard monsterCard = null;
 
@@ -66,6 +68,14 @@ public class UI_BattlePopup : UI_Popup
 
         // 스킬은 전투마다 셋 다 새로 채운다.
         BattleSkills.ResetForBattle();
+        _battle = new BattleStepper(Managers.Game.PlayerData, Managers.Game.MonsterData[0],
+            Managers.Game.AttackCount, Managers.Game.DefenceCoolTime);
+        _battle.OnStrike = (player, damage, critical, guarded) => {
+            UI_BaseCard card = player ? (UI_BaseCard)playerCard : monsterCard;
+            card.PresentAttack(player ? _battle.Player : _battle.Monster,
+                player ? _battle.Monster : _battle.Player, damage, critical, guarded);
+        };
+        _battle.OnGuard = player => { if (player) playerCard.Defence(); else monsterCard.Defence(); };
 
         return true;
     }
@@ -87,8 +97,27 @@ public class UI_BattlePopup : UI_Popup
             BattleSkills.Use((int)BattleSkills.Kind.Drain, playerCard, monsterCard);
     }
 
+    public void RaisePlayerGuard() => _battle?.Guard(true);
+
+    void FixedUpdate()
+    {
+        if (_battle == null || _ending || !Managers.Game.OnBattle) return;
+        for (int i = 0; i < Mathf.Max(1, Managers.Game.GameSpeed) && !_battle.Finished; i++)
+            _battle.Step(Time.fixedDeltaTime);
+        Managers.Game.AttackCount = _battle.PlayerHits;
+        Managers.Game.DefenceCoolTime = _battle.PlayerDefenceTime;
+        playerCard.ShowCombatGauges(_battle.PlayerAttackTime, _battle.PlayerAttackPeriod,
+            _battle.PlayerDefenceTime, _battle.PlayerDefencePeriod);
+        monsterCard.ShowCombatGauges(_battle.MonsterAttackTime, _battle.MonsterAttackPeriod,
+            _battle.MonsterDefenceTime, _battle.MonsterDefencePeriod);
+    }
+
+    void OnDestroy() => _battle?.Dispose();
+
     public void BattleEnd()
     {
+        if (_ending) return;
+        _ending = true;
         float closeTime = 0.3f;
         StartCoroutine(CoBattleEnd(closeTime));
     }

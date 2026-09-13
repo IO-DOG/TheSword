@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -97,6 +97,7 @@ public static class MapBuilder
         PlaceDeco(root, dungeonId);
 
         int doorCount = 0;
+        var rewardGroups = new Dictionary<int, ConsumableItem>();
 
         foreach (Data.ObjectData obj in mapData.Objects)
         {
@@ -126,6 +127,10 @@ public static class MapBuilder
                             mc.id = obj.Id;
                             mc._monsterIndex_forActive = obj.Count;
                             SetupLook(go, obj.Id);
+                            // 그림 아래끝이 낮은 시트(Mob_C0_I009)는 SitOnFloor 가 0.9 쯤 들어 올린다.
+                            // 콜라이더가 루트에 있어 같이 떠오르면 플레이어 광선이 빈손이 되고,
+                            // 관문 몬스터를 싸우지 않고 통과한다(6·7층). 보스처럼 높이를 넉넉히 준다.
+                            FitColliderToCell(go);
                         }
                         break;
                     }
@@ -156,6 +161,15 @@ public static class MapBuilder
                             ConsumableItem ci = Bind<ConsumableItem>(go);
                             ci.id = obj.Id;
                             ci._itemIndex_forActive = obj.Count;
+                            if (obj.ChoiceGroup > 0)
+                            {
+                                if (rewardGroups.TryGetValue(obj.ChoiceGroup, out var other))
+                                {
+                                    ci.ChoicePartner = other;
+                                    other.ChoicePartner = ci;
+                                }
+                                else rewardGroups.Add(obj.ChoiceGroup, ci);
+                            }
                             StretchBillboard(go);   // 그대로 두면 눌려 보인다
                             SitOnFloor(go);
                         }

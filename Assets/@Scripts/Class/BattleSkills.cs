@@ -88,7 +88,7 @@ public static class BattleSkills
                 // FillDefenceGague 가 아니라 Defence 를 부른다 — 만드는 상태는 똑같은데
                 // (게이지 가득 + IsDefence), UI_PlayerCard 의 override 가 방패 애니메이션까지
                 // 재생한다. 안 그러면 화면에서는 아무 일도 안 일어난 것으로 보인다.
-                playerCard.Defence();
+                playerCard.GetComponentInParent<UI_BattlePopup>().RaisePlayerGuard();
                 break;
 
             case Kind.Drain:

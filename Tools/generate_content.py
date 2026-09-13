@@ -25,6 +25,8 @@ import json
 import os
 import random
 
+from ui_text import append_rows, emit_bootstrap
+
 from thesword_balance import (
     Creature, extend_player_table, exp_to_next, load_player_table,
     make_player, player_stats_at, simulate_battle,
@@ -1037,8 +1039,12 @@ def emit_scripts(monsters):
         add(m["MonsterDescId"], f"{m['Name']}. 깊은 곳에서 올라온 존재.",
             f"{m['Name']}.")
 
+    append_rows(scripts)
+    emit_bootstrap(ROOT)
     scripts.sort(key=lambda s: s["id"])
     write_json(path, "scripts", scripts)
+    header = ["id", "ScriptKr", "ScriptEn", "ScriptJp", "ScriptCn"]
+    write_csv(os.path.join(EXCEL, "ScriptData.csv"), header, [[row.get(k, "") for k in header] for row in scripts])
 
 
 # ------------------------------------------------------------------ 층 레이아웃
@@ -1074,7 +1080,7 @@ def emit_layouts(monsters, write=True):
                 [m["id"] for m in mobs], boss["id"] if boss else None, walls,
                 seed=floor * 1000 + attempt, mobs_in_floor=MOBS_PER_FLOOR,
                 equip_id=CHAPTER_EQUIP_REWARD.get(floor), potions=pots,
-                rune=rune_of(floor), alcove=alcove_plan(floor))
+                rune=rune_of(floor), alcove=alcove_plan(floor), layout_kind=floor_type(floor))
             if g is None:
                 continue
             ok, err = validate_layout(g, origins, doors)
@@ -1145,9 +1151,14 @@ def report_choices(choices):
           (tot["optional_mobs"], tot["optional_mobs"] / n, tot["optional_items"]))
     print("      [선택] 막다른 골방 %d개 (층당 %.2f)" %
           (tot["dead_ends"], tot["dead_ends"] / n))
+    print("      [선택] 둘 중 하나 보상 %d쌍 (보물 층마다 한 쌍, 완주 계산에는 없다)" %
+          (tot["choice_rewards"] // 2))
 
     broken = []
     for floor, c in sorted(choices.items()):
+        want = 2 if floor_type(floor) == 4 else 0
+        if c["choice_rewards"] != want:
+            broken.append(f"{floor}층 둘 중 하나 보상 칸 {c['choice_rewards']}개 (!= {want})")
         if c["forced_mobs"] < FORCED_PER_FLOOR:
             broken.append(f"{floor}층 관문 {c['forced_mobs']}마리 (< {FORCED_PER_FLOOR})")
         if c["boss"] and not c["boss_forced"]:
@@ -1285,7 +1296,7 @@ def build_all(dry_run=False):
 
     print("[4/7] 층 레이아웃 생성 + 도달 가능성 검사")
     (written, failures, bad_doors, choices, sealed_off,
-     unsafe_vaults, econ) = emit_layouts(monsters, write=not dry_run)
+     unsafe_vaults, econ) = emit_layouts(monsters, write=False)
     print(f"      {written}/{TOTAL_FLOORS - HANDMADE_FLOORS} 층 생성 "
           f"(1~{HANDMADE_FLOORS}층은 원본 유지)")
     if failures:
@@ -1339,6 +1350,9 @@ def build_all(dry_run=False):
     emit_monster_data(monsters)
     emit_stage_info()
     emit_scripts(monsters)
+    # [4/7] 은 검사만 한다 — 검사가 다 통과한 뒤에야 쓴다. 씨앗이 층수로
+    # 정해지므로 다시 뽑아도 같은 격자가 나온다.
+    emit_layouts(monsters, write=True)
 
     # 레이아웃 CSV 를 쓴 "다음에" 돌려야 한다. MapBuilder 가 읽는 것은 이 JSON 이다.
     print("      MapData.json 생성 (CSV -> 런타임 오브젝트 배치)")

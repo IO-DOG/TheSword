@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -119,6 +119,7 @@ namespace Data
     [Serializable]
     public class ObjectData
     {
+        public int ChoiceGroup { get; set; }
         public int Id { get; set; }
         public int Count { get; set; }
         public int ObjectType { get; set; }

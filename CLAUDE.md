@@ -97,6 +97,11 @@ CLI 빌드/테스트 스크립트는 없다. Unity 에디터에서 열어 작업
 같은 그림을 색으로 갈라 쓴다(`MonsterTint`): 색조=챕터, 진하기=층 안 서열,
 그리고 **다섯 층마다 색 갈래**가 바뀐다(한 챕터 20층이 같은 색이면 같은 놈으로 보인다).
 
+**그림을 바닥에 앉히면 콜라이더도 같이 뜬다.** `SitOnFloor` 는 그림 아래끝에 맞춰 루트를
+들어 올리는데, 몬스터 프리팹은 콜라이더가 루트에 있다. 아래끝이 낮은 시트(`Mob_C0_I009`)는
+0.9 쯤 떠서 플레이어 광선(키높이)이 빈손이 됐고, 관문 몬스터를 싸우지 않고 통과했다.
+그래서 일반 몬스터도 보스처럼 `FitColliderToCell` 로 높이를 넉넉히 준다.
+
 시트를 추가하면 클립을 손으로 만들지 말고:
 
 ```bash
@@ -293,9 +298,11 @@ Unity.exe -projectPath . -executeMethod MapDecoSetup.Build
 게이지식 전투에 특성 8종이 얽혀 사람이 암산할 수 없으니, 이 표시가 없으면
 완전 정보 위에서 계산한다는 설계가 성립하지 않는다.
 
-**예측을 새로 구현하지 마라.** `CreatureData` 를 복제하고 같은 `ITrait` 을 붙여
-카드 코루틴과 같은 쿨타임 루프(3f/AttackSpeed, 3f/DefenceSpeed)를 돌린다 —
-피해 계산은 `CreatureClass` 의 코드가 그대로 돈다. 같은 계산을 두 곳에 두면 어긋난다.
+**예측을 새로 구현하지 마라.** 전투 시계는 `BattleStepper` 하나다 — 실제 전투
+(`UI_BattlePopup.FixedUpdate`)와 예측이 같은 것을 돌린다. 카드는 그림만 그린다
+(`PresentAttack`, `ShowCombatGauges`). 예측은 `CreatureData` 를 복제해 그 시계에 넣을
+뿐이고, 피해 계산은 `CreatureClass` 의 `ITrait` 이 그대로 돈다. 같은 계산을 두 곳에 두면 어긋난다.
+배속은 `Step` 을 여러 번 부르는 것이라 결과를 바꾸지 않는다.
 
 **방어 게이지는 플레이어 전용 전역이다.** `Managers.Game.DefenceCoolTime` 은
 `UI_PlayerCard` 만 누적하는데, 부모의 `ClearDefence` 가 그것까지 지우고 있었다.
@@ -312,8 +319,9 @@ FastChecks.EditorBootData();          // 표를 올린다
 var r = BattleForecast.Of(902, 59);   // 몬스터 id, CurStageid(0부터)
 ```
 
-실측(몹 15 + 보스 5): 오차 0 이 17건, 게임이 덜 아픈 쪽 3건, **더 아픈 쪽 0건**.
-남은 3건은 안전한 방향이라 두었다 — 원인은 아직 못 밝혔다(904 는 정확히 한 대 차이).
+실측(`BattleStepper` 이후, 특성 9종 x 3마리, 살아남는 최저 레벨): 오차 0 이 21건,
+게임이 덜 아픈 쪽 6건, **더 아픈 쪽 0건**. 어긋나는 것은 거대(6) 셋, 암살(7) 셋 중 둘, 1568(1점)이다.
+안전한 방향이라 두었다 — 원인은 아직 못 밝혔다. (그 전 실측은 17/3/0, 904 가 한 대 차이였는데 지금은 맞는다.)
 
 ### 이펙트가 없어도 게임은 굴러가야 한다
 
@@ -385,6 +393,9 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
 칸뿐이라 그 칸을 막으면 안쪽에 갈 수 없고, 그래서 입구에 선 몬스터가 진짜 파수꾼이
 된다. 열린 방에서는 아무리 잘 놓아도 돌아서 접근할 수 있어 "잡아야 얻는다" 가
 성립하지 않았다. **세로로만 판다** — 가로 간격이 2칸이라 안쪽이 옆방과 맞닿는다.
+그리고 **테두리 한 칸 안쪽까지만** 판다. 격자 맨 윗줄·아랫줄까지 파면 그 바깥에 벽을 세울
+자리가 없어 걸어서 맵 밖으로 나간다 — 29개 층의 골방 끝이 그랬고, 자동 플레이가 7층
+금고에 들어갔다가 빠져 10분을 헤맸다. `validate_layout` 이 테두리의 열린 칸을 거부한다.
 
 골방 안의 덤은 **완주 계산에 넣지 않는다.** 안 잡고 지나갈 수 있는 것을 셈에 넣으면
 완주 보장이 거짓말이 된다. 파수꾼도 그 층 다섯 마리 중 하나를 옮겨 세운 것이지
@@ -468,8 +479,8 @@ Lv17 로 관측됐다 (예측보다 3 높다). 완주 판정이 그만큼 보수
   일반 몹도 슬라임이 늑대로 불렸다. 그림에 맞춰 이름을 고쳐도 화면은 안 바뀐다는 뜻이다.
   지금은 **생성 구간(5100~, 10900~, 11000~, 20900~, 21000~)만 덮어쓴다.**
 - 테이블 원본: `Assets/@Resources/Data/Excel/*.csv` → 변환된 `Assets/@Resources/Data/JsonData/*.json`(Addressable TextAsset)을 `DataManager.Init()`이 Newtonsoft.Json + `ILoader<Key,Value>` 패턴으로 로드. 새 테이블 추가 시 `Data.Contents.cs`에 Data 클래스+Loader 정의 후 `DataManager`에 딕셔너리·로드 라인 추가.
-- 던전 맵: `Assets/StreamingAssets/Data/Excel/Dungeon_*.csv` 그리드를 `DataManager.ResetActiveDic()`이 파싱해 `MapData.json` 생성. 셀 코드: `I`=소비 아이템, `E`=장비, `M`=몬스터, `B`=보스, `W`=벽, 숫자 3~8=문, 11=스폰 지점, 12=레버, 13=기둥, 14~16=포탈.
-- 세이브: 오브젝트별 활성화 상태 딕셔너리들을 `Application.persistentDataPath/*.json`으로 저장/로드 (`UpdateActiveDic`/`LoadActiveDic`).
+- 던전 맵: `Assets/StreamingAssets/Data/Excel/Dungeon_*.csv` 그리드를 `Tools/mapdata_gen.py` 가 런타임 `MapData.json` 으로 굽는다. `DataManager.ResetActiveDic()` 은 같은 CSV 에서 활성화 딕셔너리만 만든다(카운터 순서가 같아야 한다). 셀 코드: `I`=소비 아이템, `E`=장비, `M`=몬스터, `B`=보스, `W`=벽, 숫자 3~8=문, 11=스폰 지점, 12=레버, 13=기둥, 14~16=포탈. 끝의 `~` 는 "둘 중 하나" 보상(보물 층에 한 쌍, `ChoiceGroup`) — 하나를 주우면 짝이 사라진다.
+- 세이브: `SaveStore` 가 플레이어·오브젝트 활성화·진행 플래그를 **`Checkpoint.json` 하나**에 쓴다. `MapData` 해시를 같이 적어, 데이터를 다시 뽑은 뒤의 옛 세이브는 섞지 않고 거부한다. 예전 방식(`SaveData.json` + `*ActiveData.json`)은 이어하기 때 한 번 옮겨 적는다.
 
 ### UI 컨벤션
 
@@ -482,4 +493,7 @@ Lv17 로 관측됐다 (예측보다 3 높다). 완주 판정이 그만큼 보수
 ### 로컬라이제이션
 
 UI에 노출되는 문자열은 하드코딩하지 않고 `ScriptData` 테이블 ID로 `Managers.GetString(id)` 호출 (Kr/En/Jp/Cn).
+생성기가 넣는 UI 문구(타이틀 버튼·전투 예측 라벨 등)는 `Tools/ui_text.py` 의 `TEXT` 한 곳에 적는다 —
+`ScriptData` 와 함께 `GeneratedUiText.cs` 로도 구워지고, 어드레서블을 못 올려 표가 빈 때
+`GetString` 이 그쪽으로 되돌아간다("불러오지 못했습니다" 가 그때 뜬다).
 데이터 시트 이스케이프: `\n`=줄바꿈, `^`=쉼표.

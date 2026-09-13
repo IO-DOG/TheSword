@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -74,14 +74,17 @@ public class UI_CItemInfo : UI_Base
 
     void SetInfo()
     {
-        int id = gameObject.transform.parent.GetComponent<ConsumableItem>().id;
+        var item = gameObject.transform.parent.GetComponent<ConsumableItem>();
+        int id = item.id;
         GetText((int)Texts.MonsterNameText).text = Managers.GetString(Managers.Data.ConsumableItemDic[id].ScriptNameId);
-        GetText((int)Texts.MonsterAttackText).text = "0";
-        GetText((int)Texts.MonsterDefenseText).text = "0";
+        GetText((int)Texts.MonsterAttackText).text = Managers.Data.ConsumableItemDic[id].AttackUp.ToString();
+        GetText((int)Texts.MonsterDefenseText).text = Managers.Data.ConsumableItemDic[id].DefenceUp.ToString();
         float heal = Managers.Data.ConsumableItemDic[id].Heal * Managers.Game.PlayerData.MaxHP / 100;
-        heal = Mathf.Round(heal);
+        heal = Mathf.Round(heal) + Managers.Data.ConsumableItemDic[id].HPUp;
         GetText((int)Texts.MonsterHPText).text = $"{heal}";
-        GetText((int)Texts.MonsterDescText).text = Managers.GetString(Managers.Data.ConsumableItemDic[id].ScriptDescriptionId);
+        GetText((int)Texts.MonsterDescText).text = (item.ChoicePartner != null
+            ? Managers.GetString(Define.REWARD_CHOICE) + "\n\n" : "") +
+            Managers.GetString(Managers.Data.ConsumableItemDic[id].ScriptDescriptionId);
     }
 
     private void Update()

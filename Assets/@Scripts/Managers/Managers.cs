@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -83,6 +83,9 @@ public class Managers : MonoBehaviour
         Data.ScriptData script;
         if (Managers.Data.ScriptDic.TryGetValue(id, out script) == false || script == null)
         {
+            // 어드레서블을 못 올리면 표가 비어 있다 — 타이틀의 "불러오지 못했습니다" 가 그때 뜬다.
+            string boot = GeneratedUiText.Get(id, scriptType);
+            if (boot != null) return boot;
             Debug.LogWarning($"[Script] {id} 번 문자열이 없다");
             return "";
         }

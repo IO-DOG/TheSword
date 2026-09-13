@@ -60,7 +60,10 @@ def build_mapdata():
 
                 c = block[0]
                 if c == "I":
-                    objects.append(_obj(CITEM, id_, counts["citem"], px, z))
+                    item = _obj(CITEM, id_, counts["citem"], px, z)
+                    if block.endswith("~"):
+                        item["ChoiceGroup"] = 1  # At most one pair per floor; the group is map-local.
+                    objects.append(item)
                     counts["citem"] += 1
                 elif c == "E":
                     objects.append(_obj(EITEM, id_, counts["eitem"], px, z))

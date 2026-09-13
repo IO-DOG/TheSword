@@ -1,4 +1,4 @@
-﻿using Coffee.UIExtensions;
+using Coffee.UIExtensions;
 using DG.Tweening;
 using System;
 using System.Collections;
@@ -42,8 +42,6 @@ public class UI_MonsterCard : UI_BaseCard
 
         //GetImage((int)Images.AttackIcon).sprite = spriteAtlas.GetSprite("BattleUI_Weppon2_0");
 
-        StartCoroutine(CoDelayAttack());
-        StartCoroutine(CoDelayDefence());
 
         return true;
     }
@@ -53,16 +51,10 @@ public class UI_MonsterCard : UI_BaseCard
         base.Refresh();
     }
 
-    public override void Attack(CreatureData attacker, CreatureData target)
+    public override void PresentAttack(CreatureData attacker, CreatureData target,
+        int damage, bool critical, bool guarded)
     {
-        _attackCount++;
-        if (_attackCount == _creature.Critical)
-        {
-            _creature.IsCritical = true;
-            _attackCount = 0;
-        }
-
-        base.Attack(attacker, target);
+        base.PresentAttack(attacker, target, damage, critical, guarded);
 
         Vector3 pos = GameObject.Find("UI_PlayerCard").GetComponent<UI_PlayerCard>().GetImage((int)Images.CreatureImage).gameObject.transform.position;
         pos = new Vector3(pos.x, pos.y - 100, pos.z);
@@ -70,13 +62,7 @@ public class UI_MonsterCard : UI_BaseCard
         GameObject go = GameObject.Find("UI_BattlePopup");
         if (go != null)
         {
-            Managers.Object.ShowDamageFont(pos, _hitDamage, 0, go.transform, attacker.IsCritical, target.IsDefence);
-            if (attacker.IsCritical) attacker.IsCritical = false;
-        }
-
-        if (target.IsDefence)
-        {
-            target.OnDefenceAction.Invoke();
+            Managers.Object.ShowDamageFont(pos, _hitDamage, 0, go.transform, critical, guarded);
         }
 
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Weapon);
@@ -99,51 +85,6 @@ public class UI_MonsterCard : UI_BaseCard
         base.Defence();
         GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Shield);
 
-    }
-
-    IEnumerator CoDelayAttack()
-    {
-        float maxAttackCoolTime = 3f;
-        float attackCoolTime = 0f;
-        maxAttackCoolTime = maxAttackCoolTime / _creature.AttackSpeed;
-
-        while (true)
-        {
-            if (attackCoolTime >= maxAttackCoolTime)
-            {
-                attackCoolTime = 0f;
-                Attack(_creature, Managers.Game.PlayerData);
-            }
-            attackCoolTime += Time.deltaTime * Managers.Game.GameSpeed;
-
-            GetImage((int)Images.AttackDelayGauge).fillAmount = attackCoolTime / maxAttackCoolTime;
-
-            yield return new WaitForFixedUpdate();
-        }
-    }
-
-    IEnumerator CoDelayDefence()
-    {
-        _maxDefenceCoolTime = _maxDefenceCoolTime / _creature.DefenceSpeed;
-
-        while (true)
-        {
-            if (_defenceCoolTime >= _maxDefenceCoolTime)
-            {
-                if (_creature.IsDefence == false)
-                {
-                    _creature.IsDefence = true;
-                    Defence();
-                }
-                _defenceCoolTime = _maxDefenceCoolTime;
-                //_defenceCoolTime = 0f;
-            }
-            _defenceCoolTime += Time.deltaTime * Managers.Game.GameSpeed;
-
-            GetImage((int)Images.DefenceDelayGauge).fillAmount = _defenceCoolTime / _maxDefenceCoolTime;
-
-            yield return new WaitForFixedUpdate();
-        }
     }
 
     public void Berserk()

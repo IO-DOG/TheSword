@@ -1,4 +1,4 @@
-﻿using Data;
+using Data;
 using System.Collections;
 using TMPro;
 using System.Collections.Generic;
@@ -190,12 +190,19 @@ public class UI_BaseCard : UI_Base
 
     }
 
-    public virtual void Attack(CreatureData attacker, CreatureData target)
+    public virtual void PresentAttack(CreatureData attacker, CreatureData target,
+        int damage, bool critical, bool guarded)
     {
-        int damage = attacker.Trait.ExecuteAttack(attacker, target);
-        target.Trait.ExcuteOnHit(attacker, target, damage);
         _hitDamage = damage;
-        _isCriHit = attacker.IsCritical;
+        _isCriHit = critical;
+    }
+
+    public void ShowCombatGauges(float attack, float attackPeriod, float defence, float defencePeriod)
+    {
+        _defenceCoolTime = defence;
+        _maxDefenceCoolTime = defencePeriod;
+        GetImage((int)Images.AttackDelayGauge).fillAmount = attack / attackPeriod;
+        GetImage((int)Images.DefenceDelayGauge).fillAmount = defence / defencePeriod;
     }
 
     public virtual void Defence()

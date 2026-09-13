@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Unity.VisualScripting;
@@ -12,15 +12,34 @@ public class ConsumableItem : MonoBehaviour
     public const int NUM_OF_RUNES = NUM_OF_POTIONS + 3;
     public int id;
     public int _itemIndex_forActive;
+    public ConsumableItem ChoicePartner;
+    LineRenderer _choiceLine;
 
     private void Start()
     {
+        if (ChoicePartner != null && _itemIndex_forActive < ChoicePartner._itemIndex_forActive)
+        {
+            _choiceLine = gameObject.AddComponent<LineRenderer>();
+            _choiceLine.sharedMaterial = GetComponent<SpriteRenderer>().sharedMaterial;
+            _choiceLine.positionCount = 2;
+            _choiceLine.startWidth = _choiceLine.endWidth = 0.015f;
+            _choiceLine.startColor = _choiceLine.endColor = new Color(0.5f, 1f, 1f, 0.8f);
+            _choiceLine.SetPosition(0, transform.position + Vector3.up * 0.06f);
+            _choiceLine.SetPosition(1, ChoicePartner.transform.position + Vector3.up * 0.06f);
+        }
         GetComponent<Animator>().Play($"ConsumableItem_{id}");
         GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>(Managers.Data.ConsumableItemDic[id].Shadow);
     }
 
     public void PickUp()
     {
+        if (!gameObject.activeInHierarchy) return;
+        // Consume the pair together before presentation callbacks can run again.
+        if (ChoicePartner != null)
+        {
+            Managers.Data.CItemActiveDic[ChoicePartner._itemIndex_forActive] = false;
+            ChoicePartner.gameObject.SetActive(false);
+        }
         #region Data Loading
         Managers.Game.ConsumableItemData.id = id;
         Managers.Game.ConsumableItemData.Heal = Managers.Data.ConsumableItemDic[id].Heal;

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -131,7 +131,7 @@ public class CreatureClass : MonoBehaviour
             //OnGuardianAction += uI_BaseCard.FillDefenceGague;
             //Managers.Event.Unsubscribe(Define.GameEvent.FillDefenceGague, uI_BaseCard.FillDefenceGague);
             //Managers.Event.Subscribe(Define.GameEvent.FillDefenceGague, uI_BaseCard.FillDefenceGague);
-            uI_BaseCard.FillDefenceGague();
+            if (uI_BaseCard != null) uI_BaseCard.FillDefenceGague();
         }
 
         ~GuardianTrait()

@@ -121,11 +121,11 @@ def room_cells(rx, ry):
             for x in range(ox, ox + 2 * hw + 1)]
 
 
-def _carve_rooms(grid):
-    for ry in range(ROOMS_Y):
-        for rx in range(ROOMS_X):
-            for (x, y) in room_cells(rx, ry):
-                grid[y][x] = FLOOR
+def _carve_rooms(grid, rooms=None):
+    for rx, ry in (rooms if rooms is not None else
+                   [(x, y) for y in range(ROOMS_Y) for x in range(ROOMS_X)]):
+        for x, y in room_cells(rx, ry):
+            grid[y][x] = FLOOR
 
 
 def _corridor(grid, a, b):
@@ -291,7 +291,8 @@ def _carve_alcove(grid, rooms, rng):
     for (bx, by), (dx, dy) in cands:
         gate = (bx + dx, by + dy)
         prize = (bx + 2 * dx, by + 2 * dy)
-        if not _inside(gate) or not _inside(prize):
+        # 한 칸 안쪽까지만 판다. 테두리까지 파면 그 바깥에 벽을 둘 자리가 없다.
+        if not all(1 <= c[0] < GRID_W - 1 and 1 <= c[1] < GRID_H - 1 for c in (gate, prize)):
             continue
         if grid[gate[1]][gate[0]] != VOID or grid[prize[1]][prize[0]] != VOID:
             continue
@@ -308,7 +309,7 @@ def _carve_alcove(grid, rooms, rng):
 
 def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
                        with_down_stairs=True, equip_id=None, potions=None, rune=None,
-                       alcove=None):
+                       alcove=None, layout_kind=0):
     """한 층의 격자를 만든다.
 
     mob_ids : 이 층의 몬스터 id 들. 약한 놈부터 정렬돼 있어야 한다.
@@ -336,9 +337,16 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
         mob_ids.append(mob_ids[-1])
 
     grid = [[VOID] * GRID_W for _ in range(GRID_H)]
-    _carve_rooms(grid)
-
-    order = _room_order(rng)
+    full_order = _room_order(rng)
+    # Compact floors use six rooms; exploration floors add three same-region branches.
+    order = full_order[:6] if layout_kind in (1, 3) else full_order
+    cuts = (2, 3, 4) if len(order) == 6 else (3, 5, 7)
+    regions = [list(order[:cuts[0]]), list(order[cuts[0]:cuts[1]]),
+               list(order[cuts[1]:cuts[2]]), list(order[cuts[2]:])]
+    if layout_kind == 2:  # Narrow gauntlet rooms, with enough corridor for boss and rune.
+        for room in order:
+            _SHAPE[room] = (2, 1)
+    _carve_rooms(grid, order)
     centers = [room_center(*r) for r in order]
 
     # 큰 줄기. 통로마다 방 밖 구간의 한가운데가 관문 자리다.
@@ -379,15 +387,35 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     # 그러면 큰길 문을 열 열쇠가 사라져 층이 통째로 막힌다. 세 문을 다 연
     # 뒤라야 손에 남은 것이 진짜 여분이고, 잘못 써서 갇히는 수가 없어진다.
     # check_vault_safe 가 완성된 격자에서 그걸 다시 잰다.
+    if layout_kind == 3:
+        pending = set(full_order) - set(order)
+        while pending:
+            attached = False
+            for room in sorted(pending):
+                parents = [(i, parent) for i, region in enumerate(regions) for parent in region
+                           if parent != order[-1] and
+                           abs(parent[0] - room[0]) + abs(parent[1] - room[1]) == 1]
+                if not parents:
+                    continue
+                region, parent = rng.choice(parents)
+                _carve_rooms(grid, [room])
+                _corridor(grid, room_center(*room), room_center(*parent))
+                regions[region].append(room)
+                pending.remove(room)
+                attached = True
+                break
+            if not attached:
+                return None, None, None
+
     vault_color = alcove[1] if alcove and alcove[0] == "vault" else None
     alcove_gate, alcove_prize, alcove_base = _carve_alcove(
-        grid, order[7:] if vault_color is not None else order, rng)
+        grid, regions[3] if vault_color is not None else [r for region in regions for r in region], rng)
     if vault_color is not None and alcove_gate is None:
         return None, None, None
 
     # 구역: 방 아홉 개를 3/2/2/2 로 끊고 경계에 문을 세운다.
     doors = []
-    for c in (3, 5, 7):
+    for c in cuts:
         g = gates[c - 1]
         if g is None:
             return None, None, None
@@ -395,7 +423,6 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     if len(set(doors)) != 3:
         return None, None, None
 
-    regions = [order[0:3], order[3:5], order[5:7], order[7:9]]
 
     place = {}
     used = set()
@@ -496,7 +523,8 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
                 out.append(c)
         return out
 
-    free_gates = _unique([g for g in gates if g and g not in used and g not in doors])
+    free_gates = _unique([g for neck in necks for g in neck
+                          if g and g not in used and g not in doors])
 
     toll_spots = [g for g in free_gates if _cuts_path(grid, spawn, up, g)]
 
@@ -592,6 +620,17 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     if alcove_prize is not None and alcove_prize not in used:
         place[alcove_prize] = alcove[2] if alcove else POTION_20
         used.add(alcove_prize)
+
+    if layout_kind == 4:
+        # A bonus choice, outside the guaranteed healing/rune budget. Both cells are optional.
+        pool = [c for c in free_in(regions[3]) if not _cuts_path(grid, spawn, up, c)]
+        pairs = [(a, b) for a in pool for b in pool if a < b and
+                 abs(a[0] - b[0]) + abs(a[1] - b[1]) == 2]
+        if not pairs:
+            return None, None, None
+        a, b = rng.choice(pairs)
+        place[a], place[b] = POTION_30 + "~", rune + "~"
+        used.update((a, b))
 
     if equip_id is not None:
         pool = free_in(regions[3])
@@ -815,6 +854,13 @@ def validate_layout(grid, regions, doors):
         return False, "스폰 없음"
     if stairs is None:
         return False, "계단 없음"
+    # 테두리의 열린 칸은 바깥에 벽을 세울 자리가 없다 — 걸어서 맵 밖으로 나간다.
+    # 좁은 방 층에서 금고가 맨 아래 줄까지 파여 자동 플레이가 그렇게 빠졌다(7층).
+    for y in range(GRID_H):
+        for x in range(GRID_W):
+            if (x in (0, GRID_W - 1) or y in (0, GRID_H - 1)) and \
+                    grid[y][x] != VOID and not grid[y][x].startswith("W"):
+                return False, f"테두리에 열린 칸 ({x}, {y})"
 
     door_set = set(doors)
 
@@ -941,7 +987,7 @@ def floor_choices(grid, doors):
     spawn, up = _endpoints(grid)
     out = dict(forced_mobs=0, optional_mobs=0, boss=0, boss_forced=0,
                forced_items=0, optional_items=0, runes=0, forced_runes=0,
-               keys=0, dead_ends=0, vaults=0, vault_items=0)
+               keys=0, dead_ends=0, vaults=0, vault_items=0, choice_rewards=0)
     if spawn is None or up is None:
         return out
 
@@ -957,6 +1003,8 @@ def floor_choices(grid, doors):
     for y in range(len(grid)):
         for x in range(len(grid[y])):
             cell = grid[y][x]
+            if cell.endswith("~"):
+                out["choice_rewards"] += 1
             if (x, y) in inside:
                 # 금고 안. 막다른 자리 셈에는 그대로 들어간다 — 잠겼을 뿐
                 # 골방은 여전히 골방이다.

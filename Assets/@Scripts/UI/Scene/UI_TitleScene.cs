@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -44,6 +44,9 @@ public class UI_TitleScene : UI_Scene
     int maxButtonCount = 4;
     bool _lock = false;
     bool _isFirst = false;
+    bool _loading;
+    bool _loadFailed;
+    Define.ScriptType _language;
 
     public override bool Init()
     {
@@ -63,7 +66,7 @@ public class UI_TitleScene : UI_Scene
         GetObject((int)Objects.Slider).GetComponent<Slider>().gameObject.SetActive(false);
 
         GetButton((int)Buttons.NewGameButton).gameObject.BindEvent(() => { buttonsIdx = 0; SetButtonColorAndButtonsText(buttonsIdx); StartCoroutine(CoOnClickNewGameButton()); });
-        if (PlayerPrefs.GetInt("ISFIRST", 1) != 1)
+        if (Managers.Game.HasSave)
         {
             GetButton((int)Buttons.LoadGameButton).gameObject.BindEvent(() => { buttonsIdx = 1; SetButtonColorAndButtonsText(buttonsIdx); OnClickLoadGameButton(); });
         }
@@ -105,15 +108,25 @@ public class UI_TitleScene : UI_Scene
 
     void Loading()
     {
+        if (_loading) return;
+        _loading = true;
+        // 재시도일 때만 실패 문구를 걷는다. 처음부터 끄면 PlayOneShot.Start 의
+        // GameObject.Find 가 꺼진 것을 못 찾아, 칼 부딪히는 소리 이벤트가 널참조로 죽는다.
+        if (_loadFailed) GetText((int)Texts.PessAnyKeyText).gameObject.SetActive(false);
+        _loadFailed = false;
+        isPreload = false;
+        var slider = GetObject((int)Objects.Slider).GetComponent<Slider>();
+        slider.gameObject.SetActive(true);
+        slider.value = 0;
         GameObject.Find("MainTitle_BGAnim").GetComponent<Animator>().Play("WaitForOpening");
-
-        Managers.Resource.LoadAllAsync<Object>("PreLoad", (key, count, totalCount) =>
-        {
-            GetObject((int)Objects.Slider).GetComponent<Slider>().value = (float)count / totalCount;
-            if (count == totalCount)
+        Managers.Resource.LoadAllAsync<Object>("PreLoad", (key, count, total) => {
+            if (this != null) slider.value = total > 0 ? (float)count / total : 0;
+        }, error => {
+            if (this == null) return;
+            _loading = false;
+            if (error != null) { LoadingFailed(error); return; }
+            try
             {
-                isPreload = true;
-
                 Managers.Data.Init();
                 Managers.Game.Init();
                 Managers.Sound.Init();
@@ -124,22 +137,44 @@ public class UI_TitleScene : UI_Scene
                 if (!PlayerPrefs.HasKey("CUREFFECTSOUND")) PlayerPrefs.SetFloat("CUREFFECTSOUND", 1);
                 Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1));
                 Managers.Sound.SetEffectVolume(PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1));
-
                 GameObject.Find("MainTitle_BGAnim").GetComponent<Animator>().Play("TitleOpeningAnimation");
-                GetObject((int)Objects.Slider).gameObject.SetActive(false);
+                slider.gameObject.SetActive(false);
                 GetButton((int)Buttons.NewGameButton).gameObject.SetActive(true);
-
-                // cursor 시작
                 Managers.Cursor = GameObject.Find("@Cursor").GetOrAddComponent<CursorManager>();
                 Managers.Cursor.Init();
+                isPreload = true;
+                _language = Managers.Game.ScriptType;
+                // 켜는 것은 오프닝의 칼 부딪히는 순간(PlayOneShot)이다. 여기서 켜면 그 전에 넘길 수 있다.
+                GetText((int)Texts.PessAnyKeyText).text = Managers.GetString(Define.TITLE_PRESS_KEY);
             }
+            catch (System.Exception ex) { LoadingFailed(ex.ToString()); }
         });
+    }
+
+    void LoadingFailed(string detail)
+    {
+        Debug.LogError("[Title] " + detail);
+        _loadFailed = true;
+        GetObject((int)Objects.Slider).SetActive(false);
+        var prompt = GetText((int)Texts.PessAnyKeyText);
+        prompt.text = Managers.GetString(Define.TITLE_LOAD_FAILED);
+        prompt.gameObject.SetActive(true);
     }
 
     private void Update()
     {
-        if (_lock)
+        if (_lock) return;
+        if (!isPreload)
+        {
+            if (_loadFailed && Input.GetKeyDown(KeyCode.Return)) Loading();
+            if (_loadFailed && Input.GetKeyDown(KeyCode.Escape)) Application.Quit();
             return;
+        }
+        if (_language != Managers.Game.ScriptType)
+        {
+            _language = Managers.Game.ScriptType;
+            SetButtonColorAndButtonsText(buttonsIdx);
+        }
 
         if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S))
         {
@@ -165,13 +200,13 @@ public class UI_TitleScene : UI_Scene
                     //OnClickNewGameButton();
                     break;
                 case 1:
-                    if (PlayerPrefs.GetInt("ISFIRST", 1) != 1) // 최초가 아니면
+                    if (Managers.Game.HasSave) // 최초가 아니면
                         OnClickLoadGameButton();
                     else
                         OnClickSettingButton();
                     break;
                 case 2:
-                    if (PlayerPrefs.GetInt("ISFIRST", 1) != 1) // 최초가 아니면
+                    if (Managers.Game.HasSave) // 최초가 아니면
                         OnClickSettingButton();
                     else
                         OnClickExitButton();
@@ -212,6 +247,7 @@ public class UI_TitleScene : UI_Scene
 
     IEnumerator CoOnClickNewGameButton()
     {
+        if (_lock || !isPreload) yield break;
         _lock = true;
 
         Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UIselect");
@@ -226,7 +262,6 @@ public class UI_TitleScene : UI_Scene
         Managers.Game.PlayerData.Ability = (int)Define.Trait.None;
         Debug.Log("Cllck OnClickNewGameButton");
         Managers.Game.DeleteGameData();
-        Managers.Data.Init();
         SetPlayerInitSetting();
         Managers.Scene.LoadScene(Define.Scene.IntroScene);
     }
@@ -235,7 +270,7 @@ public class UI_TitleScene : UI_Scene
     {
         Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UIselect");
 
-        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1)
+        if (_isFirst)
         {
             Debug.Log("Cllck OnClickLoadGameButton Nut Data is Null");
             Managers.Scene.LoadScene(Define.Scene.IntroScene);
@@ -278,17 +313,16 @@ public class UI_TitleScene : UI_Scene
 
     void CheckFirstGame()
     {
-        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1) // 최초 실행 시
+        if (_isFirst) // 최초 실행 시
         {
-            SetPlayerInitSetting();
 
-            GetText((int)Texts.NewGameText).text = "Game Start";
+            GetText((int)Texts.NewGameText).text = Managers.GetString(Define.TITLE_START);
             buttonsIdx = 0;
             SetButtonColorAndButtonsText(buttonsIdx);
         }
         else
         {
-            GetText((int)Texts.NewGameText).text = "New Game";
+            GetText((int)Texts.NewGameText).text = Managers.GetString(Define.TITLE_NEW);
             buttonsIdx = 1;
             SetButtonColorAndButtonsText(buttonsIdx);
         }
@@ -301,16 +335,15 @@ public class UI_TitleScene : UI_Scene
         GetText((int)Texts.SettingText).color = new Color(0.5f, 0.5f, 0.5f);
         GetText((int)Texts.ExitText).color = new Color(0.5f, 0.5f, 0.5f);
 
-        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1) // 최초 실행 시
+        if (_isFirst) // 최초 실행 시
         {
-            GetText((int)Texts.NewGameText).text = "Game Start";
-            SetPlayerInitSetting();
+            GetText((int)Texts.NewGameText).text = Managers.GetString(Define.TITLE_START);
         }
         else
-            GetText((int)Texts.NewGameText).text = "New Game";
-        GetText((int)Texts.LoadGameText).text = "Load Game";
-        GetText((int)Texts.SettingText).text = "Setting";
-        GetText((int)Texts.ExitText).text = "Exit";
+            GetText((int)Texts.NewGameText).text = Managers.GetString(Define.TITLE_NEW);
+        GetText((int)Texts.LoadGameText).text = Managers.GetString(Define.TITLE_CONTINUE);
+        GetText((int)Texts.SettingText).text = Managers.GetString(Define.SETTING);
+        GetText((int)Texts.ExitText).text = Managers.GetString(Define.QUIT_GAME);
     }
 
     void SetButtonColorAndButtonsText(int index)
@@ -320,7 +353,7 @@ public class UI_TitleScene : UI_Scene
             GetText((int)Texts.NewGameText), GetText((int)Texts.LoadGameText),
             GetText((int)Texts.SettingText), GetText((int)Texts.ExitText)
         };
-        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1)
+        if (_isFirst)
         {
             texts.Remove(GetText((int)Texts.LoadGameText));
         }

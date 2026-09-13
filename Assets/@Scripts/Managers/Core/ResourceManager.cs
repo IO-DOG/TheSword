@@ -1,4 +1,4 @@
-﻿using DG.Tweening.Plugins.Core.PathCore;
+using DG.Tweening.Plugins.Core.PathCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +12,8 @@ public class ResourceManager
 {
     // 실제 로드한 리소스.
     Dictionary<string, UnityEngine.Object> _resources = new Dictionary<string, UnityEngine.Object>();
+    // 로드 중인 키. 같은 키를 두 번 부르면 두 번째는 첫 요청의 결과를 기다린다.
+    Dictionary<string, Action<Object>> _pending = new Dictionary<string, Action<Object>>();
 
     #region 리소스 로드
     public T Load<T>(string key) where T : Object
@@ -88,60 +90,68 @@ public class ResourceManager
     #endregion
     #region 어드레서블
 
-    public void LoadAsync<T>(string key, Action<T> callback = null) where T : UnityEngine.Object
+    public void LoadAsync<T>(string key, Action<T> callback = null) where T : Object
     {
-        //스프라이트인 경우 하위객체의 찐이름으로 로드하면 스프라이트로 로딩이 됌
-        string loadKey = key;
-        if (key.Contains(".sprite"))
-            loadKey = $"{key}[{key.Replace(".sprite", "")}]";
-        //if (key.Contains(".spriteatlas"))
-        //    loadKey = $"{key}[{key.Replace(".spriteatlas", "_0")}]";
-
-        var asyncOperation = Addressables.LoadAssetAsync<T>(loadKey);
-        asyncOperation.Completed += (op) =>
+        if (_resources.TryGetValue(key, out Object cached) && cached != null)
         {
-            // 캐시 확인.
-            if (_resources.TryGetValue(key, out Object resource))
+            callback?.Invoke(cached as T);
+            return;
+        }
+        Action<Object> listener = obj => callback?.Invoke(obj as T);
+        if (_pending.ContainsKey(key)) { _pending[key] += listener; return; }
+        _pending.Add(key, listener);
+        string loadKey = key.EndsWith(".sprite", StringComparison.Ordinal)
+            ? $"{key}[{key.Substring(0, key.Length - 7)}]" : key;
+        var request = Addressables.LoadAssetAsync<T>(loadKey);
+        request.Completed += op => {
+            Object result = null;
+            if (op.Status == AsyncOperationStatus.Succeeded && op.Result != null)
             {
-                callback?.Invoke(op.Result);
+                result = op.Result;
+                _resources[key] = result;
+            }
+            else
+            {
+                Debug.LogWarning($"[Resource] Failed to load {key}: {op.OperationException}");
+                Addressables.Release(op);
+            }
+            var listeners = _pending[key];
+            _pending.Remove(key);
+            listeners?.Invoke(result);
+        };
+    }
+
+    // Completion is separate from progress: reaching 100% does not imply success.
+    public void LoadAllAsync<T>(string label, Action<string, int, int> progress,
+        Action<string> completed = null) where T : Object
+    {
+        var request = Addressables.LoadResourceLocationsAsync(label, typeof(T));
+        request.Completed += op => {
+            if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0)
+            {
+                string error = $"No loadable resources for label '{label}': {op.OperationException}";
+                Addressables.Release(op);
+                completed?.Invoke(error);
                 return;
             }
-
-            _resources.Add(key, op.Result);
-            callback?.Invoke(op.Result);
-        };
-    }
-
-    public void LoadAllAsync<T>(string label, Action<string, int, int> callback) where T : UnityEngine.Object
-    {
-        var opHandle = Addressables.LoadResourceLocationsAsync(label, typeof(T));
-        opHandle.Completed += (op) =>
-        {
-            int loadCount = 0;
-
-            int totalCount = op.Result.Count;
-
-            foreach (var result in op.Result)
+            var keys = op.Result.Select(location => location.PrimaryKey).Distinct().ToArray();
+            Addressables.Release(op);
+            int count = 0;
+            var failures = new List<string>();
+            foreach (string key in keys)
             {
-                if (result.PrimaryKey.Contains(".sprite"))
+                void OnLoaded(Object obj)
                 {
-                    LoadAsync<Sprite>(result.PrimaryKey, (obj) =>
-                    {
-                        loadCount++;
-                        callback?.Invoke(result.PrimaryKey, loadCount, totalCount);
-                    });
+                    if (obj == null) failures.Add(key);
+                    count++;
+                    progress?.Invoke(key, count, keys.Length);
+                    if (count == keys.Length)
+                        completed?.Invoke(failures.Count == 0 ? null : "Missing resources: " + string.Join(", ", failures));
                 }
-                else
-                {
-                    LoadAsync<T>(result.PrimaryKey, (obj) =>
-                    {
-                        loadCount++;
-                        callback?.Invoke(result.PrimaryKey, loadCount, totalCount);
-                    });
-                }
+                if (key.EndsWith(".sprite", StringComparison.Ordinal)) LoadAsync<Sprite>(key, OnLoaded);
+                else LoadAsync<T>(key, OnLoaded);
             }
         };
     }
-
     #endregion
 }

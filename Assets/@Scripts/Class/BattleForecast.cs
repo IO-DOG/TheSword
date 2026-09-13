@@ -1,29 +1,9 @@
-﻿using UnityEngine;
+using UnityEngine;
 using static GameManager;
 
 /// <summary>
-/// 이 몬스터와 싸우면 체력이 얼마나 줄어드는가 — 싸우기 전에 재 본다.
-///
-/// 매직 타워는 완전 정보 위에서 계산하는 게임인데 이 게임의 전투는 게이지식이다.
-/// 공격 주기·방어 게이지·치명 주기·특성 여덟 가지가 얽혀 사람이 암산할 수 없으니,
-/// 계산할 수 있는 정보를 주려면 결과를 대신 재 주는 수밖에 없다.
-///
-/// <b>예측을 새로 구현하지 않는다.</b> 같은 계산을 두 곳에 두면 반드시 어긋나고,
-/// 어긋난 예측은 없느니만 못하다. 여기서 하는 일은 CreatureData 를 복제하고
-/// 같은 ITrait 을 붙여 UI_PlayerCard/UI_MonsterCard 의 쿨타임 루프를 그대로 도는 것뿐이다 —
-/// 피해 계산은 전투가 쓰는 CreatureClass 의 코드가 그대로 돈다.
-///
-/// 진짜 전투와 다른 점은 넷뿐이고, 넷 다 "UI 가 없다" 에서 나온다.
-///  - <b>철벽(GuardianTrait)</b> 은 만들 수 없다. 생성자가 UI_BaseCard 의 방어 게이지를
-///    채우기 때문이다(FillDefenceGague). 공격·피격 코드는 DefaultTrait 과 한 글자도
-///    다르지 않으므로, 파이썬 시뮬레이터(Tools/thesword_balance.py)가 하듯
-///    "방어 상태로 시작" 만 옮긴다.
-///  - 애니메이션·파티클·소리·데미지 폰트는 하지 않는다. OnHitAction 류에는 빈 대리자를
-///    넣는다 — 특성이 그 자리를 무조건 Invoke 하므로 null 이면 널참조로 죽는다.
-///  - 액티브 스킬(강타/철벽/흡혈)은 사람이 언제 누를지 모르니 넣지 않는다.
-///    <b>그래서 이 예측은 늘 "스킬을 안 썼을 때" 이고, 실제보다 나쁜 쪽으로 틀린다.</b>
-///  - Berserk(20회 공격마다 강화)는 넣지 않는다. UI_MonsterCard._totalAttackCount 를
-///    아무도 올리지 않아 진짜 전투에서도 돌지 않는 코드다.
+/// Clones combat state and runs the same BattleStepper as UI_BattlePopup.
+/// Assumes no active skills; changing game speed does not change the combat result.
 /// </summary>
 public static class BattleForecast
 {
@@ -55,112 +35,16 @@ public static class BattleForecast
         CreatureData player = Clone(Managers.Game.PlayerData);
         CreatureData monster = MonsterOf(table, stage);
 
-        bool playerGuards;
-        bool monsterGuards;
-        player.Trait = TraitOf(player, out playerGuards);
-        monster.Trait = TraitOf(monster, out monsterGuards);
-
-        // 죽음은 진짜 전투와 같은 자리에서 잡는다 — 특성이 OnDeadAction 을 부르는 그 순간이
-        // 카드가 Dead() 로 전투를 끝내는 순간이다. 체력으로 판정하면 안 된다:
-        // 야수(BeastTrait)는 죽은 뒤에 최대 체력의 40% 를 회복해 버려서, 실제로는
-        // 전투가 끝났는데 예측에서는 계속 살아 있는 것으로 보인다.
-        bool playerDead = false;
-        bool monsterDead = false;
-        player.OnDeadAction = () => playerDead = true;
-        monster.OnDeadAction = () => monsterDead = true;
-
-        // 공격 주기 3f/AttackSpeed, 방어 게이지 3f/DefenceSpeed — 카드의 코루틴과 같다.
-        float playerMax = 3f / player.AttackSpeed;
-        float monsterMax = 3f / monster.AttackSpeed;
-        float playerDefMax = 3f / player.DefenceSpeed;
-        float monsterDefMax = 3f / monster.DefenceSpeed;
-        float playerCool = 0f;
-        float monsterCool = 0f;
-        // 플레이어 쪽 두 값은 전투 사이에 이어진다. 치명타는 확률이 아니라 "N 번째 공격"
-        // 인데 그 셈(Managers.Game.AttackCount)도, 방어 게이지(Managers.Game.DefenceCoolTime)도
-        // 전투가 시작될 때 0 으로 돌아가지 않는다. 0 에서 시작한 예측은 실제와 한 대씩 어긋난다.
-        float playerDefCool = Managers.Game.DefenceCoolTime;
-        float monsterDefCool = 0f;
-        int playerHits = Managers.Game.AttackCount;
-        int monsterHits = 0;
-
-        if (playerGuards)
-        {
-            player.IsDefence = true;
-            playerDefCool = playerDefMax;
-        }
-        if (monsterGuards)
-        {
-            monster.IsDefence = true;
-            monsterDefCool = monsterDefMax;
-        }
-
         float startHP = player.CurHP;
-        // 한 걸음의 폭. 코루틴이 WaitForFixedUpdate 로 도니 Time.deltaTime 은 고정 간격이고,
-        // 거기에 게임 배속이 곱해진다 (attackCoolTime += Time.deltaTime * GameSpeed).
-        float dt = Time.fixedDeltaTime * Mathf.Max(1, Managers.Game.GameSpeed);
-        float t = 0f;
-
-        while (t < MAX_SECONDS && playerDead == false && monsterDead == false)
+        bool playerDead, monsterDead;
+        using (var battle = new BattleStepper(player, monster, Managers.Game.AttackCount,
+                                              Managers.Game.DefenceCoolTime))
         {
-            // 도는 순서는 코루틴이 시작된 순서다 — UI_BattlePopup 이 플레이어 카드를 먼저
-            // 만들고, 카드마다 공격 코루틴이 방어 코루틴보다 먼저 시작한다.
-            if (playerCool >= playerMax)
-            {
-                playerCool = 0f;
-                playerHits++;
-                if (playerHits == player.Critical)   // UI_PlayerCard.Attack 과 같은 비교
-                {
-                    player.IsCritical = true;
-                    playerHits = 0;
-                }
-
-                if (Swing(player, monster))
-                {
-                    // 상대의 방패를 깼다. 되돌아가는 것은 <b>상대 게이지뿐</b>이다.
-                    //
-                    // 예전에는 여기서 플레이어 게이지도 0 으로 만들었다 —
-                    // UI_BaseCard.ClearDefence 가 Managers.Game.DefenceCoolTime(플레이어 몫)
-                    // 까지 지우고 있었기 때문이다. 그건 버그였고 고쳤으므로 여기서도 뺀다.
-                    monsterDefCool = 0f;
-                }
-                if (playerDead || monsterDead)
-                    break;
-            }
-
-            if (playerDefCool >= playerDefMax)
-            {
-                player.IsDefence = true;
-                playerDefCool = playerDefMax;
-            }
-
-            if (monsterCool >= monsterMax)
-            {
-                monsterCool = 0f;
-                monsterHits++;
-                if (monsterHits == monster.Critical)
-                {
-                    monster.IsCritical = true;
-                    monsterHits = 0;
-                }
-
-                if (Swing(monster, player))
-                    playerDefCool = 0f;
-                if (playerDead || monsterDead)
-                    break;
-            }
-
-            if (monsterDefCool >= monsterDefMax)
-            {
-                monster.IsDefence = true;
-                monsterDefCool = monsterDefMax;
-            }
-
-            playerCool += dt;
-            monsterCool += dt;
-            playerDefCool += dt;
-            monsterDefCool += dt;
-            t += dt;
+            float dt = Time.fixedDeltaTime;
+            for (float time = 0; time < MAX_SECONDS && !battle.Finished; time += dt)
+                battle.Step(dt);
+            playerDead = battle.PlayerDead;
+            monsterDead = battle.MonsterDead;
         }
 
         float remain = Mathf.Max(0f, player.CurHP);
@@ -169,27 +53,6 @@ public static class BattleForecast
         r.RemainHP = Mathf.FloorToInt(remain);
         r.Damage = Mathf.Max(0, Mathf.CeilToInt(startHP - remain));
         return r;
-    }
-
-    /// <summary>
-    /// 한 대 때린다. UI_BaseCard.Attack 이 하는 것과 같은 순서다.
-    /// 상대의 방어를 깨뜨렸으면 true (부르는 쪽이 게이지를 되돌린다).
-    /// </summary>
-    static bool Swing(CreatureData attacker, CreatureData target)
-    {
-        int damage = attacker.Trait.ExecuteAttack(attacker, target);
-        target.Trait.ExcuteOnHit(attacker, target, damage);
-
-        // 치명타는 한 번 쓰고 내린다 (UI_PlayerCard/UI_MonsterCard.Attack).
-        if (attacker.IsCritical)
-            attacker.IsCritical = false;
-
-        // 막힌 공격이면 OnDefenceAction -> ClearDefence 로 방어가 풀린다.
-        bool broke = target.IsDefence;
-        if (broke)
-            target.IsDefence = false;
-
-        return broke;
     }
 
     /// <summary>전투에 쓰이는 값만 복제한다. 진짜 데이터는 건드리지 않는다.</summary>
@@ -247,16 +110,4 @@ public static class BattleForecast
         c.OnDeadAction = () => { };
     }
 
-    /// <summary>
-    /// 특성을 만든다. 철벽만 예외로, 카드 없이는 생성자가 널참조로 죽으므로
-    /// 같은 코드를 도는 DefaultTrait 으로 대신하고 "방어 상태로 시작" 을 밖에서 준다.
-    /// </summary>
-    static CreatureClass.ITrait TraitOf(CreatureData c, out bool startsGuarding)
-    {
-        startsGuarding = (c.Ability == (int)Define.Trait.Guardian);
-        if (startsGuarding)
-            return new CreatureClass.DefaultTrait();
-
-        return EffectFactory.GetTrait(c);
-    }
 }

@@ -1,4 +1,4 @@
-﻿using Coffee.UIExtensions;
+using Coffee.UIExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,8 +23,6 @@ public class UI_PlayerCard : UI_BaseCard
         _creature.OnDeadAction += Dead;
         _creature.OnDataRefreshAction += Refresh;
 
-        StartCoroutine(CoDelayAttack());
-        StartCoroutine(CoDelayDefence());
 
         if (Managers.Game.PlayerData.Inventory[(int)Define.Types.Shield].Count == 0)
         {
@@ -47,16 +45,10 @@ public class UI_PlayerCard : UI_BaseCard
         SetUI();
     }
 
-    public override void Attack(CreatureData attacker, CreatureData target)
+    public override void PresentAttack(CreatureData attacker, CreatureData target,
+        int damage, bool critical, bool guarded)
     {
-        Managers.Game.AttackCount++;
-        if (Managers.Game.AttackCount == Managers.Game.PlayerData.Critical)
-        {
-            _creature.IsCritical = true;
-            Managers.Game.AttackCount = 0;
-        }
-
-        base.Attack(attacker, target);
+        base.PresentAttack(attacker, target, damage, critical, guarded);
 
         Vector3 pos = GameObject.Find("UI_MonsterCard").GetComponent<UI_MonsterCard>().GetImage((int)Images.CreatureImage).gameObject.transform.position;
         // 맞는 쪽 이미지 기준으로 살짝 아래. 몬스터가 때릴 때(UI_MonsterCard)와 같은 값이다.
@@ -66,13 +58,7 @@ public class UI_PlayerCard : UI_BaseCard
         GameObject go = GameObject.Find("UI_BattlePopup");
         if (go != null)
         {
-            Managers.Object.ShowDamageFont(pos, _hitDamage, 0, go.transform, attacker.IsCritical, target.IsDefence);
-            if (attacker.IsCritical) attacker.IsCritical = false;
-        }
-
-        if (target.IsDefence)
-        {
-            target.OnDefenceAction.Invoke();
+            Managers.Object.ShowDamageFont(pos, _hitDamage, 0, go.transform, critical, guarded);
         }
 
         //Debug.Log(Managers.Game.PlayerData.CurSword);
@@ -92,51 +78,6 @@ public class UI_PlayerCard : UI_BaseCard
         base.Defence();
         GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Shield);
         Debug.Log(Managers.Data.MonsterClassDic[_creature.Ability].Shield);
-    }
-
-    IEnumerator CoDelayAttack()
-    {
-        float maxAttackCoolTime = 3f;
-        float attackCoolTime = 0f;
-        maxAttackCoolTime = maxAttackCoolTime / Managers.Game.PlayerData.AttackSpeed;
-
-        while (true)
-        {
-            if (attackCoolTime >= maxAttackCoolTime)
-            {
-                attackCoolTime = 0f;
-                Attack(_creature, Managers.Game.MonsterData[0]);
-            }
-            attackCoolTime += Time.deltaTime * Managers.Game.GameSpeed;
-
-            GetImage((int)Images.AttackDelayGauge).fillAmount = attackCoolTime / maxAttackCoolTime;
-
-            yield return new WaitForFixedUpdate();
-        }
-    }
-
-    IEnumerator CoDelayDefence()
-    {
-        _maxDefenceCoolTime = _maxDefenceCoolTime / Managers.Game.PlayerData.DefenceSpeed;
-
-        while (true)
-        {
-            if (Managers.Game.DefenceCoolTime >= _maxDefenceCoolTime)
-            {
-                if (_creature.IsDefence == false)
-                {
-                    _creature.IsDefence = true;
-                    Defence();
-                }
-                Managers.Game.DefenceCoolTime = _maxDefenceCoolTime;
-                //_defenceCoolTime = 0f;
-            }
-            Managers.Game.DefenceCoolTime += Time.deltaTime * Managers.Game.GameSpeed;
-
-            GetImage((int)Images.DefenceDelayGauge).fillAmount = Managers.Game.DefenceCoolTime / _maxDefenceCoolTime;
-
-            yield return new WaitForFixedUpdate();
-        }
     }
 
     public override void ClearDefence()

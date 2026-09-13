@@ -1,4 +1,4 @@
-﻿using Cinemachine;
+using Cinemachine;
 using Data;
 using Newtonsoft.Json;
 using System;
@@ -768,65 +768,85 @@ public class GameManager
             };
         }
 
-        string jsonStr = JsonConvert.SerializeObject(PlayerData, Formatting.Indented, new JsonSerializerSettings
+        try
         {
-            TypeNameHandling = TypeNameHandling.Objects,
-            TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
-        });
-        File.WriteAllText(_path, jsonStr);
+            var snapshot = new SaveStore.Snapshot {
+                Version = SaveStore.Version, ContentHash = CurrentContentHash(), Player = PlayerData,
+                Active = Managers.Data.CaptureActive(), Progress = CaptureProgress(),
+                PlayTime = PlayerPrefs.GetFloat("PLAYTIME", PlayTime),
+                AttackCount = AttackCount, DefenceCoolTime = DefenceCoolTime
+            };
+            SaveStore.Write(SaveStore.DirectoryPath, snapshot);
+            LastSaveError = null;
+        }
+        catch (Exception ex) when (SaveStore.IsSaveError(ex))
+        {
+            LastSaveError = ex.Message;
+            Debug.LogError($"[Save] Checkpoint was not written: {ex.Message}");
+        }
+    }
 
-        Managers.Data.UpdateActiveDic();
+    public string LastSaveError { get; private set; }
+    public bool HasSave => SaveStore.Exists(SaveStore.DirectoryPath) ||
+        File.Exists(Path.Combine(SaveStore.DirectoryPath, "SaveData.json"));
+
+    string CurrentContentHash() => SaveStore.Hash(Managers.Resource.Load<TextAsset>("MapData").text);
+
+    Dictionary<string, int> CaptureProgress() => SaveStore.ProgressKeys.ToDictionary(
+        key => key, key => PlayerPrefs.GetInt(key, key == "ISFIRST" ? 1 : 0));
+
+    void ValidateCheckpoint(SaveStore.Snapshot snapshot)
+    {
+        if (snapshot.ContentHash != CurrentContentHash())
+            throw new InvalidDataException("This checkpoint belongs to a different dungeon layout.");
+        if (!Managers.Data.StageInfoDic.ContainsKey(snapshot.Player.CurStageid) ||
+            !Managers.Data.PlayerDic.ContainsKey(snapshot.Player.Level + 1))
+            throw new InvalidDataException("Checkpoint stage or level is unavailable.");
     }
 
     public bool LoadGame()
     {
-        if (PlayerPrefs.GetInt("ISFIRST", 1) == 1)
+        LastSaveError = null;
+        SaveStore.Snapshot snapshot;
+        if (!SaveStore.TryRead(SaveStore.DirectoryPath, out snapshot, out string error, ValidateCheckpoint))
         {
-            string path = Application.persistentDataPath + "/SaveData.json";
-            if (File.Exists(path))
-                File.Delete(path);
-
-
-            Managers.Game.PlayerData.Clear();
-
-            KeyInventory.InitKeyInventory();
-
-            for (int i = 0; i < 10; ++i)
+            // Never mix an incomplete new checkpoint with old object files.
+            if (SaveStore.Exists(SaveStore.DirectoryPath)) { LastSaveError = error; return false; }
+            string legacy = Path.Combine(SaveStore.DirectoryPath, "SaveData.json");
+            if (!File.Exists(legacy)) return false;
+            try
             {
-                Managers.Game.PlayerData.Inventory.Add(new List<int>());
+                string legacyMap = Path.Combine(SaveStore.DirectoryPath, "MapData.json");
+                if (!File.Exists(legacyMap) || !Newtonsoft.Json.Linq.JToken.DeepEquals(
+                    Newtonsoft.Json.Linq.JToken.Parse(File.ReadAllText(legacyMap)),
+                    Newtonsoft.Json.Linq.JToken.Parse(Managers.Resource.Load<TextAsset>("MapData").text)))
+                    throw new InvalidDataException("Legacy checkpoint uses a different dungeon layout.");
+                snapshot = new SaveStore.Snapshot {
+                    Version = SaveStore.Version, ContentHash = CurrentContentHash(),
+                    Player = JsonConvert.DeserializeObject<CurPlayerData>(File.ReadAllText(legacy), SaveStore.Settings),
+                    Active = Managers.Data.ReadLegacyActive(SaveStore.DirectoryPath),
+                    Progress = CaptureProgress(), PlayTime = PlayerPrefs.GetFloat("PLAYTIME", 0)
+                };
+                SaveStore.Validate(snapshot);
+                ValidateCheckpoint(snapshot);
+                SaveStore.Write(SaveStore.DirectoryPath, snapshot);
             }
-            Managers.Game.PlayerData.FirstEnterMapCheck = new List<bool>(new bool[110]);
-            // 오픈하면 1로 변경해야함.
-            PlayerPrefs.SetInt("ISOPENSWORD", 0);
-            PlayerPrefs.SetInt("ISOPENPORTAL", 0);
-            PlayTime = PlayerPrefs.GetFloat("PLAYTIME", 0);
-
-            return false;
+            catch (Exception ex) when (SaveStore.IsSaveError(ex))
+            {
+                LastSaveError = ex.Message;
+                Debug.LogWarning($"[Save] Cannot restore checkpoint: {ex.Message}");
+                return false;
+            }
         }
-
-        if (File.Exists(_path) == false)
-        {
-            Debug.Log("�÷��̾� ������ �ε� ����");
-            return false;
-        }
-
-        string fileStr = File.ReadAllText(_path);
-        CurPlayerData data = JsonConvert.DeserializeObject<CurPlayerData>(fileStr, new JsonSerializerSettings
-        {
-            TypeNameHandling = TypeNameHandling.Objects
-        });
-
-        if (data != null)
-        {
-            PlayerData = data;
-
-            PlayTime = PlayerPrefs.GetFloat("PLAYTIME", 0);
-            Managers.Data.LoadActiveDic();
-            Debug.Log("Complete Loading Data.");
-        }
-
+        PlayerData = snapshot.Player;
+        Managers.Data.ApplyActive(snapshot.Active);
+        foreach (var key in SaveStore.ProgressKeys)
+            PlayerPrefs.SetInt(key, snapshot.Progress.TryGetValue(key, out int value) ? value : 0);
+        PlayTime = snapshot.PlayTime;
+        PlayerPrefs.SetFloat("PLAYTIME", PlayTime);
+        AttackCount = snapshot.AttackCount;
+        DefenceCoolTime = snapshot.DefenceCoolTime;
         KeyInventory.InitKeyInventory();
-
         return true;
     }
 
@@ -838,6 +858,11 @@ public class GameManager
 
     public void DeleteGameData()
     {
+        SaveStore.Delete(SaveStore.DirectoryPath);
+        File.Delete(Path.Combine(SaveStore.DirectoryPath, "SaveData.json"));
+        LastSaveError = null;
+        AttackCount = 0;
+        DefenceCoolTime = 0;
         //PlayerPrefs.DeleteAll();
         // ISFIRST를 지워야하나? 진짜 최초는 아닌데
         PlayerPrefs.DeleteKey("ISFIRST");
@@ -866,6 +891,7 @@ public class GameManager
         Managers.Data.ResetActiveDic();
         //ParseMapData();
         Managers.Game.PlayerData.Clear();
+        Managers.Game.PlayerData.FirstEnterMapCheck = new List<bool>(new bool[110]);
         Managers.Game.PlayerData.Inventory.Clear();
         for (int i = 0; i < 10; ++i)
         {
@@ -884,6 +910,11 @@ public class GameManager
         if (LoadGame())
             return;
 
-        //SaveGame();
+        // Initialize a fresh in-memory run without deleting an unreadable checkpoint.
+        Managers.Data.ResetActiveDic();
+        PlayerData.Clear();
+        PlayerData.Inventory = Enumerable.Range(0, 10).Select(_ => new List<int>()).ToList();
+        PlayerData.FirstEnterMapCheck = new List<bool>(new bool[110]);
+        KeyInventory.InitKeyInventory();
     }
 }
