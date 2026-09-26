@@ -210,11 +210,16 @@ public class UI_GameScene : UI_Scene
         if (PlayerPrefs.GetInt("ISMEETSWORD") == 1 && PlayerPrefs.GetInt("ISMEETBOSS") == 0)
         {
             // 검 먹고 남은 자리에 있는 key 활성화
+            // 챕터를 넘을 때 ISMEETBOSS 가 0 으로 돌아가므로 21층 이후 세이브도 여기로 온다.
+            // 그때는 도입부 맵이 씬에 없다 — 없으면 건너뛴다. 예전에는 여기서 널참조가 났다.
             GameObject map = GameObject.Find("Dungeon_00_002");
-            GameObject key = map.transform.Find("Items/CItem13").gameObject;
-            key.GetComponent<SpriteRenderer>().enabled = true;
-            key.GetComponent<BoxCollider>().enabled = true;
-            key.SetActive(true);
+            Transform key = map != null ? map.transform.Find("Items/CItem13") : null;
+            if (key != null)
+            {
+                key.GetComponent<SpriteRenderer>().enabled = true;
+                key.GetComponent<BoxCollider>().enabled = true;
+                key.gameObject.SetActive(true);
+            }
         }
         return true;
     }

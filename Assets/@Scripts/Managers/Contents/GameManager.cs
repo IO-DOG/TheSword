@@ -657,6 +657,7 @@ public class GameManager
             OnPortalAction.Invoke();
         if (GameScene != null)
             GameScene.Refresh();
+        SaveOnFloorEntry();
         return true;
     }
 
@@ -784,6 +785,26 @@ public class GameManager
             LastSaveError = ex.Message;
             Debug.LogError($"[Save] Checkpoint was not written: {ex.Message}");
         }
+    }
+
+    /// <summary>층에 올라선 순간을 남긴다 — 죽으면 그 층 입구에서 다시 시작한다.
+    ///
+    /// 생성 층에는 기둥도 보스문도 없어서 저장이 한 번도 일어나지 않았다.
+    /// 그래서 60층에서 죽으면 4층 보스문을 열던 순간(BossDoor 의 SaveGame)으로 돌아갔다.
+    /// 계단·워프가 새 층 좌표와 CurStageid 를 다 적은 뒤에 부른다. 그 전에 부르면
+    /// 윗층 번호에 아랫층 좌표가 섞여 불러올 때 벽에 파묻힌다.
+    ///
+    /// 손수 만든 1~4층은 건드리지 않는다. 그 층들은 연출이 제 시점에 저장하고
+    /// (DirectingManager·Pillar·BossDoor), 다시 시작 경로가 ISMEETSWORD/ISMEETBOSS
+    /// 로 갈라져 있어서 층 입구 저장이 끼어들면 그 분기가 어긋난다.</summary>
+    public void SaveOnFloorEntry()
+    {
+        Data.StageInfoData info;
+        if (Managers.Data.StageInfoDic.TryGetValue(PlayerData.CurStageid, out info) == false)
+            return;
+        if (MapBuilder.IsHandAuthored(info.DungeonID))
+            return;
+        SaveGame();
     }
 
     public string LastSaveError { get; private set; }
