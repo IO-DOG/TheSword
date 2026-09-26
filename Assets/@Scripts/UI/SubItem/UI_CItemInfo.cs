@@ -79,11 +79,13 @@ public class UI_CItemInfo : UI_Base
         GetText((int)Texts.MonsterNameText).text = Managers.GetString(Managers.Data.ConsumableItemDic[id].ScriptNameId);
         GetText((int)Texts.MonsterAttackText).text = Managers.Data.ConsumableItemDic[id].AttackUp.ToString();
         GetText((int)Texts.MonsterDefenseText).text = Managers.Data.ConsumableItemDic[id].DefenceUp.ToString();
-        float heal = Managers.Data.ConsumableItemDic[id].Heal * Managers.Game.PlayerData.MaxHP / 100;
-        heal = Mathf.Round(heal) + Managers.Data.ConsumableItemDic[id].HPUp;
+        // 물약은 지금 마시면 실제로 차는 양을 보인다. 넘치는 몫은 설명 첫 줄에 따로 적는다.
+        float waste = ConsumableItem.PotionWaste(id);
+        float heal = ConsumableItem.PotionHeal(id) - waste + Managers.Data.ConsumableItemDic[id].HPUp;
         GetText((int)Texts.MonsterHPText).text = $"{heal}";
         GetText((int)Texts.MonsterDescText).text = (item.ChoicePartner != null
             ? Managers.GetString(Define.REWARD_CHOICE) + "\n\n" : "") +
+            (waste > 0f ? string.Format(Managers.GetString(Define.POTION_OVERFLOW), Mathf.RoundToInt(waste)) + "\n\n" : "") +
             Managers.GetString(Managers.Data.ConsumableItemDic[id].ScriptDescriptionId);
     }
 
