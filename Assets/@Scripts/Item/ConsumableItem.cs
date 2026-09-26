@@ -18,8 +18,10 @@ public class ConsumableItem : MonoBehaviour
     Color _baseColor = Color.white;
     float _shownWaste = -1f;
 
-    // 넘치는 몫이 전부일 때의 색. 흰 물약이 이 색까지 흐려진다.
-    static readonly Color OverflowColor = new Color(0.45f, 0.45f, 0.45f, 0.55f);
+    // 넘치는 몫이 전부일 때의 색. 흰 물약이 이 색까지 어두워진다.
+    // 알파는 1 로 둔다 — 물약 셰이더(HalfSpriteShadow)는 알파 클립이라 정점 알파를
+    // 읽지 않는다. 투명도로 흐리게 하려 하면 아무 일도 일어나지 않는다.
+    static readonly Color OverflowColor = new Color(0.35f, 0.35f, 0.35f, 1f);
 
     private void Start()
     {
@@ -62,10 +64,10 @@ public class ConsumableItem : MonoBehaviour
         if (heal <= 0f)
             return 0f;
         var player = Managers.Game.PlayerData;
-        return Mathf.Max(0f, player.CurHP + heal - player.MaxHP);
+        return Mathf.Clamp(player.CurHP + heal - player.MaxHP, 0f, heal);
     }
 
-    /// <summary>넘칠 물약을 밟기 전에 알린다 — 버려질 몫만큼 흐려진다.
+    /// <summary>넘칠 물약을 밟기 전에 알린다 — 버려질 몫만큼 어두워진다.
     /// HP 는 전투마다 바뀌므로 매 프레임 보되, 색은 값이 바뀔 때만 쓴다.</summary>
     private void Update()
     {
@@ -125,11 +127,13 @@ public class ConsumableItem : MonoBehaviour
         {
             float heal = PotionHeal(id);
             float gained = heal - PotionWaste(id);
-            Managers.Game.PlayerData.CurHP += gained;
+            Managers.Game.PlayerData.CurHP += heal;
+            if (Managers.Game.PlayerData.CurHP > Managers.Game.PlayerData.MaxHP)
+                Managers.Game.PlayerData.CurHP = Managers.Game.PlayerData.MaxHP;
 
             // 실제로 찬 만큼만 띄운다. 넘친 몫까지 띄우면 버린 것이 보이지 않는다.
             Transform ui_PlayerHpBar = Managers.UI.GetPlayerHpBar();
-            Managers.Object.ShowPotionHealingFont(Mathf.Max(0f, gained), ui_PlayerHpBar);
+            Managers.Object.ShowPotionHealingFont(gained, ui_PlayerHpBar);
 
             // 최초 포션인지 확인
             if (PlayerPrefs.GetInt("ISFIRSTRECOVERY") == 0)
