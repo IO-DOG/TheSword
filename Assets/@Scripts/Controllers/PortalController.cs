@@ -120,7 +120,6 @@ public class PortalController : MonoBehaviour
             //Managers.Game.PlayerData.CurStageid = Managers.Game.BossRoomId;
         }
         Debug.Log($"Setting player position to: {nextPos}");
-        //Managers.Game.SaveGame();
     }
 
     PortalController SearchPortal(int targetmapId, Type targetType)
@@ -184,10 +183,10 @@ public class PortalController : MonoBehaviour
 
         Managers.Game.Player.transform.position = nextPos;
         Managers.Game.Player._cellPos = nextPos;
-        //Managers.Game.SaveGame();
 
         Managers.Game.OnPortalAction.Invoke();
         Managers.Game.GameScene.Refresh();
+        Managers.Game.SaveOnFloorEntry();
         Managers.Game.OnInteract = false;
 
         Managers.UI.ShowStageNamePopup(1f);
@@ -216,10 +215,10 @@ public class PortalController : MonoBehaviour
 
         Managers.Game.Player.transform.position = nextPos;
         Managers.Game.Player._cellPos = nextPos;
-        //Managers.Game.SaveGame();
 
         Managers.Game.OnPortalAction.Invoke();
         Managers.Game.GameScene.Refresh();
+        Managers.Game.SaveOnFloorEntry();
         Managers.Game.OnInteract = false;
 
         Managers.UI.ShowStageNamePopup(1f);
@@ -246,10 +245,10 @@ public class PortalController : MonoBehaviour
 
         Managers.Game.Player.transform.position = nextPos;
         Managers.Game.Player._cellPos = nextPos;
-        //Managers.Game.SaveGame();
 
         Managers.Game.OnPortalAction.Invoke();
         Managers.Game.GameScene.Refresh();
+        Managers.Game.SaveOnFloorEntry();
         Managers.Game.OnInteract = false;
 
         Managers.UI.ShowStageNamePopup(1f);
