@@ -15,6 +15,7 @@ public static class GeneratedUiText
             case 144: return new[] { "Loading failed. Enter: retry / Esc: quit", "불러오지 못했습니다. Enter: 재시도 / Esc: 종료", "Loading failed. Enter: retry / Esc: quit", "読み込めませんでした。Enter：再試行 / Esc：終了", "加载失败。Enter：重试 / Esc：退出" }[language >= 0 && language <= 4 ? language : 0];
             case 145: return new[] { "Could not restore your save. The original is preserved. Press any key to return.", "저장을 복구하지 못했습니다. 원본은 보존됩니다. 아무 키나 눌러 돌아가세요.", "Could not restore your save. The original is preserved. Press any key to return.", "セーブを復元できませんでした。元のデータは保持されます。何かキーを押して戻ります。", "无法恢复存档。原始存档已保留。请按任意键返回。" }[language >= 0 && language <= 4 ? language : 0];
             case 146: return new[] { "Taking one reward removes the other.", "둘 중 하나를 얻으면 다른 보상은 사라집니다.", "Taking one reward removes the other.", "片方を取ると、もう片方の報酬は消えます。", "领取一个奖励后，另一个奖励将消失。" }[language >= 0 && language <= 4 ? language : 0];
+            case 147: return new[] { "Drinking now wastes {0} HP.", "지금 마시면 {0} 이 넘쳐 사라집니다.", "Drinking now wastes {0} HP.", "今飲むと {0} が溢れて失われます。", "现在饮用将溢出 {0} 点生命。" }[language >= 0 && language <= 4 ? language : 0];
             default: return null;
         }
     }
