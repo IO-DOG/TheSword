@@ -287,15 +287,11 @@ public class CreatureClass : MonoBehaviour
         public int Roar(CreatureData attacker, CreatureData target)
         {
             // 기획서 53쪽: 포효는 공격력의 20%. 감쇠 없이 전탄으로 들어가고 있었다.
-            float num = (int)Mathf.Max(0, attacker.Attack) * 0.2f;
-            if (attacker.IsCritical) num = num * (attacker.CriticalAttack / 100);
-            int damage = Mathf.RoundToInt(num);
-            damage -= (int)target.Defence;
-            damage = (int)Mathf.Max(1, damage);
-            if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);
-            else if (target.IsDefence) damage = 1;
-
-            return damage;
+            // 20% 는 "지금 때렸다면 들어갈 피해" 에 곱한다. 공격력의 20% 에서 방어를 빼면
+            // 몬스터 공격력이 플레이어 방어력 근처로 역산되는 이 게임에서는 언제나 1 이라,
+            // 포효가 아무 일도 하지 않았고 완주 검증(thesword_balance.apply_hit)보다
+            // 게임이 덜 아팠다.
+            return Mathf.RoundToInt(ExecuteAttack(attacker, target) * 0.2f);
         }
     }
 
