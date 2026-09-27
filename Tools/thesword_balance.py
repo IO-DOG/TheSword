@@ -11,9 +11,46 @@ Unity C# 전투 코드(UI_BaseCard / UI_MonsterCard / CreatureClass.DefaultTrait
 """
 
 import csv
+import functools
 import os
+import struct
 
 FIXED_DT = 0.02  # WaitForFixedUpdate 기본값
+
+
+def _f32(x):
+    return struct.unpack("f", struct.pack("f", x))[0]
+
+
+def armor_gauge(max_hp):
+    """껍질 게이지 (ArmorTrait: target.MaxHP * 0.3f).
+
+    float 로 곱해야 한다. 1440 * 0.3 은 double 로 432 이고 float 로 432.00003 이라,
+    넘친 피해를 int 로 자르는 순간 1 이 갈리고 그 1 이 "한 대 더" 로 번졌다
+    (95층 갑옷 셋이 게임에서 50% 더 아팠다, 108 -> 162).
+    """
+    return _f32(_f32(max_hp) * _f32(ARMOR_SHIELD_RATIO))
+
+
+@functools.lru_cache(maxsize=None)
+def _ticks(speed):
+    """주기 3/speed 가 몇 번의 FixedUpdate 만에 차는가 (BattleStepper 그대로).
+
+    C# 은 타이머를 float 로 0.02 씩 더해 가며 `>= 주기` 를 본다. float 는 0.02 를
+    정확히 담지 못해서 더할수록 오차가 쌓이고, 경계에 걸린 주기는 double 로 셀 때보다
+    한 스텝 늦거나 빠르게 찬다. 그 한 스텝이 누가 먼저 치느냐를 바꿔,
+    암살 둘이 게임에서 덜 아팠다(82층 134 -> 124).
+    타이머는 0 에서 시작해 0 으로 돌아가므로 같은 주기는 늘 같은 스텝 수다.
+    """
+    if speed <= 0:
+        return float("inf")
+    period = _f32(3.0 / _f32(speed))
+    dt = _f32(FIXED_DT)
+    t, n = 0.0, 0
+    while t < period:
+        t = _f32(t + dt)
+        n += 1
+    return n
 
 # ---------------------------------------------------------------- 플레이어 테이블
 
@@ -46,7 +83,7 @@ class Creature:
         self.shield = False
         self.atk_count = 0
         self.trait = int(trait)
-        self.armor = self.max_hp * ARMOR_SHIELD_RATIO
+        self.armor = armor_gauge(self.max_hp)
         self.hit_count = 0
         self.beast_done = False
         self.stealth = True
@@ -115,9 +152,9 @@ def apply_hit(attacker, target, damage, is_crit):
             target.stealth = False
     elif target.trait == ARMOR:
         # 껍질: 방어 게이지가 모든 공격을 흡수하고, 다 깎이면 넘친 만큼만 들어간다.
-        target.armor -= damage
+        target.armor = _f32(target.armor - damage)
         if target.armor <= 0:
-            damage = -target.armor
+            damage = int(-target.armor)
             target.armor = 0
         else:
             damage = 0
@@ -162,16 +199,17 @@ def simulate_battle(player, monster, max_seconds=600.0):
 
     플레이어 HP는 호출자가 넘긴 player.hp 에서 이어서 깎인다.
     """
-    p_cd = 3.0 / player.aspd
-    m_cd = 3.0 / monster.aspd
-    p_def_cd = 3.0 / player.dspd
-    m_def_cd = 3.0 / monster.dspd
+    # 타이머는 초가 아니라 FixedUpdate 횟수로 센다 (_ticks 참조).
+    p_cd = _ticks(player.aspd)
+    m_cd = _ticks(monster.aspd)
+    p_def_cd = _ticks(player.dspd)
+    m_def_cd = _ticks(monster.dspd)
 
-    p_t = m_t = p_def_t = m_def_t = 0.0
+    p_t = m_t = p_def_t = m_def_t = 0
     player.shield = monster.shield = False
     player.atk_count = monster.atk_count = 0
-    player.armor = player.max_hp * ARMOR_SHIELD_RATIO
-    monster.armor = monster.max_hp * ARMOR_SHIELD_RATIO
+    player.armor = armor_gauge(player.max_hp)
+    monster.armor = armor_gauge(monster.max_hp)
     player.hit_count = monster.hit_count = 0
     player.beast_done = monster.beast_done = False
     player.stealth = monster.stealth = True
@@ -189,7 +227,7 @@ def simulate_battle(player, monster, max_seconds=600.0):
     while t < max_seconds:
         # --- 공격 판정 (원본: 쿨 도달 시 공격 후 0으로 리셋)
         if p_t >= p_cd:
-            p_t = 0.0
+            p_t = 0
             player.atk_count += 1
             is_crit = False
             if player.crit_period > 0 and player.atk_count >= player.crit_period:
@@ -202,14 +240,14 @@ def simulate_battle(player, monster, max_seconds=600.0):
             apply_hit(player, monster, dmg, is_crit)
             if was_shielded:  # OnDefenceAction -> ClearDefence
                 monster.shield = False
-                m_def_t = 0.0
+                m_def_t = 0
             if player.hp <= 0:          # 거대의 포효에 되맞아 죽을 수 있다
                 return False, t, start_hp - player.hp
             if monster.hp <= 0:
                 return True, t, start_hp - player.hp
 
         if m_t >= m_cd:
-            m_t = 0.0
+            m_t = 0
             monster.atk_count += 1
             is_crit = False
             if monster.crit_period > 0 and monster.atk_count >= monster.crit_period:
@@ -222,7 +260,7 @@ def simulate_battle(player, monster, max_seconds=600.0):
             apply_hit(monster, player, dmg, is_crit)
             if was_shielded:
                 player.shield = False
-                p_def_t = 0.0
+                p_def_t = 0
             if monster.hp <= 0:         # 플레이어가 거대라면 포효로 몬스터가 죽을 수 있다
                 return True, t, start_hp - player.hp
             if player.hp <= 0:
@@ -236,10 +274,10 @@ def simulate_battle(player, monster, max_seconds=600.0):
             monster.shield = True
             m_def_t = m_def_cd
 
-        p_t += FIXED_DT
-        m_t += FIXED_DT
-        p_def_t += FIXED_DT
-        m_def_t += FIXED_DT
+        p_t += 1
+        m_t += 1
+        p_def_t += 1
+        m_def_t += 1
         t += FIXED_DT
 
     # 시간 초과 = 서로 못 죽임 = 사실상 진행 불가
@@ -366,8 +404,10 @@ def _self_check():
     # 갑옷: 체력의 30% 만큼 흡수하고 넘친 만큼만 들어간다
     t = mk(ARMOR, hp=100)          # 껍질 30
     apply_hit(mk(), t, 20, False); assert t.hp == 100
-    apply_hit(mk(), t, 25, False); assert t.hp == 85, t.hp   # 15 만 관통
-    apply_hit(mk(), t, 10, False); assert t.hp == 75
+    # 15 만 관통해야 하지만 게임은 14 다 — 0.3f 가 0.30000001 이라 껍질이 30.000002 로
+    # 차고, 넘친 -14.999998 을 int 로 자른다. 게임이 그러니 여기도 그래야 한다.
+    apply_hit(mk(), t, 25, False); assert t.hp == 86, t.hp
+    apply_hit(mk(), t, 10, False); assert t.hp == 76
 
     # 거대: 5회째 피격에 공격력 20% 로 되받아친다
     atk = mk(); t = mk(TITAN, atk=100)
