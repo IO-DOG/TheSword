@@ -38,6 +38,7 @@ public class UI_GuidePopup : UI_Popup
         #endregion
 
         Managers.Game.OnInputLock = true;
+        _locked = true;
 
         //guideAnim = GetImage((int)Images.GuideImage).gameObject.GetComponent<Animator>();
         //btnAnim = GetImage((int)Images.OnlyYestButton).gameObject.GetComponent<Animator>();
@@ -78,6 +79,7 @@ public class UI_GuidePopup : UI_Popup
     void YesClick()
     {
         Managers.Game.OnInputLock = false;
+        _locked = false;
         Managers.Sound.Play(Define.Sound.Effect, "ButtonUI_Ok_SFX");
 
         ClosePopupUI();
@@ -89,4 +91,16 @@ public class UI_GuidePopup : UI_Popup
     }
     #endregion
 
+    // Esc 로는 닫히지 않는다. 확인(O)을 눌러야 입력 잠금이 풀린다.
+    public override bool OnEscape() => true;
+
+    // 이 창이 건 입력 잠금. 어떤 길로 사라지든(연출이 창을 모두 걷는 등) 풀고 간다 —
+    // 예전에는 Esc 로 걷히면 잠금이 켜진 채 남아 플레이어가 영영 못 움직였다.
+    bool _locked;
+
+    void OnDestroy()
+    {
+        if (_locked)
+            Managers.Game.OnInputLock = false;
+    }
 }

@@ -83,6 +83,14 @@ public class MonsterController : MonoBehaviour
         //Util.Screenshot((screenShot) => {Managers.Game._screenShot = screenShot; });
         StartCoroutine(Util.Screenshot2((screenShot) =>
         {
+            // 전투마다 화면을 통째로 한 장(1080p 면 8MB) 찍는다. 지난 전투의 것을 버리지 않으면
+            // 씬이 바뀔 때까지 쌓인다 — 100층 한 판이 전투 500번 남짓이다.
+            Sprite old = Managers.Game._screenShot2;
+            if (old != null)
+            {
+                Destroy(old.texture);
+                Destroy(old);
+            }
             Managers.Game._screenShot2 = screenShot;
             if (gameObject.GetComponent<BossMonsterController>() != null)
             {

@@ -52,12 +52,24 @@ public class UI_GameScene : UI_Scene
 
     #endregion
 
-    public bool isOpenMenuPopup = false;
+    /// <summary>메뉴가 떠 있다. 스택에서 읽는다 — 따로 적어 두던 플래그는 메뉴가 다른 길로 닫히면 켜진 채 남았다.</summary>
+    public bool isOpenMenuPopup => Managers.UI.FindPopup<UI_MenuPopup>() != null;
     public bool isOpenInfoPopup = false;
+
+    // 플레이 시간. 매 프레임 PlayerPrefs(윈도우에서는 레지스트리)에 쓰던 것을 모아 두었다가 몇 초에 한 번만 쓴다.
+    // 체크포인트(SaveGame)는 PlayerPrefs 의 값을 읽으므로 최대 PlayTimeFlush 초 늦게 적힐 수 있다.
+    const float PlayTimeFlush = 5f;
+    float _playTime;
+    float _playTimeFlushed;
+
     public override bool Init()
     {
         if (base.Init() == false)
             return false;
+
+        // 씬을 다시 올렸다(죽음·다시 시작). 전투 직전 관문이 중간에 끊겼으면 그대로 남아 있다.
+        FightGate.Reset();
+        _playTime = _playTimeFlushed = PlayerPrefs.GetFloat("PLAYTIME", 0);
 
         // 워프 창(Tab). 프리팹이 없어 코드로 세우는 창이라 여기서 한 번 붙여 둔다.
         WarpUI.Spawn();
@@ -100,7 +112,9 @@ public class UI_GameScene : UI_Scene
         #endregion
 
         Managers.Game.GenerateMap(Managers.Game.PlayerData.CurStageid);
-        Managers.Game.PlayerData.MoveSpeed = 1f;
+        // 이동 속도·전투 배속은 낀 장비가 정한다(기준 1 에 부츠 배수). 예전에는 여기서 1 로 덮어쓰기만 해서
+        // 부츠·목걸이 효과가 씬을 다시 올릴 때마다(이어하기·죽은 뒤) 사라졌다.
+        EquipUtility.Apply();
         Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
 
         Managers.Sound.Play(Define.Sound.Effect, "MapTransition_SFX");
@@ -127,14 +141,11 @@ public class UI_GameScene : UI_Scene
 
         GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
         {
-            GameObject go = GameObject.Find("UI_MenuPopup");
-            if (go == null)
-            {
-                isOpenMenuPopup = true;
-                Managers.UI.ShowPopupUI<UI_MenuPopup>();
-            }
+            UI_MenuPopup menu = Managers.UI.FindPopup<UI_MenuPopup>();
+            if (menu != null)
+                menu.OnClickContinueGameButton();
             else
-                go.GetComponent<UI_MenuPopup>().OpenOtherUI();
+                TryOpenMenu();
         });
         GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(OnClickMainUIInventoryAImage);
 
@@ -200,23 +211,65 @@ public class UI_GameScene : UI_Scene
         else
         {
             Managers.UI.ShowStageNamePopup(1f);
-            // 하드코딩
-            Managers.Sound.Play(Define.Sound.Bgm, "Chapter0_BGM");
-            Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1));
+            // 곡은 GenerateMap 이 챕터 곡·조로 이미 틀었다. 예전에는 여기서 Chapter0_BGM 을 조 1 로 다시 틀어
+            // 이어하기·죽은 뒤마다 챕터 조를 덮었다. 소리 크기만 설정값으로 되돌린다.
+            Managers.Sound.SetBGMVolume(SoundManager.ConfiguredBgmVolume);
         }
 
-        // 보스를 만나지 않았을 때만 키를 다시 생성
-        // 보스를 만나면, 세이브 지점이 달라지므로 키를 다시 생성할 필요가 없다. 
-        if (PlayerPrefs.GetInt("ISMEETSWORD") == 1 && PlayerPrefs.GetInt("ISMEETBOSS") == 0)
+        RestoreMagicSwordKey();
+
+        if (GameEvents.RespawnPending)
         {
-            // 검 먹고 남은 자리에 있는 key 활성화
-            GameObject map = GameObject.Find("Dungeon_00_002");
-            GameObject key = map.transform.Find("Items/CItem13").gameObject;
-            key.GetComponent<SpriteRenderer>().enabled = true;
-            key.GetComponent<BoxCollider>().enabled = true;
-            key.SetActive(true);
+            GameEvents.RespawnPending = false;
+            GameEvents.RaiseRespawned();
         }
         return true;
+    }
+
+    /// <summary>
+    /// 마검 계약 뒤 3층에 생기는 열쇠를 다시 세운다. 그 열쇠는 계약 연출이 켜는 것이라, 계약 뒤에
+    /// 층을 다시 만들면(이어하기·죽은 뒤) 프리팹대로 꺼진 채 나온다. 보스를 만난 뒤에는 저장 지점이
+    /// 그 너머라 세우지 않는다.
+    ///
+    /// 예전에는 이름으로 맵을 찾아 무조건 켰다. 챕터 1~4 에서는 그 맵이 없어 널참조로 Init 끝이
+    /// 날아갔고(챕터 경계마다 ISMEETBOSS 가 0 이 된다), 이미 주운 열쇠도 다시 켜져서 불러올 때마다
+    /// 열쇠가 하나씩 늘었다. 주웠는지는 계약 때 옮겨 둔 번호로 본다 — 프리팹의 13 은 2층 물약과 겹친다.
+    /// </summary>
+    void RestoreMagicSwordKey()
+    {
+        if (PlayerPrefs.GetInt("ISMEETSWORD") != 1 || PlayerPrefs.GetInt("ISMEETBOSS") != 0)
+            return;
+
+        Transform key = null;
+        foreach (KeyValuePair<int, GameObject> pair in Managers.Game.Maps)
+        {
+            Data.StageInfoData info;
+            if (pair.Value != null && Managers.Data.StageInfoDic.TryGetValue(pair.Key, out info) && info.DungeonID == "00_002")
+            {
+                key = pair.Value.transform.Find("Items/CItem13");
+                break;
+            }
+        }
+        if (key == null)
+            return;   // 지금 챕터에는 그 층이 없다
+
+        ConsumableItem item = key.GetComponent<ConsumableItem>();
+        if (item != null)
+            item._itemIndex_forActive = Define.MAGICAL_SWORD_KEY_INDEX;
+
+        bool alive;
+        if (Managers.Data.CItemActiveDic.TryGetValue(Define.MAGICAL_SWORD_KEY_INDEX, out alive) == false)
+            Managers.Data.CItemActiveDic[Define.MAGICAL_SWORD_KEY_INDEX] = alive = true;   // 번호를 옮기기 전의 저장
+
+        key.gameObject.SetActive(alive);
+        if (alive == false)
+            return;
+        SpriteRenderer sr = key.GetComponent<SpriteRenderer>();
+        if (sr != null)
+            sr.enabled = true;
+        BoxCollider col = key.GetComponent<BoxCollider>();
+        if (col != null)
+            col.enabled = true;
     }
 
     public void Refresh()
@@ -228,15 +281,19 @@ public class UI_GameScene : UI_Scene
         Managers.Game.PlayerData.Level = Mathf.Max(level, 1);
         level = Mathf.Max(level, 1);
 
-        GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Game.PlayerData.CurExp / Managers.Data.PlayerDic[level + 1].NeedExp;
+        // 표의 끝 레벨에는 다음 레벨이 없다. 거기서 터지면 HUD 를 다시 칠했다는 알림까지 끊긴다.
+        Data.PlayerData next;
+        GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Data.PlayerDic.TryGetValue(level + 1, out next) && next.NeedExp > 0f
+            ? Managers.Game.PlayerData.CurExp / next.NeedExp : 1f;
         float hpRatio = Managers.Game.PlayerData.CurHP / Managers.Game.PlayerData.MaxHP;
         //GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = hpRatio;
-        GameObject.Find("PlayerHPBarGauge").GetComponent<Image>().fillAmount = hpRatio;
+        GameObject hpGauge = GameObject.Find("PlayerHPBarGauge");   // 게임오버 연출 중에는 꺼져 있다
+        if (hpGauge != null)
+            hpGauge.GetComponent<Image>().fillAmount = hpRatio;
         Managers.Game.KeyInventory.ShowKeySlot(Managers.Game.Player._keyInventory);
         SetPlayerInfo();
 
-        Debug.Log($"{Managers.Game.PlayerData.CurExp} , {Managers.Data.PlayerDic[level + 1].NeedExp}");
-        Debug.Log($"ATK : {Managers.Game.PlayerData.Attack} , total ATK : {Managers.Game.PlayerData.Attack + Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ATK}, cursword : {Managers.Game.PlayerData.CurSword}");
+        GameEvents.RaiseHudRefreshed();
     }
 
     int _mask = (1 << (int)Define.Layer.Monster | 1 << (int)Define.Layer.CItem);
@@ -251,6 +308,8 @@ public class UI_GameScene : UI_Scene
         // Timer
         StartTimer();
 
+        // 치트 키는 에디터와 개발 빌드에서만. 출시 빌드에 F2(공격 +10000)가 그대로 살아 있었다.
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         #region for_test
         if (Input.GetKeyDown(KeyCode.F1))
         {
@@ -313,9 +372,10 @@ public class UI_GameScene : UI_Scene
         {
             Debug.Log("move count : " + PlayerPrefs.GetInt("MOVECOUNT"));
             Debug.Log("death count : " + PlayerPrefs.GetInt("DEATHCOUNT"));
-            Debug.Log("paly time : " + PlayerPrefs.GetFloat("PLAYTIME"));
+            Debug.Log("paly time : " + _playTime);
         }
         #endregion
+#endif
     }
 
     void ShowInfo()
@@ -328,7 +388,6 @@ public class UI_GameScene : UI_Scene
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         bool raycastHit = Physics.Raycast(ray, out hit, 100.0f, _mask);
-        Debug.DrawRay(Camera.main.transform.position, ray.direction * 100.0f, Color.red, 1.0f);
 
         if (raycastHit)
         {
@@ -363,28 +422,60 @@ public class UI_GameScene : UI_Scene
         }
     }
 
+    /// <summary>
+    /// 게임 화면의 Esc 는 여기 한 곳에서만 받는다. 맨 위 창에게 먼저 묻고(UI_Popup.OnEscape),
+    /// 창이 쓰지 않으면 메뉴를 연다. 창을 대신 걷어내지 않는다 — 가이드·대화·보스방 확인·게임오버 창이
+    /// 잠금 플래그를 켠 채 사라져 플레이어가 굳었던 것이 그 때문이다.
+    /// </summary>
     void OnClickESC()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) && !Managers.Game.OnBattle)
+        if (Input.GetKeyDown(KeyCode.Escape) == false)
+            return;
+        // 죽는 연출이 도는 중이다. 게임오버 창을 걷으면 되살리는 코루틴이 같이 죽는다.
+        if (Managers.Game.IsPlayerDead)
+            return;
+        if (Managers.UI.EscapeTopPopup())
+            return;
+        TryOpenMenu();
+    }
+
+    /// <summary>
+    /// 메뉴를 연다(시간이 멈춘다). 창이 떠 있으면 저절로 사라지는 창(전투창·층 이름·보스 이름) 위에서만
+    /// 연다 — 가이드·대화·확인 창은 제 손으로 닫혀야 잠금이 풀린다. 연출·문·계단·레버처럼 흐름이
+    /// 캐릭터를 쥐고 있을 때도 열지 않는다. 그 사이에 씬을 다시 올리면 도는 중이던 연출이 옛 씬을 만진다.
+    /// </summary>
+    public bool TryOpenMenu()
+    {
+        GameManager g = Managers.Game;
+        if (isOpenMenuPopup || g.IsPlayerDead || FightGate.Pending)
+            return false;
+        if (g.OnDirect || g.OnConversation || g.OnFade || g.OnInteract || g.OnLever || g.OnInputLock)
+            return false;
+
+        UI_Popup top = Managers.UI.TopPopup;
+        // 전투 중이면 전투창 위에서만. 전투창이 뜨기 전(화면을 찍는 한 프레임, 보스 등장 연출)에 열면
+        // 전투창이 메뉴 위로 올라온다.
+        if (g.OnBattle)
         {
-            GameObject go = GameObject.Find("UI_MenuPopup");
-            if (Managers.UI.GetPopupCount() > 0 && go == null)
-            {
-                //go.GetComponent<UI_MenuPopup>().OpenOtherUI();
-                Managers.UI.ClosePopupUI();
-                Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Back_SFX");
-            }
-            else if (go != null)
-            {
-                go.GetComponent<UI_MenuPopup>().OpenOtherUI();
-                Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Back_SFX");
-            }
-            else
-            {
-                isOpenMenuPopup = true;
-                Managers.UI.ShowPopupUI<UI_MenuPopup>();
-            }
+            if ((top is UI_BattlePopup) == false)
+                return false;
         }
+        else if (top != null && (top is UI_StageNamePopup || top is UI_BossNamePopup) == false)
+        {
+            return false;
+        }
+
+        Managers.UI.ShowPopupUI<UI_MenuPopup>();
+        return true;
+    }
+
+    // 창을 내리면(알트탭) 메뉴를 열어 멈춘다. runInBackground 라 그냥 두면 전투가 혼자 흘러갔다.
+    // 에디터에서는 인스펙터를 누를 때마다 멈추면 일을 못 하고, 자동 플레이는 멈추면 안 된다.
+    void OnApplicationFocus(bool focus)
+    {
+        if (focus || Application.isEditor || GameEvents.IsAutoPlaying)
+            return;
+        TryOpenMenu();
     }
 
     /// <summary>
@@ -409,10 +500,12 @@ public class UI_GameScene : UI_Scene
 
     public void OnClickMainUIInventoryAImage()
     {
-        if (GameObject.Find("UI_InvenPopup") == null)
+        // 열려 있으면 그 창을 닫는다. 예전에는 맨 위 창을 걷었다 — 인벤토리가 맨 위가 아니면 엉뚱한 창이 닫혔다.
+        UI_InvenPopup inven = Managers.UI.FindPopup<UI_InvenPopup>();
+        if (inven == null)
             Managers.UI.ShowPopupUI<UI_InvenPopup>();
         else
-            Managers.UI.ClosePopupUI();
+            inven.ClosePopupUI();
     }
 
     /// <summary>
@@ -485,11 +578,25 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(true);
     }
 
+    // 멈춘 동안(메뉴)은 deltaTime 이 0 이라 세지 않는다.
     public void StartTimer()
     {
-        float playTime = PlayerPrefs.GetFloat("PLAYTIME", 0);
-        playTime += Time.deltaTime;
-        PlayerPrefs.SetFloat("PLAYTIME", playTime);
+        _playTime += Time.deltaTime;
+        Managers.Game.PlayTime = _playTime;
+        if (_playTime - _playTimeFlushed >= PlayTimeFlush)
+            FlushPlayTime();
+    }
+
+    void FlushPlayTime()
+    {
+        _playTimeFlushed = _playTime;
+        PlayerPrefs.SetFloat("PLAYTIME", _playTime);
+    }
+
+    // 씬을 떠나기 전에 아직 안 적은 몇 초를 적는다.
+    void OnDestroy()
+    {
+        FlushPlayTime();
     }
 
     /// <summary>
@@ -524,7 +631,8 @@ public class UI_GameScene : UI_Scene
         }
 
         //Image image = Managers.Game.GameScene.ShowLoadingIllust(randValue);
-        yield return new WaitForSeconds(UnityEngine.Random.Range(1, 2));
+        // 정수 Range(1, 2) 는 늘 1 이었다. 1~2초 사이로.
+        yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 2f));
 
         timer = 0f;
         while (timer < duration / 2)

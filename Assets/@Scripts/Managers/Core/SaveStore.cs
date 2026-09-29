@@ -98,21 +98,82 @@ public static class SaveStore
         foreach (var suffix in new[] { "", ".bak" })
         {
             string path = Path.Combine(directory, FileName + suffix);
-            if (!File.Exists(path)) continue;
-            try
-            {
-                var candidate = JsonConvert.DeserializeObject<Snapshot>(File.ReadAllText(path), Settings);
-                Validate(candidate);
-                validateContent?.Invoke(candidate);
-                value = candidate;
+            if (File.Exists(path) && TryReadFile(path, out value, out error, validateContent))
                 return true;
-            }
-            catch (Exception ex) when (IsSaveError(ex))
-            {
-                error = ex.Message;
-            }
         }
         return false;
+    }
+
+    /// <summary>파일 하나를 읽는다. 층별 사본(History)을 고를 때도 이 길로 온다.</summary>
+    public static bool TryReadFile(string path, out Snapshot value, out string error,
+        Action<Snapshot> validateContent = null)
+    {
+        value = null;
+        error = null;
+        try
+        {
+            var candidate = JsonConvert.DeserializeObject<Snapshot>(File.ReadAllText(path), Settings);
+            Validate(candidate);
+            validateContent?.Invoke(candidate);
+            value = candidate;
+            return true;
+        }
+        catch (Exception ex) when (IsSaveError(ex))
+        {
+            error = ex.Message;
+            return false;
+        }
+    }
+
+    // ---------------------------------------------------------------- 층별 사본
+    // 층에 들어설 때마다 방금 쓴 체크포인트를 그 층 이름으로 한 벌 더 둔다. 같은 층에
+    // 다시 오면 덮어쓴다 — 오르내리기만 해도 목록이 같은 두 층으로 차 버리면 쓸모가 없다.
+    // 체크포인트 하나로는 "피가 바닥인 채 저장된 층" 에 갇힐 수 있어서, 몇 층 앞으로
+    // 되돌아갈 길을 남긴다.
+
+    public struct CheckpointInfo
+    {
+        public string File;        // RestartFromCheckpoint 에 그대로 넘긴다
+        public int Stage;          // 0 부터 (화면에는 +1 층)
+        public int Level;
+        public int Hp;
+        public int MaxHp;
+        public DateTime SavedAt;
+    }
+
+    const string HistoryPrefix = "Floor_";
+    public const int HistoryLimit = 10;
+
+    static IEnumerable<string> HistoryFiles(string directory) => Directory.Exists(directory)
+        ? Directory.GetFiles(directory, HistoryPrefix + "*.json").OrderByDescending(f => File.GetLastWriteTimeUtc(f))
+        : Enumerable.Empty<string>();
+
+    /// <summary>지금의 Checkpoint.json 을 그 층의 사본으로 복사하고, 오래된 것은 지운다.</summary>
+    public static void WriteHistory(string directory, int stage)
+    {
+        File.Copy(Path.Combine(directory, FileName),
+            Path.Combine(directory, $"{HistoryPrefix}{stage:000}.json"), true);
+        foreach (string old in HistoryFiles(directory).Skip(HistoryLimit).ToList())
+            File.Delete(old);
+    }
+
+    /// <summary>층별 사본, 최근 것부터 HistoryLimit 개. 읽히지 않는 것은 뺀다.</summary>
+    public static List<CheckpointInfo> History(string directory)
+    {
+        var found = new List<CheckpointInfo>();
+        foreach (string path in HistoryFiles(directory))
+        {
+            if (found.Count == HistoryLimit)
+                break;
+            if (!TryReadFile(path, out Snapshot s, out _))
+                continue;
+            found.Add(new CheckpointInfo {
+                File = path, Stage = s.Player.CurStageid, Level = s.Player.Level,
+                Hp = Mathf.CeilToInt(s.Player.CurHP), MaxHp = Mathf.CeilToInt(s.Player.MaxHP),
+                SavedAt = File.GetLastWriteTime(path)
+            });
+        }
+        return found;
     }
 
     public static void Write(string directory, Snapshot value)
@@ -143,5 +204,8 @@ public static class SaveStore
     {
         foreach (var suffix in new[] { "", ".bak", ".tmp" })
             File.Delete(Path.Combine(directory, FileName + suffix));
+        // 새 게임에 지난 판의 층별 사본이 남아 있으면 "되돌아가기" 가 옛 판으로 간다.
+        foreach (string old in HistoryFiles(directory).ToList())
+            File.Delete(old);
     }
 }

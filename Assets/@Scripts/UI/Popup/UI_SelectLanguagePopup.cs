@@ -56,6 +56,14 @@ public class UI_SelectLanguagePopup : UI_Popup
         return true;
     }
 
+    // Esc 는 한 칸 뒤로 — 메뉴로 돌아간다. 비켜 있던 메뉴 버튼은 메뉴가 제자리로 돌린다.
+    public override bool OnEscape()
+    {
+        Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Back_SFX");
+        ClosePopupUI();
+        return true;
+    }
+
     void Refresh()
     {
         GetImage((int)Images.KoreanChoice).gameObject.SetActive(false);
@@ -97,10 +105,11 @@ public class UI_SelectLanguagePopup : UI_Popup
         }, null, Define.UIEvent.PointerExit);
     }
 
+    // 저장된 언어를 그대로 보여 준다. 예전에는 고른 적이 없으면(None) 한국어에 표시가 붙었지만
+    // 글자는 영어로 나왔다.
     void TurnOnCurScriptTypeImage()
     {
-        Define.ScriptType curScriptType = Managers.Game.ScriptType;
-        switch (curScriptType)
+        switch (GameSettings.Language)
         {
             case Define.ScriptType.Kr:
                 GetImage((int)Images.KoreanPick).gameObject.SetActive(true);
@@ -114,45 +123,19 @@ public class UI_SelectLanguagePopup : UI_Popup
             case Define.ScriptType.Cn:
                 GetImage((int)Images.ChinaPick).gameObject.SetActive(true);
                 break;
-            default:
-                GetImage((int)Images.KoreanPick).gameObject.SetActive(true);
-                break;
         }
     }
 
-    void OnClickKorean()
+    void OnClickKorean() => Select(Define.ScriptType.Kr);
+    void OnClickEnglish() => Select(Define.ScriptType.En);
+    void OnClickJapan() => Select(Define.ScriptType.Jp);
+    void OnClickChina() => Select(Define.ScriptType.Cn);
+
+    // 저장하고 GameSettings.Changed 를 울린다 — 떠 있는 글자는 그걸 듣고 다시 칠한다.
+    void Select(Define.ScriptType language)
     {
-        Managers.Game.ScriptType = Define.ScriptType.Kr;
+        GameSettings.Language = language;
         Refresh();
         TurnOnCurScriptTypeImage();
-
-        //ClosePopupUI();
-    }
-
-    void OnClickEnglish()
-    {
-        Managers.Game.ScriptType = Define.ScriptType.En;
-        Refresh();
-        TurnOnCurScriptTypeImage();
-
-        //ClosePopupUI();
-    }
-
-    void OnClickJapan()
-    {
-        Managers.Game.ScriptType = Define.ScriptType.Jp;
-        Refresh();
-        TurnOnCurScriptTypeImage();
-
-        //ClosePopupUI();
-    }
-
-    void OnClickChina()
-    {
-        Managers.Game.ScriptType = Define.ScriptType.Cn;
-        Refresh();
-        TurnOnCurScriptTypeImage();
-
-        //ClosePopupUI();
     }
 }

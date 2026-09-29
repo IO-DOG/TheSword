@@ -58,6 +58,9 @@ public class ConsumableItem : MonoBehaviour
         gameObject.SetActive(false);
         PlayParticle();
 
+        // 물약이 실제로 채운 HP 와, 최대치에 막혀 버려진 HP. 물약이 아니면 둘 다 0.
+        int healed = 0, overflow = 0;
+
         if (id < NUM_OF_KEYS)
         {
             Managers.Game.KeyInventory.AddItem(this);
@@ -74,6 +77,7 @@ public class ConsumableItem : MonoBehaviour
         {
             float heal = Managers.Game.ConsumableItemData.Heal * Managers.Game.PlayerData.MaxHP / 100;
             heal = Mathf.Round(heal);
+            float before = Managers.Game.PlayerData.CurHP;
             Managers.Game.PlayerData.CurHP += heal;
 
             // Show Healing Font
@@ -82,6 +86,9 @@ public class ConsumableItem : MonoBehaviour
 
             if (Managers.Game.PlayerData.CurHP > Managers.Game.PlayerData.MaxHP)
                 Managers.Game.PlayerData.CurHP = Managers.Game.PlayerData.MaxHP;
+
+            healed = Mathf.Max(0, Mathf.RoundToInt(Managers.Game.PlayerData.CurHP - before));
+            overflow = Mathf.RoundToInt(heal) - healed;
 
             // 최초 포션인지 확인
             if (PlayerPrefs.GetInt("ISFIRSTRECOVERY") == 0)
@@ -106,7 +113,8 @@ public class ConsumableItem : MonoBehaviour
         {
             Managers.Game.GameScene.Refresh();
         }
-        //Managers.Game.SaveGame();
+
+        GameEvents.RaiseItemPicked(id, healed, overflow);
     }
 
     /// <summary>획득 이펙트.

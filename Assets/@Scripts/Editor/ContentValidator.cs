@@ -217,12 +217,12 @@ public static class ContentValidator
 
     static void CheckLevelTable(Dictionary<int, Data.PlayerData> players)
     {
-        // 100층까지 가면 레벨 101 이 된다. CurExp 세터가 PlayerDic[Level + 1] 을
-        // 무조건 읽으므로 그보다 넉넉해야 KeyNotFoundException 이 안 난다.
+        // 완주 레벨(지금 112)보다 4 이상 길어야 한다 — 표 끝에서 레벨업이 멈추고, 다음 레벨을
+        // 읽는 곳이 많다. 정확한 완주 레벨은 validate_content.py 가 데이터를 끝까지 돌려서 잰다.
         int max = 0;
         foreach (var kv in players) max = Mathf.Max(max, kv.Key);
-        if (max < 103)
-            Errors.Add($"PlayerData 최대 레벨이 {max} — 100층 완주(레벨 101) 시 예외가 난다");
+        if (max < 116)
+            Errors.Add($"PlayerData 최대 레벨이 {max} — 100층 완주 레벨(112) + 4 보다 짧다");
     }
 
     static void Report()

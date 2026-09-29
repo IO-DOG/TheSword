@@ -21,8 +21,14 @@ public class UI_BattlePopup : UI_Popup
 
     BattleStepper _battle;
     bool _ending;
+    int _monsterId;
+    bool _boss;     // 우두머리(챕터 보스·킹 슬라임)와의 전투인가
+    int _stage;
     UI_PlayerCard playerCard = null;
     UI_MonsterCard monsterCard = null;
+
+    /// <summary>승부가 났다. 닫히기까지 0.3초가 남아 있어도 이제 아무것도 바꾸지 못한다 (스킬 포함).</summary>
+    public bool BattleOver => _ending || _battle == null || _battle.Finished;
 
     public override bool Init()
     {
@@ -68,6 +74,11 @@ public class UI_BattlePopup : UI_Popup
 
         // 스킬은 전투마다 셋 다 새로 채운다.
         BattleSkills.ResetForBattle();
+        _monsterId = Managers.Game.MonsterData[0].id;
+        // 챕터 보스(생성 층의 "Boss" 태그)와 킹 슬라임. 분열 슬라임은 보스 연출은 쓰지만 우두머리가 아니다.
+        MonsterController fought = Managers.Game.Monster;
+        _boss = fought != null && (fought.CompareTag("Boss") || fought is KingSlimeController);
+        _stage = Managers.Game.PlayerData.CurStageid;
         _battle = new BattleStepper(Managers.Game.PlayerData, Managers.Game.MonsterData[0],
             Managers.Game.AttackCount, Managers.Game.DefenceCoolTime);
         _battle.OnStrike = (player, damage, critical, guarded) => {
@@ -86,7 +97,7 @@ public class UI_BattlePopup : UI_Popup
     /// 셋 다 전투당 한 번뿐이라, 아낄지 지금 쓸지가 유일한 판단거리가 된다.</summary>
     void Update()
     {
-        if (BattleSkills.Unlocked == false || Managers.Game.OnBattle == false)
+        if (BattleSkills.Unlocked == false || Managers.Game.OnBattle == false || Managers.UI.IsPaused)
             return;
 
         if (Input.GetKeyDown(KeyCode.Alpha1))
@@ -112,7 +123,13 @@ public class UI_BattlePopup : UI_Popup
             _battle.MonsterDefenceTime, _battle.MonsterDefencePeriod);
     }
 
-    void OnDestroy() => _battle?.Dispose();
+    void OnDestroy()
+    {
+        _battle?.Dispose();
+        // 메뉴에서 다시 시작하거나 타이틀로 나가면 전투가 끝나지 않은 채 파괴된다 — 남은 구독이 다음 전투를 닫으면 안 된다.
+        if (Managers.IsAlive && Managers.Game.OnBattleAction != null)
+            Managers.Game.OnBattleAction -= BattleEnd;
+    }
 
     public void BattleEnd()
     {
@@ -139,6 +156,14 @@ public class UI_BattlePopup : UI_Popup
         Managers.Game.OnBattle = false;
 
         ClosePopupUI();
+
+        // 우두머리를 쓰러뜨렸다는 알림은 승부가 난 여기서 낸다. 쓰러진 순간(UI_MonsterCard.Dead)에 내면
+        // 거대의 다섯 번째 대 포효가 같은 교환에서 플레이어를 죽여도 이미 나간 뒤였다 — 같이 죽으면
+        // 진 것이고(thesword_balance, BattleForecast.Win) 체크포인트가 보스를 되살린다.
+        bool won = Managers.Game.IsPlayerDead == false;
+        if (won && _boss)
+            GameEvents.RaiseBossDefeated(_monsterId, _stage);
+        GameEvents.RaiseBattleEnded(_monsterId, won);
 
         // Game Over Popup
         if (Managers.Game.IsPlayerDead)

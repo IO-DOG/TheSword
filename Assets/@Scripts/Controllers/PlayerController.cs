@@ -46,9 +46,15 @@ public class PlayerController : MonoBehaviour
         _state = state;
     }
 
+    // 매 프레임 GetComponent 하던 것들. 무기·방패 애니메이터는 Start 에서 슬롯을 찾은 뒤 잡는다.
+    Animator _body;
+    Animator _weaponAnim;
+    Animator _shieldAnim;
+
     private void Awake()
     {
         Managers.Game.Player = this;
+        _body = GetComponent<Animator>();
     }
 
     void Start()
@@ -58,11 +64,16 @@ public class PlayerController : MonoBehaviour
 
         transform.localScale = new Vector3(1f, 2f, 1f);
 
-        _duration = 1 / _speed;
+        // 세터가 MoveSpeed 를 다시 읽는다. 예전에는 필드 기본값 5 로 셈해서, 씬을 다시 올리면(이어하기·죽은 뒤)
+        // 부츠를 신고도 1배로 걸었다 — EquipUtility.Apply 는 MoveSpeed 가 이미 맞으면 플레이어를 건드리지 않는다.
+        Speed = 0f;
+
         _keyInventory = GameObject.Find("KeyInventory");
         _weapon = GameObject.Find("WeaponSlot");
         _shield = GameObject.Find("ShieldSlot");
         _back = GameObject.Find("BackSlot");
+        _weaponAnim = _weapon.GetComponent<Animator>();
+        _shieldAnim = _shield.GetComponent<Animator>();
 
         if (PlayerPrefs.GetInt("ISFIRST", 1) != 1)
         {
@@ -70,12 +81,39 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // 씬을 다시 올리면(죽음·다시 시작) 새 플레이어가 구독한다. 부서진 쪽을 남겨 두면 키를 누를 때마다
+    // 그쪽이 먼저 불려 MissingReference 로 뒤따르는 구독까지 끊겼다 — 다시 올린 뒤 첫 키가 먹지 않았다.
+    void OnDestroy()
+    {
+        Managers.Input.KeyAction -= OnKeyboard;
+    }
+
+    // 꺼졌다 켜진 애니메이터는 기본 상태로 돌아간다. 틀어 둔 것을 잊고 다시 튼다.
+    void OnEnable()
+    {
+        _bodyPlayed = _weaponPlayed = _shieldPlayed = 0;
+    }
+
+    /// <summary>연출·대화·전투처럼 흐름이 캐릭터를 쥐고 있다. 걷던 방향도 버린다.</summary>
+    static bool IsBusy()
+    {
+        GameManager g = Managers.Game;
+        return g.OnBattle || g.OnConversation || g.OnLever || g.OnFade || g.OnDirect || g.OnInteract
+            || g.OnInputLock || g.IsPlayerDead;
+    }
+
+    /// <summary>창이 떠서 잠깐 멈췄다 — 메뉴(시간이 멈춘다), 확인 창, 전투 직전 관문.
+    /// 걷던 방향은 남겨 둔다. 창이 닫히면 걷던 쪽을 보고 선다.</summary>
+    static bool IsHeld()
+    {
+        return Managers.UI.IsPaused || UI_ConfirmPopup.IsOpen || FightGate.Pending;
+    }
+
     Stack<int> keyInputStack = new Stack<int>();
 
     void OnKeyboard()
     {
-        if (Managers.Game.OnBattle || Managers.Game.OnConversation || Managers.Game.OnLever
-            || Managers.Game.OnFade || Managers.Game.OnDirect || Managers.Game.OnInteract || Managers.Game.OnInputLock)
+        if (IsBusy())
         {
             _moveDir = MoveDir.None;
             return;
@@ -154,6 +192,11 @@ public class PlayerController : MonoBehaviour
                 keyInputStack.Push(tempStack.Pop());
         }
 
+        // 창이 떠 있어도 누름·뗌은 위에서 쌓는다 — 걷지만 않는다. 예전에는 창 동안 통째로 건너뛰어
+        // 창 전에 걷던 방향이 맨 위에 남았고, 메뉴에서 S 를 쥔 채 닫으면 S 가 아니라 오른쪽으로 걸었다.
+        if (IsHeld())
+            return;
+
         int topKey = -1;
         keyInputStack.TryPeek(out topKey);
         if (Input.GetKey(KeyCode.W) && topKey == (int)MoveDir.Up)
@@ -184,8 +227,7 @@ public class PlayerController : MonoBehaviour
     {
         PlayAnimation();
 
-        if (Managers.Game.OnBattle || Managers.Game.OnConversation || Managers.Game.OnLever
-            || Managers.Game.OnFade || Managers.Game.OnDirect || Managers.Game.OnInteract || Managers.Game.OnInputLock)
+        if (IsBusy() || IsHeld())
         {
             return;
         }
@@ -200,154 +242,97 @@ public class PlayerController : MonoBehaviour
     {
         if (Managers.Game.PlayerData.CurSword == Define.NOT_EQUIP)
             _isEquiptWeapon = false;
-        if (_isEquiptWeapon)
-            _weapon.SetActive(true);
-        else
-            _weapon.SetActive(false);
+        if (_weapon.activeSelf != _isEquiptWeapon)
+            _weapon.SetActive(_isEquiptWeapon);
+        if (_weapon.activeInHierarchy == false)
+            _weaponPlayed = 0;   // 꺼지면 애니메이터가 처음으로 돌아간다 — 켜질 때 다시 튼다
     }
 
     void CheckShield()
     {
         if (Managers.Game.PlayerData.CurShield == Define.NOT_EQUIP)
             _isEquiptShield = false;
-        if (_isEquiptShield)
-            _shield.SetActive(true);
-        else
-            _shield.SetActive(false);
+        if (_shield.activeSelf != _isEquiptShield)
+            _shield.SetActive(_isEquiptShield);
+        if (_shield.activeInHierarchy == false)
+            _shieldPlayed = 0;
     }
+
+    // 마지막으로 튼 상태. 예전에는 매 프레임 GetComponent 두세 번에 상태 이름을 문자열로 새로 짓고
+    // Play 를 불렀다. 이제 상태·장비가 바뀔 때만 이름을 짓고 튼다. 0 은 "아직 안 틀었다".
+    int _bodyPlayed;
+    int _weaponPlayed;
+    int _shieldPlayed;
 
     void PlayAnimation()
     {
         CheckWeapon();
         CheckShield();
 
+        string body = null;
+        string gear = null;         // 무기·방패 상태 이름의 뒤쪽 ("_Idle_B" …). null 이면 장비를 틀지 않는다
+        bool followMove = false;    // 걷는 속도에 맞춰 돈다
+        bool keepSpeed = false;     // 속도를 건드리지 않는다
+        float weaponZ = 0f;         // 몸 앞(-)·뒤(+)
+        float shieldZ = 0f;
+
         switch (_state)
         {
-            case PlayerState.IdleBack:
-                GetComponent<Animator>().speed = 1f;
-                GetComponent<Animator>().Play("Player_Idle_B");
-                if (_isEquiptWeapon)
-                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName}_Idle_B");
-                if (_isEquiptShield)
-                    _shield.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurShield].ImageName}_Idle_B");
-
-                _weapon.transform.localPosition = Vector3.forward * adjustingDis;
-                _shield.transform.localPosition = Vector3.forward * adjustingDis;
-
-                break;
-            case PlayerState.IdleFront:
-                GetComponent<Animator>().speed = 1f;
-                GetComponent<Animator>().Play("Player_Idle_F");
-                if (_isEquiptWeapon)
-                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName}_Idle_F");
-                if (_isEquiptShield)
-                    _shield.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurShield].ImageName}_Idle_F");
-
-                _weapon.transform.localPosition = Vector3.back * adjustingDis;
-                _shield.transform.localPosition = Vector3.back * adjustingDis;
-                break;
-            case PlayerState.IdleLeft:
-                GetComponent<Animator>().speed = Managers.Game.PlayerData.MoveSpeed;
-                GetComponent<Animator>().Play("Player_Idle_L");
-                if (_isEquiptWeapon)
-                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName}_Idle_L");
-                if (_isEquiptShield)
-                    _shield.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurShield].ImageName}_Idle_L");
-
-                _weapon.transform.localPosition = Vector3.forward * adjustingDis;
-                _shield.transform.localPosition = Vector3.back * adjustingDis;
-                break;
-            case PlayerState.IdleRight:
-                GetComponent<Animator>().speed = Managers.Game.PlayerData.MoveSpeed;
-                GetComponent<Animator>().Play("Player_Idle_R");
-                if (_isEquiptWeapon)
-                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName}_Idle_R");
-                if (_isEquiptShield)
-                    _shield.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurShield].ImageName}_Idle_R");
-
-                _weapon.transform.localPosition = Vector3.back * adjustingDis;
-                _shield.transform.localPosition = Vector3.forward * adjustingDis;
-                break;
-            case PlayerState.Left:
-                GetComponent<Animator>().speed = Managers.Game.PlayerData.MoveSpeed;
-                GetComponent<Animator>().Play("Player_Run_L");
-                if (_isEquiptWeapon)
-                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName}_Run_L");
-                if (_isEquiptShield)
-                    _shield.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurShield].ImageName}_Run_L");
-
-                _weapon.transform.localPosition = Vector3.forward * adjustingDis;
-                _shield.transform.localPosition = Vector3.back * adjustingDis;
-                break;
-            case PlayerState.Right:
-                GetComponent<Animator>().speed = Managers.Game.PlayerData.MoveSpeed;
-                GetComponent<Animator>().Play("Player_Run_R");
-                if (_isEquiptWeapon)
-                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName}_Run_R");
-                if (_isEquiptShield)
-                    _shield.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurShield].ImageName}_Run_R");
-
-                _weapon.transform.localPosition = Vector3.back * adjustingDis;
-                _shield.transform.localPosition = Vector3.forward * adjustingDis;
-                break;
-            case PlayerState.Up:
-                GetComponent<Animator>().speed = Managers.Game.PlayerData.MoveSpeed;
-                GetComponent<Animator>().Play("Player_Run_B");
-                if (_isEquiptWeapon)
-                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName}_Run_B");
-                if (_isEquiptShield)
-                    _shield.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurShield].ImageName}_Run_B");
-
-                _weapon.transform.localPosition = Vector3.forward * adjustingDis;
-                _shield.transform.localPosition = Vector3.forward * adjustingDis;
-                break;
-            case PlayerState.Down:
-                GetComponent<Animator>().speed = Managers.Game.PlayerData.MoveSpeed;
-                GetComponent<Animator>().Play("Player_Run_F");
-                if (_isEquiptWeapon)
-                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName}_Run_F");
-                if (_isEquiptShield)
-                    _shield.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurShield].ImageName}_Run_F");
-
-                _weapon.transform.localPosition = Vector3.back * adjustingDis;
-                _shield.transform.localPosition = Vector3.back * adjustingDis;
-                break;
-            case PlayerState.BackStep:
-                GetComponent<Animator>().speed = 1f;
-                GetComponent<Animator>().Play("Player_BackStep");
-                if (_isEquiptWeapon)
-                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName}_Run_F");
-                if (_isEquiptShield)
-                    _shield.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurShield].ImageName}_Run_F");
-
-                _weapon.transform.localPosition = Vector3.back * adjustingDis;
-                _shield.transform.localPosition = Vector3.back * adjustingDis;
-                break;
-            case PlayerState.OnLever:
-                GetComponent<Animator>().speed = 1f;
-                GetComponent<Animator>().Play("Player_IronLever_B");
-                _isEquiptShield = false;
-                _isEquiptWeapon = false;
-                break;
-            case PlayerState.DrawSword:
-                GetComponent<Animator>().speed = 1f;
-                GetComponent<Animator>().Play("Player_SwordDraw_B");
-                _isEquiptShield = false;
-                _isEquiptWeapon = false;
-                break;
-            case PlayerState.ContractSword:
-                GetComponent<Animator>().speed = 1f;
-                GetComponent<Animator>().Play("Player_ContractSword_F");
-                _isEquiptShield = false;
-                _isEquiptWeapon = false;
-                break;
-            case PlayerState.Death:
-                GetComponent<Animator>().Play("Player_Death");
-                break;
-            case PlayerState.TutorialFirst_Ready:
-                GetComponent<Animator>().Play("Player_TutorialFirst_Ready");
-                break;
+            case PlayerState.IdleBack: body = "Player_Idle_B"; gear = "_Idle_B"; weaponZ = 1f; shieldZ = 1f; break;
+            case PlayerState.IdleFront: body = "Player_Idle_F"; gear = "_Idle_F"; weaponZ = -1f; shieldZ = -1f; break;
+            case PlayerState.IdleLeft: body = "Player_Idle_L"; gear = "_Idle_L"; followMove = true; weaponZ = 1f; shieldZ = -1f; break;
+            case PlayerState.IdleRight: body = "Player_Idle_R"; gear = "_Idle_R"; followMove = true; weaponZ = -1f; shieldZ = 1f; break;
+            case PlayerState.Left: body = "Player_Run_L"; gear = "_Run_L"; followMove = true; weaponZ = 1f; shieldZ = -1f; break;
+            case PlayerState.Right: body = "Player_Run_R"; gear = "_Run_R"; followMove = true; weaponZ = -1f; shieldZ = 1f; break;
+            case PlayerState.Up: body = "Player_Run_B"; gear = "_Run_B"; followMove = true; weaponZ = 1f; shieldZ = 1f; break;
+            case PlayerState.Down: body = "Player_Run_F"; gear = "_Run_F"; followMove = true; weaponZ = -1f; shieldZ = -1f; break;
+            case PlayerState.BackStep: body = "Player_BackStep"; gear = "_Run_F"; weaponZ = -1f; shieldZ = -1f; break;
+            case PlayerState.OnLever: body = "Player_IronLever_B"; _isEquiptShield = false; _isEquiptWeapon = false; break;
+            case PlayerState.DrawSword: body = "Player_SwordDraw_B"; _isEquiptShield = false; _isEquiptWeapon = false; break;
+            case PlayerState.ContractSword: body = "Player_ContractSword_F"; _isEquiptShield = false; _isEquiptWeapon = false; break;
+            case PlayerState.Death: body = "Player_Death"; keepSpeed = true; break;
+            case PlayerState.TutorialFirst_Ready: body = "Player_TutorialFirst_Ready"; keepSpeed = true; break;
         }
+        if (body == null)
+            return;
+
+        if (keepSpeed == false)
+            _body.speed = followMove ? Managers.Game.PlayerData.MoveSpeed : 1f;
+
+        int bodyKey = (int)_state + 1;
+        if (_bodyPlayed != bodyKey)
+        {
+            _bodyPlayed = bodyKey;
+            _body.Play(body);
+        }
+
+        if (gear == null)
+            return;
+
+        // 같은 상태라도 칼·방패를 바꾸면 다른 클립이다. 장비 id 를 같이 센다.
+        if (_isEquiptWeapon)
+        {
+            int sword = Managers.Game.PlayerData.CurSword;
+            int key = bodyKey << 16 | sword;
+            if (_weaponPlayed != key)
+            {
+                _weaponPlayed = key;
+                _weaponAnim.Play(Managers.Data.EquipDic[sword].ImageName + gear);
+            }
+        }
+        if (_isEquiptShield)
+        {
+            int shield = Managers.Game.PlayerData.CurShield;
+            int key = bodyKey << 16 | shield;
+            if (_shieldPlayed != key)
+            {
+                _shieldPlayed = key;
+                _shieldAnim.Play(Managers.Data.EquipDic[shield].ImageName + gear);
+            }
+        }
+
+        _weapon.transform.localPosition = Vector3.forward * (adjustingDis * weaponZ);
+        _shield.transform.localPosition = Vector3.forward * (adjustingDis * shieldZ);
     }
 
     public void ResetWeaponAndShieldAnimation()
@@ -357,30 +342,31 @@ public class PlayerController : MonoBehaviour
             switch (_state)
             {
                 case PlayerState.IdleFront:
-                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName}_Idle_F", 0, 0.0f);
+                    _weaponAnim.Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName}_Idle_F", 0, 0.0f);
                     break;
                 case PlayerState.IdleLeft:
-                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName}_Idle_L", 0, 0.0f);
+                    _weaponAnim.Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName}_Idle_L", 0, 0.0f);
                     break;
                 case PlayerState.IdleRight:
-                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName}_Idle_R", 0, 0.0f);
+                    _weaponAnim.Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName}_Idle_R", 0, 0.0f);
                     break;
             }
 
         }
 
+        // 방패 상태를 무기 애니메이터에 틀고 있었다(없는 상태라 경고만 나고 방패는 맞춰지지 않았다).
         if (_isEquiptShield)
         {
             switch (_state)
             {
                 case PlayerState.IdleFront:
-                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurShield].ImageName}_Idle_F", 0, 0.0f);
+                    _shieldAnim.Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurShield].ImageName}_Idle_F", 0, 0.0f);
                     break;
                 case PlayerState.IdleLeft:
-                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurShield].ImageName}_Idle_L", 0, 0.0f);
+                    _shieldAnim.Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurShield].ImageName}_Idle_L", 0, 0.0f);
                     break;
                 case PlayerState.IdleRight:
-                    _weapon.GetComponent<Animator>().Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurShield].ImageName}_Idle_R", 0, 0.0f);
+                    _shieldAnim.Play($"{Managers.Data.EquipDic[Managers.Game.PlayerData.CurShield].ImageName}_Idle_R", 0, 0.0f);
                     break;
             }
         }
@@ -501,7 +487,7 @@ public class PlayerController : MonoBehaviour
             {
                 MonsterController mc = Util.Find<MonsterController>(hit.collider.gameObject);
                 if (mc != null)
-                    mc.SetMonster();
+                    StartFight(mc);
                 somethingExist = true;
             }
             // Checking Item
@@ -672,7 +658,7 @@ public class PlayerController : MonoBehaviour
                 if (mc == null)
                     continue;
                 Debug.Log($"{mc.gameObject.name} (광선 밖 — 칸 검사로 붙는다)");
-                mc.SetMonster();
+                StartFight(mc);
                 somethingExist = true;
                 break;
             }
@@ -698,6 +684,17 @@ public class PlayerController : MonoBehaviour
         //Managers.Game.SaveGame();
 
         return somethingExist;
+    }
+
+    /// <summary>
+    /// 몬스터와 부딪혔다. 전투는 관문(FightGate)을 거쳐 연다 — 보스 등장 연출이나 "이 싸움은 죽는다"
+    /// 확인 창이 그 사이에 끼어든다. 관문이 처리하는 동안(Pending) 캐릭터는 움직이지 않는다.
+    /// </summary>
+    void StartFight(MonsterController mc)
+    {
+        // 관문이 창을 띄우는 동안 뛰는 그림으로 서 있지 않게 먼저 선다. (SetMonster 도 같은 일을 한다)
+        SetIdleState(_moveDir);
+        FightGate.Request(mc, mc.SetMonster);
     }
 
     Sequence InteractAnim()

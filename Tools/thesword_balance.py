@@ -1,19 +1,55 @@
 """TheSword 전투 시뮬레이터 + 레벨 곡선.
 
-Unity C# 전투 코드(UI_BaseCard / UI_MonsterCard / CreatureClass.DefaultTrait)를
-그대로 옮긴 것. 밸런스 수치는 전부 이 시뮬레이터로 검증한다.
+Unity C# 전투 코드(BattleStepper / CreatureClass 의 ITrait)를 그대로 옮긴 것.
+밸런스 수치는 전부 이 시뮬레이터로 검증한다.
 
 원본 대응:
-  - 공격 주기      : 3f / AttackSpeed        (UI_MonsterCard.CoDelayAttack)
-  - 방어 게이지 주기: 3f / DefenceSpeed       (UI_MonsterCard.CoDelayDefence)
+  - 전투 시계      : BattleStepper.Step(Time.fixedDeltaTime) — 한 스텝의 순서는
+                     플레이어 공격 -> 플레이어 방어 -> 몬스터 공격 -> 몬스터 방어
+  - 공격 주기      : 3f / AttackSpeed
+  - 방어 게이지 주기: 3f / DefenceSpeed
   - Critical       : "N회 공격마다 1회" 주기  (확률 아님)
   - 데미지         : max(1, round(ATK * crit) - DEF), 방어 중이면 1 (크리면 25%)
+
+다른 점 하나 — 전투 사이에 이어지는 것:
+  게임은 치명 횟수(AttackCount)·방어 게이지(DefenceCoolTime)·방어 상태(IsDefence)를
+  전투가 끝나도 들고 다음 전투로 간다(UI_BattlePopup, BattleForecast 가 받는다).
+  여기서는 전투마다 0 에서 시작한다. 그러면 치명타가 늘 20번째 공격에야 나오니
+  실제보다 늦거나 같다 — 합으로 보면 플레이어에게 불리한 쪽이라 완주 판정이
+  보수적이 된다. 그래서 일부러 맞추지 않는다 (한 전투만 보면 순서에 따라 몇 대
+  차이가 난다 — 전투 예측이 "다음에 싸우면" 이라고 말하는 이유다).
 """
 
+import bisect
 import csv
 import os
+import struct
 
-FIXED_DT = 0.02  # WaitForFixedUpdate 기본값
+# ProjectSettings/TimeManager.asset 의 Fixed Timestep (4699296 / 141120000 = 0.0333).
+# 전투는 FixedUpdate 한 번에 Step 한 번이다. 예전에는 0.02 로 셌다 — 공격 한 번이
+# 한 스텝 늦거나 빨라지는 만큼 전투마다 몇 %씩 어긋났다.
+FIXED_DT = 4699296 / 141120000
+
+
+def _f32(x):
+    """C# float 로 반올림한 값."""
+    return struct.unpack("f", struct.pack("f", x))[0]
+
+
+# BattleStepper 의 타이머는 float 에 dt 를 더해 간다. float 로 k 번 더한 값을 미리
+# 재 두고 타이머를 "마지막으로 0 이 된 뒤 몇 스텝" 으로 세면 비교가 비트까지 같다.
+# (배정밀도로 더하면 주기가 스텝 경계에 걸린 전투에서 한 대가 어긋난다.)
+_DT32 = _f32(FIXED_DT)
+_ELAPSED = [0.0]            # _ELAPSED[k] = float 로 dt 를 k 번 더한 값
+while _ELAPSED[-1] < 601.0:
+    _ELAPSED.append(_f32(_ELAPSED[-1] + _DT32))
+
+
+def _steps(speed):
+    """3f / speed 초가 차는 데 드는 스텝 수. 속도 0 이면 영영 안 찬다."""
+    if speed <= 0:
+        return len(_ELAPSED)
+    return bisect.bisect_left(_ELAPSED, _f32(3.0 / _f32(speed)))
 
 # ---------------------------------------------------------------- 플레이어 테이블
 
@@ -77,9 +113,12 @@ def compute_damage(attacker, target, is_crit):
     """
     if attacker.trait == BEAST:
         # 야수만 식이 다르다: 1 로 바닥을 받치지 않고, 방어 중이면 0 이다.
-        damage = int(max(0.0, attacker.atk))
+        # 치명 배율은 다른 특성처럼 실수로 곱한다 — 예전에는 (int) 로 잘라서
+        # 치명공격력 250 이 2배, 199 가 1배였다.
+        num = float(int(max(0.0, attacker.atk)))
         if is_crit:
-            damage *= int(attacker.crit_atk / 100.0)
+            num *= attacker.crit_atk / 100.0
+        damage = int(round(num))
         damage -= int(target.dfn)
         if target.shield and is_crit:
             damage = int(damage * 0.25)
@@ -131,7 +170,10 @@ def apply_hit(attacker, target, damage, is_crit):
             target.hp += target.max_hp * 0.4
 
     if target.trait == TITAN:
-        # 포효: 5회 맞을 때마다 때린 쪽에 되받아친다.
+        # 포효: 5회 맞을 때마다 때린 쪽에 되받아친다. 5번째 대에 죽어도 포효한다.
+        # 이 식이 명세다 — round(0.2 * max(1, ATK - DEF)), 방어 중이면 1 의 20% = 0.
+        # (C# 은 공격력의 20% 에서 방어력을 빼서, 층 설계 레벨에서 41마리 전부
+        # 포효가 1 이었다. C# 쪽을 이 식에 맞춘다.)
         target.hit_count += 1
         if target.hit_count >= 5:
             target.hit_count = 0
@@ -157,17 +199,37 @@ def skill_damage(player, monster, ratio):
     return max(0.0, before - monster.hp)
 
 
+def _strike(attacker, target, is_crit):
+    """BattleStepper.Strike. 방어 중이던 쪽은 맞으면 방패가 깨진다 — True 를 돌려준다."""
+    if attacker.trait == MAGIC:
+        is_crit = True                  # 마력: 마법은 100% 치명 공격
+    dmg = compute_damage(attacker, target, is_crit)
+    was_shielded = target.shield
+    apply_hit(attacker, target, dmg, is_crit)
+    if was_shielded:                    # OnDefenceAction -> ClearDefence
+        target.shield = False
+    return was_shielded
+
+
+def _next_crit(c):
+    c.atk_count += 1
+    if c.crit_period > 0 and c.atk_count >= c.crit_period:
+        c.atk_count = 0
+        return True
+    return False
+
+
 def simulate_battle(player, monster, max_seconds=600.0):
     """1:1 전투. (플레이어 생존여부, 소요시간, 플레이어 HP 손실) 반환.
 
     플레이어 HP는 호출자가 넘긴 player.hp 에서 이어서 깎인다.
+    둘 다 쓰러지면(거대의 포효) 진 것이다 — BattleForecast 의 Win 과 같다.
     """
-    p_cd = 3.0 / player.aspd
-    m_cd = 3.0 / monster.aspd
-    p_def_cd = 3.0 / player.dspd
-    m_def_cd = 3.0 / monster.dspd
+    p_cd, m_cd = _steps(player.aspd), _steps(monster.aspd)
+    p_def_cd, m_def_cd = _steps(player.dspd), _steps(monster.dspd)
 
-    p_t = m_t = p_def_t = m_def_t = 0.0
+    # 타이머는 "마지막으로 0 이 된 뒤 지난 스텝 수" 다 (_ELAPSED 참고).
+    p_t = m_t = p_def_t = m_def_t = 0
     player.shield = monster.shield = False
     player.atk_count = monster.atk_count = 0
     player.armor = player.max_hp * ARMOR_SHIELD_RATIO
@@ -176,7 +238,6 @@ def simulate_battle(player, monster, max_seconds=600.0):
     player.beast_done = monster.beast_done = False
     player.stealth = monster.stealth = True
     start_hp = player.hp
-    t = 0.0
 
     # 철벽: 전투 시작 시 방어 상태로 시작한다 (GuardianTrait 생성자가 게이지를 채운다).
     if player.trait == GUARDIAN:
@@ -186,64 +247,43 @@ def simulate_battle(player, monster, max_seconds=600.0):
         monster.shield = True
         m_def_t = m_def_cd
 
-    while t < max_seconds:
-        # --- 공격 판정 (원본: 쿨 도달 시 공격 후 0으로 리셋)
+    # BattleForecast 가 float 로 초를 더해 가며 멈추는 자리와 같다.
+    max_steps = bisect.bisect_left(_ELAPSED, max_seconds)
+    for step in range(max_steps):
         if p_t >= p_cd:
-            p_t = 0.0
-            player.atk_count += 1
-            is_crit = False
-            if player.crit_period > 0 and player.atk_count >= player.crit_period:
-                is_crit = True
-                player.atk_count = 0
-            if player.trait == MAGIC:
-                is_crit = True          # 마력: 마법은 100% 치명 공격
-            dmg = compute_damage(player, monster, is_crit)
-            was_shielded = monster.shield
-            apply_hit(player, monster, dmg, is_crit)
-            if was_shielded:  # OnDefenceAction -> ClearDefence
-                monster.shield = False
-                m_def_t = 0.0
+            p_t = 0
+            if _strike(player, monster, _next_crit(player)):
+                m_def_t = 0
             if player.hp <= 0:          # 거대의 포효에 되맞아 죽을 수 있다
-                return False, t, start_hp - player.hp
+                return False, step * FIXED_DT, start_hp - player.hp
             if monster.hp <= 0:
-                return True, t, start_hp - player.hp
+                return True, step * FIXED_DT, start_hp - player.hp
 
-        if m_t >= m_cd:
-            m_t = 0.0
-            monster.atk_count += 1
-            is_crit = False
-            if monster.crit_period > 0 and monster.atk_count >= monster.crit_period:
-                is_crit = True
-                monster.atk_count = 0
-            if monster.trait == MAGIC:
-                is_crit = True
-            dmg = compute_damage(monster, player, is_crit)
-            was_shielded = player.shield
-            apply_hit(monster, player, dmg, is_crit)
-            if was_shielded:
-                player.shield = False
-                p_def_t = 0.0
-            if monster.hp <= 0:         # 플레이어가 거대라면 포효로 몬스터가 죽을 수 있다
-                return True, t, start_hp - player.hp
-            if player.hp <= 0:
-                return False, t, start_hp - player.hp
-
-        # --- 방어 게이지
+        # 플레이어 방패는 몬스터 공격보다 먼저 선다 — 같은 스텝에 차면 그 공격을 막는다.
         if p_def_t >= p_def_cd:
             player.shield = True
             p_def_t = p_def_cd
+
+        if m_t >= m_cd:
+            m_t = 0
+            if _strike(monster, player, _next_crit(monster)):
+                p_def_t = 0
+            if player.hp <= 0:
+                return False, step * FIXED_DT, start_hp - player.hp
+            if monster.hp <= 0:
+                return True, step * FIXED_DT, start_hp - player.hp
+
         if m_def_t >= m_def_cd:
             monster.shield = True
             m_def_t = m_def_cd
 
-        p_t += FIXED_DT
-        m_t += FIXED_DT
-        p_def_t += FIXED_DT
-        m_def_t += FIXED_DT
-        t += FIXED_DT
+        p_t += 1
+        m_t += 1
+        p_def_t += 1
+        m_def_t += 1
 
     # 시간 초과 = 서로 못 죽임 = 사실상 진행 불가
-    return False, t, start_hp - player.hp
+    return False, max_steps * FIXED_DT, start_hp - player.hp
 
 
 # ---------------------------------------------------------------- 레벨 테이블
@@ -338,10 +378,27 @@ def _self_check():
     b.shield = True
     assert compute_damage(a, b, False) == 1
 
+    # 전투 시계는 프로젝트의 고정 스텝을 float 로 센다
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
+                           "ProjectSettings", "TimeManager.asset"), encoding="utf-8") as f:
+        text = f.read()
+    count = int(text.split("m_Count:")[1].split()[0])
+    rate = int(text.split("m_Numerator:")[1].split()[0])
+    assert FIXED_DT == count / rate, (FIXED_DT, count, rate)
+    assert _steps(1.0) == 91 and _steps(2.2) == 41      # 3초 / 1.36초 주기
+
+    # 한 스텝 안에서는 플레이어 방패가 몬스터 공격보다 먼저 선다
+    p = Creature(1000, 1, 0, 0.01, 1.0, 99, 200)          # 3초에 방패, 공격은 없다
+    m = Creature(10 ** 6, 100, 0, 1.0, 0.01, 99, 200)     # 3초에 첫 공격
+    _, _, lost = simulate_battle(p, m, max_seconds=3.1)
+    assert lost == 1, lost                                # 막혔다
+
     # 야수: 방어 중이면 0, 그리고 10% 이하에서 한 번 회복한다
     a, b = mk(BEAST), mk()
     b.shield = True
     assert compute_damage(a, b, False) == 0
+    a = Creature(1000, 100, 0, 1.0, 0.1, 99, 250, BEAST)  # 치명 배율은 자르지 않는다
+    assert compute_damage(a, mk(), True) == 250
     beast = mk(BEAST, hp=1000)
     beast.hp = 60
     apply_hit(mk(), beast, 20, False)

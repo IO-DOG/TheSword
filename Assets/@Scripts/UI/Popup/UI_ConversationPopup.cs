@@ -35,9 +35,22 @@ public class UI_ConversationPopup : UI_Popup
             return false;
 
         Managers.Game.OnConversation = true;
+        _locked = true;
         InitScript();
 
         return true;
+    }
+
+    // Esc 로는 닫히지 않는다. 대사를 끝까지 넘겨야 다음 연출(마검 계약 창 등)로 이어진다.
+    public override bool OnEscape() => true;
+
+    // 이 창이 건 대화 잠금. 어떤 길로 사라지든 풀고 간다.
+    bool _locked;
+
+    void OnDestroy()
+    {
+        if (_locked)
+            Managers.Game.OnConversation = false;
     }
 
     private void Awake()
@@ -53,12 +66,15 @@ public class UI_ConversationPopup : UI_Popup
 
     private void Update()
     {
-        if(!_isAllTextShown && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space)))
+        // 마우스 클릭으로도 넘긴다. 위에 다른 창이 떠 있으면 그 창을 누른 것이지 대사를 넘긴 게 아니다.
+        bool next = Managers.UI.TopPopup == this
+            && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0));
+        if(!_isAllTextShown && next)
         {
             GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().SetVisibilityEntireText(true);
             _isAllTextShown = true;
         }
-        else if(_isAllTextShown && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space)))
+        else if(_isAllTextShown && next)
         {
             ShowNextScript();
             _isAllTextShown = false;
@@ -144,6 +160,7 @@ public class UI_ConversationPopup : UI_Popup
         {
             Debug.Log("Conversation ended");
             Managers.Game.OnConversation = false;
+            _locked = false;
             ClosePopupUI();
 
             if(Managers.Directing.PopupAction != null)

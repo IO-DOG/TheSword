@@ -51,6 +51,7 @@ public class Door : MonoBehaviour
         gameObject.GetComponent<Collider>().enabled = false;
         Managers.Sound.Play(Define.Sound.Effect, "DoorUnlock_SFX");
         _openDoorCoroutine = StartCoroutine(OpenDoor(time));
+        GameEvents.RaiseDoorOpened(_keyIndex);
     }
 
     IEnumerator OpenDoor(float time)
@@ -87,9 +88,11 @@ public class Door : MonoBehaviour
     }
 
 
+    /// <summary>열쇠 없이 문에 부딪혔다 (자물쇠 + FX_Cross).</summary>
     public void CoDoorLockLockedAnim()
     {
         _doorLockLockedAnimCoroutine = StartCoroutine(DoorLockLockedAnim());
+        GameEvents.RaiseDoorBlocked(_keyIndex);
     }
 
 

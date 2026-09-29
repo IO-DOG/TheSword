@@ -82,7 +82,10 @@ public sealed class BattleStepper : IDisposable
         var attacker = fromPlayer ? Player : Monster;
         var target = fromPlayer ? Monster : Player;
         int hits = (fromPlayer ? PlayerHits : MonsterHits) + 1;
-        attacker.IsCritical = hits == attacker.Critical;
+        // ">=" 여야 한다 (thesword_balance._next_crit). 전투 사이에 이어 온 횟수가 주기보다
+        // 크면 (장비로 주기가 줄었을 때) "==" 는 다시는 맞지 않아 치명타가 영영 안 나왔다.
+        int period = (int)attacker.Critical;
+        attacker.IsCritical = period > 0 && hits >= period;
         if (attacker.IsCritical) hits = 0;
         if (fromPlayer) PlayerHits = hits; else MonsterHits = hits;
         int damage = attacker.Trait.ExecuteAttack(attacker, target);

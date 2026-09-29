@@ -145,9 +145,10 @@ public class UI_MonsterInfo : UI_Base
 
         string cost = Str(SCRIPT_COST, "예상 피해");
         string hp = Str(SCRIPT_HP, "체력");
+        // 화살표는 → 다. 두 글꼴 모두 ▶ 가 없어 네모(□)로 나왔다.
         if (forecast.Win)
         {
-            line.text = $"{cost} -{forecast.Damage} ▶ {hp} {forecast.RemainHP}";
+            line.text = $"{cost} -{forecast.Damage} → {hp} {forecast.RemainHP}";
             // 이기긴 하는데 남는 게 1/4 도 안 되면 그것도 알려야 한다. 다음 층이 있다.
             float left = Managers.Game.PlayerData.MaxHP > 0f
                 ? forecast.RemainHP / Managers.Game.PlayerData.MaxHP : 1f;
@@ -157,7 +158,7 @@ public class UI_MonsterInfo : UI_Base
         {
             // 죽는 싸움. 이 표시의 존재 이유이므로 눈에 띄어야 한다.
             string end = (forecast.RemainHP <= 0) ? Str(SCRIPT_DIE, "쓰러진다") : Str(SCRIPT_NO_WIN, "못 이긴다");
-            line.text = $"{cost} -{forecast.Damage} ▶ {end}";
+            line.text = $"{cost} -{forecast.Damage} → {end}";
             line.color = new Color32(255, 70, 70, 255);
             line.fontStyle = FontStyles.Bold;
         }
@@ -165,7 +166,7 @@ public class UI_MonsterInfo : UI_Base
         // 창 폭이 200 이라 긴 숫자는 넘친다. 이름표(UI_BaseCard.SetName)와 같은 방식으로
         // 한 줄에 맞춰 줄인다 — 접히면 아래 칸으로 넘쳐 나간다.
         line.alignment = TextAlignmentOptions.Center;
-        line.enableWordWrapping = false;
+        line.textWrappingMode = TextWrappingModes.NoWrap;
         line.overflowMode = TextOverflowModes.Ellipsis;
         line.fontSizeMin = 7f;
         line.fontSizeMax = line.fontSize;
@@ -195,15 +196,34 @@ public class UI_MonsterInfo : UI_Base
             //Debug.Log(hit.collider.gameObject.layer);
             if (hit.collider.gameObject.layer != (int)Define.Layer.Monster)
             {
-                Managers.Game.GameScene.isOpenInfoPopup = false;
+                Release();
                 Destroy(gameObject);
             }
         }
         else
         {
-            Managers.Game.GameScene.isOpenInfoPopup = false;
+            Release();
             Destroy(gameObject);
         }
+    }
+
+    // 이 창은 몬스터의 자식이다. 마우스를 올린 채 그 몬스터와 싸우면 몬스터가 통째로 꺼지거나 부서져
+    // 위의 Update 가 돌지 않았고, "정보 창이 떠 있다" 표시가 켜진 채 남아 그 뒤로 전투 예측이 영영 안 떴다.
+    // 표시는 한 번만 내린다 — 부서질 때도 OnDisable 이 오는데, 그 사이 새로 뜬 창의 표시를 지우면 안 된다.
+    bool _released;
+
+    void Release()
+    {
+        if (_released)
+            return;
+        _released = true;
+        if (Managers.Game.GameScene != null)
+            Managers.Game.GameScene.isOpenInfoPopup = false;
+    }
+
+    void OnDisable()
+    {
+        Release();
     }
 
     private IEnumerator CoAutoScroll()

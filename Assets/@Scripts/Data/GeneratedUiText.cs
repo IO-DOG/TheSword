@@ -15,6 +15,26 @@ public static class GeneratedUiText
             case 144: return new[] { "Loading failed. Enter: retry / Esc: quit", "불러오지 못했습니다. Enter: 재시도 / Esc: 종료", "Loading failed. Enter: retry / Esc: quit", "読み込めませんでした。Enter：再試行 / Esc：終了", "加载失败。Enter：重试 / Esc：退出" }[language >= 0 && language <= 4 ? language : 0];
             case 145: return new[] { "Could not restore your save. The original is preserved. Press any key to return.", "저장을 복구하지 못했습니다. 원본은 보존됩니다. 아무 키나 눌러 돌아가세요.", "Could not restore your save. The original is preserved. Press any key to return.", "セーブを復元できませんでした。元のデータは保持されます。何かキーを押して戻ります。", "无法恢复存档。原始存档已保留。请按任意键返回。" }[language >= 0 && language <= 4 ? language : 0];
             case 146: return new[] { "Taking one reward removes the other.", "둘 중 하나를 얻으면 다른 보상은 사라집니다.", "Taking one reward removes the other.", "片方を取ると、もう片方の報酬は消えます。", "领取一个奖励后，另一个奖励将消失。" }[language >= 0 && language <= 4 ? language : 0];
+            case 230: return new[] { "Resolution", "해상도", "Resolution", "解像度", "分辨率" }[language >= 0 && language <= 4 ? language : 0];
+            case 231: return new[] { "VSync", "수직 동기화", "VSync", "垂直同期", "垂直同步" }[language >= 0 && language <= 4 ? language : 0];
+            case 232: return new[] { "Text speed", "글자 속도", "Text speed", "文字速度", "文字速度" }[language >= 0 && language <= 4 ? language : 0];
+            case 233: return new[] { "Slow", "느림", "Slow", "遅い", "慢" }[language >= 0 && language <= 4 ? language : 0];
+            case 234: return new[] { "Normal", "보통", "Normal", "普通", "中" }[language >= 0 && language <= 4 ? language : 0];
+            case 235: return new[] { "Fast", "빠름", "Fast", "速い", "快" }[language >= 0 && language <= 4 ? language : 0];
+            case 236: return new[] { "Instant", "즉시", "Instant", "瞬間", "立即" }[language >= 0 && language <= 4 ? language : 0];
+            case 237: return new[] { "Screen shake", "화면 흔들림", "Screen shake", "画面の揺れ", "屏幕震动" }[language >= 0 && language <= 4 ? language : 0];
+            case 238: return new[] { "Game", "게임", "Game", "ゲーム", "游戏" }[language >= 0 && language <= 4 ? language : 0];
+            case 180: return new[] { "Restart floor", "이 층 다시 시작", "Restart floor", "この階をやり直す", "重新开始本层" }[language >= 0 && language <= 4 ? language : 0];
+            case 181: return new[] { "Checkpoints", "체크포인트", "Checkpoints", "チェックポイント", "检查点" }[language >= 0 && language <= 4 ? language : 0];
+            case 182: return new[] { "Back to title", "타이틀로", "Back to title", "タイトルへ", "返回标题" }[language >= 0 && language <= 4 ? language : 0];
+            case 183: return new[] { "Return to when you entered this floor? Progress since then will be lost.", "이 층에 들어섰을 때로 돌아갈까요? 그 뒤의 진행은 사라집니다.", "Return to when you entered this floor? Progress since then will be lost.", "この階に入った時点に戻りますか？それ以降の進行は失われます。", "要回到进入本层时的状态吗？之后的进度将会丢失。" }[language >= 0 && language <= 4 ? language : 0];
+            case 184: return new[] { "Return to the title? You will resume from the last floor you entered.", "타이틀로 돌아갈까요? 마지막으로 층에 들어섰을 때부터 이어집니다.", "Return to the title? You will resume from the last floor you entered.", "タイトルに戻りますか？最後に階に入った時点から再開します。", "要返回标题画面吗？将从最后进入的楼层继续。" }[language >= 0 && language <= 4 ? language : 0];
+            case 185: return new[] { "Quit the game? You will resume from the last floor you entered.", "게임을 끌까요? 마지막으로 층에 들어섰을 때부터 이어집니다.", "Quit the game? You will resume from the last floor you entered.", "ゲームを終了しますか？最後に階に入った時点から再開します。", "要退出游戏吗？将从最后进入的楼层继续。" }[language >= 0 && language <= 4 ? language : 0];
+            case 186: return new[] { "Return to when you entered floor {0}? Current progress will be lost.", "{0}층에 들어섰을 때로 돌아갈까요? 지금까지의 진행은 사라집니다.", "Return to when you entered floor {0}? Current progress will be lost.", "{0}階に入った時点に戻りますか？現在の進行は失われます。", "要回到进入第{0}层时的状态吗？当前进度将会丢失。" }[language >= 0 && language <= 4 ? language : 0];
+            case 187: return new[] { "Floor {0}  Lv {1}  HP {2}/{3}", "{0}층  Lv {1}  HP {2}/{3}", "Floor {0}  Lv {1}  HP {2}/{3}", "{0}階  Lv {1}  HP {2}/{3}", "第{0}层  Lv {1}  HP {2}/{3}" }[language >= 0 && language <= 4 ? language : 0];
+            case 188: return new[] { "No checkpoints yet.", "아직 돌아갈 체크포인트가 없습니다.", "No checkpoints yet.", "まだチェックポイントがありません。", "还没有可以返回的检查点。" }[language >= 0 && language <= 4 ? language : 0];
+            case 189: return new[] { "Could not load the checkpoint. Your current progress is unchanged.", "체크포인트를 불러오지 못했습니다. 지금 진행은 그대로입니다.", "Could not load the checkpoint. Your current progress is unchanged.", "チェックポイントを読み込めませんでした。現在の進行はそのままです。", "无法读取检查点。当前进度保持不变。" }[language >= 0 && language <= 4 ? language : 0];
+            case 190: return new[] { "Starting a new game erases your current save. Start anyway?", "새 게임을 시작하면 지금 저장이 지워집니다. 시작할까요?", "Starting a new game erases your current save. Start anyway?", "ニューゲームを始めると現在のセーブが消えます。始めますか？", "开始新游戏将删除当前存档。确定开始吗？" }[language >= 0 && language <= 4 ? language : 0];
             default: return null;
         }
     }

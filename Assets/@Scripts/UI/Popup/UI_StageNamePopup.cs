@@ -45,10 +45,13 @@ public class UI_StageNamePopup : UI_Popup
     {
         // 층 이름이 없어도 여기서 터지면 안 된다 — 이 팝업을 띄우는 쪽이
         // 포탈 워프 코루틴이라, 같이 죽으면 다음 층으로 넘어가지 못한다.
-        int id = (int)Define.STAGE_NAME + Managers.Game.PlayerData.CurStageid;
+        //
+        // HUD(UI_GameScene.Refresh)와 같은 이름을 쓴다. 예전에는 5000+층 을 따로 읽어서
+        // 5층이 HUD 에서는 "이끼 낀 지하 묘소 5층", 여기서는 "가브 마을" 로 서로 달랐다.
         TMP_Text text = GetText((int)Texts.StageNameText);
-        if (text != null)
-            text.text = Managers.GetString(id);
+        Data.StageInfoData info;
+        if (text != null && Managers.Data.StageInfoDic.TryGetValue(Managers.Game.PlayerData.CurStageid, out info))
+            text.text = Managers.GetString(info.DungeonNameScriptID);
     }
 
     public IEnumerator HideStageNamePopup(float duration)
@@ -75,12 +78,12 @@ public class UI_StageNamePopup : UI_Popup
 
             yield return new WaitForSeconds(duration);
 
-            if (Managers.UI.StageNamePopup != null)
-            {
-                Managers.UI.ClosePopupUI(Managers.UI.StageNamePopup);
+            // 제 자신을 닫는다. 그 사이 다른 창(전투창 등)이 위에 올라와 있어도 닫힌다 —
+            // 예전에는 맨 위가 아니면 조용히 실패해서 보이지 않는 창이 스택에 남아 휠 줌을 막았다.
+            Managers.UI.ClosePopupUI(this);
+            if (Managers.UI.StageNamePopup == this)
                 Managers.UI.StageNamePopup = null;
-            }
         }
-        
+
     }
 }

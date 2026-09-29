@@ -10,11 +10,6 @@ using static GameManager;
 
 public class UI_MonsterCard : UI_BaseCard
 {
-    #region Member
-    public int _attackCount = 0;
-    public int _totalAttackCount = 0;
-    #endregion
-
     public override bool Init()
     {
         if (base.Init() == false)
@@ -69,11 +64,6 @@ public class UI_MonsterCard : UI_BaseCard
 
         Managers.Sound.Play(Define.Sound.Effect, "MonsterAttack0_SFX");
 
-        if (_totalAttackCount > 0 && _totalAttackCount % 20 == 0)
-        {
-            Berserk();
-        }
-
         PlayMonsterAttackAnim();
         CreateMonsterAttackParticle();
         CreatePlayerHitParticle();
@@ -85,14 +75,6 @@ public class UI_MonsterCard : UI_BaseCard
         base.Defence();
         GetImage((int)Images.DefenceIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Shield);
 
-    }
-
-    public void Berserk()
-    {
-        _creature.Attack *= 1.2f;
-        _creature.AttackSpeed *= 1.2f;
-        _creature.Defence *= 1.2f;
-        _creature.DefenceSpeed *= 1.2f;
     }
 
     public override void ClearDefence()
@@ -252,6 +234,7 @@ public class UI_MonsterCard : UI_BaseCard
         if (fought != null)
             fought.MarkDead();
 
+        // 우두머리를 쓰러뜨렸다는 알림(GameEvents.BossDefeated)은 여기서 내지 않는다 — UI_BattlePopup.CoBattleEnd.
         BossMonsterController boss = (fought != null) ? fought.GetComponent<BossMonsterController>() : null;
         if (boss != null)
         {

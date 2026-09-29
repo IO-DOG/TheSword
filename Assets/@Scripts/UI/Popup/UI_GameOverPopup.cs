@@ -15,6 +15,8 @@ public class UI_GameOverPopup : UI_Popup
 
     #endregion
 
+    bool _respawned;
+
     public override bool Init()
     {
         if (base.Init() == false)
@@ -28,27 +30,6 @@ public class UI_GameOverPopup : UI_Popup
         DeadAni();
 
         return true;
-    }
-
-    void OnClickReGameButton()
-    {
-        // 마검 습득 후
-        if (PlayerPrefs.GetInt("ISMEETSWORD") == 1)
-        {
-            Managers.Game.PlayerData.Clear();
-            Managers.Game.Player.gameObject.SetActive(true);
-            Managers.Game.Player.SetPlayerPosition(Managers.Game.SpawnPoints[2].position);
-            Managers.Game.LoadGame();
-        }
-        else
-        {
-            Managers.Game.Player.gameObject.SetActive(true);
-            Managers.Game.PlayerData.Ability = (int)Define.Trait.None;
-            Debug.Log("Cllck OnClickNewGameButton");
-            Managers.Game.DeleteGameData();
-            Managers.Data.Init();
-            Managers.Scene.LoadScene(Define.Scene.GameScene);
-        }
     }
 
     void DeadAni()
@@ -104,29 +85,53 @@ public class UI_GameOverPopup : UI_Popup
         // 게임 오버 일러스트 페이드 아웃
         //StartCoroutine(Util.CoFade(GetImage((int)Images.GameOverIllust), 1f, false));
 
-        Managers.Game.Player.gameObject.SetActive(true);
-        GameObject.Find("UI_PlayerHPBar")?.SetActive(true);
+        Respawn();
+    }
 
-        Managers.Game.LoadGame();
-        //Managers.Game.PlayerData.Ability = (int)Define.Trait.None;
-        //Debug.Log("Cllck OnClickNewGameButton");
-        //Managers.Game.DeleteGameData();
-        //Managers.Data.Init();
-        Managers.Game.OnInputLock = false;
-        Managers.Game.IsPlayerDead = false;
-
-        // 죽을때 타격횟수 초기화
-        Managers.Game.AttackCount = 0;
-
-        GameObject.Find("Maps")?.SetActive(false);
-        Managers.Game.GameScene.gameObject?.SetActive(false);
-        //Managers.Scene.LoadScene(Define.Scene.TitleScene);
-        Managers.Scene.LoadScene(Define.Scene.GameScene);
-        //Managers.Game.LoadGame();
-
-        //Managers.Game.Player.gameObject.SetActive(true);
-
+    void Respawn()
+    {
+        if (_respawned)
+            return;
+        _respawned = true;
+        Restart();
         ClosePopupUI();
     }
 
+    /// <summary>
+    /// 체크포인트에서 되살린다. 못 읽으면 타이틀로 간다 — 죽은 PlayerData(HP 0 이하)를 든 채
+    /// 게임 화면을 다시 세우면 다음 전투의 첫 대에 또 죽는다. 타이틀은 켜질 때 Game.Init 으로
+    /// 판을 다시 세운다(읽히면 그 체크포인트, 아니면 새 판).
+    /// </summary>
+    static void Restart()
+    {
+        GameEvents.RespawnPending = true;
+        if (Managers.Game.RestartFromCheckpoint())
+        {
+            // 죽을때 타격횟수 초기화
+            Managers.Game.AttackCount = 0;
+            return;
+        }
+
+        GameEvents.RespawnPending = false;
+        Debug.LogError($"[GameOver] 체크포인트를 읽지 못해 타이틀로 간다: {Managers.Game.LastSaveError}");
+        Managers.Scene.LoadScene(Define.Scene.TitleScene);
+    }
+
+    void OnDestroy()
+    {
+        // 연출 도중에 창이 사라졌다(Esc·창 정리). 이 창이 되살리기를 맡고 있어서, 그대로 두면
+        // 죽은 채 입력 잠금(OnInputLock)이 걸린 채로 멈춘다. 씬이 내려가는 중이면 그쪽에 맡긴다.
+        if (_respawned || gameObject.scene.isLoaded == false)
+            return;
+        CoroutineManager.StartCoroutine(CoRestartIfStranded());
+    }
+
+    // 한 프레임 뒤에 본다. 같은 프레임에 다른 씬으로 가는 길이 열렸다면(타이틀로 가기 등)
+    // 그때는 게임 화면이 이미 내려가 있어 여기서 끼어들지 않는다.
+    static IEnumerator CoRestartIfStranded()
+    {
+        yield return null;
+        if (Managers.Game.IsPlayerDead && Managers.Game.GameScene != null)
+            Restart();
+    }
 }

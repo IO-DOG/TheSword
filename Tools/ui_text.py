@@ -22,6 +22,28 @@ TEXT = {
 }
 
 
+# More UI text lives in Tools/ui_text_parts/*.py, one file per feature, each with its
+# own TEXT dict — so features can add strings without editing the same lines. Blocks:
+#   150-179 core/save   180-229 menus/popups/input   230-259 settings/language/build
+#   260-299 forecast/manual/warp   300-349 story UI
+def _load_parts():
+    import importlib.util
+    parts = sorted((Path(__file__).parent / "ui_text_parts").glob("*.py"))
+    for part in parts:
+        spec = importlib.util.spec_from_file_location(f"ui_text_part_{part.stem}", part)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        for sid, values in getattr(mod, "TEXT", {}).items():
+            if sid in TEXT:
+                raise ValueError(f"UI text id {sid} is defined twice ({part.name})")
+            if len(values) != 4 or not all(isinstance(v, str) and v for v in values):
+                raise ValueError(f"UI text id {sid} in {part.name} needs 4 non-empty strings (kr, en, jp, cn)")
+            TEXT[sid] = tuple(values)
+
+
+_load_parts()
+
+
 def append_rows(scripts):
     by_id = {row["id"]: row for row in scripts}
     for sid, values in TEXT.items():

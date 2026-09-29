@@ -42,9 +42,13 @@ public class CameraController : MonoBehaviour
     Vector3 _goOriginScale;
     Vector3 _playerOriginScale;
 
+    // 메인 카메라의 픽셀 퍼펙트. 예전에는 매 프레임 두세 번씩 GetComponent 했다.
+    PixelPerfectCamera _pixelPerfect;
+
     private void Awake()
     {
         Managers.Game.MainCamera = this.transform.parent.GetComponent<Camera>();
+        _pixelPerfect = Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>();
         _vCam = GetComponent<CinemachineVirtualCamera>();
     }
     private void Start()
@@ -55,9 +59,16 @@ public class CameraController : MonoBehaviour
 
         _transposer = _vCam.GetCinemachineComponent<CinemachineTransposer>();
 
-        Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[Managers.Game.ResolutionIdx];
-        Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[Managers.Game.ResolutionIdx];
+        SetResolution(Managers.Game.ResolutionIdx);
         //_transposer.m_FollowOffset = new Vector3(0f, 10f, -5f);
+    }
+
+    void SetResolution(int index)
+    {
+        if (_pixelPerfect == null)
+            return;
+        _pixelPerfect.refResolutionX = _resolutionX[index];
+        _pixelPerfect.refResolutionY = _resolutionY[index];
     }
 
     /// <summary>
@@ -88,29 +99,19 @@ public class CameraController : MonoBehaviour
 
         if (Managers.Game.OnStaticResolution == true)
         {
-            Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[2];
-            Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[2];
+            SetResolution(2);
         }
         else if (Managers.Game.OnDirect == true) return;
         else if (Managers.UI.GetPopupCount() == 0 || (Managers.UI.StageNamePopup != null && Managers.UI.GetPopupCount() == 1))
         {
             float scroll = Input.GetAxis("Mouse ScrollWheel") * _scrollSpeed * Time.deltaTime;
 
-            Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[Managers.Game.ResolutionIdx];
-            Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[Managers.Game.ResolutionIdx];
-
             if (scroll > 0 && Managers.Game.ResolutionIdx < _resolutionX.Length - 1)
-            {
                 Managers.Game.ResolutionIdx++;
-                Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[Managers.Game.ResolutionIdx];
-                Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[Managers.Game.ResolutionIdx];
-            }
             else if (scroll < 0 && 0 < Managers.Game.ResolutionIdx)
-            {
                 Managers.Game.ResolutionIdx--;
-                Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionX = _resolutionX[Managers.Game.ResolutionIdx];
-                Managers.Game.MainCamera.GetComponent<PixelPerfectCamera>().refResolutionY = _resolutionY[Managers.Game.ResolutionIdx];
-            }
+
+            SetResolution(Managers.Game.ResolutionIdx);
         }
     }
 
@@ -262,6 +263,13 @@ public class CameraController : MonoBehaviour
 
     public static IEnumerator CoShakeCamera(float time, float force = 1f)
     {
+        // 흔들림을 끈 사람(멀미)에게도 같은 시간은 흐른다 — 이 코루틴을 기다리는 쪽의 박자가 어긋나지 않게.
+        if (GameSettings.ScreenShake == false)
+        {
+            yield return new WaitForSeconds(0.1f + time + 0.2f);
+            yield break;
+        }
+
         float noiseOffsetX = Random.Range(0f, 80f); // X축 노이즈 시작점
         float noiseOffsetY = Random.Range(0f, 80f); // Y축 노이즈 시작점
         yield return new WaitForSeconds(0.1f);

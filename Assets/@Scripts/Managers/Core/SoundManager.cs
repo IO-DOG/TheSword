@@ -53,10 +53,14 @@ public class SoundManager
     {
         AudioSource audioSource = _audioSources[(int)type];
 
+        // 없는 키는 조용히 넘어간다. 그대로 두면 아래에서 null 의 length 를 읽어 예외가 나고,
+        // 소리를 부른 쪽(전투·연출 코루틴)이 통째로 죽는다. 곡이면 지금 곡을 끊지도 않는다.
         if (type == Define.Sound.Bgm)
         {
             LoadAudioClip(key, (audioClip) =>
             {
+                if (audioClip == null)
+                    return;
                 if (audioSource.isPlaying)
                     audioSource.Stop();
 
@@ -72,6 +76,8 @@ public class SoundManager
         {
             LoadAudioClip(key, (audioClip) =>
             {
+                if (audioClip == null)
+                    return;
                 if (audioSource.isPlaying)
                     audioSource.Stop();
 
@@ -84,9 +90,12 @@ public class SoundManager
         {
             LoadAudioClip(key, (audioClip) =>
             {
-                audioSource.pitch = Managers.Game.GameSpeed;
+                if (audioClip == null)
+                    return;
+                // 배속은 전투에만 건다 — 전투가 빨리 도는 만큼 타격음도 빨라진다.
+                // 발소리·UI 까지 올리면 목걸이(2~5배)를 낀 뒤로 걸을 때마다 새된 소리가 났다.
+                audioSource.pitch = Managers.Game.OnBattle ? pitch * Managers.Game.GameSpeed : pitch;
 
-                //audioSource.pitch = pitch;
                 //audioSource.volume = PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) / (float)_totalEffectCount; // 오디오 수에 따를 볼륨 조절
                 _totalEffectCount++;
                 //if (Managers.Game.EffectSoundOn)
@@ -128,7 +137,7 @@ public class SoundManager
             //if (Managers.Game.EffectSoundOn)
             audioSource.Play();
         }
-        else
+        else if (audioClip != null)
         {
             audioSource.pitch = pitch;
             //if (Managers.Game.EffectSoundOn)
@@ -206,7 +215,8 @@ public class SoundManager
 
         audioClip = Managers.Resource.Load<AudioClip>(key);
 
-        if (!_audioClips.ContainsKey(key))
+        // 못 찾은 것은 담아 두지 않는다. null 을 담으면 나중에 올라와도 끝까지 무음이다.
+        if (audioClip != null && !_audioClips.ContainsKey(key))
             _audioClips.Add(key, audioClip);
 
         callback?.Invoke(audioClip);
@@ -254,7 +264,9 @@ public class SoundManager
     public void FadeAndPlayBGM(string key, float time, float pitch = 1f)
     {
         AudioSource audioSource = _audioSources[(int)Define.Sound.Bgm];
-        float volume = audioSource.volume;
+        // 되돌아갈 소리 크기는 설정값이다. 지금 크기를 잡으면, 로딩 삽화가 막 0 으로 내려 둔
+        // 챕터 첫 층에서 새 곡이 0 으로 페이드인되어 그 챕터 내내 무음이었다.
+        float volume = ConfiguredBgmVolume;
         LoadAudioClip(key, (audioClip) =>
         {
             if (audioClip == null)
@@ -306,6 +318,10 @@ public class SoundManager
         return _audioSources[(int)type];
     }
 
+    /// <summary>설정 화면이 정한 곡 소리 크기 (전체 x 배경음).</summary>
+    public static float ConfiguredBgmVolume =>
+        PlayerPrefs.GetFloat("CURBGMSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1);
+
     public void FadeInBGM(float time)
     {
         CoroutineManager.StartCoroutine(CoFadeInBGM(time));
@@ -319,12 +335,12 @@ public class SoundManager
             timer += Time.deltaTime;
             float t = Mathf.Clamp01(timer / time);
             //// 소리켜기
-            Managers.Sound.SetBGMVolume(Mathf.Min(t, PlayerPrefs.GetFloat("CURBGMSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1)));
+            Managers.Sound.SetBGMVolume(Mathf.Min(t, ConfiguredBgmVolume));
             Managers.Sound.SetEffectVolume(Mathf.Min(t, PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1)));
 
             yield return null;
         }
-        Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1));
+        Managers.Sound.SetBGMVolume(ConfiguredBgmVolume);
         Managers.Sound.SetEffectVolume(PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1));
     }
 }

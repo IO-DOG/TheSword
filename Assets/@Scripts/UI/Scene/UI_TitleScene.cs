@@ -39,6 +39,9 @@ public class UI_TitleScene : UI_Scene
     }
     #endregion
 
+    // 새 게임이 저장을 지운다는 확인 (Tools/ui_text_parts/ui.py)
+    public const int ASK_NEW_GAME = 190;
+
     bool isPreload = false;
     int buttonsIdx = 0;
     int maxButtonCount = 4;
@@ -65,7 +68,7 @@ public class UI_TitleScene : UI_Scene
         //GetObject((int)Objects.Slider).GetComponent<Slider>().value = 0;
         GetObject((int)Objects.Slider).GetComponent<Slider>().gameObject.SetActive(false);
 
-        GetButton((int)Buttons.NewGameButton).gameObject.BindEvent(() => { buttonsIdx = 0; SetButtonColorAndButtonsText(buttonsIdx); StartCoroutine(CoOnClickNewGameButton()); });
+        GetButton((int)Buttons.NewGameButton).gameObject.BindEvent(() => { buttonsIdx = 0; SetButtonColorAndButtonsText(buttonsIdx); OnClickNewGameButton(); });
         if (Managers.Game.HasSave)
         {
             GetButton((int)Buttons.LoadGameButton).gameObject.BindEvent(() => { buttonsIdx = 1; SetButtonColorAndButtonsText(buttonsIdx); OnClickLoadGameButton(); });
@@ -170,6 +173,16 @@ public class UI_TitleScene : UI_Scene
             if (_loadFailed && Input.GetKeyDown(KeyCode.Escape)) Application.Quit();
             return;
         }
+        // 창(설정 메뉴·확인 창)이 떠 있으면 타이틀 키는 쉰다 — 설정 창 밑에서 Enter 가 "새 게임" 을 눌러
+        // 저장을 지운 적이 있다. 창을 닫은 그 Enter 도 같은 프레임에 여기서 다시 먹히면 안 된다.
+        // Esc 는 맨 위 창에 넘긴다(메뉴·확인 창이 제 닫는 길로 닫힌다).
+        if (Managers.UI.GetPopupCount() > 0 || Managers.UI.ClosedThisFrame)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+                Managers.UI.EscapeTopPopup();
+            return;
+        }
+
         if (_language != Managers.Game.ScriptType)
         {
             _language = Managers.Game.ScriptType;
@@ -196,8 +209,7 @@ public class UI_TitleScene : UI_Scene
             switch (buttonsIdx)
             {
                 case 0:
-                    StartCoroutine(CoOnClickNewGameButton());
-                    //OnClickNewGameButton();
+                    OnClickNewGameButton();
                     break;
                 case 1:
                     if (Managers.Game.HasSave) // 최초가 아니면
@@ -217,6 +229,8 @@ public class UI_TitleScene : UI_Scene
                 default:
                     break;
             }
+            // 이 Enter 가 아래 "아무 키나" 에 한 번 더 먹히면, 방금 띄운 이어하기 실패 문구가 곧바로 닫힌다.
+            return;
         }
 
         if (isPreload && Input.anyKeyDown && GetText((int)Texts.PessAnyKeyText).gameObject.activeSelf /*&& !Input.GetKeyDown(KeyCode.Return)*/ && !Input.GetKeyDown(KeyCode.UpArrow) && !Input.GetKeyDown(KeyCode.DownArrow))
@@ -227,6 +241,8 @@ public class UI_TitleScene : UI_Scene
             CheckFirstGame();
         }
 
+        // 치트 키는 에디터와 개발 빌드에서만.
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         #region ForTest
 
         if (Input.GetKeyDown(KeyCode.F8))
@@ -243,6 +259,22 @@ public class UI_TitleScene : UI_Scene
             Managers.Game.PlayerData.CurSword = 10;
         }
         #endregion
+#endif
+    }
+
+    // 새 게임은 저장을 지운다. 저장이 있으면 먼저 묻는다 — 처음 골라 둔 쪽은 "아니오".
+    // (자동 플레이는 CoOnClickNewGameButton 을 곧장 부른다)
+    void OnClickNewGameButton()
+    {
+        if (_lock || !isPreload)
+            return;
+        if (Managers.Game.HasSave == false)
+        {
+            StartCoroutine(CoOnClickNewGameButton());
+            return;
+        }
+        Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UIselect");
+        UI_ConfirmPopup.AskDestructive(Managers.GetString(ASK_NEW_GAME), () => StartCoroutine(CoOnClickNewGameButton()));
     }
 
     IEnumerator CoOnClickNewGameButton()
@@ -285,8 +317,14 @@ public class UI_TitleScene : UI_Scene
             // 시작하고, 오브젝트 상태만 남아 먹은 아이템이 없는 맵을 돌게 된다.
             if (Managers.Game.LoadGame() == false)
             {
-                Debug.LogWarning("[Title] 불러올 저장이 없다 — 새 게임으로 간다");
-                StartCoroutine(CoOnClickNewGameButton());
+                // 저장은 지우지 않는다. 예전에는 여기서 새 게임으로 넘어가 DeleteGameData 가 저장을 지웠다 —
+                // 층 데이터를 다시 뽑기만 해도(내용 패치) 해시가 달라져 모두의 저장이 그렇게 사라졌다.
+                // 알리고 타이틀에 머문다. 아무 키나 누르면 버튼으로 돌아간다.
+                Debug.LogWarning($"[Title] 이어하기 실패 — 저장은 그대로 둔다: {Managers.Game.LastSaveError}");
+                GetImage((int)Images.Buttons).gameObject.SetActive(false);
+                TMP_Text notice = GetText((int)Texts.PessAnyKeyText);
+                notice.text = Managers.GetString(Define.TITLE_SAVE_FAILED);
+                notice.gameObject.SetActive(true);
                 return;
             }
 

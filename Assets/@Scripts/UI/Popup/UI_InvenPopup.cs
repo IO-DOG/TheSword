@@ -189,13 +189,24 @@ public class UI_InvenPopup : UI_Popup
         return true;
     }
 
-    private void Update()
+    // Esc 는 게임 화면(UI_GameScene)이 맨 위 창에게만 넘긴다. 예전에는 여기서도 따로 받아서,
+    // 한 번 누른 Esc 에 인벤토리가 닫히고 곧바로 메뉴가 열렸다.
+    public override bool OnEscape()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
+        Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Back_SFX");
+        ClosePopupUI();
+        return true;
+    }
 
-            ClosePopupUI();
-        }
+    /// <summary>
+    /// 장비 그림을 칸에 넣는다. 그림이 어드레서블에 없으면(부츠·목걸이·반지 대부분) 칸을 비운다 —
+    /// 예전에는 sprite 가 null 인 채 불투명하게 그려져 흰 네모가 떴다.
+    /// </summary>
+    static void ShowIcon(Image image, string spriteKey)
+    {
+        Sprite sprite = Managers.Resource.Load<Sprite>(spriteKey);
+        image.sprite = sprite;
+        image.color = new Color(1, 1, 1, sprite != null ? 1 : 0);
     }
 
     void SortInven()
@@ -248,40 +259,32 @@ public class UI_InvenPopup : UI_Popup
             GetImage((int)Images.necklace).color = new Color(1, 1, 1, 0);
         else
         {
-            GetImage((int)Images.necklace).color = new Color(1, 1, 1, 1);
             int idx = Managers.Game.PlayerData.Inventory[(int)Define.Types.Necklace][Managers.Game.PlayerData.Inventory[(int)Define.Types.Necklace].Count - 1];
-            GetImage((int)Images.necklace).sprite = Managers.Resource.Load<Sprite>(
-                $"{Managers.Data.EquipDic[idx].ImageName}");
+            ShowIcon(GetImage((int)Images.necklace), Managers.Data.EquipDic[idx].ImageName);
         }
 
         if (Managers.Game.PlayerData.Inventory[(int)Define.Types.Ring].Count == 0)
             GetImage((int)Images.ring).color = new Color(1, 1, 1, 0);
         else
         {
-            GetImage((int)Images.ring).color = new Color(1, 1, 1, 1);
             int idx = Managers.Game.PlayerData.Inventory[(int)Define.Types.Ring][Managers.Game.PlayerData.Inventory[(int)Define.Types.Ring].Count - 1];
-            GetImage((int)Images.ring).sprite = Managers.Resource.Load<Sprite>(
-                $"{Managers.Data.EquipDic[idx].ImageName}");
+            ShowIcon(GetImage((int)Images.ring), Managers.Data.EquipDic[idx].ImageName);
         }
 
         if (Managers.Game.PlayerData.Inventory[(int)Define.Types.Shoes].Count == 0)
             GetImage((int)Images.shoes).color = new Color(1, 1, 1, 0);
         else
         {
-            GetImage((int)Images.shoes).color = new Color(1, 1, 1, 1);
             int idx = Managers.Game.PlayerData.Inventory[(int)Define.Types.Shoes][Managers.Game.PlayerData.Inventory[(int)Define.Types.Shoes].Count - 1];
-            GetImage((int)Images.shoes).sprite = Managers.Resource.Load<Sprite>(
-                $"{Managers.Data.EquipDic[idx].ImageName}");
+            ShowIcon(GetImage((int)Images.shoes), Managers.Data.EquipDic[idx].ImageName);
         }
 
         if (Managers.Game.PlayerData.Inventory[(int)Define.Types.Book].Count == 0)
             GetImage((int)Images.book).color = new Color(1, 1, 1, 0);
         else
         {
-            GetImage((int)Images.book).color = new Color(1, 1, 1, 1);
             int idx = Managers.Game.PlayerData.Inventory[(int)Define.Types.Book][Managers.Game.PlayerData.Inventory[(int)Define.Types.Book].Count - 1];
-            GetImage((int)Images.book).sprite = Managers.Resource.Load<Sprite>(
-                $"{Managers.Data.EquipDic[idx].ImageName}");
+            ShowIcon(GetImage((int)Images.book), Managers.Data.EquipDic[idx].ImageName);
         }
 
         // 이 칸이 그리는 것은 "가진 것"이 아니라 "낀 것"이다. 둘이 어긋나면
@@ -291,12 +294,7 @@ public class UI_InvenPopup : UI_Popup
             || Managers.Game.PlayerData.CurSword == Define.NOT_EQUIP)
             GetImage((int)Images.sword).color = new Color(1, 1, 1, 0);
         else
-        {
-            GetImage((int)Images.sword).color = new Color(1, 1, 1, 1);
-            int idx = Managers.Game.PlayerData.CurSword;
-            GetImage((int)Images.sword).sprite = Managers.Resource.Load<Sprite>(
-                $"{Managers.Data.EquipDic[idx].ImageName}");
-        }
+            ShowIcon(GetImage((int)Images.sword), Managers.Data.EquipDic[Managers.Game.PlayerData.CurSword].ImageName);
 
         // to check player class
         GetImage((int)Images.Class).color = new Color(1, 1, 1, 0);
@@ -306,12 +304,7 @@ public class UI_InvenPopup : UI_Popup
             || Managers.Game.PlayerData.CurShield == Define.NOT_EQUIP)
             GetImage((int)Images.shield).color = new Color(1, 1, 1, 0);
         else
-        {
-            GetImage((int)Images.shield).color = new Color(1, 1, 1, 1);
-            int idx = Managers.Game.PlayerData.CurShield;
-            GetImage((int)Images.shield).sprite = Managers.Resource.Load<Sprite>(
-                $"{Managers.Data.EquipDic[idx].ImageName}");
-        }
+            ShowIcon(GetImage((int)Images.shield), Managers.Data.EquipDic[Managers.Game.PlayerData.CurShield].ImageName);
 
         GetImage((int)Images.EquipList1).color = new Color(1, 1, 1, 0);
         GetImage((int)Images.EquipList2).color = new Color(1, 1, 1, 0);
@@ -405,9 +398,8 @@ public class UI_InvenPopup : UI_Popup
         {
             if (Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Count >= i)
             {
-                equipList[i - 1].color = Color.white;
                 int idx = Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword][i - 1];
-                equipList[i - 1].sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[idx].ImageName}");
+                ShowIcon(equipList[i - 1], Managers.Data.EquipDic[idx].ImageName);
                 inventory_equipList_get[i - 1].gameObject.SetActive(true);
             }
         }
@@ -419,10 +411,9 @@ public class UI_InvenPopup : UI_Popup
         GetObject((int)GameObjects.EquipIllust).gameObject.SetActive(true);
 
         int curSwordIdx = Managers.Game.PlayerData.CurSword;
-        int idx = curSwordIdx - 8;
 
-        GetImage((int)Images.IllustBG).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[curSwordIdx].IllustBG}");
-        GetImage((int)Images.Illust).sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[curSwordIdx].Illust}");
+        ShowIcon(GetImage((int)Images.IllustBG), Managers.Data.EquipDic[curSwordIdx].IllustBG);
+        ShowIcon(GetImage((int)Images.Illust), Managers.Data.EquipDic[curSwordIdx].Illust);
 
         // 이미 일러스트 코루틴이 실행 중이라면 중단한다.
         if (illustCoroutine != null)
@@ -431,7 +422,31 @@ public class UI_InvenPopup : UI_Popup
             illustCoroutine = null;
         }
         illustCoroutine = StartCoroutine(CoIllustUIEffect());
-        GetImage((int)Images.IllustFX).GetComponent<Animator>().Play($"{Managers.Data.EquipDic[curSwordIdx].IllustFX}");
+        PlayIllustFX(Managers.Data.EquipDic[curSwordIdx].IllustFX);
+    }
+
+    /// <summary>
+    /// 칼 그림 위의 번쩍임. 데이터는 "Illust_SwordFX_01" 로 적는데 컨트롤러의 상태는 "SwordIllust1FX" 다 —
+    /// 이름이 달라 여태 한 번도 재생되지 않았다. 번호로 옮겨 부르고, 클립이 없는 칼(지금은 01·02 만 있다)은
+    /// FX 칸을 끈다. 없는 상태를 부르면 기본 상태, 곧 다른 칼의 번쩍임이 나온다.
+    /// </summary>
+    void PlayIllustFX(string data)
+    {
+        Animator fx = GetImage((int)Images.IllustFX).GetComponent<Animator>();
+        if (fx == null)
+            return;
+
+        int number;
+        string state = null;
+        int underscore = string.IsNullOrEmpty(data) ? -1 : data.LastIndexOf('_');
+        if (underscore >= 0 && int.TryParse(data.Substring(underscore + 1), out number))
+            state = $"SwordIllust{number}FX";
+
+        fx.gameObject.SetActive(true);   // 꺼진 애니메이터에는 상태를 물을 수 없다
+        if (state != null && fx.HasState(0, Animator.StringToHash(state)))
+            fx.Play(state);
+        else
+            fx.gameObject.SetActive(false);
     }
 
     IEnumerator CoIllustUIEffect()
@@ -480,9 +495,8 @@ public class UI_InvenPopup : UI_Popup
         {
             if (Managers.Game.PlayerData.Inventory[(int)Define.Types.Shield].Count >= i)
             {
-                equipList[i - 1].color = Color.white;
                 int idx = Managers.Game.PlayerData.Inventory[(int)Define.Types.Shield][i - 1];
-                equipList[i - 1].sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[idx].ImageName}");
+                ShowIcon(equipList[i - 1], Managers.Data.EquipDic[idx].ImageName);
                 inventory_equipList_get[i - 1].gameObject.SetActive(true);
             }
         }
@@ -578,9 +592,7 @@ public class UI_InvenPopup : UI_Popup
                 equipList[i].color = new Color(1, 1, 1, 0);
                 continue;
             }
-            equipList[i].color = Color.white;
-            equipList[i].sprite = Managers.Resource.Load<Sprite>(
-                $"{Managers.Data.EquipDic[owned[i]].ImageName}");
+            ShowIcon(equipList[i], Managers.Data.EquipDic[owned[i]].ImageName);
         }
     }
 
@@ -726,7 +738,8 @@ public class UI_InvenPopup : UI_Popup
         GetText((int)Texts.BaseCRIATK).text = Managers.Game.PlayerData.CriticalAttack.ToString();
 
         GetText((int)Texts.TotalLV).text = Managers.Game.PlayerData.Level.ToString();
-        GetText((int)Texts.AddLV).text = Managers.Data.PlayerDic[Managers.Game.PlayerData.Level + 1].NeedExp.ToString();
+        GetText((int)Texts.AddLV).text = Managers.Data.PlayerDic.TryGetValue(Managers.Game.PlayerData.Level + 1, out var nextLevel)
+            ? nextLevel.NeedExp.ToString() : "-";
         GetText((int)Texts.BaseLV).text = Managers.Game.PlayerData.CurExp.ToString();
 
         GetText((int)Texts.TotalATKSPEED).text = Managers.Game.PlayerData.AttackSpeed.ToString();

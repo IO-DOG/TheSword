@@ -69,6 +69,12 @@ public static class BattleSkills
             return false;
         if (Managers.Game.OnBattle == false || monsterCard == null || playerCard == null)
             return false;
+        // 승부가 난 뒤 창이 닫히기까지 0.3초 동안 OnBattle 은 아직 켜져 있다. 그 사이에 흡혈로
+        // 죽은 상대에게서 피를 받거나 강타가 죽은 야수를 건드리지 못하게 전투 시계에 묻는다.
+        // 사람(1/2/3 키)도 봇(직접 호출)도 여기를 지나므로 여기서 한 번 막는다.
+        UI_BattlePopup popup = playerCard.GetComponentInParent<UI_BattlePopup>();
+        if (popup == null || popup.BattleOver)
+            return false;
 
         GameManager.CurPlayerData player = Managers.Game.PlayerData;
         if (Managers.Game.MonsterData == null || Managers.Game.MonsterData.Count == 0)
@@ -88,7 +94,7 @@ public static class BattleSkills
                 // FillDefenceGague 가 아니라 Defence 를 부른다 — 만드는 상태는 똑같은데
                 // (게이지 가득 + IsDefence), UI_PlayerCard 의 override 가 방패 애니메이션까지
                 // 재생한다. 안 그러면 화면에서는 아무 일도 안 일어난 것으로 보인다.
-                playerCard.GetComponentInParent<UI_BattlePopup>().RaisePlayerGuard();
+                popup.RaisePlayerGuard();
                 break;
 
             case Kind.Drain:

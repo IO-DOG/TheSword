@@ -26,8 +26,8 @@ public static class EquipUtility
     // 등급별 배수. 1등급이 가장 약하다.
     static readonly float[] MoveScale = { 1.15f, 1.30f, 1.45f, 1.60f };
 
-    /// <summary>부츠를 신기 전의 기준 이동 속도. 한 번만 기억한다.</summary>
-    static float _baseMove;
+    /// <summary>부츠를 신기 전의 이동 속도 — GameScene 이 들어설 때마다 넣는 값이다.</summary>
+    const float BaseMove = 1f;
     static readonly int[] BattleSpeed = { 2, 3, 4, 5 };
 
     /// <summary>워프를 쓸 수 있는가 (워프석 반지를 끼고 있는가).</summary>
@@ -51,21 +51,22 @@ public static class EquipUtility
         // 절대값이 아니라 레벨당 증가치이고, Lv2 부터는 0 이다. 그걸 그대로 넣으면
         // 이동속도가 0 이 되고 PlayerController.Speed 세터가 1/0 을 물어서
         // 한 칸도 못 가고 멈춘다. 실제로 그렇게 1층에서 굳었다.
-        // 게임이 실제로 쓰는 기준값(GameScene 이 넣는 1)을 한 번 기억해 두고 쓴다.
-        if (_baseMove <= 0f)
-            _baseMove = p.MoveSpeed > 0f ? p.MoveSpeed : 1f;
-
-        float move = _baseMove;
+        // 게임이 실제로 쓰는 기준값(GameScene 이 넣는 1)을 쓴다. 예전처럼 "처음 부를 때의
+        // MoveSpeed" 를 기억하면, 타이틀에서 첫 검을 쥘 때(표의 Lv1 값 2.5) 불린 뒤로
+        // 부츠가 2.5배 위에 얹혔다.
+        float move = BaseMove;
         int shoes = AbilityOf(p.CurShoes);
         if (shoes >= AbilityMoveFirst && shoes <= AbilityMoveLast)
             move *= MoveScale[shoes - AbilityMoveFirst];
 
         if (move > 0f && Mathf.Abs(p.MoveSpeed - move) > 0.0001f)
-        {
             p.MoveSpeed = move;
-            if (Managers.Game.Player != null)
-                Managers.Game.Player.Speed = 0f;   // 세터가 MoveSpeed 를 다시 읽는다
-        }
+
+        // 값이 같아도 플레이어에는 늘 넣는다. 씬을 다시 올리면(죽음·이어하기) 새 플레이어는 기본 5
+        // (이동속도 1)로 서는데, 체크포인트의 MoveSpeed 는 이미 부츠 값이라 "바뀌었을 때만" 넣으면
+        // 부츠를 신은 채로 걸음만 느렸다.
+        if (Managers.Game.Player != null)
+            Managers.Game.Player.Speed = 0f;   // 세터가 MoveSpeed 를 다시 읽는다
 
         int neck = AbilityOf(p.CurNecklace);
         int speed = 1;

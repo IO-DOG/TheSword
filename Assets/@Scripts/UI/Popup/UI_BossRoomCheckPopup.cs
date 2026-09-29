@@ -57,8 +57,22 @@ public class UI_BossRoomCheckPopup : UI_Popup
         StartCoroutine(PopupAnimation());
 
         Managers.Game.OnConversation = true;
+        _locked = true;
 
         return true;
+    }
+
+    // Esc 로는 닫히지 않는다. 예/아니오 중 하나를 골라야 한다.
+    public override bool OnEscape() => true;
+
+    // 이 창이 건 대화 잠금. 어떤 길로 사라지든 풀고 간다. (확인 창이 이 프리팹을 빌려 쓸 때는
+    // 이 스크립트를 Init 전에 떼므로 잠금을 건 적이 없다 — 그때는 건드리지 않는다)
+    bool _locked;
+
+    void OnDestroy()
+    {
+        if (_locked)
+            Managers.Game.OnConversation = false;
     }
 
     IEnumerator PopupAnimation()
@@ -97,6 +111,7 @@ public class UI_BossRoomCheckPopup : UI_Popup
 
         Managers.Game.ParentMap.GetComponentInChildren<BossDoor>().CoStartPlayEffect();
         Managers.Game.OnConversation = false;
+        _locked = false;
         ClosePopupUI();
     }
 
@@ -105,6 +120,7 @@ public class UI_BossRoomCheckPopup : UI_Popup
         Managers.Sound.Play(Define.Sound.Effect, "ButtonUI_No_SFX");
 
         Managers.Game.OnConversation = false;
+        _locked = false;
         ClosePopupUI();
     }
 

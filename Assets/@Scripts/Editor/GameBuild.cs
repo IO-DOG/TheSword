@@ -1,10 +1,14 @@
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 /// <summary>
 /// 사람이 직접 해 볼 빌드를 만든다.
@@ -21,6 +25,9 @@ using UnityEngine;
 /// 순서가 중요하다. 이 게임은 프리팹·데이터·소리를 전부 어드레서블 "PreLoad"
 /// 라벨로 읽는다(UI_TitleScene). 콘텐츠를 먼저 굽지 않으면 실행 파일은 만들어지되
 /// 타이틀에서 한 발짝도 못 나간다 — 로드할 것이 아무것도 없기 때문이다.
+///
+/// Windows 는 콘텐츠 검증(validate_content.py)을 통과해야 굽고, 굽기 전에 출력 폴더를 비운다.
+/// 내보내면 안 되는 디버그 기호 폴더(*_DoNotShip)는 Build/Symbols/{버전}/ 으로 옮긴다.
 /// </summary>
 public static class GameBuild
 {
@@ -69,6 +76,9 @@ public static class GameBuild
     {
         try
         {
+            if (ContentIsValid() == false)
+                return 6;
+
             // 콘텐츠를 굽는다. 등록은 Prepare 가 먼저 끝내 둔다.
             Debug.Log("[GameBuild] 어드레서블 콘텐츠 빌드");
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
@@ -88,8 +98,10 @@ public static class GameBuild
             }
             Debug.Log($"[GameBuild] 콘텐츠 빌드 {(aaResult != null ? aaResult.Duration.ToString("F1") + "초" : "완료")}");
 
-            // 실행 파일.
+            // 실행 파일. 지난 빌드에서 남은 파일(지운 씬·에셋의 데이터)이 섞이지 않게 비우고 시작한다.
             string dir = Path.GetFullPath(OutDir);
+            if (Directory.Exists(dir))
+                Directory.Delete(dir, true);
             Directory.CreateDirectory(dir);
 
             BuildPlayerOptions opt = new BuildPlayerOptions
@@ -97,11 +109,24 @@ public static class GameBuild
                 scenes = ScenePaths(),
                 locationPathName = Path.Combine(dir, ExeName),
                 target = target,
-                options = BuildOptions.None,
+                // 압축하지 않으면 .assets/.resS 가 날것으로 들어간다 (536MB 중 텍스처가 88%).
+                options = BuildOptions.CompressWithLz4HC,
             };
 
-            Debug.Log($"[GameBuild] 플레이어 빌드 -> {opt.locationPathName} (씬 {opt.scenes.Length}개)");
-            BuildReport report = BuildPipeline.BuildPlayer(opt);
+            // 콘텐츠는 위에서 한 번 구웠다. 플레이어 빌드가 또 굽지 않게 그 결과를 그대로 건넨다
+            // (예전에는 46.9초 + 13.1초로 두 번 구웠다). 위에서 따로 굽는 쪽을 남기는 까닭은
+            // 매번 비우고(CleanPlayerContent) 굽고, 실패를 여기서 종료 코드로 알리기 위해서다.
+            AddressablesPlayerBuildProcessor.BuildAddressablesOverride = _ => aaResult;
+            BuildReport report;
+            try
+            {
+                Debug.Log($"[GameBuild] 플레이어 빌드 -> {opt.locationPathName} (씬 {opt.scenes.Length}개)");
+                report = BuildPipeline.BuildPlayer(opt);
+            }
+            finally
+            {
+                AddressablesPlayerBuildProcessor.BuildAddressablesOverride = null;
+            }
             BuildSummary sum = report.summary;
 
             Debug.Log($"[GameBuild] 결과 {sum.result} · {sum.totalSize / (1024 * 1024)}MB · {sum.totalTime}");
@@ -111,6 +136,7 @@ public static class GameBuild
                 return 4;
             }
 
+            MoveSymbols(dir);
             Debug.Log("[GameBuild] 완료: " + opt.locationPathName);
             return 0;
         }
@@ -118,6 +144,60 @@ public static class GameBuild
         {
             Debug.LogError("[GameBuild] 예외: " + e);
             return 5;
+        }
+    }
+
+    /// <summary>콘텐츠가 깨졌으면 굽지 않는다.
+    ///
+    /// ContentValidator.Validate 를 부르지 않는 까닭: 배치모드에서는 보고를 찍자마자 에디터를 끈다
+    /// (EditorApplication.Exit — 통과해도 0 으로). 굽기와 같은 실행에서 부르면 실행 파일 없이
+    /// "성공" 으로 끝난다. 그래서 같은 검사를 하는 파이썬 쪽을 부른다 — 에디터와 상관없이 돈다.</summary>
+    static bool ContentIsValid()
+    {
+        ProcessStartInfo info = new ProcessStartInfo("python", "Tools/validate_content.py")
+        {
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            CreateNoWindow = true,
+            StandardOutputEncoding = Encoding.UTF8,
+        };
+        info.EnvironmentVariables["PYTHONIOENCODING"] = "utf-8";
+        try
+        {
+            using (Process p = Process.Start(info))
+            {
+                string output = p.StandardOutput.ReadToEnd();
+                p.WaitForExit();
+                if (p.ExitCode == 0)
+                {
+                    Debug.Log("[GameBuild] 콘텐츠 검증 통과\n" + output);
+                    return true;
+                }
+                Debug.LogError($"[GameBuild] 콘텐츠 검증 실패(종료 코드 {p.ExitCode}) — 굽지 않는다\n{output}");
+                return false;
+            }
+        }
+        catch (System.ComponentModel.Win32Exception e)
+        {
+            Debug.LogError("[GameBuild] python 을 못 찾아 콘텐츠를 검증하지 못했다 — 굽지 않는다: " + e.Message);
+            return false;
+        }
+    }
+
+    /// <summary>Unity 가 실행 파일 옆에 늘 만드는 디버그 기호 폴더를 버전별로 옮겨 둔다.
+    /// 내보내면 안 되지만 크래시를 풀 때 필요하다 (Burst 는 *_DoNotShip, IL2CPP 는 *_ButDontShipItWithYourGame).</summary>
+    static void MoveSymbols(string dir)
+    {
+        string symbols = Path.GetFullPath($"Build/Symbols/{PlayerSettings.bundleVersion}");
+        foreach (string from in Directory.GetDirectories(dir, "*_DoNotShip")
+                     .Concat(Directory.GetDirectories(dir, "*_ButDontShipItWithYourGame")))
+        {
+            Directory.CreateDirectory(symbols);
+            string to = Path.Combine(symbols, Path.GetFileName(from));
+            if (Directory.Exists(to))
+                Directory.Delete(to, true);
+            Directory.Move(from, to);
+            Debug.Log($"[GameBuild] 기호 폴더 -> {to}");
         }
     }
 

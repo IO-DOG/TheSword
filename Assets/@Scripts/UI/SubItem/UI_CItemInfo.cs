@@ -98,15 +98,34 @@ public class UI_CItemInfo : UI_Base
             //Debug.Log(hit.collider.gameObject.layer);
             if (hit.collider.gameObject.layer != (int)Define.Layer.CItem)
             {
-                Managers.Game.GameScene.isOpenInfoPopup = false;
+                Release();
                 Destroy(gameObject);
             }
         }
         else
         {
-            Managers.Game.GameScene.isOpenInfoPopup = false;
+            Release();
             Destroy(gameObject);
         }
+    }
+
+    // 이 창은 아이템의 자식이다. 마우스를 올린 채 그 아이템을 밟으면 아이템이 꺼져 위의 Update 가 돌지
+    // 않았고, "정보 창이 떠 있다" 표시가 켜진 채 남아 그 뒤로 전투 예측과 아이템 설명이 영영 안 떴다.
+    // 표시는 한 번만 내린다 — 부서질 때도 OnDisable 이 오는데, 그 사이 새로 뜬 창의 표시를 지우면 안 된다.
+    bool _released;
+
+    void Release()
+    {
+        if (_released)
+            return;
+        _released = true;
+        if (Managers.Game.GameScene != null)
+            Managers.Game.GameScene.isOpenInfoPopup = false;
+    }
+
+    void OnDisable()
+    {
+        Release();
     }
 
     private IEnumerator CoAutoScroll()

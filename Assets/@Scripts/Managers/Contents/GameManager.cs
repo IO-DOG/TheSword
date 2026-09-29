@@ -119,18 +119,22 @@ public class GameManager
             {
                 curExp = value;
 
-                float needExp = Managers.Data.PlayerDic[Level + 1].NeedExp;
-                Debug.Log($"CurExp : {CurExp}");
-                Debug.Log($"NeedExp : {Managers.Data.PlayerDic[Level + 1].NeedExp}");
-
-                if (curExp >= needExp)
+                // 한 번에 여러 레벨이 오를 수 있다 (킹 슬라임 400 = Lv11~12 에서 두 레벨 남짓).
+                // 예전에는 if 하나라 한 레벨만 오르고 나머지가 다음 전투로 밀렸다 —
+                // generate_content 의 while 과 어긋났다. 표의 끝(Lv115)에서는 멈춘다.
+                bool leveled = false;
+                Data.PlayerData next;
+                while (Managers.Data.PlayerDic.TryGetValue(Level + 1, out next) && curExp >= next.NeedExp)
                 {
-                    curExp = curExp - needExp;
+                    curExp -= next.NeedExp;
                     Level++;
-                    Debug.Log("Level UP!!");
-                    Managers.Resource.Instantiate("LevelUp", Managers.Game.Player.transform);
                     LevelUp();
+                    leveled = true;
+                    GameEvents.RaiseLevelUp(Level);
                 }
+
+                if (leveled && Managers.Game.Player != null)
+                    Managers.Resource.Instantiate("LevelUp", Managers.Game.Player.transform);
             }
         }
         //public float MaxHP { get; set; }
@@ -276,44 +280,6 @@ public class GameManager
         Managers.Game.PlayerData.MoveSpeed += Managers.Data.PlayerDic[Managers.Game.PlayerData.Level].MoveSpeed;
     }
 
-    public void SwapEquip(int curIdx, int idx)
-    {
-        if (curIdx == 0)
-        {
-            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[curIdx].ATK;
-            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[curIdx].DEF;
-            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[curIdx].HP;
-            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[curIdx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[curIdx].DSPD;
-            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[curIdx].CRI;
-            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[curIdx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[curIdx].MSPD;
-            return;
-        }
-        else
-        {
-            Managers.Game.PlayerData.Attack -= Managers.Data.EquipDic[curIdx].ATK;
-            Managers.Game.PlayerData.Defence -= Managers.Data.EquipDic[curIdx].DEF;
-            Managers.Game.PlayerData.MaxHP -= Managers.Data.EquipDic[curIdx].HP;
-            Managers.Game.PlayerData.AttackSpeed -= Managers.Data.EquipDic[curIdx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed -= Managers.Data.EquipDic[curIdx].DSPD;
-            Managers.Game.PlayerData.Critical -= Managers.Data.EquipDic[curIdx].CRI;
-            Managers.Game.PlayerData.CriticalAttack -= Managers.Data.EquipDic[curIdx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed -= Managers.Data.EquipDic[curIdx].MSPD;
-
-            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[idx].ATK;
-            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[idx].DEF;
-            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[idx].HP;
-            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[idx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[idx].DSPD;
-            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[idx].CRI;
-            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[idx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[idx].MSPD;
-        }
-
-        Managers.Game.GameScene.Refresh();
-    }
-
     #region Map 생성
     public KeyValuePair<int, int> GetChapterCount(int mapId)
     {
@@ -370,6 +336,7 @@ public class GameManager
 
             map.transform.position = new Vector3(count * 100, 0f, 0f);
             Maps.Add(i, map);
+            BindKingSlime(map);
             RefreshMap(i);
             count++;
         }
@@ -434,6 +401,39 @@ public class GameManager
                 if (portal.transform.parent != null)
                     portal.transform.parent.gameObject.SetActive(bossAlive == false);
             }
+        }
+    }
+
+    /// <summary>킹 슬라임만 쓰는 활성 번호. 맵 데이터의 카운터(수백 번대)와 마검 열쇠(9000)를 피한다.</summary>
+    const int KingSlimeActiveIndex = 9001;
+
+    /// <summary>
+    /// 손수 만든 4층의 킹 슬라임이 죽은 것을 기억하게 한다.
+    ///
+    /// 그 프리팹의 킹 슬라임은 활성 번호가 구워져 있지 않아 0 번(1층 첫 몬스터)을 나눠 쓰고,
+    /// "BossMonsters" 밑에 있어 RefreshMap 이 보지도 않는다. 그래서 불러올 때마다 되살아났다.
+    /// 층마다 체크포인트를 남기는 지금은 5층 이후에 죽고 4층으로 내려가기만 해도 등장 연출과
+    /// 보스전이 처음부터 다시 열렸다 (경험치·보상도 다시).
+    /// 마검 열쇠(MAGICAL_SWORD_KEY_INDEX)처럼 안 쓰는 번호를 따로 주고, 잡았으면 보스와 함께
+    /// 등장 연출을 여는 발판도 치운다 — 연출 끝(AfterMeetKingSlime)이 보스를 도로 켜기 때문이다.
+    /// </summary>
+    static void BindKingSlime(GameObject map)
+    {
+        KingSlimeController king = map.GetComponentInChildren<KingSlimeController>(true);
+        if (king == null)
+            return;
+
+        king._monsterIndex_forActive = KingSlimeActiveIndex;
+        if (Managers.Data.MonsterActiveDic.ContainsKey(KingSlimeActiveIndex) == false)
+            Managers.Data.MonsterActiveDic[KingSlimeActiveIndex] = true;
+        if (Managers.Data.MonsterActiveDic[KingSlimeActiveIndex])
+            return;
+
+        king.gameObject.SetActive(false);
+        foreach (Transform t in map.GetComponentsInChildren<Transform>(true))
+        {
+            if (t.gameObject.layer == (int)Define.Layer.BossEventTrigger)
+                t.gameObject.SetActive(false);
         }
     }
 
@@ -581,19 +581,9 @@ public class GameManager
                 break;
         }
 
-        if (curIdx == 0)
-        {
-            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[idx].ATK;
-            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[idx].DEF;
-            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[idx].HP;
-            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[idx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[idx].DSPD;
-            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[idx].CRI;
-            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[idx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[idx].MSPD;
-            return;
-        }
-        else
+        // 빈 칸(0)이면 뺄 것이 없을 뿐, 나머지는 똑같이 간다. 예전에는 여기서 return 해서
+        // 그 부위의 첫 장비(첫 부츠·목걸이)가 아래 EquipUtility.Apply 를 못 거쳐 효과가 없었다.
+        if (curIdx != 0)
         {
             Managers.Game.PlayerData.Attack -= Managers.Data.EquipDic[curIdx].ATK;
             Managers.Game.PlayerData.Defence -= Managers.Data.EquipDic[curIdx].DEF;
@@ -603,16 +593,16 @@ public class GameManager
             Managers.Game.PlayerData.Critical -= Managers.Data.EquipDic[curIdx].CRI;
             Managers.Game.PlayerData.CriticalAttack -= Managers.Data.EquipDic[curIdx].CRIATK;
             Managers.Game.PlayerData.MoveSpeed -= Managers.Data.EquipDic[curIdx].MSPD;
-
-            Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[idx].ATK;
-            Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[idx].DEF;
-            Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[idx].HP;
-            Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[idx].ASPD;
-            Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[idx].DSPD;
-            Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[idx].CRI;
-            Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[idx].CRIATK;
-            Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[idx].MSPD;
         }
+
+        Managers.Game.PlayerData.Attack += Managers.Data.EquipDic[idx].ATK;
+        Managers.Game.PlayerData.Defence += Managers.Data.EquipDic[idx].DEF;
+        Managers.Game.PlayerData.MaxHP += Managers.Data.EquipDic[idx].HP;
+        Managers.Game.PlayerData.AttackSpeed += Managers.Data.EquipDic[idx].ASPD;
+        Managers.Game.PlayerData.DefenceSpeed += Managers.Data.EquipDic[idx].DSPD;
+        Managers.Game.PlayerData.Critical += Managers.Data.EquipDic[idx].CRI;
+        Managers.Game.PlayerData.CriticalAttack += Managers.Data.EquipDic[idx].CRIATK;
+        Managers.Game.PlayerData.MoveSpeed += Managers.Data.EquipDic[idx].MSPD;
 
         // 착용한 것이 바뀌었으니 유틸(이동 속도·전투 배속)을 다시 계산한다.
         EquipUtility.Apply();
@@ -636,11 +626,17 @@ public class GameManager
         if (OnBattle || OnFade || OnDirect || OnInteract)
             return false;
 
+        // 층 번호부터 옮긴다. 카메라 경계·몬스터 배율·계단의 층 계산이 전부 CurStageid 를 읽는다.
+        // 예전에는 맨 끝에 옮겨서 경계가 옛 층으로 잡히고, 아래의 스폰 지점도 챕터 첫 층 것이라
+        // 몸은 챕터 첫 층에 서고 게임은 고른 층이라고 여겼다 — 그 차이가 계단마다 이어졌다.
+        PlayerData.CurStageid = stageId;
+        OnStaticResolution = stageId == 2;
         GenerateMap(stageId);
 
-        Vector3 pos = Player.transform.position;
-        if (SpawnPoints != null && SpawnPoints.Length > 0 && SpawnPoints[0] != null)
-            pos = SpawnPoints[0].transform.position;
+        Transform arrival = ArrivalPoint(stageId);
+        Vector3 pos = arrival != null ? arrival.position : Player.transform.position;
+        Player.transform.position = pos;
+        Player._cellPos = pos;
 
         if (MainCamera != null)
         {
@@ -649,15 +645,61 @@ public class GameManager
                 cam.SetupCameraConfiner();
         }
 
-        Player.transform.position = pos;
-        Player._cellPos = pos;
-        PlayerData.CurStageid = stageId;
-
         if (OnPortalAction != null)
             OnPortalAction.Invoke();
         if (GameScene != null)
             GameScene.Refresh();
+        EnterFloor(false);
         return true;
+    }
+
+    /// <summary>
+    /// 그 층에 내려설 자리. 그 층 안의 스폰 지점, 없으면(손수 만든 2·3층) 내려가는 계단,
+    /// 그것도 없으면 아무 계단. SpawnPoints 는 챕터 전체를 긁은 것이라 [0] 은 늘 챕터 첫 층이다.
+    /// </summary>
+    public Transform ArrivalPoint(int stageId)
+    {
+        GameObject map;
+        if (Maps.TryGetValue(stageId, out map) == false || map == null)
+            return null;
+
+        foreach (Transform t in map.GetComponentsInChildren<Transform>(true))
+        {
+            if (t.CompareTag("SpawnPoint"))
+                return t;
+        }
+
+        PortalController any = null;
+        foreach (PortalController p in map.GetComponentsInChildren<PortalController>(true))
+        {
+            if (p._portalType == PortalController.Type.DownStairs)
+                return p.transform;
+            if (any == null && p._portalType != PortalController.Type.None)
+                any = p;
+        }
+        return any != null ? any.transform : null;
+    }
+
+    /// <summary>
+    /// 층에 들어섰다 — 계단·워프가 다 끝나 층 번호와 자리가 확정된 뒤에 한 번 부른다.
+    /// 체크포인트를 쓰고 그 층의 사본을 남긴 다음 알린다 (GameEvents.FloorEntered).
+    /// 연출 도중에는 쓰지 않는다: 반쯤 진행된 연출의 상태가 체크포인트에 굳으면 안 된다.
+    /// </summary>
+    public void EnterFloor(bool firstVisit)
+    {
+        if (OnDirect == false)
+        {
+            SaveGame();
+            if (LastSaveError == null)
+            {
+                try { SaveStore.WriteHistory(SaveStore.DirectoryPath, PlayerData.CurStageid); }
+                catch (Exception ex) when (SaveStore.IsSaveError(ex))
+                {
+                    Debug.LogWarning($"[Save] Floor copy was not written: {ex.Message}");
+                }
+            }
+        }
+        GameEvents.RaiseFloorEntered(PlayerData.CurStageid, firstVisit);
     }
 
     /// <summary>그 층으로 워프할 수 있는가. 다녀온 층이어야 한다.</summary>
@@ -749,31 +791,17 @@ public class GameManager
 
     public void SaveGame()
     {
-        if (Managers.Game.Player == null)
-        {
-            Managers.Game.PlayerData.CurPosition = new Data.MyVector3
-            {
-                X = 0,
-                Y = 0,
-                Z = 0,
-            };
-        }
-        else
-        {
-            Managers.Game.PlayerData.CurPosition = new Data.MyVector3
-            {
-                X = Managers.Game.Player.transform.position.x,
-                Y = Managers.Game.Player.transform.position.y,
-                Z = Managers.Game.Player.transform.position.z,
-            };
-        }
+        // 칸 자리(_cellPos)를 적는다. transform 은 레버를 당기는 동안 레버 쪽으로 반 칸 떠 있고
+        // 걷는 도중에는 칸 사이에 있다 — 그 자리를 적으면 이어하기 때 칸에서 어긋나 선다.
+        Vector3 pos = Managers.Game.Player != null ? Managers.Game.Player._cellPos : Vector3.zero;
+        Managers.Game.PlayerData.CurPosition = new Data.MyVector3 { X = pos.x, Y = pos.y, Z = pos.z };
 
         try
         {
             var snapshot = new SaveStore.Snapshot {
                 Version = SaveStore.Version, ContentHash = CurrentContentHash(), Player = PlayerData,
                 Active = Managers.Data.CaptureActive(), Progress = CaptureProgress(),
-                PlayTime = PlayerPrefs.GetFloat("PLAYTIME", PlayTime),
+                PlayTime = Mathf.Max(PlayTime, PlayerPrefs.GetFloat("PLAYTIME", 0)),
                 AttackCount = AttackCount, DefenceCoolTime = DefenceCoolTime
             };
             SaveStore.Write(SaveStore.DirectoryPath, snapshot);
@@ -790,28 +818,38 @@ public class GameManager
     public bool HasSave => SaveStore.Exists(SaveStore.DirectoryPath) ||
         File.Exists(Path.Combine(SaveStore.DirectoryPath, "SaveData.json"));
 
-    string CurrentContentHash() => SaveStore.Hash(Managers.Resource.Load<TextAsset>("MapData").text);
+    // MapData 는 5MB 가 넘는다. 층마다 저장하면서 매번 해시하면 계단마다 끊긴다. 실행 중엔 안 바뀐다.
+    string _contentHash;
+    string CurrentContentHash() =>
+        _contentHash ??= SaveStore.Hash(Managers.Resource.Load<TextAsset>("MapData").text);
 
     Dictionary<string, int> CaptureProgress() => SaveStore.ProgressKeys.ToDictionary(
         key => key, key => PlayerPrefs.GetInt(key, key == "ISFIRST" ? 1 : 0));
 
     void ValidateCheckpoint(SaveStore.Snapshot snapshot)
     {
+        // Level+1 을 요구하면 표의 끝(Lv115)에서 저장한 체크포인트가 영영 안 읽힌다.
         if (snapshot.ContentHash != CurrentContentHash())
             throw new InvalidDataException("This checkpoint belongs to a different dungeon layout.");
         if (!Managers.Data.StageInfoDic.ContainsKey(snapshot.Player.CurStageid) ||
-            !Managers.Data.PlayerDic.ContainsKey(snapshot.Player.Level + 1))
+            !Managers.Data.PlayerDic.ContainsKey(snapshot.Player.Level))
             throw new InvalidDataException("Checkpoint stage or level is unavailable.");
     }
 
-    public bool LoadGame()
+    /// <summary>체크포인트를 불러 지금 판에 입힌다. file 이 null 이면 Checkpoint.json(없으면 .bak),
+    /// 아니면 SaveStore.History 가 준 층별 사본. 읽지 못하면 아무것도 바꾸지 않고 false.</summary>
+    public bool LoadGame(string file = null)
     {
         LastSaveError = null;
         SaveStore.Snapshot snapshot;
-        if (!SaveStore.TryRead(SaveStore.DirectoryPath, out snapshot, out string error, ValidateCheckpoint))
+        string error;
+        bool read = file == null
+            ? SaveStore.TryRead(SaveStore.DirectoryPath, out snapshot, out error, ValidateCheckpoint)
+            : SaveStore.TryReadFile(file, out snapshot, out error, ValidateCheckpoint);
+        if (!read)
         {
             // Never mix an incomplete new checkpoint with old object files.
-            if (SaveStore.Exists(SaveStore.DirectoryPath)) { LastSaveError = error; return false; }
+            if (file != null || SaveStore.Exists(SaveStore.DirectoryPath)) { LastSaveError = error; return false; }
             string legacy = Path.Combine(SaveStore.DirectoryPath, "SaveData.json");
             if (!File.Exists(legacy)) return false;
             try
@@ -841,13 +879,84 @@ public class GameManager
         PlayerData = snapshot.Player;
         Managers.Data.ApplyActive(snapshot.Active);
         foreach (var key in SaveStore.ProgressKeys)
-            PlayerPrefs.SetInt(key, snapshot.Progress.TryGetValue(key, out int value) ? value : 0);
-        PlayTime = snapshot.PlayTime;
+        {
+            int saved = snapshot.Progress.TryGetValue(key, out int value) ? value : 0;
+            // 죽은 횟수·걸음 수는 기록이다. 체크포인트로 돌아가도 줄지 않는다 — 예전에는 죽어서
+            // 불러올 때마다 저장 시점 값으로 돌아가 죽은 횟수가 늘지 않았다.
+            bool tally = key == "DEATHCOUNT" || key == "MOVECOUNT";
+            PlayerPrefs.SetInt(key, tally ? Mathf.Max(saved, PlayerPrefs.GetInt(key, 0)) : saved);
+        }
+        PlayTime = Mathf.Max(snapshot.PlayTime, PlayerPrefs.GetFloat("PLAYTIME", 0));
         PlayerPrefs.SetFloat("PLAYTIME", PlayTime);
         AttackCount = snapshot.AttackCount;
         DefenceCoolTime = snapshot.DefenceCoolTime;
         KeyInventory.InitKeyInventory();
+        ResetTransientState();
+        // 배속은 낀 목걸이가 정한다. 불러온 판에 없는 목걸이의 배속이 남지 않게 되돌린 뒤 다시 건다.
+        GameSpeed = 1;
+        EquipUtility.Apply();
+
+        if (file != null)
+        {
+            // 고른 사본이 이제 지금의 체크포인트다. 여기서 죽거나 이어하기를 눌러도 이 자리로 온다.
+            snapshot.Progress = CaptureProgress();
+            snapshot.PlayTime = PlayTime;
+            try { SaveStore.Write(SaveStore.DirectoryPath, snapshot); }
+            catch (Exception ex) when (SaveStore.IsSaveError(ex))
+            {
+                LastSaveError = ex.Message;
+                Debug.LogError($"[Save] Checkpoint was not written: {ex.Message}");
+            }
+        }
         return true;
+    }
+
+    /// <summary>
+    /// 체크포인트에서 다시 선다 (게임오버, "이 층 다시" 같은 것). file 은 LoadGame 과 같다.
+    /// 게임오버가 하던 그대로 GameScene 을 다시 올린다. 읽지 못하면 아무것도 바꾸지 않고 false.
+    /// </summary>
+    public bool RestartFromCheckpoint(string file = null)
+    {
+        if (LoadGame(file) == false)
+            return false;
+
+        // 불러온 상태로 옛 맵이 한 프레임 비치지 않게 가린다.
+        if (ParentMap != null)
+            ParentMap.SetActive(false);
+        if (GameScene != null)
+            GameScene.gameObject.SetActive(false);
+        Managers.Scene.LoadScene(Define.Scene.GameScene);
+        return true;
+    }
+
+    /// <summary>판이 바뀔 때(불러오기·새 게임) 지난 장면의 흐름 표시를 걷는다.
+    /// 하나라도 남으면 새 장면에서 입력이 막히거나, 죽은 채로 다음 전투가 게임오버로 끝난다.</summary>
+    void ResetTransientState()
+    {
+        OnBattle = OnConversation = OnLever = OnFade = OnDirect = OnInteract = OnInputLock = false;
+        OnStaticResolution = false;
+        IsPlayerDead = false;
+        // 분열 슬라임은 맵 데이터에 없이 그때 태어난다. 불러오면 없으니 센 것도 처음부터다 —
+        // 안 그러면 다시 싸울 때 셋을 다 잡기 전에 4층 출구가 열렸다.
+        TotalKillSplitSlime = 0;
+        FightGate.Reset();
+    }
+
+    /// <summary>메모리 위의 판을 새로 세운다. 파일은 건드리지 않는다.
+    ///
+    /// PlayerData 를 통째로 새로 만든다. Clear() 는 스탯만 되돌려서, 타이틀이 켜자마자 불러 둔
+    /// 세이브의 열쇠·장비 칸이 새 게임으로 그대로 넘어갔다 (열쇠 칸 HUD 는 꺼진 채로).</summary>
+    void ResetRun()
+    {
+        Managers.Data.ResetActiveDic();
+        PlayerData = new CurPlayerData();
+        PlayerData.Clear();
+        KeyInventory.InitKeyInventory();
+        AttackCount = 0;
+        DefenceCoolTime = 0;
+        PlayTime = 0;
+        GameSpeed = 1;
+        ResetTransientState();
     }
 
     #endregion
@@ -861,8 +970,6 @@ public class GameManager
         SaveStore.Delete(SaveStore.DirectoryPath);
         File.Delete(Path.Combine(SaveStore.DirectoryPath, "SaveData.json"));
         LastSaveError = null;
-        AttackCount = 0;
-        DefenceCoolTime = 0;
         //PlayerPrefs.DeleteAll();
         // ISFIRST를 지워야하나? 진짜 최초는 아닌데
         PlayerPrefs.DeleteKey("ISFIRST");
@@ -888,16 +995,7 @@ public class GameManager
         PlayerPrefs.DeleteKey("MOVECOUNT");
         PlayerPrefs.DeleteKey("PLAYTIME");
 
-        Managers.Data.ResetActiveDic();
-        //ParseMapData();
-        Managers.Game.PlayerData.Clear();
-        Managers.Game.PlayerData.FirstEnterMapCheck = new List<bool>(new bool[110]);
-        Managers.Game.PlayerData.Inventory.Clear();
-        for (int i = 0; i < 10; ++i)
-        {
-            Managers.Game.PlayerData.Inventory.Add(new List<int>());
-        }
-
+        ResetRun();
         Debug.Log("Complete DeleteGameData");
     }
 
@@ -907,14 +1005,8 @@ public class GameManager
     {
         _path = Application.persistentDataPath + "/SaveData.json";
 
-        if (LoadGame())
-            return;
-
         // Initialize a fresh in-memory run without deleting an unreadable checkpoint.
-        Managers.Data.ResetActiveDic();
-        PlayerData.Clear();
-        PlayerData.Inventory = Enumerable.Range(0, 10).Select(_ => new List<int>()).ToList();
-        PlayerData.FirstEnterMapCheck = new List<bool>(new bool[110]);
-        KeyInventory.InitKeyInventory();
+        if (LoadGame() == false)
+            ResetRun();
     }
 }

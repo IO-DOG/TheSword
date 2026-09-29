@@ -48,7 +48,8 @@ public class UI_LetterBox : UI_Popup
         {
             GetImage((int)Images.LetterBoxTop).gameObject.SetActive(false);
             GetImage((int)Images.LetterBoxBottom).gameObject.SetActive(false);
-            Managers.UI.ClosePopupUI();
+            // 위에 대화창이 막 올라왔을 수 있다 — 맨 위가 아니라 자기 자신을 닫는다.
+            Managers.UI.ClosePopupUI(this);
         });
     }
 }

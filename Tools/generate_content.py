@@ -24,12 +24,14 @@ import csv
 import json
 import os
 import random
+import statistics
 
+import bestiary
 from ui_text import append_rows, emit_bootstrap
 
 from thesword_balance import (
     Creature, extend_player_table, exp_to_next, load_player_table,
-    make_player, player_stats_at, simulate_battle,
+    player_stats_at, simulate_battle,
     NONE, BEAST, MAGIC, GUARDIAN, IMMORTAL, KNIGHT, TITAN, ASSASSIN, ARMOR,
     TRAIT_NAME,
 )
@@ -58,7 +60,10 @@ STREAM = os.path.join(ROOT, "Assets", "StreamingAssets", "Data", "Excel")
 TOTAL_FLOORS = 100
 FLOORS_PER_CHAPTER = 20
 MOBS_PER_FLOOR = 5
-MAX_LEVEL_TABLE = 115          # CurExp 세터가 Level+1 을 읽으므로 여유를 둔다
+# CurExp 세터가 PlayerDic[Level+1] 을 읽는다. 완주 레벨보다 4 이상 넉넉해야 한다 —
+# build_all 과 validate_content 가 확인한다.
+MAX_LEVEL_TABLE = 120
+LEVEL_HEADROOM = 4
 NEW_MONSTER_ID_BASE = 100      # (예전 대역. 아래 표로 대체됨)
 # 층마다 몹이 5종이라 대역을 넉넉히 잡는다. 층 F 의 k 번째 몹 = BASE + F*8 + k.
 MOB_ID_BASE = 1000             # 1040 ~ 1804
@@ -98,12 +103,15 @@ for _run in MOB_SPECIES_RUN:
     assert len(set(MOB_LOSS_RAMP[_i:_i + _run])) == 1, MOB_LOSS_RAMP
     _i += _run
 
-# 층 유형(기본/인색/관문/넉넉/보물)을 넣고 다시 조율한 값.
-# 물약이 하나뿐인 "인색" 층이 생기면서 0.048 로는 11층에서 죽는다.
-# 0.040~0.046 이 모두 완주하고 그중 0.042 가 실수를 가장 많이 봐준다(8회).
-MOB_HP_LOSS = 0.042
+# 마검(공격 +10, 공속 +0.5)을 계산에 넣고 다시 조율한 값.
+# 예전 0.042 는 마검 없이 잰 것이라 실제 전투는 1~7% 였다(예측이 늘 초록).
+# 마검을 넣으면 0.042 그대로도 설계만큼(몹 한 마리 약 5%) 아프지만, 예측을 볼
+# 이유가 되게 한 단계 올린다 — 몹 중앙값 약 6.5%·상위 10% 약 9%·보스 약 36%.
+# 그래도 곁길·룬·물약을 거르면 10~11층에서 죽고, 실수는 8번 봐준다(예전 설계와 같은 폭).
+# 0.065 부터 실수 허용이 6 이하로 떨어진다.
+MOB_HP_LOSS = 0.060
 MOB_DURATION = 16.0
-BOSS_HP_LOSS = 0.28
+BOSS_HP_LOSS = 0.35
 BOSS_DURATION = 45.0
 
 # 층에 배치되는 포션 (ConsumableItemData 의 회복 % 와 대응)
@@ -137,29 +145,26 @@ POTION_USE_THRESHOLD = 0.55  # 이 비율 밑으로 떨어지면 마신다 (실�
 MOB_ART = ([(f"Mob_C0_I{i:03d}", f"Mob_C0_A{i:03d}") for i in range(8)]
            + [("Mob_C0_I008", "Mob_C0_I008"), ("Mob_C0_I009", "Mob_C0_A009")])
 
-# 챕터 보스가 입는 그림. 새로 살린 두 종을 우두머리 자리에 먼저 세운다 —
-# 덩치가 크고(48x36, 86x68) 색이 달라서 일반 몹과 확실히 구분된다.
-BOSS_ART_INDEX = [8, 9, 6, 4, 7]
+# 챕터 보스가 입는 그림 (MOB_ART 의 인덱스). 그림이 특성을 말하게 고른다 —
+#   20층 늑대(야수) · 40층 고블린 방패병(수호) · 60층 잿빛 파수꾼(마법)
+#   80층 해골 전사(불사) · 100층 심연의 거수(거대, 가장 큰 86x68)
+# 두 애니메이터(맵/전투창) 모두 이 상태가 있다 — validate_content 가 확인한다.
+BOSS_ART_INDEX = [4, 7, 8, 6, 9]
 
 # 벽 프리팹은 Tilemap_C00_W01 / W02 / W03 만 실재한다 (W00 은 없음).
 # 챕터별 분위기는 MapBuilder 의 틴트 + 조명 + BGM 으로 낸다.
+# 챕터 이름·몬스터 접두어·종 이름은 네 언어로 bestiary.py 가 낸다 (스토리 도감이
+# 원본). 종 이름은 MOB_ART 의 순서와 한 줄씩 짝이다 — 이름은 실제 그림을 따라간다.
 CHAPTER_THEMES = [
-    # (이름, 몬스터 접두어, BGM, 벽 타일셋)
-    ("이끼 낀 지하 묘소", "이끼", "BGM_000", ["W_01", "W_02"]),
-    ("무너진 수로", "수렁", "BGM_100", ["W_02", "W_03"]),
-    ("잿빛 용광로", "잿불", "BGM_001", ["W_03", "W_01"]),
-    ("얼어붙은 심층", "서리", "BGM_101", ["W_01", "W_03"]),
-    ("왕좌의 균열", "심연", "BGM_102", ["W_02", "W_01"]),
+    # (BGM, 벽 타일셋)
+    ("BGM_000", ["W_01", "W_02"]),
+    ("BGM_100", ["W_02", "W_03"]),
+    ("BGM_001", ["W_03", "W_01"]),
+    ("BGM_101", ["W_01", "W_03"]),
+    ("BGM_102", ["W_02", "W_01"]),
 ]
-# 이름은 반드시 실제로 쓰는 그림을 따라간다. 예전에는 아무 접미어나 붙여서
-# "이끼 골렘" 이 숲의 정령 그림으로 나오는 식이었다.
-# MOB_ART 의 순서(Mob_C0_I000~007)와 한 줄씩 짝이다.
-# 이름은 반드시 실제 그림을 따라간다.
-# 8~9 는 원본 기획 이름이 없는 시트라, 재어 본 색과 덩치로 이름을 붙였다
-# (8 = 회색조 48x36, 9 = 짙은 청록 86x68 로 가장 큼).
-MOB_SPECIES = ["슬라임", "슬라임", "크로우", "정령",
-               "늑대", "고블린 창병", "해골 전사", "고블린 방패병",
-               "잿빛 파수꾼", "심연의 거수"]
+BOOKS, BOOKS_MISSING = bestiary.tables()
+KR = BOOKS["kr"]
 
 # ---------------------------------------------------------------- 특성 (기획서 13·53·71쪽)
 #
@@ -179,19 +184,23 @@ CHAPTER_TRAITS = [
     [IMMORTAL, ASSASSIN, IMMORTAL, ASSASSIN, BEAST],
     [ARMOR,    MAGIC,    IMMORTAL, TITAN,    ASSASSIN],
 ]
-# 챕터 보스의 특성. 챕터의 성격을 보스가 대표한다.
-BOSS_TRAITS = [BEAST, GUARDIAN, TITAN, IMMORTAL, MAGIC]
+# 챕터 보스의 특성. 챕터의 성격을 보스가 대표한다 — 도입(야수)·방어(수호)·
+# 화력(마법)·치명타(불사), 그리고 마지막은 가장 오래 버티는 거대.
+BOSS_TRAITS = [BEAST, GUARDIAN, MAGIC, IMMORTAL, TITAN]
 
 # 챕터 보스가 떨구는 장비 (EquipData.csv 의 ID).
 # 능력치가 0 이고 유틸만 해금하는 것들이라 전투 밸런스를 건드리지 않는다.
-#   1~4 부츠   : 이동 속도 등급 (어빌리티 2~5)
-#   5~8 목걸이 : 전투 배속 등급 (어빌리티 6~9, 전부 시계 이름)
-#   32  반지   : 워프석 반지 — 다녀온 층으로 워프 해금 (어빌리티 1)
+#   1~4 부츠   : 이동 속도 등급 — 보스가 아니라 20·40·60·80층 바닥에 있다
+#                (CHAPTER_EQUIP_REWARD)
+#   5~8 목걸이 : 전투 배속 등급 — 5 는 킹 슬라임이, 6~8 은 40·60·80층 보스가 준다
+#   32  반지   : 워프석 반지 — 다녀온 층으로 워프 해금
 #
-# 챕터를 넘을 때마다 한 부위씩 좋아지게 섞고, 워프는 2챕터 보스가 준다.
-# 처음부터 주면 매직 타워식 "한 층을 짜내는" 긴장이 사라지고, 너무 늦게 주면
-# 쓸 일이 없다.
-BOSS_REWARD = [1, 5, 32, 2, 6]
+# 워프는 20층 보스가 준다 — 매직 타워의 층 이동처럼 일찍 풀려야 남은 열쇠를 들고
+# 앞 층 금고로 돌아가는 판단이 생긴다(60층이면 쓸 일이 거의 없었다).
+# 100층 보스는 아무것도 주지 않는다 — 떨굴 곳이 없다. -1 은 "없음" 이다
+# (UI_MonsterCard.DropReward 가 0 이하를 건너뛴다. 0 은 EquipData 의 빈 자리표다).
+# 같은 장비를 두 번 주지 않는다 — validate_content 가 모든 출처를 센다.
+BOSS_REWARD = [32, 6, 7, 8, -1]
 
 # 특성별 스탯 성격 (기획서 53쪽의 "능력치 특징"을 배수로 옮긴 것).
 # 절대값이 아니라 배수다 — 실제 수치는 특성을 켠 시뮬레이터로 역산하므로,
@@ -336,11 +345,12 @@ def rune_bonus(floor):
     return bonus
 
 
-def stats_with_runes(ptable, level, floor):
-    """레벨 스탯 + 그 층까지 모은 룬."""
-    s = dict(player_stats_at(ptable, level))
-    for stat, amount in rune_bonus(floor).items():
-        s[stat] += amount
+def stats_with_runes(ptable, level, floor, runes=True):
+    """레벨 스탯 + 손에 든 검 + 그 층까지 모은 룬 (runes=False 면 룬 없이)."""
+    s = with_equip(player_stats_at(ptable, level), sword_on(floor))
+    if runes:
+        for stat, amount in rune_bonus(floor).items():
+            s[stat] += amount
     return s
 
 
@@ -359,10 +369,47 @@ CHAPTER_EQUIP_REWARD = {20: 1, 40: 2, 60: 3, 80: 4}
 
 # ---- 손수 만든 도입부 (건드리지 않는다) -------------------------------------
 HANDMADE_FLOORS = 4                      # 1~4층 = Dungeon_00_000 ~ 00_003
-# 실제 진행 순서. 00_002(3층)는 마검 이벤트 방이라 몬스터가 없다.
-HANDMADE_RUN = [("00_000", None), ("00_001", None), ("00_003", 5)]
 HANDMADE_BOSS_ID = 5                     # 킹 슬라임 (프리팹에 구워져 있는 값)
-STARTING_SWORD_ATK = 3.0                 # Define.EQUIP_SOWRD_FIRST = 9 (블레이드)
+SPLIT_SLIME_IDS = (7, 6, 8)              # 노랑·빨강·파랑 (DirectingManager 가 띄운다)
+SPLIT_POTION_ID = 7                      # 노랑 슬라임 자리에 함께 떨어지는 60% 물약
+# 실제 진행 순서: (층, 싸우는 몬스터 — None 이면 그 층 CSV 전부, 더 놓이는 물약).
+# 00_002(3층)는 마검 이벤트 방이라 몬스터가 없다. 킹 슬라임을 잡으면 분열 셋이
+# 나오고 셋을 다 잡아야 계단이 열린다 — 반드시 치르는 전투인데 예전에는 빠져
+# 있어서 경험치 420 을 덜 셌다. 넣으니 5층 진입 예측이 Lv14 -> Lv16 이 됐다.
+# 자동 플레이 실측은 Lv17 이다 — 남은 1레벨(106 EXP 이상)은 아직 원인을 모른다.
+HANDMADE_RUN = [("00_000", None, ()), ("00_001", None, ()),
+                ("00_003", (HANDMADE_BOSS_ID,), ()),
+                ("00_003", SPLIT_SLIME_IDS, (SPLIT_POTION_ID,))]
+
+# ---- 손에 든 검 ----------------------------------------------------------------
+# 1~2층은 블레이드(EquipData 9 = Define.EQUIP_SOWRD_FIRST), 3층 계약부터 끝까지
+# 에고소드(10)다 (DirectingManager.ContractSword -> SwapEquip). 예전에는 완주 계산에
+# 마검이 없었다 — 실제 플레이어는 공격력·공속만큼 늘 강해서, 설계한 손실의 절반
+# 남짓만 치렀고 전투 예측은 거의 늘 초록이었다. 값은 표에서 그대로 읽는다.
+SWORD_BLADE, SWORD_EGO = 9, 10
+CONTRACT_FLOOR = 3
+_EQUIP_STAT = dict(atk="ATK", dfn="DEF", hp="HP", aspd="ASPD", dspd="DSPD",
+                   crit="CRI", crit_atk="CRIATK")
+
+
+def _equip_rows():
+    with open(os.path.join(JSOND, "EquipData.json"), "r", encoding="utf-8") as f:
+        return {e["id"]: e for e in json.load(f)["equips"]}
+
+
+EQUIPS = _equip_rows()
+
+
+def sword_on(floor):
+    return EQUIPS[SWORD_EGO if floor >= CONTRACT_FLOOR else SWORD_BLADE]
+
+
+def with_equip(stats, equip):
+    """레벨 스탯에 장비를 얹는다 (GameManager.SwapEquip 이 더하는 것과 같다)."""
+    s = dict(stats)
+    for stat, col in _EQUIP_STAT.items():
+        s[stat] += equip[col]
+    return s
 
 # 원본 StageInfoData 의 1~4층 행. 선형이 아니다:
 #   1층 -> 2층 -> 3층(막다른 마검방),  2층 -> [보스방] 4층 -> 5층
@@ -444,21 +491,22 @@ def simulate_handmade(ptable):
     # 적게 셌다 — 5층의 기준 레벨이 그만큼 낮게 잡혀 있었다.
     exp_scale = {st["DungeonID"]: st["EXP"] / 100.0 for st in ORIGINAL_STAGES}
 
-    for did, boss_id in HANDMADE_RUN:
+    for did, ids, extra_potions in HANDMADE_RUN:
         scale = exp_scale.get(did, 1.0)
-        mob_ids = [boss_id] if boss_id is not None else _cells(did, r"M_[0-9]+")
+        floor = int(did.split("_")[1]) + 1
+        mob_ids = list(ids) if ids is not None else _cells(did, r"M_[0-9]+")
         # 순서가 곧 난이도. 약한 놈부터.
         mob_ids.sort(key=lambda i: monsters[i]["MaxHP"] * monsters[i]["Attack"])
 
-        potions = sorted(p for p in (potions_by_id.get(i, 0.0)
-                                     for i in _cells(did, r"I_[0-9]+")) if p > 0)
+        potion_ids = (_cells(did, r"I_[0-9]+") if ids is None else []) + list(extra_potions)
+        potions = sorted(p for p in (potions_by_id.get(i, 0.0) for i in potion_ids) if p > 0)
 
         for i, mid in enumerate(mob_ids):
-            stats = player_stats_at(ptable, level)
+            stats = with_equip(player_stats_at(ptable, level), sword_on(floor))
             while potions and cur_hp < stats["hp"] * POTION_USE_THRESHOLD:
                 cur_hp = min(stats["hp"], cur_hp + stats["hp"] * potions.pop(0) / 100.0)
 
-            p = Creature(stats["hp"], stats["atk"] + STARTING_SWORD_ATK, stats["dfn"],
+            p = Creature(stats["hp"], stats["atk"], stats["dfn"],
                          stats["aspd"], stats["dspd"], stats["crit"], stats["crit_atk"])
             p.hp = min(cur_hp, stats["hp"])
 
@@ -484,8 +532,7 @@ def simulate_handmade(ptable):
 
 # ------------------------------------------------------------------ 밸런싱
 
-def solve_monster(ptable, level, hp_loss_target, duration_target, aspd, trait=NONE,
-                  floor=None):
+def solve_monster(ptable, level, hp_loss_target, duration_target, aspd, trait, floor):
     """플레이어 레벨에 맞춰 몬스터 스탯을 역산한다.
 
     HP  -> 전투 지속시간이 목표가 되도록 (플레이어 DPS 기준)
@@ -496,7 +543,7 @@ def solve_monster(ptable, level, hp_loss_target, duration_target, aspd, trait=NO
     회피하고 불사는 80% 를 흘리므로, 특성을 끄고 뽑은 수치는 실제와 몇 배씩
     어긋난다. 이분 탐색이 특성까지 포함해서 답을 찾게 둔다.
     """
-    ps = player_stats_at(ptable, level) if floor is None else stats_with_runes(ptable, level, floor)
+    ps = stats_with_runes(ptable, level, floor)
     flavor = TRAIT_FLAVOR[trait]
     aspd = round(aspd * flavor["aspd"], 2)
     dspd = round(max(0.01, 0.1 * flavor["dspd"]), 3)
@@ -510,7 +557,7 @@ def solve_monster(ptable, level, hp_loss_target, duration_target, aspd, trait=NO
     lo, hi = 1.0, max(50.0, ps["atk"] * duration_target)
     for _ in range(40):
         mid = (lo + hi) / 2
-        p = make_player(ptable, level) if floor is None else player_with_runes(ptable, level, floor)
+        p = player_with_runes(ptable, level, floor)
         won, dur, _ = simulate_battle(p, build(mid, 1))
         if not won or dur < duration_target:
             lo = mid
@@ -534,7 +581,7 @@ def solve_monster(ptable, level, hp_loss_target, duration_target, aspd, trait=NO
     lo, hi = 0.0, float(int(ps["dfn"])) + max(20.0, ps["hp"])
     for _ in range(40):
         mid = (lo + hi) / 2
-        p = make_player(ptable, level) if floor is None else player_with_runes(ptable, level, floor)
+        p = player_with_runes(ptable, level, floor)
         won, _, loss = simulate_battle(p, build(hp_m, mid))
         if not won or loss > target_loss:
             hi = mid
@@ -552,8 +599,12 @@ def target_level(floor, start_level):
 
     1~4층은 손수 만든 구간이라 우리가 정할 수 없다. 거기서 실제로 도달하는 레벨
     (start_level)을 5층의 기준으로 삼고, 그 뒤로는 층당 1레벨씩 올라간다.
+
+    예전에는 5층을 start_level + 1 로 셌다. 그러면 챕터 0 내내 플레이어가 설계보다
+    한 레벨 낮은 채로 싸워서(첫 보스의 경험치로 20층에서야 따라잡는다) 도입부가
+    가장 비쌌다 — 몹 한 마리가 설계의 두 배(8~17%), 20층 보스가 49% 였다.
     """
-    return start_level + (floor - HANDMADE_FLOORS)
+    return start_level + (floor - HANDMADE_FLOORS - 1)
 
 
 def build_monsters(ptable, start_level):
@@ -568,7 +619,6 @@ def build_monsters(ptable, start_level):
         ramp = 1.0 + 0.35 * (idx / (FLOORS_PER_CHAPTER - 1))
         aspd = round(0.9 + 0.4 * (idx / (FLOORS_PER_CHAPTER - 1)), 2)
 
-        theme = CHAPTER_THEMES[ch]
         # 층 몹 전부를 잡으면 정확히 1레벨
         reward = round(exp_to_next(ptable, level) / MOBS_PER_FLOOR)
 
@@ -587,7 +637,7 @@ def build_monsters(ptable, start_level):
             for _ in range(run):
                 monsters.append(dict(
                     id=MOB_ID_BASE + floor * 8 + k, Chapter=ch, Ability=trait,
-                    Name=f"{theme[1]} {MOB_SPECIES[art_idx]}",
+                    Name=bestiary.mob_name(KR, "kr", ch, art_idx),
                     Attack=float(atk_k), Defence=float(dfn_k), MaxHP=float(hp_k),
                     AttackSpeed=float(aspd_k), DefenceSpeed=float(dspd_k),
                     Critical=99.0, CriticalAttack=200.0,
@@ -598,25 +648,27 @@ def build_monsters(ptable, start_level):
                     Shadow="Mob_Shadow_000",
                     MonsterNameId=MOB_NAME_BASE + floor * 8 + k,
                     MonsterDescId=MOB_DESC_BASE + floor * 8 + k,
-                    _floor=floor, _boss=False, _order=k,
+                    _floor=floor, _boss=False, _order=k, _art=art_idx,
                 ))
                 k += 1
 
         if boss:
+            # 보스는 층의 몹 다섯을 다 잡고 한 레벨 오른 뒤에 만난다(계단 방 입구).
+            # 도착 레벨로 풀면 실제로는 설계보다 싸다 — 20층 보스가 28% 가 아니라 15% 였다.
             btrait = BOSS_TRAITS[ch % len(BOSS_TRAITS)]
             bhp, batk, bdfn, baspd, bdspd = solve_monster(
-                ptable, level, BOSS_HP_LOSS, BOSS_DURATION, 1.1, btrait, floor)
+                ptable, level + 1, BOSS_HP_LOSS, BOSS_DURATION, 1.1, btrait, floor)
             bart_idx = BOSS_ART_INDEX[ch % len(BOSS_ART_INDEX)]
             bart = MOB_ART[bart_idx]
             monsters.append(dict(
                 id=BOSS_ID_BASE + ch, Chapter=ch, Ability=btrait,
-                Name=f"{theme[0]}의 {MOB_SPECIES[bart_idx]} 우두머리",
+                Name=KR["bosses"][ch][0],
                 Attack=float(batk), Defence=float(bdfn), MaxHP=float(bhp),
                 AttackSpeed=float(baspd), DefenceSpeed=float(max(0.15, bdspd)),
                 Critical=20.0, CriticalAttack=200.0,
                 RewardExp=float(round(exp_to_next(ptable, level) * 0.6)),
                 # 기획서 107쪽 — 보스를 잡으면 보상 아이템을 떨군다.
-                # 능력치가 0 인 부츠·목걸이만 준다(기획서 34쪽의 "유틸 기능 해금").
+                # 능력치가 0 인 반지·목걸이만 준다(기획서 34쪽의 "유틸 기능 해금").
                 # 공격력이 붙은 무기를 주면 그 뒤 층의 밸런스가 통째로 어긋난다.
                 RewardItem=BOSS_REWARD[ch % len(BOSS_REWARD)],
                 IdleAnimStr=bart[0], AttackAnimStr=bart[1],
@@ -625,7 +677,7 @@ def build_monsters(ptable, start_level):
                 Shadow="Mob_Shadow_000",
                 MonsterNameId=BOSS_NAME_BASE + ch,
                 MonsterDescId=BOSS_DESC_BASE + ch,
-                _floor=floor, _boss=True,
+                _floor=floor, _boss=True, _art=bart_idx,
             ))
     return monsters
 
@@ -655,16 +707,15 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
       skip_potions   막다른 길의 구역 물약을 안 들른다. 계단 앞 물약만 밟는다.
                      이쪽이 진짜 나쁜 선택이다.
 
-    ponytail: 장비 보너스는 계산에 넣지 않는다. 실제 플레이어는 마검(+10 ATK)을
-              들고 있으므로 여기 결과보다 항상 강하다 — 안전한 방향의 오차다.
+    플레이어는 마검을 든 채로 싸운다(stats_with_runes). 전투 사이에 치명 횟수와
+    방어 게이지를 넘겨 받지 않는 것만 게임과 다르다 — thesword_balance 머리말 참조.
     """
     by_floor = {}
     for m in monsters:
         by_floor.setdefault(m["_floor"], []).append(m)
 
     def stats_at(level, floor):
-        return (player_stats_at(ptable, level) if skip_runes
-                else stats_with_runes(ptable, level, floor))
+        return stats_with_runes(ptable, level, floor, runes=not skip_runes)
 
     level, exp, cur_hp = start_state
     log = []
@@ -684,6 +735,7 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
 
         entry_level, entry_hp = level, cur_hp
         floor_spill = 0.0
+        fight_cost = []     # (보스인가, 최대 HP 대비 잃은 %) — 전투 예측이 보여 줄 값
         # 미로가 강제하는 순서 그대로. 약한 놈부터, 마지막에 보스.
         fights = list(mobs) + ([boss] if boss else [])
 
@@ -749,13 +801,15 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
 
             won, dur, loss = simulate_battle(p, m)
             cur_hp = p.hp
+            fight_cost.append((md["_boss"], 100.0 * loss / stats["hp"]))
             if not won:
                 return False, log, (
                     f"{floor}층 {i + 1}번째 전투에서 사망 "
                     f"(Lv{level}, 진입HP {entry_hp:.0f}/{stats['hp']:.0f}, "
                     f"몬스터 {md['Name']} HP{md['MaxHP']:.0f} ATK{md['Attack']:.0f})")
 
-            # 경험치 -> 레벨업 (Unity CurExp 세터와 동일하게 반복 처리)
+            # 경험치 -> 레벨업. 한 번에 여러 레벨이 오를 수 있다 — C# CurExp 세터도
+            # 같은 while 이어야 한다 (도입부 킹 슬라임은 한 번에 두 레벨 넘게 준다).
             exp += md["RewardExp"]
             while level + 1 in ptable and exp >= ptable[level + 1]["need_exp"]:
                 exp -= ptable[level + 1]["need_exp"]
@@ -778,7 +832,7 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
         log.append(dict(floor=floor, entry_level=entry_level, exit_level=level,
                         hp=cur_hp, max_hp=stats["hp"], spill=floor_spill,
                         spill_total=spilled, served=served, budget=budget,
-                        hp_pct=100.0 * cur_hp / stats["hp"]))
+                        hp_pct=100.0 * cur_hp / stats["hp"], fights=fight_cost))
         if verbose and (floor % 10 == 0 or floor == HANDMADE_FLOORS + 1
                         or is_boss_floor(floor)):
             tag = "BOSS" if is_boss_floor(floor) else "    "
@@ -786,6 +840,24 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
                   f"HP {cur_hp:>6.0f}/{stats['hp']:>6.0f} ({100.0 * cur_hp / stats['hp']:>5.1f}%)")
 
     return True, log, None
+
+
+def report_fight_costs(log):
+    """전투 한 번의 값(최대 HP 대비 잃는 %)을 챕터별로 찍는다.
+
+    전투 예측이 보여 줄 숫자다. 이게 몇 % 에 머무느냐가 예측을 볼 이유를 정한다 —
+    마검을 빼고 셌을 때는 실제 전투가 1~7% 라 예측이 늘 초록이었다.
+    """
+    for ch in range(len(CHAPTER_THEMES)):
+        rows = [r for r in log if dungeon_id(r["floor"])[1] == ch]
+        mobs = sorted(p for r in rows for boss, p in r["fights"] if not boss)
+        bosses = [p for r in rows for boss, p in r["fights"] if boss]
+        print(f"      챕터 {ch} 전투 한 번의 값: 몹 중앙값 {statistics.median(mobs):.1f}% · "
+              f"상위 10% {mobs[int(0.9 * (len(mobs) - 1))]:.1f}% · 최대 {mobs[-1]:.1f}%"
+              + (f" · 보스 {bosses[0]:.0f}%" if bosses else ""))
+    print("      (치명 횟수·방어 게이지는 전투마다 0 에서 센다. 게임은 전투 사이에 이어"
+          " 받으므로 치명타가 같거나 먼저 나온다 — 합으로는 보수적이고, 한 전투만 보면"
+          " 싸우는 순서에 따라 몇 대 어긋난다)")
 
 
 # ------------------------------------------------------------------ 나쁜 선택
@@ -927,11 +999,18 @@ def emit_player_data(ptable):
 
 
 def emit_monster_data(monsters):
-    """기존 몬스터(0~16)는 보존하고 새 몬스터만 뒤에 붙인다."""
+    """기존 몬스터(0~16)는 보존하고 새 몬스터만 뒤에 붙인다.
+
+    보존하되 떨구는 장비만은 킹 슬라임 것만 남긴다. 손수 만든 표는 "몬스터 i 가
+    장비 i 를 떨군다" 는 자리표여서, 1~2층의 망고 슬라임·크로우·정령·늑대가 부츠
+    1~4 를, 분열 슬라임 셋이 목걸이 5 를 떨궜다 — 20~80층 바닥의 부츠와 킹 슬라임의
+    목걸이를 도입부에서 이미 여러 켤레 받고 있었다. 같은 장비는 한 번만 준다.
+    """
     existing_path = os.path.join(JSOND, "MonsterData.json")
     with open(existing_path, "r", encoding="utf-8") as f:
         existing = json.load(f)["creatures"]
-    keep = [m for m in existing if m["id"] < NEW_MONSTER_ID_BASE]
+    keep = [dict(m, RewardItem=m["RewardItem"] if m["id"] == HANDMADE_BOSS_ID else -1)
+            for m in existing if m["id"] < NEW_MONSTER_ID_BASE]
 
     items = list(keep)
     for m in monsters:
@@ -977,11 +1056,11 @@ def emit_stage_info():
         # 층별 수치는 이미 MonsterData 에 정확히 넣었으므로 여기서는 1배로 둔다.
         item = dict(id=floor - 1, DungeonID=did, Type=2 if boss else 0,
                     UpStage=up, DownStage=down, BossRoom="-",
-                    ATK=1, DEF=1, EXP=100, BGM=theme[2],
+                    ATK=1, DEF=1, EXP=100, BGM=theme[0],
                     DungeonNameScriptID=SCRIPT_STAGE_NAME_BASE + floor)
         items.append(item)
         rows.append([item["id"], did, "Boss" if boss else "Common", up, down, "-",
-                     1, 1, 100, theme[2], item["DungeonNameScriptID"]])
+                     1, 1, 100, theme[0], item["DungeonNameScriptID"]])
 
     header = ["ID", "Dungeon_ID", "Type", "Up_Stairs", "Down_Stairs", "Boss_Room",
               "ATK_보정 (n)", "DEF_보정 (n)", "EXP_보정 (%)", "BGM", "던전 이름_ID"]
@@ -990,54 +1069,70 @@ def emit_stage_info():
     return items
 
 
+# 생성기가 통째로 소유하는 ScriptData 구간 (양끝 포함). 여기 있는 행은 매번 새로
+# 쓰고 이번에 만들지 않은 행은 지운다 — 옛 생성기가 남긴 5101~5104 가 일본어·중국어
+# 칸에 한국어를 담은 채 남아 있었다. 특성(MonsterClassData)·도감(EquipData 31)이
+# 가리키는 행도 생성기가 쓴다.
+GENERATED_SCRIPT_RANGES = [
+    (SCRIPT_STAGE_NAME_BASE, SCRIPT_STAGE_NAME_BASE + TOTAL_FLOORS),
+    (BOSS_NAME_BASE, BOSS_NAME_BASE + len(CHAPTER_THEMES) - 1),
+    (BOSS_DESC_BASE, BOSS_DESC_BASE + len(CHAPTER_THEMES) - 1),
+    (MOB_NAME_BASE, MOB_NAME_BASE + TOTAL_FLOORS * 8 + 7),
+    (MOB_DESC_BASE, MOB_DESC_BASE + TOTAL_FLOORS * 8 + 7),
+]
+BOOK_EQUIP_ID = 31              # EquipData 의 몬스터 도감
+
+
 def emit_scripts(monsters):
-    """손으로 쓴 번역은 지키고, 생성한 이름은 덮어쓴다.
+    """생성한 이름·설명을 네 언어로 쓴다. 손으로 쓴 행은 건드리지 않는다.
 
     예전에는 있는 ID 를 전부 건너뛰었다. 번역을 지키려던 것인데, 생성한 몬스터의
     이름까지 옛 문자열이 남았다 — 데이터에는 "이끼 낀 지하 묘소의 잿빛 파수꾼
     우두머리" 인데 화면에는 "이끼 낀 지하 묘소의 킹 슬라임" 이 떴다.
-    그림에 맞춰 이름을 고쳐도 화면은 그대로였다는 뜻이다.
+    그 다음에는 네 칸에 똑같이 한국어를 넣었다 — 영어 층 이름은 "5F" 뿐이었다.
 
-    그래서 생성 구간(층 이름 / 몹 이름·설명 / 보스 이름·설명)만 덮어쓴다.
-    1~4층과 UI 문자열은 그 구간 밖이라 손대지 않는다.
+    문구는 bestiary.py 가 낸다(스토리 도감이 원본, 없으면 내장 문구).
+    특성 이름·설명은 MonsterClassData 의 i 번째 행(= Define.Trait i)이 가리키는 id 에 쓴다.
     """
     path = os.path.join(JSOND, "ScriptData.json")
     with open(path, "r", encoding="utf-8") as f:
         scripts = json.load(f)["scripts"]
-    by_id = {s["id"]: s for s in scripts}
+    with open(os.path.join(JSOND, "MonsterClassData.json"), "r", encoding="utf-8") as f:
+        classes = json.load(f)["monsterClasses"]
+    book = EQUIPS[BOOK_EQUIP_ID]
 
-    generated = [
-        (SCRIPT_STAGE_NAME_BASE, SCRIPT_STAGE_NAME_BASE + TOTAL_FLOORS),
-        (BOSS_NAME_BASE, BOSS_NAME_BASE + len(CHAPTER_THEMES)),
-        (BOSS_DESC_BASE, BOSS_DESC_BASE + len(CHAPTER_THEMES)),
-        (MOB_NAME_BASE, MOB_NAME_BASE + (TOTAL_FLOORS + 1) * 8),
-        (MOB_DESC_BASE, MOB_DESC_BASE + (TOTAL_FLOORS + 1) * 8),
-    ]
+    made = {}                       # id -> {언어: 문구}
 
-    def is_generated(sid):
-        return any(lo <= sid <= hi for lo, hi in generated)
-
-    def add(sid, kr, en):
-        row = by_id.get(sid)
-        if row is not None:
-            if not is_generated(sid):
-                return                      # 손으로 쓴 번역은 건드리지 않는다
-            row.update(ScriptKr=kr, ScriptEn=en, ScriptJp=kr, ScriptCn=kr)
-            return
-        row = dict(id=sid, ScriptKr=kr, ScriptEn=en, ScriptJp=kr, ScriptCn=kr)
-        scripts.append(row)
-        by_id[sid] = row
+    def put(sid, text_of):
+        assert sid not in made, f"ScriptData {sid} 를 두 번 쓴다"
+        made[sid] = {lang: text_of(lang, BOOKS[lang]) for lang in bestiary.LANGS}
 
     # 1~4층 이름(5000~5003)은 원본 번역이 이미 있다.
     for floor in range(HANDMADE_FLOORS + 1, TOTAL_FLOORS + 1):
-        _, ch, _ = dungeon_id(floor)
-        theme = CHAPTER_THEMES[ch]
-        add(SCRIPT_STAGE_NAME_BASE + floor, f"{theme[0]} {floor}층",
-            f"{floor}F")
+        ch = dungeon_id(floor)[1]
+        put(SCRIPT_STAGE_NAME_BASE + floor,
+            lambda lang, t: bestiary.floor_name(t, lang, ch, floor))
     for m in monsters:
-        add(m["MonsterNameId"], m["Name"], m["Name"])
-        add(m["MonsterDescId"], f"{m['Name']}. 깊은 곳에서 올라온 존재.",
-            f"{m['Name']}.")
+        ch, art = m["Chapter"], m["_art"]
+        if m["_boss"]:
+            put(m["MonsterNameId"], lambda lang, t: t["bosses"][ch][0])
+            put(m["MonsterDescId"], lambda lang, t: t["bosses"][ch][1])
+        else:
+            put(m["MonsterNameId"], lambda lang, t: bestiary.mob_name(t, lang, ch, art))
+            put(m["MonsterDescId"], lambda lang, t: bestiary.mob_desc(t, lang, ch, art))
+    for c in classes:
+        put(c["ClassName"], lambda lang, t: t["traits"][c["id"]][0])
+        put(c["ClassDesc"], lambda lang, t: t["traits"][c["id"]][1])
+    put(book["NameId"], lambda lang, t: t["book"][0])
+    put(book["DescId"], lambda lang, t: t["book"][1])
+
+    def owned(sid):
+        return sid in made or any(lo <= sid <= hi for lo, hi in GENERATED_SCRIPT_RANGES)
+
+    scripts = [row for row in scripts if not owned(row["id"])]
+    for sid, texts in made.items():
+        scripts.append(dict(id=sid, **{col: texts[lang] for lang, col
+                                       in zip(bestiary.LANGS, bestiary.COLUMNS)}))
 
     append_rows(scripts)
     emit_bootstrap(ROOT)
@@ -1062,7 +1157,7 @@ def emit_layouts(monsters, write=True):
         mobs = sorted((m for m in by_floor[floor] if not m["_boss"]),
                       key=lambda m: m["_order"])
         boss = next((m for m in by_floor[floor] if m["_boss"]), None)
-        walls = CHAPTER_THEMES[ch][3]
+        walls = CHAPTER_THEMES[ch][1]
 
         # 구역별 회복 아이템 (없는 구역은 None)
         region3 = [POTION_BY_HEAL[EXIT_POTION]]
@@ -1284,6 +1379,13 @@ def build_all(dry_run=False):
     print(f"[2/7] {HANDMADE_FLOORS + 1}~{TOTAL_FLOORS}층 몬스터 스탯 역산 중...")
     monsters = build_monsters(ptable, start_level)
     print(f"      몬스터 {len(monsters)}종 생성")
+    # 다른 종이 같은 이름을 달면 도감에 같은 이름이 스탯만 다르게 뜬다. 쓰기 전에 막는다.
+    clashes = bestiary.name_clashes(BOOKS)
+    if clashes:
+        for line in clashes[:10]:
+            print(f"  [실패] {line}")
+        print(f"      몬스터 이름 겹침 {len(clashes)}건 — Tools/story 의 bestiary 를 고칠 것")
+        return False
 
     print(f"[3/7] {HANDMADE_FLOORS + 1}~{TOTAL_FLOORS}층 완주 시뮬레이션")
     ok, log, err = simulate_run(ptable, monsters, start_state)
@@ -1291,8 +1393,13 @@ def build_all(dry_run=False):
         print(f"  [실패] {err}")
         return False
     worst = min(log, key=lambda r: r["hp_pct"])
+    final = log[-1]["exit_level"]
     print(f"      완주 성공. 최저 HP 구간: {worst['floor']}층 {worst['hp_pct']:.1f}%")
-    print(f"      최종 레벨: {log[-1]['exit_level']}")
+    print(f"      최종 레벨: {final} (레벨 표 {MAX_LEVEL_TABLE}, 여유 {MAX_LEVEL_TABLE - final})")
+    if MAX_LEVEL_TABLE < final + LEVEL_HEADROOM:
+        print(f"  [실패] 레벨 표가 모자란다 — MAX_LEVEL_TABLE 을 {final + LEVEL_HEADROOM} 이상으로")
+        return False
+    report_fight_costs(log)
 
     print("[4/7] 층 레이아웃 생성 + 도달 가능성 검사")
     (written, failures, bad_doors, choices, sealed_off,

@@ -63,8 +63,10 @@ public class CreatureClass : MonoBehaviour
                 ExcuteOnDead(target);
             }
 
+            // 살아 있을 때만 광폭한다 (thesword_balance 도 hp > 0 을 본다).
+            // 죽은 뒤에 40% 가 차서 쓰러진 야수의 체력 막대가 도로 차올랐다.
             float ratio = target.CurHP / target.MaxHP;
-            if (flag == false && ratio <= 0.1f)
+            if (flag == false && target.CurHP > 0 && ratio <= 0.1f)
             {
                 flag = true;
                 float heal = target.MaxHP * 0.4f;
@@ -76,8 +78,11 @@ public class CreatureClass : MonoBehaviour
 
         public int ExecuteAttack(CreatureData attacker, CreatureData target)
         {
-            int damage = (int)Mathf.Max(0, attacker.Attack);
-            if (attacker.IsCritical) damage *= (int)(attacker.CriticalAttack / 100);
+            // 치명 배율은 다른 특성처럼 실수로 곱한다. (int) 로 자르면 치명공격력 250 이 2배,
+            // 199 가 1배였다 — 야수의 치명타가 사실상 없었다.
+            float num = (int)Mathf.Max(0, attacker.Attack);
+            if (attacker.IsCritical) num = num * (attacker.CriticalAttack / 100);
+            int damage = Mathf.RoundToInt(num);
             damage -= (int)target.Defence;
             if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);
             else if (target.IsDefence) damage = 0;
@@ -258,11 +263,13 @@ public class CreatureClass : MonoBehaviour
                 ExcuteOnDead(target);
             }
 
+            // 5번째 대에 쓰러져도 포효한다 (thesword_balance.apply_hit 과 같다).
             if (hitCount == 5)
             {
                 hitCount = 0;
                 int roarDamage = Roar(target, attacker);
-                attacker.Trait.ExcuteOnHit(target, attacker, roarDamage);
+                if (roarDamage > 0)
+                    attacker.Trait.ExcuteOnHit(target, attacker, roarDamage);
 
                 //Vector3 pos = GetImage((int)Images.CreatureImage).gameObject.transform.position;
                 //Managers.Object.ShowDamageFont(pos, damage, 0, attacker., attacker.IsCritical);
@@ -284,18 +291,17 @@ public class CreatureClass : MonoBehaviour
             return damage;
         }
 
+        /// <summary>
+        /// 기획서 53쪽: 포효는 공격력의 20%. 명세는 thesword_balance.apply_hit —
+        /// 치명 아닌 보통 한 대의 20%: round(0.2 * max(1, ATK - DEF)), 상대가 방어 중이면 1 의 20% = 0.
+        /// 예전에는 공격력의 20% 에서 방어력을 빼서, 층 설계 레벨에서는 거대 41마리가 전부 1 이었다.
+        /// </summary>
         public int Roar(CreatureData attacker, CreatureData target)
         {
-            // 기획서 53쪽: 포효는 공격력의 20%. 감쇠 없이 전탄으로 들어가고 있었다.
-            float num = (int)Mathf.Max(0, attacker.Attack) * 0.2f;
-            if (attacker.IsCritical) num = num * (attacker.CriticalAttack / 100);
-            int damage = Mathf.RoundToInt(num);
-            damage -= (int)target.Defence;
-            damage = (int)Mathf.Max(1, damage);
-            if (target.IsDefence && attacker.IsCritical) damage = (int)(damage * 0.25f);
-            else if (target.IsDefence) damage = 1;
+            int blow = Mathf.Max(1, (int)Mathf.Max(0, attacker.Attack) - (int)target.Defence);
+            if (target.IsDefence) blow = 1;
 
-            return damage;
+            return Mathf.RoundToInt(blow * 0.2f);
         }
     }
 

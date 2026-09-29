@@ -34,6 +34,13 @@ public class Effects_00 : MonoBehaviour
         return Managers.Game.PlayerData.CurStageid < 4;
     }
 
+    /// <summary>킹 슬라임 방(손수 만든 4층). BossRoomId 는 챕터마다 첫 보스 층이라 챕터 1~4 에서는
+    /// 40·60·80·100층이 된다 — 거기까지 킹 슬라임 방 조명(따뜻한 빛·초록 안개)을 쓰면 안 된다.</summary>
+    static bool KingSlimeRoom()
+    {
+        return HandAuthored() && Managers.Game.PlayerData.CurStageid == Managers.Game.BossRoomId;
+    }
+
 
     void Start()
     {
@@ -175,7 +182,7 @@ public class Effects_00 : MonoBehaviour
         }
 
         // light
-        if (Managers.Game.PlayerData.CurStageid == 0 || Managers.Game.PlayerData.CurStageid == Managers.Game.BossRoomId)
+        if (Managers.Game.PlayerData.CurStageid == 0 || KingSlimeRoom())
         {
             Managers.Game.DirectionalLight.color = new Color(255/255f, 244/255f, 214/255f);
             Managers.Game.DirectionalLight.intensity = 1.5f;
@@ -246,7 +253,7 @@ public class Effects_00 : MonoBehaviour
         }
 
         // fog
-        if (Managers.Game.PlayerData.CurStageid == Managers.Game.BossRoomId)
+        if (KingSlimeRoom())
         {
             if (fog !=null && fog.GetComponent<VisualEffect>().HasVector4("FogSeconderyColor"))
             {

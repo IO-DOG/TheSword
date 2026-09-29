@@ -86,3 +86,7 @@ Recordings/
 
 # 빌드 산출물 (500MB 넘는다)
 Build/
+
+# Addressables copies this in before a player build and deletes it on the next domain reload
+/Assets/AddressableAssetsData/link.xml
+/Assets/AddressableAssetsData/link.xml.meta

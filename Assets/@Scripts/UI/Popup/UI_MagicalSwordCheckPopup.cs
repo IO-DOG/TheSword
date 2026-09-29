@@ -40,10 +40,23 @@ public class UI_MagicalSwordCheckPopup : UI_Popup
         GetText((int)Texts.MagicalSwordCheckText).text = Managers.GetString(Managers.Data.ScriptDic[Define.SWOARD_ALERT].id);
 
         Managers.Game.OnConversation = true;
+        _locked = true;
 
         YesPointerExit();
 
         return true;
+    }
+
+    // Esc 로는 닫히지 않는다. 계약(O)을 눌러야 연출이 이어진다.
+    public override bool OnEscape() => true;
+
+    // 이 창이 건 대화 잠금. 어떤 길로 사라지든 풀고 간다.
+    bool _locked;
+
+    void OnDestroy()
+    {
+        if (_locked)
+            Managers.Game.OnConversation = false;
     }
 
     #region Pointer Interaction
@@ -60,6 +73,7 @@ public class UI_MagicalSwordCheckPopup : UI_Popup
         Managers.Sound.Play(Define.Sound.Effect, "ButtonUI_Ok_SFX");
 
         Managers.Game.OnConversation = false;
+        _locked = false;
         Managers.Directing.Events.CoStartContractSword();
         ClosePopupUI();
     }
