@@ -1,5 +1,6 @@
 """UI translations and the small, generated fallback needed before Addressables loads."""
 import json
+import re
 from pathlib import Path
 
 # Korean, English, Japanese, Simplified Chinese. IDs are shared with Define.cs.
@@ -25,7 +26,9 @@ TEXT = {
 # More UI text lives in Tools/ui_text_parts/*.py, one file per feature, each with its
 # own TEXT dict — so features can add strings without editing the same lines. Blocks:
 #   150-179 core/save   180-229 menus/popups/input   230-259 settings/language/build
-#   260-299 forecast/manual/warp   300-349 story UI
+#   260-299 forecast/manual/warp   300-349 story UI   350-379 battle speed/skip
+#   380-409 story flow (instinct, skip, loading)   410-439 feel (price ticks, pickups, what-if)
+#   440-469 records/title/Steam
 def _load_parts():
     import importlib.util
     parts = sorted((Path(__file__).parent / "ui_text_parts").glob("*.py"))
@@ -38,6 +41,10 @@ def _load_parts():
                 raise ValueError(f"UI text id {sid} is defined twice ({part.name})")
             if len(values) != 4 or not all(isinstance(v, str) and v for v in values):
                 raise ValueError(f"UI text id {sid} in {part.name} needs 4 non-empty strings (kr, en, jp, cn)")
+            # string.Format 이 언어마다 다른 {n} 을 받으면 한 언어에서만 FormatException 으로 죽는다.
+            holes = [sorted(set(re.findall(r"\{(\d+)[^}]*\}", v))) for v in values]
+            if any(h != holes[0] for h in holes):
+                raise ValueError(f"UI text id {sid} in {part.name} uses different {{n}} placeholders per language: {holes}")
             TEXT[sid] = tuple(values)
 
 

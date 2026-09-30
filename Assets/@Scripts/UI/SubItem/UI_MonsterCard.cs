@@ -62,7 +62,7 @@ public class UI_MonsterCard : UI_BaseCard
 
         GetImage((int)Images.AttackIcon).gameObject.GetComponent<Animator>().Play(Managers.Data.MonsterClassDic[_creature.Ability].Weapon);
 
-        Managers.Sound.Play(Define.Sound.Effect, "MonsterAttack0_SFX");
+        Managers.Sound.PlayByGameSpeed(Define.Sound.Effect, "MonsterAttack0_SFX");
 
         PlayMonsterAttackAnim();
         CreateMonsterAttackParticle();
@@ -79,10 +79,13 @@ public class UI_MonsterCard : UI_BaseCard
 
     public override void ClearDefence()
     {
-        Managers.Sound.Play(Define.Sound.Effect, "Defense_SFX");
+        if (Quiet == false)
+        {
+            Managers.Sound.PlayByGameSpeed(Define.Sound.Effect, "Defense_SFX");
 
-        StartCoroutine(CoStartShieldFX());
-        StartCoroutine(CoDefenceMat());
+            StartCoroutine(CoStartShieldFX());
+            StartCoroutine(CoDefenceMat());
+        }
         base.ClearDefence();
     }
 
@@ -128,6 +131,8 @@ public class UI_MonsterCard : UI_BaseCard
 
     public override void StartDamagedMat()
     {
+        if (Quiet)
+            return;
         StartCoroutine(CoDamagedMat());
     }
 
@@ -188,7 +193,12 @@ public class UI_MonsterCard : UI_BaseCard
     {
         string hitFX = _creature.BattleParticleHit;
         GameObject player = GameObject.Find("UI_PlayerCard");
+        if (player == null)
+            return;
+        // 이펙트가 없어도(데이터의 "-") 전투는 굴러가야 한다 — 여기서 터지면 전투 시계의 그 걸음이 도중에 끊긴다.
         GameObject go = Managers.Resource.Instantiate(hitFX, player.transform);
+        if (go == null)
+            return;
         var uiParticle = go.GetOrAddComponent<UIParticle>();
 
         uiParticle.scale = 50;

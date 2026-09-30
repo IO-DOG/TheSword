@@ -69,8 +69,11 @@ public class PortalController : MonoBehaviour
 
                 if (_mapId + 1 != 2)
                 {
-                    yield return StartCoroutine(Managers.Game.GameScene.CoShowLoadingIllust());
-                    Managers.Sound.FadeInBGM(1f);
+                    // 새 챕터(5·21·41·61·81층)만 제 길이로 곡을 낮췄다 올린다. 보통 층은 1.2초에 곡이 그대로 흐른다.
+                    bool chapter = Array.IndexOf(GeneratedStory.ChapterFirstFloors, _mapId + 2) >= 0;
+                    yield return StartCoroutine(Managers.Game.GameScene.CoShowLoadingIllust(chapter));
+                    if (chapter)
+                        Managers.Sound.FadeInBGM(1f);
                 }
                 else
                 {
@@ -142,8 +145,7 @@ public class PortalController : MonoBehaviour
             bool firstVisit = Managers.Game.PlayerData.FirstEnterMapCheck[Managers.Game.BossRoomId] == false;
             Managers.Game.PlayerData.FirstEnterMapCheck[Managers.Game.BossRoomId] = true;
             Managers.Game.OnInteract = true;   // 삽화 동안에도 옮기는 중이다 (위의 계단과 같다)
-            yield return StartCoroutine(Managers.Game.GameScene.CoShowLoadingIllust());
-            Managers.Sound.FadeInBGM(1f);
+            yield return StartCoroutine(Managers.Game.GameScene.CoShowLoadingIllust());     // 짧은 것 — 곡을 건드리지 않는다
             LoadingAndWarp(nextPos, firstVisit);
         }
         Debug.Log($"Setting player position to: {nextPos}");

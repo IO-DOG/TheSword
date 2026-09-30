@@ -13,6 +13,8 @@ using UnityEngine.UI;
 ///            choice 장면은 마지막 줄 뒤에 선택지.
 ///   예전 대사 — CurEventID 를 정하고 ShowPopupUI 로 연다. EventData 를 Class 2 까지 넘긴다 (1~4층 연출).
 /// Enter·Space·클릭으로 넘기고, Esc 는 삼킨다(대사를 끝까지 넘겨야 다음 연출로 이어진다).
+/// Tab 을 누르고 있으면 끝까지 넘긴다(StoryDirector.WatchSkip → StoryUI.Skipping) — 줄마다 넘기는 것과 같은 길이라
+/// 연출 신호가 다 친다. 선택지에서는 선다.
 /// 자동 플레이 중에는 스스로 넘기고, 선택지는 "놓지 않는다(hold)" 를 고른다.
 /// </summary>
 public class UI_ConversationPopup : UI_Popup
@@ -69,6 +71,9 @@ public class UI_ConversationPopup : UI_Popup
     int _choice = -1;
     float _choiceOpenedAt;
 
+    /// <summary>선택지를 띄우고 고르기를 기다린다 — 건너뛸 수 없다.</summary>
+    public bool Choosing => _choosing;
+
     /// <summary>이야기 장면 하나를 연다. onLine 은 줄이 뜰 때(1부터), onDone 은 닫힐 때 한 번 (고른 선택지, 없으면 null).
     /// 창을 못 띄워도 onDone 은 부른다 — 기다리는 연출이 굳지 않게. 그때는 null 을 돌려준다.</summary>
     public static UI_ConversationPopup ShowStory(StoryScene scene, Action<int> onLine, Action<StoryChoice> onDone)
@@ -105,6 +110,7 @@ public class UI_ConversationPopup : UI_Popup
 
     void OnDestroy()
     {
+        StoryUI.EndSkip();      // 건너뛰던 창이 어떤 길로 사라지든, 다음 창까지 넘기지 않는다
         if (_locked && Managers.IsAlive)
             Managers.Game.OnConversation = false;
         // 끝까지 넘기기 전에 사라졌다(씬이 내려갔거나 누가 창을 걷었다). 기다리는 쪽이 굳지 않게 알린다.
@@ -273,6 +279,7 @@ public class UI_ConversationPopup : UI_Popup
             Debug.Log("Conversation ended");
             Managers.Game.OnConversation = false;
             _locked = false;
+            StoryUI.EndSkip();      // 이어 여는 다음 대사 창(PopupAction)까지 넘기지 않는다
             ClosePopupUI();
 
             if(Managers.Directing.PopupAction != null)
@@ -475,6 +482,7 @@ public class UI_ConversationPopup : UI_Popup
     // 이름표 그림을 틀로 썼더니 오른쪽이 투명하게 빠져서, 가운데 놓은 글의 뒷반이 맵 위에 떠 읽히지 않았다.
     void OpenChoices()
     {
+        StoryUI.EndSkip();      // 건너뛰기는 선택지 앞에서 선다 — 결말의 선택은 건너뛰지 못한다
         _choosing = true;
         _choice = -1;
         _choiceOpenedAt = Time.unscaledTime;

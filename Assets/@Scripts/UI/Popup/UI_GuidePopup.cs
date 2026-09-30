@@ -22,6 +22,10 @@ public class UI_GuidePopup : UI_Popup
     public Animator btnAnim = null;
     public TMP_Text guideText = null;
 
+    // 뜬 직후의 Enter·Space·Esc 는 이 창을 띄운 쪽(대사 넘기기·전투 끝·열쇠 줍기)의 것이다 — 읽기도 전에 닫히지 않게.
+    const float KeyGuard = 0.4f;
+    float _openedAt;
+
     private void Awake()
     {
         Init();
@@ -31,6 +35,8 @@ public class UI_GuidePopup : UI_Popup
     {
         if (base.Init() == false)
             return false;
+
+        _openedAt = Time.unscaledTime;
 
         #region Bind
         BindImage(typeof(Images));
@@ -91,8 +97,22 @@ public class UI_GuidePopup : UI_Popup
     }
     #endregion
 
-    // Esc 로는 닫히지 않는다. 확인(O)을 눌러야 입력 잠금이 풀린다.
-    public override bool OnEscape() => true;
+    // Enter·Space 도 확인(O)과 같다. 맨 위일 때만 — 위에 뜬 창을 누른 키다.
+    void Update()
+    {
+        if (Managers.UI.TopPopup != this || Time.unscaledTime - _openedAt < KeyGuard)
+            return;
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Space))
+            YesClick();
+    }
+
+    // Esc 도 확인과 같다 — 확인 길(YesClick)로 닫아야 입력 잠금이 풀린다. 뜬 직후의 Esc 는 삼키기만 한다.
+    public override bool OnEscape()
+    {
+        if (Time.unscaledTime - _openedAt >= KeyGuard)
+            YesClick();
+        return true;
+    }
 
     // 이 창이 건 입력 잠금. 어떤 길로 사라지든(연출이 창을 모두 걷는 등) 풀고 간다 —
     // 예전에는 Esc 로 걷히면 잠금이 켜진 채 남아 플레이어가 영영 못 움직였다.

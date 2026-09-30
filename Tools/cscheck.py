@@ -8,6 +8,7 @@ Library/ScriptAssemblies instead of their projects, and builds them.
 
     python Tools/cscheck.py            # errors only, exit 1 if any
     python Tools/cscheck.py --warn     # also warnings from our own scripts
+    python Tools/cscheck.py --tag lane # own csproj copies and obj folder, so parallel runs don't collide
 
 Needs the editor to have compiled once (Library/ScriptAssemblies) and the
 generated Assembly-CSharp*.csproj files to exist. The _check_*.csproj copies are
@@ -19,7 +20,11 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = "obj\\cscheck"
+TAG = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--tag=")), "")
+if "--tag" in sys.argv and sys.argv.index("--tag") + 1 < len(sys.argv):
+    TAG = sys.argv[sys.argv.index("--tag") + 1]
+SUFFIX = f"_{TAG}" if TAG else ""
+OUT = f"obj\\cscheck{SUFFIX}"
 OUR = "Assets\\@Scripts\\"
 
 
@@ -75,11 +80,12 @@ def _build(proj, warn):
 
 def main():
     warn = "--warn" in sys.argv
-    dll = _rewrite("Assembly-CSharp.csproj", "_check_runtime.csproj", editor=False)
-    code, out = _build("_check_runtime.csproj", warn)
+    runtime, editor = f"_check_runtime{SUFFIX}.csproj", f"_check_editor{SUFFIX}.csproj"
+    dll = _rewrite("Assembly-CSharp.csproj", runtime, editor=False)
+    code, out = _build(runtime, warn)
     if code == 0:
-        _rewrite("Assembly-CSharp-Editor.csproj", "_check_editor.csproj", editor=True, runtime_dll=dll)
-        code, more = _build("_check_editor.csproj", warn)
+        _rewrite("Assembly-CSharp-Editor.csproj", editor, editor=True, runtime_dll=dll)
+        code, more = _build(editor, warn)
         out += more
     else:
         out.append("(editor scripts not checked: runtime assembly failed)")

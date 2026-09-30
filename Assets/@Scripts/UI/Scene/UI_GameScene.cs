@@ -146,6 +146,15 @@ public class UI_GameScene : UI_Scene
 
         Managers.Game.Player._keyInventory = GetObject((int)GameObjects.KeyInventory);
 
+        // 열쇠 칸은 프리팹에서 화면 가운데 기준(-429)으로 놓여 있어, 16:9 보다 좁은 화면(스팀 덱 1280x800)에서는
+        // 왼쪽 밖으로 13px 나갔다. 왼쪽 가장자리 기준으로 옮긴다 — 기준 폭(1920)의 절반을 더하니 16:9 에서는 그대로다.
+        RectTransform keySlots = GetObject((int)GameObjects.KeyInventory).transform as RectTransform;
+        if (keySlots != null && keySlots.anchorMin.x == 0.5f)
+        {
+            keySlots.anchorMin = keySlots.anchorMax = new Vector2(0f, 0.5f);
+            keySlots.anchoredPosition += new Vector2(960f, 0f);
+        }
+
         if (PlayerPrefs.GetInt("ISOPENGREENKEY") == 0)
             GetObject((int)GameObjects.GreenKey).SetActive(false);
         if (PlayerPrefs.GetInt("ISOPENYELLOWKEY") == 0)
@@ -457,9 +466,14 @@ public class UI_GameScene : UI_Scene
     {
         if (Input.GetKeyDown(KeyCode.Escape) == false)
             return;
-        // 죽는 연출이 도는 중이다. 게임오버 창을 걷으면 되살리는 코루틴이 같이 죽는다.
+        // 죽는 연출이 도는 중이다. 게임오버 창을 걷으면 되살리는 코루틴이 같이 죽는다. 그 위에 뜬 전투 안내
+        // (첫 전투에서 죽었다)만은 다른 때처럼 Esc 로 닫는다 — 게임오버 창은 같은 프레임의 키를 받지 않는다.
         if (Managers.Game.IsPlayerDead)
+        {
+            if (Managers.UI.TopPopup is UI_GuidePopup)
+                Managers.UI.EscapeTopPopup();
             return;
+        }
         // 워프 창은 팝업 스택 밖의 창이다. 떠 있으면 그것부터 닫는다.
         if (WarpUI.Instance != null && WarpUI.Instance.IsOpen)
         {
@@ -777,54 +791,54 @@ public class UI_GameScene : UI_Scene
     }
 
     /// <summary>
-    /// 가짜 로딩창 만드는 함수
+    /// 층을 옮길 때의 삽화 (처음 가는 층·보스방). 보통은 1.2초이고 아무 키·클릭에 곧장 어두워진다 — 곡은 건드리지 않는다.
+    /// 예전에는 층마다 4~5초였고, 그동안 곡·효과음을 0 으로 내렸다가 올려서 한 판에 음악이 96번 끊겼다.
+    /// chapter(새 챕터에 들어설 때: 5·21·41·61·81층)만 예전 길이(2초 밝아짐, 1~2초, 1초 어두워짐)로 곡을 낮춘다 —
+    /// 곡을 되올리는 것은 부른 쪽이다(PortalController 의 FadeInBGM).
+    /// 도는 동안 입력 잠금(OnInputLock)을 쥔다. 층을 옮기는 표시(OnInteract)는 부른 쪽이 쥐고 있다 — 워프가 끼어들지 않게.
     /// </summary>
-    /// <returns></returns>
-    public IEnumerator CoShowLoadingIllust()
+    public IEnumerator CoShowLoadingIllust(bool chapter = false)
     {
         yield return null;
         Managers.Game.OnInputLock = true;
 
-        // 일러스트 표현
-        if (Managers.Game.GameScene == null)
-            yield return null;
+        Image illust = GetImage((int)Images.LoadingIllustImage);
+        illust.raycastTarget = true;        // 넘기려고 누른 클릭이 밑의 HUD 단추(인벤토리 등)에 닿지 않게. 끝나면 되돌린다
+        illust.color = new Color(0, 0, 0, 1);
+        illust.sprite = Managers.Resource.Load<Sprite>($"LoadingIllust{UnityEngine.Random.Range(1, 7)}");
+        // 정수 Range(1, 2) 는 늘 1 이었다. 1~2초 사이로.
+        float fadeIn = chapter ? 2f : 0.4f, hold = chapter ? UnityEngine.Random.Range(1f, 2f) : 0.4f, fadeOut = chapter ? 1f : 0.4f;
 
-        int randValue = UnityEngine.Random.Range(1, 7);
-        GetImage((int)Images.LoadingIllustImage).color = new Color(0, 0, 0, 1);
-        GetImage((int)Images.LoadingIllustImage).sprite = Managers.Resource.Load<Sprite>($"LoadingIllust{randValue}");
-        float timer = 0f;
-        float duration = 2f;
-        while (timer < duration)
+        for (float timer = 0f; timer < fadeIn + hold; timer += Time.deltaTime)
         {
-            timer += Time.deltaTime;
-            float t = Mathf.Clamp01(timer / duration);
-            GetImage((int)Images.LoadingIllustImage).color = new Color(t, t, t, 1);
-            //// 소리끄기
-            //Managers.Sound.SetVolume(0);
-            Managers.Sound.SetBGMVolume(PlayerPrefs.GetFloat("CURBGMSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1) - t);
-            Managers.Sound.SetEffectVolume(PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1) - t);
-
+            float t = Mathf.Clamp01(timer / fadeIn);
+            illust.color = new Color(t, t, t, 1);
+            if (chapter)
+            {
+                Managers.Sound.SetBGMVolume(SoundManager.ConfiguredBgmVolume - t);
+                Managers.Sound.SetEffectVolume(PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1) - t);
+            }
+            else if (timer > 0f && Input.anyKeyDown)     // 계단을 밟은 그 프레임의 키는 치지 않는다
+            {
+                break;
+            }
             yield return null;
         }
 
-        //Image image = Managers.Game.GameScene.ShowLoadingIllust(randValue);
-        // 정수 Range(1, 2) 는 늘 1 이었다. 1~2초 사이로.
-        yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 2f));
-
-        timer = 0f;
-        while (timer < duration / 2)
+        // 지금 밝기에서 까맣게. 누르면 남은 밝기만큼 짧아진다.
+        float from = illust.color.r;
+        for (float timer = 0f; timer < fadeOut * from; timer += Time.deltaTime)
         {
-            timer += Time.deltaTime;
-            float t = Mathf.Clamp01(timer / (duration / 2));
-            GetImage((int)Images.LoadingIllustImage).color = new Color(1 - t, 1 - t, 1 - t, 1);
-
+            float t = from - timer / fadeOut;
+            illust.color = new Color(t, t, t, 1);
             yield return null;
         }
 
         Managers.Game.OnInputLock = false;
 
         // 일러스트 끄기
-        GetImage((int)Images.LoadingIllustImage).color = new Color(1, 1, 1, 0);
+        illust.color = new Color(1, 1, 1, 0);
+        illust.raycastTarget = false;
     }
 
     /// <summary>

@@ -1,0 +1,14 @@
+"DepotBuild"
+{
+	"DepotID"	"<DEMO_DEPOTID>"	// demo depot - see scripts/README.md
+	"FileMapping"
+	{
+		"LocalPath"	"*"
+		"DepotPath"	"."
+		"Recursive"	"1"
+	}
+	"FileExclusion"	"*.pdb"
+	"FileExclusion"	"steam_appid.txt"
+	"FileExclusion"	"*_DoNotShip*"
+	"FileExclusion"	"*_ButDontShipItWithYourGame*"
+}

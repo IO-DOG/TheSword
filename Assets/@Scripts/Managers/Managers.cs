@@ -93,7 +93,11 @@ public class Managers : MonoBehaviour
             s_instance = go.GetComponent<Managers>();
 
             if (Application.isPlaying)
+            {
+                // Steam 을 먼저 붙인다 — 언어를 고른 적이 없으면 Steam 의 게임 언어가 기본이 된다. 없으면 아무 일도 없다.
+                SteamManager.Init();
                 ApplySettings();
+            }
         }
     }
 
@@ -158,6 +162,7 @@ public class Managers : MonoBehaviour
     private void Update()
     {
         //Debug.Log("Managers");
+        SteamManager.RunCallbacks();
         _input.OnUpdate();
     }
 

@@ -18,6 +18,13 @@ public class AutoPlayer : MonoBehaviour
 {
     public static AutoPlayer Instance;
 
+    /// <summary>
+    /// 건너뛸 수 있는 전투(UI_BattlePopup.SkipAllowed — 보스가 아니고 치명 수업 뒤)는 스킬 없이 전부 건너뛴다.
+    /// 예측 대조가 그대로 "건너뛰어도 예측 그대로인가" 의 회귀 시험이 된다(줄 끝에 "(건너뜀)"). 기본은 꺼져 있다.
+    /// 플레이를 시작하면 비워지므로(ResetStatics) 플레이가 뜬 뒤 에디터 eval 로 켠다: AutoPlayer.ForceSkipAll = true;
+    /// </summary>
+    public static bool ForceSkipAll;
+
     public bool Finished;
     public bool Failed;
     public string Result = "";
@@ -222,6 +229,7 @@ public class AutoPlayer : MonoBehaviour
     {
         Instance = null;
         ResumeFromSave = false;
+        ForceSkipAll = false;
     }
 
     IEnumerator CoRun()
@@ -251,7 +259,9 @@ public class AutoPlayer : MonoBehaviour
                 TickBattleLog();
                 // 스킬은 여기서 본다. TickPlay 안에 두면 안 된다 — 그쪽은 전투가 열리면
                 // 맨 앞에서 return 해 버려서 전투 중에는 한 번도 도달하지 않는다.
-                TickSkills();
+                // 건너뛸 전투면(ForceSkipAll) 스킬을 쓰지 않는다 — 예측은 스킬 없이 잰다.
+                if (TickSkip() == false)
+                    TickSkills();
                 TickUI();
                 TickPlay();
             }
@@ -322,6 +332,22 @@ public class AutoPlayer : MonoBehaviour
             Debug.Log($"[AutoPlayer] 전투 끝 HP {_hpBefore:0} -> {g.PlayerData.CurHP:0}");
         }
     }
+
+    #region 건너뛰기
+    /// <summary>ForceSkipAll 이 켜져 있고 건너뛸 수 있는 전투면 건너뛴다(사람이 Tab 을 누르는 것과 같은 UI_BattlePopup.Skip).
+    /// 그런 전투면 true — 카드가 서기 전(CanSkip 이 아직 false)이라도 스킬은 쓰지 않고 다음 프레임에 다시 본다.</summary>
+    bool TickSkip()
+    {
+        if (ForceSkipAll == false || Managers.Game == null || Managers.Game.OnBattle == false)
+            return false;
+        UI_BattlePopup popup = Managers.UI.FindPopup<UI_BattlePopup>();
+        if (popup == null || popup.SkipAllowed == false)
+            return false;
+        if (popup.CanSkip)
+            popup.Skip();
+        return true;
+    }
+    #endregion
 
     #region 액티브 스킬
     /// <summary>
@@ -1384,10 +1410,12 @@ public class AutoPlayer : MonoBehaviour
 
         GameManager g = Managers.Game;
         int floor = g.PlayerData.CurStageid + 1;
+        // 건너뛴 전투(UI_BattlePopup.Skip)도 같은 줄을 찍는다 — 끝에 표시만 붙인다.
+        string skipped = LastBattle.Skipped ? " (건너뜀)" : "";
         if (won == false)
         {
             Debug.Log($"[AutoPlayer] 예측 대조 {floor}층 몬스터{monsterId}: " +
-                      $"예측 {(_predicted.Win ? $"-{_predicted.Damage} 이김" : "짐")} / 실제 쓰러짐");
+                      $"예측 {(_predicted.Win ? $"-{_predicted.Damage} 이김" : "짐")} / 실제 쓰러짐{skipped}");
             return;
         }
 
@@ -1396,7 +1424,7 @@ public class AutoPlayer : MonoBehaviour
         int diff = actual - _predicted.Damage;
         string line = $"[AutoPlayer] 예측 대조 {floor}층 몬스터{monsterId}: 예측 -{_predicted.Damage}" +
                       $"{(_predicted.Win ? "" : " (지는 싸움)")} / 실제 -{actual}" +
-                      $"{(_skillUsed ? " (스킬 사용)" : diff == 0 ? " 일치" : $" 차이 {diff:+0;-0}")}";
+                      $"{(_skillUsed ? " (스킬 사용)" : diff == 0 ? " 일치" : $" 차이 {diff:+0;-0}")}{skipped}";
         if (_skillUsed)
         {
             Debug.Log(line);

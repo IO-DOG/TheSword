@@ -133,8 +133,9 @@ public class GameManager
                     GameEvents.RaiseLevelUp(Level);
                 }
 
-                if (leveled && Managers.Game.Player != null)
-                    Managers.Resource.Instantiate("LevelUp", Managers.Game.Player.transform);
+                // 불기둥·소리는 맵 위에서 — 전투 중이면 전투창이 닫힌 뒤에 튼다(ObjectManager.ShowLevelUp).
+                if (leveled)
+                    Managers.Object.ShowLevelUp();
             }
         }
         //public float MaxHP { get; set; }
@@ -379,11 +380,13 @@ public class GameManager
     /// <summary>
     /// 보스 층의 위층 계단은 그 층 보스를 잡기 전까지 잠근다 — "순서" 설계의 핵심 관문.
     ///
-    /// 건드리는 것은 생성된 보스 층의 UpStairs 뿐이다:
+    /// 건드리는 것은 보스 층의 UpStairs 뿐이다:
     ///   - 보스방 입구(id 16)는 절대 끄지 않는다. 껐다가 다시 켜주는 곳이 없어서
     ///     킹슬라임 보스방에 영영 못 들어가고 3층에서 진행이 막혔다.
-    ///   - 손수 만든 1~4층은 기존 연출(BossOnDeadAction -> Unlock4Floor)이 처리한다.
-    ///     그 프리팹의 보스는 _monsterIndex_forActive 가 구워져 있지 않아 여기서 판정할 수 없다.
+    ///   - 손수 만든 4층(킹 슬라임)도 여기서 잠근다. 예전에는 1~4층을 건너뛰었는데, 그 층 계단을 끄던 옛 줄
+    ///     (GenerateMap 의 "Portals 마지막 끄기")이 챕터 확장 때 이 함수로 바뀌면서 4층을 끄는 곳이 사라졌다 —
+    ///     킹 슬라임을 옆으로 돌아 5층으로 올라갈 수 있었다. 지금은 킹 슬라임(BindKingSlime)도 분열 슬라임
+    ///     (SpawnSplitSlime)도 활성 번호를 받으니 IsBossAlive 가 판정한다.
     /// </summary>
     public void RefreshBossGates()
     {
@@ -392,7 +395,7 @@ public class GameManager
             Data.StageInfoData info;
             if (Managers.Data.StageInfoDic.TryGetValue(pair.Key, out info) == false)
                 continue;
-            if (info.Type != Define.DungeonType.Boss || MapBuilder.IsHandAuthored(info.DungeonID))
+            if (info.Type != Define.DungeonType.Boss)
                 continue;
 
             bool bossAlive = IsBossAlive(pair.Value);
@@ -460,18 +463,20 @@ public class GameManager
         }
     }
 
+    /// <summary>보스가 하나라도 살아 있는가. 4층은 킹 슬라임(Boss 태그)에 더해, 그가 쓰러지면 연출이 세우는 분열 슬라임
+    /// 셋(태그 없는 BossMonsterController)까지 다 잡아야 열린다. 분열 슬라임은 맵 데이터에 없어 불러온 판에는 다시 서지
+    /// 않는다 — 그때는 없으니 킹 슬라임만 보고 연다(못 잡을 상대 때문에 갇히지 않는다).</summary>
     static bool IsBossAlive(GameObject map)
     {
         foreach (MonsterController mc in map.GetComponentsInChildren<MonsterController>(true))
         {
-            if (mc.CompareTag("Boss") == false)
+            if (mc.CompareTag("Boss") == false && (mc is BossMonsterController) == false)
                 continue;
             bool alive;
-            if (Managers.Data.MonsterActiveDic.TryGetValue(mc._monsterIndex_forActive, out alive) == false)
+            if (Managers.Data.MonsterActiveDic.TryGetValue(mc._monsterIndex_forActive, out alive) == false || alive)
                 return true;   // 모르면 잠가 둔다
-            return alive;
         }
-        return false;          // 보스가 없는 층은 잠그지 않는다
+        return false;          // 보스가 없는(다 잡은) 층은 잠그지 않는다
     }
 
     /// <summary>

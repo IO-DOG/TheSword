@@ -41,6 +41,8 @@ public class UI_PlayerCard : UI_BaseCard
 
     public override void Refresh()
     {
+        if (Quiet)
+            return;
         base.Refresh();
         SetUI();
     }
@@ -71,7 +73,9 @@ public class UI_PlayerCard : UI_BaseCard
         CreatePlayerAttackParticle();
         CreateMonsterHitParticle();
 
-        Managers.Sound.Play(Define.Sound.Effect, "HeroAttack0_SFX");
+        // 치명타는 전투창(UI_BattlePopup.Crit)이 제 소리를 낸다. 여기서도 내면 효과음 소스가 하나라 둘이 나중 것의 높이로 겹친다.
+        if (critical == false)
+            Managers.Sound.PlayByGameSpeed(Define.Sound.Effect, "HeroAttack0_SFX");
     }
 
     public override void Defence()
@@ -83,10 +87,13 @@ public class UI_PlayerCard : UI_BaseCard
 
     public override void ClearDefence()
     {
-        Managers.Sound.Play(Define.Sound.Effect, "Defense_SFX");
+        if (Quiet == false)
+        {
+            Managers.Sound.PlayByGameSpeed(Define.Sound.Effect, "Defense_SFX");
 
-        StartCoroutine(CoStartShieldFX());
-        StartCoroutine(CoDefenceMat());
+            StartCoroutine(CoStartShieldFX());
+            StartCoroutine(CoDefenceMat());
+        }
 
         // 플레이어의 방어 게이지는 GameManager 에 있다 (전투 사이에 이어진다).
         // 부모는 자기 게이지만 지우므로 이 몫은 여기서 지운다.
@@ -166,6 +173,8 @@ public class UI_PlayerCard : UI_BaseCard
 
     public override void StartDamagedMat()
     {
+        if (Quiet)
+            return;
         StartCoroutine(CoDamagedMat());
     }
 

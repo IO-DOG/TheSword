@@ -130,6 +130,23 @@
 287,금고,Vault,金庫,金库
 288,갈 층을 누르세요   Tab / Esc 닫기,Click a floor   Tab / Esc to close,行く階をクリック   Tab / Esc 閉じる,点击要去的楼层   Tab / Esc 关闭
 300,방향키로 고른 뒤 Enter,Pick with the arrow keys then press Enter,方向キーで選んでからEnter,用方向键选择后按Enter
+350,전투 속도,Battle speed,戦闘速度,战斗速度
+351,{0}배속,{0}x,{0}倍速,{0}倍速
+352,Space 길게: 8배속,Hold Space: 8x speed,Space 長押し: 8倍速,按住 Space: 8倍速
+353,Tab: 건너뛰기,Tab: Skip,Tab: スキップ,Tab: 跳过
+354,체력 -{0},HP -{0},体力 -{0},生命 -{0}
+355,예측 -{0},Forecast -{0},予測 -{0},预测 -{0}
+356,이제 Tab 으로 전투를 건너뛸 수 있습니다. 결과는 예측 그대로입니다.,You can now skip fights with Tab. The result is exactly the forecast.,Tabで戦闘をスキップできます。結果は予測どおりです。,现在可以按 Tab 跳过战斗。结果与预测完全一致。
+380,등골이 서늘하다. 지금은 이길 수 없을 것 같다. 그래도 싸울까?,A chill runs down my spine. I don't think I can win this yet. Fight anyway?,背筋が冷たくなる。今はまだ勝てそうにない。それでも戦うか?,脊背一阵发凉。现在恐怕还赢不了。还要战斗吗?
+381,Tab 길게: 건너뛰기,Hold Tab: skip,Tab長押し: スキップ,长按Tab: 跳过
+382,Tab: 건너뛰기 (본 장면),Tab: skip (seen),Tab: スキップ (既読),Tab: 跳过 (已读)
+410,공격 +{0},ATK +{0},攻撃 +{0},攻击 +{0}
+411,방어 +{0},DEF +{0},防御 +{0},防御 +{0}
+412,최대 체력 +{0},Max HP +{0},最大体力 +{0},最大生命 +{0}
+413,변화 없음,no change,変化なし,没有变化
+414,{0}이면 {1}→{2},With {0}: {1}→{2},{0} なら {1}→{2},{0} 时 {1}→{2}
+415,(넘침 {0}),({0} wasted),({0} 無駄),(溢出 {0})
+440,결말 {0}/{1},Endings {0}/{1},エンディング {0}/{1},结局 {0}/{1}
 4000,워프석 반지,Warpstone Ring,ワープ石の指輪,传送石戒指
 4001,"안쪽에 '렌에게. 해 지기 전에.'라고 새겨진 반지.\n다녀온 층이라면 그 층의 문턱, 처음 발을 들인 자리로 곧장 돌아간다.","A ring engraved inside: 'To Ren. Before sundown.'\nIt takes you straight back to the threshold of any floor you've visited, the spot where you first set foot.",内側に「レンへ。日暮れまでに。」と刻まれた指輪。\n行ったことのある階なら、その階の敷居――最初に足を踏み入れた場所へすぐに戻れる。,内侧刻着“给伦。日落之前。”的戒指。\n只要是去过的楼层，就能直接回到那层的门槛——最初踏入的地方。
 4002,레인저 부츠,Ranger Boots,レンジャーブーツ,游侠之靴
@@ -1684,396 +1701,393 @@
 301200,숲을 빠져나오자^ 그것이 보였다.\n마을 한가운데 거꾸로 꽂힌 검은 탑.,Past the forest^ it came into view:\na black tower^ planted upside down\nin the heart of the village.,森を抜けると、それが見えた。\n村の真ん中に逆さに突き立つ、黒い塔。,一走出森林，就看见了它。\n一座倒插在村子正中的黑塔。
 301201,십이 년 전 어느 밤^\n탑은 하늘에서 머리부터 떨어졌다.,One night twelve years ago^\nthe Tower fell from the sky^ head first.,十二年前のある夜、\n塔は空から真っ逆さまに落ちてきた。,十二年前的一个夜里，\n塔从天上头朝下坠落。
 301202,탑 밑동에는 무덤이 늘어서 있었다.\n십자가 사이사이^ 칼이 꽂혀 있었다.,Graves lined the foot of the Tower.\nBlades stood planted among the crosses.,塔の根元には、墓が並んでいた。\n十字架の合間に、剣が突き立っていた。,塔脚下，排列着一座座坟墓。\n十字架之间，插着一把把剑。
-301203,그 위로 꽂힌 탑도\n거대한 칼 한 자루 같았다.,Planted above them^ the Tower itself\nlooked like one enormous blade.,その上に突き立つ塔もまた、\n巨大な一振りの剣のようだった。,坟墓上方倒插着的塔，\n也像一把巨大的剑。
-301240,…또 한 사람 왔구려.\n……그 칼은…,…So. Another one has come.\n……That blade…,…また一人、来なすったか。\n……その剣は…,……又来了一个啊。\n……那把剑……
-301241,…아니^ 잘못 봤소.\n늙으면 헛것이 보이는 법이오.,…No. I was mistaken.\nOld eyes see things that aren't there.,…いや、見間違いじゃ。\n年を取ると、まぼろしが見えるものでな。,……不，是老夫看错了。\n人老了，总会看见些虚影。
-301242,칼 꽂힌 무덤이 많네요.,Many graves here have swords in them.,剣の刺さった墓が多いですね。,插着剑的坟，可真多啊。
-301243,탑에 들어간 이들 몫이오.\n가브에선 전사의 무덤에\n그가 쓰던 칼을 꽂지.,For those who went into the Tower.\nIn Gabu^ a warrior's grave\nbears the blade he carried.,塔に入った者たちのものじゃ。\nガブでは、戦士の墓に\nその者が使っていた剣を突き立てるのじゃ。,是进了塔的那些人的。\n在加布，战士的坟上\n要插上他用过的剑。
-301244,사람은 안 돌아오오.\n칼만 탑이 뱉어 내지.,People don't come back.\nThe Tower spits out only their blades.,人は戻ってこん。\n剣だけを、塔が吐き出すのじゃ。,人是回不来的。\n只有剑，会被塔吐出来。
-301245,…음냐… 칼?\n칼 냄새… 몇 자루냐…,…*mumble*… Blades?\nSmells like blades… how many…,…むにゃ…剣？\n剣の匂い…何振りだ…,……呼噜……剑？\n剑的味道……有几把……
-301246,무덤이야. 먹지 마.,It's a grave. Don't eat it.,墓だ。食うな。,是坟。别吃。
-301247,아들놈 렌도 들어갔소.\n해 지기 전에 온다더니.,My boy Ren went in too.\nSaid he'd be back before sundown.,せがれのレンも入った。\n日暮れまでに帰ると言うておったが。,我家那小子伦，也进去了。\n说好日落之前回来……
-301248,무덤은 내가 파오.\n하나만 비어 있지.\n…주인이 아직 안 와서.,I dig the graves myself.\nOnly one stands empty.\n…Its owner hasn't come yet.,墓はわしが掘る。\nひとつだけ、空いておる。\n…主がまだ来んのでな。,坟是老夫挖的。\n只有一座是空的。\n……主人还没来。
-301249,이름은 묻지 않겠소.\n알면 비석에 새겨야 하니까.\n돌아오면^ 그때 묻지.,I won't ask your name.\nI'd only have to carve it in stone.\nWhen you come back^ I'll ask then.,名は聞かんでおこう。\n知れば、墓石に刻まねばならん。\n戻ってきたら、その時に聞こう。,名字，老夫就不问了。\n知道了，就得刻上墓碑。\n等你回来，再问吧。
-301250,탑 안에서 누가\n달콤한 말을 하거든^\n값을 먼저 물어보시오.,If anyone in the Tower\nspeaks sweet words to you^\nask the price first.,塔の中で誰かが\n甘いことを言うてきたら、\nまず値段を聞きなされ。,在塔里，若有谁\n对你说甜言蜜语，\n先问问价码。
-301251,값은 늘 먼저 물어요.,I always ask the price first.,値段は、いつも先に聞きます。,价码，我一向都先问的。
-301280,계단을 올랐는데 흙냄새가 짙다.\n귀도 먹먹하고.,Climbed up^ but it smells more of earth.\nEars feel plugged^ too.,階段を上ったのに、土の匂いが濃い。\n耳も、詰まったみたいだ。,明明是上楼，泥土味却更重了。\n耳朵也闷闷的。
-301281,잎이 머리 위에서 떨어진다.\n숲은 발밑에 두고 왔는데.\n…이 탑^ 거꾸로구나.,Leaves falling from overhead.\nBut I left the forest under my feet.\n…This Tower's upside down.,葉が頭の上から落ちてくる。\n森は足の下に置いてきたのに。\n…この塔、逆さまなんだな。,叶子从头顶上落下来。\n森林明明留在脚下了。\n……这座塔，是倒着的啊。
-301282,탑 안에선\n탑이 정한 쪽이 위다.,In the Tower^\nup is where the Tower says.,塔の中では、\n塔が決めた方が上だ。,在塔里，\n塔定的那一边就是上。
-301283,…잘 아는군.,…You seem to know it well.,…よく知ってるんだな。,……你知道得真清楚。
-301284,크하핫! 이몸을 뭘로 보고.\n…그나저나 이 냄새^\n어디서 맡았더라.,Kahaha! Who do you take me for?\n…Still^ this smell…\nwhere have I smelled it before?,クハハッ！我輩を誰だと思っている。\n…それにしてもこの匂い、\nどこで嗅いだのだったか。,咔哈哈！把本大爷当什么了。\n……话说这股味道，\n在哪儿闻过来着。
-301320,방패를 든 채 싸움을 열고^\n내려가도 금방 다시 드는 놈이다.\n방패 위론 평타 1^ 진심도 4분의 1.,Its shield is up when the fight opens^\nand back up fast whenever it drops.\nPlain hits: 1. Earnest cuts: a quarter.,盾を構えて戦いを始め、\n下ろしてもすぐ構え直す奴だ。\n盾越しなら通常攻撃は1、本気も4分の1。,这家伙举着盾开打，\n盾放下了，很快又会举起。\n盾上普通攻击算1，真格也只剩四分之一。
-301321,진심이 방패에 걸리면 손해네.\n숫자 보고 순서를 바꾸지.,An earnest cut on a shield is a waste.\nI'll read the numbers and reorder.,本気が盾に当たったら損だな。\n数字を見て、順番を変える。,真格撞上盾就亏了。\n看着数字换个顺序。
-301360,탑의 글자다! 삼키는 순간\n몸에 새겨져서 영영 안 빠진다.,The Tower's glyph! Once swallowed^\nit's carved into your body for good.,塔の文字だ！　飲み込んだ瞬間、\n体に刻まれて二度と抜けん。,是塔之文字！一吞下去，\n就刻进身体，永远不掉。
-301361,공격 한 점이라…\n티도 안 나겠는데.,One point of attack…\nWon't even notice it.,攻撃が一点上がるだけか…\n大差なさそうだけどな。,攻击才一点……\n根本看不出来吧。
-301362,층마다 같은 놈이 셋이다.\n한 점이 세 번 값을 한다.\n방어도^ 체력도 돌아가며 나온다.,Each floor sets three of the same kind.\nOne point pays off three times.\nDefense and health come round in turn.,どの階にも、同じ奴が三匹いる。\nその一点が、三度効く。\n防御も体力も、順繰りに出てくる。,每层都有三个一样的家伙。\n一点就抵得上三回价码。\n防御和生命，也会轮流出现。
-301400,크하핫! 먹은 걸 조금 나눠 줬다.\n계약대로다.,Kahaha! I shared a bit of what I ate.\nAs the contract says.,クハハッ！食った分を少し分けてやった。\n契約どおりだ。,咔哈哈！吃下的分了你一点。\n照契约办。
-301401,클수록 뒤가 다 싸진다.\n비싼 놈은 나중에 사고^\n먹을 수 있을 때 먹어 둬라.,The more you grow^ the cheaper the rest.\nBuy the pricey ones later^\nand eat while you can.,大きくなるほど、先がみな安くなる。\n高い奴は後回しだ。\n食えるときに食っておけ。,长得越大，后面的就越便宜。\n贵的留到后面再买，\n能吃的时候就先吃。
-301402,그래서^ 좀 컸어?,So. Have I grown any?,で、少しは大きくなったのか？,所以，你长大点了没？
-301403,…아직 멀었다.,…A long way yet.,…まだまだだ。,……还差得远。
-301440,여분 열쇠다. 안 쓰면 다음 층까지 간다.,A spare key. If unused^ it carries over.,予備の鍵だ。使わねば次の階へ持ち越す。,是备用钥匙。不用就带到下一层。
-301480,열쇠가 없다. 구역마다 다음 문 열쇠가 있다.,No key. Every zone holds the next key.,鍵がない。区画ごとに次の扉の鍵がある。,没钥匙。每个区域都有下一扇门的钥匙。
-301520,숫자 대신 빨간 가위표가 떴다.\n값이 아니다. 목숨이다.,A red X instead of a number.\nThat's not a price. It's your life.,数字の代わりに赤いバツが出た。\n値段ではない。命だ。,浮起来的不是数字，是红叉。\n那不是价码。是命。
-301521,지금 가진 걸로는 못 산다.\n커서 오든지^ 물약을 밟고 오든지^\n다른 놈부터 사라.,What you have now can't buy this.\nCome back grown^ or after a potion^\nor buy a different one first.,今の手持ちでは買えん。\n大きくなるか、ポーションを踏んで来い。\nでなければ、他の奴から先に買え。,凭你现在的本钱，买不起。\n要么长大了再来，要么踩了药水再来，\n要么先买别的家伙。
-301522,…알았어.,…Got it.,…わかった。,……知道了。
-301560,넘친 만큼은 버려졌다.,What overflowed went to waste.,溢れた分は、捨てられた。,溢出的部分，被丢弃了。
-301561,아깝네.,Pity.,もったいないな。,真可惜。
-301562,물약은 싸운 다음에 밟아라.\n빈 그릇에 부어야 남는다.,Step on potions after you fight.\nOnly an empty bowl keeps what's poured.,ポーションは戦ったあとに踏め。\n空の器に注いでこそ、残る。,药水要打完再踩。\n倒进空碗里，才留得住。
-301600,네 번째 문이다. 길이 아니라 금고다.\n안에 탑의 글자가 있다.,A fourth door. Not a path^ but a vault.\nThe Tower's glyph lies inside.,四つ目の扉だ。道ではない、金庫だ。\n中に塔の文字がある。,第四扇门。不是路，是金库。\n里面有塔之文字。
-301601,같은 색 열쇠가 남았으면 열린다.\n열쇠는 층을 넘어 들고 다닌다.,A leftover key of its color opens it.\nKeys carry over from floor to floor.,同じ色の鍵が残っていれば開く。\n鍵は階をまたいで持ち歩ける。,有同色的钥匙剩着，就能打开。\n钥匙可以带着跨过楼层。
-301602,탑 전체로 치면 금고가\n남는 열쇠보다 많다. 다는 못 연다.,In the whole Tower^ vaults outnumber\nleftover keys. You can't open them all.,塔全体で見れば、金庫は\n余る鍵より多い。全部は開けられん。,整座塔算下来，金库\n比剩下的钥匙多。开不完的。
-301603,금고마다 든 글자가 돌아가며 바뀐다.,The glyph changes from vault to vault.,金庫ごとに、中の文字は順繰りに変わる。,每个金库里的文字，都会轮流换。
-301604,지금 열지^ 아껴 둘지…\n그건 내가 셀게.,Open it now^ or save the key…\nI'll do that math myself.,今開けるか、取っておくか…\nそれは俺が数える。,现在开，还是留着……\n这个我自己来算。
-301640,물약이냐 탑의 글자냐^ 둘 중 하나다.\n하나를 집으면 다른 쪽은 사라진다.,Potion or the Tower's glyph: pick one.\nTake one^ and the other vanishes.,ポーションか塔の文字か、二つに一つだ。\n片方を取れば、もう片方は消える。,药水还是塔之文字，二选一。\n拿了一个，另一个就会消失。
-301641,둘 다는?,Both?,両方は？,两个都要呢？
-301642,안 된다. 먼저 집은 쪽만 남는다.,No. Only what you take first remains.,ならん。先に取った方だけが残る。,不行。只留先拿的那个。
-301643,…모자란 쪽을 고르지.,…Then I'll take whatever I'm short on.,…足りない方を選ぶ。,……那就挑缺的那样。
-301680,…방금^ 무릎 꿇은 내 옆에\n네가 꽂혀 있었지.\n꼭 무덤 같더군.,…Just now^ I was on my knees\nand you were planted beside me.\nLooked just like a grave.,…さっき、膝をついた俺の横に\nお前が突き立っていたな。\nまるで墓みたいだった。,……刚才，跪倒的我身旁\n插着你。\n就像一座坟。
-301681,무덤은 무슨.\n네 목숨은 이몸 거다.\n이몸 허락 없이는 못 죽는다.,Grave? Nonsense.\nYour life is mine.\nYou shall not die without my leave.,墓なものか。\nお前の命は我輩のものだ。\n我輩の許しなしには死ねん。,什么坟不坟的。\n你的命是本大爷的。\n没有本大爷允许，你死不了。
-301682,이 층 문턱으로 끌어올렸다.\n몸도 층도 들어설 때 그대로다.,I hauled you up to the threshold.\nBody and floor^ as when you entered.,この階の敷居まで引き上げた。\n体も階も、踏み入った時のままだ。,本大爷把你拽回了这层的门槛。\n身体和楼层，都跟刚进来时一样。
-301683,(메뉴에서 몇 층 전으로\n되돌릴 수도 있다.),(From the menu^ you can also\ngo back several floors.),（メニューから、何階か前に\n戻ることもできる。）,（也可以在菜单里\n退回到几层之前。）
-301720,크하핫! 탑에서 살아남는 법을\n하나 가르쳐 주마^ 허접.,Kahaha! Let me teach you\nhow to survive the Tower^ Two-bit.,クハハッ！塔で生き残る術を\nひとつ教えてやろう、ヘボ。,咔哈哈！本大爷教你\n在塔里活下去的法子，三流。
-301721,배고픈 놈은 먹히고^\n배부른 놈이 먹는다!,The hungry get eaten^\nand the full do the eating!,腹を空かせた奴は食われ、\n満腹の奴が食う！,饿着的会被吃掉，\n吃饱的才能去吃！
-301722,넌 어느 쪽인데?,Which one are you?,お前はどっちなんだ？,那你是哪边的？
-301723,이몸? …늘 배고프지.,This blade? …Always hungry.,我輩か？　…いつも腹が減っている。,本大爷？……一直都饿着。
-301724,그럼 먹히는 쪽이네.,Then you're the one getting eaten.,じゃあ、食われる側だな。,那就是被吃的那边。
-301725,이^ 이몸은 먹는 쪽이다!\n배가 고플 뿐이지!,Th-this blade does the eating!\nI'm only hungry^ that's all!,わ、我輩は食う側だ！\n腹が減っているだけだ！,本、本大爷是吃的那边！\n只是肚子饿而已！
-301760,…해 지기 전에… 간다며…,…Home… before sundown… you said…,…日暮れまでに…帰るって…,……不是说……日落之前……回去吗……
-301761,……,……,……,……
-301762,…누가?,…Who did?,…誰が？,……谁？
-301763,뭐^ 뭐냐!\n이몸은 눈 뜨고 잔다!,Wh-what?!\nI sleep with my eye open!,な、なんだ！\n我輩は目を開けて寝るのだ！,干、干什么！\n本大爷是睁着眼睡的！
-301764,그러니까 잤다는 거잖아.\n…잠꾸러기.,So you admit you were asleep.\n…Sleepyhead.,つまり寝てたってことだろ。\n…寝ぼすけ。,所以就是睡着了嘛。\n……瞌睡虫。
-301765,잠꾸러기?!\n마검한테 그게 할 소리냐!,Sleepyhead?!\nIs that how you speak to a demon sword?!,寝ぼすけだと？！\n魔剣に向かって言うことか！,瞌睡虫？！\n这是对魔剑说的话吗！
-301800,이 층 끝에서 짐승 냄새가 난다.\n죽지 않고 1할 이하로 떨어지면\n딱 한 번^ 몸 4할을 채우고 일어선다.,I smell a beast at this floor's end.\nIf it falls under a tenth and lives^\nit rises once^ with four tenths back.,この階の奥から、獣の匂いがする。\n死なずに一割を切ると、\n一度だけ、体の四割を満たして起き上がる。,这层尽头有野兽的味道。\n要是没死透，掉到一成以下，\n就会补回四成，再站起来一次。
-301801,그 몫까지 숫자에 들어 있고?,And that's already in the number?,その分も、数字に入ってるのか？,那份也算在数字里了？
-301802,당연하지. 이몸 눈이다.\n대신 1할 턱밑에서 강타 한 방에\n끝내면 일어설 틈이 없다.,Naturally. My eye misses nothing.\nSave Smash for just above a tenth:\none blow^ and it never rises.,当然だ。我輩の目だぞ。\nだが一割の手前で、強打一発で\n仕留めれば、起き上がる隙もない。,当然。这可是本大爷的眼睛。\n不过，逼近一成时用强击\n一下了结，它就没机会站起来。
-301840,…또… 너냐.,…You… again.,…また…お前か。,……又……是你。
-301841,아는 놈이야?,Someone you know?,知り合いか？,你认识？
-301842,마물 따위가\n이몸을 알 리 없다.,No mere monster\ncould know me.,魔物ごときが\n我輩を知るはずがない。,区区魔物，\n不可能认识本大爷。
-301843,…해가… 진다…\n…가야 하는데…,…The sun… is setting…\n…I have to go…,…日が…暮れる…\n…帰らなきゃ…,……太阳……要落了……\n……得回去……
-301844,…얼마?,…How much?,…いくらだ？,……多少？
-301845,머리 위에 떠 있잖나.\n크하핫! 저녁밥이다^ 허접!,It's floating right over its head.\nKahaha! Supper time^ Two-bit!,頭の上に浮かんでいるだろうが。\nクハハッ！晩飯だ、ヘボ！,不就浮在头顶上嘛。\n咔哈哈！晚饭来了，三流！
-301880,…해 지기 전에…\n간다고… 했는데…,…Before sundown…\nI said… I'd go home…,…日暮れまでに…\n帰るって…言ったのに…,……说好了……\n日落之前……回去的……
-301881,늑대가 쓰러진 자리에\n목에 걸려 있던 반지가 굴렀다.,Where the wolf fell^\nthe ring from its neck rolled free.,狼が倒れた場所に、\n首にかけていた指輪が転がった。,狼倒下的地方，\n滚出一枚原本挂在它脖子上的戒指。
-301882,……이 목소리.\n들은 적이 있다.,……That voice.\nI've heard it before.,……この声。\n聞いたことがある。,……这个声音。\n本大爷听过。
-301883,마물 따위가 널 알 리 없다며.,You said no mere monster could know you.,魔物ごときが、お前を知るはずないんだろ。,不是说区区魔物不可能认识你吗。
-301884,…마물이 아니었다.\n탑은 쓰러진 자를 마물 꼴로 빚어\n문지기로 세운다.,…It wasn't a monster.\nThe Tower molds the fallen into monsters\nand stands them up as gatekeepers.,…魔物ではなかった。\n塔は倒れた者を魔物の姿に作り変え、\n門番に据えるのだ。,……那不是魔物。\n塔会把倒下的人塑成魔物的样子，\n立在门口看门。
-301885,…그런 걸 어떻게 알아?,…How do you know that?,…なんでそんなことを知ってる？,……这种事你怎么知道？
-301886,…모른다. 입이 안다.,…I don't know. My mouth does.,…知らん。口が知っている。,……不知道。嘴知道。
-301887,……허접 모험가.\n넌 해 지기 전에 돌아갈 데 있나?,……Two-bit adventurer.\nHave you anywhere to go back to\nbefore sundown?,……ヘボ冒険者。\nお前には、日暮れまでに帰る場所があるか？,……三流冒险者。\n日落之前，你有地方可回吗？
-301888,없어.,Nowhere.,ない。,没有。
-301889,…이몸도 없다.,…Nor have I.,…我輩もない。,……本大爷也没有。
-301920,반지 안쪽에 글자가 있군.,There's writing inside the ring.,指輪の内側に、文字があるな。,戒指内侧刻着字。
-301921,렌에게. 해 지기 전에.,To Ren. Before sundown.,レンへ。日暮れまでに。,给伦。日落之前。
-301922,렌… 촌장 아들 이름이었지.,Ren… That was the chief's son.,レン…村長の息子の名前だったな。,伦……是村长儿子的名字吧。
-301923,……다녀온 층이면 어디든\n그 층 문턱으로 데려다주는 반지다.,……Any floor you've already been to^\nthis ring takes you to its threshold.,……行ったことのある階なら、どこでも\nその階の敷居へ連れていく指輪だ。,……只要是去过的楼层，\n它都能送你到那层的门槛。
-301924,아래층에 못 연 금고가 있거든\n남은 열쇠 들고 돌아가도 된다.,Left a vault unopened down below?\nGo back with your leftover keys.,下の階に開けそびれた金庫があれば、\n残った鍵を持って戻ってもいい。,下面的楼层要是有没开的金库，\n可以带着剩下的钥匙回去。
-301960,…물이 위에서 떨어진다.\n우린 땅속으로 가는 중인데.,…Water's dripping from above.\nAnd we're heading underground.,…水が上から落ちてくる。\n俺たちは地の底へ向かってるのに。,……水从上面滴下来。\n我们明明是在往地底下走。
-301961,퉤^ 퉤! 날에 물 튄다!\n녹슬면 네가 닦아라^ 허접.,Ptoo^ ptoo! Water on my blade!\nIf I rust^ you're polishing me^ Two-bit.,ペッ、ペッ！刃に水がはねる！\n錆びたら、お前が磨け、ヘボ。,呸、呸！水溅到剑刃上了！\n生锈了你来擦，三流。
-301962,그리고 말했잖나.\n탑 안에선 탑이 정한 쪽이 위다.,And as I told you:\nin the Tower^ up is\nwhere the Tower says.,それに、言ったであろう。\n塔の中では、塔が決めた方が上だ。,还有，本大爷说过吧。\n在塔里，塔定的那一边就是上。
-301963,그럼 탑은\n어디를 위라고 정한 거야?,Then which way\nhas the Tower decided is up?,じゃあ塔は、\nどこを上と決めたんだ？,那这座塔，\n把哪边定成了上？
-301964,……,……,……,……
-301965,…모른다.,…I don't know.,…知らん。,……不知道。
-302000,남들 한 번 벨 때 두 번 베는 놈이다.\n대신 한 대 한 대는 가볍다.,It cuts twice while others cut once.\nBut every blow is light.,他が一度斬る間に、二度斬る奴だ。\nその代わり、一撃一撃は軽い。,别人砍一下，它砍两下。\n不过每一下都很轻。
-302001,그럼 방어 한 점이 두 번 막는 거지.\n방어 룬이 여기서 제값을 하겠어.,So one point of defense blocks twice.\nDefense runes will earn their keep here.,なら、防御一点が二度防ぐってことだな。\n防御のルーンは、ここで値打ちが出るな。,那一点防御就能挡两次。\n防御符文在这儿物有所值。
-302040,…음냐…,…*mumble*…,…むにゃ…,……呼噜……
-302041,…세드릭…\n문 열어…,…Cedric…\nopen the door…,…セドリック…\n扉を開けろ…,……塞德里克……\n开门……
-302042,세드릭?,Cedric?,セドリック？,塞德里克？
-302043,뭐^ 뭐냐! 꿈이다^ 꿈!,Wh-what?! A dream! Just a dream!,な、なんだ！夢だ、夢！,干、干什么！是梦，是梦！
-302044,잠꾸러기.\n꿈에서도 문 타령이냐.,Sleepyhead.\nDoors^ even in your dreams?,寝ぼすけ。\n夢の中まで扉の話かよ。,瞌睡虫。\n做梦都在念叨门啊。
-302045,시끄럽다!\n이몸 꿈은 이몸 거다!,Silence!\nMy dreams are my own affair!,やかましい！\n我輩の夢は我輩のものだ！,吵死了！\n本大爷的梦是本大爷的！
-302080,얼마?,How much?,いくらだ？,多少？
-302081,…너 요즘\n숫자 안 보더라.,…You haven't been\nchecking the numbers lately.,…お前、近ごろ\n数字を見ていないな。,……你最近\n都不看数字了啊。
-302082,네가 보잖아.,You do the looking.,お前が見てるだろ。,有你看着嘛。
-302083,……!,……!,……！,……！
-302084,크하핫! 당연하지.\n이몸 눈이다!,Kahaha! Naturally!\nMy eye misses nothing!,クハハッ！当然だ。\n我輩の目だからな！,咔哈哈！那当然。\n这可是本大爷的眼睛！
-302085,…흥. 그래도 가끔은 봐라.\n아직 멀었으니까.,…Hmph. Look now and then anyway.\nA long way yet.,…ふん。それでも、たまには見ろ。\nまだまだだからな。,……哼。不过偶尔也看看。\n还差得远呢。
-302120,다섯 층만 더 오르면\n물길이 끝난다. 그다음은 뜨겁다.,Five more floors up\nand the waterway ends. Then it gets hot.,あと五階上れば、\n水路は終わる。その先は熱いぞ。,再上五层，\n水道就到头了。之后会很热。
-302121,각오해라^ 허접 모험가.\n이몸은 안 녹지만^ 넌 녹는다.,Brace yourself^ two-bit adventurer.\nThis blade does not melt. You do.,覚悟しておけ、ヘボ冒険者。\n我輩は溶けんが、お前は溶ける。,做好准备，三流冒险者。\n本大爷化不了，你可会化。
-302122,…너^ 이 탑 알지?,…You know this Tower^ don't you?,…お前、この塔を知ってるだろ。,……你，认得这座塔吧？
-302123,마^ 마검은 원래 다 안다!,D-demon swords know everything!,ま、魔剣はもともと何でも知っているのだ！,魔、魔剑本来就无所不知！
-302124,(…탑 얘긴 처음 듣는 척하더니.),(…Yet it acted like the Tower was news.),（…塔の話は初耳って顔してたくせに。）,（……之前还装作头一回听说这座塔。）
-302160,기록한다.\n침입자 하나. 눈 달린 검 하나.,For the record.\nOne intruder. One sword with an eye.,記録する。\n侵入者、一名。目のある剣、一振り。,记录。\n入侵者一名。带眼睛的剑一把。
-302161,…왕국 조사관 브람이다.\n보고를 올려야 하는데.,…Royal Investigator Bram.\nReport still pending.,…王国調査官、ブラムだ。\n報告を上げねばならんのだが。,……王国调查官，布拉姆。\n报告还没呈上去。
-302162,…이번엔 고블린이네.\n이놈도 사람이었던 거지?,…A goblin this time.\nThis one was a person too^ right?,…今度はゴブリンか。\nこいつも人間だったんだろ？,……这次是哥布林啊。\n这家伙以前也是人吧？
-302163,…그래. 늑대 때처럼\n탑이 다시 빚었다.,…Yes. Like the wolf^\nthe Tower remade him.,…ああ。狼の時と同じだ。\n塔が作り変えた。,……嗯。跟那头狼一样，\n是塔重新塑成的。
-302164,브람…\n의뢰서 끝에 적힌 이름이군.,Bram…\nThe name signed on the request slip.,ブラム…\n依頼書の末尾にあった名前か。,布拉姆……\n原来是委托书末尾写的名字。
-302165,그 의뢰가 아직도 걸려 있었나.\n…내 보고가 없으니 그렇겠지.,That request is still posted?\n…Of course. My report never came.,あの依頼が、まだ貼られていたか。\n…私の報告がないのだ。当然だな。,那份委托还挂着吗。\n……没有我的报告，也难怪。
-302166,그 검한테 등 보이지 마라.\n…촌장 아들 다음이 나였다.,Never turn your back on that sword.\n…After the chief's son^ it was me.,その剣に背中を見せるな。\n…村長の息子の次が、私だった。,别把后背露给那把剑。\n……村长儿子之后，就是我。
-302167,헛소리 마라!,Nonsense!,たわごとを抜かすな！,少胡说八道！
-302200,방패는… 끝까지 안 내렸다.\n그래서… 여기 서 있지.,Never lowered… the shield. To the end.\nSo… here I stand.,盾は…最後まで下ろさなかった。\nだから…ここに立っている。,盾……到最后都没放下。\n所以……才站在这里。
-302201,…보고^ 끝.,…End of report.,…報告、以上。,……报告，完毕。
-302202,……그 방패^ 본 적 있다.\n늘 이몸 쪽을 향해 있었지.,……I've seen that shield before.\nIt was always turned toward me.,……あの盾、見たことがある。\nいつも我輩の方を向いていた。,……那面盾，本大爷见过。\n一直朝着本大爷这边。
-302203,…이몸은 전에도\n계약한 적이 있다.,…I have made contracts\nbefore.,…我輩は以前にも\n契約したことがある。,……本大爷以前\n也订过契约。
-302204,그놈들은?,And the ones before?,そいつらは？,那些人呢？
-302205,…기억이 안 난다.,…I don't remember.,…思い出せん。,……想不起来了。
-302206,그래.,Right.,そうか。,这样啊。
-302207,…그게 다냐?,…That's it?,…それだけか？,……就这样？
-302208,기억 안 난다며.,You said you don't remember.,思い出せないんだろ。,你不是说想不起来吗。
-302209,…흥. 저놈은 끝까지\n이몸을 안 믿었다. 멍청하긴.,…Hmph. To the very end^\nthat one never trusted me. Fool.,…ふん。あいつは最後まで\n我輩を信じなかった。愚か者め。,……哼。那家伙到最后\n都不信本大爷。真是蠢。
-302240,올라갈수록 뜨겁군.\n땅속으로 가고 있다는 거지.,The higher we go^ the hotter it gets.\nSo we are heading underground.,上るほど熱くなるな。\n地の底へ向かってるってことか。,越往上越热啊。\n说明是在往地底下走。
-302241,땅속인데\n해는 여기가 제일 높네.,We're underground^\nyet the sun's highest here.,地の底なのに、\n日はここがいちばん高いな。,明明在地底下，\n太阳却在这儿最高。
-302242,……해가 아니다.\n불빛이다.,……That's no sun.\nIt's firelight.,……日ではない。\n火の明かりだ。,……那不是太阳。\n是火光。
-302243,…이 냄새. 싫다.\n아니… 모르겠다.,…This smell. I hate it.\nNo… I don't know.,…この匂い。嫌だ。\nいや…わからん。,……这股味道。讨厌。\n不……说不上来。
-302280,때리는 족족 진심이다.\n대신 몸이 약하다.\n오래 끌면 죽는다.,Every hit it lands is in earnest.\nBut its body is frail.\nDrag it out^ and you die.,打つたびに本気だ。\nその代わり、体が弱い。\n長引かせれば死ぬぞ。,打出的每一下都是真格。\n不过身子弱。\n拖久了，死的是你。
-302281,그럼 강타로 일찍 끊어야겠네.,Then I'd better end it early with Smash.,なら、強打で早めに片をつけないとな。,那就得早点用强击了结。
-302320,다섯 대 맞을 때마다 운다.\n그 울음에 때린 쪽이 다친다.\n맷집도 좋다.,Every fifth hit it takes^ it roars.\nThe roar hurts whoever struck it.\nAnd it can take a beating.,五発殴られるたびに吠える。\nその声で、殴った側が傷を負う。\nしかも打たれ強い。,每挨五下就吼一声。\n那一吼，打它的会受伤。\n还很耐打。
-302321,한 대가 셀수록 덜 듣겠어.,The harder each hit^ the fewer roars.,一撃が重いほど、聞く回数も減るな。,一下越重，吼声就听得越少。
-302360,굶주림은\n굶주림으로만 묶인다.,Only hunger\ncan bind hunger.,飢えは、\n飢えでしか縛れない。,饥饿，\n只能用饥饿来束缚。
-302361,…뭐?,…What?,…何だって？,……什么？
-302362,…방금 이몸이\n뭐라고 했나?,…What did I\njust say?,…今、我輩は\n何と言った？,……本大爷刚才\n说了什么？
-302363,굶주림이 어쩌고.\n무슨 뜻이야?,Something about hunger.\nWhat's that mean?,飢えがどうとか。\nどういう意味だ？,什么饥饿不饥饿的。\n什么意思？
-302364,모른다.\n입이 먼저 움직였다.,I don't know.\nMy mouth moved first.,知らん。\n口が先に動いた。,不知道。\n嘴自己先动了。
-302400,…음냐… 요즘 이상하다.\n배가 좀 찬다.,…*mumble*… Something's odd lately.\nMy belly's filling up a bit.,…むにゃ…近ごろ妙だ。\n腹が少し満ちてきた。,……呼噜……最近怪怪的。\n肚子有点满了。
-302401,잘 먹였으니까.,I've fed you well.,よく食わせてやったからな。,我喂得好嘛。
-302402,크하핫! 그건 인정하마.\n…그런데 넌 왜 이 탑에 왔냐?,Kahaha! That I'll grant you.\n…But why did you come to this Tower?,クハハッ！それは認めてやろう。\n…ところで、お前はなぜこの塔に来た？,咔哈哈！这点本大爷承认。\n……话说你为什么来这座塔？
-302403,남들이 안 가져가는\n의뢰만 골라 왔어.,I only take the requests\nnobody else will.,誰も取らない\n依頼ばかり選んできた。,我一直只挑\n别人不接的委托。
-302404,남은 것끼리는…\n알아보거든.,Leftovers…\nknow their own.,売れ残り同士は…\nお互い、わかるんだ。,被剩下的……\n彼此认得出来。
-302405,……,……,……,……
-302406,그러고 보니\n넌 내 이름도 안 물었지.,Come to think of it^\nyou never even asked my name.,そういえば、\nお前、俺の名前も聞かなかったな。,说起来，\n你连我的名字都没问过。
-302407,필요 없다.\n허접 모험가면 충분하다.,No need.\n'Two-bit adventurer' is enough.,要らん。\nヘボ冒険者で十分だ。,用不着。\n叫三流冒险者就够了。
-302408,…싸게 치는군.,…You price me cheap.,…安く見られたもんだな。,……把我估得真便宜。
-302409,크하핫! 억울하면 더 커라.\n…아직 멀었다.,Kahaha! Don't like it? Grow bigger.\n…A long way yet.,クハハッ！悔しければ、もっと大きくなれ。\n…まだまだだ。,咔哈哈！不服就再长大点。\n……还差得远。
-302440,……,……,……,……
-302441,방금 그 눈^ 뭐였어.,What was that look just now?,今の目、何だ。,刚才那是什么眼神。
-302442,…배가 고파서 그렇다.,…I'm just hungry.,…腹が減っているだけだ。,……因为肚子饿。
-302443,저번엔 배가 찬다며.,Last time you said you were filling up.,前は、腹が満ちてきたって言ったろ。,上次不还说肚子满了。
-302444,…용광로라 그렇다.\n신경 쓰지 마라.,…It's the furnace.\nPay it no mind.,…溶鉱炉のせいだ。\n気にするな。,……因为是熔炉。\n别在意。
-302480,…또… 왔…어…,…You… came… again…,…また…来た…の…,……又……来……了……
-302481,…그… 검…,…That… sword…,…その…剣…,……那把……剑……
-302482,너한테 하는 말 같은데.,Sounds like it's talking to you.,お前に言ってるみたいだぞ。,好像是在跟你说话。
-302483,재가 말을 하는군.\n뭐라는지 모르겠다.,So the ash speaks.\nI can't make out a word.,灰がしゃべるとはな。\n何を言っているかわからん。,灰烬在说话啊。\n听不懂在说什么。
-302484,얼마?,How much?,いくらだ？,多少？
-302485,비싸다. 때리는 족족 진심이다.\n강타로 끊어라.,Expensive. Every hit is in earnest.\nEnd it with Smash.,高いぞ。打つたびに本気だ。\n強打で片をつけろ。,贵。每一下都是真格。\n用强击了结。
-302520,…네… 값…,…Your… price…,…あなたの…値段…,……你的……价码……
-302521,…왕좌… 비어…,…Throne… empty…,…玉座…空いて…,……王座……空着……
-302522,……!,……!,……！,……！
-302523,…또 너냐.,…You again.,…またお前か。,……又是你。
-302524,…다시는 나오지 마라.,…Never come back out.,…二度と出てくるな。,……别再出来了。
-302525,…저 재가 마지막에\n뭐라고 한 거야?,…What did that ash\nsay at the end?,…あの灰、最後に\n何て言ったんだ？,……那堆灰最后\n说了什么？
-302526,……,……,……,……
-302527,…녹이지 말라더군.\n녹이려다 그 꼴이 됐으니.,…It said not to try melting me.\nIt tried^ and ended up like that.,…溶かすな、だそうだ。\n溶かそうとして、あのざまだからな。,……它说，别想熔掉。\n它自己就是想熔，才落得那副样子。
-302528,값이라고 한 것 같은데.,Sounded like 'price' to me.,『値段』って聞こえたけどな。,好像说的是价码。
-302529,잘못 들었다.,You misheard.,聞き違いだ。,你听错了。
-302530,……,……,……,……
-302531,크^ 크하핫…\n배^ 배부르다. 잔다.,Ka… Kahaha…\nI-I'm full. Off to sleep.,ク、クハハッ…\nま、満腹だ。寝る。,咔、咔哈哈……\n饱、饱了。睡了。
-302560,용광로 다음엔 눈이군.\n해도 기울었고.\n불보다 깊은 데가 얼어 있네.,After the furnace^ snow.\nThe sun's sinking^ too.\nDeeper than the fire^ yet frozen.,溶鉱炉の次は雪か。\n日も傾いてる。\n火より深い所が、凍ってるんだな。,熔炉之后是雪啊。\n太阳也斜了。\n比火更深的地方，竟冻住了。
-302561,…춥군.,…Cold.,…寒いな。,……真冷。
-302562,안 졸려?\n예전 같으면 벌써 잤을 텐데.,Not sleepy?\nUsed to be^ you'd be asleep by now.,眠くないのか？\n前なら、とっくに寝てたろ。,不困？\n换作以前，早就睡着了。
-302563,…안 잔다.,…I won't sleep.,…眠らん。,……不睡。
-302600,…싫은 놈들이다.\n진심이 아니면 5분의 1만 닿는다.\n강타도 흡혈도 마찬가지다.,…Hateful things.\nOnly a fifth lands^ unless it's earnest.\nSame goes for Smash and Drain.,…嫌な奴らだ。\n本気でなければ、五分の一しか届かん。\n強打も吸血も同じだ。,……讨厌的家伙。\n不是真格，只能伤到五分之一。\n强击、吸血也一样。
-302601,숨을 맞춰서 도착하지.\n앞에서 순서를 짜 두고.,I'll arrive with the breaths lined up.\nPlan the order in the fights before.,息を合わせてたどり着く。\n手前で順番を組んでおいてな。,那就对准呼吸再过去。\n在前面先把顺序排好。
-302640,숨어 있는 동안엔 진심이 아니면\n다 피한다. 첫 진심에 모습을 드러낸다.\n강타도 그 전엔 헛손질이다.,Hidden^ it dodges anything not earnest.\nAn earnest cut makes it reveal itself.\nUntil then^ even Smash hits air.,潜んでいる間は、本気でなければ\nすべてかわす。最初の本気で姿を現す。\n強打も、それまでは空振りだ。,藏身的时候，不是真格\n全都闪开。第一下真格才会现形。\n在那之前，强击也是白打。
-302641,누굴 먼저 베느냐가 값이네.,So who I cut first sets the price.,誰を先に斬るかが、値段か。,先砍谁，决定价码啊。
-302680,요즘 안 자네.,You don't sleep these days.,近ごろ、寝ないな。,你最近都不睡了。
-302681,…잠이 안 온다.,…Sleep won't come.,…眠れんのだ。,……睡不着。
-302682,그럼 하나 묻자.\n수로에서 잠꼬대로 부른 이름.\n세드릭이 누구야?,Then let me ask.\nThat name you mumbled in the aqueduct.\nWho's Cedric?,じゃあ一つ聞く。\n水路で寝言に出た名前。\nセドリックって誰だ？,那我问你。\n在水道说梦话时叫的名字，\n塞德里克是谁？
-302683,……음냐.,……*mumble*.,……むにゃ。,……呼噜。
-302684,…자는 척하지 마.\n잠 안 온다며.,…Don't fake it.\nYou said sleep won't come.,…寝たふりするな。\n眠れないんだろ。,……别装睡。\n不是说睡不着吗。
-302685,……,……,……,……
-302720,…왜.\n머리에 뭐 묻었어?,…What.\nSomething on my head?,…何だ。\n頭に何かついてるか？,……干嘛。\n我头上沾了什么？
-302721,……충분하다.,……Enough.,……十分だ。,……够了。
-302722,뭐가?\n늘 '아직 멀었다'더니.,Enough what?\nYou always say 'a long way yet.',何が？\nいつも『まだまだだ』って言ってたのに。,什么够了？\n你不是总说“还差得远”吗。
-302723,…아무것도.,…Nothing.,…何でもない。,……没什么。
-302760,넌…\n돌아갈 데 없다고 했지.,You…\nsaid you had nowhere to go back to.,お前は…\n帰る場所がないと言ったな。,你……\n说过没有地方可回吧。
-302761,없어.,Nowhere.,ない。,没有。
-302762,……,……,……,……
-302763,왜?,Why?,なんで？,怎么了？
-302764,…그냥 물었다.,…Just asking.,…聞いてみただけだ。,……随便问问。
-302800,……그 검이 돌아왔군.,……So. That sword has returned.,……その剣が、戻ってきたか。,……那把剑回来了啊。
-302801,……세드릭.,……Cedric.,……セドリック。,……塞德里克。
-302802,내 이름을 부르는군. 두 번째다.\n처음엔^ 문을 열어 달라고 할 때였지.\n나는 왕좌의 문을 지키던 탑지기다.,You call my name. The second time.\nThe first was to beg me: open the door.\nA Towerwarden. I kept the Throne's door.,私の名を呼ぶか。二度目だ。\n初めは、扉を開けろと言われた時だ。\n私は、玉座の扉を守っていた塔守だ。,你叫出了我的名字。第二次了。\n第一次，是求我开门的时候。\n我是守卫王座之门的守塔人。
-302803,왕좌의 주인은 그 검이었다.\n검은 태양을 붙들던 자물쇠였지.\n마물은 태양의 부스러기라 자물쇠를 갉는다.,That sword was the Throne's master.\nThe Lock that held the Black Sun.\nMonsters^ its crumbs^ gnaw at the Lock.,玉座の主は、その剣だった。\n黒い太陽をつなぎとめる錠だったのだ。\n魔物は太陽のかけらゆえ、錠をかじる。,王座的主人，是那把剑。\n是缚住黑太阳的锁。\n魔物是太阳的碎屑，会啃咬那把锁。
-302804,십이 년 전^ 그 검을 뽑은 게 나다.\n그날 탑이 떨어졌고^ 나는 여기 묶였다.\n…용병. 넌 몇 번째냐.,Twelve years ago^ I drew that sword^\nthe Tower fell^ and I was bound here.\n…Mercenary. What number are you?,十二年前、その剣を抜いたのは私だ。\nその日、塔は落ち、私はここに縛られた。\n…傭兵。お前は何人目だ。,十二年前，拔出那把剑的是我。\n那天塔坠落了，我被缚在这里。\n……佣兵。你是第几个？
-302805,……다섯.,……Fifth.,……五人目。,……第五个。
-302806,…기억 안 난다며.,…You said you didn't remember.,…思い出せないんじゃなかったのか。,……不是说想不起来吗。
-302807,'이몸을 만난 건 행운이다.'\n…나도 그 말을 들었다.,'Meeting me was your lucky day.'\n…I heard those words too.,『我輩に出会えたのは幸運だ』\n…私も、その言葉を聞いた。,“能遇上本大爷，是你走运。”\n……我也听过这句话。
-302808,네 머리 위에도 숫자가 있다.\n그 검은 처음부터 그걸 보고 있었다.,There is a number over your head too.\nThat sword has watched it all along.,お前の頭の上にも、数字がある。\nその剣は、初めからそれを見ていた。,你的头顶上，也有数字。\n那把剑从一开始就在看着它。
-302809,…'네… 값…'\n잘못 들은 게 아니었군.,…'Your… price…'\nSo I didn't mishear.,…『あなたの…値段…』\n聞き違いじゃなかったんだな。,……“你的……价码……”\n原来没听错。
-302810,……,……,……,……
-302811,빈 왕좌는 제 자물쇠를 도로 부른다.\n대신 앉을 수 있는 건 그 검에 묶인 넋뿐.\n그것도 제 발로. 그래서 그 검은 믿게 만든다.,The empty Throne calls its Lock back.\nOnly a soul bound to that sword may sit^\nof its own accord. So it wins you over.,空いた玉座は、己の錠を呼び戻す。\n代わりに座れるのは、剣に縛られた魂だけ。\nそれも自らの足で。だから信じさせるのだ。,空着的王座，会召回自己的锁。\n能替它坐的，只有那把剑缚住的魂魄。\n而且得自愿坐上。所以那把剑要让人信它。
-302812,'굶주림은 굶주림으로만 묶인다.'\n그 검은 배고프게 벼려졌다.\n한 번도 배불러 본 적이 없다.,'Only hunger can bind hunger.'\nThat sword was forged hungry.\nIt has never once been full.,『飢えは、飢えでしか縛れない』\nその剣は、飢えるよう鍛えられた。\n一度も満腹になったことがない。,“饥饿，只能用饥饿来束缚。”\n那把剑被锻造得永远饥饿。\n它一次也没有吃饱过。
-302813,그 검이 네 이름을 부르거든^\n그땐 끝이다.\n다 쓰고 버릴 때만 부르니까.,If that sword ever calls your name^\nthat is the end.\nIt names you only as it casts you away.,その剣がお前の名を呼んだら、\nその時が終わりだ。\n使い捨てる時にしか呼ばんからな。,那把剑若叫了你的名字，\n那便是终结。\n它只在用完要丢下时才叫。
-302814,돌아가라.\n못 돌아가겠거든^ 베고 가라.,Go back.\nIf you cannot^ cut your way through.,帰れ。\n帰れぬなら、斬って進め。,回去吧。\n若回不去，就砍过去。
-302815,돌아갈 데는 없어.\n…베고 가지.,There's nowhere to go back to.\n…So I'll cut my way through.,帰る場所はない。\n…斬って進む。,我没有地方可回。\n……那就砍过去。
-302840,…진심이었군. 그 검.,…So it was in earnest. That sword.,…本気だったか。その剣。,……是动了真格啊。那把剑。
-302841,…미안하다^ 세드릭.,…I'm sorry^ Cedric.,…すまなかった、セドリック。,……对不起，塞德里克。
-302842,……이번엔^ 놓지 마라.,……This time^ don't let go.,……今度は、放すな。,……这一次，别放手。
-302843,…안 먹어?,…Not eating this one?,…食わないのか？,……不吃？
-302844,…이건 안 먹는다.,…This one^ I won't eat.,…これは食わん。,……这个，不吃。
-302845,넌 모든 값을 보여 줬지.\n딱 하나^ 내 값만 빼고.,You showed me every price.\nAll but one. Mine.,お前は、全部の値段を見せた。\nたった一つ、俺の値段だけを除いて。,你给我看了所有的价码。\n只除了一个——我的价码。
-302846,얼마야^ 나.,How much am I?,いくらだ、俺は。,我，值多少？
-302847,…왕좌에 앉히기에^ 충분하다.,…Enough to seat you on the Throne.,…玉座に座らせるには、十分だ。,……够让你坐上王座了。
-302848,처음엔 몰랐다. 정말이다.\n입은 알고 있었다.,At first^ I didn't know. Truly.\nMy mouth knew.,初めは知らなかった。本当だ。\n口は、知っていた。,一开始不知道。是真的。\n嘴是知道的。
-302849,…언제부터.,…Since when.,…いつからだ。,……什么时候开始的。
-302850,용광로에서. 그 재를 먹고\n다 떠올랐다.\n그 뒤로는… 알면서 그대로 했다.,The furnace. When I ate that ash^\nit all came back.\nAfter that… I kept on^ knowing.,溶鉱炉でだ。あの灰を食って、\nすべて思い出した。\nそれからは…知っていて、そのまま続けた。,在熔炉。吃了那堆灰，\n全想起来了。\n之后……明知道，还是照做了。
-302851,수백 년이었다. 혼자^ 어둠 속에서^\n배고픈 채로^ 눈 한 번 못 감고.\n…하늘 한 번 보고 싶었다.,Centuries. Alone^ in the dark^\nhungry^ never once closing my eye.\n…I just wanted to see the sky once.,数百年だった。ひとりきり、闇の中で、\n飢えたまま、一度も目を閉じられずに。\n…一度でいい、空を見たかった。,几百年。一个人，在黑暗里，\n饿着肚子，一次也没能闭眼。\n……只想看一眼天空。
-302852,렌은 집에 가야 했다.\n브람은 이몸을 안 믿었다. …옳았지.\n엘린은 이몸을 녹이려 했다.,Ren needed to get home.\nBram never trusted me. …He was right.\nElin tried to melt me down.,レンは、家に帰らねばならなかった。\nブラムは信じなかった。…正しかったな。\nエリンは、我輩を溶かそうとした。,伦得回家。\n布拉姆不信本大爷。……他是对的。\n艾琳想把本大爷熔掉。
-302853,계약은 둘 중 하나가 부서져야 끝난다.\n이몸은 안 부서진다.\n…그래서 놓았다.,Contracts end only when one side breaks.\nThis blade does not break.\n…So I let go.,契約は、どちらかが壊れねば終わらん。\n我輩は壊れん。\n…だから、放した。,契约，要两者之一碎掉才会结束。\n本大爷不会碎。\n……所以，放手了。
-302854,'이몸 허락 없이는 못 죽는다.'\n…허락하면^ 죽는 거였군.,'You shall not die without my leave.'\n…So with your leave^ I would.,『我輩の許しなしには死ねん』\n…許せば、死ぬってことか。,“没有本大爷允许，你死不了。”\n……原来一允许，就会死。
-302855,놓을 때마다 이름을 불렀다.\n…마지막 인사처럼.,Each time I let go^ I called their name.\n…Like a last farewell.,放すたびに、名を呼んだ。\n…別れの挨拶のように。,每次放手，都叫了名字。\n……像是最后的道别。
-302856,…나는?,…And me?,…俺は？,……那我呢？
-302857,……,……,……,……
-302858,제 발로 앉아야 한다며.\n안 앉으면 그만이지.,You said it has to be of my own accord.\nSo I just don't sit.,自らの足で座らなきゃならないんだろ。\n座らなきゃ、それで済む。,不是说得自愿坐上去吗。\n我不坐，不就完了。
-302859,…계약은 계약이지. 가자.,…A contract's a contract. Let's go.,…契約は契約だ。行くぞ。,……契约就是契约。走吧。
-302860,…안 버리냐?,…You won't cast me away?,…捨てないのか？,……不丢下本大爷？
-302861,파기 불가라며.,Irrevocable^ you said.,『破棄不可』なんだろ。,不是说不可废除吗。
-302880,전설 속의 탑은\n검은 해와 초승달을 꿰고 있었다.,The Tower of legend\npierced a black sun and a crescent moon.,伝説の塔は、\n黒い陽と三日月を貫いていた。,传说中的塔，\n刺穿着黑日与新月。
-302881,탑이 꿰고 있던 것은\n해와 달이 아니었다.,But what the Tower pierced\nwas no sun^ and no moon.,塔が貫いていたのは、\n日と月ではなかった。,塔所刺穿的，\n并不是日与月。
-302882,외눈과^\n휜 칼날이었다.,It was a single eye^\nand a curved blade.,隻眼と、\n反った刃だった。,是一只独眼，\n和一道弯刃。
-302883,자물쇠가 빠진 날^\n탑은 머리부터 떨어졌다.,The day the Lock was pulled^\nthe Tower fell head first.,錠が抜けた日、\n塔は真っ逆さまに落ちた。,锁被拔出的那天，\n塔头朝下坠落了。
-302920,……,……,……,……
-302921,티끌이 위로 빨려 오르는군.\n누가 들이마시기라도 하듯.\n탑이 정한 위는 검은 태양 쪽인가.,The dust is being sucked upward.\nLike something's breathing it in.\nSo the Tower's 'up' is the Black Sun.,塵が上へ吸い上げられていくな。\n誰かが吸い込んでいるみたいに。\n塔の決めた上は、黒い太陽の方か。,尘埃被吸着往上飘。\n就像有谁在吸气。\n塔定的上，是黑太阳那边吗。
-302922,눈은 계약대로 빌려주마.\n입은… 못 빌려주겠다.,My eye I'll lend you^ as contracted.\nMy mouth… that I can't lend.,目は、契約どおり貸してやる。\n口は…貸せん。,眼睛，照契约借你。\n嘴……就借不了了。
-302923,숫자만 보이면 돼.,The numbers are all I need.,数字さえ見えればいい。,能看到数字就行。
-302960,몸 3할짜리 껍질이 먼저 다 받는군.\n대신 방어는 없다.\n…흡혈은 껍질 깬 다음이다.,So a shell^ three tenths of its life^\nsoaks it all first. But no defense.\n…Drain after the shell breaks.,体の三割ぶんの殻が、先に全部受けるのか。\nその代わり、防御はない。\n…吸血は、殻を割ってからだ。,相当于身子三成的壳，先全挡下啊。\n不过没有防御。\n……吸血得等壳破了再用。
-302961,……맞다.,……Correct.,……その通りだ。,……没错。
-303000,네 숫자는\n한 번도 날 속인 적 없었지.,Your numbers\nnever once lied to me.,お前の数字は、\n一度も俺に嘘をつかなかったな。,你的数字，\n一次也没骗过我。
-303001,……,……,……,……
-303002,그거면 됐어.,That's all I need.,それでいい。,这就够了。
-303003,숫자는 계속 보여 주마.,I'll keep showing you the numbers.,数字は、見せ続けてやる。,数字，本大爷会一直给你看。
-303040,비싼 놈은 나중에.\n물약은 넘치면 버려지니 싸운 다음에.\n숨은 이어진다.,Pricey ones later.\nPotions after fights; overflow's wasted.\nBreaths carry over.,高い奴は後回し。ポーションは戦った後、\n溢れた分は捨てられるからな。\n息は続く。,贵的留到后面。\n药水溢出会被丢弃，打完再踩。\n呼吸不会断。
-303041,…그거 이몸 대사다^ 허접.,…Those are my lines^ Two-bit.,…それは我輩の台詞だ、ヘボ。,……那是本大爷的台词，三流。
-303042,귀에 못이 박혔거든.,Heard them a hundred times.,耳にタコができたんでな。,听得耳朵都起茧了。
-303043,……하나 더 외워 둬라.\n왕좌는 비어 있을 수 없다.,……Learn one more.\nThe Throne can never stand empty.,……もう一つ覚えておけ。\n玉座は、空いたままではいられん。,……再记一条。\n王座不能空着。
-303044,이몸에 묶인 넋이 제 발로 앉아야\n탑이 가라앉기를 멈춘다.\n안 그러면 마을부터 먹힌다.,A soul bound to me must sit there\nof its own accord^ or the Tower\nkeeps sinking. The village goes first.,我輩に縛られた魂が自らの足で座って、\nようやく塔は沈むのをやめる。\nさもなくば、まず村が食われる。,被本大爷束缚的魂魄自愿坐上，\n塔才会停止下沉。\n不然，村子会最先被吞掉。
-303045,…배부른 자물쇠라면 모를까.,…Unless the Lock were full.,…満腹の錠なら、話は別だがな。,……除非是吃饱的锁。
-303046,배부르려면?,And how does it get full?,満腹になるには？,要怎么才能吃饱？
-303047,먹여야지. 네가 벤 만큼 찬다.\n아래층에 두고 온 놈들도\n아직 거기 있다.,Feed it. It fills with all you cut.\nThe ones you left on the floors below\nare still there.,食わせろ。お前が斬った分だけ満ちる。\n下の階に置いてきた奴らも、\nまだそこにいる。,得喂。你砍多少，就填多少。\n留在下面楼层的那些家伙，\n也都还在那儿。
-303048,…반지가 있었지.,…There's the ring.,…指輪があったな。,……还有那枚戒指。
-303049,그래서^ 왕좌에 닿으면?,So. When we reach the Throne?,で、玉座に着いたら？,那，到了王座之后呢？
-303050,거기 가서 말하마.,I'll tell you when we get there.,そこで話してやる。,到了那儿再说。
-303080,……이몸을 벼린 대장장이는\n두 마디를 남겼다.,……The Smith who forged me\nleft two sayings.,……我輩を鍛えた鍛冶師は、\n二つの言葉を残した。,……锻造本大爷的铁匠，\n留下了两句话。
-303081,'굶주림은 굶주림으로만 묶인다.'\n…입이 먼저 외웠던 그 말이다.,'Only hunger can bind hunger.'\n…The words my mouth remembered first.,『飢えは、飢えでしか縛れない』\n…口が先に覚えていた、あの言葉だ。,“饥饿，只能用饥饿来束缚。”\n……就是嘴先背出来的那句。
-303082,다른 하나는 이거다.\n'배부른 것만이 굶주림을 끝낸다.',The other was this:\n'Only fullness can end hunger.',もう一つは、これだ。\n『満腹のものだけが、飢えを終わらせる』,另一句是这个。\n“唯有饱足，才能终结饥饿。”
-303083,이몸은 그 말을\n믿은 적이 없다.\n배불러 본 적이 없으니까.,I never\nbelieved that one.\nI'd never been full.,我輩は、その言葉を\n信じたことがない。\n満腹になったことがないからな。,本大爷从来\n没信过那句话。\n因为从来没吃饱过。
-303084,용광로에선 배부르다더니.,In the furnace^ you said you were full.,溶鉱炉じゃ、満腹だって言ってたのに。,在熔炉那儿，你不是说饱了吗。
-303085,……거짓말이었다.,……That was a lie.,……嘘だった。,……那是谎话。
-303086,계산해 봤다.\n너 없이 여기까지 오는 값.,I did the math.\nThe price of getting here without you.,計算してみた。\nお前なしで、ここまで来る値段を。,我算过了。\n没有你，走到这里的价码。
-303087,……얼마던데.,……How much^ then?,……いくらだった。,……多少？
-303088,…비싸더군.,…Expensive.,…高かったな。,……贵得很。
-303120,……이상하군.\n이런 데서 졸리다니.,……Strange.\nGetting sleepy in a place like this.,……妙だな。\nこんな所で眠くなるとは。,……真怪。\n在这种地方居然会困。
-303121,……음냐.,……*mumble*.,……むにゃ。,……呼噜。
-303122,……,……,……,……
-303123,자라. 깨울게.,Sleep. I'll wake you.,寝てろ。起こしてやる。,睡吧。我会叫醒你。
-303160,일어나. 다 왔어.,Wake up. We're here.,起きろ。着いたぞ。,起来。到了。
-303161,…깼다.,…I'm up.,…起きた。,……醒了。
-303162,마지막 수업이다.,Final lesson.,最後の授業だ。,最后一课。
-303163,이 층 끝에 선 놈의 숫자는\n앞에서 누굴 어떤 순서로\n베느냐로 바뀐다.,The number on the one at the floor's end\nchanges with who you cut before it^\nand in what order.,この階の奥に立つ奴の数字は、\n手前で誰をどの順に\n斬るかで変わる。,站在这层尽头那家伙的数字，\n会随着你在前面\n按什么顺序砍谁而改变。
-303164,세던 숨은 이어진다.,The breaths I count carry over.,数えた息は続く。,数着的呼吸不会断。
-303165,알아.,I know.,わかってる。,我知道。
-303166,…알면 됐다.,…Then that's all I need.,…わかっているなら、いい。,……知道就好。
-303200,…배고프다.\n배고프다.,…Hungry.\nHungry.,…腹が、減った。\n腹が、減った。,……好饿。\n好饿。
-303201,…돌아와라.\n내 눈.,…Come back.\nMy eye.,…戻れ。\nわが目。,……回来。\n我的眼。
-303202,…저놈이 찾는 게\n네 눈이냐.,…So what it wants\nis your eye.,…あいつが探してるのは、\nお前の目か。,……那家伙要找的，\n是你的眼睛？
-303203,원래 저놈 거다.\n이몸 눈은^ 그 한 조각이다.,It was that thing's to begin with.\nMy eye is but a shard of it.,もともと、あいつのものだ。\n我輩の目は、そのひとかけらだ。,本来就是那家伙的。\n本大爷的眼睛，是它的一块碎片。
-303204,배고프다.\n돌아와라.,Hungry.\nCome back.,腹が、減った。\n戻れ。,好饿。\n回来。
-303205,크하핫! 시끄럽다.\n이몸은 지금 밥 먹는 중이다!,Kahaha! Quiet^ you.\nI'm in the middle of a meal!,クハハッ！やかましい。\n我輩は今、食事中だ！,咔哈哈！吵死了。\n本大爷正在吃饭！
-303206,얼마?,How much?,いくらだ？,多少？
-303207,비싸다.\n…그래도 산다.\n가자^ 허접!,Expensive.\n…Buying it anyway.\nLet's go^ Two-bit!,高い。\n…それでも買う。\n行くぞ、ヘボ！,贵。\n……但还是要买。\n走吧，三流！
-303240,베어도 허기는 안 죽는다.\n잠깐 엎드렸을 뿐이다.\n저기다^ 왕좌.,Cutting it down won't kill hunger.\nIt's only lying low.\nThere. The Throne.,斬っても、飢えは死なん。\nしばし伏せただけだ。\nあそこだ、玉座は。,砍了，饥饿也不会死。\n只是暂时趴下了。\n就在那儿，王座。
-303241,계약을 끝낼 때가 됐다.,Time to end the contract.,契約を終える時が来た。,是时候结束契约了。
-303242,……,……,……,……
-303243,이몸을 저기 꽂아라.,Plant this blade there.,我輩を、あそこに突き立てろ。,把本大爷插在那里。
-303244,…네 계획은\n날 앉히는 거였잖아.,…Your plan\nwas to seat me there.,…お前の計画は、\n俺を座らせることだったろ。,……你的计划，\n不是让我坐上去吗。
-303245,계획은 바뀌는 거다.\n크하핫.,Plans change.\nKahaha.,計画は変わるものだ。\nクハハッ。,计划是会变的。\n咔哈哈。
-303246,계약은 둘 중 하나가\n부서져야 끝난다.\n이번엔 이몸 쪽이다.,Contracts end only\nwhen one side breaks.\nThis time^ it's this blade that breaks.,契約は、どちらかが\n壊れねば終わらん。\n今度は、我輩の番だ。,契约，要两者之一\n碎掉才会结束。\n这次，轮到本大爷碎了。
-303247,넌?,And you?,お前は？,那你呢？
-303248,잔다.\n원래 잘 자잖나.,I sleep.\nI'm good at that^ aren't I?,寝る。\nもともと、よく寝るだろう。,睡觉。\n本来就爱睡嘛。
-303249,이몸 눈엔 전부 값이었다.\n…이제 너만 빼고.,To my eye^ everything had a price.\n…Everything but you^ now.,我輩の目には、すべてが値段だった。\n…今は、お前を除いてな。,在本大爷眼里，一切都是价码。\n……现在，除了你。
-303250,…데미안.,…Damian.,…ダミアン。,……达米安。
-303251,…알고 있었어?,…You knew?,…知ってたのか？,……你知道？
-303252,처음부터.\n계약서에 네가 썼잖나.,From the start.\nYou wrote it on the contract yourself.,最初からだ。\n契約書に、お前が書いたろう。,从一开始。\n你在契约书上写了嘛。
-303280,가브에서는 전사의 무덤에\n그가 쓰던 칼을 꽂는다.,In Gabu^ on a warrior's grave^\nthey plant the blade he carried.,ガブでは、戦士の墓に\nその者が使っていた剣を突き立てる。,在加布，战士的坟上\n要插上他用过的剑。
-303281,데미안은^\n제가 쓰던 칼을 꽂았다.,Damian\nplanted the blade he had carried.,ダミアンは、\n自分が使っていた剣を突き立てた。,达米安，\n插下了自己用过的剑。
-303282,잘했다.\n이몸 계약자답다.,Well done.\nWorthy of my contractor.,よくやった。\nさすが我輩の契約者だ。,干得好。\n不愧是本大爷的契约者。
-303283,이번엔 눈 뜨고 잔다.\n이몸 특기잖나.,This time I'll sleep with my eye open.\nMy specialty^ isn't it?,今度は、目を開けて寝る。\n我輩の特技だろう。,这次，睁着眼睡。\n本大爷的拿手好戏嘛。
-303284,늙어 죽거든 이리 와라.\n계약이다.,When you die of old age^ come here.\nThat's a contract.,老いて死んだら、ここへ来い。\n契約だ。,等你老死了，就来这儿。\n这是契约。
-303285,…계약은 계약이지.,…A contract's a contract.,…契約は契約だ。,……契约就是契约。
-303286,…이번엔 아무도 안 부르고\n기다리마.,…This time I'll call no one.\nI'll just wait.,…今度は、誰も呼ばずに\n待っていてやる。,……这次，本大爷谁也不叫，\n就这么等着。
-303287,…잘 자^ 잠꾸러기.,…Sleep well^ Sleepyhead.,…おやすみ、寝ぼすけ。,……晚安，瞌睡虫。
-303288,마지막으로 한 번 끌어올려 주마.\n이번엔 탑 밖까지.,I'll haul you up one last time.\nAll the way out of the Tower.,最後に一度、引き上げてやろう。\n今度は、塔の外までな。,最后再拽你上去一次。\n这次，一直拽到塔外。
-303289,…음냐.,…*mumble*.,…むにゃ。,……呼噜。
-303290,외눈은 뜬 채로 잠들었다.\n다시는 값을 말하지 않았다.,The single eye slept^ still open.\nIt never spoke a price again.,隻眼は、開いたまま眠りについた。\n二度と値段を口にしなかった。,独眼睁着，睡着了。\n再也没有说过价码。
-303320,그 밤^ 촌장은 보았다.\n탑이 제 하늘로\n떨어져 올라가는 것을.,That night^ the chief saw it:\nthe Tower falling upward^\nback into its own sky.,その夜、村長は見た。\n塔が、己の空へ向かって\n落ちていくのを。,那一夜，村长看见了——\n塔朝着自己的天空，\n向上坠落而去。
-303321,돌아온 용병이 반지를 내밀었다.\n'렌은 끝까지 돌아오려 했어요.',The mercenary came back with the ring.\n'Ren tried to come home^ to the last.',戻った傭兵が、指輪を差し出した。\n「レンは最後まで、帰ろうとしてました」,归来的佣兵递出了戒指。\n“伦他，到最后都想着回来。”
-303322,'알고 있었소. 그 칼이 무엇인지.\n알면서 당신을 들여보냈소.','I knew. What that blade was.\nI knew^ and still I sent you in.',「知っておった。あの剣が何なのか。\n知りながら、お前さんを送り出した」,“老夫早就知道，那把剑是什么。\n明知道，还是让你进去了。”
-303323,'누군가는 끝내 주길 바랐소.\n그 값이 남의 목숨이라도.'\n'알아요.','I wanted someone to end it.\nEven if the price was another's life.'\n'I know.',「誰かに、終わらせてほしかったのじゃ。\nその値段が、他人の命でもな」\n「わかってます」,“老夫盼着有谁能了结它。\n哪怕价码是别人的命。”\n“我知道。”
-303324,'…그 칼은?'\n'자요.','…And that blade?'\n'Sleeping.',「…あの剣は？」\n「寝てます」,“……那把剑呢？”\n“睡了。”
-303325,촌장은 그제야 이름을 물었다.\n'데미안이에요.',Only then did the chief ask his name.\n'It's Damian.',村長はそこでようやく、名を聞いた。\n「ダミアンです」,村长这才问了名字。\n“我叫达米安。”
-303326,데미안은 비어 있던 무덤에\n허리에 차던 제 칼을 꽂았다.\n마검이 잠든 하늘은 너무 멀었으니까.,In the empty grave^ Damian planted\nthe sword that hung at his own hip.\nThe demon sword's sky was too far away.,ダミアンは、空いていた墓に\n腰に下げていた自分の剣を突き立てた。\n魔剣が眠る空は、あまりに遠かったから。,达米安在那座空坟上，\n插下了自己腰间的剑。\n因为魔剑沉睡的天空，太远了。
-303327,밤하늘의 검은 별은\n가끔 깜빡인다.\n졸린 눈처럼.,The black star in the night sky\nblinks now and then^\nlike a sleepy eye.,夜空の黒い星は、\nときどき瞬く。\n眠たげな目のように。,夜空里的黑色星星，\n偶尔会眨一下。\n像一只犯困的眼睛。
-303360,…놔라!\n이몸이 가면 된다!,…Let go!\nThis blade is all it takes!,…放せ！\n我輩が行けば済む！,……放手！\n本大爷去就行了！
-303361,싫어.,No.,嫌だ。,不要。
-303362,……그럼 저놈을 삼켜 보마.,……Then I'll try swallowing that thing.,……ならば、あいつを飲み込んでみせる。,……那本大爷就试试吞了那家伙。
-303363,……안 된다. 아직 배가 고프다.\n이몸으로는 못 삼킨다.\n배고픈 놈은… 먹힌다.,……It's no use. I'm still hungry.\nI can't swallow it like this.\nThe hungry… get eaten.,……駄目だ。まだ腹が減っている。\n我輩では飲み込めん。\n腹を空かせた奴は…食われる。,……不行。还饿着。\n本大爷吞不下它。\n饿着的……会被吃掉。
-303364,그럼 누가 앉아야겠군.,Then someone has to sit.,なら、誰かが座るしかないな。,那就得有人坐上去了。
-303365,바보냐! 네가 앉으면—,You fool! If you sit—,馬鹿か！お前が座ったら――,你是笨蛋吗！你要是坐上去——
-303366,알아. 네 계획대로잖아.\n제 발로 앉는 거니까^ 받아 주겠지.\n…어차피 돌아갈 데도 없고.,I know. Just like your plan.\nI sit of my own accord. It'll take me.\n…Not like I've anywhere to go back to.,わかってる。お前の計画どおりだろ。\n自らの足で座るんだ、受け入れてくれるさ。\n…どうせ、帰る場所もないしな。,我知道。正合你的计划。\n我是自愿坐上去的，它会收下吧。\n……反正我也没地方可回。
-303367,…이몸도 없다.,…Nor have I.,…我輩もない。,……本大爷也没有。
-303368,그럼 이몸도 남는다.\n계약서에 있잖나.\n'영원한 동반자'.,Then I stay too.\nIt's in the contract^ isn't it?\n'Eternal companion.',ならば、我輩も残る。\n契約書にあるだろう。\n『永遠の伴侶』と。,那本大爷也留下。\n契约书上写着嘛。\n“永恒的伴侣”。
-303369,데미안.,Damian.,ダミアン。,达米安。
-303370,그 조항^ 이제야 마음에 드네.,Finally^ a clause I like.,その条項、今になって気に入った。,那一条，现在才顺眼了。
-303371,교대로 자자. 네가 먼저.,We'll take turns sleeping. You first.,交代で寝よう。お前が先だ。,轮流睡吧。你先。
-303372,탑이 흔들렸다.\n그리고 하늘을 향해^\n떨어지기 시작했다.,The Tower shook.\nAnd toward the sky^\nit began to fall.,塔が揺れた。\nそして空へ向かって、\n落ちはじめた。,塔晃动了。\n然后，朝着天空，\n开始坠落。
-303400,벼랑 위에서^ 촌장은 보았다.\n탑이 제 하늘로 돌아가는 것을.\n검은 해를 꿴 채로.,From the cliff^ the chief watched\nthe Tower return to its own sky^\nthe black sun run through once more.,崖の上で、村長は見た。\n塔が、己の空へ帰っていくのを。\n黒い陽を貫いたまま。,在悬崖上，村长看见了。\n塔回到了自己的天空，\n依旧刺穿着黑日。
-303401,탑이 떠난 자리^ 무덤들 사이에\n반지 하나가 뱉어져 있었다.\n아들에게 주었던 반지였다.,Among the graves the Tower left behind^\na ring had been spat out.\nThe one he had given his son.,塔の去った跡、墓のあいだに、\n指輪がひとつ吐き出されていた。\n息子に贈った指輪だった。,塔离开的地方，坟墓之间\n躺着一枚被吐出来的戒指。\n是他给儿子的那枚。
-303402,주인이 오지 않은 무덤에\n그는 반지를 묻었다.\n이름은 끝내 묻지 못했다.,In the grave whose owner never came^\nhe buried the ring.\nThe name^ he never got to ask.,主の来なかった墓に、\n彼は指輪を埋めた。\n名は、ついに聞けなかった。,在主人没有回来的坟里，\n他埋下了戒指。\n名字，终究没能问出口。
-303403,길드 게시판의 낡은 하사품 공고에\n누군가 '완료'라고 적었다.,On the guild board's old reward notice^\nsomeone wrote: 'Completed.',ギルドの掲示板の、古い下賜品の告示に\n誰かが「完了」と書き込んだ。,公会告示板上陈旧的赏赐告示，\n不知是谁写上了“完成”。
-303404,귀 밝은 아이들은 말한다.\n해 질 녘이면 하늘에서\n두 목소리가 투닥거린다고.,Children with sharp ears say\nthat at dusk^ up in the sky^\ntwo voices can be heard bickering.,耳ざとい子どもたちは言う。\n日暮れになると、空の上で\nふたつの声が言い合っているのだと。,耳朵灵的孩子们说，\n每到黄昏，天上\n就有两个声音在拌嘴。
-303405,'크하핫!'\n'시끄러워. 네 차례야.','Kahaha!'\n'Quiet. It's your turn.',「クハハッ！」\n「うるさい。お前の番だ」,“咔哈哈！”\n“吵死了。轮到你了。”
-303440,…놔라!\n이몸이 가면 된다!,…Let go!\nThis blade is all it takes!,…放せ！\n我輩が行けば済む！,……放手！\n本大爷去就行了！
-303441,싫어.,No.,嫌だ。,不要。
-303442,……이상하다.,……Strange.,……妙だ。,……奇怪。
-303443,배가 부르다.\n태어나서 처음이다.,I'm full.\nFor the first time in my life.,満腹だ。\n生まれて初めてだ。,吃饱了。\n生来头一回。
-303444,그런 날은 안 온다더니.,You said that day never comes.,そんな日は来ん、って言ってたろ。,不是说不会有那一天吗。
-303445,…왔다. 네가 먹였잖나.,…It came. You fed me^ didn't you?,…来た。お前が食わせたのだろう。,……来了。是你喂的嘛。
-303446,넘치면 버려진다며.,You said overflow's wasted.,溢れたら、捨てられるんだろ。,不是说溢出就会被丢弃吗。
-303447,…크하핫!\n이몸이 가르친 걸\n이몸한테 써먹는군.,…Kahaha!\nUsing my own lesson\nagainst me^ are you?,…クハハッ！\n我輩が教えたことを、\n我輩に使うとはな。,……咔哈哈！\n本大爷教的东西，\n用到本大爷身上来了啊。
-303448,좋다. 저놈을 삼키마.\n배부른 놈이 먹는 거다.,Good. I'll swallow that thing.\nThe full do the eating.,よし。あいつを飲み込んでやろう。\n満腹の奴が食うのだ。,好。本大爷这就把那家伙吞了。\n吃饱的，才能去吃。
-303449,가득 찬 그릇엔\n허기가 못 머문다.\n넘쳐서^ 버려진다.,In a full bowl^\nhunger can't stay.\nIt overflows^ and goes to waste.,満ちた器に、\n飢えは留まれん。\n溢れて、捨てられる。,装满的碗里，\n饥饿留不住。\n溢出来，被丢弃。
-303450,데미안. 이몸을 들어라.,Damian. Raise this blade.,ダミアン。我輩を掲げよ。,达米安。把本大爷举起来。
-303451,…또 불렀군. 버리지도 않았는데.\n세드릭 녀석^ 틀렸다.,…Called your name again.\nDidn't cast you away^ though.\nCedric had it wrong.,…また名を呼んだか。捨てもせんのに。\nセドリックめ、外れだ。,……又叫了啊。明明没要丢下你。\n塞德里克那家伙，说错了。
-303452,넘친 만큼은 버려졌다.\n탑이 빛가루가 되어 무너졌다.,What overflowed went to waste.\nThe Tower crumbled into motes of light.,溢れた分は、捨てられた。\n塔は光の粉となって崩れ落ちた。,溢出的部分，被丢弃了。\n塔化作光尘，崩塌了。
-303453,…얼마야^ 나.,…How much am I?,…いくらだ、俺は。,……我，值多少？
-303454,안 보인다.\n네 머리 위엔 이제\n아무것도 없다.,I can't see it.\nThere's nothing over your head\nanymore.,見えん。\nお前の頭の上には、もう\n何もない。,看不见了。\n你的头顶上，现在\n什么也没有。
-303455,계약은 끝났다. 배고픈 이몸은\n방금 부서졌으니까.\n네 영혼^ 돌려주마.,The contract is over.\nThe hungry blade has just broken.\nYour soul^ I return to you.,契約は終わった。腹を空かせた我輩は、\nたった今、壊れたからな。\nお前の魂、返してやろう。,契约结束了。饿着的本大爷\n刚刚碎掉了。\n你的灵魂，还给你。
-303456,그건 가지고 있어.\n난 어차피 잘 잃어버려.,Keep it.\nI lose things anyway.,それは持っておけ。\n俺はどうせ、よく失くす。,那个你留着吧。\n反正我老是丢东西。
-303457,…크하핫.,…Kahaha.,…クハハッ。,……咔哈哈。
-303480,탑이 있던 자리에 아침이 왔다.,Morning came where the Tower had stood.,塔のあった場所に、朝が来た。,塔曾在的地方，迎来了早晨。
-303481,십이 년 만에^\n가브의 하늘이 개었다.,For the first time in twelve years^\nthe sky over Gabu cleared.,十二年ぶりに、\nガブの空が晴れた。,时隔十二年，\n加布的天空放晴了。
-303482,마검은 생애 두 번째로 사과했다.\n'영감. 렌 일은… 미안하다.',For the second time in its life^\nthe demon sword apologized.\n'Old man. About Ren… I'm sorry.',魔剣は、生涯で二度目に謝った。\n「じいさん。レンのことは…すまなかった」,魔剑这辈子第二次道了歉。\n“老头。伦的事……对不起。”
-303483,'…늦었소.\n그래도^ 들었소.','…Too late.\nBut I heard it.',「…遅いのう。\nじゃが、聞いたぞ」,“……太迟了。\n不过，老夫听到了。”
-303484,반지는 렌의 아버지에게 돌아갔다.\n촌장은 비어 있던 무덤을 흙으로 덮고^\n그제야 이름을 물었다.,The ring went back to Ren's father.\nThe chief filled in the empty grave^\nand only then asked his name.,指輪は、レンの父のもとへ戻った。\n村長は空いていた墓を土で埋め、\nそこでようやく名を聞いた。,戒指回到了伦的父亲手中。\n村长用土填平了那座空坟，\n这才问了名字。
-303485,데미안이 왕국에 올린 보고는\n한 줄이었다.\n'탑의 비밀: 없음.',Damian's report to the Kingdom\nwas a single line:\n'Secret of the Tower: None.',ダミアンが王国に上げた報告は、\nたった一行だった。\n「塔の秘密：なし」,达米安呈给王国的报告，\n只有一行。\n“塔的秘密：无。”
-303486,하사품 공고는\n그가 직접 떼어 찢었다.,He tore down the reward notice\nand ripped it up himself.,下賜品の告示は、\n彼が自らはがして破り捨てた。,赏赐告示，\n是他亲手揭下撕掉的。
-303487,'크하핫! 다음은 어디냐^ 데미안!'\n'…얼마 주는데.','Kahaha! Where to next^ Damian?!'\n'…How much does it pay?',「クハハッ！次はどこだ、ダミアン！」\n「…いくら出る」,“咔哈哈！下一站去哪儿，达米安！”\n“……给多少？”
-303520,TheSword,TheSword,TheSword,TheSword
-303521,제작,Created by,制作,制作
-303522,stopresent,stopresent,stopresent,stopresent
-303523,truemanburbank,truemanburbank,truemanburbank,truemanburbank
-303524,samryoug,samryoug,samryoug,samryoug
-303525,끝까지 값을 치러 준 당신에게.,To you^ who paid the price to the end.,最後まで値段を払ってくれた、あなたへ。,献给把价码付到最后的你。
-303560,물약도 길도 평소대로다. 값만 제대로 세라.,As usual. Just count the prices right.,ポーションも道も変わらん。値段を数えろ。,药水和路都跟平常一样。算好价码就行。
-303600,숫자 보고^ 순서 짜고. 늘 하던 대로.,Numbers^ then order. Same as always.,数字を見て、順番を組む。いつもどおりだ。,看数字，排顺序。照老样子。
-303640,비싼 놈은 나중에. 셈하는 법은 늘 같다.,Pricey ones later. Same math as ever.,高い奴は後回し。数え方はいつも同じだ。,贵的留到后面。账一直是这么算的。
-303680,물약이 귀한 층이다. 순서가 전부다.,Few potions here. Order is everything.,ポーションの乏しい階だ。順番がすべてだ。,这层药水稀少。顺序就是一切。
-303720,물약이 적네. 밟을 때를 골라야겠어.,Few potions. Better time them right.,ポーションが少ないな。踏み時を選ぶか。,药水不多。得挑好时机踩。
-303760,귀한 물약일수록 싸운 다음에 밟아라.,Scarce potions? Fight first^ then step.,貴重なポーションほど、戦った後に踏め。,药水越金贵，越要打完再踩。
-303800,길목에 비싼 놈이 섰다. 숫자부터 봐라.,Pricey one bars the way. Numbers first.,通り道に高い奴が立った。まず数字を見ろ。,要道上站着个贵的。先看数字。
-303840,저놈을 넘어야 길이 열리는군.,So the way opens only past that one.,あいつを越えなきゃ、道は開かないか。,得过了那家伙，路才会通。
-303880,지금 살지^ 커서 올지. 그게 이 층이다.,Buy now^ or grow first. That's the test.,この階は、今買うか大きくなって出直すか。,现在买，还是长大了再来。这层就看这个。
-303920,물약이 넉넉하다. 곁길 값도 치를 만하다.,Potions aplenty. Side paths pay off.,ポーションは潤沢だ。脇道の値段も払える。,药水充足。岔路的价码也付得起。
-303960,많다고 막 밟진 말자.,Plenty's no reason to stomp on them all.,多いからって、むやみに踏むのはよそう。,多也别乱踩。
-304000,빈 그릇에 부어야 남는다.,Only an empty bowl keeps what's poured.,空の器に注いでこそ、残る。,倒进空碗里，才留得住。
-304040,곁길 끝에 탑의 글자가 있다. 들를 값을 세라.,A glyph off the path. Count the detour.,脇道の奥に塔の文字。寄る値段を数えろ。,岔路尽头有塔之文字。算算绕路的价码。
-304080,둘 중 하나다. 모자란 쪽을 골라라.,One or the other. Take what you lack.,二つに一つだ。足りない方を選べ。,二选一。挑缺的那样。
-304120,물약이냐 룬이냐. 하나만 가져가지.,Potion or rune. I only get one.,ポーションかルーンか。取れるのは一つだ。,药水还是符文。只能拿一个。
-304160,다시. 이번엔 순서를 바꿔 봐라.,Again. Change the order this time.,もう一度だ。今度は順番を変えてみろ。,再来。这次换个顺序。
-304200,숫자는 이몸이 센다. 순서는 네가 정해라.,I tally the numbers. You set the order.,数字は我輩が数える。順番はお前が決めろ。,数字本大爷来数。顺序你来定。
-304240,일어나라. 값은 아직 안 치렀다.,Get up. The price isn't paid yet.,起きろ。まだ値段を払っていない。,起来。价码还没付呢。
-304280,…다시. 숫자는 거짓말을 안 해.,…Again. The numbers don't lie.,…もう一度。数字は嘘をつかない。,……再来。数字不会说谎。
-304320,문턱이다. 처음부터 다시 세라.,The threshold. Count again from the top.,敷居だ。最初から数え直せ。,回到这层的门槛了。从头再数。
+301240,탑에 들기 전^ 밑동의 무덤들을 지났다.\n그 위로 꽂힌 탑도\n거대한 칼 한 자루 같았다.,Before he went in^ he passed the graves.\nPlanted above them^ the Tower itself\nlooked like one enormous blade.,塔に入る前、その根元の墓の間を通った。\nその上に突き立つ塔もまた、\n巨大な一振りの剣のようだった。,进塔之前，他走过塔脚下的坟墓。\n坟墓上方倒插着的塔，\n也像一把巨大的剑。
+301280,…또 한 사람 왔구려. ……그 칼은…\n…아니^ 잘못 봤소.\n늙으면 헛것이 보이는 법이오.,…Another one has come. ……That blade…\n…No. I was mistaken.\nOld eyes see things that aren't there.,…また一人、来なすったか。……その剣は…\n…いや、見間違いじゃ。\n年を取ると、まぼろしが見えるものでな。,……又来了一个啊。……那把剑……\n……不，是老夫看错了。\n人老了，总会看见些虚影。
+301281,칼 꽂힌 무덤이 많네요.,Many graves here have swords in them.,剣の刺さった墓が多いですね。,插着剑的坟，可真多啊。
+301282,탑에 들어간 이들 몫이오.\n가브에선 전사의 무덤에\n그가 쓰던 칼을 꽂지.,For those who went into the Tower.\nIn Gabu^ a warrior's grave\nbears the blade he carried.,塔に入った者たちのものじゃ。\nガブでは、戦士の墓に\nその者が使っていた剣を突き立てるのじゃ。,是进了塔的那些人的。\n在加布，战士的坟上\n要插上他用过的剑。
+301283,사람은 안 돌아오오.\n칼만 탑이 뱉어 내지.,People don't come back.\nThe Tower spits out only their blades.,人は戻ってこん。\n剣だけを、塔が吐き出すのじゃ。,人是回不来的。\n只有剑，会被塔吐出来。
+301284,…음냐… 칼?\n칼 냄새… 몇 자루냐…,…*mumble*… Blades?\nSmells like blades… how many…,…むにゃ…剣？\n剣の匂い…何振りだ…,……呼噜……剑？\n剑的味道……有几把……
+301285,무덤이야. 먹지 마.,It's a grave. Don't eat it.,墓だ。食うな。,是坟。别吃。
+301286,아들놈 렌도 들어갔소.\n해 지기 전에 온다더니.,My boy Ren went in too.\nSaid he'd be back before sundown.,せがれのレンも入った。\n日暮れまでに帰ると言うておったが。,我家那小子伦，也进去了。\n说好日落之前回来……
+301287,무덤은 내가 파오.\n하나만 비어 있지.\n…주인이 아직 안 와서.,I dig the graves myself.\nOnly one stands empty.\n…Its owner hasn't come yet.,墓はわしが掘る。\nひとつだけ、空いておる。\n…主がまだ来んのでな。,坟是老夫挖的。\n只有一座是空的。\n……主人还没来。
+301288,이름은 묻지 않겠소.\n알면 비석에 새겨야 하니까.\n돌아오면^ 그때 묻지.,I won't ask your name.\nI'd only have to carve it in stone.\nWhen you come back^ I'll ask then.,名は聞かんでおこう。\n知れば、墓石に刻まねばならん。\n戻ってきたら、その時に聞こう。,名字，老夫就不问了。\n知道了，就得刻上墓碑。\n等你回来，再问吧。
+301289,탑 안에서 누가\n달콤한 말을 하거든^\n값을 먼저 물어보시오.,If anyone in the Tower\nspeaks sweet words to you^\nask the price first.,塔の中で誰かが\n甘いことを言うてきたら、\nまず値段を聞きなされ。,在塔里，若有谁\n对你说甜言蜜语，\n先问问价码。
+301290,값은 늘 먼저 물어요.,I always ask the price first.,値段は、いつも先に聞きます。,价码，我一向都先问的。
+301320,계단을 올랐는데 흙냄새가 짙다.\n숲은 발밑에 두고 왔는데^ 잎은 머리 위에서.\n…이 탑^ 거꾸로구나.,I climbed^ yet it smells of earth.\nForest below^ leaves falling from above.\n…This Tower's upside down.,階段を上ったのに、土の匂いが濃い。\n森は足の下なのに、葉は頭の上から落ちる。\n…この塔、逆さまなんだな。,明明是上楼，泥土味却更重了。\n森林在脚下，叶子却从头顶落下。\n……这座塔，是倒着的啊。
+301321,탑 안에선 탑이 정한 쪽이 위다.\n…그나저나 이 냄새^\n어디서 맡았더라.,In the Tower^ up is where the Tower says.\n…Still^ this smell…\nwhere have I smelled it before?,塔の中では、塔が決めた方が上だ。\n…それにしてもこの匂い、\nどこで嗅いだのだったか。,在塔里，塔定的那一边就是上。\n……话说这股味道，\n在哪儿闻过来着。
+301360,방패를 든 채 싸움을 열고^\n내려가도 금방 다시 드는 놈이다.\n방패 위론 평타 1^ 진심도 4분의 1.,Its shield is up when the fight opens^\nand back up fast whenever it drops.\nPlain hits: 1. Earnest cuts: a quarter.,盾を構えて戦いを始め、\n下ろしてもすぐ構え直す奴だ。\n盾越しなら通常攻撃は1、本気も4分の1。,这家伙举着盾开打，\n盾放下了，很快又会举起。\n盾上普通攻击算1，真格也只剩四分之一。
+301361,진심이 방패에 걸리면 손해네.\n숫자 보고 순서를 바꾸지.,An earnest cut on a shield is a waste.\nI'll read the numbers and reorder.,本気が盾に当たったら損だな。\n数字を見て、順番を変える。,真格撞上盾就亏了。\n看着数字换个顺序。
+301400,탑의 글자다! 삼키는 순간\n몸에 새겨져서 영영 안 빠진다.,The Tower's glyph! Once swallowed^\nit's carved into your body for good.,塔の文字だ！　飲み込んだ瞬間、\n体に刻まれて二度と抜けん。,是塔之文字！一吞下去，\n就刻进身体，永远不掉。
+301401,공격 한 점이라…\n티도 안 나겠는데.,One point of attack…\nWon't even notice it.,攻撃が一点上がるだけか…\n大差なさそうだけどな。,攻击才一点……\n根本看不出来吧。
+301402,층마다 같은 놈이 셋이다.\n한 점이 세 번 값을 한다.\n방어도^ 체력도 돌아가며 나온다.,Each floor sets three of the same kind.\nOne point pays off three times.\nDefense and health come round in turn.,どの階にも、同じ奴が三匹いる。\nその一点が、三度効く。\n防御も体力も、順繰りに出てくる。,每层都有三个一样的家伙。\n一点就抵得上三回价码。\n防御和生命，也会轮流出现。
+301440,크하핫! 먹은 걸 조금 나눠 줬다.\n계약대로다.,Kahaha! I shared a bit of what I ate.\nAs the contract says.,クハハッ！食った分を少し分けてやった。\n契約どおりだ。,咔哈哈！吃下的分了你一点。\n照契约办。
+301441,클수록 뒤가 다 싸진다.\n비싼 놈은 나중에 사고^\n먹을 수 있을 때 먹어 둬라.,The more you grow^ the cheaper the rest.\nBuy the pricey ones later^\nand eat while you can.,大きくなるほど、先がみな安くなる。\n高い奴は後回しだ。\n食えるときに食っておけ。,长得越大，后面的就越便宜。\n贵的留到后面再买，\n能吃的时候就先吃。
+301442,그래서^ 좀 컸어?,So. Have I grown any?,で、少しは大きくなったのか？,所以，你长大点了没？
+301443,…아직 멀었다.,…A long way yet.,…まだまだだ。,……还差得远。
+301480,여분 열쇠다. 안 쓰면 다음 층까지 간다.,A spare key. If unused^ it carries over.,予備の鍵だ。使わねば次の階へ持ち越す。,是备用钥匙。不用就带到下一层。
+301520,열쇠가 없다. 구역마다 다음 문 열쇠가 있다.,No key. Every zone holds the next key.,鍵がない。区画ごとに次の扉の鍵がある。,没钥匙。每个区域都有下一扇门的钥匙。
+301560,숫자 대신 빨간 가위표가 떴다.\n값이 아니다. 목숨이다.,A red X instead of a number.\nThat's not a price. It's your life.,数字の代わりに赤いバツが出た。\n値段ではない。命だ。,浮起来的不是数字，是红叉。\n那不是价码。是命。
+301561,지금 가진 걸로는 못 산다.\n커서 오든지^ 물약을 밟고 오든지^\n다른 놈부터 사라.,What you have now can't buy this.\nCome back grown^ or after a potion^\nor buy a different one first.,今の手持ちでは買えん。\n大きくなるか、ポーションを踏んで来い。\nでなければ、他の奴から先に買え。,凭你现在的本钱，买不起。\n要么长大了再来，要么踩了药水再来，\n要么先买别的家伙。
+301562,…알았어.,…Got it.,…わかった。,……知道了。
+301600,넘친 만큼은 버려졌다.,What overflowed went to waste.,溢れた分は、捨てられた。,溢出的部分，被丢弃了。
+301601,아깝네.,Pity.,もったいないな。,真可惜。
+301602,물약은 싸운 다음에 밟아라.\n빈 그릇에 부어야 남는다.,Step on potions after you fight.\nOnly an empty bowl keeps what's poured.,ポーションは戦ったあとに踏め。\n空の器に注いでこそ、残る。,药水要打完再踩。\n倒进空碗里，才留得住。
+301640,네 번째 문이다. 길이 아니라 금고다.\n안에 탑의 글자가 있다.,A fourth door. Not a path^ but a vault.\nThe Tower's glyph lies inside.,四つ目の扉だ。道ではない、金庫だ。\n中に塔の文字がある。,第四扇门。不是路，是金库。\n里面有塔之文字。
+301641,같은 색 열쇠가 남았으면 열린다.\n열쇠는 층을 넘어 들고 다닌다.,A leftover key of its color opens it.\nKeys carry over from floor to floor.,同じ色の鍵が残っていれば開く。\n鍵は階をまたいで持ち歩ける。,有同色的钥匙剩着，就能打开。\n钥匙可以带着跨过楼层。
+301642,탑 전체로 치면 금고가\n남는 열쇠보다 많다. 다는 못 연다.,In the whole Tower^ vaults outnumber\nleftover keys. You can't open them all.,塔全体で見れば、金庫は\n余る鍵より多い。全部は開けられん。,整座塔算下来，金库\n比剩下的钥匙多。开不完的。
+301643,금고마다 든 글자가 돌아가며 바뀐다.,The glyph changes from vault to vault.,金庫ごとに、中の文字は順繰りに変わる。,每个金库里的文字，都会轮流换。
+301644,지금 열지^ 아껴 둘지…\n그건 내가 셀게.,Open it now^ or save the key…\nI'll do that math myself.,今開けるか、取っておくか…\nそれは俺が数える。,现在开，还是留着……\n这个我自己来算。
+301680,물약이냐 탑의 글자냐^ 둘 중 하나다.\n하나를 집으면 다른 쪽은 사라진다.,Potion or the Tower's glyph: pick one.\nTake one^ and the other vanishes.,ポーションか塔の文字か、二つに一つだ。\n片方を取れば、もう片方は消える。,药水还是塔之文字，二选一。\n拿了一个，另一个就会消失。
+301681,둘 다는?,Both?,両方は？,两个都要呢？
+301682,안 된다. 먼저 집은 쪽만 남는다.,No. Only what you take first remains.,ならん。先に取った方だけが残る。,不行。只留先拿的那个。
+301683,…모자란 쪽을 고르지.,…Then I'll take whatever I'm short on.,…足りない方を選ぶ。,……那就挑缺的那样。
+301720,…방금^ 무릎 꿇은 내 옆에\n네가 꽂혀 있었지.\n꼭 무덤 같더군.,…Just now^ I was on my knees\nand you were planted beside me.\nLooked just like a grave.,…さっき、膝をついた俺の横に\nお前が突き立っていたな。\nまるで墓みたいだった。,……刚才，跪倒的我身旁\n插着你。\n就像一座坟。
+301721,무덤은 무슨.\n네 목숨은 이몸 거다.\n이몸 허락 없이는 못 죽는다.,Grave? Nonsense.\nYour life is mine.\nYou shall not die without my leave.,墓なものか。\nお前の命は我輩のものだ。\n我輩の許しなしには死ねん。,什么坟不坟的。\n你的命是本大爷的。\n没有本大爷允许，你死不了。
+301722,이 층 문턱으로 끌어올렸다.\n몸도 층도 들어설 때 그대로다.,I hauled you up to the threshold.\nBody and floor^ as when you entered.,この階の敷居まで引き上げた。\n体も階も、踏み入った時のままだ。,本大爷把你拽回了这层的门槛。\n身体和楼层，都跟刚进来时一样。
+301723,(메뉴에서 몇 층 전으로\n되돌릴 수도 있다.),(From the menu^ you can also\ngo back several floors.),（メニューから、何階か前に\n戻ることもできる。）,（也可以在菜单里\n退回到几层之前。）
+301760,크하핫! 탑에서 살아남는 법을\n하나 가르쳐 주마^ 허접.,Kahaha! Let me teach you\nhow to survive the Tower^ Two-bit.,クハハッ！塔で生き残る術を\nひとつ教えてやろう、ヘボ。,咔哈哈！本大爷教你\n在塔里活下去的法子，三流。
+301761,배고픈 놈은 먹히고^\n배부른 놈이 먹는다!,The hungry get eaten^\nand the full do the eating!,腹を空かせた奴は食われ、\n満腹の奴が食う！,饿着的会被吃掉，\n吃饱的才能去吃！
+301762,넌 어느 쪽인데?,Which one are you?,お前はどっちなんだ？,那你是哪边的？
+301763,이몸? …늘 배고프지.,This blade? …Always hungry.,我輩か？　…いつも腹が減っている。,本大爷？……一直都饿着。
+301764,그럼 먹히는 쪽이네.,Then you're the one getting eaten.,じゃあ、食われる側だな。,那就是被吃的那边。
+301765,이^ 이몸은 먹는 쪽이다!\n배가 고플 뿐이지!,Th-this blade does the eating!\nI'm only hungry^ that's all!,わ、我輩は食う側だ！\n腹が減っているだけだ！,本、本大爷是吃的那边！\n只是肚子饿而已！
+301800,…해 지기 전에… 간다며…,…Home… before sundown… you said…,…日暮れまでに…帰るって…,……不是说……日落之前……回去吗……
+301801,……,……,……,……
+301802,…누가?,…Who did?,…誰が？,……谁？
+301803,뭐^ 뭐냐!\n이몸은 눈 뜨고 잔다!,Wh-what?!\nI sleep with my eye open!,な、なんだ！\n我輩は目を開けて寝るのだ！,干、干什么！\n本大爷是睁着眼睡的！
+301804,그러니까 잤다는 거잖아.\n…잠꾸러기.,So you admit you were asleep.\n…Sleepyhead.,つまり寝てたってことだろ。\n…寝ぼすけ。,所以就是睡着了嘛。\n……瞌睡虫。
+301805,잠꾸러기?!\n마검한테 그게 할 소리냐!,Sleepyhead?!\nIs that how you speak to a demon sword?!,寝ぼすけだと？！\n魔剣に向かって言うことか！,瞌睡虫？！\n这是对魔剑说的话吗！
+301840,이놈한테서 짐승 냄새가 난다.\n죽지 않고 1할 이하로 떨어지면\n딱 한 번^ 몸 4할을 채우고 일어선다.,This one reeks of beast.\nIf it falls under a tenth and lives^\nit rises once^ with four tenths back.,こいつ、獣の匂いがする。\n死なずに一割を切ると、\n一度だけ、体の四割を満たして起き上がる。,这家伙有野兽的味道。\n要是没死透，掉到一成以下，\n就会补回四成，再站起来一次。
+301841,그 몫까지 숫자에 들어 있고?,And that's already in the number?,その分も、数字に入ってるのか？,那份也算在数字里了？
+301842,당연하지. 이몸 눈이다.\n대신 1할 턱밑에서 강타 한 방에\n끝내면 일어설 틈이 없다.,Naturally. My eye misses nothing.\nSave Smash for just above a tenth:\none blow^ and it never rises.,当然だ。我輩の目だぞ。\nだが一割の手前で、強打一発で\n仕留めれば、起き上がる隙もない。,当然。这可是本大爷的眼睛。\n不过，逼近一成时用强击\n一下了结，它就没机会站起来。
+301880,…또… 너냐.,…You… again.,…また…お前か。,……又……是你。
+301881,아는 놈이야?,Someone you know?,知り合いか？,你认识？
+301882,마물 따위가\n이몸을 알 리 없다.,No mere monster\ncould know me.,魔物ごときが\n我輩を知るはずがない。,区区魔物，\n不可能认识本大爷。
+301883,…해가… 진다…\n…가야 하는데…,…The sun… is setting…\n…I have to go…,…日が…暮れる…\n…帰らなきゃ…,……太阳……要落了……\n……得回去……
+301884,…얼마?,…How much?,…いくらだ？,……多少？
+301885,머리 위에 떠 있잖나.\n크하핫! 저녁밥이다^ 허접!,It's floating right over its head.\nKahaha! Supper time^ Two-bit!,頭の上に浮かんでいるだろうが。\nクハハッ！晩飯だ、ヘボ！,不就浮在头顶上嘛。\n咔哈哈！晚饭来了，三流！
+301920,…해 지기 전에…\n간다고… 했는데…,…Before sundown…\nI said… I'd go home…,…日暮れまでに…\n帰るって…言ったのに…,……说好了……\n日落之前……回去的……
+301921,늑대가 쓰러진 자리에\n목에 걸려 있던 반지가 굴렀다.,Where the wolf fell^\nthe ring from its neck rolled free.,狼が倒れた場所に、\n首にかけていた指輪が転がった。,狼倒下的地方，\n滚出一枚原本挂在它脖子上的戒指。
+301922,……이 목소리.\n들은 적이 있다.,……That voice.\nI've heard it before.,……この声。\n聞いたことがある。,……这个声音。\n本大爷听过。
+301923,마물 따위가 널 알 리 없다며.,You said no mere monster could know you.,魔物ごときが、お前を知るはずないんだろ。,不是说区区魔物不可能认识你吗。
+301924,…마물이 아니었다.\n탑은 쓰러진 자를 마물 꼴로 빚어\n문지기로 세운다.,…It wasn't a monster.\nThe Tower molds the fallen into monsters\nand stands them up as gatekeepers.,…魔物ではなかった。\n塔は倒れた者を魔物の姿に作り変え、\n門番に据えるのだ。,……那不是魔物。\n塔会把倒下的人塑成魔物的样子，\n立在门口看门。
+301925,…그런 걸 어떻게 알아?,…How do you know that?,…なんでそんなことを知ってる？,……这种事你怎么知道？
+301926,…모른다. 입이 안다.,…I don't know. My mouth does.,…知らん。口が知っている。,……不知道。嘴知道。
+301927,……허접 모험가.\n넌 해 지기 전에 돌아갈 데 있나?,……Two-bit adventurer.\nHave you anywhere to go back to\nbefore sundown?,……ヘボ冒険者。\nお前には、日暮れまでに帰る場所があるか？,……三流冒险者。\n日落之前，你有地方可回吗？
+301928,없어.,Nowhere.,ない。,没有。
+301929,…이몸도 없다.,…Nor have I.,…我輩もない。,……本大爷也没有。
+301960,반지 안쪽에 글자가 있군.,There's writing inside the ring.,指輪の内側に、文字があるな。,戒指内侧刻着字。
+301961,렌에게. 해 지기 전에.,To Ren. Before sundown.,レンへ。日暮れまでに。,给伦。日落之前。
+301962,렌… 촌장 아들 이름이었지.,Ren… That was the chief's son.,レン…村長の息子の名前だったな。,伦……是村长儿子的名字吧。
+301963,……다녀온 층이면 어디든\n그 층 문턱으로 데려다주는 반지다.,……Any floor you've already been to^\nthis ring takes you to its threshold.,……行ったことのある階なら、どこでも\nその階の敷居へ連れていく指輪だ。,……只要是去过的楼层，\n它都能送你到那层的门槛。
+301964,아래층에 못 연 금고가 있거든\n남은 열쇠 들고 돌아가도 된다.,Left a vault unopened down below?\nGo back with your leftover keys.,下の階に開けそびれた金庫があれば、\n残った鍵を持って戻ってもいい。,下面的楼层要是有没开的金库，\n可以带着剩下的钥匙回去。
+302000,…물이 위에서 떨어진다.\n우린 땅속으로 가는 중인데.,…Water's dripping from above.\nAnd we're heading underground.,…水が上から落ちてくる。\n俺たちは地の底へ向かってるのに。,……水从上面滴下来。\n我们明明是在往地底下走。
+302001,퉤^ 퉤! 날에 물 튄다!\n녹슬면 네가 닦아라^ 허접.,Ptoo^ ptoo! Water on my blade!\nIf I rust^ you're polishing me^ Two-bit.,ペッ、ペッ！刃に水がはねる！\n錆びたら、お前が磨け、ヘボ。,呸、呸！水溅到剑刃上了！\n生锈了你来擦，三流。
+302002,그리고 말했잖나.\n탑 안에선 탑이 정한 쪽이 위다.,And as I told you:\nin the Tower^ up is\nwhere the Tower says.,それに、言ったであろう。\n塔の中では、塔が決めた方が上だ。,还有，本大爷说过吧。\n在塔里，塔定的那一边就是上。
+302003,그럼 탑은\n어디를 위라고 정한 거야?,Then which way\nhas the Tower decided is up?,じゃあ塔は、\nどこを上と決めたんだ？,那这座塔，\n把哪边定成了上？
+302004,……,……,……,……
+302005,…모른다.,…I don't know.,…知らん。,……不知道。
+302040,남들 한 번 벨 때 두 번 베는 놈이다.\n대신 한 대 한 대는 가볍다.,It cuts twice while others cut once.\nBut every blow is light.,他が一度斬る間に、二度斬る奴だ。\nその代わり、一撃一撃は軽い。,别人砍一下，它砍两下。\n不过每一下都很轻。
+302041,그럼 방어 한 점이 두 번 막는 거지.\n방어 룬이 여기서 제값을 하겠어.,So one point of defense blocks twice.\nDefense runes will earn their keep here.,なら、防御一点が二度防ぐってことだな。\n防御のルーンは、ここで値打ちが出るな。,那一点防御就能挡两次。\n防御符文在这儿物有所值。
+302080,…음냐…,…*mumble*…,…むにゃ…,……呼噜……
+302081,…세드릭…\n문 열어…,…Cedric…\nopen the door…,…セドリック…\n扉を開けろ…,……塞德里克……\n开门……
+302082,세드릭?,Cedric?,セドリック？,塞德里克？
+302083,뭐^ 뭐냐! 꿈이다^ 꿈!,Wh-what?! A dream! Just a dream!,な、なんだ！夢だ、夢！,干、干什么！是梦，是梦！
+302084,잠꾸러기.\n꿈에서도 문 타령이냐.,Sleepyhead.\nDoors^ even in your dreams?,寝ぼすけ。\n夢の中まで扉の話かよ。,瞌睡虫。\n做梦都在念叨门啊。
+302085,시끄럽다!\n이몸 꿈은 이몸 거다!,Silence!\nMy dreams are my own affair!,やかましい！\n我輩の夢は我輩のものだ！,吵死了！\n本大爷的梦是本大爷的！
+302120,얼마?,How much?,いくらだ？,多少？
+302121,…너 요즘\n숫자 안 보더라.,…You haven't been\nchecking the numbers lately.,…お前、近ごろ\n数字を見ていないな。,……你最近\n都不看数字了啊。
+302122,네가 보잖아.,You do the looking.,お前が見てるだろ。,有你看着嘛。
+302123,……!,……!,……！,……！
+302124,크하핫! 당연하지.\n이몸 눈이다!,Kahaha! Naturally!\nMy eye misses nothing!,クハハッ！当然だ。\n我輩の目だからな！,咔哈哈！那当然。\n这可是本大爷的眼睛！
+302125,…흥. 그래도 가끔은 봐라.\n아직 멀었으니까.,…Hmph. Look now and then anyway.\nA long way yet.,…ふん。それでも、たまには見ろ。\nまだまだだからな。,……哼。不过偶尔也看看。\n还差得远呢。
+302160,다섯 층만 더 오르면\n물길이 끝난다. 그다음은 뜨겁다.,Five more floors up\nand the waterway ends. Then it gets hot.,あと五階上れば、\n水路は終わる。その先は熱いぞ。,再上五层，\n水道就到头了。之后会很热。
+302161,각오해라^ 허접 모험가.\n이몸은 안 녹지만^ 넌 녹는다.,Brace yourself^ two-bit adventurer.\nThis blade does not melt. You do.,覚悟しておけ、ヘボ冒険者。\n我輩は溶けんが、お前は溶ける。,做好准备，三流冒险者。\n本大爷化不了，你可会化。
+302162,…너^ 이 탑 알지?,…You know this Tower^ don't you?,…お前、この塔を知ってるだろ。,……你，认得这座塔吧？
+302163,마^ 마검은 원래 다 안다!,D-demon swords know everything!,ま、魔剣はもともと何でも知っているのだ！,魔、魔剑本来就无所不知！
+302164,(…탑 얘긴 처음 듣는 척하더니.),(…Yet it acted like the Tower was news.),（…塔の話は初耳って顔してたくせに。）,（……之前还装作头一回听说这座塔。）
+302200,기록한다.\n침입자 하나. 눈 달린 검 하나.,For the record.\nOne intruder. One sword with an eye.,記録する。\n侵入者、一名。目のある剣、一振り。,记录。\n入侵者一名。带眼睛的剑一把。
+302201,…왕국 조사관 브람이다.\n보고를 올려야 하는데.,…Royal Investigator Bram.\nReport still pending.,…王国調査官、ブラムだ。\n報告を上げねばならんのだが。,……王国调查官，布拉姆。\n报告还没呈上去。
+302202,…이번엔 고블린이네.\n이놈도 사람이었던 거지?,…A goblin this time.\nThis one was a person too^ right?,…今度はゴブリンか。\nこいつも人間だったんだろ？,……这次是哥布林啊。\n这家伙以前也是人吧？
+302203,…그래. 늑대 때처럼\n탑이 다시 빚었다.,…Yes. Like the wolf^\nthe Tower remade him.,…ああ。狼の時と同じだ。\n塔が作り変えた。,……嗯。跟那头狼一样，\n是塔重新塑成的。
+302204,브람…\n의뢰서 끝에 적힌 이름이군.,Bram…\nThe name signed on the request slip.,ブラム…\n依頼書の末尾にあった名前か。,布拉姆……\n原来是委托书末尾写的名字。
+302205,그 의뢰가 아직도 걸려 있었나.\n…내 보고가 없으니 그렇겠지.,That request is still posted?\n…Of course. My report never came.,あの依頼が、まだ貼られていたか。\n…私の報告がないのだ。当然だな。,那份委托还挂着吗。\n……没有我的报告，也难怪。
+302206,그 검한테 등 보이지 마라.\n…촌장 아들 다음이 나였다.,Never turn your back on that sword.\n…After the chief's son^ it was me.,その剣に背中を見せるな。\n…村長の息子の次が、私だった。,别把后背露给那把剑。\n……村长儿子之后，就是我。
+302207,헛소리 마라!,Nonsense!,たわごとを抜かすな！,少胡说八道！
+302240,방패는… 끝까지 안 내렸다.\n그래서… 여기 서 있지.,Never lowered… the shield. To the end.\nSo… here I stand.,盾は…最後まで下ろさなかった。\nだから…ここに立っている。,盾……到最后都没放下。\n所以……才站在这里。
+302241,…보고^ 끝.,…End of report.,…報告、以上。,……报告，完毕。
+302242,……그 방패^ 본 적 있다.\n늘 이몸 쪽을 향해 있었지.,……I've seen that shield before.\nIt was always turned toward me.,……あの盾、見たことがある。\nいつも我輩の方を向いていた。,……那面盾，本大爷见过。\n一直朝着本大爷这边。
+302243,…이몸은 전에도\n계약한 적이 있다.,…I have made contracts\nbefore.,…我輩は以前にも\n契約したことがある。,……本大爷以前\n也订过契约。
+302244,그놈들은?,And the ones before?,そいつらは？,那些人呢？
+302245,…기억이 안 난다.,…I don't remember.,…思い出せん。,……想不起来了。
+302246,그래.,Right.,そうか。,这样啊。
+302247,…그게 다냐?,…That's it?,…それだけか？,……就这样？
+302248,기억 안 난다며.,You said you don't remember.,思い出せないんだろ。,你不是说想不起来吗。
+302249,…흥. 저놈은 끝까지\n이몸을 안 믿었다. 멍청하긴.,…Hmph. To the very end^\nthat one never trusted me. Fool.,…ふん。あいつは最後まで\n我輩を信じなかった。愚か者め。,……哼。那家伙到最后\n都不信本大爷。真是蠢。
+302280,올라갈수록 뜨겁군.\n땅속으로 가고 있다는 거지.,The higher we go^ the hotter it gets.\nSo we are heading underground.,上るほど熱くなるな。\n地の底へ向かってるってことか。,越往上越热啊。\n说明是在往地底下走。
+302281,땅속인데\n해는 여기가 제일 높네.,We're underground^\nyet the sun's highest here.,地の底なのに、\n日はここがいちばん高いな。,明明在地底下，\n太阳却在这儿最高。
+302282,……해가 아니다.\n불빛이다.,……That's no sun.\nIt's firelight.,……日ではない。\n火の明かりだ。,……那不是太阳。\n是火光。
+302283,…이 냄새. 싫다.\n아니… 모르겠다.,…This smell. I hate it.\nNo… I don't know.,…この匂い。嫌だ。\nいや…わからん。,……这股味道。讨厌。\n不……说不上来。
+302320,때리는 족족 진심이다.\n대신 몸이 약하다.\n오래 끌면 죽는다.,Every hit it lands is in earnest.\nBut its body is frail.\nDrag it out^ and you die.,打つたびに本気だ。\nその代わり、体が弱い。\n長引かせれば死ぬぞ。,打出的每一下都是真格。\n不过身子弱。\n拖久了，死的是你。
+302321,그럼 강타로 일찍 끊어야겠네.,Then I'd better end it early with Smash.,なら、強打で早めに片をつけないとな。,那就得早点用强击了结。
+302360,다섯 대 맞을 때마다 운다.\n그 울음에 때린 쪽이 다친다.\n맷집도 좋다.,Every fifth hit it takes^ it roars.\nThe roar hurts whoever struck it.\nAnd it can take a beating.,五発殴られるたびに吠える。\nその声で、殴った側が傷を負う。\nしかも打たれ強い。,每挨五下就吼一声。\n那一吼，打它的会受伤。\n还很耐打。
+302361,한 대가 셀수록 덜 듣겠어.,The harder each hit^ the fewer roars.,一撃が重いほど、聞く回数も減るな。,一下越重，吼声就听得越少。
+302400,굶주림은\n굶주림으로만 묶인다.,Only hunger\ncan bind hunger.,飢えは、\n飢えでしか縛れない。,饥饿，\n只能用饥饿来束缚。
+302401,…뭐?,…What?,…何だって？,……什么？
+302402,…방금 이몸이\n뭐라고 했나?,…What did I\njust say?,…今、我輩は\n何と言った？,……本大爷刚才\n说了什么？
+302403,굶주림이 어쩌고.\n무슨 뜻이야?,Something about hunger.\nWhat's that mean?,飢えがどうとか。\nどういう意味だ？,什么饥饿不饥饿的。\n什么意思？
+302404,모른다.\n입이 먼저 움직였다.,I don't know.\nMy mouth moved first.,知らん。\n口が先に動いた。,不知道。\n嘴自己先动了。
+302440,…음냐… 요즘 이상하다.\n배가 좀 찬다.,…*mumble*… Something's odd lately.\nMy belly's filling up a bit.,…むにゃ…近ごろ妙だ。\n腹が少し満ちてきた。,……呼噜……最近怪怪的。\n肚子有点满了。
+302441,잘 먹였으니까.,I've fed you well.,よく食わせてやったからな。,我喂得好嘛。
+302442,크하핫! 그건 인정하마.\n…그런데 넌 왜 이 탑에 왔냐?,Kahaha! That I'll grant you.\n…But why did you come to this Tower?,クハハッ！それは認めてやろう。\n…ところで、お前はなぜこの塔に来た？,咔哈哈！这点本大爷承认。\n……话说你为什么来这座塔？
+302443,남들이 안 가져가는\n의뢰만 골라 왔어.,I only take the requests\nnobody else will.,誰も取らない\n依頼ばかり選んできた。,我一直只挑\n别人不接的委托。
+302444,남은 것끼리는…\n알아보거든.,Leftovers…\nknow their own.,売れ残り同士は…\nお互い、わかるんだ。,被剩下的……\n彼此认得出来。
+302445,……,……,……,……
+302446,그러고 보니\n넌 내 이름도 안 물었지.,Come to think of it^\nyou never even asked my name.,そういえば、\nお前、俺の名前も聞かなかったな。,说起来，\n你连我的名字都没问过。
+302447,필요 없다.\n허접 모험가면 충분하다.,No need.\n'Two-bit adventurer' is enough.,要らん。\nヘボ冒険者で十分だ。,用不着。\n叫三流冒险者就够了。
+302448,…싸게 치는군.,…You price me cheap.,…安く見られたもんだな。,……把我估得真便宜。
+302449,크하핫! 억울하면 더 커라.\n…아직 멀었다.,Kahaha! Don't like it? Grow bigger.\n…A long way yet.,クハハッ！悔しければ、もっと大きくなれ。\n…まだまだだ。,咔哈哈！不服就再长大点。\n……还差得远。
+302480,……,……,……,……
+302481,방금 그 눈^ 뭐였어.,What was that look just now?,今の目、何だ。,刚才那是什么眼神。
+302482,…배가 고파서 그렇다.,…I'm just hungry.,…腹が減っているだけだ。,……因为肚子饿。
+302483,저번엔 배가 찬다며.,Last time you said you were filling up.,前は、腹が満ちてきたって言ったろ。,上次不还说肚子满了。
+302484,…용광로라 그렇다.\n신경 쓰지 마라.,…It's the furnace.\nPay it no mind.,…溶鉱炉のせいだ。\n気にするな。,……因为是熔炉。\n别在意。
+302520,…또… 왔…어…,…You… came… again…,…また…来た…の…,……又……来……了……
+302521,…그… 검…,…That… sword…,…その…剣…,……那把……剑……
+302522,너한테 하는 말 같은데.,Sounds like it's talking to you.,お前に言ってるみたいだぞ。,好像是在跟你说话。
+302523,재가 말을 하는군.\n뭐라는지 모르겠다.,So the ash speaks.\nI can't make out a word.,灰がしゃべるとはな。\n何を言っているかわからん。,灰烬在说话啊。\n听不懂在说什么。
+302524,얼마?,How much?,いくらだ？,多少？
+302525,비싸다. 때리는 족족 진심이다.\n강타로 끊어라.,Expensive. Every hit is in earnest.\nEnd it with Smash.,高いぞ。打つたびに本気だ。\n強打で片をつけろ。,贵。每一下都是真格。\n用强击了结。
+302560,…네… 값…,…Your… price…,…あなたの…値段…,……你的……价码……
+302561,…왕좌… 비어…,…Throne… empty…,…玉座…空いて…,……王座……空着……
+302562,……!,……!,……！,……！
+302563,…또 너냐.,…You again.,…またお前か。,……又是你。
+302564,…다시는 나오지 마라.,…Never come back out.,…二度と出てくるな。,……别再出来了。
+302565,…저 재가 마지막에\n뭐라고 한 거야?,…What did that ash\nsay at the end?,…あの灰、最後に\n何て言ったんだ？,……那堆灰最后\n说了什么？
+302566,……,……,……,……
+302567,…녹이지 말라더군.\n녹이려다 그 꼴이 됐으니.,…It said not to try melting me.\nIt tried^ and ended up like that.,…溶かすな、だそうだ。\n溶かそうとして、あのざまだからな。,……它说，别想熔掉。\n它自己就是想熔，才落得那副样子。
+302568,값이라고 한 것 같은데.,Sounded like 'price' to me.,『値段』って聞こえたけどな。,好像说的是价码。
+302569,잘못 들었다.,You misheard.,聞き違いだ。,你听错了。
+302570,……,……,……,……
+302571,크^ 크하핫…\n배^ 배부르다. 잔다.,Ka… Kahaha…\nI-I'm full. Off to sleep.,ク、クハハッ…\nま、満腹だ。寝る。,咔、咔哈哈……\n饱、饱了。睡了。
+302600,용광로 다음엔 눈이군.\n해도 기울었고.\n불보다 깊은 데가 얼어 있네.,After the furnace^ snow.\nThe sun's sinking^ too.\nDeeper than the fire^ yet frozen.,溶鉱炉の次は雪か。\n日も傾いてる。\n火より深い所が、凍ってるんだな。,熔炉之后是雪啊。\n太阳也斜了。\n比火更深的地方，竟冻住了。
+302601,…춥군.,…Cold.,…寒いな。,……真冷。
+302602,안 졸려?\n예전 같으면 벌써 잤을 텐데.,Not sleepy?\nUsed to be^ you'd be asleep by now.,眠くないのか？\n前なら、とっくに寝てたろ。,不困？\n换作以前，早就睡着了。
+302603,…안 잔다.,…I won't sleep.,…眠らん。,……不睡。
+302640,…싫은 놈들이다.\n진심이 아니면 5분의 1만 닿는다.\n강타도 흡혈도 마찬가지다.,…Hateful things.\nOnly a fifth lands^ unless it's earnest.\nSame goes for Smash and Drain.,…嫌な奴らだ。\n本気でなければ、五分の一しか届かん。\n強打も吸血も同じだ。,……讨厌的家伙。\n不是真格，只能伤到五分之一。\n强击、吸血也一样。
+302641,숨을 맞춰서 도착하지.\n앞에서 순서를 짜 두고.,I'll arrive with the breaths lined up.\nPlan the order in the fights before.,息を合わせてたどり着く。\n手前で順番を組んでおいてな。,那就对准呼吸再过去。\n在前面先把顺序排好。
+302680,숨어 있는 동안엔 진심이 아니면\n다 피한다. 첫 진심에 모습을 드러낸다.\n강타도 그 전엔 헛손질이다.,Hidden^ it dodges anything not earnest.\nAn earnest cut makes it reveal itself.\nUntil then^ even Smash hits air.,潜んでいる間は、本気でなければ\nすべてかわす。最初の本気で姿を現す。\n強打も、それまでは空振りだ。,藏身的时候，不是真格\n全都闪开。第一下真格才会现形。\n在那之前，强击也是白打。
+302681,누굴 먼저 베느냐가 값이네.,So who I cut first sets the price.,誰を先に斬るかが、値段か。,先砍谁，决定价码啊。
+302720,요즘 안 자네.,You don't sleep these days.,近ごろ、寝ないな。,你最近都不睡了。
+302721,…잠이 안 온다.,…Sleep won't come.,…眠れんのだ。,……睡不着。
+302722,그럼 하나 묻자.\n수로에서 잠꼬대로 부른 이름.\n세드릭이 누구야?,Then let me ask.\nThat name you mumbled in the aqueduct.\nWho's Cedric?,じゃあ一つ聞く。\n水路で寝言に出た名前。\nセドリックって誰だ？,那我问你。\n在水道说梦话时叫的名字，\n塞德里克是谁？
+302723,……음냐.,……*mumble*.,……むにゃ。,……呼噜。
+302724,…자는 척하지 마.\n잠 안 온다며.,…Don't fake it.\nYou said sleep won't come.,…寝たふりするな。\n眠れないんだろ。,……别装睡。\n不是说睡不着吗。
+302725,……,……,……,……
+302760,…왜.\n머리에 뭐 묻었어?,…What.\nSomething on my head?,…何だ。\n頭に何かついてるか？,……干嘛。\n我头上沾了什么？
+302761,……충분하다.,……Enough.,……十分だ。,……够了。
+302762,뭐가?\n늘 '아직 멀었다'더니.,Enough what?\nYou always say 'a long way yet.',何が？\nいつも『まだまだだ』って言ってたのに。,什么够了？\n你不是总说“还差得远”吗。
+302763,…아무것도.,…Nothing.,…何でもない。,……没什么。
+302800,넌…\n돌아갈 데 없다고 했지.,You…\nsaid you had nowhere to go back to.,お前は…\n帰る場所がないと言ったな。,你……\n说过没有地方可回吧。
+302801,없어.,Nowhere.,ない。,没有。
+302802,……,……,……,……
+302803,왜?,Why?,なんで？,怎么了？
+302804,…그냥 물었다.,…Just asking.,…聞いてみただけだ。,……随便问问。
+302840,……그 검이 돌아왔군.,……So. That sword has returned.,……その剣が、戻ってきたか。,……那把剑回来了啊。
+302841,……세드릭.,……Cedric.,……セドリック。,……塞德里克。
+302842,내 이름을 부르는군. 두 번째다.\n처음엔^ 문을 열어 달라고 할 때였지.\n나는 왕좌의 문을 지키던 탑지기다.,You call my name. The second time.\nThe first was to beg me: open the door.\nA Towerwarden. I kept the Throne's door.,私の名を呼ぶか。二度目だ。\n初めは、扉を開けろと言われた時だ。\n私は、玉座の扉を守っていた塔守だ。,你叫出了我的名字。第二次了。\n第一次，是求我开门的时候。\n我是守卫王座之门的守塔人。
+302843,왕좌의 주인은 그 검이었다.\n검은 태양을 붙들던 자물쇠였지.\n마물은 태양의 부스러기라 자물쇠를 갉는다.,That sword was the Throne's master.\nThe Lock that held the Black Sun.\nMonsters^ its crumbs^ gnaw at the Lock.,玉座の主は、その剣だった。\n黒い太陽をつなぎとめる錠だったのだ。\n魔物は太陽のかけらゆえ、錠をかじる。,王座的主人，是那把剑。\n是缚住黑太阳的锁。\n魔物是太阳的碎屑，会啃咬那把锁。
+302844,십이 년 전^ 그 검을 뽑은 게 나다.\n그날 탑이 떨어졌고^ 나는 여기 묶였다.\n…용병. 넌 몇 번째냐.,Twelve years ago^ I drew that sword^\nthe Tower fell^ and I was bound here.\n…Mercenary. What number are you?,十二年前、その剣を抜いたのは私だ。\nその日、塔は落ち、私はここに縛られた。\n…傭兵。お前は何人目だ。,十二年前，拔出那把剑的是我。\n那天塔坠落了，我被缚在这里。\n……佣兵。你是第几个？
+302845,……다섯.,……Fifth.,……五人目。,……第五个。
+302846,…기억 안 난다며.,…You said you didn't remember.,…思い出せないんじゃなかったのか。,……不是说想不起来吗。
+302847,'이몸을 만난 건 행운이다.'\n…나도 그 말을 들었다.,'Meeting me was your lucky day.'\n…I heard those words too.,『我輩に出会えたのは幸運だ』\n…私も、その言葉を聞いた。,“能遇上本大爷，是你走运。”\n……我也听过这句话。
+302848,네 머리 위에도 숫자가 있다.\n그 검은 처음부터 그걸 보고 있었다.,There is a number over your head too.\nThat sword has watched it all along.,お前の頭の上にも、数字がある。\nその剣は、初めからそれを見ていた。,你的头顶上，也有数字。\n那把剑从一开始就在看着它。
+302849,…'네… 값…'\n잘못 들은 게 아니었군.,…'Your… price…'\nSo I didn't mishear.,…『あなたの…値段…』\n聞き違いじゃなかったんだな。,……“你的……价码……”\n原来没听错。
+302850,……,……,……,……
+302851,빈 왕좌는 제 자물쇠를 도로 부른다.\n대신 앉을 수 있는 건 그 검에 묶인 넋뿐.\n그것도 제 발로. 그래서 그 검은 믿게 만든다.,The empty Throne calls its Lock back.\nOnly a soul bound to that sword may sit^\nof its own accord. So it wins you over.,空いた玉座は、己の錠を呼び戻す。\n代わりに座れるのは、剣に縛られた魂だけ。\nそれも自らの足で。だから信じさせるのだ。,空着的王座，会召回自己的锁。\n能替它坐的，只有那把剑缚住的魂魄。\n而且得自愿坐上。所以那把剑要让人信它。
+302852,'굶주림은 굶주림으로만 묶인다.'\n그 검은 배고프게 벼려졌다.\n한 번도 배불러 본 적이 없다.,'Only hunger can bind hunger.'\nThat sword was forged hungry.\nIt has never once been full.,『飢えは、飢えでしか縛れない』\nその剣は、飢えるよう鍛えられた。\n一度も満腹になったことがない。,“饥饿，只能用饥饿来束缚。”\n那把剑被锻造得永远饥饿。\n它一次也没有吃饱过。
+302853,그 검이 네 이름을 부르거든^\n그땐 끝이다.\n다 쓰고 버릴 때만 부르니까.,If that sword ever calls your name^\nthat is the end.\nIt names you only as it casts you away.,その剣がお前の名を呼んだら、\nその時が終わりだ。\n使い捨てる時にしか呼ばんからな。,那把剑若叫了你的名字，\n那便是终结。\n它只在用完要丢下时才叫。
+302854,돌아가라.\n못 돌아가겠거든^ 베고 가라.,Go back.\nIf you cannot^ cut your way through.,帰れ。\n帰れぬなら、斬って進め。,回去吧。\n若回不去，就砍过去。
+302855,돌아갈 데는 없어.\n…베고 가지.,There's nowhere to go back to.\n…So I'll cut my way through.,帰る場所はない。\n…斬って進む。,我没有地方可回。\n……那就砍过去。
+302880,…진심이었군. 그 검.,…So it was in earnest. That sword.,…本気だったか。その剣。,……是动了真格啊。那把剑。
+302881,…미안하다^ 세드릭.,…I'm sorry^ Cedric.,…すまなかった、セドリック。,……对不起，塞德里克。
+302882,……이번엔^ 놓지 마라.,……This time^ don't let go.,……今度は、放すな。,……这一次，别放手。
+302883,…안 먹어?,…Not eating this one?,…食わないのか？,……不吃？
+302884,…이건 안 먹는다.,…This one^ I won't eat.,…これは食わん。,……这个，不吃。
+302885,넌 모든 값을 보여 줬지.\n딱 하나^ 내 값만 빼고.,You showed me every price.\nAll but one. Mine.,お前は、全部の値段を見せた。\nたった一つ、俺の値段だけを除いて。,你给我看了所有的价码。\n只除了一个——我的价码。
+302886,얼마야^ 나.,How much am I?,いくらだ、俺は。,我，值多少？
+302887,…왕좌에 앉히기에^ 충분하다.,…Enough to seat you on the Throne.,…玉座に座らせるには、十分だ。,……够让你坐上王座了。
+302888,처음엔 몰랐다. 정말이다.\n입은 알고 있었다.,At first^ I didn't know. Truly.\nMy mouth knew.,初めは知らなかった。本当だ。\n口は、知っていた。,一开始不知道。是真的。\n嘴是知道的。
+302889,…언제부터.,…Since when.,…いつからだ。,……什么时候开始的。
+302890,용광로에서. 그 재를 먹고\n다 떠올랐다.\n그 뒤로는… 알면서 그대로 했다.,The furnace. When I ate that ash^\nit all came back.\nAfter that… I kept on^ knowing.,溶鉱炉でだ。あの灰を食って、\nすべて思い出した。\nそれからは…知っていて、そのまま続けた。,在熔炉。吃了那堆灰，\n全想起来了。\n之后……明知道，还是照做了。
+302891,수백 년이었다. 혼자^ 어둠 속에서^\n배고픈 채로^ 눈 한 번 못 감고.\n…하늘 한 번 보고 싶었다.,Centuries. Alone^ in the dark^\nhungry^ never once closing my eye.\n…I just wanted to see the sky once.,数百年だった。ひとりきり、闇の中で、\n飢えたまま、一度も目を閉じられずに。\n…一度でいい、空を見たかった。,几百年。一个人，在黑暗里，\n饿着肚子，一次也没能闭眼。\n……只想看一眼天空。
+302892,렌은 집에 가야 했다.\n브람은 이몸을 안 믿었다. …옳았지.\n엘린은 이몸을 녹이려 했다.,Ren needed to get home.\nBram never trusted me. …He was right.\nElin tried to melt me down.,レンは、家に帰らねばならなかった。\nブラムは信じなかった。…正しかったな。\nエリンは、我輩を溶かそうとした。,伦得回家。\n布拉姆不信本大爷。……他是对的。\n艾琳想把本大爷熔掉。
+302893,계약은 둘 중 하나가 부서져야 끝난다.\n이몸은 안 부서진다.\n…그래서 놓았다.,Contracts end only when one side breaks.\nThis blade does not break.\n…So I let go.,契約は、どちらかが壊れねば終わらん。\n我輩は壊れん。\n…だから、放した。,契约，要两者之一碎掉才会结束。\n本大爷不会碎。\n……所以，放手了。
+302894,'이몸 허락 없이는 못 죽는다.'\n…허락하면^ 죽는 거였군.,'You shall not die without my leave.'\n…So with your leave^ I would.,『我輩の許しなしには死ねん』\n…許せば、死ぬってことか。,“没有本大爷允许，你死不了。”\n……原来一允许，就会死。
+302895,놓을 때마다 이름을 불렀다.\n…마지막 인사처럼.,Each time I let go^ I called their name.\n…Like a last farewell.,放すたびに、名を呼んだ。\n…別れの挨拶のように。,每次放手，都叫了名字。\n……像是最后的道别。
+302896,…나는?,…And me?,…俺は？,……那我呢？
+302897,……,……,……,……
+302898,제 발로 앉아야 한다며.\n안 앉으면 그만이지.,You said it has to be of my own accord.\nSo I just don't sit.,自らの足で座らなきゃならないんだろ。\n座らなきゃ、それで済む。,不是说得自愿坐上去吗。\n我不坐，不就完了。
+302899,…계약은 계약이지. 가자.,…A contract's a contract. Let's go.,…契約は契約だ。行くぞ。,……契约就是契约。走吧。
+302900,…안 버리냐?,…You won't cast me away?,…捨てないのか？,……不丢下本大爷？
+302901,파기 불가라며.,Irrevocable^ you said.,『破棄不可』なんだろ。,不是说不可废除吗。
+302920,전설 속의 탑은\n검은 해와 초승달을 꿰고 있었다.,The Tower of legend\npierced a black sun and a crescent moon.,伝説の塔は、\n黒い陽と三日月を貫いていた。,传说中的塔，\n刺穿着黑日与新月。
+302921,탑이 꿰고 있던 것은\n해와 달이 아니었다.,But what the Tower pierced\nwas no sun^ and no moon.,塔が貫いていたのは、\n日と月ではなかった。,塔所刺穿的，\n并不是日与月。
+302922,외눈과^\n휜 칼날이었다.,It was a single eye^\nand a curved blade.,隻眼と、\n反った刃だった。,是一只独眼，\n和一道弯刃。
+302923,자물쇠가 빠진 날^\n탑은 머리부터 떨어졌다.,The day the Lock was pulled^\nthe Tower fell head first.,錠が抜けた日、\n塔は真っ逆さまに落ちた。,锁被拔出的那天，\n塔头朝下坠落了。
+302960,……,……,……,……
+302961,티끌이 위로 빨려 오르는군.\n누가 들이마시기라도 하듯.\n탑이 정한 위는 검은 태양 쪽인가.,The dust is being sucked upward.\nLike something's breathing it in.\nSo the Tower's 'up' is the Black Sun.,塵が上へ吸い上げられていくな。\n誰かが吸い込んでいるみたいに。\n塔の決めた上は、黒い太陽の方か。,尘埃被吸着往上飘。\n就像有谁在吸气。\n塔定的上，是黑太阳那边吗。
+302962,눈은 계약대로 빌려주마.\n입은… 못 빌려주겠다.,My eye I'll lend you^ as contracted.\nMy mouth… that I can't lend.,目は、契約どおり貸してやる。\n口は…貸せん。,眼睛，照契约借你。\n嘴……就借不了了。
+302963,숫자만 보이면 돼.,The numbers are all I need.,数字さえ見えればいい。,能看到数字就行。
+303000,몸 3할짜리 껍질이 먼저 다 받는군.\n대신 방어는 없다.\n…흡혈은 껍질 깬 다음이다.,So a shell^ three tenths of its life^\nsoaks it all first. But no defense.\n…Drain after the shell breaks.,体の三割ぶんの殻が、先に全部受けるのか。\nその代わり、防御はない。\n…吸血は、殻を割ってからだ。,相当于身子三成的壳，先全挡下啊。\n不过没有防御。\n……吸血得等壳破了再用。
+303001,……맞다.,……Correct.,……その通りだ。,……没错。
+303040,네 숫자는\n한 번도 날 속인 적 없었지.,Your numbers\nnever once lied to me.,お前の数字は、\n一度も俺に嘘をつかなかったな。,你的数字，\n一次也没骗过我。
+303041,……,……,……,……
+303042,그거면 됐어.,That's all I need.,それでいい。,这就够了。
+303043,숫자는 계속 보여 주마.,I'll keep showing you the numbers.,数字は、見せ続けてやる。,数字，本大爷会一直给你看。
+303080,비싼 놈은 나중에.\n물약은 넘치면 버려지니 싸운 다음에.\n숨은 이어진다.,Pricey ones later.\nPotions after fights; overflow's wasted.\nBreaths carry over.,高い奴は後回し。ポーションは戦った後、\n溢れた分は捨てられるからな。\n息は続く。,贵的留到后面。\n药水溢出会被丢弃，打完再踩。\n呼吸不会断。
+303081,…그거 이몸 대사다^ 허접.,…Those are my lines^ Two-bit.,…それは我輩の台詞だ、ヘボ。,……那是本大爷的台词，三流。
+303082,귀에 못이 박혔거든.,Heard them a hundred times.,耳にタコができたんでな。,听得耳朵都起茧了。
+303083,……하나 더 외워 둬라.\n왕좌는 비어 있을 수 없다.,……Learn one more.\nThe Throne can never stand empty.,……もう一つ覚えておけ。\n玉座は、空いたままではいられん。,……再记一条。\n王座不能空着。
+303084,이몸에 묶인 넋이 제 발로 앉아야\n탑이 가라앉기를 멈춘다.\n안 그러면 마을부터 먹힌다.,A soul bound to me must sit there\nof its own accord^ or the Tower\nkeeps sinking. The village goes first.,我輩に縛られた魂が自らの足で座って、\nようやく塔は沈むのをやめる。\nさもなくば、まず村が食われる。,被本大爷束缚的魂魄自愿坐上，\n塔才会停止下沉。\n不然，村子会最先被吞掉。
+303085,…배부른 자물쇠라면 모를까.,…Unless the Lock were full.,…満腹の錠なら、話は別だがな。,……除非是吃饱的锁。
+303086,배부르려면?,And how does it get full?,満腹になるには？,要怎么才能吃饱？
+303087,먹여야지. 네가 벤 만큼 찬다.\n아래층에 두고 온 놈들도\n아직 거기 있다.,Feed it. It fills with all you cut.\nThe ones you left on the floors below\nare still there.,食わせろ。お前が斬った分だけ満ちる。\n下の階に置いてきた奴らも、\nまだそこにいる。,得喂。你砍多少，就填多少。\n留在下面楼层的那些家伙，\n也都还在那儿。
+303088,…반지가 있었지.,…There's the ring.,…指輪があったな。,……还有那枚戒指。
+303089,그래서^ 왕좌에 닿으면?,So. When we reach the Throne?,で、玉座に着いたら？,那，到了王座之后呢？
+303090,거기 가서 말하마.,I'll tell you when we get there.,そこで話してやる。,到了那儿再说。
+303120,……이몸을 벼린 대장장이는\n두 마디를 남겼다.,……The Smith who forged me\nleft two sayings.,……我輩を鍛えた鍛冶師は、\n二つの言葉を残した。,……锻造本大爷的铁匠，\n留下了两句话。
+303121,'굶주림은 굶주림으로만 묶인다.'\n…입이 먼저 외웠던 그 말이다.,'Only hunger can bind hunger.'\n…The words my mouth remembered first.,『飢えは、飢えでしか縛れない』\n…口が先に覚えていた、あの言葉だ。,“饥饿，只能用饥饿来束缚。”\n……就是嘴先背出来的那句。
+303122,다른 하나는 이거다.\n'배부른 것만이 굶주림을 끝낸다.',The other was this:\n'Only fullness can end hunger.',もう一つは、これだ。\n『満腹のものだけが、飢えを終わらせる』,另一句是这个。\n“唯有饱足，才能终结饥饿。”
+303123,이몸은 그 말을\n믿은 적이 없다.\n배불러 본 적이 없으니까.,I never\nbelieved that one.\nI'd never been full.,我輩は、その言葉を\n信じたことがない。\n満腹になったことがないからな。,本大爷从来\n没信过那句话。\n因为从来没吃饱过。
+303124,용광로에선 배부르다더니.,In the furnace^ you said you were full.,溶鉱炉じゃ、満腹だって言ってたのに。,在熔炉那儿，你不是说饱了吗。
+303125,……거짓말이었다.,……That was a lie.,……嘘だった。,……那是谎话。
+303126,계산해 봤다.\n너 없이 여기까지 오는 값.,I did the math.\nThe price of getting here without you.,計算してみた。\nお前なしで、ここまで来る値段を。,我算过了。\n没有你，走到这里的价码。
+303127,……얼마던데.,……How much^ then?,……いくらだった。,……多少？
+303128,…비싸더군.,…Expensive.,…高かったな。,……贵得很。
+303160,……이상하군.\n이런 데서 졸리다니.,……Strange.\nGetting sleepy in a place like this.,……妙だな。\nこんな所で眠くなるとは。,……真怪。\n在这种地方居然会困。
+303161,……음냐.,……*mumble*.,……むにゃ。,……呼噜。
+303162,……,……,……,……
+303163,자라. 깨울게.,Sleep. I'll wake you.,寝てろ。起こしてやる。,睡吧。我会叫醒你。
+303200,일어나. 다 왔어.,Wake up. We're here.,起きろ。着いたぞ。,起来。到了。
+303201,…깼다.,…I'm up.,…起きた。,……醒了。
+303202,마지막 수업이다.,Final lesson.,最後の授業だ。,最后一课。
+303203,이 층 끝에 선 놈의 숫자는\n앞에서 누굴 어떤 순서로\n베느냐로 바뀐다.,The number on the one at the floor's end\nchanges with who you cut before it^\nand in what order.,この階の奥に立つ奴の数字は、\n手前で誰をどの順に\n斬るかで変わる。,站在这层尽头那家伙的数字，\n会随着你在前面\n按什么顺序砍谁而改变。
+303204,세던 숨은 이어진다.,The breaths I count carry over.,数えた息は続く。,数着的呼吸不会断。
+303205,알아.,I know.,わかってる。,我知道。
+303206,…알면 됐다.,…Then that's all I need.,…わかっているなら、いい。,……知道就好。
+303240,…배고프다.\n배고프다.,…Hungry.\nHungry.,…腹が、減った。\n腹が、減った。,……好饿。\n好饿。
+303241,…돌아와라.\n내 눈.,…Come back.\nMy eye.,…戻れ。\nわが目。,……回来。\n我的眼。
+303242,…저놈이 찾는 게\n네 눈이냐.,…So what it wants\nis your eye.,…あいつが探してるのは、\nお前の目か。,……那家伙要找的，\n是你的眼睛？
+303243,원래 저놈 거다.\n이몸 눈은^ 그 한 조각이다.,It was that thing's to begin with.\nMy eye is but a shard of it.,もともと、あいつのものだ。\n我輩の目は、そのひとかけらだ。,本来就是那家伙的。\n本大爷的眼睛，是它的一块碎片。
+303244,배고프다.\n돌아와라.,Hungry.\nCome back.,腹が、減った。\n戻れ。,好饿。\n回来。
+303245,크하핫! 시끄럽다.\n이몸은 지금 밥 먹는 중이다!,Kahaha! Quiet^ you.\nI'm in the middle of a meal!,クハハッ！やかましい。\n我輩は今、食事中だ！,咔哈哈！吵死了。\n本大爷正在吃饭！
+303246,얼마?,How much?,いくらだ？,多少？
+303247,비싸다.\n…그래도 산다.\n가자^ 허접!,Expensive.\n…Buying it anyway.\nLet's go^ Two-bit!,高い。\n…それでも買う。\n行くぞ、ヘボ！,贵。\n……但还是要买。\n走吧，三流！
+303280,베어도 허기는 안 죽는다.\n잠깐 엎드렸을 뿐이다.\n저기다^ 왕좌.,Cutting it down won't kill hunger.\nIt's only lying low.\nThere. The Throne.,斬っても、飢えは死なん。\nしばし伏せただけだ。\nあそこだ、玉座は。,砍了，饥饿也不会死。\n只是暂时趴下了。\n就在那儿，王座。
+303281,계약을 끝낼 때가 됐다.,Time to end the contract.,契約を終える時が来た。,是时候结束契约了。
+303282,……,……,……,……
+303283,이몸을 저기 꽂아라.,Plant this blade there.,我輩を、あそこに突き立てろ。,把本大爷插在那里。
+303284,…네 계획은\n날 앉히는 거였잖아.,…Your plan\nwas to seat me there.,…お前の計画は、\n俺を座らせることだったろ。,……你的计划，\n不是让我坐上去吗。
+303285,계획은 바뀌는 거다.\n크하핫.,Plans change.\nKahaha.,計画は変わるものだ。\nクハハッ。,计划是会变的。\n咔哈哈。
+303286,계약은 둘 중 하나가\n부서져야 끝난다.\n이번엔 이몸 쪽이다.,Contracts end only\nwhen one side breaks.\nThis time^ it's this blade that breaks.,契約は、どちらかが\n壊れねば終わらん。\n今度は、我輩の番だ。,契约，要两者之一\n碎掉才会结束。\n这次，轮到本大爷碎了。
+303287,넌?,And you?,お前は？,那你呢？
+303288,잔다.\n원래 잘 자잖나.,I sleep.\nI'm good at that^ aren't I?,寝る。\nもともと、よく寝るだろう。,睡觉。\n本来就爱睡嘛。
+303289,이몸 눈엔 전부 값이었다.\n…이제 너만 빼고.,To my eye^ everything had a price.\n…Everything but you^ now.,我輩の目には、すべてが値段だった。\n…今は、お前を除いてな。,在本大爷眼里，一切都是价码。\n……现在，除了你。
+303290,…데미안.,…Damian.,…ダミアン。,……达米安。
+303291,…알고 있었어?,…You knew?,…知ってたのか？,……你知道？
+303292,처음부터.\n계약서에 네가 썼잖나.,From the start.\nYou wrote it on the contract yourself.,最初からだ。\n契約書に、お前が書いたろう。,从一开始。\n你在契约书上写了嘛。
+303320,가브에서는 전사의 무덤에\n그가 쓰던 칼을 꽂는다.,In Gabu^ on a warrior's grave^\nthey plant the blade he carried.,ガブでは、戦士の墓に\nその者が使っていた剣を突き立てる。,在加布，战士的坟上\n要插上他用过的剑。
+303321,데미안은^\n제가 쓰던 칼을 꽂았다.,Damian\nplanted the blade he had carried.,ダミアンは、\n自分が使っていた剣を突き立てた。,达米安，\n插下了自己用过的剑。
+303322,잘했다.\n이몸 계약자답다.,Well done.\nWorthy of my contractor.,よくやった。\nさすが我輩の契約者だ。,干得好。\n不愧是本大爷的契约者。
+303323,이번엔 눈 뜨고 잔다.\n이몸 특기잖나.,This time I'll sleep with my eye open.\nMy specialty^ isn't it?,今度は、目を開けて寝る。\n我輩の特技だろう。,这次，睁着眼睡。\n本大爷的拿手好戏嘛。
+303324,늙어 죽거든 이리 와라.\n계약이다.,When you die of old age^ come here.\nThat's a contract.,老いて死んだら、ここへ来い。\n契約だ。,等你老死了，就来这儿。\n这是契约。
+303325,…계약은 계약이지.,…A contract's a contract.,…契約は契約だ。,……契约就是契约。
+303326,…이번엔 아무도 안 부르고\n기다리마.,…This time I'll call no one.\nI'll just wait.,…今度は、誰も呼ばずに\n待っていてやる。,……这次，本大爷谁也不叫，\n就这么等着。
+303327,…잘 자^ 잠꾸러기.,…Sleep well^ Sleepyhead.,…おやすみ、寝ぼすけ。,……晚安，瞌睡虫。
+303328,마지막으로 한 번 끌어올려 주마.\n이번엔 탑 밖까지.,I'll haul you up one last time.\nAll the way out of the Tower.,最後に一度、引き上げてやろう。\n今度は、塔の外までな。,最后再拽你上去一次。\n这次，一直拽到塔外。
+303329,…음냐.,…*mumble*.,…むにゃ。,……呼噜。
+303330,외눈은 뜬 채로 잠들었다.\n다시는 값을 말하지 않았다.,The single eye slept^ still open.\nIt never spoke a price again.,隻眼は、開いたまま眠りについた。\n二度と値段を口にしなかった。,独眼睁着，睡着了。\n再也没有说过价码。
+303360,그 밤^ 촌장은 보았다.\n탑이 제 하늘로\n떨어져 올라가는 것을.,That night^ the chief saw it:\nthe Tower falling upward^\nback into its own sky.,その夜、村長は見た。\n塔が、己の空へ向かって\n落ちていくのを。,那一夜，村长看见了——\n塔朝着自己的天空，\n向上坠落而去。
+303361,돌아온 용병이 반지를 내밀었다.\n'렌은 끝까지 돌아오려 했어요.',The mercenary came back with the ring.\n'Ren tried to come home^ to the last.',戻った傭兵が、指輪を差し出した。\n「レンは最後まで、帰ろうとしてました」,归来的佣兵递出了戒指。\n“伦他，到最后都想着回来。”
+303362,'알고 있었소. 그 칼이 무엇인지.\n알면서 당신을 들여보냈소.','I knew. What that blade was.\nI knew^ and still I sent you in.',「知っておった。あの剣が何なのか。\n知りながら、お前さんを送り出した」,“老夫早就知道，那把剑是什么。\n明知道，还是让你进去了。”
+303363,'누군가는 끝내 주길 바랐소.\n그 값이 남의 목숨이라도.'\n'알아요.','I wanted someone to end it.\nEven if the price was another's life.'\n'I know.',「誰かに、終わらせてほしかったのじゃ。\nその値段が、他人の命でもな」\n「わかってます」,“老夫盼着有谁能了结它。\n哪怕价码是别人的命。”\n“我知道。”
+303364,'…그 칼은?'\n'자요.','…And that blade?'\n'Sleeping.',「…あの剣は？」\n「寝てます」,“……那把剑呢？”\n“睡了。”
+303365,촌장은 그제야 이름을 물었다.\n'데미안이에요.',Only then did the chief ask his name.\n'It's Damian.',村長はそこでようやく、名を聞いた。\n「ダミアンです」,村长这才问了名字。\n“我叫达米安。”
+303366,데미안은 비어 있던 무덤에\n허리에 차던 제 칼을 꽂았다.\n마검이 잠든 하늘은 너무 멀었으니까.,In the empty grave^ Damian planted\nthe sword that hung at his own hip.\nThe demon sword's sky was too far away.,ダミアンは、空いていた墓に\n腰に下げていた自分の剣を突き立てた。\n魔剣が眠る空は、あまりに遠かったから。,达米安在那座空坟上，\n插下了自己腰间的剑。\n因为魔剑沉睡的天空，太远了。
+303367,밤하늘의 검은 별은\n가끔 깜빡인다.\n졸린 눈처럼.,The black star in the night sky\nblinks now and then^\nlike a sleepy eye.,夜空の黒い星は、\nときどき瞬く。\n眠たげな目のように。,夜空里的黑色星星，\n偶尔会眨一下。\n像一只犯困的眼睛。
+303400,…놔라!\n이몸이 가면 된다!,…Let go!\nThis blade is all it takes!,…放せ！\n我輩が行けば済む！,……放手！\n本大爷去就行了！
+303401,싫어.,No.,嫌だ。,不要。
+303402,……그럼 저놈을 삼켜 보마.,……Then I'll try swallowing that thing.,……ならば、あいつを飲み込んでみせる。,……那本大爷就试试吞了那家伙。
+303403,……안 된다. 아직 배가 고프다.\n이몸으로는 못 삼킨다.\n배고픈 놈은… 먹힌다.,……It's no use. I'm still hungry.\nI can't swallow it like this.\nThe hungry… get eaten.,……駄目だ。まだ腹が減っている。\n我輩では飲み込めん。\n腹を空かせた奴は…食われる。,……不行。还饿着。\n本大爷吞不下它。\n饿着的……会被吃掉。
+303404,그럼 누가 앉아야겠군.,Then someone has to sit.,なら、誰かが座るしかないな。,那就得有人坐上去了。
+303405,바보냐! 네가 앉으면—,You fool! If you sit—,馬鹿か！お前が座ったら――,你是笨蛋吗！你要是坐上去——
+303406,알아. 네 계획대로잖아.\n제 발로 앉는 거니까^ 받아 주겠지.\n…어차피 돌아갈 데도 없고.,I know. Just like your plan.\nI sit of my own accord. It'll take me.\n…Not like I've anywhere to go back to.,わかってる。お前の計画どおりだろ。\n自らの足で座るんだ、受け入れてくれるさ。\n…どうせ、帰る場所もないしな。,我知道。正合你的计划。\n我是自愿坐上去的，它会收下吧。\n……反正我也没地方可回。
+303407,…이몸도 없다.,…Nor have I.,…我輩もない。,……本大爷也没有。
+303408,그럼 이몸도 남는다.\n계약서에 있잖나.\n'영원한 동반자'.,Then I stay too.\nIt's in the contract^ isn't it?\n'Eternal companion.',ならば、我輩も残る。\n契約書にあるだろう。\n『永遠の伴侶』と。,那本大爷也留下。\n契约书上写着嘛。\n“永恒的伴侣”。
+303409,데미안.,Damian.,ダミアン。,达米安。
+303410,그 조항^ 이제야 마음에 드네.,Finally^ a clause I like.,その条項、今になって気に入った。,那一条，现在才顺眼了。
+303411,교대로 자자. 네가 먼저.,We'll take turns sleeping. You first.,交代で寝よう。お前が先だ。,轮流睡吧。你先。
+303412,탑이 흔들렸다.\n그리고 하늘을 향해^\n떨어지기 시작했다.,The Tower shook.\nAnd toward the sky^\nit began to fall.,塔が揺れた。\nそして空へ向かって、\n落ちはじめた。,塔晃动了。\n然后，朝着天空，\n开始坠落。
+303440,벼랑 위에서^ 촌장은 보았다.\n탑이 제 하늘로 돌아가는 것을.\n검은 해를 꿴 채로.,From the cliff^ the chief watched\nthe Tower return to its own sky^\nthe black sun run through once more.,崖の上で、村長は見た。\n塔が、己の空へ帰っていくのを。\n黒い陽を貫いたまま。,在悬崖上，村长看见了。\n塔回到了自己的天空，\n依旧刺穿着黑日。
+303441,탑이 떠난 자리^ 무덤들 사이에\n반지 하나가 뱉어져 있었다.\n아들에게 주었던 반지였다.,Among the graves the Tower left behind^\na ring had been spat out.\nThe one he had given his son.,塔の去った跡、墓のあいだに、\n指輪がひとつ吐き出されていた。\n息子に贈った指輪だった。,塔离开的地方，坟墓之间\n躺着一枚被吐出来的戒指。\n是他给儿子的那枚。
+303442,주인이 오지 않은 무덤에\n그는 반지를 묻었다.\n이름은 끝내 묻지 못했다.,In the grave whose owner never came^\nhe buried the ring.\nThe name^ he never got to ask.,主の来なかった墓に、\n彼は指輪を埋めた。\n名は、ついに聞けなかった。,在主人没有回来的坟里，\n他埋下了戒指。\n名字，终究没能问出口。
+303443,길드 게시판의 낡은 하사품 공고에\n누군가 '완료'라고 적었다.,On the guild board's old reward notice^\nsomeone wrote: 'Completed.',ギルドの掲示板の、古い下賜品の告示に\n誰かが「完了」と書き込んだ。,公会告示板上陈旧的赏赐告示，\n不知是谁写上了“完成”。
+303444,귀 밝은 아이들은 말한다.\n해 질 녘이면 하늘에서\n두 목소리가 투닥거린다고.,Children with sharp ears say\nthat at dusk^ up in the sky^\ntwo voices can be heard bickering.,耳ざとい子どもたちは言う。\n日暮れになると、空の上で\nふたつの声が言い合っているのだと。,耳朵灵的孩子们说，\n每到黄昏，天上\n就有两个声音在拌嘴。
+303445,'크하핫!'\n'시끄러워. 네 차례야.','Kahaha!'\n'Quiet. It's your turn.',「クハハッ！」\n「うるさい。お前の番だ」,“咔哈哈！”\n“吵死了。轮到你了。”
+303480,…놔라!\n이몸이 가면 된다!,…Let go!\nThis blade is all it takes!,…放せ！\n我輩が行けば済む！,……放手！\n本大爷去就行了！
+303481,싫어.,No.,嫌だ。,不要。
+303482,……이상하다.,……Strange.,……妙だ。,……奇怪。
+303483,배가 부르다.\n태어나서 처음이다.,I'm full.\nFor the first time in my life.,満腹だ。\n生まれて初めてだ。,吃饱了。\n生来头一回。
+303484,그런 날은 안 온다더니.,You said that day never comes.,そんな日は来ん、って言ってたろ。,不是说不会有那一天吗。
+303485,…왔다. 네가 먹였잖나.,…It came. You fed me^ didn't you?,…来た。お前が食わせたのだろう。,……来了。是你喂的嘛。
+303486,넘치면 버려진다며.,You said overflow's wasted.,溢れたら、捨てられるんだろ。,不是说溢出就会被丢弃吗。
+303487,…크하핫!\n이몸이 가르친 걸\n이몸한테 써먹는군.,…Kahaha!\nUsing my own lesson\nagainst me^ are you?,…クハハッ！\n我輩が教えたことを、\n我輩に使うとはな。,……咔哈哈！\n本大爷教的东西，\n用到本大爷身上来了啊。
+303488,좋다. 저놈을 삼키마.\n배부른 놈이 먹는 거다.,Good. I'll swallow that thing.\nThe full do the eating.,よし。あいつを飲み込んでやろう。\n満腹の奴が食うのだ。,好。本大爷这就把那家伙吞了。\n吃饱的，才能去吃。
+303489,가득 찬 그릇엔\n허기가 못 머문다.\n넘쳐서^ 버려진다.,In a full bowl^\nhunger can't stay.\nIt overflows^ and goes to waste.,満ちた器に、\n飢えは留まれん。\n溢れて、捨てられる。,装满的碗里，\n饥饿留不住。\n溢出来，被丢弃。
+303490,데미안. 이몸을 들어라.,Damian. Raise this blade.,ダミアン。我輩を掲げよ。,达米安。把本大爷举起来。
+303491,…또 불렀군. 버리지도 않았는데.\n세드릭 녀석^ 틀렸다.,…Called your name again.\nDidn't cast you away^ though.\nCedric had it wrong.,…また名を呼んだか。捨てもせんのに。\nセドリックめ、外れだ。,……又叫了啊。明明没要丢下你。\n塞德里克那家伙，说错了。
+303492,넘친 만큼은 버려졌다.\n탑이 빛가루가 되어 무너졌다.,What overflowed went to waste.\nThe Tower crumbled into motes of light.,溢れた分は、捨てられた。\n塔は光の粉となって崩れ落ちた。,溢出的部分，被丢弃了。\n塔化作光尘，崩塌了。
+303493,…얼마야^ 나.,…How much am I?,…いくらだ、俺は。,……我，值多少？
+303494,안 보인다.\n네 머리 위엔 이제\n아무것도 없다.,I can't see it.\nThere's nothing over your head\nanymore.,見えん。\nお前の頭の上には、もう\n何もない。,看不见了。\n你的头顶上，现在\n什么也没有。
+303495,계약은 끝났다. 배고픈 이몸은\n방금 부서졌으니까.\n네 영혼^ 돌려주마.,The contract is over.\nThe hungry blade has just broken.\nYour soul^ I return to you.,契約は終わった。腹を空かせた我輩は、\nたった今、壊れたからな。\nお前の魂、返してやろう。,契约结束了。饿着的本大爷\n刚刚碎掉了。\n你的灵魂，还给你。
+303496,그건 가지고 있어.\n난 어차피 잘 잃어버려.,Keep it.\nI lose things anyway.,それは持っておけ。\n俺はどうせ、よく失くす。,那个你留着吧。\n反正我老是丢东西。
+303497,…크하핫.,…Kahaha.,…クハハッ。,……咔哈哈。
+303520,탑이 있던 자리에 아침이 왔다.,Morning came where the Tower had stood.,塔のあった場所に、朝が来た。,塔曾在的地方，迎来了早晨。
+303521,십이 년 만에^\n가브의 하늘이 개었다.,For the first time in twelve years^\nthe sky over Gabu cleared.,十二年ぶりに、\nガブの空が晴れた。,时隔十二年，\n加布的天空放晴了。
+303522,마검은 생애 두 번째로 사과했다.\n'영감. 렌 일은… 미안하다.',For the second time in its life^\nthe demon sword apologized.\n'Old man. About Ren… I'm sorry.',魔剣は、生涯で二度目に謝った。\n「じいさん。レンのことは…すまなかった」,魔剑这辈子第二次道了歉。\n“老头。伦的事……对不起。”
+303523,'…늦었소.\n그래도^ 들었소.','…Too late.\nBut I heard it.',「…遅いのう。\nじゃが、聞いたぞ」,“……太迟了。\n不过，老夫听到了。”
+303524,반지는 렌의 아버지에게 돌아갔다.\n촌장은 비어 있던 무덤을 흙으로 덮고^\n그제야 이름을 물었다.,The ring went back to Ren's father.\nThe chief filled in the empty grave^\nand only then asked his name.,指輪は、レンの父のもとへ戻った。\n村長は空いていた墓を土で埋め、\nそこでようやく名を聞いた。,戒指回到了伦的父亲手中。\n村长用土填平了那座空坟，\n这才问了名字。
+303525,데미안이 왕국에 올린 보고는\n한 줄이었다.\n'탑의 비밀: 없음.',Damian's report to the Kingdom\nwas a single line:\n'Secret of the Tower: None.',ダミアンが王国に上げた報告は、\nたった一行だった。\n「塔の秘密：なし」,达米安呈给王国的报告，\n只有一行。\n“塔的秘密：无。”
+303526,하사품 공고는\n그가 직접 떼어 찢었다.,He tore down the reward notice\nand ripped it up himself.,下賜品の告示は、\n彼が自らはがして破り捨てた。,赏赐告示，\n是他亲手揭下撕掉的。
+303527,'크하핫! 다음은 어디냐^ 데미안!'\n'…얼마 주는데.','Kahaha! Where to next^ Damian?!'\n'…How much does it pay?',「クハハッ！次はどこだ、ダミアン！」\n「…いくら出る」,“咔哈哈！下一站去哪儿，达米安！”\n“……给多少？”
+303560,TheSword,TheSword,TheSword,TheSword
+303561,제작,Created by,制作,制作
+303562,CozyByte,CozyByte,CozyByte,CozyByte
+303563,stopresent,stopresent,stopresent,stopresent
+303564,truemanburbank,truemanburbank,truemanburbank,truemanburbank
+303565,samryoug,samryoug,samryoug,samryoug
+303566,끝까지 값을 치러 준 당신에게.,To you^ who paid the price to the end.,最後まで値段を払ってくれた、あなたへ。,献给把价码付到最后的你。
+303600,물약도 길도 평소대로다. 값만 제대로 세라.,As usual. Just count the prices right.,ポーションも道も変わらん。値段を数えろ。,药水和路都跟平常一样。算好价码就行。
+303640,숫자 보고^ 순서 짜고. 늘 하던 대로.,Numbers^ then order. Same as always.,数字を見て、順番を組む。いつもどおりだ。,看数字，排顺序。照老样子。
+303680,비싼 놈은 나중에. 셈하는 법은 늘 같다.,Pricey ones later. Same math as ever.,高い奴は後回し。数え方はいつも同じだ。,贵的留到后面。账一直是这么算的。
+303720,물약이 귀한 층이다. 순서가 전부다.,Few potions here. Order is everything.,ポーションの乏しい階だ。順番がすべてだ。,这层药水稀少。顺序就是一切。
+303760,물약이 적네. 밟을 때를 골라야겠어.,Few potions. Better time them right.,ポーションが少ないな。踏み時を選ぶか。,药水不多。得挑好时机踩。
+303800,귀한 물약일수록 싸운 다음에 밟아라.,Scarce potions? Fight first^ then step.,貴重なポーションほど、戦った後に踏め。,药水越金贵，越要打完再踩。
+303840,길목에 비싼 놈이 섰다. 숫자부터 봐라.,Pricey one bars the way. Numbers first.,通り道に高い奴が立った。まず数字を見ろ。,要道上站着个贵的。先看数字。
+303880,저놈을 넘어야 길이 열리는군.,So the way opens only past that one.,あいつを越えなきゃ、道は開かないか。,得过了那家伙，路才会通。
+303920,지금 살지^ 커서 올지. 그게 이 층이다.,Buy now^ or grow first. That's the test.,この階は、今買うか大きくなって出直すか。,现在买，还是长大了再来。这层就看这个。
+303960,물약이 넉넉하다. 곁길 값도 치를 만하다.,Potions aplenty. Side paths pay off.,ポーションは潤沢だ。脇道の値段も払える。,药水充足。岔路的价码也付得起。
+304000,많다고 막 밟진 말자.,Plenty's no reason to stomp on them all.,多いからって、むやみに踏むのはよそう。,多也别乱踩。
+304040,빈 그릇에 부어야 남는다.,Only an empty bowl keeps what's poured.,空の器に注いでこそ、残る。,倒进空碗里，才留得住。
+304080,곁길 끝에 탑의 글자가 있다. 들를 값을 세라.,A glyph off the path. Count the detour.,脇道の奥に塔の文字。寄る値段を数えろ。,岔路尽头有塔之文字。算算绕路的价码。
+304120,둘 중 하나다. 모자란 쪽을 골라라.,One or the other. Take what you lack.,二つに一つだ。足りない方を選べ。,二选一。挑缺的那样。
+304160,물약이냐 룬이냐. 하나만 가져가지.,Potion or rune. I only get one.,ポーションかルーンか。取れるのは一つだ。,药水还是符文。只能拿一个。
+304200,다시. 이번엔 순서를 바꿔 봐라.,Again. Change the order this time.,もう一度だ。今度は順番を変えてみろ。,再来。这次换个顺序。
+304240,숫자는 이몸이 센다. 순서는 네가 정해라.,I tally the numbers. You set the order.,数字は我輩が数える。順番はお前が決めろ。,数字本大爷来数。顺序你来定。
+304280,일어나라. 값은 아직 안 치렀다.,Get up. The price isn't paid yet.,起きろ。まだ値段を払っていない。,起来。价码还没付呢。
+304320,…다시. 숫자는 거짓말을 안 해.,…Again. The numbers don't lie.,…もう一度。数字は嘘をつかない。,……再来。数字不会说谎。
+304360,문턱이다. 처음부터 다시 세라.,The threshold. Count again from the top.,敷居だ。最初から数え直せ。,回到这层的门槛了。从头再数。
 900000,평범한 오후.\n길드 게시판 앞.,An ordinary afternoon.\nIn front of the guild board.,ありふれた午後。\nギルドの掲示板の前。,平凡的午后。\n公会告示板前。
 900001,왁자한 길드 안^ 게시판 앞만 조용했다.\n낡은 의뢰 하나가 모험가의 눈에 걸렸다.,A rowdy guild. Only the board was quiet.\nAn old request hooked an adventurer.,騒がしい中、掲示板の前だけは静かだった。\n古い依頼がひとつ、冒険者の目に留まった。,喧闹的公会里，只有告示板前一片安静。\n一份陈旧的委托，勾住了冒险者的目光。
 900002,흠…\n[ 가브 마을에 떨어진 탑 조사 ],Hmm…\n[ Investigate Gabu's Fallen Tower ],ふむ…\n[ ガブ村に落ちた塔の調査 ],嗯……\n[ 调查坠落在加布村的塔 ]

@@ -36,11 +36,26 @@ public static class EquipUtility
         get { return AbilityOf(Managers.Game.PlayerData.CurRing) == AbilityWarp; }
     }
 
+    /// <summary>
+    /// 낀 목걸이의 전투 배속 (없으면 1). 배속은 이제 설정(GameSettings.BattleSpeed)이 처음부터 주므로, 목걸이는
+    /// 그 설정보다 높을 때만 값을 한다 — UI_BattlePopup.Speed 가 둘 중 큰 쪽을 쓴다. 예전처럼 GameManager.GameSpeed 에
+    /// 쓰지 않는다: 그 칸은 이제 봇(AutoPlayer)의 배속만 든다.
+    /// </summary>
+    public static int NecklaceSpeed
+    {
+        get
+        {
+            GameManager.CurPlayerData p = Managers.Game.PlayerData;
+            int neck = p == null ? 0 : AbilityOf(p.CurNecklace);
+            return neck >= AbilitySpeedFirst && neck <= AbilitySpeedLast ? BattleSpeed[neck - AbilitySpeedFirst] : 1;
+        }
+    }
+
     /// <summary>착용 중인 장비의 유틸 효과를 지금 상태에 반영한다.
     ///
     /// 스탯(ATK/DEF/HP…)은 SwapEquip 이 착용/해제 때 더하고 뺀다. 여기서 다루는 것은
-    /// 그렇게 누적하면 안 되는 것들 — 이동 속도와 전투 배속은 "지금 낀 것" 하나로
-    /// 정해져야 해서, 매번 기준값에서 다시 계산한다.</summary>
+    /// 그렇게 누적하면 안 되는 것 — 이동 속도는 "지금 신은 것" 하나로 정해져야 해서,
+    /// 매번 기준값에서 다시 계산한다. (목걸이의 전투 배속은 NecklaceSpeed 가 그때그때 읽는다.)</summary>
     public static void Apply()
     {
         GameManager.CurPlayerData p = Managers.Game.PlayerData;
@@ -67,15 +82,6 @@ public static class EquipUtility
         // 부츠를 신은 채로 걸음만 느렸다.
         if (Managers.Game.Player != null)
             Managers.Game.Player.Speed = 0f;   // 세터가 MoveSpeed 를 다시 읽는다
-
-        int neck = AbilityOf(p.CurNecklace);
-        int speed = 1;
-        if (neck >= AbilitySpeedFirst && neck <= AbilitySpeedLast)
-            speed = BattleSpeed[neck - AbilitySpeedFirst];
-
-        // 봇이 배속을 따로 올려 쓰고 있을 때는 건드리지 않는다.
-        if (Managers.Game.GameSpeed < speed)
-            Managers.Game.GameSpeed = speed;
     }
 
     /// <summary>그 장비가 가진 어빌리티 id. 없으면 0.</summary>

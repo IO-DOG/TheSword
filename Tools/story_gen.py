@@ -113,9 +113,11 @@ CUES = {
     "pro_kingslime_reveal": [(1, "Shake"), ("end", "Pose", "DrawSword")],
     "pro_kingslime_clear": [(0, "BgmStop"), (3, "Fx", "FX_PowerWave"), (6, "Dark"), (7, "Clear"),
                             (10, "Emote", "Sleepy"), ("end", "BgmFloor")],
-    "village_card": [(0, "Bgm", "StartIntro_BGM")],
+    # 5층: 탑에 닿는 카드(인트로곡) → 챕터곡으로 돌리고 챕터 카드 → ch0_start. 6층: 무덤 카드(인트로곡) → 촌장 → 챕터곡.
+    "village_card": [(0, "Bgm", "StartIntro_BGM"), ("end", "BgmFloor")],
+    "village_graves": [(0, "Bgm", "StartIntro_BGM")],
     "village_chief": [(0, "Backdrop"), ("end", "BgmFloor")],
-    "ch0_start": [(1, "Emote", "Question"), (2, "CamUp")],
+    "ch0_start": [(1, "Emote", "Question"), (1, "CamUp")],
     "f11_motto": [(6, "Emote", "SweatDrop")],
     "f16_nap": [(1, "Emote", "Sleepy"), (4, "Emote", "Surprise")],
     "boss0_defeat": [(0, "BgmStop"), (0, "Boom"), (2, "CamBoss"), (3, "Fx", "FX_PowerWave"), ("end", "BgmFloor")],
@@ -309,13 +311,9 @@ def chapter_first_floor(chapter):
     return max(gc.HANDMADE_FLOORS + 1, chapter * gc.FLOORS_PER_CHAPTER + 1)
 
 
-def entry_floors(scenes, facts):
-    """들어설 때 장면이 걸리는 층 (StoryDirector.FloorChain 과 같은 규칙). 그 층은 바크 대신 장면이 뜬다."""
-    first_trait = {}
-    for floor in sorted(facts):
-        for bit in range(1, 9):
-            if facts[floor]["traits"] >> bit & 1:
-                first_trait.setdefault(bit, floor)
+def entry_floors(scenes):
+    """들어설 때 장면이 걸리는 층 (StoryDirector.FloorChain 과 같은 규칙). 그 층은 바크 대신 장면이 뜬다.
+    특성 수업(TraitFirst)은 들어설 때가 아니라 그 특성에 처음 부딪힐 때 뜬다(StoryDirector.TraitGate) — 여기 없다."""
     floors = set()
     for s in scenes:
         t, a = s["trigger"], s["arg"]
@@ -325,8 +323,6 @@ def entry_floors(scenes, facts):
             floors.add(chapter_first_floor(a))
         elif t == "FloorFirst":
             floors.add(a)
-        elif t == "TraitFirst" and a in first_trait:
-            floors.add(first_trait[a])
     return floors
 
 
@@ -340,7 +336,7 @@ def bark_schedule(scenes, speaker_rows, facts):
     for i, s in enumerate(scenes):
         if s["trigger"] == "FloorType":
             pools.setdefault(s["arg"], []).append(i)
-    taken = entry_floors(scenes, facts) | {20 * (c + 1) for c in range(CHAPTERS)}
+    taken = entry_floors(scenes) | {20 * (c + 1) for c in range(CHAPTERS)}
     free = [f for f in range(gc.HANDMADE_FLOORS + 1, gc.TOTAL_FLOORS + 1)
             if facts[f]["type"] in pools and f not in taken]
     plan = [-1] * (gc.TOTAL_FLOORS + 1)
@@ -740,8 +736,6 @@ def emit_cs(scenes, speaker_rows, facts, source, plan):
     out.append("    // 층별 사실 — 인덱스는 층 번호(1~100). 0 번과 손수 만든 1~4층은 비어 있다.")
     array("sbyte", "FloorTypes", (str(facts[f]["type"]) if f else "-1" for f in floors),
           "generate_content.floor_type: 0 기본 1 인색 2 관문 3 넉넉 4 보물")
-    array("int", "FloorTraits", (str(facts[f]["traits"]) if f else "0" for f in floors),
-          "그 층에 나오는 특성 (1 << Define.Trait) — 몬스터와 보스")
     array("int", "VaultDoors", (str(facts[f]["vault"]) if f else "-1" for f in floors),
           "금고 문(네 번째 문)의 Door._doorIndex_forActive, 없으면 -1")
     array("int", "SpareKeys", (str(facts[f]["spare"]) if f else "-1" for f in floors),

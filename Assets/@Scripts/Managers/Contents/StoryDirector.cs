@@ -71,7 +71,7 @@ public sealed class StoryScene
 /// 이야기 장면을 언제 틀지 정하고 튼다 (Tools/story/STORY_BIBLE.md 9절, 대본은 GeneratedStory).
 ///
 /// 게임 로직은 GameEvents 로 "일어난 일" 만 알리고, 여기서 그중 이야기가 걸린 것을 고른다.
-/// 전투 직전에 끼어드는 것(보스 등장, 첫 ✖)은 FightGate 로 들어간다. 1~4층 프롤로그만은
+/// 전투 직전에 끼어드는 것(보스 등장, 특성 수업, 첫 ✖)은 FightGate 로 들어간다. 1~4층 프롤로그만은
 /// 손으로 짠 연출(DirectingManager)이 제 차례에 CoPrologue 를 부른다.
 ///
 /// 한 번 튼 장면은 StorySeen.json 에 적는다 — 틀기 시작할 때 적으므로 죽어도, 불러와도 다시 뜨지 않는다
@@ -91,6 +91,8 @@ public class StoryDirector : MonoBehaviour
 
     const int VillageFloor = 5;             // "4층 계단을 올라 5층에 처음 들어설 때" (FORMAT 트리거 표)
     const string SeenFile = "StorySeen.json";
+    const int TraitOrder = 10;              // 전투 관문 순서 — 특성 수업은 보스 등장(0) 뒤, 첫 ✖(50) 앞. 20층 늑대가 첫 야수라
+                                            // 먼저 두면 규칙 설명이 "…또… 너냐." 보다 앞에 섰다. 등장이 먼저 서고, 규칙은 싸움 바로 앞에 온다
 
     static StoryDirector s_instance;
     static HashSet<string> s_seen;
@@ -131,6 +133,10 @@ public class StoryDirector : MonoBehaviour
     bool _offsetMoved, _exposureMoved;
     GameObject _mark;                       // 보스가 사라진 자리를 카메라가 볼 때
     GameObject _portal, _vortex;            // 결말의 왕좌의 입
+    StoryScene _scene;                      // 지금 창이 떠 있는 장면 (CoScene). 건너뛰기가 본다
+    bool _title;                            // 챕터 이름 카드가 떠 있다 (CoChapterTitle) — 이것도 건너뛴다
+    bool _sceneSeenBefore;                  // 그 장면을 지난 판들에서 본 적이 있다 — Tab 한 번으로 넘긴다
+    float _skipHeld;                        // Tab 을 누르고 있은 시간 (실시간)
 
     // 보스 자리. 결말·쓰러진 뒤의 연출이 쓴다 — 그 무렵이면 보스는 이미 없다.
     static Vector3? s_bossPos;
@@ -173,6 +179,7 @@ public class StoryDirector : MonoBehaviour
         GameEvents.Respawned += OnRespawned;
         GameEvents.BattleEnded += OnBattleEnded;
         GameEvents.EquipPicked += OnEquipPicked;
+        FightGate.Add(TraitGate, TraitOrder);
         FightGate.Add(BossIntroGate, 0);
         FightGate.Add(FatalGate, 50);
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -188,6 +195,7 @@ public class StoryDirector : MonoBehaviour
         GameEvents.Respawned -= OnRespawned;
         GameEvents.BattleEnded -= OnBattleEnded;
         GameEvents.EquipPicked -= OnEquipPicked;
+        FightGate.Remove(TraitGate);
         FightGate.Remove(BossIntroGate);
         FightGate.Remove(FatalGate);
         SceneManager.sceneLoaded -= OnSceneLoaded;
@@ -232,6 +240,9 @@ public class StoryDirector : MonoBehaviour
         _running = 0;
         _levelUpPending = false;
         _endingRunning = false;
+        _scene = null;
+        _title = false;
+        StoryUI.EndSkip();
         if (held == false || Managers.IsAlive == false)
             return;     // 줄만 서 있었다 — 화면은 건드린 적이 없다
         if (_popup != null)
@@ -271,10 +282,14 @@ public class StoryDirector : MonoBehaviour
 
     public static bool HasSeen(StoryScene scene) => Seen.Contains(scene.Id);
 
+    /// <summary>그 기능 수업(mechanic_first:…)을 이번 판에 다 봤다. 전투 건너뛰기는 치명타 수업(3~4층) 뒤에 열린다.</summary>
+    public static bool MechanicSeen(StoryMechanic mechanic) => Unseen(mechanic).Count == 0;
+
     static void MarkSeen(StoryScene scene)
     {
         if (s_debug || Seen.Add(scene.Id) == false)
             return;
+        Records.MarkSceneSeen(scene.Id);    // 판을 넘어 남는 "본 적 있다" (새 게임 뒤 다시 볼 때 건너뛰기)
         // 체크포인트와 같은 방식으로 바꿔 끼운다. 쓰다 꺼져도 옛 파일은 남는다.
         try
         {
@@ -379,11 +394,43 @@ public class StoryDirector : MonoBehaviour
         }
 
         WatchCrit();
+        WatchSkip();
         if (Time.unscaledTime >= _nextWatch)
         {
             _nextWatch = Time.unscaledTime + 0.2f;
             WatchFloor();
         }
+    }
+
+    // 건너뛰기: 대화창·이야기 카드가 떠 있으면 Tab 을 SkipHold 초 누르고 있을 때(지난 판들에서 본 장면은 한 번 누를 때)
+    // 지금 장면을 끝까지 넘긴다(StoryUI.Skipping). 선택지 앞에서는 서고, 결말의 선택은 건너뛰지 못한다(대화창이 끈다).
+    // 1~4층의 예전 대사(EventData)도 같은 창이라 같이 넘어간다 — 장면이 없으니 누르고 있어야만 한다.
+    void WatchSkip()
+    {
+        UI_Popup top = Managers.UI.TopPopup;
+        UI_ConversationPopup talk = top as UI_ConversationPopup;
+        bool story = talk != null || top is UI_StoryCardPopup;
+        if (StoryUI.Skipping && story == false)
+            StoryUI.EndSkip();      // 장면을 끝낸 길이 따로 있었다 (창이 걷혔다)
+        // 카드는 장면이 걸려 있거나 챕터 이름일 때만 — 다 넘긴 뒤 다음 대화의 배경으로 깔린 카드는 넘길 것이 없다.
+        bool open = StoryUI.Auto == false && StoryUI.Skipping == false
+                    && (talk != null ? talk.Choosing == false : story && (_scene != null || _title));
+        if (open == false)
+        {
+            _skipHeld = 0f;
+            StoryUI.SkipHint(false, false, 0f);
+            return;
+        }
+        bool seen = _scene != null && _sceneSeenBefore;
+        _skipHeld = Input.GetKey(StoryUI.SkipKey) ? _skipHeld + Time.unscaledDeltaTime : 0f;
+        if (_skipHeld >= StoryUI.SkipHold || (seen && Input.GetKeyDown(StoryUI.SkipKey)))
+        {
+            _skipHeld = 0f;
+            StoryUI.BeginSkip();
+            StoryUI.SkipHint(false, false, 0f);
+            return;
+        }
+        StoryUI.SkipHint(true, seen, _skipHeld / StoryUI.SkipHold);
     }
 
     /// <summary>코루틴을 직접 돌린다. 안쪽 어디서 예외가 나도 그 코루틴만 접고(제 finally 는 돈다) 바깥은 이어 간다 —
@@ -432,7 +479,9 @@ public class StoryDirector : MonoBehaviour
     #endregion
 
     #region 게임이 알린 일
-    // 층에 들어설 때의 장면 중 아직 안 본 것. R2: village → chapter_start → trait_first(목록 순서) → floor_first
+    // 층에 들어설 때의 장면 중 아직 안 본 것. R2: village → chapter_start → floor_first.
+    // 특성 수업(trait_first)은 여기 없다 — 그 특성의 몬스터에게 처음 부딪힐 때 튼다(TraitGate). 들어서자마자 쌓으면
+    // 5층은 첫 걸음 전에 23줄이었고, 특성이 둘씩 오는 41·61층도 그랬다.
     static List<StoryScene> FloorChain(int floor)
     {
         List<StoryScene> chain = new List<StoryScene>();
@@ -441,12 +490,6 @@ public class StoryDirector : MonoBehaviour
         int chapter = Array.IndexOf(GeneratedStory.ChapterFirstFloors, floor);
         if (chapter >= 0)
             chain.AddRange(Unseen(StoryTrigger.ChapterStart, chapter));
-        int traits = FloorFact(GeneratedStory.FloorTraits, floor, 0);
-        foreach (StoryScene s in GeneratedStory.Scenes)
-        {
-            if (s.Trigger == StoryTrigger.TraitFirst && (traits >> s.Arg & 1) != 0 && HasSeen(s) == false)
-                chain.Add(s);
-        }
         chain.AddRange(Unseen(StoryTrigger.FloorFirst, floor));
         return chain;
     }
@@ -685,7 +728,40 @@ public class StoryDirector : MonoBehaviour
     }
     #endregion
 
-    #region 전투 관문 — 보스 등장(0), 첫 ✖(50)
+    #region 전투 관문 — 보스 등장(0), 특성 수업(10), 첫 ✖(50)
+    // 그 특성의 몬스터에게 처음 부딪혔다. 싸움 직전에 규칙을 가르치고, 끝나면 다음 관문(첫 ✖·확인 창)으로 넘긴다 —
+    // 배운 규칙을 바로 그 싸움에 쓴다. 지는 싸움이어도 가르친다(왜 지는지가 그 규칙이다).
+    static bool TraitGate(MonsterController monster, Action proceed)
+    {
+        if (s_instance == null || Contracted == false
+            || Managers.Data.MonsterDic.TryGetValue(monster.id, out Data.MonsterData data) == false)
+            return false;
+        List<StoryScene> chain = Unseen(StoryTrigger.TraitFirst, data.Ability);
+        if (chain.Count == 0)
+            return false;
+        Define.MoveDir facing = Toward(monster.transform.position);     // 붙잡기 전에 센다 — 여기서 터지면 캐릭터가 굳는다
+        Acquire();
+        s_instance.StartNow(s_instance.CoTrait(chain, facing, proceed));
+        return true;
+    }
+
+    IEnumerator CoTrait(List<StoryScene> chain, Define.MoveDir facing, Action proceed)
+    {
+        try
+        {
+            Managers.Game.Player.SetIdleState(facing);
+            Managers.UI.CloseGameSceneUI();
+            yield return CoChain(chain);
+        }
+        finally
+        {
+            Restore();
+            Release();
+            // 수업이 어디서 끊겼든 다음 관문으로 — 관문을 쥔 채 두면 캐릭터가 굳는다 (보스 등장과 같다).
+            proceed();
+        }
+    }
+
     static bool BossIntroGate(MonsterController monster, Action proceed)
     {
         int chapter = BossChapter(monster.id);
@@ -942,41 +1018,50 @@ public class StoryDirector : MonoBehaviour
         if (chapter < 0 || chapter >= GeneratedStory.ChapterNameIds.Length)
             yield break;
         bool done = false;
-        _popup = UI_StoryCardPopup.ShowTitle(GeneratedStory.ChapterNameIds[chapter], GeneratedStory.ChapterSubtitleIds[chapter], () => done = true);
+        _title = true;
+        _popup = UI_StoryCardPopup.ShowTitle(GeneratedStory.ChapterNameIds[chapter], GeneratedStory.ChapterSubtitleIds[chapter],
+            () => { done = true; StoryUI.EndSkip(); });
         while (done == false)
             yield return null;
+        _title = false;
     }
 
     IEnumerator CoScene(StoryScene scene, bool keepCard)
     {
+        bool seenBefore = Records.SceneSeenEver(scene.Id);     // MarkSeen 이 곧 적는다 — 그 전에 잰다
         MarkSeen(scene);
         yield return CoCues(scene, 0);
         bool done = false;
+        _scene = scene;
+        _sceneSeenBefore = seenBefore;
+        // 장면이 끝나면 건너뛰기도 끝난다 — 이어지는 장면은 다시 눌러야(누르고 있어야) 넘어간다.
+        Action finished = () => { done = true; StoryUI.EndSkip(); };
         switch (scene.Kind)
         {
             case StoryKind.Dialogue:
             case StoryKind.Choice:
                 _lastChoice = null;
-                _popup = UI_ConversationPopup.ShowStory(scene, n => Cue(scene, n), c => { _lastChoice = c; done = true; });
+                _popup = UI_ConversationPopup.ShowStory(scene, n => Cue(scene, n), c => { _lastChoice = c; finished(); });
                 break;
             case StoryKind.Card:
-                UI_StoryCardPopup card = UI_StoryCardPopup.Show(scene, n => Cue(scene, n), () => done = true, keepCard);
+                UI_StoryCardPopup card = UI_StoryCardPopup.Show(scene, n => Cue(scene, n), finished, keepCard);
                 if (keepCard)
                     _backdrop = card;
                 else
                     _popup = card;
                 break;
             case StoryKind.Credits:
-                _popup = UI_StoryCreditsPopup.Show(scene, () => done = true);
+                _popup = UI_StoryCreditsPopup.Show(scene, finished);
                 break;
             default:
                 if (scene.Lines.Length > 0)
                     UI_StoryBark.Show(scene.Lines[0]);
-                done = true;
+                finished();
                 break;
         }
         while (done == false)
             yield return null;
+        _scene = null;
         yield return CoCues(scene, StoryCue.End);
     }
 
@@ -1071,6 +1156,7 @@ public class StoryDirector : MonoBehaviour
                 PlayerPrefs.SetInt(ClearedKey, 1);
                 PlayerPrefs.SetString(ClearedEndingKey, ending.ToString().ToLowerInvariant());
                 PlayerPrefs.Save();
+                GameEvents.RaiseEndingReached(ending.ToString().ToLowerInvariant());
             }
 
             yield return CoChain(All(StoryTrigger.Ending, (int)ending));
@@ -1418,7 +1504,7 @@ public class StoryDirector : MonoBehaviour
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
     /// <summary>개발용(eval): 장면 하나를 제 연출째 다시 튼다. 본 것으로도, 결말로도 적지 않는다.
-    /// 챕터 첫 장면은 챕터 카드부터, 카드 뒤에 깔고 뜨는 대화(마을 카드 → 촌장)는 같이 튼다.
+    /// 챕터 첫 장면은 챕터 카드부터, 카드 뒤에 깔고 뜨는 대화(무덤 카드 → 촌장)는 같이 튼다.
     /// 결말 선택(ending_choice)은 고른 결말·후일담·크레딧을 지나 엔딩 씬까지 간다.</summary>
     public static void DebugPlay(string sceneId)
     {

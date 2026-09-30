@@ -27,7 +27,7 @@ using Debug = UnityEngine.Debug;
 /// 타이틀에서 한 발짝도 못 나간다 — 로드할 것이 아무것도 없기 때문이다.
 ///
 /// Windows 는 콘텐츠 검증(validate_content.py)을 통과해야 굽고, 굽기 전에 출력 폴더를 비운다.
-/// 내보내면 안 되는 디버그 기호 폴더(*_DoNotShip)는 Build/Symbols/{버전}/ 으로 옮긴다.
+/// 내보내면 안 되는 디버그 기호 폴더(*_DoNotShip)는 Build/Symbols/{버전}/ 으로 옮기고, 개발용 steam_appid.txt 는 지운다.
 /// </summary>
 public static class GameBuild
 {
@@ -137,7 +137,11 @@ public static class GameBuild
             }
 
             MoveSymbols(dir);
+            // steam_appid.txt 는 개발용이다 — 남으면 Steam 을 거치지 않고 켜진다(SteamManager.AppId). 개발 빌드가 아니면 지운다.
+            if ((opt.options & BuildOptions.Development) == 0)
+                File.Delete(Path.Combine(dir, "steam_appid.txt"));
             Debug.Log("[GameBuild] 완료: " + opt.locationPathName);
+            Debug.Log("[GameBuild] Steam 에 올리기(SteamPipe, beta 브랜치): powershell -ExecutionPolicy Bypass -File Steam/scripts/upload.ps1");
             return 0;
         }
         catch (Exception e)

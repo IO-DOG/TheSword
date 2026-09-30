@@ -844,6 +844,9 @@ public class Events : MonoBehaviour
                 SpawnSplitPotion(slimes[0]);
                 MoveCamera(cam, Define.DEFALUT_CAMERA_OFFSET, 0.5f);
             }
+            // 킹 슬라임이 쓰러진 순간(UI_MonsterCard.Dead)의 관문 셈에는 아직 분열 슬라임이 없어 출구가 열렸다.
+            // 셋이 섰으니 다시 잰다 — 셋을 다 잡으면 마지막 전투의 Dead 가 연다.
+            Managers.Game.RefreshBossGates();
             Managers.UI.ShowGameSceneUI();
             Managers.Directing.CloseLetterBox();
         }

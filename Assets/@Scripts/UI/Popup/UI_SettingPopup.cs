@@ -11,6 +11,9 @@ public class UI_SettingPopup : UI_Popup
     // 새 줄의 이름 (Tools/ui_text_parts/settings.py). 예상 피해 표시는 전투 예측 줄의 이름(133)을 그대로 쓴다.
     const int RESOLUTION = 230, VSYNC = 231, TEXT_SPEED = 232, TEXT_SPEED_SLOW = 233, SCREEN_SHAKE = 237, GAME = 238;
     const int FORECAST = 133;
+    // 전투 속도 줄 (Tools/ui_text_parts/battle.py): 이름, "{0}배속". 고를 수 있는 값은 GameSettings.BattleSpeed 와 같다.
+    const int BATTLE_SPEED = 350, BATTLE_SPEED_VALUE = 351;
+    static readonly int[] BattleSpeeds = { 1, 2, 4 };
 
     #region Enums
     enum GameObjects
@@ -249,12 +252,12 @@ public class UI_SettingPopup : UI_Popup
     }
 
     #region 새 줄
-    // 해상도·수직 동기화·글자 속도·화면 흔들림·예상 피해. 모양은 프리팹의 체크박스·슬라이더를 복제해
+    // 해상도·수직 동기화·글자 속도·전투 속도·화면 흔들림·예상 피해. 모양은 프리팹의 체크박스·슬라이더를 복제해
     // 그대로 쓰고, 판을 아래로 늘려 담는다. 자리는 프리팹 단위이고 판의 가운데가 0 이다:
     //   화면  제목 80.9 · 줄 70.9 · 창 상태 55/45/35 · 해상도 10 · 수직 동기화 -5
     //   소리  통째로 40 내린다 (제목 -30 · 슬라이더 -70/-95/-120)
-    //   게임  제목 -147 · 줄 -157 · 글자 속도 -187 · 흔들림 -202 · 예상 피해 -212
-    //   판    위 110(프리팹 그대로) ~ 아래 -237
+    //   게임  제목 -147 · 줄 -157 · 글자 속도 -187 · 전투 속도 -212 · 흔들림 -227 · 예상 피해 -237
+    //   판    위 110(프리팹 그대로) ~ 아래 -262
     void AddRows()
     {
         Image board = GetImage((int)Images.BackgroundImage);
@@ -285,23 +288,31 @@ public class UI_SettingPopup : UI_Popup
         AddSlider(slider, game, -187f, 4, GameSettings.TextSpeed,
             i => $"{Managers.GetString(TEXT_SPEED)}  {Managers.GetString(TEXT_SPEED_SLOW + i)}",
             i => GameSettings.TextSpeed = i);
-        AddToggle(check, game, -202f, SCREEN_SHAKE, () => GameSettings.ScreenShake, on => GameSettings.ScreenShake = on);
-        AddToggle(check, game, -212f, FORECAST, () => GameSettings.ShowForecast, on => GameSettings.ShowForecast = on);
+        // 전투 시계를 FixedUpdate 마다 몇 걸음 돌리나 — 결과는 같고 지켜보는 시간만 준다 (UI_BattlePopup.Speed).
+        AddSlider(slider, game, -212f, BattleSpeeds.Length, Mathf.Max(0, Array.IndexOf(BattleSpeeds, GameSettings.BattleSpeed)),
+            i => $"{Managers.GetString(BATTLE_SPEED)}  {string.Format(Managers.GetString(BATTLE_SPEED_VALUE), BattleSpeeds[i])}",
+            i => GameSettings.BattleSpeed = BattleSpeeds[i]);
+        AddToggle(check, game, -227f, SCREEN_SHAKE, () => GameSettings.ScreenShake, on => GameSettings.ScreenShake = on);
+        AddToggle(check, game, -237f, FORECAST, () => GameSettings.ShowForecast, on => GameSettings.ShowForecast = on);
 
         // 판을 늘리고 셋을 가운데로 모은다. 9분할로 그려 위쪽 테두리 무늬는 늘어나지 않게 한다
         // (스프라이트 테두리 값은 임포트 설정에 있다).
-        const float top = 110f, bottom = -237f;
+        const float top = 110f, bottom = -262f;
         board.type = Image.Type.Sliced;
         board.rectTransform.sizeDelta = new Vector2(board.rectTransform.sizeDelta.x, top - bottom);
         foreach (Transform block in new[] { screen, sound, game })
             Shift(block, -(top + bottom) / 2f);
 
         // 줄 글자(13·15)가 판 배율 2 에서도 옆 메뉴 단추 글자(72)의 3분의 1 남짓이라 960x540 창에서는 깨알 같았다.
-        // 판째로 1.3배 키운다(늘린 판이 화면 높이의 84%). 다만 옆으로 비킨 메뉴 단추(폭 480, 화면 폭 36.5%)와 판 가운데
+        // 판째로 1.3배 키운다(늘린 판이 16:9 화면 높이의 90%). 다만 옆으로 비킨 메뉴 단추(폭 480, 화면 폭 36.5%)와 판 가운데
         // (64.5%) 사이에 드는 만큼만 — 4:3 에서는 덜 키워야 판이 단추 끝을 덮지 않는다.
-        float canvasWidth = Screen.width / GetComponent<Canvas>().scaleFactor;
+        // 높이도 넘지 않게 한다(위아래 20 씩 남긴다). 캔버스 높이는 21:9(2560x1080·3440x1440)에서 935 남짓이라 1.3배 판(967)의
+        // 위아래 테두리가 잘렸다. 32:9(5120x1440)는 764 라 1배 판(744)도 여백이 모자라 1배보다 조금 작게 줄인다.
+        float scaleFactor = GetComponent<Canvas>().scaleFactor;
+        float canvasWidth = Screen.width / scaleFactor;
         float room = ((0.645f - 0.365f) * canvasWidth - 240f - 16f) / (board.rectTransform.sizeDelta.x * board.transform.localScale.x / 2f);
-        board.transform.localScale *= Mathf.Clamp(room, 1f, 1.3f);
+        float fitHeight = (Screen.height / scaleFactor - 40f) / (board.rectTransform.sizeDelta.y * board.transform.localScale.y);
+        board.transform.localScale *= Mathf.Min(Mathf.Clamp(room, 1f, 1.3f), fitHeight);
     }
 
     // 값은 이름 옆에 붙인다 — 소리 줄의 오른쪽 칸(너비 15)에는 "1920 x 1080" 이 안 들어간다.

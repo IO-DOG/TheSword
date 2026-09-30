@@ -156,8 +156,10 @@ public class CameraController : MonoBehaviour
         }
 
         string curDungeonName = $"Dungeon_{info.DungeonID}";
-        GameObject dungeon = GameObject.Find(curDungeonName);
-        if (dungeon == null)
+        // 이름으로 찾지 않는다. 같은 챕터 안에서 워프하면 GenerateMap 이 부순(프레임 끝에야 사라지는) 옛 맵에도 같은
+        // 이름이 있어 그쪽이 먼저 잡혔고, _bg 가 죽은 바닥 그림을 쥐어 Effects_00 의 떠다니는 알갱이가 예외로 멈췄다.
+        GameObject dungeon;
+        if (Managers.Game.Maps.TryGetValue(Managers.Game.PlayerData.CurStageid, out dungeon) == false || dungeon == null)
         {
             Debug.LogWarning($"[Camera] {curDungeonName} 을 못 찾아 경계를 그대로 둔다");
             return;
@@ -191,10 +193,13 @@ public class CameraController : MonoBehaviour
         _collider.size = new Vector3(area.size.x, area.size.z * Mathf.Sqrt(3) / 2, Define.CONFINER_HEIGHT);
         _collider.center = new Vector3(0, _collider.size.y, -10);
 
+        // z = center - size. 예전 식 min.z + center.z - TILE/2 는 이것과 (max.z - TILE/2) 만큼 다르다 — 위끝이 z = TILE/2 인
+        // 층(손수 만든 1~4층의 바닥 그림, 윗줄이 찬 생성 층)에서는 같은 값이고, 윗줄이 빈 층에서는 빈 만큼 경계가 더 내려갔다:
+        // 11·21·26층 2.56, 86층 1.92(카메라가 층 위쪽을 못 따라가고 화면 아래 절반이 비었다), 한 줄 빈 27개 층 0.32.
         confinerCollider.transform.position = new Vector3(
             area.min.x + area.size.x / 2 + Define.TILE_SIZE / 2,
             0,
-            area.min.z + area.center.z + -Define.TILE_SIZE / 2);
+            area.center.z - area.size.z);
 
         // Cinemachine Confiner 설정
         _confiner = _vCam.GetComponent<CinemachineConfiner>();

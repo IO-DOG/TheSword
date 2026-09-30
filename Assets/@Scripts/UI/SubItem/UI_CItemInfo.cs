@@ -80,8 +80,74 @@ public class UI_CItemInfo : UI_Base
         GetText((int)Texts.MonsterHPText).text = $"{heal}";
         GetText((int)Texts.MonsterDescText).text = (item.ChoicePartner != null
             ? Managers.GetString(Define.REWARD_CHOICE) + "\n\n" : "") + Overflow(id, heal) +
+            WhatIf(Managers.Data.ConsumableItemDic[id]) +
             Managers.GetString(Managers.Data.ConsumableItemDic[id].ScriptDescriptionId);
         FitFrame();
+    }
+
+    /// <summary>
+    /// 공격·방어가 오르는 아이템(룬)을 주우면 이 층에 남은 몬스터의 값이 어떻게 바뀌는가 — 임계가 보이는 곳이다.
+    /// "공격 +1 → 늑대 -31→-26" 을 셋까지. 같은 종(이름이 같다 — 생성기가 종마다 이름을 따로 준다)은 한 줄로 묶고,
+    /// 이 층에서 아끼는 체력(한 판 × 마릿수)이 큰 것부터, 지다가 이기게 되는 것이 맨 앞이다. 바뀌는 게 없으면
+    /// "변화 없음" 한 줄. 셈은 BattleForecast 의 가정(공격·방어 +n) 그대로라 주운 뒤 맵 위 숫자와 같다.
+    /// 예측은 마검의 눈이다 — 계약 전에는 없다.
+    /// </summary>
+    static string WhatIf(Data.ConsumableItemData row)
+    {
+        int atk = Mathf.RoundToInt(row.AttackUp), def = Mathf.RoundToInt(row.DefenceUp);
+        GameManager g = Managers.Game;
+        if (atk <= 0 && def <= 0 || g.PlayerData.IsContractedSword == false)
+            return "";
+
+        string stat = string.Join(" ",
+            atk > 0 ? string.Format(Managers.GetString(ForecastUI.AtkUp), atk) : null,
+            def > 0 ? string.Format(Managers.GetString(ForecastUI.DefUp), def) : null).Trim();
+        int stage = g.PlayerData.CurStageid;
+
+        Dictionary<string, Change> species = new Dictionary<string, Change>();
+        GameObject map;
+        if (g.Maps.TryGetValue(stage, out map) && map != null)
+        {
+            foreach (MonsterController mc in map.GetComponentsInChildren<MonsterController>(false))
+            {
+                Data.MonsterData md;
+                if (ForecastUI.IsStanding(mc) == false || Managers.Data.MonsterDic.TryGetValue(mc.id, out md) == false)
+                    continue;
+                string name = Managers.GetString(md.MonsterNameId);
+                Change c;
+                if (species.TryGetValue(name, out c))
+                {
+                    c.Count++;
+                    continue;
+                }
+                species[name] = new Change { Name = name, Count = 1, Now = ForecastUI.Forecast(mc.id, stage),
+                                             Then = ForecastUI.Forecast(mc.id, stage, atk, def) };
+            }
+        }
+
+        List<Change> changed = new List<Change>();
+        foreach (Change c in species.Values)
+        {
+            if (c.Now.Ok && ForecastUI.Price(c.Now) != ForecastUI.Price(c.Then))
+                changed.Add(c);
+        }
+        if (changed.Count == 0)
+            return $"<color=#9AA4B8>{stat} → {Managers.GetString(ForecastUI.NoChange)}</color>\n\n";
+
+        changed.Sort((a, b) => b.Saved.CompareTo(a.Saved));
+        string lines = "";
+        for (int i = 0; i < changed.Count && i < 3; i++)
+            lines += $"{stat} → {changed[i].Name} {ForecastUI.Price(changed[i].Now)}→{ForecastUI.Price(changed[i].Then)}\n";
+        return $"<color=#96E68C>{lines}</color>\n";
+    }
+
+    class Change
+    {
+        public string Name;
+        public int Count;
+        public BattleForecast.Result Now, Then;
+        // 이 층에서 아끼는 체력. 지다가 이기게 되면 어떤 값보다 크다(BattleForecast 의 값은 1e7 아래다).
+        public float Saved => (Now.Win ? Now.Damage - Then.Damage : 1e7f) * Count;
     }
 
     /// <summary>
@@ -96,6 +162,16 @@ public class UI_CItemInfo : UI_Base
         RectTransform frame = GetImage((int)Images.BGImage).rectTransform;
         desc.ForceMeshUpdate();
         float textBottom = frame.InverseTransformPoint(desc.transform.TransformPoint(desc.textBounds.min)).y;
+
+        // 보기 창(마스크)도 글 끝까지 내린다 — 룬의 "주우면" 줄에 "둘 중 하나" 안내까지 붙으면 열 줄을 넘어 끝줄이 마스크에
+        // 잘리고, 틀만 늘어 빈 띠가 남았다. 창만 늘리고 내용(Content)은 그대로 둔다: 글이 Content 가운데에 붙어 있어서
+        // Content 를 늘리면 늘린 몫의 반만큼 글이 따라 내려가 다시 잘렸다. 창보다 짧은 Content 는 ScrollRect 가 창 크기로
+        // 셈하므로(AdjustBounds) 저절로 흐르는 스크롤(CoAutoScroll)도 글을 움직이지 않는다.
+        RectTransform view = GetObject((int)Objects.ScrollView).GetComponent<RectTransform>();
+        float viewBottom = frame.InverseTransformPoint(view.TransformPoint(new Vector3(0f, view.rect.yMin, 0f))).y;
+        if (viewBottom > textBottom)
+            view.sizeDelta += new Vector2(0f, viewBottom - textBottom);
+
         float lack = frame.rect.yMin + Bottom - textBottom;
         if (lack > 0f)
         {
@@ -126,14 +202,18 @@ public class UI_CItemInfo : UI_Base
 
     // 마우스가 이 아이템을 벗어나면 닫는다 — 옆 칸 아이템으로 곧장 옮겨 가도(UI_MonsterInfo 와 같다).
     // 닫으면 UI_GameScene.ShowInfo 가 새 아이템의 창을 띄운다. 맵이 덮여도 닫는다(UI_GameScene.CanShowTooltip).
-    private void Update()
+    // LateUpdate 에서, 끄고 나서 부순다 — 메뉴·전투가 열린 그 프레임에 그려지지 않게(UI_MonsterInfo 와 같다).
+    private void LateUpdate()
     {
+        if (_init == false)
+            return;
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (UI_GameScene.CanShowTooltip() && Physics.Raycast(ray, out hit, 1000.0f, _mask) && IsOwner(hit.collider))
             return;
 
         Release();
+        gameObject.SetActive(false);
         Destroy(gameObject);
     }
 

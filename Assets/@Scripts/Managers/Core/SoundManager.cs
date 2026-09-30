@@ -92,9 +92,10 @@ public class SoundManager
             {
                 if (audioClip == null)
                     return;
-                // 배속은 전투에만 건다 — 전투가 빨리 도는 만큼 타격음도 빨라진다.
-                // 발소리·UI 까지 올리면 목걸이(2~5배)를 낀 뒤로 걸을 때마다 새된 소리가 났다.
-                audioSource.pitch = Managers.Game.OnBattle ? pitch * Managers.Game.GameSpeed : pitch;
+                // 배속 높이는 여기서 얹지 않는다 — 전투 시계가 내는 소리(타격·방어·치명)만 PlayByGameSpeed 로 얹는다.
+                // 전투 중에 나는 소리 전부에 얹었더니 기본 2배속에서 전투 시작·보스 등장·게임 오버 소리까지 1.3배로 새됐다
+                // (전투는 창이 열리기 전에 켜지고 게임 오버 소리가 난 뒤에 꺼진다).
+                audioSource.pitch = pitch;
 
                 //audioSource.volume = PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) / (float)_totalEffectCount; // 오디오 수에 따를 볼륨 조절
                 _totalEffectCount++;
@@ -146,11 +147,10 @@ public class SoundManager
     }
 
     /// <summary>
-    /// 게임 배속에 따라서 pitch가 달라짐
+    /// 전투 시계가 내는 소리 — 전투 배속만큼 높아진다(1.3 까지, BattlePitch). 타격·방어(UI_PlayerCard·UI_MonsterCard)와
+    /// 치명타(UI_BattlePopup.Crit)가 쓴다. 효과음 소스가 하나라 높이는 가장 나중에 튼 소리를 따른다.
     /// </summary>
-    /// <param name="type"></param>
-    /// <param name="key"></param>
-    public void PlayByGameSpeed(Define.Sound type, string key)
+    public void PlayByGameSpeed(Define.Sound type, string key, float pitch = 1f)
     {
         AudioSource audioSource = _audioSources[(int)type];
 
@@ -182,11 +182,61 @@ public class SoundManager
         {
             LoadAudioClip(key, (audioClip) =>
             {
-                audioSource.pitch = Managers.Game.GameSpeed;
+                if (audioClip == null)
+                    return;
+                audioSource.pitch = pitch * BattlePitch;
                 //if (Managers.Game.EffectSoundOn)
                 audioSource.PlayOneShot(audioClip);
             });
         }
+    }
+
+    /// <summary>전투 배속에 맞춰 올리는 소리 높이의 끝.</summary>
+    public const float MaxBattlePitch = 1.3f;
+
+    // 전투 배속(UI_BattlePopup.Speed — 설정 1~4, 누르고 있으면 8, 봇 8~16)을 그대로 곱하면 두 옥타브 넘게 새된 소리가 났다.
+    // 빨라진 느낌만 남기고 1.3 에서 멈춘다.
+    static float BattlePitch => Mathf.Min(UI_BattlePopup.Speed, MaxBattlePitch);
+
+    /// <summary>효과음 크기 — 설정의 효과음 슬라이더에 지금의 페이드(로딩 삽화가 0 으로 내린다)까지 얹힌 값이다.</summary>
+    public float EffectVolume
+    {
+        get
+        {
+            AudioSource effect = _audioSources[(int)Define.Sound.Effect];
+            return effect != null ? effect.volume : 1f;
+        }
+    }
+
+    // 프리팹마다 AudioSource 원래 크기. 처음 볼 때 프리팹에서 한 번 읽는다 — 인스턴스에서 읽으면 풀에서 다시 꺼낸 것은
+    // 이미 줄여 둔 값이라, 꺼낼 때마다 한 번 더 곱해져 점점 작아진다.
+    readonly Dictionary<GameObject, float[]> _baseVolumes = new Dictionary<GameObject, float[]>();
+
+    /// <summary>
+    /// 프리팹이 스스로 트는 소리(PlayOnAwake — 타격·베기 이펙트, 열쇠·물약 줍기, 죽음 등 서른다섯 개)를 효과음 크기에 맞춘다.
+    /// 그 소리들은 이 관리자를 거치지 않아서 슬라이더를 0 으로 내려도 제 크기로 울렸다. ResourceManager.Instantiate 가
+    /// 만들 때(풀에서 꺼낼 때도) 부른다. 서드파티 프리팹을 고치지 않고 여기서 맞춘다 — 원래 크기 x 효과음 크기.
+    /// </summary>
+    public void FollowEffectVolume(GameObject prefab, GameObject instance)
+    {
+        if (prefab == null || instance == null)
+            return;
+        if (_baseVolumes.TryGetValue(prefab, out float[] bases) == false)
+        {
+            AudioSource[] original = prefab.GetComponentsInChildren<AudioSource>(true);
+            bases = new float[original.Length];
+            for (int i = 0; i < original.Length; i++)
+                bases[i] = original[i].volume;
+            _baseVolumes.Add(prefab, bases);
+        }
+        if (bases.Length == 0)
+            return;
+
+        // 복제본의 AudioSource 는 프리팹과 같은 순서로 나온다 (같은 계층을 같은 순서로 훑는다).
+        AudioSource[] live = instance.GetComponentsInChildren<AudioSource>(true);
+        float volume = EffectVolume;
+        for (int i = 0; i < live.Length && i < bases.Length; i++)
+            live[i].volume = bases[i] * volume;
     }
 
     public void Stop(Define.Sound type)

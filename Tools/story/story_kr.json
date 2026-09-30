@@ -90,52 +90,56 @@
       "id": "village_card",
       "kind": "card",
       "trigger": "village",
-      "staging": "4층 계단을 오른 뒤, 5층에 들어가기 전. 인트로곡. 01 TowerArrival, 02 Intro04, 03~04 TowerGraves. 카드마다 천천히 페이드. 04 뒤 그림을 걷지 않고 village_chief 로 잇는다.",
+      "staging": "4층 계단을 오른 뒤, 5층에 들어가기 전 — 탑에 닿는 순간. 인트로곡. 01 TowerArrival, 02 Intro04, 03 TowerGraves. 카드마다 천천히 페이드. 끝나면 챕터곡으로 돌리고 챕터 카드 → ch0_start. 5층 첫 걸음 전 대사는 5줄 안이다(카드 3 + 챕터 2) — 무덤은 여기서 보여 5층의 첫 죽음(mech_death \"꼭 무덤 같더군\")보다 앞서고, 촌장은 6층에서 떠올린다(village_graves → village_chief).",
       "lines": [
         { "key": "village_card.01", "speaker": "narration", "image": "TowerArrival", "kr": "숲을 빠져나오자, 그것이 보였다.\n마을 한가운데 거꾸로 꽂힌 검은 탑." },
         { "key": "village_card.02", "speaker": "narration", "image": "Intro04", "kr": "십이 년 전 어느 밤,\n탑은 하늘에서 머리부터 떨어졌다." },
-        { "key": "village_card.03", "speaker": "narration", "image": "TowerGraves", "kr": "탑 밑동에는 무덤이 늘어서 있었다.\n십자가 사이사이, 칼이 꽂혀 있었다." },
-        { "key": "village_card.04", "speaker": "narration", "kr": "그 위로 꽂힌 탑도\n거대한 칼 한 자루 같았다." }
+        { "key": "village_card.03", "speaker": "narration", "image": "TowerGraves", "kr": "탑 밑동에는 무덤이 늘어서 있었다.\n십자가 사이사이, 칼이 꽂혀 있었다." }
+      ]
+    },
+    {
+      "id": "village_graves",
+      "kind": "card",
+      "trigger": "floor_first:6",
+      "staging": "6층에 처음 들어설 때. 탑에 들기 전의 기억 — 5층에서 마검의 값을 한 층 치른 뒤라야 촌장의 '값을 먼저 물어보시오' 가 앉는다. 인트로곡. TowerGraves 한 장. 그림을 걷지 않고 village_chief 로 잇는다.",
+      "lines": [
+        { "key": "village_graves.01", "speaker": "narration", "image": "TowerGraves", "kr": "탑에 들기 전, 밑동의 무덤들을 지났다.\n그 위로 꽂힌 탑도\n거대한 칼 한 자루 같았다." }
       ]
     },
     {
       "id": "village_chief",
       "kind": "dialogue",
-      "trigger": "village",
-      "staging": "village_card 에 이어 TowerGraves 그림을 깔아 둔 채 대화창만 띄운다(맵 없음). 인트로곡 유지. 촌장은 초상화 없이 이름만. 마검은 06 전까지 자고 있다 — 05 의 '칼' 소리에 06 에서 Treasure 로 반쯤 깼다가 07 뒤 다시 잠든다. 09 뒤 반 박자 정적(데미안이 빈 무덤을 본다. 대사 없이). 끝나면 5층으로.",
+      "trigger": "floor_first:6",
+      "staging": "village_graves 에 이어 TowerGraves 그림을 깔아 둔 채 대화창만 띄운다(맵 없음, 6층에서 떠올리는 탑에 들기 전의 일). 인트로곡 유지. 촌장은 초상화 없이 이름만. 01 은 '그 칼은…' 과 '…잘못 봤소.' 사이를 한 박자 끊어 읽는다. 마검은 05 전까지 자고 있다 — 04 의 '칼' 소리에 05 에서 Treasure 로 반쯤 깼다가 06 뒤 다시 잠든다. 08 뒤 반 박자 정적(데미안이 빈 무덤을 본다. 대사 없이). 끝나면 6층으로(챕터곡).",
       "lines": [
-        { "key": "village_chief.01", "speaker": "chief", "kr": "…또 한 사람 왔구려.\n……그 칼은…" },
-        { "key": "village_chief.02", "speaker": "chief", "kr": "…아니, 잘못 봤소.\n늙으면 헛것이 보이는 법이오." },
-        { "key": "village_chief.03", "speaker": "damian", "emotion": "Question", "kr": "칼 꽂힌 무덤이 많네요." },
-        { "key": "village_chief.04", "speaker": "chief", "kr": "탑에 들어간 이들 몫이오.\n가브에선 전사의 무덤에\n그가 쓰던 칼을 꽂지." },
-        { "key": "village_chief.05", "speaker": "chief", "kr": "사람은 안 돌아오오.\n칼만 탑이 뱉어 내지." },
-        { "key": "village_chief.06", "speaker": "sword", "emotion": "Treasure", "kr": "…음냐… 칼?\n칼 냄새… 몇 자루냐…" },
-        { "key": "village_chief.07", "speaker": "damian", "emotion": "Normal", "kr": "무덤이야. 먹지 마." },
-        { "key": "village_chief.08", "speaker": "chief", "kr": "아들놈 렌도 들어갔소.\n해 지기 전에 온다더니." },
-        { "key": "village_chief.09", "speaker": "chief", "kr": "무덤은 내가 파오.\n하나만 비어 있지.\n…주인이 아직 안 와서." },
-        { "key": "village_chief.10", "speaker": "chief", "kr": "이름은 묻지 않겠소.\n알면 비석에 새겨야 하니까.\n돌아오면, 그때 묻지." },
-        { "key": "village_chief.11", "speaker": "chief", "kr": "탑 안에서 누가\n달콤한 말을 하거든,\n값을 먼저 물어보시오." },
-        { "key": "village_chief.12", "speaker": "damian", "emotion": "Normal", "kr": "값은 늘 먼저 물어요." }
+        { "key": "village_chief.01", "speaker": "chief", "kr": "…또 한 사람 왔구려. ……그 칼은…\n…아니, 잘못 봤소.\n늙으면 헛것이 보이는 법이오." },
+        { "key": "village_chief.02", "speaker": "damian", "emotion": "Question", "kr": "칼 꽂힌 무덤이 많네요." },
+        { "key": "village_chief.03", "speaker": "chief", "kr": "탑에 들어간 이들 몫이오.\n가브에선 전사의 무덤에\n그가 쓰던 칼을 꽂지." },
+        { "key": "village_chief.04", "speaker": "chief", "kr": "사람은 안 돌아오오.\n칼만 탑이 뱉어 내지." },
+        { "key": "village_chief.05", "speaker": "sword", "emotion": "Treasure", "kr": "…음냐… 칼?\n칼 냄새… 몇 자루냐…" },
+        { "key": "village_chief.06", "speaker": "damian", "emotion": "Normal", "kr": "무덤이야. 먹지 마." },
+        { "key": "village_chief.07", "speaker": "chief", "kr": "아들놈 렌도 들어갔소.\n해 지기 전에 온다더니." },
+        { "key": "village_chief.08", "speaker": "chief", "kr": "무덤은 내가 파오.\n하나만 비어 있지.\n…주인이 아직 안 와서." },
+        { "key": "village_chief.09", "speaker": "chief", "kr": "이름은 묻지 않겠소.\n알면 비석에 새겨야 하니까.\n돌아오면, 그때 묻지." },
+        { "key": "village_chief.10", "speaker": "chief", "kr": "탑 안에서 누가\n달콤한 말을 하거든,\n값을 먼저 물어보시오." },
+        { "key": "village_chief.11", "speaker": "damian", "emotion": "Normal", "kr": "값은 늘 먼저 물어요." }
       ]
     },
     {
       "id": "ch0_start",
       "kind": "dialogue",
       "trigger": "chapter_start:0",
-      "staging": "5층 첫 진입, 챕터 0 '이끼 낀 지하 묘소'. 밝은 낮 조명, 잎이 위에서 떨어진다. 챕터곡. 01 에서 데미안이 걷다 멈추고 머리 위 Question 이모트. 02 동안 카메라를 천천히 위로 들어 떨어지는 잎을 비춘 뒤 데미안에게 돌아온다. 끝나면 trait_guardian 으로 잇는다.",
+      "staging": "5층 첫 진입, 챕터 0 '이끼 낀 지하 묘소'. 밝은 낮 조명, 잎이 위에서 떨어진다. 챕터곡. 01 에서 데미안 머리 위 Question 이모트, 카메라를 천천히 위로 들어 떨어지는 잎을 비춘 뒤 데미안에게 돌아온다. 첫 걸음 전이라 두 줄. 특성 수업은 수호 몬스터에게 처음 부딪힐 때(trait_guardian).",
       "lines": [
-        { "key": "ch0_start.01", "speaker": "damian", "emotion": "Thinking", "kr": "계단을 올랐는데 흙냄새가 짙다.\n귀도 먹먹하고." },
-        { "key": "ch0_start.02", "speaker": "damian", "emotion": "Question", "kr": "잎이 머리 위에서 떨어진다.\n숲은 발밑에 두고 왔는데.\n…이 탑, 거꾸로구나." },
-        { "key": "ch0_start.03", "speaker": "sword", "emotion": "Normal", "kr": "탑 안에선\n탑이 정한 쪽이 위다." },
-        { "key": "ch0_start.04", "speaker": "damian", "emotion": "Thinking", "kr": "…잘 아는군." },
-        { "key": "ch0_start.05", "speaker": "sword", "emotion": "Smile", "kr": "크하핫! 이몸을 뭘로 보고.\n…그나저나 이 냄새,\n어디서 맡았더라." }
+        { "key": "ch0_start.01", "speaker": "damian", "emotion": "Question", "kr": "계단을 올랐는데 흙냄새가 짙다.\n숲은 발밑에 두고 왔는데, 잎은 머리 위에서.\n…이 탑, 거꾸로구나." },
+        { "key": "ch0_start.02", "speaker": "sword", "emotion": "Question", "kr": "탑 안에선 탑이 정한 쪽이 위다.\n…그나저나 이 냄새,\n어디서 맡았더라." }
       ]
     },
     {
       "id": "trait_guardian",
       "kind": "dialogue",
       "trigger": "trait_first:guardian",
-      "staging": "5층, ch0_start 바로 뒤. 짧게. 카메라를 이 층의 수호 몬스터(정예)로 잠깐 옮긴다.",
+      "staging": "수호 몬스터에게 처음 부딪힌 순간, 싸움 직전(5층 정예부터). 짧게. 끝나면 그 싸움이 열린다.",
       "lines": [
         { "key": "trait_guardian.01", "speaker": "sword", "emotion": "Normal", "kr": "방패를 든 채 싸움을 열고,\n내려가도 금방 다시 드는 놈이다.\n방패 위론 평타 1, 진심도 4분의 1." },
         { "key": "trait_guardian.02", "speaker": "damian", "emotion": "Thinking", "kr": "진심이 방패에 걸리면 손해네.\n숫자 보고 순서를 바꾸지." }
@@ -273,9 +277,9 @@
       "id": "trait_beast",
       "kind": "dialogue",
       "trigger": "trait_first:beast",
-      "staging": "20층에 들어설 때. 야수는 이 층 끝의 보스뿐이다. 01 에서 마검 머리 위에 Question 이모트(냄새를 맡는다).",
+      "staging": "야수 몬스터에게 처음 부딪힌 순간, 싸움 직전(지금 데이터로는 20층 보스 — boss0_intro 가 끝나고 레터박스가 걷힌 뒤, 싸움이 열리기 전). 01 에서 마검 머리 위에 Question 이모트(냄새를 맡는다).",
       "lines": [
-        { "key": "trait_beast.01", "speaker": "sword", "emotion": "Nerve", "kr": "이 층 끝에서 짐승 냄새가 난다.\n죽지 않고 1할 이하로 떨어지면\n딱 한 번, 몸 4할을 채우고 일어선다." },
+        { "key": "trait_beast.01", "speaker": "sword", "emotion": "Nerve", "kr": "이놈한테서 짐승 냄새가 난다.\n죽지 않고 1할 이하로 떨어지면\n딱 한 번, 몸 4할을 채우고 일어선다." },
         { "key": "trait_beast.02", "speaker": "damian", "emotion": "Question", "kr": "그 몫까지 숫자에 들어 있고?" },
         { "key": "trait_beast.03", "speaker": "sword", "emotion": "Smile", "kr": "당연하지. 이몸 눈이다.\n대신 1할 턱밑에서 강타 한 방에\n끝내면 일어설 틈이 없다." }
       ]
@@ -343,7 +347,7 @@
       "id": "trait_knight",
       "kind": "dialogue",
       "trigger": "trait_first:knight",
-      "staging": "21층, ch1_start 바로 뒤. 짧게.",
+      "staging": "검사 몬스터에게 처음 부딪힌 순간, 싸움 직전(21층부터). 짧게.",
       "lines": [
         { "key": "trait_knight.01", "speaker": "sword", "emotion": "Normal", "kr": "남들 한 번 벨 때 두 번 베는 놈이다.\n대신 한 대 한 대는 가볍다." },
         { "key": "trait_knight.02", "speaker": "damian", "emotion": "Thinking", "kr": "그럼 방어 한 점이 두 번 막는 거지.\n방어 룬이 여기서 제값을 하겠어." }
@@ -440,7 +444,7 @@
       "id": "trait_magic",
       "kind": "dialogue",
       "trigger": "trait_first:magic",
-      "staging": "41층, ch2_start 바로 뒤. 마검은 말수가 줄어 있다. 짧게.",
+      "staging": "마법 몬스터에게 처음 부딪힌 순간, 싸움 직전(41층부터). 마검은 말수가 줄어 있다. 짧게.",
       "lines": [
         { "key": "trait_magic.01", "speaker": "sword", "emotion": "Normal", "kr": "때리는 족족 진심이다.\n대신 몸이 약하다.\n오래 끌면 죽는다." },
         { "key": "trait_magic.02", "speaker": "damian", "emotion": "Thinking", "kr": "그럼 강타로 일찍 끊어야겠네." }
@@ -450,7 +454,7 @@
       "id": "trait_titan",
       "kind": "dialogue",
       "trigger": "trait_first:titan",
-      "staging": "41층, trait_magic 바로 뒤. 짧게.",
+      "staging": "거대 몬스터에게 처음 부딪힌 순간, 싸움 직전(41층부터). 짧게.",
       "lines": [
         { "key": "trait_titan.01", "speaker": "sword", "emotion": "Normal", "kr": "다섯 대 맞을 때마다 운다.\n그 울음에 때린 쪽이 다친다.\n맷집도 좋다." },
         { "key": "trait_titan.02", "speaker": "damian", "emotion": "Thinking", "kr": "한 대가 셀수록 덜 듣겠어." }
@@ -550,7 +554,7 @@
       "id": "trait_immortal",
       "kind": "dialogue",
       "trigger": "trait_first:immortal",
-      "staging": "61층, ch3_start 바로 뒤. 웃음 없음. 마검은 졸지 않는다. 짧게.",
+      "staging": "불사 몬스터에게 처음 부딪힌 순간, 싸움 직전(61층부터). 웃음 없음. 마검은 졸지 않는다. 짧게.",
       "lines": [
         { "key": "trait_immortal.01", "speaker": "sword", "emotion": "Silence", "kr": "…싫은 놈들이다.\n진심이 아니면 5분의 1만 닿는다.\n강타도 흡혈도 마찬가지다." },
         { "key": "trait_immortal.02", "speaker": "damian", "emotion": "Thinking", "kr": "숨을 맞춰서 도착하지.\n앞에서 순서를 짜 두고." }
@@ -560,7 +564,7 @@
       "id": "trait_assassin",
       "kind": "dialogue",
       "trigger": "trait_first:assassin",
-      "staging": "61층, trait_immortal 바로 뒤. 웃음 없음. 짧게.",
+      "staging": "암살 몬스터에게 처음 부딪힌 순간, 싸움 직전(61층부터). 웃음 없음. 짧게.",
       "lines": [
         { "key": "trait_assassin.01", "speaker": "sword", "emotion": "Normal", "kr": "숨어 있는 동안엔 진심이 아니면\n다 피한다. 첫 진심에 모습을 드러낸다.\n강타도 그 전엔 헛손질이다." },
         { "key": "trait_assassin.02", "speaker": "damian", "emotion": "Thinking", "kr": "누굴 먼저 베느냐가 값이네." }
@@ -687,7 +691,7 @@
       "id": "trait_armor",
       "kind": "dialogue",
       "trigger": "trait_first:armor",
-      "staging": "81층, ch4_start 바로 뒤. 데미안이 혼자 규칙을 읽는다. 마검은 값만 말하는 구간이라 02 한마디뿐이다. 02 앞에서 한 박자 쉰다.",
+      "staging": "갑옷 몬스터에게 처음 부딪힌 순간, 싸움 직전(81층부터). 데미안이 혼자 규칙을 읽는다. 마검은 값만 말하는 구간이라 02 한마디뿐이다. 02 앞에서 한 박자 쉰다.",
       "lines": [
         { "key": "trait_armor.01", "speaker": "damian", "emotion": "Thinking", "kr": "몸 3할짜리 껍질이 먼저 다 받는군.\n대신 방어는 없다.\n…흡혈은 껍질 깬 다음이다." },
         { "key": "trait_armor.02", "speaker": "sword", "emotion": "Silence", "kr": "……맞다." }
@@ -925,14 +929,15 @@
       "id": "credits",
       "kind": "credits",
       "trigger": "credits",
-      "staging": "결말 셋이 함께 쓰는 크레딧(바이블 11절). 줄이 아래에서 위로 흐른다. 빈 줄 대신 01 뒤·05 뒤에 간격을 둔다. 제작진은 이름만, 역할은 적지 않는다. 음악은 직전 결말을 잇는다: seal 은 여기서 타이틀곡을 시작, dawn 은 타이틀곡, hold 는 마검 조우곡. 06 이 모든 결말의 마지막 인사다. 끝나면 엔딩 씬: dawn 뒤에만 Ending 그림(R5), seal·hold 뒤에는 몇 초 검은 화면.",
+      "staging": "결말 셋이 함께 쓰는 크레딧(바이블 11절). 줄이 아래에서 위로 흐른다. 빈 줄 대신 01 뒤·06 뒤에 간격을 둔다. 제작진은 이름만, 역할은 적지 않는다 — 제작 아래 첫 줄은 스튜디오(CozyByte). 음악은 직전 결말을 잇는다: seal 은 여기서 타이틀곡을 시작, dawn 은 타이틀곡, hold 는 마검 조우곡. 07 이 모든 결말의 마지막 인사다. 끝나면 엔딩 씬: dawn 뒤에만 Ending 그림(R5), seal·hold 뒤에는 몇 초 검은 화면.",
       "lines": [
         { "key": "credits.01", "speaker": "narration", "kr": "TheSword" },
         { "key": "credits.02", "speaker": "narration", "kr": "제작" },
-        { "key": "credits.03", "speaker": "narration", "kr": "stopresent" },
-        { "key": "credits.04", "speaker": "narration", "kr": "truemanburbank" },
-        { "key": "credits.05", "speaker": "narration", "kr": "samryoug" },
-        { "key": "credits.06", "speaker": "narration", "kr": "끝까지 값을 치러 준 당신에게." }
+        { "key": "credits.03", "speaker": "narration", "kr": "CozyByte" },
+        { "key": "credits.04", "speaker": "narration", "kr": "stopresent" },
+        { "key": "credits.05", "speaker": "narration", "kr": "truemanburbank" },
+        { "key": "credits.06", "speaker": "narration", "kr": "samryoug" },
+        { "key": "credits.07", "speaker": "narration", "kr": "끝까지 값을 치러 준 당신에게." }
       ]
     },
     {

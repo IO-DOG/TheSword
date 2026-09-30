@@ -13,6 +13,10 @@ using UnityEngine;
 /// 값이 바뀐다 — 전투·아이템·레벨·층 이동을 알림으로 받아 다음 프레임에 한 번만 다시 잰다.
 /// 매 프레임 하는 일은 글자를 몬스터 머리 위로 옮기는 것뿐이다(카메라가 따라가고 줌을 한다).
 ///
+/// 값이 바뀌면 옛 값에서 새 값까지 세어 가고, 곁에 ▼(싸졌다)·▲(비싸졌다)가 떴다 옅어지며 숫자가 초록·빨강에서 제
+/// 색으로 돌아온다. 레벨 업·룬·장비·이어지는 치명 횟수로 층의 절반 넘게 값이 싸지는데, 예전에는 숫자가 소리 없이
+/// 갈아 끼워져 아무도 몰랐다. 층에 들어설 때·되살아날 때·처음 칠할 때는 세지 않는다. 화면 밖에서 바뀐 것은 보일 때 센다.
+///
 /// HUD(UI_GameScene) 밑에 붙는다. HUD 가 꺼지면(연출) 같이 꺼지고, 그리는 순서는 HUD·툴팁보다 아래다.
 /// </summary>
 public class ForecastOverlay : MonoBehaviour
@@ -20,6 +24,10 @@ public class ForecastOverlay : MonoBehaviour
     const float FontSize = 24f;
     const float Lift = 4f;          // 그림 윗변에서 띄우는 거리 (캔버스 단위)
     const float Gap = 4f;           // 이웃 숫자 사이 (캔버스 단위)
+    const float CountTime = 0.6f;   // 값이 바뀌면 옛 값에서 새 값까지 세는 시간 (실시간)
+    const float MarkTime = 1.2f;    // ▼▲ 가 옅어져 사라질 때까지 (실시간)
+    // 값이 바뀐 순간의 짧은 소리 — 대사 글자 소리(0.1초)를 빌린다. 음높이가 바뀌어도 딸깍이다.
+    const string TickSound = "TextOutput_SFX";
 
     class Label
     {
@@ -31,7 +39,29 @@ public class ForecastOverlay : MonoBehaviour
         public Vector3 Want;        // 이번 프레임에 서고 싶은 자리 (화면)
         public Vector3 Last;        // 지금 선 자리 (화면)
         public bool Shown;
+        public BattleForecast.Result Result;
+        public Color Tone;
+        public Price Price;         // 이 몬스터의 값 기억 (Rebuild 가 붙인다)
+        public bool Live;           // 세는 중이라 매 프레임 다시 칠한다
+        public TextMeshProUGUI Mark;    // 숫자 오른쪽의 ▼▲. 처음 쓸 때 만든다 — 글에 넣으면 사라질 때 숫자가 반 칸 튄다
     }
+
+    // 몬스터마다 마지막으로 칠한 값. 같은 종 셋이 id 를 나눠 쓰니 컨트롤러로 묶는다.
+    class Price
+    {
+        public int Value;               // 지금 값 (Cost)
+        public float From;              // 세기 시작하는 값 — 플레이어가 마지막으로 본 것
+        public int Dir;                 // -1 싸졌다 ▼, +1 비싸졌다 ▲, 0 바뀐 적 없다
+        public float Start = float.NaN; // 세기 시작한 때. NaN 이면 화면 밖이라 보일 때까지 기다린다(Follow)
+    }
+
+    const int Unknown = -1;             // ? — 세지 않는다
+    const int Fatal = 1000000000;       // X — 어떤 값보다 비싸다 (BattleForecast 의 값은 1e7 아래다)
+    static int Cost(BattleForecast.Result r) => r.Ok == false ? Unknown : r.Win == false ? Fatal : r.Damage;
+    static bool Numeric(float v) => v >= 0f && v < Fatal;
+
+    readonly Dictionary<MonsterController, Price> _prices = new Dictionary<MonsterController, Price>();
+    int _pricedStage = -1;
 
     readonly List<Label> _labels = new List<Label>();     // 풀. 앞의 _used 개만 쓴다
     readonly List<Label> _placing = new List<Label>();    // Follow 가 왼쪽부터 놓는 순서
@@ -100,6 +130,8 @@ public class ForecastOverlay : MonoBehaviour
     {
         _setting = GameSettings.ShowForecast;
         _dirty = true;
+        if (_setting == false)
+            _prices.Clear();    // 다시 켜면 처음 칠하는 것이다 — 꺼 둔 사이의 차이를 세지 않는다
     }
 
     void LateUpdate()
@@ -116,6 +148,13 @@ public class ForecastOverlay : MonoBehaviour
         if (_dirty)
             Rebuild();
         Follow();
+
+        float now = Time.unscaledTime;
+        for (int i = 0; i < _used; i++)
+        {
+            if (_labels[i].Live)
+                Paint(_labels[i], now);
+        }
     }
 
     bool Visible() => _setting && Managers.Game.PlayerData.IsContractedSword && MapInView();
@@ -144,6 +183,13 @@ public class ForecastOverlay : MonoBehaviour
 
         GameManager g = Managers.Game;
         int stage = g.PlayerData.CurStageid;
+        // 층이 바뀌었으면 처음 칠하는 것이다 — 세지 않는다. 같은 챕터의 층은 맵이 그대로 남아 있어서, 다시 내려온
+        // 층의 몬스터가 지난번에 본 값을 쥐고 있다. 되살아나면 씬째 새로 서서 기억이 비어 있다.
+        if (stage != _pricedStage)
+        {
+            _prices.Clear();
+            _pricedStage = stage;
+        }
         GameObject map;
         if (g.Maps.TryGetValue(stage, out map) && map != null)
         {
@@ -180,12 +226,103 @@ public class ForecastOverlay : MonoBehaviour
         label.Head = HeadOf(mc) - mc.transform.position;
         label.Last = new Vector3(float.NaN, 0f, 0f);    // 다음 Follow 에서 반드시 옮긴다
 
-        label.Text.color = ForecastUI.Tone(r, hp);
-        label.Text.text = r.Ok == false ? "?"
-            : r.Win == false ? "X"
-            : (r.Damage > 0 ? "-" + r.Damage : "0") + (r.LevelUp ? ForecastUI.LevelUpMark : "");
-        label.Size = label.Text.GetPreferredValues();
+        label.Result = r;
+        label.Tone = ForecastUI.Tone(r, hp);
+        label.Price = PriceOf(mc, r);
+        Paint(label, Time.unscaledTime);
     }
+
+    // 이 몬스터의 값 기억을 새 값으로 옮긴다. 처음 보는 몬스터면 세지 않는다.
+    Price PriceOf(MonsterController mc, BattleForecast.Result r)
+    {
+        int cost = Cost(r);
+        Price p;
+        if (_prices.TryGetValue(mc, out p) == false)
+        {
+            _prices[mc] = p = new Price { Value = cost };
+            return p;
+        }
+        if (cost == p.Value)
+            return p;
+
+        // 세던 중에 또 바뀌면 지금 보이는 숫자에서, 화면 밖에서 기다리던 중이면 마지막으로 본 값에서 다시 센다.
+        float seen = p.Dir == 0 ? p.Value : float.IsNaN(p.Start) ? p.From : Counted(p, Time.unscaledTime - p.Start);
+        p.Value = cost;
+        p.From = seen;
+        p.Dir = seen == Unknown || cost == Unknown || Mathf.Approximately(seen, cost) ? 0 : cost > seen ? 1 : -1;
+        p.Start = float.NaN;
+        return p;
+    }
+
+    // 세는 중인 숫자. 둘 다 숫자일 때만 센다 — X·? 에서(로) 가는 것은 바로 바뀐다. 빨리 떨어지다 천천히 멎는다.
+    static float Counted(Price p, float age)
+    {
+        if (age >= CountTime || Numeric(p.From) == false || Numeric(p.Value) == false)
+            return p.Value;
+        float k = age / CountTime;
+        return Mathf.Lerp(p.From, p.Value, 1f - (1f - k) * (1f - k));
+    }
+
+    /// <summary>
+    /// 숫자와 색을 칠한다. 값이 바뀌었으면 옛 값에서 세어 가고, 색은 초록(싸졌다)·빨강(비싸졌다)에서 제 색으로 돌아오며,
+    /// 숫자 오른쪽의 ▼▲ 는 다 센 뒤 옅어진다. 화살표가 있어 색을 못 가려도 방향이 읽힌다. ▼▲ 는 두 픽셀 글꼴에 없어
+    /// FontFallback 이 얹은 Silver 원본에서 그린다.
+    /// </summary>
+    void Paint(Label label, float now)
+    {
+        Price p = label.Price;
+        BattleForecast.Result r = label.Result;
+        bool waiting = float.IsNaN(p.Start);
+        float age = p.Dir == 0 ? MarkTime : waiting ? 0f : now - p.Start;
+        label.Live = age < MarkTime && waiting == false;
+
+        string text = ForecastUI.Price(r);
+        if (r.Win && age < CountTime && Numeric(p.From))
+        {
+            int shown = Mathf.RoundToInt(Counted(p, age));
+            text = shown > 0 ? "-" + shown : "0";
+        }
+        text = r.LevelUp ? text + ForecastUI.LevelUpMark : text;
+        // 너비는 글이 바뀔 때마다 다시 잰다 — 세는 동안 자릿수가 바뀐다(-105→-95). 겹침(Follow)과 ▼▲ 자리가 이 너비를
+        // 쓰는데, 옛 숫자로 잰 채 두면 화살표가 숫자에서 떠 있거나 끝자리를 덮었다.
+        if (label.Text.text != text)
+        {
+            label.Text.text = text;
+            label.Size = label.Text.GetPreferredValues();
+            if (label.Mark != null)
+                label.Mark.rectTransform.anchoredPosition = MarkAt(label.Size);
+        }
+
+        bool marked = age < MarkTime;
+        Color pulse = p.Dir < 0 ? ForecastUI.Cheaper : ForecastUI.Dearer;
+        label.Text.color = marked ? Color.Lerp(pulse, label.Tone, age / CountTime) : label.Tone;
+        if (marked)
+        {
+            TextMeshProUGUI mark = MarkOf(label);
+            mark.text = p.Dir < 0 ? "▼" : "▲";
+            pulse.a = 1f - Mathf.Clamp01((age - CountTime) / (MarkTime - CountTime));
+            mark.color = pulse;
+        }
+        if (label.Mark != null && label.Mark.gameObject.activeSelf != marked)
+            label.Mark.gameObject.SetActive(marked);
+    }
+
+    TextMeshProUGUI MarkOf(Label label)
+    {
+        if (label.Mark == null)
+        {
+            label.Mark = CodeUI.NewText(label.Rect, "Change", _font, FontSize * 0.8f, Color.white, TextAlignmentOptions.BottomLeft);
+            label.Mark.fontSharedMaterial = _material;
+            RectTransform rt = label.Mark.rectTransform;
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0f);    // 숫자의 가운데 아래에서, 숫자 너비의 반만큼 오른쪽
+            rt.pivot = Vector2.zero;
+            rt.sizeDelta = new Vector2(40f, 32f);
+            rt.anchoredPosition = MarkAt(label.Size);
+        }
+        return label.Mark;
+    }
+
+    static Vector2 MarkAt(Vector2 size) => new Vector2(size.x * 0.5f + 1f, 0f);
 
     /// <summary>
     /// 그림이 보이는 윗변 가운데 (월드). 스프라이트 사각형은 위쪽 빈자리까지 품어서(Mob_001_Idle_3 은 사각형 0.86,
@@ -237,6 +374,7 @@ public class ForecastOverlay : MonoBehaviour
             return;
 
         float scale = _canvas.rootCanvas.scaleFactor;
+        bool started = false;
         _placing.Clear();
         for (int i = 0; i < _used; i++)
         {
@@ -255,10 +393,20 @@ public class ForecastOverlay : MonoBehaviour
             if (on == false)
                 continue;
 
+            // 값이 바뀐 것은 보이는 순간부터 센다 — 화면 밖에서 다 세어 버리면 바뀐 줄 모른다.
+            if (label.Price.Dir != 0 && float.IsNaN(label.Price.Start))
+            {
+                label.Price.Start = Time.unscaledTime;
+                label.Live = true;
+                started = true;
+            }
+
             label.Want.y += Lift * scale;
             label.Want.z = 0f;
             _placing.Add(label);
         }
+        if (started)
+            Managers.Sound.Play(Define.Sound.Effect, TickSound);
 
         // 같은 종 셋이 한 줄로 선다(층마다 앞 세 자리). 숫자가 칸보다 넓으면 옆 숫자에 붙어 "-42 -42 -42" 가
         // 한 덩어리로 읽혔다. 왼쪽부터 놓고, 먼저 놓인 것과 겹치면 그 위로 올린다 — 셋이면 아래·위·아래로 엇갈린다.

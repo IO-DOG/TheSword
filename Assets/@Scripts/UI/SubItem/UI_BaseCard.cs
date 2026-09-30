@@ -1,4 +1,5 @@
 using Data;
+using DG.Tweening;
 using System.Collections;
 using TMPro;
 using System.Collections.Generic;
@@ -41,6 +42,17 @@ public class UI_BaseCard : UI_Base
     public int _hitDamage = 0;
     public bool _isCriHit = false;
     public bool _isHeal = false;
+
+    /// <summary>건너뛰는 중이다(UI_BattlePopup.Skip). 한 대마다의 연출 — HP 칠하기·번쩍임·방패 이펙트·소리 — 을 끈다.
+    /// 전투 상태(HP·방어·게이지)는 그대로 바뀐다. 끝난 뒤 전투창이 Refresh 를 한 번 부른다.</summary>
+    public bool Quiet;
+
+    /// <summary>Init 을 마쳤다 — 쓰러짐(Dead)이 OnDeadAction 에 걸렸다. 그 전에 끝까지 돌리면 결말 길(경험치·보상)을 못 탄다.</summary>
+    public bool Ready => _init;
+
+    const float ShakeSeconds = 0.18f;
+    static readonly Vector3 ShakeStrength = new Vector3(14f, 8f, 0f);   // 전투창 캔버스 단위 (1080p 에서 픽셀)
+    Tween _shake;
 
     public override bool Init()
     {
@@ -154,7 +166,23 @@ public class UI_BaseCard : UI_Base
 
     public virtual void Refresh()
     {
+        if (Quiet)
+            return;
         StartCoroutine(CoRefresh());
+    }
+
+    /// <summary>
+    /// 치명타를 맞은 카드를 짧게 흔든다. 카메라가 아니라 카드다 — 전투창 배경은 찍어 둔 화면이라 카메라를 흔들어도
+    /// 보이지 않는다. 화면 흔들림을 끈 사람에게는 흔들지 않는다 (GameSettings.ScreenShake).
+    /// </summary>
+    public void Shake()
+    {
+        if (GameSettings.ScreenShake == false)
+            return;
+        // 흔들리는 중에 또 흔들면 흔들린 자리를 제자리로 알고 돌아온다 — 앞의 것을 끝내(제자리로 돌려) 놓고 다시.
+        if (_shake != null && _shake.IsActive())
+            _shake.Complete();
+        _shake = transform.DOShakePosition(ShakeSeconds, ShakeStrength, 24, 90f, false, true).SetLink(gameObject);
     }
 
     IEnumerator CoRefresh()

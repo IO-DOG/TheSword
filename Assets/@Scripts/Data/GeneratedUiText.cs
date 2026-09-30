@@ -15,6 +15,19 @@ public static class GeneratedUiText
             case 144: return new[] { "Loading failed. Enter: retry / Esc: quit", "불러오지 못했습니다. Enter: 재시도 / Esc: 종료", "Loading failed. Enter: retry / Esc: quit", "読み込めませんでした。Enter：再試行 / Esc：終了", "加载失败。Enter：重试 / Esc：退出" }[language >= 0 && language <= 4 ? language : 0];
             case 145: return new[] { "Could not restore your save. The original is preserved. Press any key to return.", "저장을 복구하지 못했습니다. 원본은 보존됩니다. 아무 키나 눌러 돌아가세요.", "Could not restore your save. The original is preserved. Press any key to return.", "セーブを復元できませんでした。元のデータは保持されます。何かキーを押して戻ります。", "无法恢复存档。原始存档已保留。请按任意键返回。" }[language >= 0 && language <= 4 ? language : 0];
             case 146: return new[] { "Taking one reward removes the other.", "둘 중 하나를 얻으면 다른 보상은 사라집니다.", "Taking one reward removes the other.", "片方を取ると、もう片方の報酬は消えます。", "领取一个奖励后，另一个奖励将消失。" }[language >= 0 && language <= 4 ? language : 0];
+            case 350: return new[] { "Battle speed", "전투 속도", "Battle speed", "戦闘速度", "战斗速度" }[language >= 0 && language <= 4 ? language : 0];
+            case 351: return new[] { "{0}x", "{0}배속", "{0}x", "{0}倍速", "{0}倍速" }[language >= 0 && language <= 4 ? language : 0];
+            case 352: return new[] { "Hold Space: 8x speed", "Space 길게: 8배속", "Hold Space: 8x speed", "Space 長押し: 8倍速", "按住 Space: 8倍速" }[language >= 0 && language <= 4 ? language : 0];
+            case 353: return new[] { "Tab: Skip", "Tab: 건너뛰기", "Tab: Skip", "Tab: スキップ", "Tab: 跳过" }[language >= 0 && language <= 4 ? language : 0];
+            case 354: return new[] { "HP -{0}", "체력 -{0}", "HP -{0}", "体力 -{0}", "生命 -{0}" }[language >= 0 && language <= 4 ? language : 0];
+            case 355: return new[] { "Forecast -{0}", "예측 -{0}", "Forecast -{0}", "予測 -{0}", "预测 -{0}" }[language >= 0 && language <= 4 ? language : 0];
+            case 356: return new[] { "You can now skip fights with Tab. The result is exactly the forecast.", "이제 Tab 으로 전투를 건너뛸 수 있습니다. 결과는 예측 그대로입니다.", "You can now skip fights with Tab. The result is exactly the forecast.", "Tabで戦闘をスキップできます。結果は予測どおりです。", "现在可以按 Tab 跳过战斗。结果与预测完全一致。" }[language >= 0 && language <= 4 ? language : 0];
+            case 410: return new[] { "ATK +{0}", "공격 +{0}", "ATK +{0}", "攻撃 +{0}", "攻击 +{0}" }[language >= 0 && language <= 4 ? language : 0];
+            case 411: return new[] { "DEF +{0}", "방어 +{0}", "DEF +{0}", "防御 +{0}", "防御 +{0}" }[language >= 0 && language <= 4 ? language : 0];
+            case 412: return new[] { "Max HP +{0}", "최대 체력 +{0}", "Max HP +{0}", "最大体力 +{0}", "最大生命 +{0}" }[language >= 0 && language <= 4 ? language : 0];
+            case 413: return new[] { "no change", "변화 없음", "no change", "変化なし", "没有变化" }[language >= 0 && language <= 4 ? language : 0];
+            case 414: return new[] { "With {0}: {1}→{2}", "{0}이면 {1}→{2}", "With {0}: {1}→{2}", "{0} なら {1}→{2}", "{0} 时 {1}→{2}" }[language >= 0 && language <= 4 ? language : 0];
+            case 415: return new[] { "({0} wasted)", "(넘침 {0})", "({0} wasted)", "({0} 無駄)", "(溢出 {0})" }[language >= 0 && language <= 4 ? language : 0];
             case 260: return new[] { "Monster Manual", "몬스터 도감", "Monster Manual", "モンスター図鑑", "怪物图鉴" }[language >= 0 && language <= 4 ? language : 0];
             case 261: return new[] { "Number = HP lost if you fight it next (no skills)   X = you lose   ★ = level up", "숫자 = 다음에 싸우면 잃는 체력 (스킬 제외)   X = 진다   ★ = 레벨 업", "Number = HP lost if you fight it next (no skills)   X = you lose   ★ = level up", "数字 = 次に戦うと失う体力 (スキル抜き)   X = 負ける   ★ = レベルアップ", "数字 = 下一战损失的生命 (不计技能)   X = 会输   ★ = 升级" }[language >= 0 && language <= 4 ? language : 0];
             case 262: return new[] { "x{0}", "{0}마리", "x{0}", "{0}体", "{0}只" }[language >= 0 && language <= 4 ? language : 0];
@@ -171,6 +184,7 @@ public static class GeneratedUiText
             case 20006: return new[] { "A slime split from King Slime and wielding a blunt weapon.\\nIt has powerful attacks but appears dull.", "킹 슬라임에 분열되어 둔기 무기를 품은 슬라임.\\n강력한 공격을 하지만 둔해보인다.", "A slime split from King Slime and wielding a blunt weapon.\\nIt has powerful attacks but appears dull.", "キングスライムから分裂し、鈍器を抱えたスライム。\\n攻撃は強力だが、動きは鈍そうだ。", "从史莱姆王分裂而出、怀抱钝器的史莱姆。\\n攻击强力，但看起来有些迟钝。" }[language >= 0 && language <= 4 ? language : 0];
             case 20007: return new[] { "A slime split from the King Slime and wielding a dagger weapon.\\nIt attacks quickly^ but seems weak.\\nIs there something shiny inside?", "킹 슬라임에 분열되어 단검 무기를 품은 슬라임.\\n재빠른 공격을 하지만 약해보인다.\\n뭔가 반짝이는 게 들어있는 것 같은데?", "A slime split from the King Slime and wielding a dagger weapon.\\nIt attacks quickly^ but seems weak.\\nIs there something shiny inside?", "キングスライムから分裂し、短剣を抱えたスライム。\\n攻撃はすばやいが、弱そうに見える。\\n何か光るものが入っているような……？", "从史莱姆王分裂而出、怀抱短剑的史莱姆。\\n攻击迅速，但看起来很弱。\\n里面好像有什么闪闪发光的东西？" }[language >= 0 && language <= 4 ? language : 0];
             case 20008: return new[] { "A slime split from the King Slime and holding a shield weapon.\\nIt has a strong defense^ but appears slow.", "킹 슬라임에 분열되어 방패 무기를 품은 슬라임.\\n튼튼한 방어를 하지만 느려보인다.", "A slime split from the King Slime and holding a shield weapon.\\nIt has a strong defense^ but appears slow.", "キングスライムから分裂し、盾を抱えたスライム。\\n守りは堅いが、動きは遅そうだ。", "从史莱姆王分裂而出、怀抱盾牌的史莱姆。\\n防御坚固，但看起来行动迟缓。" }[language >= 0 && language <= 4 ? language : 0];
+            case 440: return new[] { "Endings {0}/{1}", "결말 {0}/{1}", "Endings {0}/{1}", "エンディング {0}/{1}", "结局 {0}/{1}" }[language >= 0 && language <= 4 ? language : 0];
             case 230: return new[] { "Resolution", "해상도", "Resolution", "解像度", "分辨率" }[language >= 0 && language <= 4 ? language : 0];
             case 231: return new[] { "VSync", "수직 동기화", "VSync", "垂直同期", "垂直同步" }[language >= 0 && language <= 4 ? language : 0];
             case 232: return new[] { "Text speed", "글자 속도", "Text speed", "文字速度", "文字速度" }[language >= 0 && language <= 4 ? language : 0];
@@ -180,6 +194,9 @@ public static class GeneratedUiText
             case 236: return new[] { "Instant", "즉시", "Instant", "瞬間", "立即" }[language >= 0 && language <= 4 ? language : 0];
             case 237: return new[] { "Screen shake", "화면 흔들림", "Screen shake", "画面の揺れ", "屏幕震动" }[language >= 0 && language <= 4 ? language : 0];
             case 238: return new[] { "Game", "게임", "Game", "ゲーム", "游戏" }[language >= 0 && language <= 4 ? language : 0];
+            case 380: return new[] { "A chill runs down my spine. I don't think I can win this yet. Fight anyway?", "등골이 서늘하다. 지금은 이길 수 없을 것 같다. 그래도 싸울까?", "A chill runs down my spine. I don't think I can win this yet. Fight anyway?", "背筋が冷たくなる。今はまだ勝てそうにない。それでも戦うか?", "脊背一阵发凉。现在恐怕还赢不了。还要战斗吗?" }[language >= 0 && language <= 4 ? language : 0];
+            case 381: return new[] { "Hold Tab: skip", "Tab 길게: 건너뛰기", "Hold Tab: skip", "Tab長押し: スキップ", "长按Tab: 跳过" }[language >= 0 && language <= 4 ? language : 0];
+            case 382: return new[] { "Tab: skip (seen)", "Tab: 건너뛰기 (본 장면)", "Tab: skip (seen)", "Tab: スキップ (既読)", "Tab: 跳过 (已读)" }[language >= 0 && language <= 4 ? language : 0];
             case 300: return new[] { "Pick with the arrow keys then press Enter", "방향키로 고른 뒤 Enter", "Pick with the arrow keys then press Enter", "方向キーで選んでからEnter", "用方向键选择后按Enter" }[language >= 0 && language <= 4 ? language : 0];
             case 180: return new[] { "Restart floor", "이 층 다시 시작", "Restart floor", "この階をやり直す", "重新开始本层" }[language >= 0 && language <= 4 ? language : 0];
             case 181: return new[] { "Checkpoints", "체크포인트", "Checkpoints", "チェックポイント", "检查点" }[language >= 0 && language <= 4 ? language : 0];

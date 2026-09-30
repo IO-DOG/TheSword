@@ -137,8 +137,29 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
   예전 536MB 의 대부분은 타이틀 파티클 96장(1920x1080 한 장씩)과 압축 없는 플레이어 데이터였다 —
   파티클은 최대 1024, 빌드는 LZ4HC. 안 쓰는 `Assets/Resources` 는 `Assets/_Legacy` 로 옮겼다(Resources 폴더
   안의 것은 참조가 없어도 전부 빌드에 들어간다). 실행 첫 로딩("Loaded All Assemblies")은 0.15초.
-- **회사 이름(`companyName`)은 아직 DefaultCompany 다.** 세이브 경로와 PlayerPrefs 키에 들어가므로
-  첫 공개 빌드 **전에** 정해야 한다 — 나중에 바꾸면 모든 세이브가 고아가 된다.
+- **회사 이름은 `CozyByte`, 식별자는 `com.CozyByte.TheSword` 다(2026-10-01 확정).** 세이브 경로
+  (`%USERPROFILE%/AppData/LocalLow/CozyByte/TheSword`)와 PlayerPrefs 키에 들어가므로 **다시 바꾸지 않는다** —
+  바꾸면 모든 세이브가 고아가 된다. 그 전의 개발 세이브는 `LocalLow/DefaultCompany/TheSword` 에 남아 있다.
+
+### Steam (Steamworks.NET 2025.164.1)
+
+`Packages/manifest.json` 의 git 패키지다. 게임 로직은 Steam 을 직접 부르지 않는다.
+
+| 파일 | 하는 일 |
+|---|---|
+| `SteamManager` | `Managers.Init` 이 켜고 매 프레임 콜백, 끌 때 닫는다. **Steam 이 없으면 한 줄 적고 아무것도 안 한다** — 에디터·빌드 모두. 언어를 고른 적이 없으면 Steam 의 게임 언어를 따른다 |
+| `SteamHooks` | `GameEvents` 만 듣고 업적·통계·Rich Presence 를 올린다. 봇(`IsAutoPlaying`)·`DEMO` 에서는 아무것도 안 한다 |
+| `Records` | 판을 넘어 남는 기록 `Records.json`(본 결말·본 장면·잡은 우두머리·평생 통계). 새 게임이 지우지 않고, 봇 판은 적지 않는다. Steam 없이 얻은 것도 다음에 붙을 때 `SyncRecords` 가 풀어 준다 |
+| `LastBattle` | 방금 끝난 전투의 요약(예측·잃은 HP·첫 타 치명·스킬·건너뜀). `UI_BattlePopup` 이 `BattleEnded` 직전에 채운다 |
+
+- `SteamManager.AppId` 는 **0 이다** — 앱을 등록하면 본편·체험판(`#if DEMO`) 자리에 적는다. 0 이면
+  `RestartAppIfNecessary` 를 건너뛴다. 루트의 `steam_appid.txt`(480 = Spacewar)는 개발용이고 `GameBuild` 가
+  개발 빌드가 아니면 배포 폴더에서 지운다.
+- 출시 준비물은 `Steam/` 에 있다 — `README.md`(순서·날짜·클라우드·AI 공개), 업적·통계 표, Rich Presence VDF,
+  SteamPipe 스크립트(`scripts/upload.ps1`), 다섯 언어 스토어 문구, Deck 조작표. `python Steam/check_steam.py` 가
+  서로 맞는지 본다.
+- **Shift 를 전투 키로 쓰지 않는다.** Shift+Tab 은 Steam 오버레이라 가속(Shift)과 건너뛰기(Tab)가 겹쳤다.
+  가속은 Space 만, Deck 은 R2 → Space.
 
 ### MCP 가 물렸을 때
 
@@ -327,6 +348,13 @@ Unity.exe -projectPath . -executeMethod MapDecoSetup.Build
 뿐이고, 피해 계산은 `CreatureClass` 의 `ITrait` 이 그대로 돈다. 같은 계산을 두 곳에 두면 어긋난다.
 배속은 `Step` 을 여러 번 부르는 것이라 결과를 바꾸지 않는다.
 
+**배속과 건너뛰기도 같은 시계다.** 한 판의 37% 가 전투를 지켜보는 시간이었다(비슷한 3D 마탑의 악평 1순위가
+"전투를 못 건너뛴다"). 설정의 전투 속도 1·2·4배(기본 2), Space 를 누르는 동안 8배. **건너뛰기(Tab)** 는 같은
+`BattleStepper` 를 한 프레임에 끝까지 돌리고(한 대마다의 연출만 끈다) 끝은 보통 전투와 같은 길(`UI_MonsterCard.Dead`
+→ 경험치·드랍·`MarkDead`)로 간다 — 그래서 결과가 예측 그대로다. 치명타 수업(3~4층)을 본 뒤, 보스가 아닐 때만 열린다.
+봇은 `AutoPlayer.ForceSkipAll = true` 로 건너뛰며 돌 수 있고, 줄 끝에 "(건너뜀)" 을 붙여 예측 대조를 그대로 찍는다.
+목걸이(전투 배속)는 설정보다 낮을 때만 의미가 있다 — 설정이 자유라서. 효과음 높이는 배속을 따르되 1.3 에서 멈춘다.
+
 **방어 게이지는 플레이어 전용 전역이다.** `Managers.Game.DefenceCoolTime` 은
 `UI_PlayerCard` 만 누적하는데, 부모의 `ClearDefence` 가 그것까지 지우고 있었다.
 두 카드가 함께 쓰는 메서드라 **몬스터의 방어가 깨질 때마다 플레이어 게이지가
@@ -370,9 +398,16 @@ var r = BattleForecast.Of(902, 59);   // 몬스터 id, CurStageid(0부터)
 지워지지 않는다(구간이 다르다). 대본을 고치면: `check_story.py` → `check_story.py en|jp|cn` → `story_gen.py`.
 
 `StoryDirector` 가 `GameEvents`·`FightGate` 를 듣고 장면을 고른다. 1~4층 프롤로그만은 손으로 짠 연출
-(`DirectingManager`)이 제 차례에 부른다. 한 층에 여러 장면이 걸리면 마을 → 챕터 시작 → 특성 수업 → 층 장면.
+(`DirectingManager`)이 제 차례에 부른다. 한 층에 여러 장면이 걸리면 마을 → 챕터 시작 → 층 장면.
+**특성 수업은 층 입구가 아니라 그 특성과 처음 부딪힐 때** 튼다(`FightGate` 순서 10 — 보스 등장 0 뒤, ✖ 수업 50 앞).
 첫 경험 수업과 죽음 바크는 **계약 뒤부터** 센다(검이 없을 때 "마검의 잔소리" 가 나오면 안 된다).
 본 장면은 `StorySeen.json` 에 **틀기 시작할 때** 적는다 — 죽거나 불러와도 다시 안 뜬다. 새 게임이 지운다.
+
+**글의 벽을 세우지 않는다.** 5층에 처음 발을 딛기 전 대사는 5줄 이하다(예전 23줄 — 비슷한 게임의 가장 흔한 악평이
+"다시 불러와도 30초씩 나오는 대사"). 마을·촌장 이야기는 6층으로 옮겼다. 어느 장면이든 **Tab 을 0.6초 누르면**
+끝까지 감는다 — 연출 큐는 그대로 돌아 세계는 같은 상태로 끝나고, 선택지(결말)에서는 멈춘다. 앞 판에서 본 장면
+(`Records.SceneSeenEver`)은 Tab 한 번이면 넘어간다. 층 그림(로딩)은 1.2초에 아무 키로 넘기고, 챕터 첫 층만 다 보여 준다.
+3층 계약 전에도 지는 싸움 앞에서는 숫자 없이 "본능" 이 한 번 묻는다(`FatalFightGuard`) — 1층 영혼 → 늑대 길이 Lv2 에서 죽였다.
 
 결말은 100층 보스 뒤 선택 하나: 봉인(`seal`) / 놓지 않는다(`hold`). `hold` 이고 레벨이 `StoryDirector.DawnLevel`
 이상이면 참 결말 새벽(`dawn`) — 마검의 배부름 = 데미안이 벤 만큼 = 레벨이다(바이블 6.1). 문턱은 봇이 전부 잡는 길로
@@ -602,6 +637,10 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
   안 저장돼서, 안 줍고 워프하거나 죽으면 반지가 영영 사라졌다.
 - 챕터 첫 층(21·41·61·81)에서 **내려가는** 계단도 앞 챕터의 맵을 다시 짓는다. 올라가는 쪽만 짓고 있었다.
 - 킹 슬라임(9001)·분열 슬라임과 그 물약도 제 활성 인덱스를 쓴다 — 0 을 빌려 쓰다 1층 몬스터 0번이 죽은 것으로 저장됐다.
+- **4층 계단도 보스 문처럼 잠근다**(`RefreshBossGates` 가 손수 만든 층 중 4층만 본다). 킹 슬라임과 분열 셋(9002~9004)이
+  다 쓰러져야 열린다 — 예전에는 슬라임을 왼쪽으로 돌아 5층에 Lv12 로 올라갈 수 있었고 완주 계산(5층 Lv16)이 거짓이 됐다.
+- 카메라 범위(`CameraController.SetupCameraConfiner`)는 맵 윗줄이 비어 있는 층(11·21·26·86층 등)에서 z 를 두 번 빼서
+  위쪽으로 못 따라갔다. 그리고 층 그림을 **이름으로 찾지 않는다** — 같은 챕터 안 워프에서 프레임 끝에 부서질 옛 맵을 집었다.
 
 ### 일어난 일은 GameEvents, 전투 직전은 FightGate
 
@@ -629,6 +668,8 @@ UI에 노출되는 문자열은 하드코딩하지 않고 `ScriptData` 테이블
 `Tools/ui_text_parts/*.py`(기능별 파일, id 구간이 나뉘어 있다 — ui_text.py 머리 주석) 에 적는다 —
 `ScriptData` 와 함께 `GeneratedUiText.cs` 로도 구워지고, 어드레서블을 못 올려 표가 빈 때
 `GetString` 이 그쪽으로 되돌아간다("불러오지 못했습니다" 가 그때 뜬다).
+굽기는 `generate_content.py --write` 가 한다(데이터가 그대로면 MapData·MonsterData 해시도 그대로다) — 그 뒤 `story_gen.py`.
+`{0}` 같은 자리표시가 언어마다 다르면 `ui_text` 가 굽기 전에 멈춘다(한 언어에서만 FormatException 이 나던 것).
 데이터 시트 이스케이프: `\n`=줄바꿈, `^`=쉼표.
 
 언어는 `GameSettings.Language` 가 쥔다(처음엔 OS 언어, 고르면 PlayerPrefs 에 남는다). `GetString` 은

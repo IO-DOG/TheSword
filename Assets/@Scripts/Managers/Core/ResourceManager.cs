@@ -67,12 +67,19 @@ public class ResourceManager
             return null;
         }
 
+        GameObject go;
         if (pooling)
-            return Managers.Pool.Pop(prefab);
+        {
+            go = Managers.Pool.Pop(prefab);
+        }
+        else
+        {
+            go = Object.Instantiate(prefab, parent);
+            go.name = prefab.name;
+        }
 
-        GameObject go = Object.Instantiate(prefab, parent);
-
-        go.name = prefab.name;
+        // 프리팹이 스스로 트는 소리도 효과음 슬라이더를 따른다. 만드는 곳(풀 포함)이 여기 하나라 여기서 한 번.
+        Managers.Sound?.FollowEffectVolume(prefab, go);
         return go;
     }
 

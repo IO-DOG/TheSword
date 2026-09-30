@@ -1,0 +1,12 @@
+"AppBuild"
+{
+	"AppID"	"<APPID>"	// full game AppID - see scripts/README.md
+	"Desc"	"TheSword"	// upload.ps1 passes -desc with version and commit
+	"ContentRoot"	"..\..\Build\Windows\"	// relative to this file: repo root\Build\Windows
+	"BuildOutput"	"..\output\"	// steamcmd logs and cache: repo root\Steam\output (git-ignored)
+	"SetLive"	"beta"	// the default branch can only be set live in App Admin
+	"Depots"
+	{
+		"<DEPOTID>"	"depot_build_DEPOTID.vdf"
+	}
+}

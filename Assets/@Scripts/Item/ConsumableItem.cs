@@ -80,15 +80,14 @@ public class ConsumableItem : MonoBehaviour
             float before = Managers.Game.PlayerData.CurHP;
             Managers.Game.PlayerData.CurHP += heal;
 
-            // Show Healing Font
-            Transform ui_PlayerHpBar = Managers.UI.GetPlayerHpBar();
-            Managers.Object.ShowPotionHealingFont(heal, ui_PlayerHpBar);
-
             if (Managers.Game.PlayerData.CurHP > Managers.Game.PlayerData.MaxHP)
                 Managers.Game.PlayerData.CurHP = Managers.Game.PlayerData.MaxHP;
 
             healed = Mathf.Max(0, Mathf.RoundToInt(Managers.Game.PlayerData.CurHP - before));
             overflow = Mathf.RoundToInt(heal) - healed;
+
+            // 떠오르는 회복 숫자. 넘쳐 버려진 몫이 있으면 그것까지 — "40 (넘침 80)".
+            Managers.Object.ShowHealing(heal, healed, overflow);
 
             // 최초 포션인지 확인
             if (PlayerPrefs.GetInt("ISFIRSTRECOVERY") == 0)
@@ -107,6 +106,10 @@ public class ConsumableItem : MonoBehaviour
 
             if (Managers.Game.PlayerData.CurHP > Managers.Game.PlayerData.MaxHP)
                 Managers.Game.PlayerData.CurHP = Managers.Game.PlayerData.MaxHP;
+
+            // "방어 +1" 을 머리 위에, 차임과 함께. 오른 값에 맞춰 맵 위 숫자가 세어 내려간다(ForecastOverlay).
+            Managers.Object.ShowRuneGain(Managers.Game.ConsumableItemData.AttackUp,
+                Managers.Game.ConsumableItemData.DefenceUp, Managers.Game.ConsumableItemData.HPUp);
         }
 
         if (Managers.Game.GameScene != null)

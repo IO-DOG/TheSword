@@ -20,7 +20,6 @@ public class UI_TitleScene : UI_Scene
         NewGameButton,
         LoadGameButton,
         SettingButton,
-        //GameSpeedButton,
         ExitButton,
     }
 
@@ -41,6 +40,8 @@ public class UI_TitleScene : UI_Scene
 
     // 새 게임이 저장을 지운다는 확인 (Tools/ui_text_parts/ui.py)
     public const int ASK_NEW_GAME = 190;
+    // 본 결말 수 "결말 {0}/{1}" (Tools/ui_text_parts/records.py)
+    public const int ENDINGS_SEEN = 440;
 
     bool isPreload = false;
     int buttonsIdx = 0;
@@ -54,6 +55,7 @@ public class UI_TitleScene : UI_Scene
     CanvasGroup _logo;          // 로고. 마찬가지
     Image _notice;              // 이어하기 실패 알림 — 메뉴 자리의 어두운 띠(ShowNotice)
     TMP_Text _noticeText;
+    TMP_Text _endings;          // 본 결말 수 (Records) — 메뉴 띠 오른쪽 끝
 
     public override bool Init()
     {
@@ -92,15 +94,6 @@ public class UI_TitleScene : UI_Scene
         GetButton((int)Buttons.NewGameButton).gameObject.SetActive(false);
 
         Loading();
-
-        //GetButton((int)Buttons.GameSpeedButton).gameObject.BindEvent(() => { // 게임 속도 조절
-        //    if (Managers.Game.GameSpeed == 1)
-        //        Managers.Game.GameSpeed = 2;
-        //    else if (Managers.Game.GameSpeed == 2)
-        //        Managers.Game.GameSpeed = 4;
-        //    else
-        //        Managers.Game.GameSpeed = 1;
-        //});
 
         return true;
     }
@@ -146,6 +139,14 @@ public class UI_TitleScene : UI_Scene
             label.fontSharedMaterial = CodeUI.Outlined(label.font, 0.3f);
             label.fontSize = first.fontSize;
         }
+
+        // 본 결말 수. 띠의 자식이라 메뉴와 함께 켜지고 창이 뜨면 같이 가려진다(_buttons.alpha). 세로 줄 배치에는 끼지 않고
+        // 띠 오른쪽 끝, 칼날 빛에서 먼 어두운 잎 위에 선다 — 가운데 아래(칼끝 풀빛)는 화면에서 가장 밝다.
+        _endings = CodeUI.NewText(_buttons.transform, "Endings", first.font, 36f, new Color(0.8f, 0.8f, 0.8f), TextAlignmentOptions.Right);
+        _endings.fontSharedMaterial = CodeUI.Outlined(first.font, 0.3f);
+        _endings.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
+        CodeUI.Place(_endings.rectTransform, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-60f, 0f), new Vector2(560f, 60f));
+        _endings.gameObject.SetActive(false);
     }
 
     private void Start()
@@ -472,6 +473,12 @@ public class UI_TitleScene : UI_Scene
         GetText((int)Texts.LoadGameText).text = Managers.GetString(Define.TITLE_CONTINUE);
         GetText((int)Texts.SettingText).text = Managers.GetString(Define.SETTING);
         GetText((int)Texts.ExitText).text = Managers.GetString(Define.QUIT_GAME);
+
+        // 결말을 하나라도 봐야 뜬다 — 처음 켠 사람에게 "0/3" 은 숙제일 뿐이다. 언어가 바뀌어도 여기로 온다.
+        int seen = Records.EndingsSeen;
+        _endings.gameObject.SetActive(seen > 0);
+        if (seen > 0)
+            _endings.text = string.Format(Managers.GetString(ENDINGS_SEEN), seen, Records.EndingCount);
     }
 
     void SetButtonColorAndButtonsText(int index)

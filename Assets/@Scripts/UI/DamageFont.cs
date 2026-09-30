@@ -8,9 +8,14 @@ public class DamageFont : UI_Base
 {
     TextMeshProUGUI _damageText;
 
+    // 치명타 숫자는 1.6배. 색만 달라서는 치명이 났는지 모르고 지나갔다 — 전투에서 세는 자원이 치명타뿐인데.
+    const float CriticalSize = 1.6f;
+    float _size = 1f;
+
     public void SetInfo(Vector2 pos, float damage = 0, float healAmount = 0, Transform parent = null, bool isCritical = false, bool isDefence = false)
     {
         _damageText = GetComponent<TextMeshProUGUI>();
+        _size = isCritical && healAmount <= 0 ? CriticalSize : 1f;
         // 검은 테두리. 빨간 숫자가 주황 폭발 위에서 사라졌다. 재질은 글꼴마다 하나를 나눠 쓴다.
         _damageText.fontSharedMaterial = CodeUI.Outlined(_damageText.font, 0.4f);
         transform.position = pos;
@@ -88,14 +93,14 @@ public class DamageFont : UI_Base
         // 시작 전에 스케일을 0으로 초기화합니다.
         transform.localScale = Vector3.zero;
 
-        // 첫 번째 단계: 스케일을 0에서 1.3으로 키우면서 동시에 랜덤한 방향으로 이동
-        seq.Append(transform.DOScale(1.3f, 0.3f).SetEase(Ease.InOutBounce))
+        // 첫 번째 단계: 스케일을 0에서 1.3으로 키우면서 동시에 랜덤한 방향으로 이동 (치명타는 _size 만큼 더 크게)
+        seq.Append(transform.DOScale(1.3f * _size, 0.3f).SetEase(Ease.InOutBounce))
            .Join(transform.DOLocalMove(randomDir * firstMoveDistance, 0.3f)
                 .SetRelative(true)
                 .SetEase(Ease.Linear));
 
         // 두 번째 단계: 스케일을 1.3에서 1.0으로 줄이고, 텍스트를 페이드아웃하며, 추가로 이동
-        seq.Append(transform.DOScale(1.0f, 0.3f).SetEase(Ease.InOutBounce))
+        seq.Append(transform.DOScale(1.0f * _size, 0.3f).SetEase(Ease.InOutBounce))
            .Join(transform.GetComponent<TMP_Text>().DOFade(0, 0.3f).SetEase(Ease.InQuint))
            .Join(transform.DOLocalMove(randomDir * secondMoveDistance, 0.3f)
                 .SetRelative(true)

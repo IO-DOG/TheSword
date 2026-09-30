@@ -1,0 +1,12 @@
+"AppBuild"
+{
+	"AppID"	"<DEMO_APPID>"	// demo AppID (Add Demo on the full game's app page) - see scripts/README.md
+	"Desc"	"TheSword Demo"	// upload.ps1 passes -desc with version and commit
+	"ContentRoot"	"..\..\Build\Windows\"	// must be a build made with the DEMO define (MASTER_PLAN D1)
+	"BuildOutput"	"..\output\"
+	"SetLive"	"beta"
+	"Depots"
+	{
+		"<DEMO_DEPOTID>"	"depot_build_DEMO_DEPOTID.vdf"
+	}
+}

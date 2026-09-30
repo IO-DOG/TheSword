@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using DG.Tweening;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,13 +16,18 @@ public class UI_GameOverPopup : UI_Popup
 
     #endregion
 
+    // 이만큼(실시간 초) 지나면 아무 키·클릭으로 곧장 되살아난다. 예전에는 죽을 때마다 8.6초를 기다렸다.
+    const float SkipAfter = 2f;
+
     bool _respawned;
+    float _openedAt;
 
     public override bool Init()
     {
         if (base.Init() == false)
             return false;
 
+        _openedAt = Time.unscaledTime;
         BindImage(typeof(Images));
 
         GetImage((int)Images.BG).gameObject.SetActive(false);
@@ -85,6 +91,24 @@ public class UI_GameOverPopup : UI_Popup
         // 게임 오버 일러스트 페이드 아웃
         //StartCoroutine(Util.CoFade(GetImage((int)Images.GameOverIllust), 1f, false));
 
+        Respawn();
+    }
+
+    // 맨 위일 때만 — 첫 전투에서 죽으면 전투 안내(UI_GuidePopup)가 이 위에 뜬다. 그걸 닫는 Enter·Esc 로 같이 넘기지 않는다:
+    // 안내는 닫히는 그 자리에서 목록을 빠지므로, 같은 프레임에 이쪽이 나중에 돌면 제가 맨 위로 보인다(ClosedThisFrame).
+    void Update()
+    {
+        if (_respawned || Time.unscaledTime - _openedAt < SkipAfter || Managers.UI.TopPopup != this
+            || Managers.UI.ClosedThisFrame || Input.anyKeyDown == false)
+            return;
+        // 곡이 3초에 걸쳐 꺼지는 중이다(DeadAni). 끝까지 기다렸을 때처럼 꺼 둔다 — 반쯤 꺼지던 곡은 되살린 층이 같은 곡을
+        // 틀려 할 때 "이미 도는 중" 으로 보여 새로 틀리지 않고, 그 뒤에 마저 꺼져 층이 무음이 된다.
+        AudioSource bgm = Managers.Sound.GetAudioSource(Define.Sound.Bgm);
+        if (bgm != null)
+        {
+            bgm.DOKill();
+            bgm.Stop();
+        }
         Respawn();
     }
 

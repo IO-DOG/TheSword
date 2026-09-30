@@ -101,9 +101,12 @@ public class UI_MonsterInfo : UI_Base
     /// 공격 주기와 특성이 얽히기 때문이다. 그래서 숫자를 늘어놓는 대신 결과를 적는다.
     /// 셈은 BattleForecast 가 진짜 전투 코드를 그대로 돌려서 한다. 더 자세한 것(임계)은 도감(M)에 있다.
     ///
+    /// 셋째 줄은 다음 임계 — "공격 +3이면 -31→-24". 공격 +10 안에 값이 내려가는 수가 있을 때만 나온다.
+    /// 마우스를 옮길 때마다 창이 새로 뜨니 셈은 ForecastUI.Forecast 가 기억해 둔 것을 쓴다.
+    ///
     /// 프리팹은 에디터에서만 고칠 수 있으니 새 오브젝트를 만들지 않고, 특성 표시를
     /// 접으면서 꺼 둔 채 남아 있던 MonsterClassText 를 되살려 쓴다(위 Texts enum 의
-    /// 주석 처리된 줄이 그것이다). 자리는 설명 칸을 두 줄만큼 줄여서 낸다.
+    /// 주석 처리된 줄이 그것이다). 자리는 설명 칸을 그 줄 수만큼 줄여서 낸다.
     /// </summary>
     void ShowForecast(int id, int stageId)
     {
@@ -124,19 +127,29 @@ public class UI_MonsterInfo : UI_Base
             return;
         }
 
-        BattleForecast.Result forecast = BattleForecast.Of(id, stageId);
+        BattleForecast.Result forecast = ForecastUI.Forecast(id, stageId);
         if (forecast.Ok == false)
             return;
+
+        BattleForecast.Result then;
+        int step = ForecastUI.AttackStep(id, stageId, forecast, out then);
+        int lines = step > 0 ? 3 : 2;
 
         const float lineHeight = 22f;
         RectTransform scroll = GetObject((int)Objects.ScrollView).GetComponent<RectTransform>();
         scroll.sizeDelta = new Vector2(scroll.sizeDelta.x, scroll.sizeDelta.y - lineHeight * 2f);
+        // 셋째 줄(임계)은 설명 칸을 더 줄이지 않고 틀을 늘려 낸다. 설명은 위에, 이 줄은 아래에 붙어 있어 사이가 그만큼 벌어진다.
+        if (lines > 2)
+        {
+            GetImage((int)Images.BGImage).rectTransform.sizeDelta += new Vector2(0f, lineHeight);
+            Position = _position;   // 늘어난 높이로 화면 안에 다시 붙잡는다
+        }
 
         RectTransform rt = line.rectTransform;
         rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0f);   // 창 아래쪽, 설명 칸 밑
         rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.anchoredPosition = new Vector2(0f, lineHeight * 1.2f);
-        rt.sizeDelta = new Vector2(scroll.sizeDelta.x, lineHeight * 2f);
+        rt.anchoredPosition = new Vector2(0f, lineHeight * (0.2f + lines * 0.5f));
+        rt.sizeDelta = new Vector2(scroll.sizeDelta.x, lineHeight * lines);
 
         // 첫 줄은 결과, 둘째 줄은 곁의 것. 색은 맵 위 숫자와 같은 눈금이다(지금 체력에 대한 몫).
         // 화살표는 → 다. 두 글꼴 모두 ▶ 가 없어 네모(□)로 나왔다. ✖ 도 없어서 X 를 쓴다.
@@ -154,7 +167,15 @@ public class UI_MonsterInfo : UI_Base
         if (forecast.LevelUp)
             detail += " " + ForecastUI.LevelUpMark;
 
-        line.text = result + "\n<size=80%><color=#D8DCE6>" + detail.Trim() + "</color></size>";
+        // 곁의 두 줄은 결과 줄과 같은 크기로, 색으로만 가른다. 80% 로 줄였더니 1280x800(스팀 덱)에서 8~9px 이라
+        // "9px 아래 글자 없음" 기준에 걸렸다.
+        line.text = result + "\n<color=#D8DCE6>" + detail.Trim() + "</color>";
+        if (step > 0)
+        {
+            string atk = string.Format(Managers.GetString(ForecastUI.AtkUp), step);
+            line.text += "\n<color=#96E68C>" + string.Format(Managers.GetString(ForecastUI.NextStep), atk,
+                ForecastUI.Price(forecast), ForecastUI.Price(then)) + "</color>";
+        }
         line.color = ForecastUI.Tone(forecast, Managers.Game.PlayerData.CurHP);
         line.fontStyle = forecast.Win ? FontStyles.Normal : FontStyles.Bold;
 
@@ -164,7 +185,9 @@ public class UI_MonsterInfo : UI_Base
         line.textWrappingMode = TextWrappingModes.NoWrap;
         line.overflowMode = TextOverflowModes.Ellipsis;
         line.fontSizeMin = 7f;
-        line.fontSizeMax = line.fontSize;
+        // 설명(13)과 같은 크기까지. 프리팹의 12 로는 라틴 글자(한글보다 낮다)가 1280x800 에서 9px 를 못 넘는다.
+        // 가장 긴 줄(영어 "N hits taken  First hit crits  EXP N ★")도 13 에서 폭 200 안에 든다.
+        line.fontSizeMax = 13f;
         line.enableAutoSizing = true;
         line.gameObject.SetActive(true);
     }
@@ -179,14 +202,19 @@ public class UI_MonsterInfo : UI_Base
     // 16칸 높이라(MapBuilder.FitColliderToCell) 바닥을 안 거치고 넘어가서, A 의 이름·예측이 B 를 가리키는
     // 채 남았다(못 이기는 B 위에 A 의 "-12" 가). 닫으면 UI_GameScene.ShowInfo 가 B 의 창을 새로 띄운다.
     // 메뉴·전투·연출·대화나 다른 창이 맵을 덮어도 닫는다(UI_GameScene.CanShowTooltip).
-    private void Update()
+    // LateUpdate 에서, 끄고 나서 부순다: 부딪혀 전투가 열린 그 프레임 끝에 전투창이 화면을 찍는다(MonsterController.SetMonster).
+    // Update 는 부딪힘(PlayerController.Update)보다 먼저 돌 수 있어서, 그러면 이 창이 한 프레임 남아 전투 배경에 박혔다.
+    private void LateUpdate()
     {
+        if (_init == false)
+            return;
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (UI_GameScene.CanShowTooltip() && Physics.Raycast(ray, out hit, 1000.0f, _mask) && IsOwner(hit.collider))
             return;
 
         Release();
+        gameObject.SetActive(false);
         Destroy(gameObject);
     }
 

@@ -10,6 +10,7 @@ public static class GameSettings
     const string KeyTextSpeed = "SET_TEXT_SPEED";
     const string KeyForecast = "SET_SHOW_FORECAST";
     const string KeyVSync = "SET_VSYNC";
+    const string KeyBattleSpeed = "SET_BATTLE_SPEED";
     // 소리 키는 예전 이름 그대로다 (UI_SettingPopup 이 쓰고, 배경음·효과음 키는 여러 곳이 직접 읽는다).
     const string KeyMasterVolume = "CURSOUND";
 
@@ -18,6 +19,8 @@ public static class GameSettings
 
     // GetString 이 글자마다 부른다. Windows 의 PlayerPrefs 는 레지스트리라 한 번만 읽어 둔다.
     static Define.ScriptType? s_language;
+    // 전투창이 FixedUpdate 마다 읽는다 — 같은 이유로 한 번만 읽어 둔다. 0 = 아직 안 읽었다.
+    static int s_battleSpeed;
 
     // 에디터는 플레이할 때 도메인·씬을 다시 읽지 않는다(Enter Play Mode Options). 정적 값이 지난 플레이에서
     // 그대로 넘어와, 파괴된 오브젝트에 묶인 구독자가 남는다 — 플레이를 시작할 때마다 비운다. 빌드에는 영향이 없다.
@@ -25,6 +28,7 @@ public static class GameSettings
     static void ResetStatics()
     {
         s_language = null;
+        s_battleSpeed = 0;
         Changed = null;
     }
 
@@ -57,6 +61,21 @@ public static class GameSettings
         get => Mathf.Clamp(PlayerPrefs.GetInt(KeyTextSpeed, 1), 0, 3);
         set { PlayerPrefs.SetInt(KeyTextSpeed, Mathf.Clamp(value, 0, 3)); Commit(); }
     }
+
+    // 전투 배속 1·2·4 (기본 2). 전투 시계를 FixedUpdate 한 번에 몇 걸음 돌리느냐일 뿐이라 결과는 같다 (UI_BattlePopup.Speed).
+    // 전투의 37% 를 지켜보기만 했다 — 목걸이 없이도 처음부터 고를 수 있다.
+    public static int BattleSpeed
+    {
+        get
+        {
+            if (s_battleSpeed == 0)
+                s_battleSpeed = ValidBattleSpeed(PlayerPrefs.GetInt(KeyBattleSpeed, 2));
+            return s_battleSpeed;
+        }
+        set { s_battleSpeed = ValidBattleSpeed(value); PlayerPrefs.SetInt(KeyBattleSpeed, s_battleSpeed); Commit(); }
+    }
+
+    static int ValidBattleSpeed(int speed) => speed == 1 || speed == 4 ? speed : 2;
 
     // 맵 위 몬스터마다 예상 피해를 띄울지.
     public static bool ShowForecast

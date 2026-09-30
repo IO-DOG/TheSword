@@ -1,0 +1,15 @@
+"DepotBuild"
+{
+	"DepotID"	"<DEPOTID>"	// full game depot - see scripts/README.md
+	// no ContentRoot here: the app build's ContentRoot (Build\Windows) is used
+	"FileMapping"
+	{
+		"LocalPath"	"*"
+		"DepotPath"	"."
+		"Recursive"	"1"
+	}
+	"FileExclusion"	"*.pdb"
+	"FileExclusion"	"steam_appid.txt"	// dev only; with it present the game never relaunches through Steam
+	"FileExclusion"	"*_DoNotShip*"	// GameBuild already moves these to Build\Symbols; kept as a safety net
+	"FileExclusion"	"*_ButDontShipItWithYourGame*"
+}
