@@ -133,7 +133,12 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
   한 발짝도 못 나간다**. `TheSword_Data/StreamingAssets/aa` 에 번들이 있는지 본다.
 - `URP_COMPATIBILITY_MODE` 가 정의에 있어야 한다. URP 에셋이 호환 모드(렌더 그래프
   이전 경로)를 쓰는데 Unity 6.3 부터는 이 정의가 없으면 **빌드를 거부한다**.
-- 산출물 `Build/Windows/TheSword.exe` (약 536MB). `Build/` 는 `.gitignore` 에 있다.
+- 산출물 `Build/Windows/TheSword.exe` (약 221MB, 1.0.0). `Build/` 는 `.gitignore` 에 있다.
+  예전 536MB 의 대부분은 타이틀 파티클 96장(1920x1080 한 장씩)과 압축 없는 플레이어 데이터였다 —
+  파티클은 최대 1024, 빌드는 LZ4HC. 안 쓰는 `Assets/Resources` 는 `Assets/_Legacy` 로 옮겼다(Resources 폴더
+  안의 것은 참조가 없어도 전부 빌드에 들어간다). 실행 첫 로딩("Loaded All Assemblies")은 0.15초.
+- **회사 이름(`companyName`)은 아직 DefaultCompany 다.** 세이브 경로와 PlayerPrefs 키에 들어가므로
+  첫 공개 빌드 **전에** 정해야 한다 — 나중에 바꾸면 모든 세이브가 고아가 된다.
 
 ### MCP 가 물렸을 때
 
