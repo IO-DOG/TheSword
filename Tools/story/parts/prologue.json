@@ -1,0 +1,199 @@
+{
+  "version": 1,
+  "speakers": {
+    "damian": { "kr": "데미안" },
+    "sword": { "kr": "에고소드" },
+    "chief": { "kr": "촌장" },
+    "boss0": { "kr": "묘소의 늑대" }
+  },
+  "scenes": [
+    {
+      "id": "pro_contract_after",
+      "kind": "dialogue",
+      "trigger": "prologue:contract_after",
+      "staging": "3층, 계약의 빛기둥·파동이 잦아든 직후 그 자리. 마검 조우곡을 잇는다. 데미안은 계약 자세(ContractSword_F)를 풀고 대기. 01 직전 화면이 짧게 하얗게 번쩍인다 — 외눈이 뜨이는 순간. 02 에서 데미안 머리 위 SweatDrop 이모트. 끝나면 첫 예측 표시(mech_forecast)로 곧장 잇는다.",
+      "lines": [
+        { "key": "pro_contract_after.01", "speaker": "sword", "emotion": "Treasure", "kr": "크하핫! 뜨였다, 이몸 눈이!\n…흐음. 세상이 온통\n먹을 걸로 보이는군." },
+        { "key": "pro_contract_after.02", "speaker": "damian", "emotion": "Normal", "kr": "…어딜 보는 거야.\n내 칼은 먹지 마." },
+        { "key": "pro_contract_after.03", "speaker": "sword", "emotion": "Smile", "kr": "그 이쑤시개?\n입맛 없다, 허접 모험가." },
+        { "key": "pro_contract_after.04", "speaker": "damian", "emotion": "Normal", "kr": "…그 호칭, 굳힐 셈이야?" },
+        { "key": "pro_contract_after.05", "speaker": "sword", "emotion": "Smile", "kr": "네 입으로 한 말이다.\n이몸은 흘린 건 다 주워 먹지." },
+        { "key": "pro_contract_after.06", "speaker": "sword", "emotion": "Normal", "kr": "계약서대로다. 네 목숨은 이몸 거고,\n네가 벤 만큼 이몸이 먹는다.\n마물의 마력도, 무기도." },
+        { "key": "pro_contract_after.07", "speaker": "damian", "emotion": "Question", "kr": "배부르면?" },
+        { "key": "pro_contract_after.08", "speaker": "sword", "emotion": "Smile", "kr": "그런 날은 안 온다.\n크하핫!" }
+      ]
+    },
+    {
+      "id": "pro_kingslime_reveal",
+      "kind": "dialogue",
+      "trigger": "prologue:kingslime_reveal",
+      "staging": "4층, 킹 슬라임 등장 연출 직후, 전투 전. 킹슬라임 보스곡. 레터박스를 내리고 카메라는 킹 슬라임을 잡는다(대기 애니메이션). 01 에서 화면 흔들림 짧게. 02 동안 카메라가 킹 슬라임 쪽으로 조금 다가간다. 08 뒤 데미안 검 뽑기(SwordDraw_B) → 전투.",
+      "lines": [
+        { "key": "pro_kingslime_reveal.01", "speaker": "sword", "emotion": "Angry", "kr": "킹? 왕은 이몸 하나다!" },
+        { "key": "pro_kingslime_reveal.02", "speaker": "sword", "emotion": "Nerve", "kr": "…킁, 킁.\n저 물컹이한테서\n이몸 마력 냄새가 난다." },
+        { "key": "pro_kingslime_reveal.03", "speaker": "sword", "emotion": "Angry", "kr": "숲에서 이몸을 제일 많이\n갉아 먹은 놈이 저놈이다!" },
+        { "key": "pro_kingslime_reveal.04", "speaker": "damian", "emotion": "Normal", "kr": "그럼 복수전이군." },
+        { "key": "pro_kingslime_reveal.05", "speaker": "sword", "emotion": "Smile", "kr": "복수? 크하핫, 식사다!\n뺏긴 걸 도로 먹는 거다." },
+        { "key": "pro_kingslime_reveal.06", "speaker": "sword", "emotion": "Normal", "kr": "강타, 철벽, 흡혈을 빌려주마.\n세게 치고, 막고, 벤 만큼 채운다.\n셋 다 싸움마다 한 번씩이다." },
+        { "key": "pro_kingslime_reveal.07", "speaker": "sword", "emotion": "Normal", "kr": "숫자는 네 손을 빼고 잰 값이다.\n잘 끼어들면 그만큼 싸진다." },
+        { "key": "pro_kingslime_reveal.08", "speaker": "damian", "emotion": "Thinking", "kr": "…그러니까 숫자보다\n싸게 끝낼 수도 있다는 거군." }
+      ]
+    },
+    {
+      "id": "pro_kingslime_clear",
+      "kind": "dialogue",
+      "trigger": "prologue:kingslime_clear",
+      "staging": "4층, 분열 슬라임 셋을 다 잡은 직후. 보스곡을 끊는다. 03~04 동안 데미안 둘레에 마법 오라(짧게) — 마검이 메이스·대거·방패와 마력을 먹는다. 06 에서 반 박자 암전, 07 은 암전이 걷히며. 10 에서 Sleepy 파티클 이모트(마검 몫)를 띄우고 레터박스를 걷는다.",
+      "lines": [
+        { "key": "pro_kingslime_clear.01", "speaker": "sword", "emotion": "Smile", "kr": "크하핫! 봤냐, 허접 모험가.\n노랑부터 베니까 산 거다.\n방법은 순서에 있다 했지?" },
+        { "key": "pro_kingslime_clear.02", "speaker": "damian", "emotion": "Thinking", "kr": "물약 품은 놈부터라…\n순서 하나로 값이 바뀌는군." },
+        { "key": "pro_kingslime_clear.03", "speaker": "sword", "emotion": "Treasure", "kr": "자, 이제 이몸 차례다.\n메이스, 대거, 방패…\n계약대로 전부 이몸 몫이다!" },
+        { "key": "pro_kingslime_clear.04", "speaker": "sword", "emotion": "Smile", "kr": "…우물우물.\n흥, 전채 요리였다." },
+        { "key": "pro_kingslime_clear.05", "speaker": "damian", "emotion": "Normal", "kr": "…무기도 바친다더니.\n진짜 먹는 거였군." },
+        { "key": "pro_kingslime_clear.06", "speaker": "sword", "emotion": "Silence", "kr": "……" },
+        { "key": "pro_kingslime_clear.07", "speaker": "sword", "emotion": "Question", "kr": "어둠 속에서…\n까만 해를 올려다보고 있었다." },
+        { "key": "pro_kingslime_clear.08", "speaker": "damian", "emotion": "Question", "kr": "까만 해?" },
+        { "key": "pro_kingslime_clear.09", "speaker": "sword", "emotion": "Normal", "kr": "…모른다.\n먹으니까 떠올랐다." },
+        { "key": "pro_kingslime_clear.10", "speaker": "sword", "emotion": "Sleep", "kr": "…배 속이 따뜻하니\n눈꺼풀이… 무겁…\n…음냐." }
+      ]
+    },
+    {
+      "id": "village_card",
+      "kind": "card",
+      "trigger": "village",
+      "staging": "4층 계단을 오른 뒤, 5층에 들어가기 전. 인트로곡. 01 TowerArrival, 02 Intro04, 03~04 TowerGraves. 카드마다 천천히 페이드. 04 뒤 그림을 걷지 않고 village_chief 로 잇는다.",
+      "lines": [
+        { "key": "village_card.01", "speaker": "narration", "image": "TowerArrival", "kr": "숲을 빠져나오자, 그것이 보였다.\n마을 한가운데 거꾸로 꽂힌 검은 탑." },
+        { "key": "village_card.02", "speaker": "narration", "image": "Intro04", "kr": "십이 년 전 어느 밤,\n탑은 하늘에서 머리부터 떨어졌다." },
+        { "key": "village_card.03", "speaker": "narration", "image": "TowerGraves", "kr": "탑 밑동에는 무덤이 늘어서 있었다.\n십자가 사이사이, 칼이 꽂혀 있었다." },
+        { "key": "village_card.04", "speaker": "narration", "kr": "그리고 그 위로 꽂힌 탑은\n거대한 칼 한 자루 같았다." }
+      ]
+    },
+    {
+      "id": "village_chief",
+      "kind": "dialogue",
+      "trigger": "village",
+      "staging": "village_card 에 이어 TowerGraves 그림을 깔아 둔 채 대화창만 띄운다(맵 없음). 인트로곡 유지. 촌장은 초상화 없이 이름만. 마검은 05 전까지 자고 있다 — 05 에서 Treasure 로 반쯤 깼다가 06 뒤 다시 잠든다. 09 는 데미안 초상화 Silence 로 한 박자. 끝나면 5층으로.",
+      "lines": [
+        { "key": "village_chief.01", "speaker": "chief", "kr": "…또 한 사람 왔구려.\n……그 칼은…" },
+        { "key": "village_chief.02", "speaker": "chief", "kr": "…아니, 잘못 봤소.\n늙으면 헛것이 보이는 법이오." },
+        { "key": "village_chief.03", "speaker": "damian", "emotion": "Question", "kr": "칼 꽂힌 무덤이 많네요." },
+        { "key": "village_chief.04", "speaker": "chief", "kr": "탑에 들어간 이들 몫이오.\n가브에선 전사의 무덤에\n그가 쓰던 칼을 꽂지." },
+        { "key": "village_chief.05", "speaker": "sword", "emotion": "Treasure", "kr": "…음냐… 칼?\n칼 냄새… 몇 자루냐…" },
+        { "key": "village_chief.06", "speaker": "damian", "emotion": "Normal", "kr": "무덤이야. 먹지 마." },
+        { "key": "village_chief.07", "speaker": "chief", "kr": "아들놈 렌도 들어갔소.\n해 지기 전에 온다더니." },
+        { "key": "village_chief.08", "speaker": "chief", "kr": "무덤은 내가 파오.\n하나만 비어 있지.\n…주인이 아직 안 와서." },
+        { "key": "village_chief.09", "speaker": "damian", "emotion": "Silence", "kr": "……" },
+        { "key": "village_chief.10", "speaker": "chief", "kr": "이름은 묻지 않겠소.\n알면 비석에 새겨야 하니까.\n돌아오면, 그때 묻지." },
+        { "key": "village_chief.11", "speaker": "chief", "kr": "탑 안에서 누가\n달콤한 말을 하거든,\n값을 먼저 물어보시오." },
+        { "key": "village_chief.12", "speaker": "damian", "emotion": "Normal", "kr": "값은 늘 먼저 물어요." }
+      ]
+    },
+    {
+      "id": "ch0_start",
+      "kind": "dialogue",
+      "trigger": "chapter_start:0",
+      "staging": "5층 첫 진입, 챕터 0 '이끼 낀 지하 묘소'. 밝은 낮 조명, 잎이 위에서 떨어진다. 챕터곡. 01 에서 데미안이 걷다 멈추고 머리 위 Question 이모트. 02 동안 카메라를 천천히 위로 들어 떨어지는 잎을 비춘 뒤 데미안에게 돌아온다. 끝나면 trait_guardian 으로 잇는다.",
+      "lines": [
+        { "key": "ch0_start.01", "speaker": "damian", "emotion": "Thinking", "kr": "계단을 올랐는데 흙냄새가 짙다.\n귀도 먹먹하고." },
+        { "key": "ch0_start.02", "speaker": "damian", "emotion": "Question", "kr": "잎은 머리 위에서 떨어지고.\n…이 탑, 거꾸로구나." },
+        { "key": "ch0_start.03", "speaker": "sword", "emotion": "Normal", "kr": "탑 안에선\n탑이 정한 쪽이 위다." },
+        { "key": "ch0_start.04", "speaker": "damian", "emotion": "Thinking", "kr": "…잘 아는군." },
+        { "key": "ch0_start.05", "speaker": "sword", "emotion": "Smile", "kr": "크하핫! 이몸을 뭘로 보고.\n…그나저나 이 냄새,\n어디서 맡았더라." }
+      ]
+    },
+    {
+      "id": "f11_motto",
+      "kind": "dialogue",
+      "trigger": "floor_first:11",
+      "staging": "11층 첫 진입. 맵 위 짧은 대화, 레터박스 없음. 06 에서 데미안 머리 위 SweatDrop 이모트.",
+      "lines": [
+        { "key": "f11_motto.01", "speaker": "sword", "emotion": "Smile", "kr": "크하핫! 탑에서 살아남는 법을\n하나 가르쳐 주마, 허접." },
+        { "key": "f11_motto.02", "speaker": "sword", "emotion": "Smile", "kr": "배고픈 놈은 먹히고,\n배부른 놈이 먹는다!" },
+        { "key": "f11_motto.03", "speaker": "damian", "emotion": "Question", "kr": "넌 어느 쪽인데?" },
+        { "key": "f11_motto.04", "speaker": "sword", "emotion": "Silence", "kr": "이몸? …늘 배고프지." },
+        { "key": "f11_motto.05", "speaker": "damian", "emotion": "Normal", "kr": "그럼 먹히는 쪽이네." },
+        { "key": "f11_motto.06", "speaker": "sword", "emotion": "Panic", "kr": "이, 이몸은 먹는 쪽이다!\n배가 고플 뿐이지!" }
+      ]
+    },
+    {
+      "id": "f16_nap",
+      "kind": "dialogue",
+      "trigger": "floor_first:16",
+      "staging": "16층 첫 진입. 데미안이 몇 걸음 걷다 멈춘다. 01 직전 Sleepy 파티클 이모트(마검 몫). 02 는 카메라를 멈춘 채 한 박자 정적. 04 에서 Surprise 이모트.",
+      "lines": [
+        { "key": "f16_nap.01", "speaker": "sword", "emotion": "Sleep", "kr": "…해 지기 전에… 간다며…" },
+        { "key": "f16_nap.02", "speaker": "damian", "emotion": "Silence", "kr": "……" },
+        { "key": "f16_nap.03", "speaker": "damian", "emotion": "Question", "kr": "…누가?" },
+        { "key": "f16_nap.04", "speaker": "sword", "emotion": "Panic", "kr": "뭐, 뭐냐!\n이몸은 눈 뜨고 잔다!" },
+        { "key": "f16_nap.05", "speaker": "damian", "emotion": "Normal", "kr": "그러니까 잤다는 거잖아.\n…잠꾸러기." },
+        { "key": "f16_nap.06", "speaker": "sword", "emotion": "Angry", "kr": "잠꾸러기?!\n마검한테 그게 할 소리냐!" }
+      ]
+    },
+    {
+      "id": "boss0_intro",
+      "kind": "dialogue",
+      "trigger": "boss_intro:0",
+      "staging": "20층 보스방. 보스 입장곡. 레터박스를 내리고 카메라를 늑대에게 옮긴다(대기 애니메이션). 04 동안 카메라가 늑대에게 천천히 다가간다. 06 뒤 레터박스를 걷고 전투.",
+      "lines": [
+        { "key": "boss0_intro.01", "speaker": "boss0", "kr": "…또… 너냐." },
+        { "key": "boss0_intro.02", "speaker": "damian", "emotion": "Question", "kr": "아는 놈이야?" },
+        { "key": "boss0_intro.03", "speaker": "sword", "emotion": "Nerve", "kr": "마물 따위가\n이몸을 알 리 없다." },
+        { "key": "boss0_intro.04", "speaker": "boss0", "kr": "…해가… 진다…\n…가야 하는데…" },
+        { "key": "boss0_intro.05", "speaker": "damian", "emotion": "Normal", "kr": "…얼마?" },
+        { "key": "boss0_intro.06", "speaker": "sword", "emotion": "Smile", "kr": "머리 위에 떠 있잖나.\n크하핫! 저녁밥이다, 허접!" }
+      ]
+    },
+    {
+      "id": "boss0_defeat",
+      "kind": "dialogue",
+      "trigger": "boss_defeat:0",
+      "staging": "전투 직후 보스 폭발·흰 빛, 음악을 끊는다. 레터박스. 02 에서 카메라가 늑대가 있던 자리의 반지(보상 아이템)로 간다. 03 직전 데미안 둘레에 마법 오라(짧게) — 마검이 먹는다. 10 뒤 레터박스를 걷는다. 반지를 주우면 mech_warp.",
+      "lines": [
+        { "key": "boss0_defeat.01", "speaker": "boss0", "kr": "…해 지기 전에…\n간다고… 했는데…" },
+        { "key": "boss0_defeat.02", "speaker": "narration", "kr": "늑대가 쓰러진 자리에\n목에 걸려 있던 반지가 굴렀다." },
+        { "key": "boss0_defeat.03", "speaker": "sword", "emotion": "Silence", "kr": "……이 목소리.\n들은 적이 있다." },
+        { "key": "boss0_defeat.04", "speaker": "damian", "emotion": "Question", "kr": "마물 따위가 널 알 리 없다며." },
+        { "key": "boss0_defeat.05", "speaker": "sword", "emotion": "Normal", "kr": "…마물이 아니었다.\n탑은 쓰러진 자를 마물 꼴로 빚어\n문지기로 세운다." },
+        { "key": "boss0_defeat.06", "speaker": "damian", "emotion": "Thinking", "kr": "…그런 걸 어떻게 알아?" },
+        { "key": "boss0_defeat.07", "speaker": "sword", "emotion": "Question", "kr": "…모른다. 입이 안다." },
+        { "key": "boss0_defeat.08", "speaker": "sword", "emotion": "Normal", "kr": "……허접 모험가.\n넌 해 지기 전에 돌아갈 데 있나?" },
+        { "key": "boss0_defeat.09", "speaker": "damian", "emotion": "Normal", "kr": "없어." },
+        { "key": "boss0_defeat.10", "speaker": "sword", "emotion": "Silence", "kr": "…이몸도 없다." }
+      ]
+    }
+  ],
+  "prologue_rewrites": {
+    "900000": "평범한 오후.\n길드 게시판 앞.",
+    "900001": "왁자한 길드 안, 게시판 앞만 조용했다.\n낡은 의뢰 하나가 모험가의 눈에 걸렸다.",
+    "900002": "흠…\n[ 가브 마을에 떨어진 탑 조사 ]",
+    "900003": "하늘에서 거대한 탑이 떨어졌다.\n많은 모험가가 찾아갔으나 밝혀진 것은 없다.",
+    "900004": "지금은 마물이 들끓는 저주받은 마을.\n탑의 비밀을 가져오는 자에게 왕국이 하사품을 내린다.",
+    "900005": "…… 찌익.\n모험가는 의뢰서를 떼어 품에 넣고 문을 나섰다.",
+    "900006": "큭… 마물 냄새다.\n싸움은 피할 수 없겠군.",
+    "100011": "뭐야?!",
+    "100012": "…넌 뭐야?",
+    "100013": "말하는 검이라니…\n너, 마물이냐?",
+    "100014": "뭐? 마물 따위랑 비교하지 마!\n평범한 모험가로 보이는데…\n에고소드라고 들어는 봤나?",
+    "100015": "에고… 소드?!\n자아가 있는 검이라던…\n너, 설마 마검이야?",
+    "100016": "이제야 알아보는군.\n이몸은… 에고소드.\n너희가 말하는 마검이다!",
+    "100017": "……\n그래, 알았어.",
+    "100018": "자, 잠깐!\n그냥 가려는 거냐?!",
+    "100019": "내가 허접 모험가라도 그렇지.\n마력이 하나도 안 느껴지는 마검?\n그걸 믿으라고?",
+    "100020": "지금 이몸 꼴을 봐라!\n방치된 게 언제였는지 기억도 안 나.\n망할 마물들이 마력을 다 갉아 먹었다고!",
+    "100021": "(마을에 마물이 늘어난 게… 그 탓인가?)",
+    "100022": "허접 모험가? 듣고 있나?",
+    "100023": "그래, 꽤 재밌는 얘기였어.\n하지만 난 바쁜 몸이라.\n마력 없는 마검은 짐일 뿐이야.",
+    "100024": "흥! 아직도 못 믿는 눈치군.\n그럼 더 재밌는 얘기를 해 주지.\n마검은 계약을 맺어야 힘을 낸다!",
+    "100025": "계약?!",
+    "100026": "그래, 모험가. 이몸을 만난 건 행운이다.\n계약하자! 강한 힘을 약속하지.\n이몸도 이 숲은 지긋지긋하다.",
+    "100027": "내가 갈 곳은 폐허가 된 마을이야.\n정체 모를 탑이 저주를 내렸지.\n호기심이었는데… 이젠 못 물리겠군.",
+    "100028": "크하핫! 마물이 득실대는 탑이라고?\n당장 가자!",
+    "100029": "슬라임이 셋으로 갈라졌다!",
+    "100030": "젠장… 이대론 못 버텨.",
+    "100031": "침착해! 방법은 순서에 있다.",
+    "8": "[ 마검 계약 ]\n계약자는 이 순간부로 마검 [에고소드]와 계약을 맺는다.\n이 계약으로 계약자는 마검의 강력한 힘을 손에 넣으며,\n그 대가로 계약자의 영혼과 생명이 마검에게 귀속됨을 인정한다.\n\n◀마검의 힘▶\n계약자는 마검의 힘을 쓸 권한을 얻는다.\n그러나 이 힘은 마검의 의지에 따라 주어지며,\n그 결과는 계약자의 책임이다.\n◀영혼의 귀속▶\n계약이 맺어지는 순간부터 나의 영혼은 마검에게 속하며,\n나의 존재는 마검의 영원한 동반자가 된다.\n◀힘의 대가▶\n계약자는 마검의 힘을 자유롭게 쓸 수 있으며,\n그 대가로 마물의 마력과 무기를 에고소드에게 바친다.\n◀파기 불가▶\n계약은 육신과 영혼이 파괴되기 전까지 영원히 지속된다.\n◀서약▶\n계약자는 이 계약의 모든 내용을 숙지하였으며,\n자유의지로 서명함으로써 내용을 성실히 이행할 것이다.",
+    "7": "-경고-\n\n문 너머로 위험한 기운이 느껴진다.\n들어가시겠습니까?",
+    "4029": "자아를 가진 마검\n검을 먹고 강해지며, 그 힘을 이용할 수 있다.\n다만, 계약을 통해서만 사용할 수 있는 전설의 마검."
+  }
+}

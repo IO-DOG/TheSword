@@ -507,6 +507,8 @@ public static class MapBuilder
     ///
     /// 애니메이터는 Play 만으로는 그 프레임에 그림을 넣지 않는다. Update(0) 로
     /// 한 번 돌려야 bounds 가 실제 그림을 가리킨다 — 전투창에서 같은 함정을 겪었다.
+    /// 컬링(CullUpdateTransforms)이 걸린 몬스터 프리팹은 아직 한 번도 안 그려진 것에
+    /// Update 를 불러도 그림을 안 넣는다 — 이 한 번만 컬링을 풀고 돌린다.
     /// </summary>
     static void SitOnFloor(GameObject go)
     {
@@ -515,7 +517,12 @@ public static class MapBuilder
 
         Animator anim = go.GetComponentInChildren<Animator>();
         if (anim != null && anim.isActiveAndEnabled)
+        {
+            AnimatorCullingMode cull = anim.cullingMode;
+            anim.cullingMode = AnimatorCullingMode.AlwaysAnimate;
             anim.Update(0f);
+            anim.cullingMode = cull;
+        }
 
         SpriteRenderer sr = go.GetComponentInChildren<SpriteRenderer>();
         if (sr == null || sr.sprite == null)

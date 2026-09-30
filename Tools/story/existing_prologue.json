@@ -1,0 +1,264 @@
+{
+ "note": "기존 프롤로그 대사 슬롯. 줄 수·화자·순서는 유지, 문구만 고쳐 쓴다. id 는 EventData 행, script 는 ScriptData id. 줄바꿈은 \n, 쉼표는 ^ 로 저장되어 있다(쓸 때는 보통 쉼표를 써도 된다).",
+ "intro_cards": [
+  {
+   "script": 900000,
+   "kr": "평범한 오후..\\n길드 게시판 앞",
+   "en": "An ordinary afternoon..\\nIn front of the guild bulletin board"
+  },
+  {
+   "script": 900001,
+   "kr": "소란스러운 내부와 다르게 조용히 의뢰 게시판을 살펴보고있는 모험가..\\n그에게 오래된 퀘스트 하나가 눈에 들어왔다.",
+   "en": "Unlike the noisy interior^ an adventurer quietly looked at the request bulletin board..\\nAn old quest caught his eye."
+  },
+  {
+   "script": 900002,
+   "kr": "흠...\\n[ 가브 마을에 떨어진 타워 조사 의뢰 ]",
+   "en": "Hmm...\\n[Request to investigate the tower that fell in Gabu Village]"
+  },
+  {
+   "script": 900003,
+   "kr": "소문에 의하면.. 하늘에서 거대한 타워가 떨어졌고\\n이후 많은 모험가들이 찾아갔으나 밝혀진 게 없음.",
+   "en": "According to rumors.. a huge tower fell from the sky\\nAfter that^ many adventurers went to find it^ but nothing was revealed."
+  },
+  {
+   "script": 900004,
+   "kr": "지금은 마물이 들끓는 저주받은 마을로 취급.\\n왕국에서 타워에 비밀을 찾아오는 자에게 하사품을 지급한다.",
+   "en": "It is now treated as a cursed village overrun by monsters.\\nThe kingdom gives a gift to those who find the secrets of the tower."
+  },
+  {
+   "script": 900005,
+   "kr": "..... 찌익\\n마음을 굳힌 듯 외뢰서를 품에 넣은 모험가는 문을 나섰다.",
+   "en": "..... Squeak\\nThe adventurer^ who seemed to have made up his mind^ put the request in his bosom and went out the door."
+  }
+ ],
+ "events": [
+  {
+   "id": 0,
+   "script": 900006,
+   "speaker": "damian",
+   "emotion": "Normal",
+   "end_of_scene": true,
+   "kr": "큭.. 마물냄새가\\n전투를 피할 순 없겠어",
+   "en": "Huh.. The smell of monsters\\nI can`t avoid battle"
+  },
+  {
+   "id": 1,
+   "kind": "world_emoji",
+   "hero": "Illust_Adventurer_Surprise",
+   "other": null
+  },
+  {
+   "id": 2,
+   "kind": "world_emoji",
+   "hero": "Illust_Adventurer_Confusion",
+   "other": null
+  },
+  {
+   "id": 3,
+   "kind": "world_emoji",
+   "hero": null,
+   "other": "Illust_MagicalSword_Sleep"
+  },
+  {
+   "id": 4,
+   "kind": "world_emoji",
+   "hero": "Illust_Adventurer_Surprise",
+   "other": null
+  },
+  {
+   "id": 5,
+   "script": 100011,
+   "speaker": "damian",
+   "emotion": "Surprise",
+   "end_of_scene": false,
+   "kr": "뭐야?!",
+   "en": "What?!"
+  },
+  {
+   "id": 6,
+   "script": 100012,
+   "speaker": "sword",
+   "emotion": "Normal",
+   "end_of_scene": false,
+   "kr": "넌 뭐야?",
+   "en": "What are you?"
+  },
+  {
+   "id": 7,
+   "script": 100013,
+   "speaker": "damian",
+   "emotion": "Normal",
+   "end_of_scene": false,
+   "kr": "말하는 검이라니..\\n너 마물이냐?",
+   "en": "A talking sword...\\nAre you a monster?"
+  },
+  {
+   "id": 8,
+   "script": 100014,
+   "speaker": "sword",
+   "emotion": "Bad",
+   "end_of_scene": false,
+   "kr": "뭐? 마물 따위랑 비교하지마!\\n너 평범한 모험가로 보이는데..\\n에고소드라고 들어봤어?",
+   "en": "What? Don`t compare me to monsters!\\nYou look like an ordinary adventurer...\\nHave you heard of an Ego Sword?"
+  },
+  {
+   "id": 9,
+   "script": 100015,
+   "speaker": "damian",
+   "emotion": "Question",
+   "end_of_scene": false,
+   "kr": "에고..소드?!\\n자아가 있는 검이라고 들어본적이..\\n너! 설마 마검이야?",
+   "en": "Ego... Sword?!\\nHave you ever heard of a sword with a sense of self...\\nYou! Are you a demon sword?"
+  },
+  {
+   "id": 10,
+   "script": 100016,
+   "speaker": "sword",
+   "emotion": "Normal",
+   "end_of_scene": false,
+   "kr": "이제야 알아보는군\\n이몸은 에고소드\\n너희가 말하는 마검이다!",
+   "en": "Now you see\\nThis body is an Ego Sword\\nThe demon sword you`re talking about!"
+  },
+  {
+   "id": 11,
+   "script": 100017,
+   "speaker": "damian",
+   "emotion": "Panic",
+   "end_of_scene": false,
+   "kr": "....\\n그래 알았어",
+   "en": "\"....\\nOkay"
+  },
+  {
+   "id": 12,
+   "script": 100018,
+   "speaker": "sword",
+   "emotion": "Panic",
+   "end_of_scene": false,
+   "kr": "자.. 잠깐!\\n그냥 가려는거야?!",
+   "en": "Wait a minute!\\nYou`re just going to leave?!"
+  },
+  {
+   "id": 13,
+   "script": 100019,
+   "speaker": "damian",
+   "emotion": "Normal",
+   "end_of_scene": false,
+   "kr": "내가 비록 허접 모험가라도\\n마력이 느껴지지 않는 마검?\\n그 말을 믿으라는거야?",
+   "en": "\"Even though I`m a sloppy adventurer"
+  },
+  {
+   "id": 14,
+   "script": 100020,
+   "speaker": "sword",
+   "emotion": "Bad",
+   "end_of_scene": false,
+   "kr": "지금 내 모습을 봐라!\\n방치된 게 언제였는지 기억도 나질 않아..\\n그리고 망할 마물들이 내 마력을 갉아버렸다고!",
+   "en": "Look at me right now!\\nI can`t even remember when I was abandoned..\\nAnd those damn monsters ate away my magic!"
+  },
+  {
+   "id": 15,
+   "script": 100021,
+   "speaker": "damian",
+   "emotion": "Question",
+   "end_of_scene": false,
+   "kr": "( 마을 주변에 마물들이 늘어난게.. 그 이유인가? )",
+   "en": "(Is that why there are more monsters around the village?)"
+  },
+  {
+   "id": 16,
+   "script": 100022,
+   "speaker": "sword",
+   "emotion": "Question",
+   "end_of_scene": false,
+   "kr": "허접 모험가? 듣고 있는거야?",
+   "en": "Sloppy adventurer? Are you listening?"
+  },
+  {
+   "id": 17,
+   "script": 100023,
+   "speaker": "damian",
+   "emotion": "Normal",
+   "end_of_scene": false,
+   "kr": "그래 꽤나 재미있는 이야기였어\\n하지만 나는 바쁜 몸이야\\n마력 없는 마검은 짐만 될 뿐이라고",
+   "en": "Yeah^ that was a pretty interesting story\\nBut I`m busy\\nA magic sword without magic is just a burden."
+  },
+  {
+   "id": 18,
+   "script": 100024,
+   "speaker": "sword",
+   "emotion": "Bad",
+   "end_of_scene": false,
+   "kr": "흥! 아직도 못믿는 눈치군\\n그럼 더 재미있는 이야기를 해주지!\\n마검은 계약을 맺어야 힘을 발휘할 수 있어",
+   "en": "Huh! You still don`t believe me\\nThen let me tell you a more interesting story!\\nA magic sword can only be effective if you make a contract."
+  },
+  {
+   "id": 19,
+   "script": 100025,
+   "speaker": "damian",
+   "emotion": "Surprise",
+   "end_of_scene": false,
+   "kr": "계약?!",
+   "en": "A contract?!"
+  },
+  {
+   "id": 20,
+   "script": 100026,
+   "speaker": "sword",
+   "emotion": "Normal",
+   "end_of_scene": false,
+   "kr": "그렇다. 모험가.. 나를 만난건 행운이야\\n나와 계약하자! 강력한 힘을 약속하지!\\n그리고 나도 이제 이곳은 지긋지긋해",
+   "en": "Yes. Adventurer.. It`s lucky to meet me.\\nMake a contract with me! I promise great power!\\nAnd I`m sick of this place now."
+  },
+  {
+   "id": 21,
+   "script": 100027,
+   "speaker": "damian",
+   "emotion": "Normal",
+   "end_of_scene": false,
+   "kr": "내가 갈 곳은 폐허가된 마을이야\\n미지의 탑이 그곳에 저주를 내렸어\\n사실 호기심이였지만 지금은..돌이킬 수 없겠는걸?",
+   "en": "\"The place I`m going to is a ruined village.\\nAn unknown tower has put a curse on it.\\nI was curious"
+  },
+  {
+   "id": 22,
+   "script": 100028,
+   "speaker": "sword",
+   "emotion": "Smile",
+   "end_of_scene": true,
+   "kr": "크하핫! 마물이 득실 거리는 탑이라니?\\n당장 가자!",
+   "en": "Hahaha! A tower full of monsters?\\nLet`s go right now!"
+  },
+  {
+   "id": 23,
+   "script": 100029,
+   "speaker": "sword",
+   "emotion": "Question",
+   "end_of_scene": false,
+   "kr": "슬라임이 3마리로 늘어났어!",
+   "en": "The slimes have increased to 3!"
+  },
+  {
+   "id": 24,
+   "script": 100030,
+   "speaker": "damian",
+   "emotion": "Panic",
+   "end_of_scene": false,
+   "kr": "젠장.. 체력이 버텨기 힘든데",
+   "en": "Damn... I can`t hold out"
+  },
+  {
+   "id": 25,
+   "script": 100031,
+   "speaker": "sword",
+   "emotion": "Normal",
+   "end_of_scene": true,
+   "kr": "침착해! 방법이 있을꺼야",
+   "en": "Calm down! There must be a way."
+  }
+ ],
+ "other": {
+  "contract_text_8": "[ 마검 계약 ]\\n계약자는 이 순간부로 마검 [에고 소드] 계약을 체결한다.\\n이 계약을 통해^ 계약자는 마검의 강력한 힘을 손에 넣을 것이며^\\n그 대가로 계약자의 영혼과 생명은 마검에게 귀속됨을 인정한다.\\n\\n◀마검의 힘▶\\n계약자는 마검의 힘을 사용할 수 있는 권한을 얻는다.\\n그러나 이 힘은 마검의 의지에 따라 부여되며^\\n그 결과는 계약자의 책임이다.\\n◀영혼의 귀속▶\\n이 계약이 체결되는 순간부터^ 나의 영혼은 마검에게 속하게 되며^\\n나의 존재는 마검의 영원한 동반자가 된다.\\n◀힘의 대가▶\\n계약자는 마검의 힘을 자유롭게 사용할 수 있으며^\\n그 대가로 마물의 마력과 무기를 에고 소드에게 받친다.\\n◀파기 불가▶\\n계약은 육신과 영혼이 파괴되기 전까지 영원히 지속된다.\\n◀서약▶\\n계약자는 이 계약의 모든 내용을 숙지하였으며^\\n자유의지로 서명함으로써^ 내용을 성실히 이행할 것이다.",
+  "boss_door_7": "-경고-\\n\\n문 너머로 위험한 기운이 느껴진다.\\n들어가시겠습니까?",
+  "sword_desc_4029": "자아를 가진 마검\\n검을 먹고 강해지며^ 그 힘을 이용할 수 있다.\\n다만^ 계약을 통해서만 사용할 수 있는 전설의 마검."
+ }
+}

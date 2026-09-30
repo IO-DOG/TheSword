@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "speakers": {
+    "damian": { "kr": "데미안" },
+    "sword": { "kr": "에고소드" },
+    "boss3": { "kr": "얼어붙은 기사" }
+  },
+  "scenes": [
+    {
+      "id": "ch3_start",
+      "kind": "dialogue",
+      "trigger": "chapter_start:3",
+      "staging": "61층 첫 진입. 조명은 저녁(해 22°), 공기는 눈. 챕터곡(챕터 3 음높이). 레터박스 없이 짧게. 마검은 졸지 않는다 — Sleepy 이모트를 쓰지 않는다. 02·04 는 한 박자 늦게 띄운다. 이어서 trait_immortal → trait_assassin.",
+      "lines": [
+        { "key": "ch3_start.01", "speaker": "damian", "emotion": "Thinking", "kr": "용광로 다음엔 눈이군.\n해도 기울었고.\n불보다 깊은 데가 얼어 있네." },
+        { "key": "ch3_start.02", "speaker": "sword", "emotion": "Silence", "kr": "…춥군." },
+        { "key": "ch3_start.03", "speaker": "damian", "emotion": "Question", "kr": "안 졸려?\n예전 같으면 벌써 잤을 텐데." },
+        { "key": "ch3_start.04", "speaker": "sword", "emotion": "Silence", "kr": "…안 잔다." }
+      ]
+    },
+    {
+      "id": "f66_awake",
+      "kind": "dialogue",
+      "trigger": "floor_first:66",
+      "staging": "66층 첫 진입, 맵 위에서 짧게. 레터박스 없음. 04 에서 16층 잠꼬대와 같은 자리에 Sleepy 파티클 이모트를 띄웠다가 05 에서 곧바로 끊는다(자는 척이 들킨다). 06 은 두 박자 정적.",
+      "lines": [
+        { "key": "f66_awake.01", "speaker": "damian", "emotion": "Normal", "kr": "요즘 안 자네." },
+        { "key": "f66_awake.02", "speaker": "sword", "emotion": "Silence", "kr": "…잠이 안 온다." },
+        { "key": "f66_awake.03", "speaker": "damian", "emotion": "Thinking", "kr": "그럼 하나 묻자.\n수로에서 잠꼬대로 부른 이름.\n세드릭이 누구야?" },
+        { "key": "f66_awake.04", "speaker": "sword", "emotion": "Sleep", "kr": "……음냐." },
+        { "key": "f66_awake.05", "speaker": "damian", "emotion": "Normal", "kr": "…자는 척하지 마.\n잠 안 온다며." },
+        { "key": "f66_awake.06", "speaker": "sword", "emotion": "Silence", "kr": "……" }
+      ]
+    },
+    {
+      "id": "f72_enough",
+      "kind": "dialogue",
+      "trigger": "floor_first:72",
+      "staging": "72층 첫 진입. 대사 전에 카메라가 데미안 머리 위로 천천히 올라가 두세 박자 멈춘다(마검의 시선). 머리 위에는 아무것도 띄우지 않는다. 챕터곡 볼륨을 낮추고 눈만 내린다. 02 뒤 카메라를 제자리로.",
+      "lines": [
+        { "key": "f72_enough.01", "speaker": "damian", "emotion": "Question", "kr": "…왜.\n머리에 뭐 묻었어?" },
+        { "key": "f72_enough.02", "speaker": "sword", "emotion": "Madness", "kr": "……충분하다." },
+        { "key": "f72_enough.03", "speaker": "damian", "emotion": "Question", "kr": "뭐가?\n클 때마다 '아직 멀었다'더니." },
+        { "key": "f72_enough.04", "speaker": "sword", "emotion": "Silence", "kr": "…아무것도." }
+      ]
+    },
+    {
+      "id": "f76_nohome",
+      "kind": "dialogue",
+      "trigger": "floor_first:76",
+      "staging": "76층 첫 진입. 데미안이 걸음을 멈춘 채 짧게. 레터박스 없음. 03 은 두 박자 정적.",
+      "lines": [
+        { "key": "f76_nohome.01", "speaker": "sword", "emotion": "Silence", "kr": "넌…\n돌아갈 데 없다고 했지." },
+        { "key": "f76_nohome.02", "speaker": "damian", "emotion": "Normal", "kr": "없어." },
+        { "key": "f76_nohome.03", "speaker": "sword", "emotion": "Silence", "kr": "……" },
+        { "key": "f76_nohome.04", "speaker": "damian", "emotion": "Question", "kr": "왜?" },
+        { "key": "f76_nohome.05", "speaker": "sword", "emotion": "Silence", "kr": "…그냥 물었다." }
+      ]
+    },
+    {
+      "id": "boss3_intro",
+      "kind": "dialogue",
+      "trigger": "boss_intro:3",
+      "staging": "80층 끝, 얼어붙은 기사(해골 전사 전투 스프라이트, 대기 애니메이션)에게 처음 부딪힌 순간. 보스 입장곡. 레터박스를 내리고 카메라를 기사 쪽으로 옮긴다. 눈 이펙트를 세게 + 바람 = 눈보라. 일어서는 동작은 없으니 01 에서 카메라가 기사를 아래에서 위로 훑어 '일어남' 을 대신한다. 05 의 '그날, 탑이 떨어졌다' 에서 화면을 한 번 흔든다. 09 에서 카메라가 데미안 머리 위로 올라가 멈춘다 — 숫자는 띄우지 않는다. 16 뒤 데미안 검 뽑기(SwordDraw_B) → 전투.",
+      "lines": [
+        { "key": "boss3_intro.01", "speaker": "boss3", "kr": "……그 검이 돌아왔군." },
+        { "key": "boss3_intro.02", "speaker": "sword", "emotion": "Surprise", "kr": "……세드릭." },
+        { "key": "boss3_intro.03", "speaker": "boss3", "kr": "내 이름을 부르는군. 두 번째다.\n처음엔, 문을 열어 달라고 할 때였지." },
+        { "key": "boss3_intro.04", "speaker": "boss3", "kr": "나는 왕좌의 문을 지키던 탑지기다.\n왕좌의 주인은 그 검이었다.\n검은 태양을 붙들던 자물쇠였지." },
+        { "key": "boss3_intro.05", "speaker": "boss3", "kr": "십이 년 전, 그 검을 뽑은 게 나다.\n그날, 탑이 떨어졌다.\n…용병. 넌 몇 번째냐." },
+        { "key": "boss3_intro.06", "speaker": "sword", "emotion": "Silence", "kr": "……다섯." },
+        { "key": "boss3_intro.07", "speaker": "damian", "emotion": "Silence", "kr": "…기억 안 난다며." },
+        { "key": "boss3_intro.08", "speaker": "boss3", "kr": "'이몸을 만난 건 행운이다.'\n…나도 그 말을 들었다." },
+        { "key": "boss3_intro.09", "speaker": "boss3", "kr": "네 머리 위에도 숫자가 있다.\n그 검은 처음부터 그걸 보고 있었다." },
+        { "key": "boss3_intro.10", "speaker": "damian", "emotion": "Thinking", "kr": "…'네… 값…'\n잘못 들은 게 아니었군." },
+        { "key": "boss3_intro.11", "speaker": "sword", "emotion": "Silence", "kr": "……" },
+        { "key": "boss3_intro.12", "speaker": "boss3", "kr": "왕좌는 비어 있을 수 없다.\n그런데 제 발로 앉는 자만 받는다.\n그래서 그 검은, 믿게 만든다." },
+        { "key": "boss3_intro.13", "speaker": "boss3", "kr": "'굶주림은 굶주림으로만 묶인다.'\n그 검은 배고프게 벼려졌다.\n한 번도 배불러 본 적이 없다." },
+        { "key": "boss3_intro.14", "speaker": "boss3", "kr": "그 검이 네 이름을 부르거든,\n그땐 끝이다.\n다 쓰고 버릴 때만 부르니까." },
+        { "key": "boss3_intro.15", "speaker": "boss3", "kr": "돌아가라.\n못 돌아가겠거든, 베고 가라." },
+        { "key": "boss3_intro.16", "speaker": "damian", "emotion": "Normal", "kr": "돌아갈 데는 없어.\n…베고 가지." }
+      ]
+    },
+    {
+      "id": "boss3_defeat",
+      "kind": "dialogue",
+      "trigger": "boss_defeat:3",
+      "staging": "전투 직후. 이 게임에서 가장 긴 장면 — 끊지 않는다. 보스 폭발·흰 빛을 쓰지 않는다. 음악을 끊고(무음) 눈·바람만 남긴다. 레터박스 유지, 카메라는 기사 쪽. 03 뒤 기사 스프라이트를 끄고 그 자리에서 보라 영혼이 흩어져 위로 오른다 — 데미안(마검) 쪽으로 빨려 들지 않는다(먹지 않는다). 06 부터 카메라를 데미안에게 옮긴다. 22 뒤 레터박스를 올리고 데미안이 계단 쪽으로 걷기 시작한다.",
+      "lines": [
+        { "key": "boss3_defeat.01", "speaker": "boss3", "kr": "…진심이었군. 그 검." },
+        { "key": "boss3_defeat.02", "speaker": "sword", "emotion": "Silence", "kr": "…미안하다, 세드릭." },
+        { "key": "boss3_defeat.03", "speaker": "boss3", "kr": "……이번엔, 놓지 마라." },
+        { "key": "boss3_defeat.04", "speaker": "damian", "emotion": "Question", "kr": "…안 먹어?" },
+        { "key": "boss3_defeat.05", "speaker": "sword", "emotion": "Silence", "kr": "…이건 안 먹는다." },
+        { "key": "boss3_defeat.06", "speaker": "damian", "emotion": "Silence", "kr": "넌 모든 값을 보여 줬지.\n딱 하나, 내 값만 빼고." },
+        { "key": "boss3_defeat.07", "speaker": "damian", "emotion": "Silence", "kr": "얼마야, 나." },
+        { "key": "boss3_defeat.08", "speaker": "sword", "emotion": "Silence", "kr": "…왕좌에 앉히기에, 충분하다." },
+        { "key": "boss3_defeat.09", "speaker": "sword", "emotion": "Nerve", "kr": "처음엔 몰랐다. 정말이다.\n입은 알고 있었다." },
+        { "key": "boss3_defeat.10", "speaker": "damian", "emotion": "Thinking", "kr": "…언제부터." },
+        { "key": "boss3_defeat.11", "speaker": "sword", "emotion": "Silence", "kr": "용광로에서. 그 재를 먹고\n다 떠올랐다.\n그 뒤로는… 알면서 그대로 했다." },
+        { "key": "boss3_defeat.12", "speaker": "sword", "emotion": "Silence", "kr": "수백 년이었다.\n혼자, 어둠 속에서, 배고픈 채로.\n…하늘 한 번 보고 싶었다." },
+        { "key": "boss3_defeat.13", "speaker": "sword", "emotion": "Silence", "kr": "렌은 집에 가야 했다.\n브람은 이몸을 안 믿었다. …옳았지.\n엘린은 이몸을 녹이려 했다." },
+        { "key": "boss3_defeat.14", "speaker": "sword", "emotion": "Silence", "kr": "계약은 둘 중 하나가 부서져야 끝난다.\n이몸은 안 부서진다.\n…그래서 놓았다." },
+        { "key": "boss3_defeat.15", "speaker": "damian", "emotion": "Thinking", "kr": "'이몸 허락 없이는 못 죽는다.'\n…허락하면, 죽는 거였군." },
+        { "key": "boss3_defeat.16", "speaker": "sword", "emotion": "Silence", "kr": "놓을 때마다 이름을 불렀다.\n…마지막 인사처럼." },
+        { "key": "boss3_defeat.17", "speaker": "damian", "emotion": "Silence", "kr": "…나는?" },
+        { "key": "boss3_defeat.18", "speaker": "sword", "emotion": "Silence", "kr": "……" },
+        { "key": "boss3_defeat.19", "speaker": "damian", "emotion": "Normal", "kr": "제 발로 앉는 놈만 받는다며.\n안 앉으면 그만이지." },
+        { "key": "boss3_defeat.20", "speaker": "damian", "emotion": "Normal", "kr": "…계약은 계약이지. 가자." },
+        { "key": "boss3_defeat.21", "speaker": "sword", "emotion": "Question", "kr": "…안 버리냐?" },
+        { "key": "boss3_defeat.22", "speaker": "damian", "emotion": "Normal", "kr": "파기 불가라며." }
+      ]
+    }
+  ]
+}

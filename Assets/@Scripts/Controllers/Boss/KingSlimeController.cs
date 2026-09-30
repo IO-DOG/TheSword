@@ -20,7 +20,7 @@ public class KingSlimeController : BossMonsterController
 
     public override void OnAppearEvent()
     {
-        Managers.Directing.BossOnAppearAction.Invoke();
+        Managers.Directing.BossOnAppearAction?.Invoke();
     }
     public override void OnDeadEvent()
     {

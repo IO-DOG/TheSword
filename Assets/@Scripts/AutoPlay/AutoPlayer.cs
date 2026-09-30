@@ -179,11 +179,29 @@ public class AutoPlayer : MonoBehaviour
         return Instance;
     }
 
+    // 게임 쪽이 이것을 보고 봇을 막지 않는다 — 확인 창은 스스로 "예", 지는 싸움 확인은 건너뛰고,
+    // 대사는 기다리지 않고 넘어간다. 봇이 끝나거나(Succeed/Fail) 사라지면(OnDestroy) 내린다.
+    void Awake()
+    {
+        GameEvents.IsAutoPlaying = true;
+    }
+
     void Start()
     {
         _lastProgress = Time.unscaledTime;
         _lastReal = Time.unscaledTime;
+        FightGate.Add(RecordForecast, RecordOrder);
+        GameEvents.BattleEnded += CompareForecast;
+        GameEvents.HudRefreshed += ForgetForecasts;
         StartCoroutine(CoRun());
+    }
+
+    void OnDestroy()
+    {
+        GameEvents.IsAutoPlaying = false;
+        FightGate.Remove(RecordForecast);
+        GameEvents.BattleEnded -= CompareForecast;
+        GameEvents.HudRefreshed -= ForgetForecasts;
     }
 
     IEnumerator CoRun()
@@ -401,6 +419,7 @@ public class AutoPlayer : MonoBehaviour
             return false;
         if (BattleSkills.Use(index, playerCard, monsterCard) == false)
             return false;
+        _skillUsed = true;      // 예측은 스킬 없이 잰다 — 이 전투는 대조에서 뺀다
 
         // 나중에 이 줄로 녹화 구간을 찾아 자른다. 형식을 바꾸지 말 것.
         Debug.Log($"[AutoPlayer] 스킬 {BattleSkills.NameOf(index)} 사용 " +
@@ -668,6 +687,12 @@ public class AutoPlayer : MonoBehaviour
     {
         if (g.OnBattle)
             return;   // 전투는 스스로 끝난다
+        // 결말은 자동 진행으로도 25~30초 걸린다 — 잠금이 오래 걸렸다고 중간에 풀면 장면이 반쯤 끊긴다.
+        if (StoryDirector.IsPlaying)
+        {
+            _lastReal = Time.unscaledTime;
+            return;
+        }
 
         // 잠금 플래그로 재면 안 된다 — 죽은 연출이 다시 켜지는 사이에
         // 잠깐 풀린 프레임이 끼어들어 타이머가 계속 초기화된다.
@@ -914,15 +939,12 @@ public class AutoPlayer : MonoBehaviour
             if (retreat)
                 continue;   // 이 몸으로 더 싸우면 죽는다
 
-            Data.MonsterData md;
-            if (Managers.Data.MonsterDic.TryGetValue(mc.id, out md) == false)
-                continue;   // 모르는 놈에게는 덤비지 않는다
-
             // 붙기 전에 결과를 계산한다. 지거나 위험하면 지금은 건너뛴다 —
             // 다른 몬스터를 먼저 잡아 레벨을 올리면 그때는 이긴다. 그게 이 게임의 순서다.
-            float loss = PredictLoss(md, g);
+            // 값은 이어 온 치명 횟수까지 넣어 잰 "다음에 싸우면" 이라, 한 번 싸울 때마다 층의 순서가 다시 매겨진다.
+            float loss = PredictLoss(mc.id, g);
             if (loss == float.MaxValue)
-                continue;   // 지는 싸움
+                continue;   // 지는 싸움이거나 표에 없는 놈
 
             // 위층 계단이 잠긴 보스 층에서는 미룰 데가 없다. 이 싸움이 곧 길이다.
             if (g.PlayerData.CurHP - loss < g.PlayerData.MaxHP * SafeHpAfterFight && hasUp)
@@ -1034,12 +1056,8 @@ public class AutoPlayer : MonoBehaviour
                                                   QueryTriggerInteraction.Collide);
                 // 전투 예측도 같이 찍는다. "진다"고 나오면 봇은 그 상대를 아예
                 // 목표로 잡지 않는데, 그게 보스면 층이 통째로 막힌다.
-                Data.MonsterData md;
-                string fight = Managers.Data.MonsterDic.TryGetValue(mc.id, out md)
-                    ? (PredictLoss(md, g) == float.MaxValue
-                        ? "짐"
-                        : $"피해{PredictLoss(md, g):0}")
-                    : "표없음";
+                BattleForecast.Result forecast = Forecast(mc.id, g);
+                string fight = forecast.Ok == false ? "표없음" : forecast.Win ? $"피해{forecast.Damage}" : "짐";
 
                 info.Append($" 몹{mc.id}@{c}={(Reachable(c) ? "닿음" : "막힘")}" +
                             $"/y{mc.transform.position.y:0.00}/콜라이더{(solidHere ? "있음" : "없음")}" +
@@ -1277,89 +1295,105 @@ public class AutoPlayer : MonoBehaviour
     }
 
     #region 전투 예측
+    // 예측은 하나뿐이다 — 사람이 보는 숫자(맵 위·도감·툴팁)와 봇이 고르는 숫자가 같은 BattleForecast 다.
+    // 예전에는 여기에 따로 옮긴 셈이 있었는데, 특성을 빼고 치명 횟수를 0 부터 세고 시계도 0.02 초라
+    // 암살·불사 앞에서 몇 배씩 어긋났다.
+    //
+    // 계획은 걸음마다 다시 세지만 예측은 전투·아이템·장비·층 이동 뒤에만 바뀐다(그때 HUD 가 다시 그려진다).
+    // 그 사이에는 몬스터마다 한 번만 잰다.
+    readonly Dictionary<int, BattleForecast.Result> _forecasts = new Dictionary<int, BattleForecast.Result>();
+    int _forecastStage = -1;
+
+    BattleForecast.Result Forecast(int monsterId, GameManager g)
+    {
+        if (_forecastStage != g.PlayerData.CurStageid)
+        {
+            _forecasts.Clear();
+            _forecastStage = g.PlayerData.CurStageid;
+        }
+        BattleForecast.Result r;
+        if (_forecasts.TryGetValue(monsterId, out r) == false)
+            _forecasts[monsterId] = r = BattleForecast.Of(monsterId, g.PlayerData.CurStageid);
+        return r;
+    }
+
+    void ForgetForecasts() => _forecasts.Clear();
+
     /// <summary>
-    /// 이 몬스터와 붙으면 HP 를 얼마나 잃는지 미리 계산한다.
-    /// CreatureClass.DefaultTrait + UI_BaseCard/UI_MonsterCard 의 쿨타임 규칙을 그대로 옮긴 것이라
-    /// 실제 결과와 거의 같다. 못 이기면 float.MaxValue.
-    ///
+    /// 이 몬스터와 다음에 붙으면 HP 를 얼마나 잃는가. 지는 싸움(끝나지 않는 싸움 포함)이면 float.MaxValue.
     /// 이 게임의 설계가 "순서"인 이상, 이길 수 있는 싸움을 고르는 것이 곧 플레이다.
     /// </summary>
-    float PredictLoss(Data.MonsterData md, GameManager g)
+    float PredictLoss(int monsterId, GameManager g)
     {
-        Data.StageInfoData info;
-        float atkScale = 1f, defScale = 1f;
-        if (Managers.Data.StageInfoDic.TryGetValue(g.PlayerData.CurStageid, out info))
-        {
-            atkScale = info.ATK;
-            defScale = info.DEF;
-        }
-
-        float pHp = g.PlayerData.CurHP;
-        float pAtk = g.PlayerData.Attack;
-        float pDef = g.PlayerData.Defence;
-        float pCd = 3f / Mathf.Max(0.01f, g.PlayerData.AttackSpeed);
-        float pDefCd = 3f / Mathf.Max(0.01f, g.PlayerData.DefenceSpeed);
-        int pCrit = Mathf.RoundToInt(g.PlayerData.Critical);
-        float pCritAtk = g.PlayerData.CriticalAttack;
-
-        float mHp = md.MaxHP;
-        float mAtk = md.Attack * atkScale;
-        float mDef = md.Defence * defScale;
-        float mCd = 3f / Mathf.Max(0.01f, md.AttackSpeed);
-        float mDefCd = 3f / Mathf.Max(0.01f, md.DefenceSpeed);
-        int mCrit = Mathf.RoundToInt(md.Critical);
-        float mCritAtk = md.CriticalAttack;
-
-        float pT = 0f, mT = 0f, pDefT = 0f, mDefT = 0f;
-        bool pShield = false, mShield = false;
-        int pCount = 0, mCount = 0;
-        float start = pHp;
-
-        const float dt = 0.02f;
-        for (float t = 0f; t < 600f; t += dt)
-        {
-            if (pT >= pCd)
-            {
-                pT = 0f;
-                pCount++;
-                bool crit = pCrit > 0 && pCount >= pCrit;
-                if (crit) pCount = 0;
-                mHp -= Damage(pAtk, pCritAtk, crit, mDef, mShield);
-                if (mShield) { mShield = false; mDefT = 0f; }
-                if (mHp <= 0f)
-                    return start - pHp;
-            }
-            if (mT >= mCd)
-            {
-                mT = 0f;
-                mCount++;
-                bool crit = mCrit > 0 && mCount >= mCrit;
-                if (crit) mCount = 0;
-                pHp -= Damage(mAtk, mCritAtk, crit, pDef, pShield);
-                if (pShield) { pShield = false; pDefT = 0f; }
-                if (pHp <= 0f)
-                    return float.MaxValue;   // 진다
-            }
-
-            if (pDefT >= pDefCd) pShield = true;
-            if (mDefT >= mDefCd) mShield = true;
-
-            pT += dt; mT += dt; pDefT += dt; mDefT += dt;
-        }
-        return float.MaxValue;   // 안 끝나는 싸움도 하면 안 된다
+        BattleForecast.Result r = Forecast(monsterId, g);
+        return r.Ok && r.Win ? r.Damage : float.MaxValue;
     }
 
-    static int Damage(float atk, float critAtk, bool crit, float def, bool shield)
+    // 예측을 적어 두는 관문. 모든 관문(스토리 연출 0, 지는 싸움 확인 100) 뒤라 그 순간이 곧 전투 직전이다.
+    const int RecordOrder = 1000;
+    BattleForecast.Result _predicted;
+    int _predictedId = -1;
+    float _predictedHp;
+    float _predictedMaxHp;
+    bool _skillUsed;
+    int _compared, _exact, _gameWorse, _gameBetter;
+
+    bool RecordForecast(MonsterController monster, Action proceed)
     {
-        float num = (int)Mathf.Max(0f, atk);
-        if (crit) num = num * (critAtk / 100f);
-        int damage = Mathf.RoundToInt(num);
-        damage -= (int)def;
-        damage = (int)Mathf.Max(1, damage);
-        if (shield && crit) damage = (int)(damage * 0.25f);
-        else if (shield) damage = 1;
-        return damage;
+        GameManager g = Managers.Game;
+        _predicted = BattleForecast.Of(monster.id, g.PlayerData.CurStageid);
+        _predictedId = monster.id;
+        _predictedHp = g.PlayerData.CurHP;
+        _predictedMaxHp = g.PlayerData.MaxHP;
+        _skillUsed = false;
+        return false;   // 끼어들지 않는다. 적어 두기만 한다
     }
+
+    /// <summary>
+    /// 전투가 끝나면 예측과 실제를 대 본다 — 100층 녹화가 그대로 예측의 회귀 시험이 된다.
+    /// 스킬을 쓴 전투는 뺀다(예측은 스킬 없이 잰다). 게임이 예측보다 더 아프면 경고로 남긴다 —
+    /// 사람은 그 숫자를 믿고 싸운다.
+    /// </summary>
+    void CompareForecast(int monsterId, bool won)
+    {
+        _forecasts.Clear();
+        if (monsterId != _predictedId || _predicted.Ok == false)
+            return;
+        _predictedId = -1;
+
+        GameManager g = Managers.Game;
+        int floor = g.PlayerData.CurStageid + 1;
+        if (won == false)
+        {
+            Debug.Log($"[AutoPlayer] 예측 대조 {floor}층 몬스터{monsterId}: " +
+                      $"예측 {(_predicted.Win ? $"-{_predicted.Damage} 이김" : "짐")} / 실제 쓰러짐");
+            return;
+        }
+
+        // 레벨이 오르면 최대 체력과 함께 지금 체력도 는다(GameManager.LevelUp). 그 몫은 전투에서 잃은 것이 아니다.
+        int actual = Mathf.RoundToInt(_predictedHp - g.PlayerData.CurHP + (g.PlayerData.MaxHP - _predictedMaxHp));
+        int diff = actual - _predicted.Damage;
+        string line = $"[AutoPlayer] 예측 대조 {floor}층 몬스터{monsterId}: 예측 -{_predicted.Damage}" +
+                      $"{(_predicted.Win ? "" : " (지는 싸움)")} / 실제 -{actual}" +
+                      $"{(_skillUsed ? " (스킬 사용)" : diff == 0 ? " 일치" : $" 차이 {diff:+0;-0}")}";
+        if (_skillUsed)
+        {
+            Debug.Log(line);
+            return;
+        }
+
+        _compared++;
+        if (diff == 0) _exact++;
+        else if (diff > 0) _gameWorse++;
+        else _gameBetter++;
+        if (diff > 0)
+            Debug.LogWarning(line);
+        else
+            Debug.Log(line);
+    }
+
+    string ForecastSummary() =>
+        $"예측 대조: 스킬 없는 전투 {_compared}번 — 일치 {_exact}, 게임이 더 아픔 {_gameWorse}, 덜 아픔 {_gameBetter}";
     #endregion
 
     /// <summary>
@@ -1851,11 +1885,12 @@ public class AutoPlayer : MonoBehaviour
 
     /// <summary>
     /// 그 칸의 몬스터와 전투를 연다. 사람이 부딪혔을 때 게임이 부르는 것과
-    /// 같은 함수다. 밀어도 반응이 없을 때의 마지막 수단으로만 쓴다.
+    /// 같은 길이다(FightGate — 보스 등장 연출과 예측 기록이 그 사이에 끼어든다).
+    /// 밀어도 반응이 없을 때의 마지막 수단으로만 쓴다.
     /// </summary>
     bool ForceFight(Vector2Int cell)
     {
-        if (Managers.Game.OnBattle)
+        if (Managers.Game.OnBattle || FightGate.Pending)
             return false;
 
         int n = Physics.OverlapBoxNonAlloc(CellCenter(cell), ProbeHalf, _hits,
@@ -1871,7 +1906,7 @@ public class AutoPlayer : MonoBehaviour
             if (mc == null)
                 continue;
 
-            mc.SetMonster();
+            FightGate.Request(mc, mc.SetMonster);
             return true;
         }
         return false;
@@ -2080,14 +2115,18 @@ public class AutoPlayer : MonoBehaviour
     {
         Result = message;
         Finished = true;
+        GameEvents.IsAutoPlaying = false;
         Debug.Log($"[AutoPlayer] 완주: {message}");
+        Debug.Log($"[AutoPlayer] {ForecastSummary()}");
     }
 
     void Fail(string message)
     {
         Result = message;
         Failed = true;
+        GameEvents.IsAutoPlaying = false;
         Debug.LogError($"[AutoPlayer] 실패: {message}");
+        Debug.Log($"[AutoPlayer] {ForecastSummary()}");
     }
     #endregion
 

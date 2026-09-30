@@ -318,6 +318,13 @@ public static class FastChecks
             RequireKey(ed.Shadow, "EquipData.Shadow");
         }
 
+        // 인벤토리 아이콘은 가진 장비 전부가 부른다(바닥에 놓인 것만이 아니다). 없으면 그 칸이 빈다.
+        foreach (Data.EquipData ed in equipDic.Values)
+        {
+            scanned++;
+            RequireKey(ed.ImageName, "EquipData.ImageName");
+        }
+
         foreach (int id in placed.Items)
         {
             Data.ConsumableItemData cd;

@@ -83,8 +83,23 @@ public class UI_CItemInfo : UI_Base
         heal = Mathf.Round(heal) + Managers.Data.ConsumableItemDic[id].HPUp;
         GetText((int)Texts.MonsterHPText).text = $"{heal}";
         GetText((int)Texts.MonsterDescText).text = (item.ChoicePartner != null
-            ? Managers.GetString(Define.REWARD_CHOICE) + "\n\n" : "") +
+            ? Managers.GetString(Define.REWARD_CHOICE) + "\n\n" : "") + Overflow(id, heal) +
             Managers.GetString(Managers.Data.ConsumableItemDic[id].ScriptDescriptionId);
+    }
+
+    /// <summary>
+    /// 물약이 최대 체력을 넘겨 버려질 몫 (ConsumableItem.PickUp 이 최대치에서 자른다). 넘치면 주황 한 줄,
+    /// 아니면 빈 문자열. 물약은 층의 예산이라 "지금 마실까 아껴 둘까" 가 판단거리다.
+    /// </summary>
+    static string Overflow(int id, float heal)
+    {
+        if (id < ConsumableItem.NUM_OF_KEYS || id >= ConsumableItem.NUM_OF_POTIONS)
+            return "";
+        GameManager.CurPlayerData p = Managers.Game.PlayerData;
+        int wasted = Mathf.RoundToInt(p.CurHP + heal - p.MaxHP);
+        if (wasted <= 0)
+            return "";
+        return $"<color=#FFA040>{string.Format(Managers.GetString(ForecastUI.HealOverflow), Mathf.RoundToInt(heal), wasted)}</color>\n\n";
     }
 
     private void Update()

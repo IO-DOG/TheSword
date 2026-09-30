@@ -27,7 +27,7 @@ import random
 import statistics
 
 import bestiary
-from ui_text import append_rows, emit_bootstrap
+from ui_text import TEXT as UI_TEXT, append_rows, emit_bootstrap
 
 from thesword_balance import (
     Creature, extend_player_table, exp_to_next, load_player_table,
@@ -1081,6 +1081,7 @@ GENERATED_SCRIPT_RANGES = [
     (MOB_DESC_BASE, MOB_DESC_BASE + TOTAL_FLOORS * 8 + 7),
 ]
 BOOK_EQUIP_ID = 31              # EquipData 의 몬스터 도감
+RING_EQUIP_ID = 32              # EquipData 의 워프석 반지 — 새긴 글("렌에게. 해 지기 전에.")이 이야기의 일부다
 
 
 def emit_scripts(monsters):
@@ -1099,7 +1100,6 @@ def emit_scripts(monsters):
         scripts = json.load(f)["scripts"]
     with open(os.path.join(JSOND, "MonsterClassData.json"), "r", encoding="utf-8") as f:
         classes = json.load(f)["monsterClasses"]
-    book = EQUIPS[BOOK_EQUIP_ID]
 
     made = {}                       # id -> {언어: 문구}
 
@@ -1123,8 +1123,9 @@ def emit_scripts(monsters):
     for c in classes:
         put(c["ClassName"], lambda lang, t: t["traits"][c["id"]][0])
         put(c["ClassDesc"], lambda lang, t: t["traits"][c["id"]][1])
-    put(book["NameId"], lambda lang, t: t["book"][0])
-    put(book["DescId"], lambda lang, t: t["book"][1])
+    for eid, key in ((BOOK_EQUIP_ID, "book"), (RING_EQUIP_ID, "ring")):
+        put(EQUIPS[eid]["NameId"], lambda lang, t, key=key: t[key][0])
+        put(EQUIPS[eid]["DescId"], lambda lang, t, key=key: t[key][1])
 
     def owned(sid):
         return sid in made or any(lo <= sid <= hi for lo, hi in GENERATED_SCRIPT_RANGES)
@@ -1134,6 +1135,9 @@ def emit_scripts(monsters):
         scripts.append(dict(id=sid, **{col: texts[lang] for lang, col
                                        in zip(bestiary.LANGS, bestiary.COLUMNS)}))
 
+    # ui_text 행은 append_rows 가 말없이 덮는다 — 같은 id 를 둘이 쓰면 여기서 멈춘다.
+    clash = sorted(set(made) & set(UI_TEXT))
+    assert not clash, f"ScriptData {clash} 를 생성기와 ui_text 가 같이 쓴다 — 한쪽에서 지울 것"
     append_rows(scripts)
     emit_bootstrap(ROOT)
     scripts.sort(key=lambda s: s["id"])

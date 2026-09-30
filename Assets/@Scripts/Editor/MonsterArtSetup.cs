@@ -132,38 +132,42 @@ public static class MonsterArtSetup
     // ---------------------------------------------------------------- 떨군 장비
     const string EquipClipDir = "Assets/@Resources/Animations/ItemAnimatios/Item";
     const string EquipController = EquipClipDir + "/EquipItemAnimator.controller";
-    const string NecklaceSprite = "Assets/@Resources/Sprites/Equip/EquipSprite/Equip_Necklace_00.png";
-    const string RingSprite = "Assets/@Resources/Sprites/Equip/EquipSprite/Equip_Ring_00.png";
+    const string ItemSpriteDir = "Assets/@Resources/Sprites/Item";
+
+    /// <summary>바닥에 놓이는 장비 id -> 그림. 그림이 종류마다 한 장뿐이라 같은 종류는 같은 그림을 쓴다.
+    /// Sprites/Item 의 것이 바닥용이다 — 아래 가운데 피벗·점 필터로, EquipItem 프리팹의 기본 그림이고
+    /// 물약·열쇠 시트와 같은 규격이다. (Sprites/Equip/EquipSprite 의 같은 그림은 가운데 피벗·선형 필터다.)</summary>
+    static Dictionary<int, string> DropArt()
+    {
+        var map = new Dictionary<int, string>();
+        for (int id = 1; id <= 4; id++)
+            map[id] = $"{ItemSpriteDir}/Equip_Boot_00.png";        // 부츠: 20·40·60·80층 바닥(E_01~E_04)
+        for (int id = 5; id <= 8; id++)
+            map[id] = $"{ItemSpriteDir}/Equip_Necklace_00.png";    // 목걸이: 챕터 보스
+        map[32] = $"{ItemSpriteDir}/Equip_Ring_00.png";              // 워프석 반지: 챕터 보스
+        return map;
+    }
 
     /// <summary>맵에 떨어진 장비가 재생하는 EquipItem_{id} 상태를 채운다.
     ///
     /// Equip.Start 는 무조건 그 이름의 상태를 재생하는데, 0~4 밖에 없었다.
     /// 없는 상태를 재생하면 경고만 찍히고 아무 그림도 안 나온다 — 즉 떨어진 장비가
-    /// 눈에 보이지 않는다. 챕터 보스가 목걸이(5~8)를 떨구므로 그 자리를 채운다.
-    /// 목걸이 그림은 한 장뿐이라 넷이 같은 그림을 쓴다.</summary>
+    /// 눈에 보이지 않는다. 손으로 만든 1~4 는 그림이 밀려 있었다(부츠 자리에
+    /// 목걸이·반지·방패·검) — 그래서 있는 클립도 이 표대로 다시 쓴다.</summary>
     static int BuildEquipDropClips()
     {
-        Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(NecklaceSprite);
-        if (sprite == null)
-        {
-            Debug.LogWarning($"[MonsterArt] 목걸이 그림이 없다: {NecklaceSprite}");
-            return 0;
-        }
-
         var names = new List<string>();
-        for (int id = 5; id <= 8; id++)
+        foreach (KeyValuePair<int, string> pair in DropArt())
         {
-            string clipName = $"EquipItem_{id}";
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(pair.Value);
+            if (sprite == null)
+            {
+                Debug.LogWarning($"[MonsterArt] 장비 {pair.Key} 그림이 없다: {pair.Value}");
+                continue;
+            }
+            string clipName = $"EquipItem_{pair.Key}";
             WriteClip($"{EquipClipDir}/{clipName}.anim", clipName, new[] { sprite });
             names.Add(clipName);
-        }
-
-        // 워프석 반지(32). 챕터 보스가 떨구므로 바닥에 보여야 한다.
-        Sprite ring = AssetDatabase.LoadAssetAtPath<Sprite>(RingSprite);
-        if (ring != null)
-        {
-            WriteClip($"{EquipClipDir}/EquipItem_32.anim", "EquipItem_32", new[] { ring });
-            names.Add("EquipItem_32");
         }
 
         AssetDatabase.SaveAssets();
@@ -199,7 +203,7 @@ public static class MonsterArtSetup
             EditorUtility.SetDirty(controller);
             AssetDatabase.SaveAssets();
         }
-        Debug.Log($"[MonsterArt] 떨군 장비 상태 {added}개 추가 (EquipItem_5~8)");
+        Debug.Log($"[MonsterArt] 떨군 장비 클립 {names.Count}개 갱신, 상태 {added}개 추가");
         return added;
     }
 

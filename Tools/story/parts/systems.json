@@ -1,0 +1,506 @@
+{
+  "version": 1,
+  "speakers": {
+    "damian": { "kr": "데미안" },
+    "sword": { "kr": "에고소드" }
+  },
+  "scenes": [
+    {
+      "id": "mech_forecast",
+      "kind": "dialogue",
+      "trigger": "mechanic_first:forecast",
+      "staging": "3층, pro_contract_after 바로 뒤. 마검 조우곡을 잇는다. 대화 전 카메라를 가장 가까운 몬스터로 옮겨 처음 뜬 예측 숫자를 비추고, 01 이 끝나면 데미안에게 돌아온다. 05 에서 데미안 머리 위에 Question 이모트.",
+      "lines": [
+        { "key": "mech_forecast.01", "speaker": "sword", "emotion": "Smile", "kr": "보이나? 저놈 머리 위 숫자.\n그게 이 싸움의 값이다.\n네가 흘릴 피다." },
+        { "key": "mech_forecast.02", "speaker": "sword", "emotion": "Normal", "kr": "운 따윈 없다. 같은 몸으로\n같은 놈과 붙으면 값도 늘 같다." },
+        { "key": "mech_forecast.03", "speaker": "damian", "emotion": "Thinking", "kr": "그러니까 저 숫자가\n저놈 값이라는 거지.\n…장사꾼 눈이네." },
+        { "key": "mech_forecast.04", "speaker": "damian", "emotion": "Normal", "kr": "앞으로는 묻지. 얼마?" },
+        { "key": "mech_forecast.05", "speaker": "sword", "emotion": "Angry", "kr": "눈 달린 건 이몸인데\n왜 네가 묻냐, 허접 모험가!" }
+      ]
+    },
+    {
+      "id": "mech_crit",
+      "kind": "dialogue",
+      "trigger": "mechanic_first:crit",
+      "staging": "계약 뒤 첫 치명타가 나가기 한 대 전(3~4층). 전투창 위에 짧게 띄우고, 닫히면 바로 그 진심이 나간다.",
+      "lines": [
+        { "key": "mech_crit.01", "speaker": "sword", "emotion": "Smile", "kr": "크하핫, 잘 봐 둬라.\n다음 한 대는 진심으로 벤다." },
+        { "key": "mech_crit.02", "speaker": "damian", "emotion": "Question", "kr": "진심? 치명타 말이야?\n운이야?" },
+        { "key": "mech_crit.03", "speaker": "sword", "emotion": "Normal", "kr": "운 같은 소리. 정해진 횟수마다\n딱 한 번씩 진심이 나온다." },
+        { "key": "mech_crit.04", "speaker": "sword", "emotion": "Smile", "kr": "세던 숨은 이어진다.\n싸움이 끝나도 말이다.\n그러니 누구부터 베느냐가 값이다." }
+      ]
+    },
+    {
+      "id": "mech_rune",
+      "kind": "dialogue",
+      "trigger": "mechanic_first:rune",
+      "staging": "5층, 계단 앞 구역에서 첫 룬(공격)을 밟은 직후. 룬 폭발 이펙트가 잦아든 뒤 띄운다.",
+      "lines": [
+        { "key": "mech_rune.01", "speaker": "sword", "emotion": "Treasure", "kr": "탑의 글자다! 삼키는 순간\n몸에 새겨져서 영영 안 빠진다." },
+        { "key": "mech_rune.02", "speaker": "damian", "emotion": "Thinking", "kr": "공격 한 점이라…\n티도 안 나겠는데." },
+        { "key": "mech_rune.03", "speaker": "sword", "emotion": "Smile", "kr": "층마다 같은 놈이 셋이다.\n한 점이 세 번 값을 한다.\n방어도, 체력도 돌아가며 나온다." }
+      ]
+    },
+    {
+      "id": "mech_levelup",
+      "kind": "dialogue",
+      "trigger": "mechanic_first:levelup",
+      "staging": "5층 이후 첫 레벨업 이펙트 직후. 04 앞에서 한 박자 쉰다. 마검이 데미안 머리 위를 한참 보는 자리다(대사 없이 감정만 Silence).",
+      "lines": [
+        { "key": "mech_levelup.01", "speaker": "sword", "emotion": "Smile", "kr": "크하핫! 먹은 걸 조금 나눠 줬다.\n계약대로다." },
+        { "key": "mech_levelup.02", "speaker": "sword", "emotion": "Normal", "kr": "클수록 뒤가 다 싸진다.\n먹을 수 있을 때 먹어 둬라." },
+        { "key": "mech_levelup.03", "speaker": "damian", "emotion": "Question", "kr": "그래서, 좀 컸나?" },
+        { "key": "mech_levelup.04", "speaker": "sword", "emotion": "Silence", "kr": "…아직 멀었다." }
+      ]
+    },
+    {
+      "id": "mech_warp",
+      "kind": "dialogue",
+      "trigger": "mechanic_first:warp",
+      "staging": "20층, boss0_defeat 바로 뒤 묘소의 늑대가 떨군 반지를 주웠을 때. 레터박스를 그대로 두고 음악은 낮게. 03 뒤 한 박자 쉰다. 마검은 웃지 않는다.",
+      "lines": [
+        { "key": "mech_warp.01", "speaker": "damian", "emotion": "Thinking", "kr": "반지 안쪽에 글자가 있군." },
+        { "key": "mech_warp.02", "speaker": "damian", "emotion": "Silence", "kr": "렌에게. 해 지기 전에." },
+        { "key": "mech_warp.03", "speaker": "damian", "emotion": "Thinking", "kr": "렌… 촌장 아들 이름이었지." },
+        { "key": "mech_warp.04", "speaker": "sword", "emotion": "Silence", "kr": "……다녀온 층이면 어디든\n그 층 문턱으로 데려다주는 반지다." },
+        { "key": "mech_warp.05", "speaker": "sword", "emotion": "Normal", "kr": "아래층에 못 연 금고가 있거든\n남은 열쇠 들고 돌아가도 된다." }
+      ]
+    },
+    {
+      "id": "mech_fatal",
+      "kind": "dialogue",
+      "trigger": "mechanic_first:fatal",
+      "staging": "떠도는 장면(어느 층에서나 처음 뜰 수 있다). 계약 뒤 처음으로 못 이기는 상대(빨간 예측)에게 부딪혔을 때, 전투를 열기 전에 띄운다. 데미안은 뒷걸음(BackStep).",
+      "lines": [
+        { "key": "mech_fatal.01", "speaker": "sword", "emotion": "Normal", "kr": "빨간 건 값이 아니다. 목숨이다." },
+        { "key": "mech_fatal.02", "speaker": "sword", "emotion": "Normal", "kr": "지금 가진 걸로는 못 산다.\n커서 오든지, 물약을 밟고 오든지,\n다른 놈부터 사라." },
+        { "key": "mech_fatal.03", "speaker": "damian", "emotion": "Normal", "kr": "…알았어." }
+      ]
+    },
+    {
+      "id": "mech_overflow",
+      "kind": "dialogue",
+      "trigger": "mechanic_first:overflow",
+      "staging": "떠도는 장면. 계약 뒤 물약이 처음 넘친 직후, 회복 숫자가 사라진 다음에 띄운다.",
+      "lines": [
+        { "key": "mech_overflow.01", "speaker": "sword", "emotion": "Normal", "kr": "넘친 만큼은 버려졌다." },
+        { "key": "mech_overflow.02", "speaker": "damian", "emotion": "Thinking", "kr": "아깝네." },
+        { "key": "mech_overflow.03", "speaker": "sword", "emotion": "Normal", "kr": "물약은 싸운 다음에 밟아라.\n빈 그릇에 부어야 남는다." }
+      ]
+    },
+    {
+      "id": "mech_vault",
+      "kind": "dialogue",
+      "trigger": "mechanic_first:vault",
+      "staging": "떠도는 장면. 금고 문(마지막 구역 골방의 네 번째 문) 앞에 처음 섰을 때. 01 동안 카메라를 문 안쪽 룬으로 잠깐 옮겼다가 데미안에게 돌아온다.",
+      "lines": [
+        { "key": "mech_vault.01", "speaker": "sword", "emotion": "Normal", "kr": "네 번째 문이다. 길이 아니라 금고다.\n안에 탑의 글자가 있다." },
+        { "key": "mech_vault.02", "speaker": "sword", "emotion": "Normal", "kr": "같은 색 열쇠가 남았으면 열린다.\n열쇠는 층을 넘어 들고 다닌다." },
+        { "key": "mech_vault.03", "speaker": "sword", "emotion": "Normal", "kr": "탑 전체로 치면 금고가\n남는 열쇠보다 많다. 다는 못 연다." },
+        { "key": "mech_vault.04", "speaker": "sword", "emotion": "Normal", "kr": "든 글자는 금고마다 돌아가며 바뀐다." },
+        { "key": "mech_vault.05", "speaker": "damian", "emotion": "Thinking", "kr": "지금 열지, 아껴 둘지…\n그건 내가 세야겠군." }
+      ]
+    },
+    {
+      "id": "mech_choice",
+      "kind": "dialogue",
+      "trigger": "mechanic_first:choice",
+      "staging": "떠도는 장면. 보물 층의 둘 중 하나 보상(물약과 룬 한 쌍) 앞에 처음 섰을 때. 01 동안 카메라가 두 칸을 차례로 비춘다.",
+      "lines": [
+        { "key": "mech_choice.01", "speaker": "sword", "emotion": "Normal", "kr": "물약이냐 탑의 글자냐, 둘 중 하나다.\n하나를 집으면 다른 쪽은 사라진다." },
+        { "key": "mech_choice.02", "speaker": "damian", "emotion": "Question", "kr": "둘 다는?" },
+        { "key": "mech_choice.03", "speaker": "sword", "emotion": "Normal", "kr": "안 된다. 먼저 집은 쪽만 남는다." },
+        { "key": "mech_choice.04", "speaker": "damian", "emotion": "Thinking", "kr": "…모자란 쪽을 고르지." }
+      ]
+    },
+    {
+      "id": "mech_death",
+      "kind": "dialogue",
+      "trigger": "mechanic_first:death",
+      "staging": "떠도는 장면, 계약 뒤에만 센다(R3). 처음 죽고 게임오버 그림(무릎 꿇은 데미안 옆에 꽂힌 마검)이 걷힌 뒤, 문턱에서 되살아난 직후. 4층(킹 슬라임)에서 처음 뜰 수도 있어 01 은 마을 풍습을 몰라도 말이 되게 썼다. 04 는 내레이션으로 작게.",
+      "lines": [
+        { "key": "mech_death.01", "speaker": "damian", "emotion": "Silence", "kr": "…방금, 쓰러진 내 옆에\n네가 꽂혀 있었지.\n꼭 무덤 같더군." },
+        { "key": "mech_death.02", "speaker": "sword", "emotion": "Angry", "kr": "무덤은 무슨.\n네 목숨은 이몸 거다.\n이몸 허락 없이는 못 죽는다." },
+        { "key": "mech_death.03", "speaker": "sword", "emotion": "Normal", "kr": "이 층 문턱으로 끌어올렸다.\n몸도 층도 들어설 때 그대로다." },
+        { "key": "mech_death.04", "speaker": "narration", "kr": "(메뉴에서 몇 층 전으로\n되돌릴 수도 있다.)" }
+      ]
+    },
+    {
+      "id": "mech_spare_key",
+      "kind": "bark",
+      "trigger": "mechanic_first:spare_key",
+      "staging": "바크. 골방 파수꾼 뒤의 여분 열쇠를 처음 주웠을 때.",
+      "lines": [
+        { "key": "mech_spare_key.01", "speaker": "sword", "emotion": "Normal", "kr": "여분 열쇠다. 안 쓰면 다음 층까지 간다." }
+      ]
+    },
+    {
+      "id": "mech_nokey",
+      "kind": "bark",
+      "trigger": "mechanic_first:nokey",
+      "staging": "바크. 열쇠 없이 문에 처음 부딪혔을 때. 금고 문이어도 틀리지 않게 '큰길 문' 으로 한정했다.",
+      "lines": [
+        { "key": "mech_nokey.01", "speaker": "sword", "emotion": "Normal", "kr": "열쇠가 없다. 큰길 열쇠는 그 앞에 있다." }
+      ]
+    },
+    {
+      "id": "trait_guardian",
+      "kind": "dialogue",
+      "trigger": "trait_first:guardian",
+      "staging": "5층, ch0_start 바로 뒤. 짧게. 카메라를 이 층의 수호 몬스터(정예)로 잠깐 옮긴다.",
+      "lines": [
+        { "key": "trait_guardian.01", "speaker": "sword", "emotion": "Normal", "kr": "방패를 든 채 싸움을 열고,\n깨져도 금방 다시 드는 놈이다.\n방패 위론 평타 1, 진심도 4분의 1." },
+        { "key": "trait_guardian.02", "speaker": "damian", "emotion": "Thinking", "kr": "진심이 방패에 걸리면 손해군.\n숫자 보고 순서를 바꾸지." }
+      ]
+    },
+    {
+      "id": "trait_beast",
+      "kind": "dialogue",
+      "trigger": "trait_first:beast",
+      "staging": "20층에 들어설 때. 야수는 이 층 끝의 보스뿐이다. 01 에서 마검 머리 위에 Question 이모트(냄새를 맡는다).",
+      "lines": [
+        { "key": "trait_beast.01", "speaker": "sword", "emotion": "Nerve", "kr": "이 층 끝에서 짐승 냄새가 난다.\n죽지 않고 1할 이하로 떨어지면\n딱 한 번, 몸 4할을 채우고 일어선다." },
+        { "key": "trait_beast.02", "speaker": "damian", "emotion": "Question", "kr": "그 몫까지 숫자에 들어 있고?" },
+        { "key": "trait_beast.03", "speaker": "sword", "emotion": "Smile", "kr": "당연하지. 이몸 눈이다.\n대신 1할까지 떨어지기 전에\n강타로 끊으면 일어설 틈이 없다." }
+      ]
+    },
+    {
+      "id": "trait_knight",
+      "kind": "dialogue",
+      "trigger": "trait_first:knight",
+      "staging": "21층, ch1_start 바로 뒤. 짧게.",
+      "lines": [
+        { "key": "trait_knight.01", "speaker": "sword", "emotion": "Normal", "kr": "남들 한 번 벨 때 두 번 베는 놈이다.\n대신 한 대 한 대는 가볍다." },
+        { "key": "trait_knight.02", "speaker": "damian", "emotion": "Thinking", "kr": "그럼 방어 한 점이 두 번 막겠군.\n방어 룬이 여기서 제값을 하겠어." }
+      ]
+    },
+    {
+      "id": "trait_magic",
+      "kind": "dialogue",
+      "trigger": "trait_first:magic",
+      "staging": "41층, ch2_start 바로 뒤. 마검은 말수가 줄어 있다. 짧게.",
+      "lines": [
+        { "key": "trait_magic.01", "speaker": "sword", "emotion": "Normal", "kr": "때리는 족족 진심이다.\n대신 몸이 약하다." },
+        { "key": "trait_magic.02", "speaker": "damian", "emotion": "Thinking", "kr": "오래 끌면 죽는다.\n강타로 끊는다." }
+      ]
+    },
+    {
+      "id": "trait_titan",
+      "kind": "dialogue",
+      "trigger": "trait_first:titan",
+      "staging": "41층, trait_magic 바로 뒤. 짧게.",
+      "lines": [
+        { "key": "trait_titan.01", "speaker": "sword", "emotion": "Normal", "kr": "다섯 대 맞을 때마다 운다.\n그 울음에 때린 쪽이 다친다.\n몸도 두껍다." },
+        { "key": "trait_titan.02", "speaker": "damian", "emotion": "Thinking", "kr": "한 대가 셀수록 덜 듣겠군." }
+      ]
+    },
+    {
+      "id": "trait_immortal",
+      "kind": "dialogue",
+      "trigger": "trait_first:immortal",
+      "staging": "61층, ch3_start 바로 뒤. 웃음 없음. 마검은 졸지 않는다. 짧게.",
+      "lines": [
+        { "key": "trait_immortal.01", "speaker": "sword", "emotion": "Silence", "kr": "…싫은 놈들이다.\n진심이 아니면 5분의 1만 닿는다.\n강타도 흡혈도 마찬가지다." },
+        { "key": "trait_immortal.02", "speaker": "damian", "emotion": "Thinking", "kr": "숨을 맞춰서 도착하지.\n앞에서 순서를 짠다." }
+      ]
+    },
+    {
+      "id": "trait_assassin",
+      "kind": "dialogue",
+      "trigger": "trait_first:assassin",
+      "staging": "61층, trait_immortal 바로 뒤. 웃음 없음. 짧게.",
+      "lines": [
+        { "key": "trait_assassin.01", "speaker": "sword", "emotion": "Normal", "kr": "숨어 있는 동안엔 진심이 아니면\n다 피한다. 첫 진심이 은신을 벗긴다.\n강타도 그 전엔 헛손질이다." },
+        { "key": "trait_assassin.02", "speaker": "damian", "emotion": "Thinking", "kr": "누굴 먼저 베느냐가 값이군." }
+      ]
+    },
+    {
+      "id": "trait_armor",
+      "kind": "dialogue",
+      "trigger": "trait_first:armor",
+      "staging": "81층, ch4_start 바로 뒤. 데미안이 혼자 규칙을 읽는다. 마검은 값만 말하는 구간이라 02 한마디뿐이다. 02 앞에서 한 박자 쉰다.",
+      "lines": [
+        { "key": "trait_armor.01", "speaker": "damian", "emotion": "Thinking", "kr": "몸 3할짜리 껍질이 먼저 다 받는군.\n대신 방어는 없다.\n…흡혈은 껍질 깬 다음이다." },
+        { "key": "trait_armor.02", "speaker": "sword", "emotion": "Silence", "kr": "……맞다." }
+      ]
+    },
+    {
+      "id": "bark_basic_1",
+      "kind": "bark",
+      "trigger": "floor_type:basic",
+      "staging": "바크. 기본 층(보스층 포함)에 들어설 때 가끔.",
+      "lines": [
+        { "key": "bark_basic_1.01", "speaker": "sword", "emotion": "Normal", "kr": "별난 수 없는 층이다. 값만 제대로 세라." }
+      ]
+    },
+    {
+      "id": "bark_basic_2",
+      "kind": "bark",
+      "trigger": "floor_type:basic",
+      "staging": "바크. 기본 층(보스층 포함)에 들어설 때 가끔.",
+      "lines": [
+        { "key": "bark_basic_2.01", "speaker": "damian", "emotion": "Normal", "kr": "숫자 보고, 순서 짜고. 늘 하던 대로." }
+      ]
+    },
+    {
+      "id": "bark_basic_3",
+      "kind": "bark",
+      "trigger": "floor_type:basic",
+      "staging": "바크. 기본 층(보스층 포함)에 들어설 때 가끔.",
+      "lines": [
+        { "key": "bark_basic_3.01", "speaker": "sword", "emotion": "Normal", "kr": "비싼 놈은 나중에. 셈은 늘 같다." }
+      ]
+    },
+    {
+      "id": "bark_stingy_1",
+      "kind": "bark",
+      "trigger": "floor_type:stingy",
+      "staging": "바크. 인색한 층(구역 물약이 하나)에 들어설 때 가끔. 계단 앞·골방 물약이 따로 있을 수 있어 개수는 말하지 않는다.",
+      "lines": [
+        { "key": "bark_stingy_1.01", "speaker": "sword", "emotion": "Normal", "kr": "물약이 귀한 층이다. 순서가 전부다." }
+      ]
+    },
+    {
+      "id": "bark_stingy_2",
+      "kind": "bark",
+      "trigger": "floor_type:stingy",
+      "staging": "바크. 인색한 층에 들어설 때 가끔.",
+      "lines": [
+        { "key": "bark_stingy_2.01", "speaker": "damian", "emotion": "Thinking", "kr": "물약이 적군. 밟을 때를 골라야겠어." }
+      ]
+    },
+    {
+      "id": "bark_stingy_3",
+      "kind": "bark",
+      "trigger": "floor_type:stingy",
+      "staging": "바크. 인색한 층에 들어설 때 가끔.",
+      "lines": [
+        { "key": "bark_stingy_3.01", "speaker": "sword", "emotion": "Normal", "kr": "귀한 물약일수록 싸운 다음에 밟아라." }
+      ]
+    },
+    {
+      "id": "bark_gate_1",
+      "kind": "bark",
+      "trigger": "floor_type:gate",
+      "staging": "바크. 관문 층(가장 비싼 놈이 길목에 선다)에 들어설 때 가끔.",
+      "lines": [
+        { "key": "bark_gate_1.01", "speaker": "sword", "emotion": "Normal", "kr": "길목에 비싼 놈이 섰다. 숫자부터 봐라." }
+      ]
+    },
+    {
+      "id": "bark_gate_2",
+      "kind": "bark",
+      "trigger": "floor_type:gate",
+      "staging": "바크. 관문 층에 들어설 때 가끔.",
+      "lines": [
+        { "key": "bark_gate_2.01", "speaker": "damian", "emotion": "Thinking", "kr": "저놈을 넘어야 길이 열리는군." }
+      ]
+    },
+    {
+      "id": "bark_gate_3",
+      "kind": "bark",
+      "trigger": "floor_type:gate",
+      "staging": "바크. 관문 층에 들어설 때 가끔.",
+      "lines": [
+        { "key": "bark_gate_3.01", "speaker": "sword", "emotion": "Normal", "kr": "지금 살지, 커서 올지. 그게 이 층이다." }
+      ]
+    },
+    {
+      "id": "bark_plenty_1",
+      "kind": "bark",
+      "trigger": "floor_type:plenty",
+      "staging": "바크. 넉넉한 층(구역 물약이 셋)에 들어설 때 가끔.",
+      "lines": [
+        { "key": "bark_plenty_1.01", "speaker": "sword", "emotion": "Normal", "kr": "물약은 넉넉하다. 그래도 넘치면 버려진다." }
+      ]
+    },
+    {
+      "id": "bark_plenty_2",
+      "kind": "bark",
+      "trigger": "floor_type:plenty",
+      "staging": "바크. 넉넉한 층에 들어설 때 가끔.",
+      "lines": [
+        { "key": "bark_plenty_2.01", "speaker": "damian", "emotion": "Normal", "kr": "많다고 막 밟진 말자." }
+      ]
+    },
+    {
+      "id": "bark_plenty_3",
+      "kind": "bark",
+      "trigger": "floor_type:plenty",
+      "staging": "바크. 넉넉한 층에 들어설 때 가끔.",
+      "lines": [
+        { "key": "bark_plenty_3.01", "speaker": "sword", "emotion": "Normal", "kr": "빈 그릇에 부어야 남는다." }
+      ]
+    },
+    {
+      "id": "bark_treasure_1",
+      "kind": "bark",
+      "trigger": "floor_type:treasure",
+      "staging": "바크. 보물 층(그 층의 룬이 막다른 곁길로 가고, 물약과 룬 한 쌍이 둘 중 하나로 놓인다)에 들어설 때 가끔.",
+      "lines": [
+        { "key": "bark_treasure_1.01", "speaker": "sword", "emotion": "Normal", "kr": "곁길 끝에 글자가 있다. 들를 값을 세라." }
+      ]
+    },
+    {
+      "id": "bark_treasure_2",
+      "kind": "bark",
+      "trigger": "floor_type:treasure",
+      "staging": "바크. 보물 층에 들어설 때 가끔.",
+      "lines": [
+        { "key": "bark_treasure_2.01", "speaker": "sword", "emotion": "Normal", "kr": "둘 중 하나다. 모자란 쪽을 골라라." }
+      ]
+    },
+    {
+      "id": "bark_treasure_3",
+      "kind": "bark",
+      "trigger": "floor_type:treasure",
+      "staging": "바크. 보물 층에 들어설 때 가끔.",
+      "lines": [
+        { "key": "bark_treasure_3.01", "speaker": "damian", "emotion": "Thinking", "kr": "물약이냐 룬이냐. 하나만 가져가지." }
+      ]
+    },
+    {
+      "id": "bark_death_1",
+      "kind": "bark",
+      "trigger": "death",
+      "staging": "바크. 계약 뒤 죽고 문턱에서 되살아날 때마다(R3). 변주.",
+      "lines": [
+        { "key": "bark_death_1.01", "speaker": "sword", "emotion": "Normal", "kr": "다시. 이번엔 순서를 바꿔 봐라." }
+      ]
+    },
+    {
+      "id": "bark_death_2",
+      "kind": "bark",
+      "trigger": "death",
+      "staging": "바크. 계약 뒤 죽고 되살아날 때마다. 변주.",
+      "lines": [
+        { "key": "bark_death_2.01", "speaker": "sword", "emotion": "Normal", "kr": "숫자는 이몸이 센다. 순서는 네가 정해라." }
+      ]
+    },
+    {
+      "id": "bark_death_3",
+      "kind": "bark",
+      "trigger": "death",
+      "staging": "바크. 계약 뒤 죽고 되살아날 때마다. 변주.",
+      "lines": [
+        { "key": "bark_death_3.01", "speaker": "sword", "emotion": "Normal", "kr": "일어나라. 값은 아직 안 치렀다." }
+      ]
+    },
+    {
+      "id": "bark_death_4",
+      "kind": "bark",
+      "trigger": "death",
+      "staging": "바크. 계약 뒤 죽고 되살아날 때마다. 변주.",
+      "lines": [
+        { "key": "bark_death_4.01", "speaker": "damian", "emotion": "Silence", "kr": "…다시. 숫자를 봤어야 했는데." }
+      ]
+    },
+    {
+      "id": "bark_death_5",
+      "kind": "bark",
+      "trigger": "death",
+      "staging": "바크. 계약 뒤 죽고 되살아날 때마다. 변주.",
+      "lines": [
+        { "key": "bark_death_5.01", "speaker": "sword", "emotion": "Normal", "kr": "네 목숨은 이몸 거다. 막 굴리지 마라." }
+      ]
+    }
+  ],
+  "bestiary": {
+    "chapters": [
+      { "name": "이끼 낀 지하 묘소", "subtitle": "탑이 삼킨 옛 무덤", "mob_prefix": "이끼" },
+      { "name": "무너진 수로", "subtitle": "하늘의 비가 흐르던 길", "mob_prefix": "수렁" },
+      { "name": "잿빛 용광로", "subtitle": "무언가를 벼리던 불", "mob_prefix": "잿불" },
+      { "name": "얼어붙은 심층", "subtitle": "온기마저 먹힌 곳", "mob_prefix": "서리" },
+      { "name": "왕좌의 균열", "subtitle": "검은 해가 파고드는 틈", "mob_prefix": "심연" }
+    ],
+    "species": [
+      { "art": 0, "name": "라임 슬라임" },
+      { "art": 1, "name": "망고 슬라임" },
+      { "art": 2, "name": "크로우" },
+      { "art": 3, "name": "정령" },
+      { "art": 4, "name": "늑대" },
+      { "art": 5, "name": "고블린 창병" },
+      { "art": 6, "name": "해골 전사" },
+      { "art": 7, "name": "고블린 방패병" },
+      { "art": 8, "name": "파수꾼" },
+      { "art": 9, "name": "거수" }
+    ],
+    "mob_desc": {
+      "0:0": "틈으로 든 볕을 받아 이끼처럼 번들거린다.\n말랑한 몸으로 칼끝을 흘려보낸다.",
+      "0:1": "위에서 떨어지는 잎에 반쯤 덮여 있다.\n달큰한 냄새로 먹잇감을 꾀어낸다.",
+      "0:2": "무덤 위로 드는 낮볕 속을 맴돈다.\n반짝이는 것이면 칼이든 뼈든 쪼아 간다.",
+      "0:3": "이끼 사이로 샌 볕에 몸이 비쳐 보인다.\n탑이 떨어진 밤에 깨어났다고들 한다.",
+      "0:4": "흙냄새와 낙엽 사이에 몸을 낮추고 있다.\n피 냄새를 따라 층을 오르내린다.",
+      "0:5": "볕이 드는 길목을 그늘에 숨어 노린다.\n긴 창으로 늘 먼저 찌른다.",
+      "0:6": "머리 위 숲에서 잎이 떨어져 뼈에 앉는다.\n먼저 온 도전자의 뼈가 다시 일어섰다.",
+      "0:7": "낙엽 쌓인 길목을 방패로 틀어막는다.\n커다란 방패 뒤에서 틈을 노린다.",
+      "0:8": "무덤 사이, 볕 드는 자리에 박혀 서 있다.\n지킬 주인도 없는 무덤을 지금도 지킨다.",
+      "0:9": "머리 위 숲의 뿌리를 뚫고 기어 나왔다.\n이끼를 뒤집어써 바위처럼 보인다.",
+      "1:0": "위에서 듣는 물을 받아 몸이 불었다.\n말랑한 몸으로 칼끝을 흘려보낸다.",
+      "1:1": "고인 물 위를 떠다니며 냄새를 퍼뜨린다.\n젖은 발로 다가오면 끈적하게 달라붙는다.",
+      "1:2": "흐린 빛 아래서 젖은 날개를 턴다.\n물소리에 날갯짓을 숨긴다.",
+      "1:3": "떨어지는 물방울마다 몸이 일렁인다.\n물길을 따라 흘러 다닌다.",
+      "1:4": "물방울 소리에 발소리를 감추고 다가온다.\n젖은 털에서 비린내가 난다.",
+      "1:5": "흐린 빛 아래, 무너진 물길 위에서 창을 겨눈다.\n물을 건너오는 것부터 찌른다.",
+      "1:6": "물방울이 뼈마디를 두드리며 떨어진다.\n먼저 온 도전자의 뼈에 물이끼가 끼었다.",
+      "1:7": "물길 목을 방패로 막고 버틴다.\n방패에 부딪힌 물줄기가 둘로 갈라진다.",
+      "1:8": "물이 멎은 물길 앞, 흐린 빛 속에 서 있다.\n명령한 자는 오래전에 없는데 떠나지 않는다.",
+      "1:9": "흐린 물 밑에서 몸을 일으켰다.\n움직일 때마다 수로 전체가 울린다.",
+      "2:0": "떠오르는 불티를 뒤집어써 겉이 눌어붙었다.\n딱딱해진 껍데기 속은 여전히 말랑하다.",
+      "2:1": "열기에 달큰한 냄새가 더 짙어졌다.\n녹아내린 몸이 바닥에 들러붙는다.",
+      "2:2": "치솟는 열기를 타고 높이 맴돈다.\n불티 속에서 반짝이는 것을 노린다.",
+      "2:3": "재 낀 불빛 속에서 몸이 달아올랐다.\n가까이 가면 살갗이 먼저 뜨겁다.",
+      "2:4": "뜨거운 바닥을 겁내지 않는다.\n털끝마다 불티가 붙어 타오른다.",
+      "2:5": "일렁이는 열기 속에서 창날을 불에 달군다.\n아지랑이 너머에서 늘 먼저 찌른다.",
+      "2:6": "불티가 뼈 사이를 지나 위로 올라간다.\n먼저 온 도전자의 뼈가 그을려 잿빛이 됐다.",
+      "2:7": "달아오른 방패를 맨손으로 든다.\n불티가 방패에 부딪혀 사방으로 튄다.",
+      "2:8": "용광로 불빛을 등지고 서 있다.\n불이 꺼질 날을 기다리는 것처럼 꼼짝하지 않는다.",
+      "2:9": "용광로 밑바닥의 열기 속에서 자랐다.\n내쉬는 김마다 재가 흩날린다.",
+      "3:0": "저녁빛 아래 반쯤 얼어 굳었다.\n얼어서도 칼끝을 흘려보낸다.",
+      "3:1": "눈에 덮여 냄새가 옅어졌다.\n그래서 더 가까이 가야 알아챈다.",
+      "3:2": "눈 내리는 저녁 하늘을 맴돈다.\n얼어붙은 것들 사이의 반짝임을 노린다.",
+      "3:3": "제 빛마저 얼어 희미하다.\n눈송이 사이에 섞여 떠다닌다.",
+      "3:4": "눈 위에 발자국을 거의 남기지 않는다.\n추위에 무뎌 아픔을 모른다.",
+      "3:5": "얼어붙은 창을 놓지 못한 채 저녁빛 속에 서 있다.\n눈보라 너머에서 먼저 찌른다.",
+      "3:6": "뼈마디마다 서리가 하얗게 앉았다.\n먼저 온 도전자의 뼈는 추위도 모른다.",
+      "3:7": "방패에 눈이 얼어붙어 더 무거워졌다.\n그래도 방패를 내리는 법이 없다.",
+      "3:8": "눈이 어깨에 쌓여도 자리를 떠나지 않는다.\n주인 없는 명령을 지금도 지킨다.",
+      "3:9": "온기를 빼앗긴 채 눈 속에 웅크리고 있다.\n움직일 때마다 얼음이 갈라진다.",
+      "4:0": "보랏빛 황혼 아래 몸이 투명하게 비친다.\n떠오르는 티끌이 몸속에서 맴돈다.",
+      "4:1": "위로 빨려 오르는 티끌에 냄새가 실려 간다.\n그 냄새를 따라가면 늘 이놈이 있다.",
+      "4:2": "티끌을 따라 위로만 날아오른다.\n황혼빛에 날개가 보랏빛으로 젖었다.",
+      "4:3": "티끌과 함께 위로 빨려 가다 멈추기를 되풀이한다.\n빛이 꺼질 듯 깜빡인다.",
+      "4:4": "황혼 속에서 눈만 번뜩인다.\n무엇보다 배고픔이 먼저 움직인다.",
+      "4:5": "티끌이 창끝을 스쳐 위로 오른다.\n황혼 너머에서 먼저 찌른다.",
+      "4:6": "티끌이 뼈마디 사이로 빠져 위로 오른다.\n먼저 온 도전자의 뼈가 여기까지 끌려왔다.",
+      "4:7": "보랏빛 황혼 속에서 방패를 치켜들고 버틴다.\n티끌이 방패 가장자리로 흘러넘친다.",
+      "4:8": "균열 가장자리에서 황혼을 등지고 섰다.\n무엇을 지키라는 명령이었는지는 아무도 모른다.",
+      "4:9": "균열의 황혼 속에서 기어 나온 거대한 짐승.\n움직일 때마다 티끌이 흩어졌다가 다시 위로 오른다."
+    },
+    "bosses": [
+      { "chapter": 0, "name": "묘소의 늑대", "title": "해 질 녘을 기다리는 것", "desc": "묘소 끝 문을 지키는 늑대. 목에 무언가를 걸고 있다.\n체력이 10% 이하가 되면 한 번, 최대 체력의 40%를 되찾고 일어선다." },
+      { "chapter": 1, "name": "수로의 방패병", "title": "내리지 않는 방패", "desc": "무너진 수로를 틀어막은 방패병.\n방패를 든 채 싸움을 시작하고, 깨진 방패를 금방 다시 든다." },
+      { "chapter": 2, "name": "재의 파수꾼", "title": "타다 남은 목소리", "desc": "용광로 앞을 지키는 잿빛 파수꾼. 말이 재처럼 부서진다.\n모든 공격이 치명타다." },
+      { "chapter": 3, "name": "얼어붙은 기사", "title": "마지막 문의 파수", "desc": "왕좌 앞 마지막 문을 지키는 기사.\n치명타가 아닌 공격은 5분의 1만 받는다." },
+      { "chapter": 4, "name": "검은 태양", "title": "끝없는 허기", "desc": "탑이 꿰어 두었던 허기.\n다섯 번 맞을 때마다 포효해 때린 쪽을 되친다." }
+    ],
+    "traits": [
+      { "id": 0, "name": "없음", "desc": "특별한 능력이 없다.\n먼저 잡아 커 둘수록 뒤의 값이 싸진다." },
+      { "id": 1, "name": "야수", "desc": "살아 있는 채 체력이 10% 이하가 되면 한 번, 최대 체력의 40%를 회복한다. 회복은 예상 피해에 이미 들어 있다.\n10% 이하로 떨어지기 전에 강타로 쓰러뜨리면 회복하지 못한다." },
+      { "id": 2, "name": "마법", "desc": "모든 공격이 치명타다. 대신 체력과 방어력이 낮다.\n오래 끌수록 아프다. 강타로 일찍 끊어라." },
+      { "id": 3, "name": "수호", "desc": "방패를 든 채 싸움을 시작하고, 깨진 방패를 두 배 빨리 다시 든다. 방패는 치명타가 아닌 공격을 1로, 치명타를 4분의 1로 줄이고 깨진다.\n치명타가 방패에 걸리지 않게 싸우는 순서를 바꿔라." },
+      { "id": 4, "name": "불사", "desc": "치명타가 아닌 공격은 20%만 받는다. 스킬도 마찬가지다.\n치명 횟수는 싸움이 끝나도 이어진다. 앞의 싸움 순서로 치명타 차례를 맞춰 도착하라." },
+      { "id": 5, "name": "검사", "desc": "공격 속도가 두 배다. 대신 한 대는 약하다.\n방어력 1이 두 배로 값을 한다. 방어 룬이 제값을 하는 상대다." },
+      { "id": 6, "name": "거대", "desc": "다섯 번 맞을 때마다 포효해, 자기 일반 공격 피해의 20%를 때린 쪽에 돌려준다. 체력이 많다. 포효는 예상 피해에 이미 들어 있다.\n한 대가 셀수록 포효를 덜 듣는다." },
+      { "id": 7, "name": "암살", "desc": "숨어 있는 동안 치명타가 아닌 공격을 모두 피한다. 스킬도 빗나간다. 치명타를 맞으면 모습을 드러낸다.\n앞의 싸움 순서로 치명타 차례를 맞춰 도착하고, 강타는 모습을 드러낸 뒤에 써라." },
+      { "id": 8, "name": "갑옷", "desc": "최대 체력의 30%만큼의 껍질이 모든 피해를 먼저 받아 낸다. 방어력은 0이다.\n흡혈은 껍질이 깨진 뒤에 써라. 껍질이 받아 낸 피해로는 회복하지 못한다." }
+    ],
+    "items": {
+      "monster_book": { "name": "몬스터 도감", "desc": "마검의 기억을 옮겨 적은 책.\n이 층의 마물과 싸움의 값을 한눈에 보여 준다." },
+      "warp_ring": { "name": "워프석 반지", "desc": "안쪽에 '렌에게. 해 지기 전에.' 라고 새겨진 반지.\n다녀온 층의 문턱으로 옮겨 준다." },
+      "key": { "name": "열쇠", "desc": "같은 색 문 하나를 연다.\n층을 넘어 남는다." },
+      "potion": { "name": "물약", "desc": "밟는 즉시 마셔 최대 체력의 몇 할을 채운다.\n최대 체력을 넘친 만큼은 버려진다." },
+      "rune": { "name": "룬", "desc": "탑의 글자. 밟는 즉시 몸에 새겨진다.\n공격 +1, 방어 +1, 최대 체력 +5 가운데 하나가 영영 오른다." }
+    }
+  }
+}

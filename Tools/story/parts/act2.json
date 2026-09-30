@@ -1,0 +1,192 @@
+{
+  "version": 1,
+  "speakers": {
+    "damian": { "kr": "데미안" },
+    "sword": { "kr": "에고소드" },
+    "chief": { "kr": "촌장" },
+    "boss1": { "kr": "수로의 방패병" },
+    "boss2": { "kr": "재의 파수꾼" }
+  },
+  "scenes": [
+    {
+      "id": "ch1_start",
+      "kind": "dialogue",
+      "trigger": "chapter_start:1",
+      "staging": "21층 첫 진입, 챕터 1 '무너진 수로'. 구름 낀 낮 조명, 물방울 파티클이 위에서 떨어진다. 챕터곡(챕터 1 음높이). 대화 전 카메라를 천천히 위로 들어 떨어지는 물방울을 비춘 뒤 데미안에게 돌아온다. 02 에서 데미안 머리 위 SweatDrop 이모트, 04 에서 Question 이모트. 05·06 은 마검 초상화 Silence 로 한 박자씩 끊는다. 끝나면 trait_knight 로 이어진다.",
+      "lines": [
+        { "key": "ch1_start.01", "speaker": "damian", "emotion": "Thinking", "kr": "…물이 위에서 떨어진다.\n우린 땅속으로 가는 중인데." },
+        { "key": "ch1_start.02", "speaker": "sword", "emotion": "Angry", "kr": "퉤, 퉤! 날에 물 튄다!\n녹슬면 네가 닦아라, 허접." },
+        { "key": "ch1_start.03", "speaker": "sword", "emotion": "Normal", "kr": "그리고 말했잖나.\n탑 안에선 탑이 정한 쪽이 위다." },
+        { "key": "ch1_start.04", "speaker": "damian", "emotion": "Question", "kr": "그럼 탑은\n어디를 위라고 정한 거야?" },
+        { "key": "ch1_start.05", "speaker": "sword", "emotion": "Silence", "kr": "……" },
+        { "key": "ch1_start.06", "speaker": "sword", "emotion": "Silence", "kr": "…몰라." }
+      ]
+    },
+    {
+      "id": "f27_sleeptalk",
+      "kind": "dialogue",
+      "trigger": "floor_first:27",
+      "staging": "27층 첫 진입. 물방울 파티클. 걸음을 멈추고 대화창. 01·02 동안 Sleepy 파티클 이모트(마검의 졸음). 03 에서 데미안 머리 위 Question 이모트, 04 에서 Surprise 이모트, 06 에서 Angry 이모트. 음악은 챕터곡 그대로.",
+      "lines": [
+        { "key": "f27_sleeptalk.01", "speaker": "sword", "emotion": "Sleep", "kr": "…음냐…" },
+        { "key": "f27_sleeptalk.02", "speaker": "sword", "emotion": "Sleep", "kr": "…세드릭…\n문 열어…" },
+        { "key": "f27_sleeptalk.03", "speaker": "damian", "emotion": "Question", "kr": "세드릭?" },
+        { "key": "f27_sleeptalk.04", "speaker": "sword", "emotion": "Panic", "kr": "뭐, 뭐냐! 꿈이다, 꿈!" },
+        { "key": "f27_sleeptalk.05", "speaker": "damian", "emotion": "Normal", "kr": "잠꾸러기.\n꿈에서도 문 타령이냐." },
+        { "key": "f27_sleeptalk.06", "speaker": "sword", "emotion": "Angry", "kr": "시끄럽다!\n이몸 꿈은 이몸 거다!" }
+      ]
+    },
+    {
+      "id": "f31_trust",
+      "kind": "dialogue",
+      "trigger": "floor_first:31",
+      "staging": "31층 첫 진입. 물방울 파티클. 대화 전 카메라가 층 안쪽 몬스터들을 한 번 훑고 데미안에게 돌아온다. 04 는 대사 없이 마검 초상화 Surprise 로 한 박자 멈춘다. 05 에서 Grinning 이모트.",
+      "lines": [
+        { "key": "f31_trust.01", "speaker": "damian", "emotion": "Normal", "kr": "얼마?" },
+        { "key": "f31_trust.02", "speaker": "sword", "emotion": "Question", "kr": "…너 요즘\n숫자 안 보더라." },
+        { "key": "f31_trust.03", "speaker": "damian", "emotion": "Normal", "kr": "네가 보잖아." },
+        { "key": "f31_trust.04", "speaker": "sword", "emotion": "Surprise", "kr": "……!" },
+        { "key": "f31_trust.05", "speaker": "sword", "emotion": "Smile", "kr": "크하핫! 당연하지.\n이몸 눈이다!" },
+        { "key": "f31_trust.06", "speaker": "sword", "emotion": "Nerve", "kr": "…흥. 그래도 가끔은 봐라.\n이몸도 졸 때가 있으니." }
+      ]
+    },
+    {
+      "id": "f35_suspect",
+      "kind": "dialogue",
+      "trigger": "floor_first:35",
+      "staging": "35층 첫 진입. 물방울 파티클. 03 에서 데미안 머리 위 Question 이모트, 04 에서 SweatDrop 이모트. 05 는 데미안 속말(괄호)이다.",
+      "lines": [
+        { "key": "f35_suspect.01", "speaker": "sword", "emotion": "Normal", "kr": "다섯 층만 더 오르면\n물길이 끝난다. 그다음은 뜨겁다." },
+        { "key": "f35_suspect.02", "speaker": "sword", "emotion": "Smile", "kr": "각오해라, 허접 모험가.\n이몸은 안 녹지만, 넌 녹는다." },
+        { "key": "f35_suspect.03", "speaker": "damian", "emotion": "Thinking", "kr": "…너, 이 탑 알지?" },
+        { "key": "f35_suspect.04", "speaker": "sword", "emotion": "Panic", "kr": "마, 마검은 원래 다 안다!" },
+        { "key": "f35_suspect.05", "speaker": "damian", "emotion": "Thinking", "kr": "(…처음 듣는 탑처럼\n굴더니.)" }
+      ]
+    },
+    {
+      "id": "boss1_intro",
+      "kind": "dialogue",
+      "trigger": "boss_intro:1",
+      "staging": "40층, 수로의 방패병에게 처음 부딪힌 순간, 전투 직전. 보스 입장곡. 레터박스를 내리고 카메라를 방패병(대기 애니메이션) 쪽으로 옮긴다. 보스 대사에는 초상화 자리에 방패병 전투 스프라이트. 03 에서 데미안 머리 위 Surprise 이모트. 05 는 데미안 초상화 Thinking 으로만(품속 의뢰서를 떠올린다. 꺼내는 동작은 없다). 08 에서 Angry 이모트, 뒤이어 데미안 검 뽑기(SwordDraw_B), 레터박스를 걷고 전투.",
+      "lines": [
+        { "key": "boss1_intro.01", "speaker": "boss1", "kr": "기록한다.\n침입자 하나. 눈 달린 검 하나." },
+        { "key": "boss1_intro.02", "speaker": "boss1", "kr": "…왕국 조사관 브람이다.\n보고를 올려야 하는데." },
+        { "key": "boss1_intro.03", "speaker": "damian", "emotion": "Surprise", "kr": "고블린이 사람 말을…" },
+        { "key": "boss1_intro.04", "speaker": "sword", "emotion": "Normal", "kr": "사람이었던 거다.\n탑이 다시 빚었지." },
+        { "key": "boss1_intro.05", "speaker": "damian", "emotion": "Thinking", "kr": "브람…\n의뢰서 끝에 적힌 이름이군." },
+        { "key": "boss1_intro.06", "speaker": "boss1", "kr": "그 의뢰가 아직도 걸려 있었나.\n…내 보고가 없으니 그렇겠지." },
+        { "key": "boss1_intro.07", "speaker": "boss1", "kr": "그 검한테 등 보이지 마라.\n…촌장 아들 다음이 나였다." },
+        { "key": "boss1_intro.08", "speaker": "sword", "emotion": "Angry", "kr": "헛소리 마라!" }
+      ]
+    },
+    {
+      "id": "boss1_defeat",
+      "kind": "dialogue",
+      "trigger": "boss_defeat:1",
+      "staging": "전투 직후. 레터박스를 내리고 카메라를 방패병 쪽으로. 01·02 는 방패병이 대기 애니메이션으로 선 채 말한다. 02 뒤 보스 폭발 → 흰 빛(마검이 마력을 먹는다). 흰 빛이 걷히며 음악을 챕터곡으로 되돌리고 03 부터 대화를 잇는다. 07·09 는 데미안이 담담하게. 끝나면 레터박스를 걷는다.",
+      "lines": [
+        { "key": "boss1_defeat.01", "speaker": "boss1", "kr": "방패는… 끝까지 안 내렸다.\n그래서… 여기 서 있지." },
+        { "key": "boss1_defeat.02", "speaker": "boss1", "kr": "…보고, 끝." },
+        { "key": "boss1_defeat.03", "speaker": "sword", "emotion": "Silence", "kr": "……그 방패, 본 적 있다.\n늘 이몸 쪽을 향해 있었지." },
+        { "key": "boss1_defeat.04", "speaker": "sword", "emotion": "Silence", "kr": "…이몸은 전에도\n계약한 적이 있다." },
+        { "key": "boss1_defeat.05", "speaker": "damian", "emotion": "Question", "kr": "그놈들은?" },
+        { "key": "boss1_defeat.06", "speaker": "sword", "emotion": "Silence", "kr": "…기억이 안 난다." },
+        { "key": "boss1_defeat.07", "speaker": "damian", "emotion": "Normal", "kr": "그래." },
+        { "key": "boss1_defeat.08", "speaker": "sword", "emotion": "Question", "kr": "…그게 다냐?" },
+        { "key": "boss1_defeat.09", "speaker": "damian", "emotion": "Normal", "kr": "기억 안 난다며." },
+        { "key": "boss1_defeat.10", "speaker": "sword", "emotion": "Nerve", "kr": "…흥. 끝까지 이몸을\n안 믿은 놈이다. 멍청하긴." }
+      ]
+    },
+    {
+      "id": "ch2_start",
+      "kind": "dialogue",
+      "trigger": "chapter_start:2",
+      "staging": "41층 첫 진입, 챕터 2 '잿빛 용광로'. 재 낀 한낮, 가장 높은 해의 조명. 불티 파티클이 아래에서 위로 떠오른다. 챕터곡(챕터 2 음높이). 대화 전 카메라가 떠오르는 불티를 따라 위로 들렸다가 데미안에게 돌아온다. 03·04 는 마검 초상화 Silence, 웃음 없음. 끝나면 trait_magic → trait_titan 으로 이어진다.",
+      "lines": [
+        { "key": "ch2_start.01", "speaker": "damian", "emotion": "Thinking", "kr": "올라갈수록 뜨겁군.\n땅속으로 가고 있다는 거지." },
+        { "key": "ch2_start.02", "speaker": "damian", "emotion": "Question", "kr": "땅속인데\n해가 제일 높군." },
+        { "key": "ch2_start.03", "speaker": "sword", "emotion": "Silence", "kr": "……해가 아니다.\n불빛이다." },
+        { "key": "ch2_start.04", "speaker": "sword", "emotion": "Silence", "kr": "…이 냄새. 싫다.\n아니… 모르겠다." }
+      ]
+    },
+    {
+      "id": "f45_forge",
+      "kind": "dialogue",
+      "trigger": "floor_first:45",
+      "staging": "45층 첫 진입. 떠오르는 불티. 대화창이 뜨자마자 앞말 없이 01 이 곧바로 나온다(마검 초상화 Silence). 02 에서 데미안 머리 위 Question 이모트, 05 에서 SweatDrop 이모트.",
+      "lines": [
+        { "key": "f45_forge.01", "speaker": "sword", "emotion": "Silence", "kr": "굶주림은\n굶주림으로만 묶인다." },
+        { "key": "f45_forge.02", "speaker": "damian", "emotion": "Question", "kr": "…뭐?" },
+        { "key": "f45_forge.03", "speaker": "sword", "emotion": "Question", "kr": "…방금 이몸이\n뭐라고 했나?" },
+        { "key": "f45_forge.04", "speaker": "damian", "emotion": "Thinking", "kr": "굶주림이 어쩌고.\n무슨 뜻이야?" },
+        { "key": "f45_forge.05", "speaker": "sword", "emotion": "Nerve", "kr": "모른다.\n입이 먼저 나왔다." }
+      ]
+    },
+    {
+      "id": "f50_leftovers",
+      "kind": "dialogue",
+      "trigger": "floor_first:50",
+      "staging": "50층 첫 진입. 떠오르는 불티. 걸음을 멈추고 대화. 01 은 Sleepy 파티클 이모트와 함께 졸다 깬 목소리. 03 에서 Grinning 이모트. 05·06 은 두 초상화 모두 Silence 로 한 박자씩. 10 에서 다시 Grinning 이모트.",
+      "lines": [
+        { "key": "f50_leftovers.01", "speaker": "sword", "emotion": "Sleep", "kr": "…음냐… 요즘 이상하다.\n배가 좀 찬다." },
+        { "key": "f50_leftovers.02", "speaker": "damian", "emotion": "Normal", "kr": "잘 먹였으니까." },
+        { "key": "f50_leftovers.03", "speaker": "sword", "emotion": "Smile", "kr": "크하핫! 그건 인정하마.\n…그런데 넌 왜 이 탑에 왔냐?" },
+        { "key": "f50_leftovers.04", "speaker": "damian", "emotion": "Normal", "kr": "남들이 안 가져가는\n의뢰만 골라 왔어." },
+        { "key": "f50_leftovers.05", "speaker": "damian", "emotion": "Silence", "kr": "남은 것끼리는…\n알아보거든." },
+        { "key": "f50_leftovers.06", "speaker": "sword", "emotion": "Silence", "kr": "……" },
+        { "key": "f50_leftovers.07", "speaker": "damian", "emotion": "Normal", "kr": "그러고 보니\n넌 내 이름도 안 물었지." },
+        { "key": "f50_leftovers.08", "speaker": "sword", "emotion": "Normal", "kr": "필요 없다.\n허접 모험가면 충분하다." },
+        { "key": "f50_leftovers.09", "speaker": "damian", "emotion": "Normal", "kr": "…싸게 치는군." },
+        { "key": "f50_leftovers.10", "speaker": "sword", "emotion": "Smile", "kr": "크하핫! 억울하면\n더 커라." }
+      ]
+    },
+    {
+      "id": "f55_look",
+      "kind": "dialogue",
+      "trigger": "floor_first:55",
+      "staging": "55층 첫 진입. 떠오르는 불티. 01: 카메라를 데미안 머리 위로 천천히 붙이고, 마검 초상화 Madness 로 말없이 한 박자 둔다. 02 에서 데미안 머리 위 SweatDrop 이모트. 06 은 데미안 속말(괄호)이다. 웃음 없음.",
+      "lines": [
+        { "key": "f55_look.01", "speaker": "sword", "emotion": "Madness", "kr": "……" },
+        { "key": "f55_look.02", "speaker": "damian", "emotion": "Question", "kr": "방금 그 눈, 뭐였어." },
+        { "key": "f55_look.03", "speaker": "sword", "emotion": "Nerve", "kr": "…배가 고파서 그렇다." },
+        { "key": "f55_look.04", "speaker": "damian", "emotion": "Thinking", "kr": "좀 전엔 찬다며." },
+        { "key": "f55_look.05", "speaker": "sword", "emotion": "Nerve", "kr": "…용광로라 그렇다.\n신경 쓰지 마라." },
+        { "key": "f55_look.06", "speaker": "damian", "emotion": "Thinking", "kr": "(…마물 볼 때\n그 눈이었어.)" }
+      ]
+    },
+    {
+      "id": "boss2_intro",
+      "kind": "dialogue",
+      "trigger": "boss_intro:2",
+      "staging": "60층, 재의 파수꾼에게 처음 부딪힌 순간, 전투 직전. 보스 입장곡. 레터박스를 내리고 카메라를 파수꾼(대기 애니메이션) 쪽으로. 보스 대사에는 초상화 자리에 파수꾼 전투 스프라이트. 떠오르는 불티는 그대로. 03 에서 데미안 머리 위 Question 이모트. 06 뒤 레터박스를 걷고 전투. 웃음 없음.",
+      "lines": [
+        { "key": "boss2_intro.01", "speaker": "boss2", "kr": "…또… 왔…어…" },
+        { "key": "boss2_intro.02", "speaker": "boss2", "kr": "…그… 검…" },
+        { "key": "boss2_intro.03", "speaker": "damian", "emotion": "Question", "kr": "너한테 하는 말 같은데." },
+        { "key": "boss2_intro.04", "speaker": "sword", "emotion": "Normal", "kr": "재가 말을 하는군.\n뭐라는지 모르겠다." },
+        { "key": "boss2_intro.05", "speaker": "damian", "emotion": "Normal", "kr": "얼마?" },
+        { "key": "boss2_intro.06", "speaker": "sword", "emotion": "Normal", "kr": "비싸다. 때리는 족족 진심이다.\n강타로 끊어라." }
+      ]
+    },
+    {
+      "id": "boss2_defeat",
+      "kind": "dialogue",
+      "trigger": "boss_defeat:2",
+      "staging": "전투 직후. 레터박스를 내리고 카메라를 파수꾼 쪽으로, 음악을 끊는다. 01·02 는 파수꾼이 대기 애니메이션으로 선 채 말한다. 02 뒤 보스 폭발 → 하얗게 번쩍, 흰 빛을 길게 유지한다(마검이 먹으며 기억이 밀려든다). 03 마검 초상화 Surprise. 04·05 는 흰 빛 속 촌장의 목소리(초상화 없음, 이름만). 흰 빛이 걷힌 뒤 06 부터. 11 은 긴 침묵. 12 는 마검 초상화 Nerve 로만 — 자는 척이므로 Sleepy 이모트는 쓰지 않는다. 끝나면 챕터곡을 다시 틀고 레터박스를 걷는다.",
+      "lines": [
+        { "key": "boss2_defeat.01", "speaker": "boss2", "kr": "…네… 값…" },
+        { "key": "boss2_defeat.02", "speaker": "boss2", "kr": "…왕좌… 비어…" },
+        { "key": "boss2_defeat.03", "speaker": "sword", "emotion": "Surprise", "kr": "……!" },
+        { "key": "boss2_defeat.04", "speaker": "chief", "kr": "…또 너냐." },
+        { "key": "boss2_defeat.05", "speaker": "chief", "kr": "…다시는 나오지 마라." },
+        { "key": "boss2_defeat.06", "speaker": "damian", "emotion": "Question", "kr": "…방금 그거,\n뭐라는 거였어?" },
+        { "key": "boss2_defeat.07", "speaker": "sword", "emotion": "Silence", "kr": "……" },
+        { "key": "boss2_defeat.08", "speaker": "sword", "emotion": "Normal", "kr": "…녹이지 말라더군.\n제가 녹이려다 그 꼴이 됐으니." },
+        { "key": "boss2_defeat.09", "speaker": "damian", "emotion": "Thinking", "kr": "값이라고 한 것 같은데." },
+        { "key": "boss2_defeat.10", "speaker": "sword", "emotion": "Normal", "kr": "잘못 들었다." },
+        { "key": "boss2_defeat.11", "speaker": "damian", "emotion": "Silence", "kr": "……" },
+        { "key": "boss2_defeat.12", "speaker": "sword", "emotion": "Nerve", "kr": "크, 크하핫…\n배, 배부르다. 잔다." }
+      ]
+    }
+  ]
+}

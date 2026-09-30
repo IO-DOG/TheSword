@@ -58,6 +58,9 @@ public class DirectingManager
 
     public void PlayLetterBox()
     {
+        // 이미 내려와 있으면 그대로 쓴다. 두 번 띄우면 앞의 것은 아무도 걷지 않아 화면에 남는다.
+        if (letterBox != null)
+            return;
         letterBox = Managers.UI.ShowPopupUI<UI_LetterBox>();
         letterBox.Init();
         letterBox.StartLetterBox();
@@ -84,15 +87,33 @@ public class Events : MonoBehaviour
     }
     IEnumerator PlayEmoji(string EmojiName, UnityEngine.Transform transform)
     {
-        GameObject go = Managers.Resource.Instantiate("Emoji", transform);
-        go.transform.localScale = new Vector3(0.08f, 0.08f, 0.08f);
-        go.transform.localPosition = new Vector3(0.2f, 0.8f, -0.1f);
-        go.GetComponent<Animator>().Play(EmojiName);
-        float delay = go.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length;
-        yield return new WaitForSeconds(delay);
-        Managers.Resource.Destroy(go);
-        yield return new WaitForSeconds(1f);
-        _coroutineCompleted = true;
+        // 기다리는 쪽(EVENT_1)이 _coroutineCompleted 만 본다. 이모티콘이 없어도 끝났다고는 알린다.
+        try
+        {
+            GameObject go = transform != null ? Managers.Resource.Instantiate("Emoji", transform) : null;
+            if (go != null)
+            {
+                go.transform.localScale = new Vector3(0.08f, 0.08f, 0.08f);
+                go.transform.localPosition = new Vector3(0.2f, 0.8f, -0.1f);
+                Animator animator = go.GetComponent<Animator>();
+                float delay = 1f;
+                if (animator != null && string.IsNullOrEmpty(EmojiName) == false)
+                {
+                    animator.Play(EmojiName);
+                    // Play 는 다음 갱신에서야 상태를 바꾼다. 곧바로 재면 기본 상태(Surprise)의 길이가 나온다.
+                    yield return null;
+                    if (animator != null)
+                        delay = animator.GetCurrentAnimatorStateInfo(0).length;
+                }
+                yield return new WaitForSeconds(delay);
+                Managers.Resource.Destroy(go);
+            }
+            yield return new WaitForSeconds(1f);
+        }
+        finally
+        {
+            _coroutineCompleted = true;
+        }
     }
 
     #region EVENT_1
@@ -161,81 +182,129 @@ public class Events : MonoBehaviour
     #endregion
 
     #region Contract Sword
+    /// <summary>계약 때 함께 받는 몬스터 도감 (EquipData 31, 책 칸). 마검의 기억 = 도감 (바이블 2.3).</summary>
+    const int MonsterBookId = 31;
+
     public void CoStartContractSword()
     {
-        PlayerPrefs.SetInt("ISMEETSWORD", 1);
         CoroutineManager.StartCoroutine(ContractSword());
     }
 
     IEnumerator ContractSword()
     {
         Managers.Game.OnDirect = true;
-
-        Managers.Game.DirectionalLight.DOIntensity(0.05f, 0.5f);
-
-        Managers.Game.Player.SetState(Define.PlayerState.ContractSword);
-
-        Vector3 swordPos = Managers.Game.CurInteractObject.transform.position;
-        Managers.Game.CurInteractObject.transform.gameObject.SetActive(false);
-
-        yield return new WaitForSeconds(1f);
-
-        GameObject go1 = Managers.Resource.Instantiate("FX_ContractSwordEffect", Managers.Game.Player.transform);
-        go1.transform.localPosition = Vector3.zero;
-        go1.transform.localScale = new Vector3(0.3f, 0.3f, 0.15f);
-
-        GameObject go2 = Managers.Resource.Instantiate("FX_PowerWave", Managers.Game.Player.transform);
-        go2.transform.localPosition = Vector3.zero;
-        go2.transform.localScale = new Vector3(0.2f, 0.2f, 0.1f);
-
-        yield return new WaitForSeconds(3f);
-
-        GameObject fireflies = GameObject.Find("MagicalSwordRoomFireflies");
-        if (fireflies != null)
+        bool contracted = false;
+        try
         {
-            fireflies.SetActive(false);
+            if (Managers.Game.DirectionalLight != null)
+                Managers.Game.DirectionalLight.DOIntensity(0.05f, 0.5f);
+
+            Managers.Game.Player.SetState(Define.PlayerState.ContractSword);
+
+            if (Managers.Game.CurInteractObject != null)
+                Managers.Game.CurInteractObject.transform.gameObject.SetActive(false);
+
+            yield return new WaitForSeconds(1f);
+
+            GameObject go1 = Managers.Resource.Instantiate("FX_ContractSwordEffect", Managers.Game.Player.transform);
+            if (go1 != null)
+            {
+                go1.transform.localPosition = Vector3.zero;
+                go1.transform.localScale = new Vector3(0.3f, 0.3f, 0.15f);
+            }
+
+            GameObject go2 = Managers.Resource.Instantiate("FX_PowerWave", Managers.Game.Player.transform);
+            if (go2 != null)
+            {
+                go2.transform.localPosition = Vector3.zero;
+                go2.transform.localScale = new Vector3(0.2f, 0.2f, 0.1f);
+            }
+
+            yield return new WaitForSeconds(3f);
+
+            GameObject fireflies = GameObject.Find("MagicalSwordRoomFireflies");
+            if (fireflies != null)
+            {
+                fireflies.SetActive(false);
+            }
+
+            GameObject godray = GameObject.Find("MagicalSwordRoomGodray");
+            SpriteRenderer godraySprite = godray != null ? godray.GetComponent<SpriteRenderer>() : null;
+            if (godraySprite != null)
+            {
+                godraySprite.material = Managers.Resource.Load<Material>("Godray3");
+            }
+
+            Volume postProcessingVolume = Managers.Game.MainCamera != null ? Managers.Game.MainCamera.GetComponent<Volume>() : null;
+            if (postProcessingVolume != null && postProcessingVolume.profile.TryGet<ColorAdjustments>(out ColorAdjustments colorAdjustments))
+            {
+                colorAdjustments.colorFilter.Override(new Color(255 / 255f, 231 / 255f, 206 / 255f));
+            }
+
+            if (Managers.Game.DirectionalLight != null)
+            {
+                Managers.Game.DirectionalLight.color = new Color(255 / 255f, 244 / 255f, 214 / 255f);
+                Managers.Game.DirectionalLight.DOIntensity(1.5f, 1f);
+            }
+
+            Managers.Resource.Destroy(go1);
+            Managers.Resource.Destroy(go2);
+
+            yield return new WaitForSeconds(1.5f);
+
+            FinishContract();
+            contracted = true;
+        }
+        finally
+        {
+            // 연출이 어디서 끊겨도 계약의 결과는 남긴다. 마검(+10 공격)과 3층 열쇠가 없으면
+            // 그 뒤를 진행할 수 없다 — 예전에는 자동 플레이 봇이 이 결과를 손으로 대신 채웠다.
+            if (contracted == false)
+            {
+                Debug.LogWarning("[Directing] 마검 계약 연출이 끊겼다 — 결과만 남긴다");
+                FinishContract();
+                Managers.Game.OnDirect = false;
+                Managers.UI.ShowGameSceneUI();
+            }
         }
 
-        GameObject godray = GameObject.Find("MagicalSwordRoomGodray");
-        if (godray != null)
-        {
-            godray.GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>("Godray3");
-        }
+        // 외눈이 뜨인다 → 첫 예측 (바이블 9.1). 레터박스 없이 이 자리에서 대화만.
+        yield return StoryDirector.CoPrologue(StoryPrologue.ContractAfter);
 
-        Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
-        ColorAdjustments colorAdjustments;
-
-        if (postProcessingVolume.profile.TryGet<ColorAdjustments>(out colorAdjustments))
-        {
-            colorAdjustments.colorFilter.Override(new Color(255 / 255f, 231 / 255f, 206 / 255f));
-        }
-
-        Managers.Game.DirectionalLight.color = new Color(255 / 255f, 244 / 255f, 214 / 255f);
-        // Sound
-
-        Managers.Game.DirectionalLight.DOIntensity(1.5f, 1f);
-
-        Managers.Resource.Destroy(go1);
-        Managers.Resource.Destroy(go2);
-
-        yield return new WaitForSeconds(1.5f);
-
-        Managers.Game.PlayerData.IsContractedSword = true;
-        Managers.Game.Player.SetState(Define.PlayerState.IdleFront);
-        Managers.Game.Player._moveDir = Define.MoveDir.Down;
-        Managers.Game.Player._isEquiptWeapon = true;
-        Managers.Game.Player._isEquiptShield = true;
-
-        // 인벤토리에 마검 추가
-        Managers.Game.PlayerData.Inventory[(int)Define.Types.Sword].Add(10);
-
-        // 현재 검 변경
-        Managers.Game.SwapEquip(Define.EQUIP_SOWRD_FIRST + 1);
-
-        //Managers.Game.PlayerData.CurSword = Define.EQUIP_SOWRD_FIRST + 1;
         Managers.Game.OnDirect = false;
         Managers.Game.GameScene?.OnUIInventory();
         Managers.UI.ShowGameSceneUI();
+        Managers.Sound.FadeAndPlayBGM("Chapter0_BGM", 0.8f);
+    }
+
+    /// <summary>계약의 결과: 마검을 쥐고, 도감을 받고, 3층 열쇠가 열리고, 체크포인트를 쓴다. 두 번 불러도 한 번 한 것과 같다.</summary>
+    static void FinishContract()
+    {
+        GameManager game = Managers.Game;
+        game.PlayerData.IsContractedSword = true;
+        if (game.Player != null)
+        {
+            game.Player.SetState(Define.PlayerState.IdleFront);
+            game.Player._moveDir = Define.MoveDir.Down;
+            game.Player._isEquiptWeapon = true;
+            game.Player._isEquiptShield = true;
+        }
+
+        // 인벤토리에 마검 추가, 현재 검 변경
+        int sword = Define.EQUIP_SOWRD_FIRST + 1;
+        List<int> swords = game.PlayerData.Inventory[(int)Define.Types.Sword];
+        if (swords.Contains(sword) == false)
+            swords.Add(sword);
+        if (game.PlayerData.CurSword != sword)
+            game.SwapEquip(sword);
+
+        // 몬스터 도감 — 인벤토리의 책 칸에 뜬다.
+        List<int> books = game.PlayerData.Inventory[(int)Define.Types.Book];
+        if (Managers.Data.EquipDic.ContainsKey(MonsterBookId) && books.Contains(MonsterBookId) == false)
+        {
+            books.Add(MonsterBookId);
+            game.EquipIfBetter(MonsterBookId);
+        }
 
         // 계약이 끝나면 3층에 열쇠가 열린다. 이 열쇠가 있어야 2층의 보스방 구역 문이 열리고,
         // 그래야 킹슬라임에게 갈 수 있다 — 여기서 실패하면 게임을 더 진행할 수가 없다.
@@ -243,8 +312,10 @@ public class Events : MonoBehaviour
         // 그 사이 어디서든 예외가 나면 열쇠가 영영 안 나왔다.
         EnableMagicSwordKey();
 
-        Managers.Game.SaveGame();
-        Managers.Sound.FadeAndPlayBGM("Chapter0_BGM", 0.8f);
+        // 만났다는 표시는 계약이 끝난 뒤에 남긴다. 예전에는 연출을 시작할 때 남겨서, 연출이 죽으면
+        // 검 없이 열쇠만 되살아났다 (UI_GameScene.RestoreMagicSwordKey 가 이것을 본다).
+        PlayerPrefs.SetInt("ISMEETSWORD", 1);
+        game.SaveGame();
     }
 
     /// <summary>마검 계약 뒤에 열리는 3층 열쇠(Items/CItem13)를 켠다.</summary>
@@ -303,20 +374,15 @@ public class Events : MonoBehaviour
     #region KingSlimeDirecting
     public GameObject _kingSlime;
 
-    bool _clearKingSlime = false;
-
     public void MeetKingSlime()
     {
-        if (_clearKingSlime == false)
+        // 등장 연출이 끝에서 보스를 다시 켠다. 그래서 매번 먼저 숨긴다 — 예전에는 한 판에 한 번만 숨겨서
+        // (그 표시가 되돌려지지 않았다) 죽고 다시 온 두 번째 등장에서는 보스가 처음부터 보인 채로 연출이 돌았다.
+        _kingSlime = GameObject.Find("bossMonster0");
+        if (_kingSlime != null)
         {
-            _clearKingSlime = true;
-            _kingSlime = GameObject.Find("bossMonster0");
-
-            if (_kingSlime != null)
-            {
-                _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = false;
-                _kingSlime.GetOrAddComponent<BoxCollider>().enabled = false;
-            }
+            _kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = false;
+            _kingSlime.GetOrAddComponent<BoxCollider>().enabled = false;
         }
 
         CoroutineManager.StartCoroutine(CoKingSlimeAction());
@@ -541,32 +607,39 @@ public class Events : MonoBehaviour
 
     public IEnumerator AfterMeetKingSlime()
     {
-        if (_kingSlime != null)
+        try
         {
-            _kingSlime.transform.localScale = new Vector3(1f, 2f, 1f);
-            _kingSlime.transform.localPosition = new Vector3(3.84f, 3f, -5.5f);
-            _kingSlime.SetActive(true);
-            MakeBossReachable(_kingSlime);
-            //if (_kingSlime != null)
-            //    //_kingSlime.GetOrAddComponent<SpriteRenderer>().enabled = true;
-            //_kingSlime.gameObject.GetOrAddComponent<Animator>().Play("Boss_C0_I000");
+            if (_kingSlime != null)
+            {
+                _kingSlime.transform.localScale = new Vector3(1f, 2f, 1f);
+                _kingSlime.transform.localPosition = new Vector3(3.84f, 3f, -5.5f);
+                _kingSlime.SetActive(true);
+                MakeBossReachable(_kingSlime);
+            }
+
+            Managers.UI.ShowBossNamePopup(1.5f);
+            Managers.Sound.FadeAndPlayBGM("Chapter0_Boss_BGM", 1f);
+
+            yield return new WaitForSeconds(2f);
+
+            // "킹? 왕은 이몸 하나다!" — 레터박스를 내린 채, 카메라가 킹 슬라임을 잡고 있을 때 (바이블 10절)
+            yield return StoryDirector.CoPrologue(StoryPrologue.KingslimeReveal);
+
+            CameraController cam = Managers.Game.MainCamera != null ? Managers.Game.MainCamera.GetComponentInChildren<CameraController>() : null;
+            if (cam != null && CameraController._transposer != null)
+                cam.StartCoVirtualCameraMove(CameraController._transposer.m_FollowOffset, Define.DEFALUT_CAMERA_OFFSET, 2f);
+            yield return new WaitForSeconds(1f);
+            Managers.Directing.CloseLetterBox();
+            yield return new WaitForSeconds(1f);
         }
-
-        Managers.UI.ShowBossNamePopup(1.5f);
-
-        yield return new WaitForSeconds(2f);
-
-        Vector3 original = CameraController._transposer.m_FollowOffset;
-        Vector3 target = new Vector3(0f, 10f, -5f); ;
-        float moveTime = 2f;
-        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().StartCoVirtualCameraMove(original, target, moveTime);
-        yield return new WaitForSeconds(1f);
-        Managers.Directing.CloseLetterBox();
-        yield return new WaitForSeconds(1f);
-        Managers.Game.OnStaticResolution = false;
-        Managers.Game.OnDirect = false;
-        Managers.UI.ShowGameSceneUI();
-        Managers.Sound.FadeAndPlayBGM("Chapter0_Boss_BGM", 1f);
+        finally
+        {
+            // 어디서 끊겨도 보스방에서 움직일 수 있게 돌려놓는다 (레터박스가 이미 걷혔으면 아무 일도 없다).
+            Managers.Directing.CloseLetterBox();
+            Managers.Game.OnStaticResolution = false;
+            Managers.Game.OnDirect = false;
+            Managers.UI.ShowGameSceneUI();
+        }
     }
 
     /// <summary>
@@ -636,6 +709,8 @@ public class Events : MonoBehaviour
         // 늘어난 뒤로는 그 마지막이 20층 계단이라, 엉뚱한 층의 관문이 열렸다.
         // 보스 층 잠금은 GameManager.RefreshBossGates 가 층별로 처리한다.
         Managers.Game.RefreshBossGates();
+        // "노랑부터 베니까 산 거다." — 마지막 분열 슬라임의 전투창이 닫혀 한가해지면 뜬다.
+        StoryDirector.QueuePrologue(StoryPrologue.KingslimeClear);
         yield return new WaitForSeconds(10f);
         // 보스를 잡은 뒤 계단까지 이어지는 빛줄기. 관문 자체는 위의 RefreshBossGates
         // 가 이미 열었으니, 층을 못 찾거나 이펙트가 없으면 조용히 건너뛴다.
@@ -666,149 +741,171 @@ public class Events : MonoBehaviour
         Managers.UI.CloseGameSceneUI();
         Managers.Directing.PlayLetterBox();
         Managers.Game.OnDirect = true;
-        GameObject greenSmoke = GameObject.Find("SmokeFlatWhiteGreen");
-        greenSmoke.GetComponent<ParticleSystem>().Stop();
-
-        yield return new WaitForSeconds(2f);
-
-        #region Slime orbs event
-        Transform orbsSpawnPos = GameObject.Find("OrbsSpawnPos").transform;
-        GameObject slimeOrb = Managers.Resource.Instantiate("SlimeOrb", orbsSpawnPos);
-        //slimeOrb.transform.position = new Vector3(kingSlime.transform.position.x, kingSlime.transform.position.y, kingSlime.transform.position.z);
-        Managers.Sound.Play(Define.Sound.Effect, "Chapter0_Boss_Event2");
-        yield return new WaitForSeconds(0.5f);
-        Vector3 original = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
-        Vector3 target = new Vector3(0f, 18f, -5f); ;
-        float moveTime = 1f;
-        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().StartCoVirtualCameraMove(original, target, moveTime);
-        slimeOrb.transform.DOLocalMoveZ(2f, 1f);
-
-        yield return new WaitForSeconds(1f);
-
-        slimeOrb.transform.GetChild(0).DOLocalMoveX(-2.24f, 0.5f);
-        slimeOrb.transform.GetChild(2).DOLocalMoveX(2.24f, 0.5f);
-        yield return new WaitForSeconds(0.5f);
-
-        slimeOrb.transform.GetChild(0).DOLocalMoveZ(-1f, 0.25f);
-        slimeOrb.transform.GetChild(2).DOLocalMoveZ(-1f, 0.25f);
-        yield return new WaitForSeconds(0.5f);
-
-        Vector3 original2 = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
-        Vector3 target2 = new Vector3(0f, 16f, -7f); ;
-        float moveTime2 = 0.5f;
-        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().StartCoVirtualCameraMove(original2, target2, moveTime2);
-
-        yield return new WaitForSeconds(0.1f);
-
-        Sequence seq = DOTween.Sequence();
-
-        // Yellow Down
-        Sequence yellow = DOTween.Sequence();
-        yellow.Append(slimeOrb.transform.GetChild(0).DOLocalMoveZ(-3f, 0.5f));
-        yellow.Append(slimeOrb.transform.GetChild(0).DOScale(5f, 0.5f));
-
-        // Red Down
-        Sequence red = DOTween.Sequence();
-        red.Append(slimeOrb.transform.GetChild(1).DOLocalMoveZ(-1.8f, 0.5f));
-        red.Append(slimeOrb.transform.GetChild(1).DOScale(5f, 0.5f));
-
-        // Blue Down
-        Sequence blue = DOTween.Sequence();
-        blue.Append(slimeOrb.transform.GetChild(2).DOLocalMoveZ(-3f, 0.5f));
-        blue.Append(slimeOrb.transform.GetChild(2).DOScale(5f, 0.5f));
-
-
-        seq.Append(yellow).Join(red).Join(blue).Play().OnComplete(() =>
-        {
-            Managers.Resource.Destroy(slimeOrb);
-        });
-
-        yield return new WaitForSeconds(0.6f);
-        #endregion
-
-        #region FlashBang Effect
-        // FlashBang Effect
-
-        float whiteTime = 0.5f;
-        float defaultTime = 0.2f;
-        CoroutineManager.StartCoroutine(CameraController.CoExposure(whiteTime, CameraController.Exposure.White));
-        yield return new WaitForSeconds(whiteTime);
-
-        CoroutineManager.StartCoroutine(CameraController.CoExposure(defaultTime, CameraController.Exposure.Default));
-        yield return new WaitForSeconds(defaultTime);
-        #endregion
-
-        #region Instantiate 3 Slimes
-
+        CameraController cam = Managers.Game.MainCamera != null ? Managers.Game.MainCamera.GetComponentInChildren<CameraController>() : null;
         GameObject map = GameObject.Find("Dungeon_00_003");
+        List<GameObject> slimes = new List<GameObject>();
+        try
+        {
+            StopParticle(GameObject.Find("SmokeFlatWhiteGreen"));
 
-        GameObject yellowSlime = Managers.Resource.Instantiate("BossMonster_3Slimes", map.transform);
-        yellowSlime.transform.position = GameObject.Find("YellowSlimePos").transform.position;
-        yellowSlime.GetComponent<MonsterController>().id = 7;
-        GameObject jumpCloud0 = Managers.Resource.Instantiate("JumpCloud", yellowSlime.transform);
-        jumpCloud0.transform.localScale = new Vector3(jumpCloud0.transform.localScale.x * 1.5f, jumpCloud0.transform.localScale.y * 1.5f, jumpCloud0.transform.localScale.z * 1.5f);
-        GameObject explosion0 = Managers.Resource.Instantiate("PoisonExplosionYellow", yellowSlime.transform);
-        GameObject smoke0 = Managers.Resource.Instantiate("SmokeFlatBlack", yellowSlime.transform);
-        smoke0.transform.localPosition = new Vector3(0f, -0.8f, 0.5f);
-        smoke0.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+            yield return new WaitForSeconds(2f);
 
-        CoroutineManager.StartCoroutine(CameraController.CoShakeCamera(0.3f, 0.4f));
-        Managers.Resource.Instantiate("Stones", map.transform);
+            #region Slime orbs event
+            GameObject orbsSpawnPos = GameObject.Find("OrbsSpawnPos");
+            GameObject slimeOrb = orbsSpawnPos != null ? Managers.Resource.Instantiate("SlimeOrb", orbsSpawnPos.transform) : null;
+            Managers.Sound.Play(Define.Sound.Effect, "Chapter0_Boss_Event2");
+            yield return new WaitForSeconds(0.5f);
+            MoveCamera(cam, new Vector3(0f, 18f, -5f), 1f);
+            bool orbs = slimeOrb != null && slimeOrb.transform.childCount >= 3;
+            if (orbs)
+                slimeOrb.transform.DOLocalMoveZ(2f, 1f).SetLink(slimeOrb);
 
-        yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(1f);
 
-        GameObject redSlime = Managers.Resource.Instantiate("BossMonster_3Slimes", map.transform);
-        redSlime.transform.position = GameObject.Find("RedSlimePos").transform.position;
-        redSlime.GetComponent<MonsterController>().id = 6;
-        GameObject jumpCloud1 = Managers.Resource.Instantiate("JumpCloud", redSlime.transform);
-        jumpCloud1.transform.localScale = new Vector3(jumpCloud0.transform.localScale.x * 1.5f, jumpCloud0.transform.localScale.y * 1.5f, jumpCloud0.transform.localScale.z * 1.5f);
-        GameObject explosion1 = Managers.Resource.Instantiate("PoisonExplosionRed", redSlime.transform);
-        GameObject smoke1 = Managers.Resource.Instantiate("SmokeFlatBlack", redSlime.transform);
-        smoke1.transform.localPosition = new Vector3(0f, -0.8f, 0.5f);
-        smoke1.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+            if (orbs)
+            {
+                slimeOrb.transform.GetChild(0).DOLocalMoveX(-2.24f, 0.5f).SetLink(slimeOrb);
+                slimeOrb.transform.GetChild(2).DOLocalMoveX(2.24f, 0.5f).SetLink(slimeOrb);
+            }
+            yield return new WaitForSeconds(0.5f);
 
-        CoroutineManager.StartCoroutine(CameraController.CoShakeCamera(0.3f, 0.4f));
-        Managers.Resource.Instantiate("Stones", map.transform);
+            if (orbs)
+            {
+                slimeOrb.transform.GetChild(0).DOLocalMoveZ(-1f, 0.25f).SetLink(slimeOrb);
+                slimeOrb.transform.GetChild(2).DOLocalMoveZ(-1f, 0.25f).SetLink(slimeOrb);
+            }
+            yield return new WaitForSeconds(0.5f);
 
-        yield return new WaitForSeconds(0.1f);
+            MoveCamera(cam, new Vector3(0f, 16f, -7f), 0.5f);
 
-        GameObject blueSlime = Managers.Resource.Instantiate("BossMonster_3Slimes", map.transform);
-        blueSlime.transform.position = GameObject.Find("BlueSlimePos").transform.position;
-        blueSlime.GetComponent<MonsterController>().id = 8;
-        GameObject jumpCloud2 = Managers.Resource.Instantiate("JumpCloud", blueSlime.transform);
-        jumpCloud2.transform.localScale = new Vector3(jumpCloud0.transform.localScale.x * 1.5f, jumpCloud0.transform.localScale.y * 1.5f, jumpCloud0.transform.localScale.z * 1.5f);
-        GameObject explosion2 = Managers.Resource.Instantiate("PoisonExplosionBlue", blueSlime.transform);
-        GameObject smoke2 = Managers.Resource.Instantiate("SmokeFlatBlack", blueSlime.transform);
-        smoke2.transform.localPosition = new Vector3(0f, -0.8f, 0.5f);
-        smoke2.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+            yield return new WaitForSeconds(0.1f);
 
-        CoroutineManager.StartCoroutine(CameraController.CoShakeCamera(0.3f, 0.4f));
-        Managers.Resource.Instantiate("Stones", map.transform);
+            if (orbs)
+            {
+                // 노랑·빨강·파랑이 떨어지며 커진다
+                Sequence yellow = DOTween.Sequence();
+                yellow.Append(slimeOrb.transform.GetChild(0).DOLocalMoveZ(-3f, 0.5f));
+                yellow.Append(slimeOrb.transform.GetChild(0).DOScale(5f, 0.5f));
+                Sequence red = DOTween.Sequence();
+                red.Append(slimeOrb.transform.GetChild(1).DOLocalMoveZ(-1.8f, 0.5f));
+                red.Append(slimeOrb.transform.GetChild(1).DOScale(5f, 0.5f));
+                Sequence blue = DOTween.Sequence();
+                blue.Append(slimeOrb.transform.GetChild(2).DOLocalMoveZ(-3f, 0.5f));
+                blue.Append(slimeOrb.transform.GetChild(2).DOScale(5f, 0.5f));
+                DOTween.Sequence().Append(yellow).Join(red).Join(blue).SetLink(slimeOrb).Play()
+                    .OnComplete(() => Managers.Resource.Destroy(slimeOrb));
+            }
+            else if (slimeOrb != null)
+            {
+                Managers.Resource.Destroy(slimeOrb);
+            }
 
-        #endregion
+            yield return new WaitForSeconds(0.6f);
+            #endregion
 
-        yield return new WaitForSeconds(1f);
+            #region FlashBang Effect
+            float whiteTime = 0.5f;
+            float defaultTime = 0.2f;
+            CoroutineManager.StartCoroutine(CameraController.CoExposure(whiteTime, CameraController.Exposure.White));
+            yield return new WaitForSeconds(whiteTime);
 
-        // yellow Slime Potion
-        GameObject potion = Managers.Resource.Instantiate("ConsumableItem");
-        potion.GetComponent<ConsumableItem>().id = 7;
-        potion.transform.position = new Vector3(yellowSlime.transform.position.x, 0f, -4.05f);
-        potion.transform.localScale = new Vector3(1f, 2f, 1f);
-       
-        Vector3 original3 = Camera.main.GetComponentInChildren<CinemachineVirtualCamera>().GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset;
-        Vector3 target3 = Define.DEFALUT_CAMERA_OFFSET;
-        float moveTime3 = 1f;
-        Managers.Game.MainCamera.GetComponentInChildren<CameraController>().StartCoVirtualCameraMove(original3, target3, moveTime3);
+            CoroutineManager.StartCoroutine(CameraController.CoExposure(defaultTime, CameraController.Exposure.Default));
+            yield return new WaitForSeconds(defaultTime);
+            #endregion
 
-        yield return new WaitForSeconds(1);
+            #region Instantiate 3 Slimes
+            slimes.Add(SpawnSplitSlime(map, 0, true));
+            yield return new WaitForSeconds(0.2f);
+            slimes.Add(SpawnSplitSlime(map, 1, true));
+            yield return new WaitForSeconds(0.1f);
+            slimes.Add(SpawnSplitSlime(map, 2, true));
+            #endregion
 
-        Managers.UI.ShowGameSceneUI();
-        Managers.Directing.CloseLetterBox();
+            yield return new WaitForSeconds(1f);
+
+            SpawnSplitPotion(slimes[0]);
+            MoveCamera(cam, Define.DEFALUT_CAMERA_OFFSET, 1f);
+
+            yield return new WaitForSeconds(1);
+        }
+        finally
+        {
+            // 분열 슬라임 셋을 다 잡아야 4층 출구가 열린다. 연출이 어디서 끊겨도 셋(과 노랑의 물약)은 세운다 —
+            // 예전에는 연기 하나를 못 찾으면 여기서 멈춰 보스방에 갇혔다.
+            if (slimes.Count < SplitSlimes.Length)
+            {
+                Debug.LogWarning("[Directing] 킹 슬라임 분열 연출이 끊겼다 — 분열 슬라임만 세운다");
+                while (slimes.Count < SplitSlimes.Length)
+                    slimes.Add(SpawnSplitSlime(map, slimes.Count, false));
+                SpawnSplitPotion(slimes[0]);
+                MoveCamera(cam, Define.DEFALUT_CAMERA_OFFSET, 0.5f);
+            }
+            Managers.UI.ShowGameSceneUI();
+            Managers.Directing.CloseLetterBox();
+        }
 
         yield return new WaitForSeconds(1f);
         Managers.Game.OnDirect = false;
-        Managers.UI.ShowPopupUI<UI_ConversationPopup>();
         Managers.Game.CurEventID = Define.EVENT_KINGSLIME_DEAD;
+        Managers.UI.ShowPopupUI<UI_ConversationPopup>();
+    }
+
+    // 분열 슬라임: 자리, MonsterData id, 튀는 독 (노랑 대거·빨강 메이스·파랑 방패)
+    static readonly (string pos, int id, string fx)[] SplitSlimes =
+    {
+        ("YellowSlimePos", 7, "PoisonExplosionYellow"),
+        ("RedSlimePos", 6, "PoisonExplosionRed"),
+        ("BlueSlimePos", 8, "PoisonExplosionBlue"),
+    };
+
+    static GameObject SpawnSplitSlime(GameObject map, int index, bool effects)
+    {
+        (string posName, int id, string fx) = SplitSlimes[index];
+        GameObject slime = Managers.Resource.Instantiate("BossMonster_3Slimes", map != null ? map.transform : null);
+        if (slime == null)
+            return null;
+        GameObject pos = GameObject.Find(posName);
+        if (pos != null)
+            slime.transform.position = pos.transform.position;
+        MonsterController monster = slime.GetComponent<MonsterController>();
+        if (monster != null)
+            monster.id = id;
+        if (effects == false)
+            return slime;
+
+        GameObject jumpCloud = Managers.Resource.Instantiate("JumpCloud", slime.transform);
+        if (jumpCloud != null)      // 빨강·파랑의 구름은 예전부터 노랑 것(1.5배)의 1.5배였다 — 그림을 그대로 둔다
+            jumpCloud.transform.localScale *= index == 0 ? 1.5f : 2.25f;
+        Managers.Resource.Instantiate(fx, slime.transform);
+        GameObject smoke = Managers.Resource.Instantiate("SmokeFlatBlack", slime.transform);
+        if (smoke != null)
+        {
+            smoke.transform.localPosition = new Vector3(0f, -0.8f, 0.5f);
+            smoke.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+        }
+        CoroutineManager.StartCoroutine(CameraController.CoShakeCamera(0.3f, 0.4f));
+        if (map != null)
+            Managers.Resource.Instantiate("Stones", map.transform);
+        return slime;
+    }
+
+    // 노랑 슬라임(대거)은 몸속에 물약을 품었다 — 그 자리 앞에 떨어진다.
+    static void SpawnSplitPotion(GameObject yellowSlime)
+    {
+        GameObject potion = Managers.Resource.Instantiate("ConsumableItem");
+        ConsumableItem item = potion != null ? potion.GetComponent<ConsumableItem>() : null;
+        if (item == null)
+            return;
+        item.id = 7;
+        float x = yellowSlime != null ? yellowSlime.transform.position.x : potion.transform.position.x;
+        potion.transform.position = new Vector3(x, 0f, -4.05f);
+        potion.transform.localScale = new Vector3(1f, 2f, 1f);
+    }
+
+    static void MoveCamera(CameraController cam, Vector3 offset, float time)
+    {
+        if (cam != null && CameraController._transposer != null)
+            cam.StartCoVirtualCameraMove(CameraController._transposer.m_FollowOffset, offset, time);
     }
     #endregion
 
@@ -891,59 +988,71 @@ public class Events : MonoBehaviour
 
     IEnumerator BossDeadEffect(GameObject boss)
     {
+        if (boss == null)
+            yield break;
         Managers.Sound.Play(Define.Sound.Effect, "BossDeath_SFX");
         Vector3 bossPos = boss.transform.position;
+        GameObject light = null;
+        try
+        {
+            SpriteRenderer sr = boss.GetOrAddComponent<SpriteRenderer>();
+            sr.enabled = true;
+            sr.color = Util.DamagedColor();
+            Animator animator = boss.GetComponent<Animator>();
+            if (animator != null)
+                animator.speed = 0f;
+            // 콜라이더는 자식에 붙어 있기도 하다 — 쓰러진 보스와 다시 부딪히지 않게 전부 끈다.
+            foreach (Collider col in boss.GetComponentsInChildren<Collider>())
+                col.enabled = false;
+            yield return new WaitForSeconds(0.1f);
 
-        boss.GetComponent<SpriteRenderer>().enabled = true;
-        SpriteRenderer sr = boss.GetOrAddComponent<SpriteRenderer>();
-        sr.color = Util.DamagedColor();
-        boss.GetComponent<Animator>().speed = 0f;
-        yield return new WaitForSeconds(0.1f);
+            GameObject boom = Managers.Resource.Instantiate("BossDeathBoom");
+            BossBoom bossBoom = boom != null ? boom.GetComponent<BossBoom>() : null;
+            if (bossBoom != null)
+            {
+                boom.transform.position = bossPos;
+                bossBoom.StartCoBossBoom(boss);
+            }
 
-        GameObject boom = Managers.Resource.Instantiate("BossDeathBoom");
-        boom.transform.position = boss.transform.position;
-        boss.GetComponent<Collider>().enabled = false;
-        boom.GetComponent<BossBoom>().StartCoBossBoom(boss);
+            yield return new WaitForSeconds(0.5f);
 
-        yield return new WaitForSeconds(0.5f);
+            // 하얗게
+            if (sr != null)
+            {
+                sr.material = Managers.Resource.Load<Material>("PaintWhiteMat");
+                // 보스가 사라진 뒤에도 트윈이 살아 스프라이트 색을 만지면 널참조가 난다.
+                sr.DOColor(Color.white, 2f).SetLink(sr.gameObject);
+            }
 
-        // 하얗게
-        boss.GetOrAddComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>("PaintWhiteMat");
-        // 보스가 사라진 뒤에도 트윈이 살아 스프라이트 색을 만지면 널참조가 난다.
-        sr.DOColor(Color.white, 2f).SetLink(sr.gameObject);
+            yield return new WaitForSeconds(0.5f);
 
-        yield return new WaitForSeconds(0.5f);
+            light = Managers.Resource.Instantiate("BossDeathLight");
+            if (light != null)
+            {
+                light.transform.position = bossPos;
+                light.transform.localScale = new Vector3(1f, 2f, 1f);
+            }
+            yield return new WaitForSeconds(1f);
+        }
+        finally
+        {
+            // 연출이 어디서 끊겨도 쓰러진 보스는 치운다.
+            Managers.Resource.Destroy(light);
+            Managers.Resource.Destroy(boss);
+        }
 
-        GameObject light = Managers.Resource.Instantiate("BossDeathLight");
-        light.transform.position = boss.transform.position;
-        light.transform.localScale = new Vector3(1f, 2f, 1f);
-        yield return new WaitForSeconds(1f);
-
-
-        Managers.Resource.Destroy(light);
-        Managers.Resource.Destroy(boss);
         GameObject poofCloudArcs = Managers.Resource.Instantiate("PoofCloudArcs");
-        poofCloudArcs.transform.position = bossPos;
+        if (poofCloudArcs != null)
+            poofCloudArcs.transform.position = bossPos;
 
         GameObject poofCloudNova = Managers.Resource.Instantiate("PoofCloudNova");
-        poofCloudNova.transform.position = bossPos;
+        if (poofCloudNova != null)
+            poofCloudNova.transform.position = bossPos;
     }
 
+    /// <summary>100층 위층 계단(다음 층이 없다). 결말 흐름으로 간다 — 이미 봤으면 크레딧과 엔딩 씬만.</summary>
     public void CoStartEndingScene()
     {
-        CoroutineManager.StartCoroutine(StartEndingScene());
-    }
-    IEnumerator StartEndingScene()
-    {
-        Managers.UI.CloseGameSceneUI();
-        Managers.Game.OnDirect = true;
-
-        Managers.Sound.FadeAndStopBGM(1.5f);
-
-        CoroutineManager.StartCoroutine(CameraController.CoExposure(1.5f, CameraController.Exposure.Black));
-        yield return new WaitForSeconds(1.5f);
-
-        Managers.Scene.LoadScene(Define.Scene.EndingScene);
-        Managers.Game.OnDirect = false;
+        StoryDirector.OnFinalStairs();
     }
 }

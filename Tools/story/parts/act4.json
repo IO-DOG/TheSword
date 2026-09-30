@@ -1,0 +1,278 @@
+{
+  "version": 1,
+  "speakers": {
+    "damian": { "kr": "데미안" },
+    "sword": { "kr": "에고소드" },
+    "boss4": { "kr": "검은 태양" }
+  },
+  "scenes": [
+    {
+      "id": "ch4_card",
+      "kind": "card",
+      "trigger": "chapter_start:4",
+      "staging": "챕터 4 카드. 81층에 처음 들어서면 튼다. Intro05(세로로 긴 그림)를 아래에서 위로 천천히 훑는다(R6): 벼랑 위 후드 → 기둥 → 꿰뚫린 검은 해와 초승달. 01·02 는 팬이 기둥을 오르는 동안, 03 은 팬이 멈춰 검은 해와 초승달이 한 화면에 들어올 때 띄운다. 04 에서 Intro03(거꾸로 떨어지는 탑)으로 바꾼다. 음악은 무음. 끝나면 곧바로 ch4_start(R1). R1 이 없으면 이 카드를 빼고 ch4_start.01 을 내레이션 '탑이 꿰고 있던 것은 해와 달이 아니었다. 외눈과, 휜 칼날이었다.' 로 바꾼다.",
+      "lines": [
+        { "key": "ch4_card.01", "speaker": "narration", "image": "Intro05", "kr": "전설 속의 탑은\n검은 해와 초승달을 꿰고 있었다." },
+        { "key": "ch4_card.02", "speaker": "narration", "kr": "탑이 꿰고 있던 것은\n해와 달이 아니었다." },
+        { "key": "ch4_card.03", "speaker": "narration", "kr": "외눈과,\n휜 칼날이었다." },
+        { "key": "ch4_card.04", "speaker": "narration", "image": "Intro03", "kr": "자물쇠가 빠진 날,\n탑은 머리부터 떨어졌다." }
+      ]
+    },
+    {
+      "id": "ch4_start",
+      "kind": "dialogue",
+      "trigger": "chapter_start:4",
+      "staging": "81층 문턱, ch4_card 바로 뒤. 보랏빛 황혼 조명 아래 티끌 파티클이 위로 떠오른다(챕터 4 공기). 카메라를 천천히 위로 들어 티끌이 빨려 오르는 쪽을 보인다. 01 에서 마검 초상화가 바로 떠서, 직전 카드의 검은 해·초승달과 초상화의 둥근 눈·휜 날이 나란히 읽히게 한다. 음악은 여기서 챕터곡(챕터 4)을 시작. 뒤이어 trait_armor. 81~89층의 마검은 값만 말한다.",
+      "lines": [
+        { "key": "ch4_start.01", "speaker": "sword", "emotion": "Silence", "kr": "……" },
+        { "key": "ch4_start.02", "speaker": "damian", "emotion": "Thinking", "kr": "티끌이 위로 빨려 오르는군.\n누가 들이마시기라도 하듯." },
+        { "key": "ch4_start.03", "speaker": "sword", "emotion": "Normal", "kr": "눈은 계약대로 빌려주마.\n입은… 못 빌려주겠다." },
+        { "key": "ch4_start.04", "speaker": "damian", "emotion": "Normal", "kr": "숫자만 보이면 돼." }
+      ]
+    },
+    {
+      "id": "f85_honest",
+      "kind": "dialogue",
+      "trigger": "floor_first:85",
+      "staging": "85층 문턱, 맵 위 대화. 싸움 없는 틈. 데미안은 대기. 02 에서 마검의 NoAnswer 이모트. 음악은 챕터곡 그대로.",
+      "lines": [
+        { "key": "f85_honest.01", "speaker": "damian", "emotion": "Normal", "kr": "네 숫자는\n한 번도 틀린 적 없었지." },
+        { "key": "f85_honest.02", "speaker": "sword", "emotion": "Silence", "kr": "……" },
+        { "key": "f85_honest.03", "speaker": "damian", "emotion": "Normal", "kr": "그거면 됐어." },
+        { "key": "f85_honest.04", "speaker": "sword", "emotion": "Normal", "kr": "……숫자는 계속 보여 주마." }
+      ]
+    },
+    {
+      "id": "f90_rule",
+      "kind": "dialogue",
+      "trigger": "floor_first:90",
+      "staging": "90층 문턱, 맵 위 대화. 데미안은 대기. 02 는 60층 뒤 마검의 첫 미소다. 초상화 감정(Smile)만 쓰고 웃음소리나 Grinning 이모트는 넣지 않는다. 08~09 는 워프석 반지로 아래층에 돌아가 남겨 둔 몬스터를 잡을 수 있다는 것(새벽 결말 조건)을 읽히게 하는 줄이다. 음악은 챕터곡 그대로.",
+      "lines": [
+        { "key": "f90_rule.01", "speaker": "damian", "emotion": "Normal", "kr": "비싼 놈은 나중에.\n물약은 싸운 다음에 밟고.\n숨은 이어진다." },
+        { "key": "f90_rule.02", "speaker": "sword", "emotion": "Smile", "kr": "…그거 이몸 대사다, 허접." },
+        { "key": "f90_rule.03", "speaker": "damian", "emotion": "Normal", "kr": "귀에 못이 박혔거든." },
+        { "key": "f90_rule.04", "speaker": "sword", "emotion": "Normal", "kr": "……하나 더 외워 둬라.\n왕좌는 비어 있을 수 없다." },
+        { "key": "f90_rule.05", "speaker": "sword", "emotion": "Normal", "kr": "누군가 제 발로 앉아야\n탑이 멈춘다.\n안 그러면 마을부터 먹힌다." },
+        { "key": "f90_rule.06", "speaker": "sword", "emotion": "Normal", "kr": "…배부른 자물쇠라면 모를까." },
+        { "key": "f90_rule.07", "speaker": "damian", "emotion": "Question", "kr": "배부르려면?" },
+        { "key": "f90_rule.08", "speaker": "sword", "emotion": "Normal", "kr": "먹여야지. 네가 벤 만큼 찬다.\n아래층에 두고 온 놈들도\n아직 거기 있다." },
+        { "key": "f90_rule.09", "speaker": "damian", "emotion": "Thinking", "kr": "…반지가 있었지." },
+        { "key": "f90_rule.10", "speaker": "damian", "emotion": "Question", "kr": "그래서, 왕좌에 닿으면?" },
+        { "key": "f90_rule.11", "speaker": "sword", "emotion": "Normal", "kr": "거기 가서 말하마." }
+      ]
+    },
+    {
+      "id": "f95_price",
+      "kind": "dialogue",
+      "trigger": "floor_first:95",
+      "staging": "95층 문턱, 맵 위 대화. 티끌이 위로 떠오른다. 07~09 동안 카메라를 데미안 쪽으로 천천히 당긴다. 음악은 챕터곡 그대로.",
+      "lines": [
+        { "key": "f95_price.01", "speaker": "sword", "emotion": "Normal", "kr": "……이몸을 벼린 대장장이는\n두 마디를 남겼다." },
+        { "key": "f95_price.02", "speaker": "sword", "emotion": "Normal", "kr": "'굶주림은 굶주림으로만 묶인다.'\n…입이 먼저 외웠던 그 말이다." },
+        { "key": "f95_price.03", "speaker": "sword", "emotion": "Normal", "kr": "다른 하나는 이거다.\n'배부른 것만이 굶주림을 끝낸다.'" },
+        { "key": "f95_price.04", "speaker": "sword", "emotion": "Silence", "kr": "이몸은 그 말을\n믿은 적이 없다.\n배불러 본 적이 없으니까." },
+        { "key": "f95_price.05", "speaker": "damian", "emotion": "Thinking", "kr": "용광로에선 배부르다더니." },
+        { "key": "f95_price.06", "speaker": "sword", "emotion": "Silence", "kr": "……거짓말이었다." },
+        { "key": "f95_price.07", "speaker": "damian", "emotion": "Normal", "kr": "계산해 봤다.\n너 없이 여기까지 오는 값." },
+        { "key": "f95_price.08", "speaker": "sword", "emotion": "Question", "kr": "……얼마던데." },
+        { "key": "f95_price.09", "speaker": "damian", "emotion": "Silence", "kr": "…비싸더군." }
+      ]
+    },
+    {
+      "id": "f99_eve",
+      "kind": "dialogue",
+      "trigger": "floor_first:99",
+      "staging": "99층 문턱. 02 에서 마검의 Sleepy 이모트(16·66층과 같은 자리). 60층 뒤 처음으로 진짜 잠드는 것이다. 03 에서 데미안은 한 박자 서 있기만 한다(대기). 음악은 챕터곡 그대로.",
+      "lines": [
+        { "key": "f99_eve.01", "speaker": "sword", "emotion": "Normal", "kr": "……이상하군.\n이런 데서 졸리다니." },
+        { "key": "f99_eve.02", "speaker": "sword", "emotion": "Sleep", "kr": "……음냐." },
+        { "key": "f99_eve.03", "speaker": "damian", "emotion": "Silence", "kr": "……" },
+        { "key": "f99_eve.04", "speaker": "damian", "emotion": "Normal", "kr": "자라. 깨울게." }
+      ]
+    },
+    {
+      "id": "f100_lesson",
+      "kind": "dialogue",
+      "trigger": "floor_first:100",
+      "staging": "100층 문턱. 들어설 때 마검의 Sleepy 이모트가 떠 있다가 02 에서 걷힌다. 음악은 챕터곡. 뒤이어 몹 다섯, 그다음 boss4_intro. 04 는 사실이다 — 예측은 이어 온 치명 횟수로 잰다.",
+      "lines": [
+        { "key": "f100_lesson.01", "speaker": "damian", "emotion": "Normal", "kr": "일어나. 다 왔어." },
+        { "key": "f100_lesson.02", "speaker": "sword", "emotion": "Normal", "kr": "…깼다." },
+        { "key": "f100_lesson.03", "speaker": "sword", "emotion": "Normal", "kr": "마지막 수업이다." },
+        { "key": "f100_lesson.04", "speaker": "sword", "emotion": "Normal", "kr": "이 층 끝에 선 놈의 숫자는\n앞에서 누굴 어떤 순서로\n베느냐로 바뀐다." },
+        { "key": "f100_lesson.05", "speaker": "sword", "emotion": "Normal", "kr": "세던 숨은 이어진다." },
+        { "key": "f100_lesson.06", "speaker": "damian", "emotion": "Normal", "kr": "알아." },
+        { "key": "f100_lesson.07", "speaker": "sword", "emotion": "Smile", "kr": "…알면 됐다." }
+      ]
+    },
+    {
+      "id": "boss4_intro",
+      "kind": "dialogue",
+      "trigger": "boss_intro:4",
+      "staging": "100층 끝, 심연의 거수(가장 큰 그림, 짙은 청록)에게 처음 부딪혔을 때. 레터박스를 내리고 카메라를 거수 쪽으로 옮긴다. 거수는 대기 애니메이션, 초상화 자리에는 거수의 전투 스프라이트. 보스 줄(01·02·05)마다 화면을 짧게 흔든다 — 포효는 마검을 부르는 소리다. 06 에서 60층 뒤 사라졌던 웃음이 돌아온다. 음악은 보스 입장곡. 끝나면 곧바로 전투.",
+      "lines": [
+        { "key": "boss4_intro.01", "speaker": "boss4", "kr": "…배고프다.\n배고프다." },
+        { "key": "boss4_intro.02", "speaker": "boss4", "kr": "…돌아와라.\n내 눈." },
+        { "key": "boss4_intro.03", "speaker": "damian", "emotion": "Thinking", "kr": "…저놈이 찾는 게\n네 눈이냐." },
+        { "key": "boss4_intro.04", "speaker": "sword", "emotion": "Normal", "kr": "……원래 저놈 거다.\n이몸 눈은, 그 한 조각이다." },
+        { "key": "boss4_intro.05", "speaker": "boss4", "kr": "배고프다.\n돌아와라." },
+        { "key": "boss4_intro.06", "speaker": "sword", "emotion": "Smile", "kr": "크하핫! 시끄럽다.\n이몸은 지금 밥 먹는 중이다!" },
+        { "key": "boss4_intro.07", "speaker": "damian", "emotion": "Normal", "kr": "얼마?" },
+        { "key": "boss4_intro.08", "speaker": "sword", "emotion": "Smile", "kr": "비싸다.\n…그래도 산다.\n가자, 허접!" }
+      ]
+    },
+    {
+      "id": "ending_choice",
+      "kind": "choice",
+      "trigger": "ending:choice",
+      "staging": "100층 보스를 쓰러뜨린 직후(boss_defeat:4 장면은 없다). 보스 폭발·흰 빛 뒤, 거수가 쓰러진 자리에 보스 포탈(검은 손)과 보라 소용돌이를 띄워 '왕좌의 입' 으로 쓴다(왕좌 소품은 없다). 화면이 흔들리고 레터박스가 내려온다. 카메라는 그 자리를 내려다본다. 음악은 끊는다. 11 앞에 한 박자 여백 — 세드릭의 경고 때문에 플레이어가 이 부름을 두려워해야 한다. 13 뒤 선택지. seal → ending:seal. hold → 레벨 ≥ T 면 ending:dawn, 아니면 ending:hold (R4).",
+      "lines": [
+        { "key": "ending_choice.01", "speaker": "sword", "emotion": "Normal", "kr": "…저기다. 왕좌." },
+        { "key": "ending_choice.02", "speaker": "sword", "emotion": "Normal", "kr": "계약을 끝낼 시간이다." },
+        { "key": "ending_choice.03", "speaker": "damian", "emotion": "Silence", "kr": "……" },
+        { "key": "ending_choice.04", "speaker": "sword", "emotion": "Normal", "kr": "이몸을 저기 꽂아라." },
+        { "key": "ending_choice.05", "speaker": "damian", "emotion": "Thinking", "kr": "…네 계획은\n날 앉히는 거였잖아." },
+        { "key": "ending_choice.06", "speaker": "sword", "emotion": "Smile", "kr": "계획은 바뀌는 거다.\n크하핫." },
+        { "key": "ending_choice.07", "speaker": "sword", "emotion": "Normal", "kr": "계약은 둘 중 하나가\n부서져야 끝난다.\n이번엔 이몸 쪽이다." },
+        { "key": "ending_choice.08", "speaker": "damian", "emotion": "Question", "kr": "넌?" },
+        { "key": "ending_choice.09", "speaker": "sword", "emotion": "Normal", "kr": "잔다.\n원래 잘 자잖나." },
+        { "key": "ending_choice.10", "speaker": "sword", "emotion": "Normal", "kr": "이몸 눈엔 전부 값이었다.\n…이제 너만 빼고." },
+        { "key": "ending_choice.11", "speaker": "sword", "emotion": "Normal", "kr": "…데미안." },
+        { "key": "ending_choice.12", "speaker": "damian", "emotion": "Surprise", "kr": "…알고 있었어?" },
+        { "key": "ending_choice.13", "speaker": "sword", "emotion": "Smile", "kr": "처음부터.\n계약서에 네가 썼잖나." }
+      ],
+      "choices": [
+        { "id": "seal", "kr": "검을 왕좌에 꽂는다" },
+        { "id": "hold", "kr": "검을 놓지 않는다" }
+      ]
+    },
+    {
+      "id": "ending_seal",
+      "kind": "dialogue",
+      "trigger": "ending:seal",
+      "staging": "선택 seal. 데미안이 계약 자세(ContractSword_F, 루프)로 검을 머리 위로 든다. 계약의 빛기둥이 이번에는 위에서 아래로 떨어져 소용돌이에 꽂힌다. 칼을 꽂는 동작은 없다 — 빛기둥과 흰 빛이 그 몫을 한다. 소용돌이가 멎고 하얗게 번쩍한다. 01·02 는 번쩍임 뒤에. 03 부터 데미안은 대기, 마검 초상화만 말한다. 10 에서 마검의 Sleepy 이모트, 하얗게 번쩍한 뒤 암전. 11 은 검은 화면 위 내레이션. 음악은 없다(크레딧에서 타이틀곡). 이어서 epilogue_seal.",
+      "lines": [
+        { "key": "ending_seal.01", "speaker": "narration", "kr": "가브에서는 전사의 무덤에\n그가 쓰던 칼을 꽂는다." },
+        { "key": "ending_seal.02", "speaker": "narration", "kr": "데미안은,\n제가 쓰던 칼을 꽂았다." },
+        { "key": "ending_seal.03", "speaker": "sword", "emotion": "Smile", "kr": "잘했다.\n이몸 계약자답다." },
+        { "key": "ending_seal.04", "speaker": "sword", "emotion": "Smile", "kr": "이번엔 눈 뜨고 잔다.\n이몸 특기잖나." },
+        { "key": "ending_seal.05", "speaker": "sword", "emotion": "Normal", "kr": "늙어 죽거든 이리 와라.\n계약이다." },
+        { "key": "ending_seal.06", "speaker": "damian", "emotion": "Normal", "kr": "…계약은 계약이지." },
+        { "key": "ending_seal.07", "speaker": "sword", "emotion": "Normal", "kr": "…이번엔 아무도 안 부르고\n기다리마." },
+        { "key": "ending_seal.08", "speaker": "damian", "emotion": "Silence", "kr": "…잘 자, 잠꾸러기." },
+        { "key": "ending_seal.09", "speaker": "sword", "emotion": "Normal", "kr": "마지막으로 한 번\n끌어올려 주마. 문턱까지." },
+        { "key": "ending_seal.10", "speaker": "sword", "emotion": "Sleep", "kr": "…음냐." },
+        { "key": "ending_seal.11", "speaker": "narration", "kr": "외눈은 뜬 채로 잠들었다.\n다시는 값을 말하지 않았다." }
+      ]
+    },
+    {
+      "id": "ending_hold",
+      "kind": "dialogue",
+      "trigger": "ending:hold",
+      "staging": "선택 hold, 레벨 < T (R4). 보스 포탈의 검은 손들이 둘을 함께 끌어당긴다. 데미안은 계약 자세(ContractSword_F) 그대로 버틴다. 03·04 에서 보라 소용돌이가 검 쪽으로 빨려 들다 되밀려 나고 화면이 흔들린다. 07 뒤 데미안이 검은 손 쪽으로 걸어 들어간다(걷기) — 앉는 동작은 없으니 검은 손이 끌어들이는 것으로 그 몫을 한다. 13 앞에서 하얗게 번쩍하고 암전, 13 은 검은 화면 위 내레이션. 음악은 마검 조우곡(01 부터). 슬프되 따뜻하게. 이어서 epilogue_hold.",
+      "lines": [
+        { "key": "ending_hold.01", "speaker": "sword", "emotion": "Panic", "kr": "…놔라!\n이몸이 가면 된다!" },
+        { "key": "ending_hold.02", "speaker": "damian", "emotion": "Normal", "kr": "싫어." },
+        { "key": "ending_hold.03", "speaker": "sword", "emotion": "Angry", "kr": "……그럼 저놈을 삼켜 보마." },
+        { "key": "ending_hold.04", "speaker": "sword", "emotion": "Panic", "kr": "……안 된다. 아직 배가 고프다.\n이몸으로는 못 삼킨다.\n배고픈 놈은… 먹힌다." },
+        { "key": "ending_hold.05", "speaker": "damian", "emotion": "Thinking", "kr": "그럼 누가 앉아야겠군." },
+        { "key": "ending_hold.06", "speaker": "sword", "emotion": "Angry", "kr": "바보냐! 네가 앉으면—" },
+        { "key": "ending_hold.07", "speaker": "damian", "emotion": "Normal", "kr": "알아. 네 계획대로잖아.\n제 발로 앉는 거니까, 받아 주겠지.\n…어차피 돌아갈 데도 없고." },
+        { "key": "ending_hold.08", "speaker": "sword", "emotion": "Silence", "kr": "…이몸도 없다." },
+        { "key": "ending_hold.09", "speaker": "sword", "emotion": "Normal", "kr": "그럼 이몸도 남는다.\n계약서에 있잖나.\n'영원한 동반자'." },
+        { "key": "ending_hold.10", "speaker": "sword", "emotion": "Normal", "kr": "데미안." },
+        { "key": "ending_hold.11", "speaker": "damian", "emotion": "Normal", "kr": "그 조항, 이제야 마음에 드네." },
+        { "key": "ending_hold.12", "speaker": "damian", "emotion": "Normal", "kr": "교대로 자자. 네가 먼저." },
+        { "key": "ending_hold.13", "speaker": "narration", "kr": "탑이 흔들렸다.\n그리고 하늘을 향해,\n떨어지기 시작했다." }
+      ]
+    },
+    {
+      "id": "ending_dawn",
+      "kind": "dialogue",
+      "trigger": "ending:dawn",
+      "staging": "선택 hold, 레벨 ≥ T (R4). 참 결말. 01·02 는 ending_hold 와 같다(검은 손이 둘을 끌어당긴다). 03·04 에서 소용돌이가 검 쪽으로 빨려 들다 멈춘다. 11 에서 데미안이 계약 자세(ContractSword_F)로 검을 치켜든다. 계약의 빛기둥이 솟고 보라 소용돌이가 검으로 빨려 든다. 12 뒤 하얗게 번쩍, 카메라가 위로 오른다. 13 은 흰 화면 위 내레이션. 14 부터 흰 빛이 걷히고 데미안은 대기. 음악은 타이틀곡(11 부터). 이어서 epilogue_dawn.",
+      "lines": [
+        { "key": "ending_dawn.01", "speaker": "sword", "emotion": "Panic", "kr": "…놔라!\n이몸이 가면 된다!" },
+        { "key": "ending_dawn.02", "speaker": "damian", "emotion": "Normal", "kr": "싫어." },
+        { "key": "ending_dawn.03", "speaker": "sword", "emotion": "Question", "kr": "……이상하다." },
+        { "key": "ending_dawn.04", "speaker": "sword", "emotion": "Surprise", "kr": "배가 부르다.\n태어나서 처음이다." },
+        { "key": "ending_dawn.05", "speaker": "damian", "emotion": "Normal", "kr": "그런 날은 안 온다더니." },
+        { "key": "ending_dawn.06", "speaker": "sword", "emotion": "Normal", "kr": "…왔다. 네가 먹였잖나." },
+        { "key": "ending_dawn.07", "speaker": "damian", "emotion": "Thinking", "kr": "넘치면 버려진다며." },
+        { "key": "ending_dawn.08", "speaker": "sword", "emotion": "Smile", "kr": "…크하핫!\n이몸이 가르친 걸\n이몸한테 써먹는군." },
+        { "key": "ending_dawn.09", "speaker": "sword", "emotion": "Smile", "kr": "좋다. 저놈을 삼키마.\n배부른 놈이 먹는 거다." },
+        { "key": "ending_dawn.10", "speaker": "sword", "emotion": "Normal", "kr": "가득 찬 그릇엔\n허기가 못 머문다.\n넘쳐서, 버려진다." },
+        { "key": "ending_dawn.11", "speaker": "sword", "emotion": "Normal", "kr": "데미안. 이몸을 들어라." },
+        { "key": "ending_dawn.12", "speaker": "sword", "emotion": "Smile", "kr": "…또 불렀군. 버리지도 않았는데.\n세드릭 녀석, 틀렸다." },
+        { "key": "ending_dawn.13", "speaker": "narration", "kr": "넘친 만큼은 버려졌다.\n탑이 빛가루가 되어 무너졌다." },
+        { "key": "ending_dawn.14", "speaker": "damian", "emotion": "Silence", "kr": "…얼마야, 나." },
+        { "key": "ending_dawn.15", "speaker": "sword", "emotion": "Normal", "kr": "안 보인다.\n네 머리 위엔 이제\n아무것도 없다." },
+        { "key": "ending_dawn.16", "speaker": "sword", "emotion": "Normal", "kr": "계약을 풀어 주마.\n네 영혼은 이제 필요 없다." },
+        { "key": "ending_dawn.17", "speaker": "damian", "emotion": "Normal", "kr": "그건 가지고 있어.\n난 어차피 잘 잃어버려." },
+        { "key": "ending_dawn.18", "speaker": "sword", "emotion": "Smile", "kr": "…크하핫." }
+      ]
+    },
+    {
+      "id": "epilogue_seal",
+      "kind": "card",
+      "trigger": "epilogue:seal",
+      "staging": "후일담 카드(seal). Intro04(밤하늘의 거꾸로 선 탑)로 시작해 '제 하늘로 떨어져 오르는' 탑으로 읽힌다. 02 부터 Parchment. TowerArrival·TowerGraves 는 탑이 그려져 있어 쓰지 않는다. Ending 그림도 넣지 않는다(R5). 음악은 무음, 이어지는 크레딧에서 타이틀곡.",
+      "lines": [
+        { "key": "epilogue_seal.01", "speaker": "narration", "image": "Intro04", "kr": "그 밤, 촌장은 보았다.\n탑이 제 하늘로\n떨어져 올라가는 것을." },
+        { "key": "epilogue_seal.02", "speaker": "narration", "image": "Parchment", "kr": "돌아온 용병이 반지를 내밀었다.\n'렌은 끝까지 돌아오려 했어요.'" },
+        { "key": "epilogue_seal.03", "speaker": "narration", "kr": "'알고 있었소. 그 칼이 무엇인지.\n알면서 당신을 들여보냈소.'\n'알아요.'" },
+        { "key": "epilogue_seal.04", "speaker": "narration", "kr": "'…그 칼은?'\n'자요.'" },
+        { "key": "epilogue_seal.05", "speaker": "narration", "kr": "촌장은 그제야 이름을 물었다.\n'데미안이에요.'" },
+        { "key": "epilogue_seal.06", "speaker": "narration", "kr": "데미안은 비어 있던 무덤에\n허리에 차던 제 칼을 꽂았다.\n마검이 잠든 곳은 너무 깊었으니까." },
+        { "key": "epilogue_seal.07", "speaker": "narration", "kr": "밤하늘의 검은 별은\n가끔 한 번씩 깜빡인다.\n졸린 눈처럼." }
+      ]
+    },
+    {
+      "id": "epilogue_hold",
+      "kind": "card",
+      "trigger": "epilogue:hold",
+      "staging": "후일담 카드(hold). Intro05 를 아래에서 위로 훑는다(R6) — 탑이 다시 검은 해를 꿴 모습에서 멈춘다. 04 에서 Intro01(길드 게시판). Ending 그림은 넣지 않는다(R5). 음악은 마검 조우곡을 잇는다.",
+      "lines": [
+        { "key": "epilogue_hold.01", "speaker": "narration", "image": "Intro05", "kr": "탑은 제 하늘로 돌아갔다.\n검은 해를 꿴 채로." },
+        { "key": "epilogue_hold.02", "speaker": "narration", "kr": "탑이 있던 자리에서\n촌장은 반지 하나를 주웠다." },
+        { "key": "epilogue_hold.03", "speaker": "narration", "kr": "주인이 끝내 오지 않은 무덤에\n그는 반지를 묻었다.\n끝내, 이름은 묻지 못했다." },
+        { "key": "epilogue_hold.04", "speaker": "narration", "image": "Intro01", "kr": "길드 게시판의 낡은 의뢰에\n누군가 '완료' 라고 적었다." },
+        { "key": "epilogue_hold.05", "speaker": "narration", "kr": "귀 밝은 아이들은 말한다.\n해 질 녘이면 하늘에서\n두 목소리가 투닥거린다고." },
+        { "key": "epilogue_hold.06", "speaker": "narration", "kr": "'크하핫!'\n'시끄러워. 네 차례야.'" }
+      ]
+    },
+    {
+      "id": "epilogue_dawn",
+      "kind": "card",
+      "trigger": "epilogue:dawn",
+      "staging": "후일담 카드(dawn, 참 결말). ForestLine(선화) → ForestColor(채색): 세상이 색을 되찾는다. 06 에서 Intro02(의뢰서를 찢는 손) — 인트로의 '찌익' 과 짝이다. 08 은 Loading2(지도 든 데미안과 짜증난 에고소드). Ending 그림은 여기 넣지 않는다 — 크레딧 뒤 엔딩 씬이 한 번만 띄운다(6.7절, R5). 음악은 타이틀곡을 잇는다. 농담은 08 한 장면뿐이다.",
+      "lines": [
+        { "key": "epilogue_dawn.01", "speaker": "narration", "image": "ForestLine", "kr": "탑이 있던 자리에 아침이 왔다." },
+        { "key": "epilogue_dawn.02", "speaker": "narration", "image": "ForestColor", "kr": "십이 년 만에,\n가브의 하늘이 개었다." },
+        { "key": "epilogue_dawn.03", "speaker": "narration", "kr": "마검은 생애 두 번째로 사과했다.\n'영감. 렌 일은… 미안하다.'" },
+        { "key": "epilogue_dawn.04", "speaker": "narration", "kr": "'…늦었소.\n그래도, 들었소.'" },
+        { "key": "epilogue_dawn.05", "speaker": "narration", "kr": "반지는 렌의 아버지에게 돌아갔다.\n촌장은 비어 있던 무덤을 흙으로 덮고,\n그제야 이름을 물었다." },
+        { "key": "epilogue_dawn.06", "speaker": "narration", "image": "Intro02", "kr": "그가 왕국에 올린 보고는\n한 줄이었다.\n'탑의 비밀: 없음.'" },
+        { "key": "epilogue_dawn.07", "speaker": "narration", "kr": "하사품 공고는\n그가 직접 떼어 찢었다." },
+        { "key": "epilogue_dawn.08", "speaker": "narration", "image": "Loading2", "kr": "'크하핫! 다음은 어디냐, 데미안!'\n'…얼마 주는데.'" }
+      ]
+    },
+    {
+      "id": "credits",
+      "kind": "credits",
+      "trigger": "credits",
+      "staging": "결말 셋이 함께 쓰는 크레딧. 줄이 아래에서 위로 흐른다. 빈 줄 대신 01 뒤·03 뒤·07 뒤에 간격을 둔다. 제작진은 이름만, 역할은 적지 않는다. 음악은 직전 결말을 잇는다: seal 은 여기서 타이틀곡을 시작, dawn 은 타이틀곡, hold 는 마검 조우곡. 끝나면 엔딩 씬: dawn 뒤에만 Ending 그림(R5), seal·hold 뒤에는 몇 초 검은 화면. 09 는 모든 결말의 인사다 — dawn 은 뒤이어 Ending 그림이 같은 인사를 한 번 더 보이므로 그림이 뜨기 전 잠깐 암전을 둔다.",
+      "lines": [
+        { "key": "credits.01", "speaker": "narration", "kr": "TheSword" },
+        { "key": "credits.02", "speaker": "narration", "kr": "제작" },
+        { "key": "credits.03", "speaker": "narration", "kr": "stopresent\ntruemanburbank\nsamryoug" },
+        { "key": "credits.04", "speaker": "narration", "kr": "고마운 에셋" },
+        { "key": "credits.05", "speaker": "narration", "kr": "Retro Arsenal\nFebucci Text Animator\nDOTween" },
+        { "key": "credits.06", "speaker": "narration", "kr": "Silver font\nDNF Bit Bit font" },
+        { "key": "credits.07", "speaker": "narration", "kr": "polygonTrees\nSimple Nature Pack" },
+        { "key": "credits.08", "speaker": "narration", "kr": "끝까지 값을 치러 준 당신에게." },
+        { "key": "credits.09", "speaker": "narration", "kr": "Thank you for playing" }
+      ]
+    }
+  ]
+}

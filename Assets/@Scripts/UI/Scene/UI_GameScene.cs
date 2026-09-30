@@ -3,6 +3,7 @@ using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
@@ -62,6 +63,17 @@ public class UI_GameScene : UI_Scene
     float _playTime;
     float _playTimeFlushed;
 
+    // 전투 예측(마검의 눈) — 계약 뒤에 M 도감·V 맵 위 숫자. 판마다 처음 한 번 그 두 키를 알려 준다
+    // (새 게임이면 GameManager.DeleteGameData 가 지운다 — 다른 ISFIRST* 안내와 같다).
+    public const string KeysHintPref = "HINT_FORECAST_KEYS";
+    const float HintFade = 0.6f;
+    bool _keysHintShown;
+    TMP_Text _critText;             // 치명까지 N — 전투 사이에 이어지는 치명 횟수
+    TMP_Text _guardText;            // 방패가 올라와 있다 — 다음 한 대를 막는다
+    CanvasGroup _hint;
+    TMP_Text _hintText;
+    float _hintUntil;
+
     public override bool Init()
     {
         if (base.Init() == false)
@@ -111,6 +123,15 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false);
         #endregion
 
+        // 전투 예측(마검의 눈): 맵 위 숫자, 지는 싸움 앞의 확인, 도감(M·마검 단추), 치명·방패 표시.
+        ForecastOverlay.Spawn(transform);
+        FightGate.Add(FatalFightGuard.Ask, FatalFightGuard.Order);
+        GetImage((int)Images.MainUISwordAImage).gameObject.BindEvent(UI_MonsterManualPopup.Toggle);
+        BuildCombatState();
+        _keysHintShown = PlayerPrefs.GetInt(KeysHintPref, 0) == 1;
+        // 언어를 바꾸면 HUD 글자(층 이름·치명 표시)를 다시 칠한다.
+        GameSettings.Changed += Refresh;
+
         Managers.Game.GenerateMap(Managers.Game.PlayerData.CurStageid);
         // 이동 속도·전투 배속은 낀 장비가 정한다(기준 1 에 부츠 배수). 예전에는 여기서 1 로 덮어쓰기만 해서
         // 부츠·목걸이 효과가 씬을 다시 올릴 때마다(이어하기·죽은 뒤) 사라졌다.
@@ -134,10 +155,8 @@ public class UI_GameScene : UI_Scene
         // UI 활성화 여부 체크
         if (PlayerPrefs.GetInt("ISOPENINVENUI") == 0) // 인벤 활성화 x
             OffUIInventory();
-        if (PlayerPrefs.GetInt("ISOPENWARPUI") == 0)
-            OffUIWarp();
-        if (PlayerPrefs.GetInt("ISOPENCLASSUI") == 0)
-            OffUISword();
+        // 워프·마검 단추는 Refresh 가 정한다(반지를 꼈는가, 계약했는가). 예전의 ISOPENWARPUI·ISOPENPORTAL·
+        // ISOPENSWORD·ISOPENCLASSUI 는 1 로 켜 주는 곳이 없어서, 씬을 올릴 때마다 단추를 도로 숨겼다.
 
         GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
         {
@@ -197,11 +216,6 @@ public class UI_GameScene : UI_Scene
         //Managers.Game.PlayerData.CurStageid = 3;
         //Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
         //#endregion
-
-        if (PlayerPrefs.GetInt("ISOPENSWORD") == 0)
-            GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(false);
-        if (PlayerPrefs.GetInt("ISOPENPORTAL") == 0)
-            GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(false);
 
         Managers.Game.OnFadeAction.Invoke(1f);
 
@@ -275,6 +289,7 @@ public class UI_GameScene : UI_Scene
     public void Refresh()
     {
         RefreshWarpButton();
+        RefreshSwordButton();
         GetText((int)Texts.MainUIMapNameText).text = Managers.GetString(Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].DungeonNameScriptID);
         GetText((int)Texts.PlayerLevelText).text = Managers.Game.PlayerData.Level.ToString();
         int level = Managers.Game.PlayerData.Level;
@@ -304,6 +319,9 @@ public class UI_GameScene : UI_Scene
 
         // ESC 설정창
         OnClickESC();
+
+        // M 도감 · V 맵 위 예측 숫자
+        OnForecastKeys();
 
         // Timer
         StartTimer();
@@ -384,6 +402,9 @@ public class UI_GameScene : UI_Scene
             return;
         if (isOpenInfoPopup)
             return;
+        // 도감·워프 창이 맵을 가리고 있다. 그 밑의 몬스터에 툴팁을 세우지 않는다.
+        if (Managers.UI.FindPopup<UI_MonsterManualPopup>() != null || (WarpUI.Instance != null && WarpUI.Instance.IsOpen))
+            return;
 
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -434,9 +455,61 @@ public class UI_GameScene : UI_Scene
         // 죽는 연출이 도는 중이다. 게임오버 창을 걷으면 되살리는 코루틴이 같이 죽는다.
         if (Managers.Game.IsPlayerDead)
             return;
+        // 워프 창은 팝업 스택 밖의 창이다. 떠 있으면 그것부터 닫는다.
+        if (WarpUI.Instance != null && WarpUI.Instance.IsOpen)
+        {
+            WarpUI.Instance.Close();
+            return;
+        }
         if (Managers.UI.EscapeTopPopup())
             return;
         TryOpenMenu();
+    }
+
+    /// <summary>
+    /// 게임 화면 위에 새 창(도감·워프)을 열어도 되는가. 흐름이 캐릭터를 쥐고 있거나(전투·연출·대화·문·계단·
+    /// 레버·입력 잠금·전투 직전 관문) 다른 창이 떠 있으면 안 된다 — 저절로 사라지는 층·보스 이름은 괜찮다.
+    /// 메뉴(TryOpenMenu)와 달리 전투창 위에서는 열지 않는다.
+    /// </summary>
+    public static bool CanOpenPanel()
+    {
+        GameManager g = Managers.Game;
+        if (g == null || g.Player == null || g.GameScene == null || g.IsPlayerDead || FightGate.Pending || Managers.UI.IsPaused)
+            return false;
+        if (g.OnBattle || g.OnDirect || g.OnConversation || g.OnFade || g.OnInteract || g.OnLever || g.OnInputLock)
+            return false;
+        UI_Popup top = Managers.UI.TopPopup;
+        return top == null || top is UI_StageNamePopup || top is UI_BossNamePopup;
+    }
+
+    // M 은 도감을 열고 닫는다(UI_MonsterManualPopup 이 계약·열 수 있는가를 본다). V 는 맵 위 숫자를 끄고 켠다.
+    // 계약 뒤 처음으로 손이 비면 두 키를 한 번 알려 준다 — 자동 플레이 중에는 알리지 않고 다음으로 미룬다.
+    void OnForecastKeys()
+    {
+        if (Input.GetKeyDown(KeyCode.M))
+            UI_MonsterManualPopup.Toggle();
+        else if (Input.GetKeyDown(KeyCode.V) && Managers.Game.PlayerData.IsContractedSword && CanOpenPanel())
+        {
+            GameSettings.ShowForecast = !GameSettings.ShowForecast;
+            ShowHint(Managers.GetString(GameSettings.ShowForecast ? ForecastUI.ForecastOn : ForecastUI.ForecastOff), 1.5f);
+        }
+
+        if (_keysHintShown == false && GameEvents.IsAutoPlaying == false
+            && Managers.Game.PlayerData.IsContractedSword && CanOpenPanel() && Managers.UI.TopPopup == null)
+        {
+            _keysHintShown = true;
+            PlayerPrefs.SetInt(KeysHintPref, 1);
+            ShowHint(Managers.GetString(ForecastUI.HintKeys), 6f);
+        }
+
+        // 알림은 막지 않고 떠 있다가 스스로 옅어진다. 멈춘 시간(메뉴)에도 흐르게 실시간으로 잰다.
+        if (_hint != null && _hint.gameObject.activeSelf)
+        {
+            float left = _hintUntil - Time.unscaledTime;
+            _hint.alpha = Mathf.Clamp01(left / HintFade);
+            if (left <= 0f)
+                _hint.gameObject.SetActive(false);
+        }
     }
 
     /// <summary>
@@ -496,6 +569,79 @@ public class UI_GameScene : UI_Scene
         // 이미지의 가로 크기를 텍스트 너비 + 여백으로 설정
         imageRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, textWidth + 30f);
 
+        RefreshCombatState();
+    }
+
+    /// <summary>
+    /// 공격·방어 칸 위에 한 줄씩: "치명까지 N" 과 "방패 준비". 둘 다 전투가 끝나도 이어져서 다음 싸움의 값을
+    /// 바꾸는데(BattleForecast), 예전에는 어디에도 보이지 않았다. 프리팹을 건드리지 않고 칸 옆에 글자만 세운다.
+    /// </summary>
+    void BuildCombatState()
+    {
+        _critText = CombatLabel(GetText((int)Texts.PlayerAttackText), "CritCountText");
+        _guardText = CombatLabel(GetText((int)Texts.PlayerDefenseText), "GuardReadyText");
+        _guardText.color = new Color32(140, 205, 255, 255);
+    }
+
+    // 능력치 칸(왼쪽 아래 기준, 2배 그림) 바로 위, 칸 폭 안에 맞춘다 — 옆 칸 위의 글자와 겹치지 않게.
+    // 메뉴가 PlayerInfo 를 가리면 같이 가려진다.
+    static TMP_Text CombatLabel(TMP_Text value, string name)
+    {
+        RectTransform box = (RectTransform)value.transform.parent;
+        Vector2 size = new Vector2(box.rect.width * box.localScale.x, box.rect.height * box.localScale.y);
+        TextMeshProUGUI label = CodeUI.NewText(box.parent, name, CodeUI.NumberFont, 20f, Color.white, TextAlignmentOptions.BottomLeft);
+        label.fontSharedMaterial = CodeUI.Outlined(label.font, 0.25f);
+        CodeUI.Place(label.rectTransform, Vector2.zero, Vector2.zero,
+            box.anchoredPosition + new Vector2(2f, size.y + 2f), new Vector2(size.x, 28f));
+        return CodeUI.Fit(label, 12f);
+    }
+
+    void RefreshCombatState()
+    {
+        if (_critText == null)
+            return;
+
+        // 1 이면 다음 한 대가 치명타다. 암살(치명만 맞는다)·불사(치명이 아니면 20%)를 앞두고 보는 숫자다.
+        int crit = ForecastUI.HitsToCrit();
+        _critText.gameObject.SetActive(crit > 0);
+        if (crit > 0)
+        {
+            _critText.text = string.Format(Managers.GetString(ForecastUI.CritIn), crit);
+            _critText.color = crit == 1 ? new Color32(255, 216, 74, 255) : new Color32(230, 230, 236, 255);
+        }
+
+        bool guard = Managers.Game.PlayerData.IsDefence;
+        _guardText.gameObject.SetActive(guard);
+        if (guard)
+            _guardText.text = Managers.GetString(ForecastUI.GuardUp);
+    }
+
+    /// <summary>
+    /// 막지 않는 알림 한 줄. 화면 위쪽 가운데에 잠깐 떠 있다가 옅어진다(OnForecastKeys 가 옅게 한다).
+    /// 틀은 인벤토리 칸 그림을 빌린다 — 없으면 반투명 검정.
+    /// </summary>
+    void ShowHint(string message, float seconds)
+    {
+        if (_hint == null)
+        {
+            Sprite frame = CodeUI.PrefabSprite("UI_InvenPopup", "Inventory_Popup32");
+            Image box = CodeUI.NewImage(transform, "ForecastHint", frame, frame != null ? Color.white : new Color(0f, 0f, 0f, 0.7f), true);
+            CodeUI.Place(box.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -120f), new Vector2(700f, 64f));
+            _hint = box.gameObject.AddComponent<CanvasGroup>();
+            _hint.blocksRaycasts = false;
+            _hintText = CodeUI.Fit(CodeUI.NewText(box.transform, "Text", CodeUI.ProseFont, 30f, new Color32(240, 210, 138, 255),
+                TextAlignmentOptions.Center), 16f);
+            CodeUI.Stretch(_hintText.rectTransform);
+        }
+
+        _hintText.text = message;
+        // 글 길이에 맞춰 틀을 줄인다 (자동 축소 전의 폭 기준).
+        RectTransform rt = (RectTransform)_hint.transform;
+        rt.sizeDelta = new Vector2(Mathf.Clamp(_hintText.GetPreferredValues(message).x + 64f, 240f, 1200f), rt.sizeDelta.y);
+        _hint.alpha = 1f;
+        _hint.gameObject.SetActive(true);
+        _hint.transform.SetAsLastSibling();
+        _hintUntil = Time.unscaledTime + seconds;
     }
 
     public void OnClickMainUIInventoryAImage()
@@ -557,6 +703,15 @@ public class UI_GameScene : UI_Scene
             GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false);
     }
 
+    /// <summary>마검 단추(몬스터 도감)는 계약 뒤에만 보인다 — 도감은 마검의 눈이다.</summary>
+    public void RefreshSwordButton()
+    {
+        bool on = Managers.Game.PlayerData.IsContractedSword;
+        GetImage((int)Images.MainUISwordAImage).gameObject.SetActive(on);
+        if (on == false)
+            GetImage((int)Images.MainUISwordBImage).gameObject.SetActive(false);
+    }
+
     public void OffUIWarp()
     {
         GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(false);
@@ -597,6 +752,8 @@ public class UI_GameScene : UI_Scene
     void OnDestroy()
     {
         FlushPlayTime();
+        GameSettings.Changed -= Refresh;
+        FightGate.Remove(FatalFightGuard.Ask);
     }
 
     /// <summary>

@@ -1,26 +1,38 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
 /// 워프석 반지를 끼면 열리는 층 이동 창 (기획서 65쪽 "워프를 등록한 층에 한하여 자유롭게 이동").
+/// 다녀온 층(FirstEnterMapCheck)을 층 이름과 함께 늘어놓고, 누르면 그 층으로 간다.
+/// 아직 안 연 금고가 남은 층에는 "금고" 를 단다 — 남는 열쇠를 들고 돌아갈 이유다.
 ///
-/// 이 창에는 프리팹이 없다. MainUI_Warp_A/B 스프라이트만 있고 팝업은 만들어진 적이 없어서,
-/// UIManager.ShowPopupUI 로는 띄울 수가 없다. 그래서 최소한의 UI 를 코드로 세운다 —
-/// 기능이 먼저 돌아가야 프리팹을 어떻게 만들지도 정할 수 있다.
-/// 미술이 들어오면 이 스크립트는 목록을 채우는 부분만 남기고 프리팹으로 옮기면 된다.
+/// 이 창에는 프리팹이 없어 코드로 세운다. 글꼴과 틀은 CodeUI 가 다른 창에서 빌려 와 같은 그림을 쓴다.
+/// 팝업 스택 밖의 창이라 Esc 는 UI_GameScene 이 먼저 여기로 보낸다.
 ///
-/// 여는 키는 Tab. 반지를 끼지 않았거나 전투/연출 중에는 열리지 않는다.
+/// 여는 키는 Tab (또는 HUD 의 워프 단추). 반지를 끼지 않았거나, 메뉴·다른 창이 떠 있거나, 흐름이 캐릭터를
+/// 쥐고 있으면(전투·연출·대화·문·계단·레버·입력 잠금·전투 직전 관문 — UI_GameScene.CanOpenPanel) 열리지 않는다.
 /// </summary>
 public class WarpUI : MonoBehaviour
 {
     public static KeyCode OpenKey = KeyCode.Tab;
 
+    const int Columns = 10;
+    const float Gap = 8f;
+    static readonly Vector2 Cell = new Vector2(150f, 64f);
+    static readonly Color Gold = new Color32(240, 210, 138, 255);
+    static readonly Color Soft = new Color32(174, 182, 200, 255);
+    static readonly Color Idle = new Color(0.8f, 0.8f, 0.86f, 1f);
+
     static WarpUI _instance;
     GameObject _panel;
+    bool _lockedInput;      // 입력 잠금을 이 창이 켰다. 켠 쪽만 끈다
 
     /// <summary>지금 살아 있는 워프 창. HUD 의 워프 버튼이 이걸 연다.</summary>
     public static WarpUI Instance { get { return _instance; } }
+
+    public bool IsOpen => _panel != null;
 
     public static void Spawn()
     {
@@ -33,83 +45,30 @@ public class WarpUI : MonoBehaviour
 
     void Update()
     {
+        // 창은 씬에 놓이므로 씬이 바뀌면 같이 사라진다. 잠금은 새 씬이 스스로 푼다 — 여기서 건드리지 않는다.
+        if (_lockedInput && _panel == null)
+            _lockedInput = false;
+
         if (Input.GetKeyDown(OpenKey) == false)
             return;
-
-        if (_panel != null)
-        {
+        if (IsOpen)
             Close();
-            return;
-        }
-
-        if (Managers.Game == null || Managers.Game.Player == null)
-            return;
-        if (EquipUtility.WarpUnlocked == false)
-            return;
-        if (Managers.Game.OnBattle || Managers.Game.OnFade || Managers.Game.OnDirect
-            || Managers.Game.OnInteract || Managers.Game.OnConversation)
-            return;
-
-        Open();
+        else
+            Open();
     }
 
     public void Open()
     {
+        if (IsOpen || EquipUtility.WarpUnlocked == false || UI_GameScene.CanOpenPanel() == false)
+            return;
         List<int> stages = Managers.Game.WarpableStages();
         if (stages.Count == 0)
             return;
 
         // 창이 떠 있는 동안은 캐릭터가 움직이면 안 된다.
+        _lockedInput = Managers.Game.OnInputLock == false;
         Managers.Game.OnInputLock = true;
-
-        _panel = new GameObject("WarpPanel", typeof(Canvas), typeof(GraphicRaycaster));
-        Canvas canvas = _panel.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 500;
-
-        Image bg = NewChild(_panel.transform, "BG").AddComponent<Image>();
-        bg.color = new Color(0f, 0f, 0f, 0.75f);
-        Stretch(bg.rectTransform);
-
-        GameObject list = NewChild(_panel.transform, "List");
-        RectTransform listRt = list.AddComponent<RectTransform>();
-        listRt.anchorMin = new Vector2(0.5f, 0.5f);
-        listRt.anchorMax = new Vector2(0.5f, 0.5f);
-        listRt.pivot = new Vector2(0.5f, 0.5f);
-        listRt.sizeDelta = new Vector2(420f, 460f);
-
-        GridLayoutGroup grid = list.AddComponent<GridLayoutGroup>();
-        grid.cellSize = new Vector2(96f, 40f);
-        grid.spacing = new Vector2(8f, 8f);
-        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        grid.constraintCount = 4;
-        grid.childAlignment = TextAnchor.UpperCenter;
-
-        foreach (int stage in stages)
-            AddButton(list.transform, stage);
-    }
-
-    void AddButton(Transform parent, int stageId)
-    {
-        GameObject go = NewChild(parent, $"Warp_{stageId}");
-        Image img = go.AddComponent<Image>();
-        img.color = new Color(0.16f, 0.16f, 0.20f, 0.95f);
-
-        Button button = go.AddComponent<Button>();
-        button.onClick.AddListener(() =>
-        {
-            Close();
-            Managers.Game.WarpToStage(stageId);
-        });
-
-        GameObject labelGo = NewChild(go.transform, "Label");
-        Text label = labelGo.AddComponent<Text>();
-        label.text = $"{stageId + 1}층";
-        label.alignment = TextAnchor.MiddleCenter;
-        label.color = Color.white;
-        label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        label.fontSize = 18;
-        Stretch(label.rectTransform);
+        Build(stages);
     }
 
     public void Close()
@@ -117,22 +76,127 @@ public class WarpUI : MonoBehaviour
         if (_panel != null)
             Destroy(_panel);
         _panel = null;
-        if (Managers.Game != null)
+        if (_lockedInput && Managers.Game != null)
             Managers.Game.OnInputLock = false;
+        _lockedInput = false;
     }
 
-    static GameObject NewChild(Transform parent, string name)
+    void Build(List<int> stages)
     {
-        GameObject go = new GameObject(name);
-        go.transform.SetParent(parent, false);
-        return go;
+        // 다 세운 뒤에 켠다. 스케일러는 켜질 때 비율을 재므로 첫 프레임부터 맞는다.
+        _panel = new GameObject("WarpPanel", typeof(RectTransform));
+        _panel.SetActive(false);
+        Canvas canvas = _panel.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 500;
+        CanvasScaler scaler = _panel.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        scaler.matchWidthOrHeight = 1f;     // 높이 1080 에 맞춘다
+        _panel.AddComponent<GraphicRaycaster>();
+
+        Image dim = CodeUI.NewImage(_panel.transform, "Dim", null, new Color(0f, 0f, 0f, 0.7f));
+        CodeUI.Stretch(dim.rectTransform);
+        dim.raycastTarget = true;
+        dim.gameObject.BindEvent(Close);    // 창 밖을 누르면 닫는다
+
+        int rows = (stages.Count + Columns - 1) / Columns;
+        int columns = Mathf.Min(Columns, stages.Count);
+        Vector2 grid = new Vector2(columns * Cell.x + (columns - 1) * Gap, rows * Cell.y + (rows - 1) * Gap);
+        Vector2 size = grid + new Vector2(56f, 150f);
+
+        Sprite frame = Frame();
+        Image box = CodeUI.NewImage(_panel.transform, "Frame", frame, frame != null ? Color.white : new Color(0.07f, 0.08f, 0.12f, 0.97f), true);
+        box.raycastTarget = true;
+        CodeUI.Place(box.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, size);
+        // 좁은 화면(4:3)에서는 창째로 줄인다. 캔버스 높이는 늘 1080 이다.
+        float width = 1080f * Screen.width / Mathf.Max(1, Screen.height);
+        box.rectTransform.localScale = Vector3.one * Mathf.Min(1f, (width - 40f) / size.x, 1040f / size.y);
+
+        TextMeshProUGUI title = CodeUI.NewText(box.transform, "Title", CodeUI.ProseFont, 40f, Gold, TextAlignmentOptions.Center);
+        CodeUI.Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -18f), new Vector2(grid.x, 50f));
+        title.text = Managers.GetString(ForecastUI.WarpTitle);
+
+        TextMeshProUGUI help = CodeUI.NewText(box.transform, "Help", CodeUI.ProseFont, 22f, Soft, TextAlignmentOptions.Center);
+        CodeUI.Place(help.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 20f), new Vector2(grid.x, 30f));
+        CodeUI.Fit(help, 14f).text = Managers.GetString(ForecastUI.WarpHelp);
+
+        RectTransform list = CodeUI.NewRect(box.transform, "Floors");
+        CodeUI.Place(list, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -80f), grid);
+        GridLayoutGroup layout = list.gameObject.AddComponent<GridLayoutGroup>();
+        layout.cellSize = Cell;
+        layout.spacing = new Vector2(Gap, Gap);
+        layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        layout.constraintCount = columns;
+        layout.childAlignment = TextAnchor.UpperLeft;
+
+        foreach (int stage in stages)
+            AddFloor(list, stage);
+        _panel.SetActive(true);
     }
 
-    static void Stretch(RectTransform rt)
+    // 한 칸 = 층 번호 + 그 층 이름 (+ 남은 금고). 마우스를 올리면 밝아진다.
+    void AddFloor(Transform list, int stageId)
     {
-        rt.anchorMin = Vector2.zero;
-        rt.anchorMax = Vector2.one;
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
+        Sprite frame = Frame();
+        Image cell = CodeUI.NewImage(list, $"Warp_{stageId}", frame, frame != null ? Idle : new Color(0.16f, 0.16f, 0.2f, 0.95f), true);
+        cell.raycastTarget = true;
+        Color idle = cell.color;
+        cell.gameObject.BindEvent(() => cell.color = Color.white, type: Define.UIEvent.PointerEnter);
+        cell.gameObject.BindEvent(() => cell.color = idle, type: Define.UIEvent.PointerExit);
+        cell.gameObject.BindEvent(() =>
+        {
+            Close();
+            Managers.Game.WarpToStage(stageId);
+        });
+
+        TextMeshProUGUI number = CodeUI.NewText(cell.transform, "Floor", CodeUI.NumberFont, 24f, Color.white);
+        CodeUI.Place(number.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(12f, -6f), new Vector2(Cell.x - 24f, 28f));
+        number.text = string.Format(Managers.GetString(ForecastUI.FloorN), stageId + 1);
+
+        Data.StageInfoData info;
+        TextMeshProUGUI name = CodeUI.NewText(cell.transform, "Name", CodeUI.ProseFont, 18f, Soft);
+        CodeUI.Place(name.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(12f, -34f), new Vector2(Cell.x - 24f, 24f));
+        CodeUI.Fit(name, 10f).text = Managers.Data.StageInfoDic.TryGetValue(stageId, out info)
+            ? Managers.GetString(info.DungeonNameScriptID) : "";
+
+        if (HasClosedVault(stageId))
+        {
+            TextMeshProUGUI vault = CodeUI.NewText(cell.transform, "Vault", CodeUI.ProseFont, 20f, Gold, TextAlignmentOptions.TopRight);
+            CodeUI.Place(vault.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-10f, -6f), new Vector2(70f, 26f));
+            CodeUI.Fit(vault, 10f).text = Managers.GetString(ForecastUI.Vault);
+        }
     }
+
+    /// <summary>
+    /// 아직 안 연 금고(네 번째 문)가 남은 층인가. 큰길 문 셋은 위층 계단 앞을 차례로 막고 있어서, 위층에 한 번이라도
+    /// 올라갔다면 셋은 다 열린 것이다 — 그 층에 아직 닫힌 문이 있으면 그것이 금고다(금고는 마지막 구역에만 있다,
+    /// layout_gen.check_vault_safe). 위층에 아직 못 간 층은 큰길 문과 가를 수 없어 달지 않는다.
+    /// 손수 만든 1~4층에는 금고가 없다.
+    /// </summary>
+    static bool HasClosedVault(int stageId)
+    {
+        List<bool> visited = Managers.Game.PlayerData.FirstEnterMapCheck;
+        if (visited == null || stageId + 1 >= visited.Count || visited[stageId + 1] == false)
+            return false;
+
+        Data.StageInfoData info;
+        Data.MapData map;
+        if (Managers.Data.StageInfoDic.TryGetValue(stageId, out info) == false || MapBuilder.IsHandAuthored(info.DungeonID))
+            return false;
+        if (Managers.Data.MapDic.TryGetValue(stageId, out map) == false || map.Objects == null)
+            return false;
+
+        foreach (Data.ObjectData obj in map.Objects)
+        {
+            bool closed;
+            if (obj.ObjectType == (int)Define.ObjectType.Door
+                && Managers.Data.DoorActiveDic.TryGetValue(obj.Count, out closed) && closed)
+                return true;
+        }
+        return false;
+    }
+
+    // 틀: 인벤토리의 능력치 칸 그림(9분할, 두 배 픽셀). 도감과 같은 그림이다.
+    static Sprite Frame() => CodeUI.PrefabSprite("UI_InvenPopup", "Inventory_Popup32");
 }

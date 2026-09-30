@@ -62,7 +62,8 @@ public class UI_IntroScene : UI_Scene
         BindText(typeof(Texts));
         #endregion
 
-        GetText((int)Texts.SceneText).GetComponent<TAnimSoundWriter>().source = Managers.Sound.GetAudioSource(Define.Sound.Effect);
+        // 글자 속도(설정)와 타자 소리. 인트로 문구(900000~900006)는 story_gen 이 줄 수를 그대로 두고 고쳐 쓴다.
+        StoryUI.ApplyTextSpeed(GetText((int)Texts.SceneText));
     }
 
     private void Update()

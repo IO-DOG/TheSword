@@ -71,7 +71,8 @@ FALLBACK = {
             ("갑옷", "최대 체력의 30%만큼의 껍질이 모든 피해를 먼저 받아 낸다. 방어력은 0이다.\\n껍질만 깨면 무르다."),
             ("분열", "쓰러지면 세 마리로 갈라진다."),
         ],
-        book=("몬스터 도감", "마검의 기억을 옮겨 적은 책.\\n이 층의 마물과 싸움의 값을 한눈에 보여 준다."),
+        book=("몬스터 도감", "마검의 눈이 알아보는 것을 옮겨 적은 책.\\n머리는 잊어도, 뿌리가 같은 것은 눈이 안다.\\n이 층의 마물과 싸움의 값을 한눈에 보여 준다."),
+        ring=("워프석 반지", "안쪽에 '렌에게. 해 지기 전에.'라고 새겨진 반지.\\n다녀온 층이라면 그 층의 문턱, 처음 발을 들인 자리로 곧장 돌아간다."),
     ),
     "en": dict(
         chapters=["Mossy Catacombs", "Collapsed Aqueduct", "Ashen Furnace", "Frozen Depths", "Rift of the Throne"],
@@ -116,7 +117,8 @@ FALLBACK = {
             ("Armor", "A shell worth 30% of its max HP absorbs all damage first. Its defense is 0.\\nOnce the shell breaks, it is soft."),
             ("Split", "Splits into three when defeated."),
         ],
-        book=("Monster Manual", "A book of the Ego Sword's memories.\\nShows this floor's monsters and what each fight will cost."),
+        book=("Monster Manual", "A book of all the demon sword's eye can recognize.\\nThe head may forget, but the eye knows what shares a root.\\nShows this floor's monsters and what each fight will cost."),
+        ring=("Warpstone Ring", "A ring engraved on the inside: 'To Ren. Before sunset.'\\nIt takes you straight back to the threshold of any floor you have visited, the spot where you first set foot."),
     ),
     "jp": dict(
         chapters=["苔むした地下墓所", "崩れた水路", "灰色の溶鉱炉", "凍てついた深層", "玉座の亀裂"],
@@ -161,7 +163,8 @@ FALLBACK = {
             ("鎧", "最大HPの30%分の殻が、すべてのダメージを先に受け止める。防御力は0。\\n殻さえ割れば脆い。"),
             ("分裂", "倒すと3体に分裂する。"),
         ],
-        book=("モンスター図鑑", "魔剣の記憶を書き写した本。\\nこの階の魔物と戦いの代償がひと目でわかる。"),
+        book=("モンスター図鑑", "魔剣の目が見分けるものを書き写した本。\\n頭は忘れても、根が同じものは目が知っている。\\nこの階の魔物と戦いの代償がひと目でわかる。"),
+        ring=("ワープ石の指輪", "内側に「レンへ。日が暮れる前に。」と刻まれた指輪。\\n一度訪れた階なら、初めて敷居をまたいだ場所へすぐに戻れる。"),
     ),
     "cn": dict(
         chapters=["苔藓地下墓穴", "坍塌水道", "灰烬熔炉", "冰封深层", "王座裂隙"],
@@ -206,7 +209,8 @@ FALLBACK = {
             ("铠甲", "相当于最大生命值30%的外壳会先吸收所有伤害，防御力为0。\\n外壳一破就很脆弱。"),
             ("分裂", "被击败后会分裂成三只。"),
         ],
-        book=("怪物图鉴", "抄录魔剑记忆的书。\\n一眼看清本层的魔物与每场战斗的代价。"),
+        book=("怪物图鉴", "抄录魔剑之眼所识之物的书。\\n脑子会忘，但同根之物，眼睛认得。\\n一眼看清本层的魔物与每场战斗的代价。"),
+        ring=("传送石戒指", "内侧刻着“给伦。日落之前。”的戒指。\\n只要是去过的楼层，就能立刻回到最初踏进的那道门槛。"),
     ),
 }
 
@@ -255,8 +259,10 @@ def _merge(lang, story):
         if isinstance(tid, int) and 0 <= tid < len(t["traits"]):
             name, desc = t["traits"][tid]
             t["traits"][tid] = (_text(row.get("name")) or name, _text(row.get("desc")) or desc)
-    book = (story.get("items") or {}).get("monster_book") or {}
-    t["book"] = (_text(book.get("name")) or t["book"][0], _text(book.get("desc")) or t["book"][1])
+    items = story.get("items") or {}
+    for key, item in (("book", "monster_book"), ("ring", "warp_ring")):
+        row = items.get(item) or {}
+        t[key] = (_text(row.get("name")) or t[key][0], _text(row.get("desc")) or t[key][1])
     return t
 
 
@@ -320,7 +326,7 @@ if __name__ == "__main__":
         assert len(t["species"]) == len(t["species_desc"]) == 10 and len(t["traits"]) == 10
         names = [mob_name(t, lang, c, a) for c in range(5) for a in range(10)]
         if lang != "kr":
-            texts = names + [x for pair in t["bosses"] + t["traits"] + [t["book"]] for x in pair]
+            texts = names + [x for pair in t["bosses"] + t["traits"] + [t["book"], t["ring"]] for x in pair]
             texts += t["chapters"] + [mob_desc(t, lang, c, a) for c in range(5) for a in range(10)]
             assert not any(has_hangul(x) for x in texts), lang
     assert not name_clashes(books), name_clashes(books)[:3]      # 이름이 겹치지 않는다

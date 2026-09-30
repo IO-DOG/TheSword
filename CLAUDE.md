@@ -4,8 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 프로젝트 개요
 
-**TheSword** — Unity **6000.0.34f1** (URP) 기반 던전 탐험 게임 소스 프로젝트.
-CLI 빌드/테스트 스크립트는 없다. Unity 에디터에서 열어 작업하며, 씬은 `Assets/@Scenes/`에 있다
+**TheSword** — Unity **6000.3.10f1** (URP) 기반 "마탑 + 전투 예측" 게임. 매직 타워(魔塔)의 완전 정보 퍼즐에
+특성 8종과 게이지식 자동 전투를 얹었다. Unity 에디터에서 열어 작업하며, 씬은 `Assets/@Scenes/`에 있다
 (진입: `TitleScene` → `IntroScene` → `GameScene` → `EndingScene`).
 
 `@` 접두사 폴더(`@Scripts`, `@Resources`, `@Scenes`)만 이 프로젝트의 자체 콘텐츠다.
@@ -122,15 +122,17 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.P
 Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.Windows
 ```
 
-- **두 번으로 나눈 이유**: 등록이 에셋을 다시 임포트하면서 도메인 리로드가 걸리고,
-  `-executeMethod` 로 돌던 함수가 그 자리에서 **조용히 끊긴다**. 오류도 예외도 없이
-  로그에 "등록 6건" 만 찍히고 에디터가 종료됐다. 종료 코드는 0 이라 성공처럼 보인다.
+- **두 번으로 나눈 이유**: `Prepare` 가 부르는 `AddressableSetup.RegisterRuntimePrefabs` 는 배치
+  모드에서 끝나면 `EditorApplication.Exit` 를 부른다 — 그 뒤에 적은 일은 배치 모드에서 **조용히
+  안 돈다**. 오류도 예외도 없이 로그에 "등록 6건" 만 찍히고 종료 코드는 0 이라 성공처럼 보인다.
+- `Windows` 는 빌드 전에 `Tools/validate_content.py` 를 돌려 실패하면 멈춘다(`ContentValidator` 는
+  배치 모드에서 보고 뒤 에디터를 끝내 버려 관문으로 못 쓴다). LZ4HC 로 압축하고, 출력 폴더를 비운 뒤
+  굽고, `*_DoNotShip` 폴더는 `Build/Symbols/<버전>/` 으로 옮긴다 — 배포 폴더에 남기지 않는다.
 - **순서가 중요하다**. 프리팹·데이터·소리를 전부 어드레서블 "PreLoad" 로 읽으므로
   (`UI_TitleScene`), 콘텐츠를 먼저 굽지 않으면 실행 파일은 만들어지되 **타이틀에서
   한 발짝도 못 나간다**. `TheSword_Data/StreamingAssets/aa` 에 번들이 있는지 본다.
 - `URP_COMPATIBILITY_MODE` 가 정의에 있어야 한다. URP 에셋이 호환 모드(렌더 그래프
   이전 경로)를 쓰는데 Unity 6.3 부터는 이 정의가 없으면 **빌드를 거부한다**.
-  `ProjectVersion` 은 6000.0.34f1 인데 실제 에디터는 6000.3.10f1 이라 생기는 일이다.
 - 산출물 `Build/Windows/TheSword.exe` (약 536MB). `Build/` 는 `.gitignore` 에 있다.
 
 ### MCP 가 물렸을 때
@@ -319,9 +321,23 @@ FastChecks.EditorBootData();          // 표를 올린다
 var r = BattleForecast.Of(902, 59);   // 몬스터 id, CurStageid(0부터)
 ```
 
-실측(`BattleStepper` 이후, 특성 9종 x 3마리, 살아남는 최저 레벨): 오차 0 이 21건,
-게임이 덜 아픈 쪽 6건, **더 아픈 쪽 0건**. 어긋나는 것은 거대(6) 셋, 암살(7) 셋 중 둘, 1568(1점)이다.
-안전한 방향이라 두었다 — 원인은 아직 못 밝혔다. (그 전 실측은 17/3/0, 904 가 한 대 차이였는데 지금은 맞는다.)
+예전 실측은 게임이 덜 아픈 쪽으로 몇 건 어긋났는데, 원인 셋을 맞췄다 — 파이썬 고정 스텝 0.02
+(프로젝트는 4699296/141120000 ≈ 1/30초, 이제 float 누적까지 같다), 한 스텝 안의 순서(플레이어 방패가
+몬스터 공격보다 먼저), 포효 식(명세 `round(0.2·max(1, ATK−DEF))`, 방어 중 0). 남은 차이는 치명 횟수·방어
+게이지를 전투 사이에 **넘겨받는 것**뿐이다 — 게임은 이어 세고 시뮬레이터는 전투마다 0 으로 둔다(보수적).
+그래서 화면의 모든 예측은 "**다음에** 이놈과 싸우면" 이고, 전투가 끝날 때마다 다시 칠한다.
+
+### 밸런스는 마검을 든 채로 역산한다
+
+완주 계산에 마검이 없어서 실제 전투는 설계의 절반 남짓(몹 1~4%, 보스 10~19%)이었고, 물약을 하나도
+안 들러도 완주했다 — 예측이 늘 초록색이면 "전투 예측" 을 내세울 수 없다. `stats_with_runes` 가 손에 든
+검을 EquipData 에서 그대로 읽어 얹는다(1~2층 블레이드, 3층 계약부터 에고소드). 5층은 도착 레벨로,
+보스는 층 몹을 다 잡고 오른 레벨(level+1)로 푼다. `MOB_HP_LOSS` 0.060 · `BOSS_HP_LOSS` 0.35 →
+몹 한 판 중앙값 약 6.5% · 상위 10% 약 9% · 보스 약 36%(챕터마다 고르다). `[3/7]` 이 챕터별로 찍는다.
+
+**장비는 한 번씩만 준다.** 부츠 1~4 = 19·39·59·79층 바닥, 목걸이 5 = 킹 슬라임, 워프석 반지 32 = 20층 보스
+(매직 타워의 층 이동처럼 일찍 준다 — 아래층 금고로 돌아갈 이유가 생긴다), 목걸이 6/7/8 = 40/60/80층 보스,
+100층 보스는 없음(`-1`, C# 은 `RewardItem <= 0` 을 건너뛴다). `validate_content` 가 두 번 주는 것을 막는다.
 
 ### 이펙트가 없어도 게임은 굴러가야 한다
 
@@ -406,7 +422,7 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
 층마다 다섯 마리 중 **셋은 관문, 둘은 곁길**이다(`MIN_TOLLS`). 관문은 그 칸을 벽으로
 막으면 `validate_layout` 이 실패하는 자리고, 곁길은 막아도 길이 남는 자리다.
 `layout_gen.floor_choices()` 가 완성된 격자에서 이걸 다시 재고
-`generate_content` 의 `[5/6]` 이 층수로 찍는다.
+`generate_content` 의 `[5/7]` 이 층수로 찍는다.
 
 **배치 의도만 믿으면 안 된다.** 곁길 통로 하나가 우회로를 만들면 관문이 조용히
 곁길이 된다 — 실제로 다섯 챕터 보스가 전부 그렇게 지나칠 수 있는 상대였고
@@ -417,13 +433,14 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
 그 통로가 절단점이 되고, 거기에 보스와 룬을 세울 수 있다. 이 한 줄을 지우면
 보스와 룬이 다시 장식이 된다.
 
-나쁜 선택도 같은 공식으로 돌려 본다(`[6/6]`). 고를 것이 있다는 말은 잘못 골랐을 때
+나쁜 선택도 같은 공식으로 돌려 본다(`[7/7]`). 고를 것이 있다는 말은 잘못 골랐을 때
 값을 치른다는 뜻이고, 값이 없으면 선택이 아니라 장식이다.
 
 | 나쁜 선택 | 결과 |
 |---|---|
-| 곁길 몬스터를 전부 지나친다 | 11층에서 죽는다 (70층부터는 지나쳐도 완주) |
-| 룬을 전부 지나친다 | 7층에서 죽는다 (지금은 구조상 못 지나친다) |
+| 곁길 몬스터를 전부 지나친다 | 10층에서 죽는다 (59층부터는 지나쳐도 완주) |
+| 룬을 전부 지나친다 | 11층에서 죽는다 |
+| 막다른 길의 물약을 안 들른다 | 11층에서 죽는다 |
 | 물약을 보이는 대로 마셔 넘친다 | **벌이 없다** — 예산 쪽 문제다 |
 
 ### 1~4층은 손대지 않는다
@@ -438,12 +455,12 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
 `Tools/validate_content.py` 의 `HAND_AUTHORED`.
 
 5층의 목표 레벨은 고정값이 아니라 1~4층을 원본 데이터로 실제 전투 시뮬레이션해서 얻는다
-(`simulate_handmade`). 현재 4층 종료 시 Lv14 → 5층 목표 Lv15 → 100층 Lv105.
+(`simulate_handmade`). 현재 4층 종료 시 Lv16(다음 레벨까지 138/244) → 5층 목표 Lv16 → 100층 Lv112.
+레벨 표는 120 — 완주 레벨 +4 보다 짧으면 `generate_content`·`validate_content` 가 막는다.
 
-이 값은 **아래로 치우친 추정**이다. 시뮬레이터는 "약한 놈부터 필요한 만큼"만 잡는데
-실제 플레이는 그 층의 몬스터를 대체로 다 잡기 때문에, 자동 검증에서는 5층 진입이
-Lv17 로 관측됐다 (예측보다 3 높다). 완주 판정이 그만큼 보수적이라는 뜻이라 위험하지는
-않지만, **도입부 난이도를 손볼 때는 예측이 아니라 실측 레벨을 봐야 한다.**
+이 값은 **아래로 치우친 추정**이다. 분열 슬라임 셋(경험치 420)을 넣어 예측이 Lv14 → 16 이 됐지만
+자동 검증의 실측은 Lv17 이다 — **1레벨(106 EXP 이상) 차이는 아직 모른다.** 완주 판정이 그만큼
+보수적이라 위험하지는 않지만, **도입부 난이도를 손볼 때는 예측이 아니라 실측 레벨을 봐야 한다.**
 
 ### 맵 생성 방식
 
@@ -477,10 +494,15 @@ Lv17 로 관측됐다 (예측보다 3 높다). 완주 판정이 그만큼 보수
   번역을 지키려고 **이미 있는 ID 를 건너뛰었는데**, 그 바람에 생성한 몬스터의 이름이
   옛 문자열로 남았다: 데이터는 "…잿빛 파수꾼 우두머리" 인데 화면은 "…킹 슬라임" 이었고,
   일반 몹도 슬라임이 늑대로 불렸다. 그림에 맞춰 이름을 고쳐도 화면은 안 바뀐다는 뜻이다.
-  지금은 **생성 구간(5100~, 10900~, 11000~, 20900~, 21000~)만 덮어쓴다.**
+  지금은 **생성 구간(5100~5200, 10900~10904, 20900~20904, 11000~11807, 21000~21807)과 특성(30000+i 이름 /
+  30010+i 설명)·도감(4060/4061)만** 네 언어로 덮어쓰고, 구간 안의 옛 행은 지운다. 원본은
+  `Tools/story/story_*.json` 의 `bestiary`, 빈 항목은 `Tools/bestiary.py` 의 내장 문구. 생성 행의
+  영/일/중에 한글이 있으면 `validate_content` 오류. 종·보스 이름이 언어 안에서 겹치면 `[2/7]` 에서 멈춘다.
 - 테이블 원본: `Assets/@Resources/Data/Excel/*.csv` → 변환된 `Assets/@Resources/Data/JsonData/*.json`(Addressable TextAsset)을 `DataManager.Init()`이 Newtonsoft.Json + `ILoader<Key,Value>` 패턴으로 로드. 새 테이블 추가 시 `Data.Contents.cs`에 Data 클래스+Loader 정의 후 `DataManager`에 딕셔너리·로드 라인 추가.
 - 던전 맵: `Assets/StreamingAssets/Data/Excel/Dungeon_*.csv` 그리드를 `Tools/mapdata_gen.py` 가 런타임 `MapData.json` 으로 굽는다. `DataManager.ResetActiveDic()` 은 같은 CSV 에서 활성화 딕셔너리만 만든다(카운터 순서가 같아야 한다). 셀 코드: `I`=소비 아이템, `E`=장비, `M`=몬스터, `B`=보스, `W`=벽, 숫자 3~8=문, 11=스폰 지점, 12=레버, 13=기둥, 14~16=포탈. 끝의 `~` 는 "둘 중 하나" 보상(보물 층에 한 쌍, `ChoiceGroup`) — 하나를 주우면 짝이 사라진다.
-- 세이브: `SaveStore` 가 플레이어·오브젝트 활성화·진행 플래그를 **`Checkpoint.json` 하나**에 쓴다. `MapData` 해시를 같이 적어, 데이터를 다시 뽑은 뒤의 옛 세이브는 섞지 않고 거부한다. 예전 방식(`SaveData.json` + `*ActiveData.json`)은 이어하기 때 한 번 옮겨 적는다.
+- 세이브: `SaveStore` 가 플레이어·오브젝트 활성화·진행 플래그를 **`Checkpoint.json` 하나**에 쓴다. `MapData` 해시를 같이 적어, 데이터를 다시 뽑은 뒤의 옛 세이브는 섞지 않고 거부한다 — **거부해도 지우지 않는다**(타이틀이 "원본은 보존됩니다" 를 띄운다). 예전 방식(`SaveData.json` + `*ActiveData.json`)은 이어하기 때 한 번 옮겨 적는다.
+- ScriptData 는 **JSON 이 원본**이고 CSV 는 생성기가 JSON 에서 다시 쓴다. CSV 만 고치면 사라진다.
+  줄바꿈은 **백슬래시와 n 두 글자**로 적는다(실제 줄바꿈 문자를 넣으면 CSV 가 여러 줄로 쪼개진다).
 
 ### UI 컨벤션
 
@@ -489,11 +511,53 @@ Lv17 로 관측됐다 (예측보다 3 높다). 완주 판정이 그만큼 보수
 - 자식 위젯은 클래스 내 `enum`(Buttons, Texts, GameObjects…)으로 선언하고 `Init()`에서 `BindButton(typeof(Buttons))` 등으로 바인딩 — **enum 이름이 하이어라키의 자식 GameObject 이름과 정확히 일치해야 한다**
 - 접근은 `GetButton((int)Buttons.Xxx)`, 이벤트는 `BindEvent(go, action, type)`
 - 텍스트는 TextMeshPro (`TMP_Text`)
+- **ESC 는 한 곳에서만 받는다.** `UI_GameScene`(타이틀은 `UI_TitleScene`)이 맨 위 팝업의
+  `UI_Popup.OnEscape()` 를 묻고, 팝업이 처리했으면(스스로의 닫기 경로로) 끝이다. 예전에는 ESC 가
+  맨 위 팝업을 **그냥 뽑아** 버려서, 잠금을 쥔 팝업(안내·보스방·대화·계약·게임오버)이 잠금을 풀지
+  못한 채 사라지고 플레이어가 영영 멈췄다. 잠금을 쥔 팝업은 ESC 를 삼키고, `OnDestroy` 에서도
+  자기가 쥔 잠금만 푼다. 팝업마다 따로 ESC 를 받지 않는다 — 한 번 누른 ESC 가 두 창을 닫았다.
+- 메뉴가 떠 있으면 `Time.timeScale = 0` 이다(`UIManager.RefreshTimeScale`) — 전투도 멈춘다.
+  예/아니오는 `UI_ConfirmPopup.Ask`/`AskDestructive`(되돌릴 수 없는 질문은 "아니오" 가 먼저)를 쓴다.
+  자동 플레이 중(`GameEvents.IsAutoPlaying`)에는 묻지 않고 "예" 로 간다.
+
+### 체크포인트는 층 입구다
+
+층에 들어선 순간(계단·워프·보스문이 다 끝나고 층 번호·위치·카메라가 선 뒤) `GameManager.EnterFloor` 가
+`Checkpoint.json` 과 층별 사본 `Floor_NNN.json`(최근 10개)을 쓴다. 죽으면 그 층 입구로 돌아가고,
+메뉴의 "이 층 다시 시작" / "체크포인트" 가 같은 파일을 쓴다. 매직 타워처럼 **한 층을 다시 짜는**
+게임이라 층 입구가 자연스러운 단위다 — 예전에는 층 이동 저장이 전부 주석이라 5층부터는 저장이 한 번도
+안 됐고, 60층에서 죽으면 도입부로 돌아갔다(봇은 녹화기가 대신 저장해 줘서 드러나지 않았다).
+죽은 횟수·플레이 시간은 체크포인트를 불러도 줄지 않는다.
+
+### 일어난 일은 GameEvents, 전투 직전은 FightGate
+
+스토리·전투 예측·튜토리얼은 핵심 로직을 고치지 않고 `GameEvents`(층 입장·보스 처치·레벨업·아이템·
+문·전투 끝·부활·HUD 갱신)에 귀를 댄다. 듣는 쪽 예외는 거기서 삼킨다 — 연출 버그가 층 이동을 멈추면 안 된다.
+몬스터와 부딪힌 순간과 전투 사이에 끼어들 것(보스 등장 연출, "이 싸움은 죽는다" 확인)은
+`FightGate.Add(fn, order)` 로 줄을 선다. `PlayerController` 는 전투를 직접 열지 않고 `FightGate.Request` 를 부른다.
+
+### 에디터 없이 컴파일 확인
+
+```bash
+python Tools/cscheck.py          # Assets/@Scripts 의 C# 을 디스크 그대로 빌드 (런타임 + 에디터)
+python Tools/cscheck.py --warn   # 우리 스크립트의 경고까지
+```
+
+Unity 는 에디터가 새로고침할 때만 csproj 를 다시 쓰므로, 밖에서 추가한 스크립트는 `dotnet build` 에
+빠진다. `cscheck` 는 csproj 를 복사해 디스크의 파일 목록으로 바꾸고, 패키지는 `Library/ScriptAssemblies`
+의 DLL 을 참조한다(에디터가 한 번은 컴파일해 둬야 한다). 에디터가 열려 있으면 `unity command recompile`
+→ `recompile_status` → `get_console_logs` 로 진짜 컴파일을 확인한다.
 
 ### 로컬라이제이션
 
 UI에 노출되는 문자열은 하드코딩하지 않고 `ScriptData` 테이블 ID로 `Managers.GetString(id)` 호출 (Kr/En/Jp/Cn).
-생성기가 넣는 UI 문구(타이틀 버튼·전투 예측 라벨 등)는 `Tools/ui_text.py` 의 `TEXT` 한 곳에 적는다 —
+생성기가 넣는 UI 문구(타이틀 버튼·전투 예측 라벨 등)는 `Tools/ui_text.py` 의 `TEXT` 와
+`Tools/ui_text_parts/*.py`(기능별 파일, id 구간이 나뉘어 있다 — ui_text.py 머리 주석) 에 적는다 —
 `ScriptData` 와 함께 `GeneratedUiText.cs` 로도 구워지고, 어드레서블을 못 올려 표가 빈 때
 `GetString` 이 그쪽으로 되돌아간다("불러오지 못했습니다" 가 그때 뜬다).
 데이터 시트 이스케이프: `\n`=줄바꿈, `^`=쉼표.
+
+언어는 `GameSettings.Language` 가 쥔다(처음엔 OS 언어, 고르면 PlayerPrefs 에 남는다). `GetString` 은
+고른 언어 → 영어 → 한국어 → … 순으로 비지 않은 것을 준다. 일본어·중국어 글자는 두 픽셀 글꼴에
+대부분 없어서, 켤 때 `FontFallback` 이 `Silver.ttf` 동적 아틀라스와 Windows 글꼴(맑은 고딕·Yu Gothic·
+Microsoft YaHei)을 TMP 전역 대체 목록에 얹는다 — 에셋은 고치지 않고, 플레이가 끝나면 걷어 낸다.

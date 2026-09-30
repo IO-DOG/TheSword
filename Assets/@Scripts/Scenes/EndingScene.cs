@@ -9,7 +9,8 @@ public class EndingScene : BaseScene
     {
         base.Init();
 
-        SceneType = Define.Scene.GameScene;
+        // 예전에는 GameScene 이라 적혀 있어, 자동 플레이가 엔딩에 닿은 것을 씬 이름으로만 알았다.
+        SceneType = Define.Scene.EndingScene;
         Managers.UI.ShowSceneUI<UI_EndingScene>();
     }
 

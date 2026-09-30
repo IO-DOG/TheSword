@@ -402,6 +402,9 @@ public class UI_MenuPopup : UI_Popup
         layout.childForceExpandWidth = layout.childForceExpandHeight = false;
         layout.childScaleHeight = true;
         layout.spacing = 12f;
+        // 목록 높이를 줄들에 맞춘다. 줄이 틀(100)보다 길면 레이아웃은 가운데 맞춤을 버리고 위끝부터 쌓아서,
+        // 열 줄이 화면 가운데에서 시작해 아래로 넘쳤다(1080p 에서 일곱 줄만 보였다). 가운데를 기준으로 위아래로 편다.
+        _list.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         Row template = _main[_main.Count - 1];
         _listRows.Clear();

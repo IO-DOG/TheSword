@@ -90,7 +90,7 @@ def check_scripts(stages, monsters, classes, equips, events, scripts):
             if e[field] <= 0 and e["id"] != 0:
                 errors.append(f"장비 {e['id']}({e['Name']}) {what}: ScriptData id 가 {e[field]}"
                               " — 인벤토리에 뜨면 빈칸이다")
-        if e["id"] == G.BOOK_EQUIP_ID:
+        if e["id"] in (G.BOOK_EQUIP_ID, G.RING_EQUIP_ID):
             generated.update((e["NameId"], e["DescId"]))
     for e in events:
         refs[e["ScriptID"]] = f"대사 {e['id']}"

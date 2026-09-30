@@ -969,6 +969,7 @@ public class GameManager
     {
         SaveStore.Delete(SaveStore.DirectoryPath);
         File.Delete(Path.Combine(SaveStore.DirectoryPath, "SaveData.json"));
+        StoryDirector.ClearSeen();      // 새 판은 이야기도 처음부터 (StorySeen.json)
         LastSaveError = null;
         //PlayerPrefs.DeleteAll();
         // ISFIRST를 지워야하나? 진짜 최초는 아닌데
@@ -977,6 +978,7 @@ public class GameManager
         PlayerPrefs.DeleteKey("ISFIRSTLEVER");
         PlayerPrefs.DeleteKey("ISFIRSTRECOVERY");
         PlayerPrefs.DeleteKey("ISFIRSTKEY");
+        PlayerPrefs.DeleteKey(UI_GameScene.KeysHintPref);   // 마검의 눈 키 안내(M 도감·V 예측)
         // 여기까지 찐으로 처음만 표시해야할거같은데
 
         PlayerPrefs.DeleteKey("ISOPENSWORD");

@@ -348,7 +348,7 @@ public class UIManager
         if (Managers.Game.GameScene != null)
         {
             for (int i = 0; i < _popups.Count && pause == false; i++)
-                pause = _popups[i] is UI_MenuPopup && _popups[i] != null;
+                pause = (_popups[i] is UI_MenuPopup || _popups[i] is UI_MonsterManualPopup) && _popups[i] != null;
         }
 
         if (pause == IsPaused)

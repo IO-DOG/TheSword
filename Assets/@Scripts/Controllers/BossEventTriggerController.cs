@@ -8,7 +8,8 @@ public class BossEventTriggerController : MonoBehaviour
     {
         if (other.gameObject.tag == "Player")
         {
-            Managers.Directing.BossOnAppearAction.Invoke();
+            // 등장 연출을 건 보스가 없는 층(이미 잡았다)에서는 비어 있다.
+            Managers.Directing.BossOnAppearAction?.Invoke();
         }
 
         Managers.Resource.Destroy(gameObject);
