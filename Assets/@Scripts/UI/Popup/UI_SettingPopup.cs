@@ -80,7 +80,7 @@ public class UI_SettingPopup : UI_Popup
         //GetImage((int)Images.BackgroundImage).gameObject.transform.localScale = new Vector3(0, 0, 0);
         float dist = Screen.width * 0.645f;
 
-        GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveX(dist, 0.2f);
+        GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveX(dist, 0.2f).SetLink(gameObject);   // 곧장 닫혀도 경고 없이
         //GetImage((int)Images.BackgroundImage).gameObject.transform.DOScale(2, 0.2f);
 
         // 복제 원본에 이벤트를 걸기 전에 복제한다.
@@ -121,6 +121,8 @@ public class UI_SettingPopup : UI_Popup
     {
         Slider s = GetObject((int)slider).GetComponent<Slider>();
         TMP_Text text = GetText((int)percent);
+        // "100%" 는 칸(너비 15)을 꽉 채워 오른쪽 끝에 선 손잡이(너비 8)에 붙어 있었다. 조금 띄운다.
+        ((RectTransform)text.transform).anchoredPosition += new Vector2(6f, 0f);
         s.SetValueWithoutNotify(PlayerPrefs.GetFloat(key, 1));
         text.text = Percent(s.value);
         s.onValueChanged.AddListener(v =>

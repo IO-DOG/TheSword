@@ -394,14 +394,21 @@ public class UI_GameScene : UI_Scene
 #endif
     }
 
+    /// <summary>
+    /// 맵 위 툴팁(몬스터·아이템 정보)을 세워 둬도 되는가 — 맵 위 숫자와 같은 때에(ForecastOverlay.MapInView), 팝업 스택
+    /// 밖의 워프 창이 맵을 가리지 않을 때. 툴팁은 이것이 거짓이 되면 스스로 닫힌다: 몬스터에 마우스를 올린 채 Esc 를
+    /// 누르거나 싸우면 설명이 메뉴 단추 사이와 전투창 뒤에 남아 있었다. 덮개가 걷히면 ShowInfo 가 다시 띄운다.
+    /// 인벤토리 위에서는 선다 — 오른쪽 판이라 맵 왼쪽이 보이고 그동안도 걷는다. 칼을 갈아 끼우며 비용을 견주는
+    /// 자리인데 맵 위 숫자는 창 밑에서 숨으니, 그때 예측을 보는 곳은 툴팁뿐이다.
+    /// ponytail: 판 위에서도 그 밑의 몬스터를 짚는다(커서도 돋보기가 된다) — 예전과 같다. 툴팁 캔버스(0)가 판(10~)
+    /// 밑이라 판의 클릭은 막지 않는다. 거슬리면 판(Inventory_Frame) 안의 마우스를 뺀다.
+    /// </summary>
+    public static bool CanShowTooltip() =>
+        ForecastOverlay.MapInView(besideInventory: true) && (WarpUI.Instance == null || WarpUI.Instance.IsOpen == false);
+
     void ShowInfo()
     {
-        if (isOpenMenuPopup)
-            return;
-        if (isOpenInfoPopup)
-            return;
-        // 도감·워프 창이 맵을 가리고 있다. 그 밑의 몬스터에 툴팁을 세우지 않는다.
-        if (Managers.UI.FindPopup<UI_MonsterManualPopup>() != null || (WarpUI.Instance != null && WarpUI.Instance.IsOpen))
+        if (isOpenInfoPopup || CanShowTooltip() == false)
             return;
 
         RaycastHit hit;
@@ -600,8 +607,11 @@ public class UI_GameScene : UI_Scene
         if (_critText == null)
             return;
 
+        // 둘 다 마검의 눈이 보는 값이다 — 계약 전에는 다른 예측(맵 위 숫자·도감)처럼 숨긴다. 치명 이야기도 계약 뒤의 장면이다.
+        bool eye = Managers.Game.PlayerData.IsContractedSword;
+
         // 1 이면 다음 한 대가 치명타다. 암살(치명만 맞는다)·불사(치명이 아니면 20%)를 앞두고 보는 숫자다.
-        int crit = ForecastUI.HitsToCrit();
+        int crit = eye ? ForecastUI.HitsToCrit() : 0;
         _critText.gameObject.SetActive(crit > 0);
         if (crit > 0)
         {
@@ -609,7 +619,7 @@ public class UI_GameScene : UI_Scene
             _critText.color = crit == 1 ? new Color32(255, 216, 74, 255) : new Color32(230, 230, 236, 255);
         }
 
-        bool guard = Managers.Game.PlayerData.IsDefence;
+        bool guard = eye && Managers.Game.PlayerData.IsDefence;
         _guardText.gameObject.SetActive(guard);
         if (guard)
             _guardText.text = Managers.GetString(ForecastUI.GuardUp);

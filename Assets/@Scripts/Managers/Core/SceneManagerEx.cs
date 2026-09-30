@@ -7,27 +7,12 @@ public class SceneManagerEx
 {
     public BaseScene CurrentScene { get { return GameObject.FindObjectOfType<BaseScene>(); } }
 
+    // 씬 컨트롤러(BaseScene)가 없는 씬도 있다 — EndingScene.unity 에는 엔딩 UI 만 놓여 있다. 예전에는 지금 씬의 종류로
+    // 갈라서(어느 씬이든 하는 일은 같았다) 거기서 널 예외로 멈췄다. 씬이 없어도 비우고 넘어간다.
     public void LoadScene(Define.Scene type, Transform parents = null)
     {
-        switch (CurrentScene.SceneType)
-        {
-            case Define.Scene.TitleScene:
-                Managers.Clear();
-                SceneManager.LoadScene(GetSceneName(type));
-                break;
-            case Define.Scene.IntroScene:
-                Managers.Clear();
-                SceneManager.LoadScene(GetSceneName(type));
-                break;
-            case Define.Scene.GameScene:
-                Managers.Clear();
-                SceneManager.LoadScene(GetSceneName(type));
-                break;
-            case Define.Scene.EndingScene:
-                Managers.Clear();
-                SceneManager.LoadScene(GetSceneName(type));
-                break;
-        }
+        Managers.Clear();
+        SceneManager.LoadScene(GetSceneName(type));
     }
 
     string GetSceneName(Define.Scene type)
@@ -38,6 +23,6 @@ public class SceneManagerEx
 
     public void Clear()
     {
-        CurrentScene.Clear();
+        CurrentScene?.Clear();
     }
 }

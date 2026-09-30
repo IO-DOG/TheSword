@@ -20,7 +20,7 @@ public class WarpUI : MonoBehaviour
 
     const int Columns = 10;
     const float Gap = 8f;
-    static readonly Vector2 Cell = new Vector2(150f, 64f);
+    static readonly Vector2 Cell = new Vector2(150f, 72f);
     static readonly Color Gold = new Color32(240, 210, 138, 255);
     static readonly Color Soft = new Color32(174, 182, 200, 255);
     static readonly Color Idle = new Color(0.8f, 0.8f, 0.86f, 1f);
@@ -163,10 +163,13 @@ public class WarpUI : MonoBehaviour
         string floor = string.Format(Managers.GetString(ForecastUI.FloorN), stageId + 1);
         number.text = floor;
 
+        // 이름은 조금만 줄이고 넘치면 말줄임(…)으로 자른다. 12 까지 줄이던 때는 긴 이름 하나(Inside the Forest of
+        // Demons)만 이웃의 절반 크기가 됐고, 720p 에서 이름이 10px 남짓이었다. 글꼴(Silver)은 줄 높이 1.1em 이라 칸도 높인다.
         Data.StageInfoData info;
-        TextMeshProUGUI name = CodeUI.NewText(cell.transform, "Name", CodeUI.ProseFont, 22f, Soft);
-        CodeUI.Place(name.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(12f, -34f), new Vector2(Cell.x - 24f, 26f));
-        CodeUI.Fit(name, 12f).text = Managers.Data.StageInfoDic.TryGetValue(stageId, out info)
+        TextMeshProUGUI name = CodeUI.NewText(cell.transform, "Name", CodeUI.ProseFont, 28f, Soft);
+        CodeUI.Place(name.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(12f, -36f), new Vector2(Cell.x - 24f, 34f));
+        name.overflowMode = TextOverflowModes.Ellipsis;
+        CodeUI.Fit(name, 22f).text = Managers.Data.StageInfoDic.TryGetValue(stageId, out info)
             ? WithoutFloor(Managers.GetString(info.DungeonNameScriptID), floor) : "";
 
         if (HasClosedVault(stageId))

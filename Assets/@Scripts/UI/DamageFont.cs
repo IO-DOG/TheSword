@@ -11,6 +11,8 @@ public class DamageFont : UI_Base
     public void SetInfo(Vector2 pos, float damage = 0, float healAmount = 0, Transform parent = null, bool isCritical = false, bool isDefence = false)
     {
         _damageText = GetComponent<TextMeshProUGUI>();
+        // 검은 테두리. 빨간 숫자가 주황 폭발 위에서 사라졌다. 재질은 글꼴마다 하나를 나눠 쓴다.
+        _damageText.fontSharedMaterial = CodeUI.Outlined(_damageText.font, 0.4f);
         transform.position = pos;
 
         if (healAmount > 0)
@@ -72,7 +74,8 @@ public class DamageFont : UI_Base
         // Vector3.up 방향을 randomAngle만큼 회전시켜 랜덤한 사선 방향을 구합니다.
         Vector3 randomDir = Quaternion.Euler(0, 0, randomAngle) * Vector3.up;
 
-        // 각 단계에서 이동할 거리를 설정합니다.
+        // 각 단계에서 이동할 거리. 캔버스 단위라(부모가 전투창 캔버스다) 화면 크기를 따라 늘고 준다 — 예전에는 화면
+        // 픽셀이라 어느 해상도에서나 200px 를 날아, 960x540 에서는 화면 높이의 37% 를 올라갔다. 1080p 에서는 그대로다.
         float firstMoveDistance = 100.5f;   // 첫 번째 애니메이션에서 이동할 거리
         float secondMoveDistance = 100.5f;  // 두 번째 애니메이션에서 추가로 이동할 거리
 
@@ -87,14 +90,14 @@ public class DamageFont : UI_Base
 
         // 첫 번째 단계: 스케일을 0에서 1.3으로 키우면서 동시에 랜덤한 방향으로 이동
         seq.Append(transform.DOScale(1.3f, 0.3f).SetEase(Ease.InOutBounce))
-           .Join(transform.DOMove(randomDir * firstMoveDistance, 0.3f)
+           .Join(transform.DOLocalMove(randomDir * firstMoveDistance, 0.3f)
                 .SetRelative(true)
                 .SetEase(Ease.Linear));
 
         // 두 번째 단계: 스케일을 1.3에서 1.0으로 줄이고, 텍스트를 페이드아웃하며, 추가로 이동
         seq.Append(transform.DOScale(1.0f, 0.3f).SetEase(Ease.InOutBounce))
            .Join(transform.GetComponent<TMP_Text>().DOFade(0, 0.3f).SetEase(Ease.InQuint))
-           .Join(transform.DOMove(randomDir * secondMoveDistance, 0.3f)
+           .Join(transform.DOLocalMove(randomDir * secondMoveDistance, 0.3f)
                 .SetRelative(true)
                 .SetEase(Ease.Linear));
 

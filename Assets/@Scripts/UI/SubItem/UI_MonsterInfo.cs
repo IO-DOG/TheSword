@@ -178,11 +178,12 @@ public class UI_MonsterInfo : UI_Base
     // 마우스가 이 몬스터를 벗어나면 닫는다 — 옆 칸 몬스터로 곧장 옮겨 가도. 몬스터 콜라이더는 한 칸 폭에
     // 16칸 높이라(MapBuilder.FitColliderToCell) 바닥을 안 거치고 넘어가서, A 의 이름·예측이 B 를 가리키는
     // 채 남았다(못 이기는 B 위에 A 의 "-12" 가). 닫으면 UI_GameScene.ShowInfo 가 B 의 창을 새로 띄운다.
+    // 메뉴·전투·연출·대화나 다른 창이 맵을 덮어도 닫는다(UI_GameScene.CanShowTooltip).
     private void Update()
     {
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit, 1000.0f, _mask) && IsOwner(hit.collider))
+        if (UI_GameScene.CanShowTooltip() && Physics.Raycast(ray, out hit, 1000.0f, _mask) && IsOwner(hit.collider))
             return;
 
         Release();

@@ -52,7 +52,7 @@ public class UI_MonsterCard : UI_BaseCard
         base.PresentAttack(attacker, target, damage, critical, guarded);
 
         Vector3 pos = GameObject.Find("UI_PlayerCard").GetComponent<UI_PlayerCard>().GetImage((int)Images.CreatureImage).gameObject.transform.position;
-        pos = new Vector3(pos.x, pos.y - 100, pos.z);
+        pos = new Vector3(pos.x, pos.y - 100f * transform.parent.lossyScale.y, pos.z);   // 캔버스 100 칸 (UI_PlayerCard 와 같다)
 
         GameObject go = GameObject.Find("UI_BattlePopup");
         if (go != null)

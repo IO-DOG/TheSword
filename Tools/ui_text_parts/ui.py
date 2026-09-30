@@ -57,4 +57,6 @@ TEXT = {
     200: ("공격 속도", "ATK SPEED", "攻撃 速度", "攻击 速度"),
     201: ("방어 속도", "DEF SPEED", "防御 速度", "防御 速度"),
     202: ("이동 속도", "MOVE SPEED", "移動 速度", "移动 速度"),
+    # UI_MenuPopup first row when opened from the title: it only closes the menu ("Continue" read as "load save")
+    203: ("돌아가기", "Back", "戻る", "返回"),
 }

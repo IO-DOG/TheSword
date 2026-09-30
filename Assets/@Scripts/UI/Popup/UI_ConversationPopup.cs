@@ -43,6 +43,7 @@ public class UI_ConversationPopup : UI_Popup
     const float BossBodyHeight = 460f;      // 보스 초상화에서 그려진 몸의 키 (캔버스 단위)
     const float BossBodyWidth = 620f;       // 넓은 놈(검은 태양)은 이 폭에서 멈춘다
     const float BossFromRight = 480f;       // 화면 오른끝에서 몸 한가운데까지 — 대화 상자 오른끝 안쪽에 선다
+    const float BossDimFloor = 0.75f;       // 보스가 곁에 설 때(남이 말할 때)의 가장 어두운 밝기
     static readonly Color Dim = new Color(0.5f, 0.5f, 0.5f, 1f);
 
     // 이야기 대사. null 이면 예전 EventData 대사다.
@@ -58,6 +59,7 @@ public class UI_ConversationPopup : UI_Popup
     // 오른쪽 자리는 마검과 보스가 나눠 쓴다. 보스는 전투창의 애니메이션을 그대로 튼다.
     Animator _bossAnim;
     Color _rightColor = Color.white;
+    Color _rightDim = Dim;          // 오른쪽이 듣고 있을 때
 
     // 선택지
     RectTransform[] _choiceBoxes;
@@ -346,7 +348,7 @@ public class UI_ConversationPopup : UI_Popup
                 break;
         }
         left.color = who.Portrait == StoryPortrait.Damian ? Color.white : Dim;
-        right.color = who.Portrait == StoryPortrait.Sword || who.Portrait == StoryPortrait.Boss ? _rightColor : _rightColor * Dim;
+        right.color = who.Portrait == StoryPortrait.Sword || who.Portrait == StoryPortrait.Boss ? _rightColor : _rightDim;
 
         GetObject((int)GameObjects.Speaker).SetActive(narration == false);
         if (narration == false)
@@ -392,6 +394,7 @@ public class UI_ConversationPopup : UI_Popup
         rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(1f, 0.5f);
         rt.anchoredPosition = Vector2.zero;
         _rightColor = Color.white;
+        _rightDim = Dim;
     }
 
     // 보스의 초상화 자리 = 그 보스의 전투 그림 (대기 애니메이션, 맵과 같은 색조).
@@ -417,8 +420,11 @@ public class UI_ConversationPopup : UI_Popup
         _bossAnim.Play(data.IdleAnimStr);
         _bossAnim.Update(0f);       // Play 만으로는 이 프레임에 그림이 바뀌지 않는다
         right.preserveAspect = true;
-        _rightColor = MonsterTint.Of(id);
+        // 색조는 색만 입히고 밝기는 빼지 않는다. ForBoss 가 0.8 을 곱해서 원래 검은 놈(잿빛 파수꾼)은 어두운 바닥에 묻혔고,
+        // 데미안 차례에 반으로 더 어두워지면 거의 사라졌다. 곁에 설 때도 BossDimFloor 밑으로는 내리지 않는다.
+        _rightColor = AtLeast(MonsterTint.Of(id), 1f);
         _rightColor.a = 1f;         // ForBoss 는 알파까지 0.8 을 곱한다 — 초상화 너머로 맵이 비쳤다
+        _rightDim = AtLeast(_rightColor * Dim, BossDimFloor);
 
         Sprite s = right.sprite;
         if (s == null)
@@ -439,6 +445,16 @@ public class UI_ConversationPopup : UI_Popup
         rt.pivot = new Vector2((min.x + max.x) * 0.5f / s.rect.width, min.y / s.rect.height);    // 몸의 발밑 가운데
         rt.anchoredPosition = new Vector2(-BossFromRight, box.rect.height);
         rt.sizeDelta = s.rect.size * k / rt.localScale.y;
+    }
+
+    // 가장 밝은 채널을 floor 까지 끌어올린다. 색의 비율과 알파는 그대로.
+    static Color AtLeast(Color c, float floor)
+    {
+        float max = c.maxColorComponent;
+        if (max >= floor || max <= 0f)
+            return c;
+        float k = floor / max;
+        return new Color(c.r * k, c.g * k, c.b * k, c.a);
     }
 
     void Finish(StoryChoice choice)
@@ -463,6 +479,9 @@ public class UI_ConversationPopup : UI_Popup
         _choice = -1;
         _choiceOpenedAt = Time.unscaledTime;
         GetImage((int)Images.ConversationArrow).gameObject.SetActive(false);
+        // 마검의 감정 풍선이 첫 선택지의 오른쪽 위 모서리를 덮었다. 고르는 동안은 걷는다(고른 뒤에는 창이 닫힌다).
+        GetObject((int)GameObjects.LeftEmoji).SetActive(false);
+        GetObject((int)GameObjects.RightEmoji).SetActive(false);
 
         int count = _story.Choices.Length;
         Transform box = GetObject((int)GameObjects.Speaker).transform.parent;   // CoversationBox

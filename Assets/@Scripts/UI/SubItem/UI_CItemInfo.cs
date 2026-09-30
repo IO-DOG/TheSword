@@ -125,12 +125,12 @@ public class UI_CItemInfo : UI_Base
     bool _lastHitIsOwner;
 
     // 마우스가 이 아이템을 벗어나면 닫는다 — 옆 칸 아이템으로 곧장 옮겨 가도(UI_MonsterInfo 와 같다).
-    // 닫으면 UI_GameScene.ShowInfo 가 새 아이템의 창을 띄운다.
+    // 닫으면 UI_GameScene.ShowInfo 가 새 아이템의 창을 띄운다. 맵이 덮여도 닫는다(UI_GameScene.CanShowTooltip).
     private void Update()
     {
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit, 1000.0f, _mask) && IsOwner(hit.collider))
+        if (UI_GameScene.CanShowTooltip() && Physics.Raycast(ray, out hit, 1000.0f, _mask) && IsOwner(hit.collider))
             return;
 
         Release();

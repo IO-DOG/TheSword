@@ -118,17 +118,22 @@ public class ForecastOverlay : MonoBehaviour
         Follow();
     }
 
-    // 전투·연출·대화·메뉴 동안, 그리고 창이 떠 있으면 숨긴다. 저절로 사라지는 층·보스 이름 위에서는 보인다.
-    bool Visible()
+    bool Visible() => _setting && Managers.Game.PlayerData.IsContractedSword && MapInView();
+
+    /// <summary>
+    /// 맵 위에 얹는 것(이 숫자·몬스터와 아이템 툴팁)이 서도 되는가. 전투·연출·대화·메뉴 동안, 그리고 창이 떠 있으면
+    /// 아니다. 저절로 사라지는 층·보스 이름 위에서는 된다. besideInventory 면 인벤토리 위에서도 된다(툴팁만 쓴다 —
+    /// UI_GameScene.CanShowTooltip).
+    /// </summary>
+    public static bool MapInView(bool besideInventory = false)
     {
         GameManager g = Managers.Game;
-        if (_setting == false || g.PlayerData.IsContractedSword == false)
-            return false;
         if (g.OnBattle || g.OnDirect || g.OnConversation || g.OnFade || g.IsPlayerDead
             || FightGate.Pending || Managers.UI.IsPaused)
             return false;
         UI_Popup top = Managers.UI.TopPopup;
-        return top == null || top is UI_StageNamePopup || top is UI_BossNamePopup;
+        return top == null || top is UI_StageNamePopup || top is UI_BossNamePopup
+            || (besideInventory && top is UI_InvenPopup);
     }
 
     void Rebuild()

@@ -51,6 +51,9 @@ public class UI_TitleScene : UI_Scene
     bool _loadFailed;
     Define.ScriptType _language;
     CanvasGroup _buttons;       // 타이틀 메뉴 글자 묶음. 창이 떠 있는 동안 가린다
+    CanvasGroup _logo;          // 로고. 마찬가지
+    Image _notice;              // 이어하기 실패 알림 — 메뉴 자리의 어두운 띠(ShowNotice)
+    TMP_Text _noticeText;
 
     public override bool Init()
     {
@@ -111,7 +114,8 @@ public class UI_TitleScene : UI_Scene
     /// "아무 키나 누르세요" 는 프리팹에서 화면 가운데 조금 아래(-200)라 빛나는 칼날 위에 얹혀 칼이 글자를 갈랐다.
     /// 칼끝 아래 화면 아래쪽으로 내리고 검은 테두리를 둘러 풀빛 위에서도 읽히게 한다. 깜빡임(애니메이터)은 색만
     /// 만지고 켜기(PlayOneShot)는 SetActive 만 하니 자리·재질은 그대로 남는다.
-    /// 불러오기·이어하기 실패 문구도 이 칸을 쓴다 — 한 줄로는 화면 밖으로 잘려서, 넓게 두고 넘치면 접고 줄인다.
+    /// 불러오기 실패 문구도 이 칸을 쓴다 — 한 줄로는 화면 밖으로 잘려서, 넓게 두고 넘치면 접고 줄인다.
+    /// (이어하기 실패는 제 칸을 쓴다 — ShowNotice)
     /// </summary>
     void PlacePrompt()
     {
@@ -134,6 +138,7 @@ public class UI_TitleScene : UI_Scene
     void StyleButtons()
     {
         _buttons = GetImage((int)Images.Buttons).gameObject.GetOrAddComponent<CanvasGroup>();
+        _logo = GetImage((int)Images.MainTitle_Text).gameObject.GetOrAddComponent<CanvasGroup>();
         TMP_Text first = GetText((int)Texts.NewGameText);
         foreach (Texts t in new[] { Texts.NewGameText, Texts.LoadGameText, Texts.SettingText, Texts.ExitText })
         {
@@ -214,7 +219,9 @@ public class UI_TitleScene : UI_Scene
         }
         // 창이 떠 있는 동안 타이틀 메뉴 글자를 가린다. 설정 메뉴에는 어둡게 덮는 판이 없어서, 그 단추 사이로
         // "- 이어하기 -" 가 비쳐 보였다. 켜고 끄기(SetActive)는 "아무 키나" 가 맡으니 투명도만 만진다.
-        _buttons.alpha = Managers.UI.GetPopupCount() > 0 ? 0f : 1f;
+        // 로고도 가린다 — 설정 판(1.3배, 화면 높이의 83%)이 로고 오른쪽 절반을 덮고 메뉴 첫 단추가 로고 아랫단에
+        // 걸렸다. 판을 로고 밑으로 옮길 자리는 없다(판을 도로 줄여야 한다).
+        _buttons.alpha = _logo.alpha = Managers.UI.GetPopupCount() > 0 ? 0f : 1f;
 
         // 창(설정 메뉴·확인 창)이 떠 있으면 타이틀 키는 쉰다 — 설정 창 밑에서 Enter 가 "새 게임" 을 눌러
         // 저장을 지운 적이 있다. 창을 닫은 그 Enter 도 같은 프레임에 여기서 다시 먹히면 안 된다.
@@ -232,14 +239,19 @@ public class UI_TitleScene : UI_Scene
             SetButtonColorAndButtonsText(buttonsIdx);
         }
 
-        if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S))
+        // 방향키·Enter 는 메뉴가 서 있을 때만 받는다. 불러오기가 끝나고 칼이 부딪혀 "아무 키나" 가 뜨기까지(1초 남짓)는
+        // 메뉴도 문구도 없어 Waiting 이 거짓이라, Enter 가 보이지 않는 "새 게임" 을 눌렀다 — 저장이 없으면 곧장 시작했고
+        // 있으면 오프닝 위에 확인 창이 떴다.
+        bool menu = GetImage((int)Images.Buttons).gameObject.activeSelf && !Waiting;
+
+        if (menu && (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)))
         {
             if (buttonsIdx != (maxButtonCount - 1)) Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UImove");
             buttonsIdx++;
             buttonsIdx = Mathf.Min(buttonsIdx, maxButtonCount - 1);
             SetButtonColorAndButtonsText(buttonsIdx);
         }
-        if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W))
+        if (menu && (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)))
         {
             if (buttonsIdx != 0) Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UImove");
             buttonsIdx--;
@@ -247,7 +259,7 @@ public class UI_TitleScene : UI_Scene
             SetButtonColorAndButtonsText(buttonsIdx);
         }
 
-        if (Input.GetKeyDown(KeyCode.Return) && !GetText((int)Texts.PessAnyKeyText).gameObject.activeSelf)
+        if (menu && Input.GetKeyDown(KeyCode.Return))
         {
             switch (buttonsIdx)
             {
@@ -276,9 +288,11 @@ public class UI_TitleScene : UI_Scene
             return;
         }
 
-        if (isPreload && Input.anyKeyDown && GetText((int)Texts.PessAnyKeyText).gameObject.activeSelf /*&& !Input.GetKeyDown(KeyCode.Return)*/ && !Input.GetKeyDown(KeyCode.UpArrow) && !Input.GetKeyDown(KeyCode.DownArrow))
+        if (isPreload && Input.anyKeyDown && Waiting /*&& !Input.GetKeyDown(KeyCode.Return)*/ && !Input.GetKeyDown(KeyCode.UpArrow) && !Input.GetKeyDown(KeyCode.DownArrow))
         {
             GetText((int)Texts.PessAnyKeyText).gameObject.SetActive(false);
+            if (_notice != null)
+                _notice.gameObject.SetActive(false);
             GetImage((int)Images.Buttons).gameObject.SetActive(true);
             ButtonsSetting();
             CheckFirstGame();
@@ -365,9 +379,7 @@ public class UI_TitleScene : UI_Scene
                 // 알리고 타이틀에 머문다. 아무 키나 누르면 버튼으로 돌아간다.
                 Debug.LogWarning($"[Title] 이어하기 실패 — 저장은 그대로 둔다: {Managers.Game.LastSaveError}");
                 GetImage((int)Images.Buttons).gameObject.SetActive(false);
-                TMP_Text notice = GetText((int)Texts.PessAnyKeyText);
-                notice.text = Managers.GetString(Define.TITLE_SAVE_FAILED);
-                notice.gameObject.SetActive(true);
+                ShowNotice(Managers.GetString(Define.TITLE_SAVE_FAILED));
                 return;
             }
 
@@ -375,6 +387,41 @@ public class UI_TitleScene : UI_Scene
             Managers.Scene.LoadScene(Define.Scene.GameScene);
         }
     }
+
+    /// <summary>
+    /// 이어하기를 거절한 까닭. 예전에는 "아무 키나" 칸을 빌려 그 깜빡임(색 0.08~0.96)을 같이 탔고, 칼끝 풀빛(화면에서
+    /// 가장 밝은 곳) 위에 섰다 — 영어는 "return." 만 둘째 줄로 떨어졌다. 메뉴가 서던 어두운 띠(Buttons 와 같은 자리·색)에
+    /// 가만히 세우고, 줄 길이가 고르게 접히게 폭을 정한다. 아무 키나 누르면 걷히고 메뉴로 돌아간다(Update).
+    /// </summary>
+    void ShowNotice(string message)
+    {
+        const float MaxWidth = 1100f, Pad = 24f;
+        if (_notice == null)
+        {
+            Image band = GetImage((int)Images.Buttons);
+            _notice = CodeUI.NewImage(transform, "Notice", null, band.color);
+            _notice.rectTransform.anchorMin = band.rectTransform.anchorMin;
+            _notice.rectTransform.anchorMax = band.rectTransform.anchorMax;
+            _notice.rectTransform.anchoredPosition = band.rectTransform.anchoredPosition;
+            TMP_FontAsset font = GetText((int)Texts.PessAnyKeyText).font;
+            _noticeText = CodeUI.NewText(_notice.transform, "Text", font, 52f, Color.white, TextAlignmentOptions.Center);
+            _noticeText.fontSharedMaterial = CodeUI.Outlined(font, 0.4f);
+            _noticeText.textWrappingMode = TextWrappingModes.Normal;
+        }
+
+        // 한 줄 폭을 줄 수로 나눈다. TMP 는 앞줄부터 꽉 채워 끝줄에 낱말 하나만 남기곤 한다. 여유(글자 두 개)는
+        // 줄 끝에 걸린 낱말이 한 줄을 더 만들지 않게.
+        float line = _noticeText.GetPreferredValues(message).x;
+        float width = Mathf.Min(MaxWidth, line / Mathf.Max(1f, Mathf.Ceil(line / MaxWidth)) + _noticeText.fontSize * 2f);
+        float height = _noticeText.GetPreferredValues(message, width, 0f).y;
+        _noticeText.text = message;
+        CodeUI.Place(_noticeText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(width, height));
+        _notice.rectTransform.sizeDelta = new Vector2(0f, height + Pad * 2f);
+        _notice.gameObject.SetActive(true);
+    }
+
+    // "아무 키나" 나 이어하기 실패 알림이 떠 있다 — 아무 키나 누르면 걷히고 메뉴가 나온다.
+    bool Waiting => GetText((int)Texts.PessAnyKeyText).gameObject.activeSelf || (_notice != null && _notice.gameObject.activeSelf);
 
     void OnClickSettingButton()
     {

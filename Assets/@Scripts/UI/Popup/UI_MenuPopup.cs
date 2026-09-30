@@ -10,7 +10,7 @@ using UnityEngine.UI;
 ///
 /// 게임에서 열면 시간이 멈춘다(UIManager.RefreshTimeScale) — 전투 중에도 열 수 있다.
 /// 게임에서는 계속 / 설정 / 언어 / 이 층 다시 시작 / 체크포인트 / 타이틀로 / 게임 종료,
-/// 타이틀에서는 앞의 셋과 게임 종료만 있다. 게임에만 있는 줄은 프리팹을 고치지 않고
+/// 타이틀에서는 돌아가기 / 설정 / 언어 / 게임 종료만 있다. 게임에만 있는 줄은 프리팹을 고치지 않고
 /// "게임 종료" 버튼을 복제해서 세운다 — 그래야 그림·글꼴·반짝임이 똑같다.
 ///
 /// 키보드: W/S 또는 ↑/↓ 로 고르고 Enter/Space 로 누른다. Esc 는 한 칸 뒤로(체크포인트 목록 → 메뉴 → 닫기).
@@ -60,6 +60,8 @@ public class UI_MenuPopup : UI_Popup
     public const int CHECKPOINT_ROW = 187;      // {0} 층, {1} 레벨, {2}/{3} HP
     public const int CHECKPOINT_NONE = 188;
     public const int CHECKPOINT_FAILED = 189;
+    // 타이틀에서 연 메뉴의 첫 줄. 메뉴를 닫을 뿐인데 "계속하기" 라서 저장을 불러오는 줄로 읽혔다.
+    public const int MENU_BACK = 203;
     #endregion
 
     // 한 줄 = 버튼 그림 + 고른 표시(Choice) + 열어 둔 표시(Set) + 글자.
@@ -75,7 +77,10 @@ public class UI_MenuPopup : UI_Popup
 
     // 일곱 줄이 되면 프리팹 간격(100)으로는 화면 밖으로 넘친다.
     const float GameRowSpacing = 70f;
-    const float ListRowScale = 1.5f;
+    // 체크포인트 줄. 1.5 에서는 두 줄 글자가 1080p 에서 14px 남짓이었다 — 열 줄(SaveStore.HistoryLimit)이 화면
+    // 높이의 85% 안에 드는 만큼만 키운다(줄 사이 ListRowGap).
+    const float ListRowScale = 1.75f;
+    const float ListRowGap = 8f;
     const float SlideTime = 0.3f;
 
     readonly List<Row> _main = new List<Row>();
@@ -114,7 +119,8 @@ public class UI_MenuPopup : UI_Popup
         _settingRow = MainRow(Images.SettingButton, Images.SettingButtonChoice, Images.SettingButtonSet, Texts.SettingButtonText, Define.SETTING, OnClickSettingButton);
         _languageRow = MainRow(Images.SelectLanguageButton, Images.SelectLanguageButtonChoice, Images.SelectLanguageButtonSet, Texts.SelectLanguageButtonText, Define.LANGUAGE, OnClickSelectLanguageButton);
         Row quit = MainRow(Images.QuitGameButton, Images.QuitGameButtonChoice, Images.QuitGameButtonSet, Texts.QuitGameButtonText, Define.QUIT_GAME, OnClickQuitButton);
-        _main.Add(MainRow(Images.ContinueButton, Images.ContinueButtonChoice, Images.ContinueButtonSet, Texts.ContinueButtonText, Define.CONTINUE, OnClickContinueGameButton));
+        _main.Add(MainRow(Images.ContinueButton, Images.ContinueButtonChoice, Images.ContinueButtonSet, Texts.ContinueButtonText,
+            _inGame ? Define.CONTINUE : MENU_BACK, OnClickContinueGameButton));
         _main.Add(_settingRow);
         _main.Add(_languageRow);
         if (_inGame)
@@ -407,7 +413,7 @@ public class UI_MenuPopup : UI_Popup
         layout.childControlWidth = layout.childControlHeight = false;
         layout.childForceExpandWidth = layout.childForceExpandHeight = false;
         layout.childScaleHeight = true;
-        layout.spacing = 12f;
+        layout.spacing = ListRowGap;
         // 목록 높이를 줄들에 맞춘다. 줄이 틀(100)보다 길면 레이아웃은 가운데 맞춤을 버리고 위끝부터 쌓아서,
         // 열 줄이 화면 가운데에서 시작해 아래로 넘쳤다(1080p 에서 일곱 줄만 보였다). 가운데를 기준으로 위아래로 편다.
         _list.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -421,7 +427,9 @@ public class UI_MenuPopup : UI_Popup
             row.Text.text = string.Format(Managers.GetString(CHECKPOINT_ROW), info.Stage + 1, info.Level, info.Hp, info.MaxHp)
                 + "\n" + info.SavedAt.ToString("MM/dd HH:mm");
             // 글 칸(50)이 단추 그림(48)보다 높아서 두 줄을 채우면 첫 줄이 윗테두리에 닿았다. 테두리만큼 비운다.
+            // 두 줄 글자는 칸 높이에 맞춰 줄어든다. 줄 간격(글꼴 줄 높이 1.1em, 글자 몸은 그 절반)을 좁혀 그만큼 키운다.
             row.Text.margin = new Vector4(0f, 5f, 0f, 5f);
+            row.Text.lineSpacing = -20f;
             _listRows.Add(row);
         }
         for (int i = 0; i < _listRows.Count; i++)
@@ -429,7 +437,7 @@ public class UI_MenuPopup : UI_Popup
 
         // 설정 창이 들어오는 자리(화면 64.5%)로 오른쪽 밖에서 밀어 넣는다.
         _list.transform.position = new Vector3(Screen.width * 1.3f, Screen.height * 0.5f, 0f);
-        _list.transform.DOMoveX(Screen.width * 0.645f, SlideTime).SetUpdate(true);
+        _list.transform.DOMoveX(Screen.width * 0.645f, SlideTime).SetUpdate(true).SetLink(_list);
 
         _rows = _listRows;
         Highlight(0);
@@ -479,14 +487,18 @@ public class UI_MenuPopup : UI_Popup
         SlideRows(_homeX);
     }
 
+    // 되돌아가던 중에 다시 비키면 두 트윈이 싸운다 — 앞의 것을 죽인다. 단추 트윈은 시퀀스 안에 있어 단추째로
+    // DOKill 해서는 안 죽는다. 메뉴와 함께 죽는다(SetLink): 곁창을 연 채 메뉴를 닫으면 되돌아가던 트윈이 부서진
+    // 단추를 만지며 "Target missing" 경고를 줄줄이 찍었다.
+    Sequence _slide;
+
     void SlideRows(float x)
     {
-        Sequence seq = DOTween.Sequence().SetUpdate(true);
+        if (_slide.IsActive())      // 다 돌고 끝난 것은 이미 죽었다
+            _slide.Kill();
+        _slide = DOTween.Sequence().SetUpdate(true).SetLink(gameObject);
         for (int i = 0; i < _main.Count; i++)
-        {
-            _main[i].Button.transform.DOKill();   // 되돌아가던 중에 다시 비키면 두 트윈이 싸운다
-            seq.Insert(0.1f + 0.02f * i, _main[i].Button.transform.DOMoveX(x, SlideTime));
-        }
+            _slide.Insert(0.1f + 0.02f * i, _main[i].Button.transform.DOMoveX(x, SlideTime));
     }
 
     // 메뉴에서 연 곁창(설정·언어 창, 체크포인트 목록)을 닫고 버튼을 제자리로.

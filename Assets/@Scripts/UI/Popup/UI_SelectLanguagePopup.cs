@@ -42,7 +42,7 @@ public class UI_SelectLanguagePopup : UI_Popup
         //GetImage((int)Images.BackgroundImage).gameObject.transform.localScale = new Vector3(0, 0, 0);
         float dist = Screen.width * 0.645f;
 
-        GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveX(dist, 0.2f);
+        GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveX(dist, 0.2f).SetLink(gameObject);   // 곧장 닫혀도 경고 없이
         //GetImage((int)Images.BackgroundImage).gameObject.transform.DOMoveX(1240, 0.2f);
         //GetImage((int)Images.BackgroundImage).gameObject.transform.DOScale(1, 0.2f);
 

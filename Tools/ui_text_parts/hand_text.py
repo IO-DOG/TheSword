@@ -7,7 +7,7 @@ GetString 이 둘 다 되돌리고, 어드레서블 전 GeneratedUiText 로 나�
 영어는 CSV 에서 쉼표로 잘려 일본어·중국어 칸으로 샌 10행(126 4009 4017 4033 4039 20000
 20004 20005 20007 20008)을 한국어 뜻으로 다시 잇고, 백틱(`)을 ' 로, 없는 스탯인 stamina 를
 HP 로, 뜻이 틀린 18(Full Volume)·4020(Ballet Font)·128 을 고쳤다. 한국어는 4057 의 문장 가운데
-마침표 하나만 고쳤다.
+마침표 하나만 고쳤다. 물약 126~129 의 설명 끝 '..' 는 한국어·영어 모두 '.' 로 고쳤다.
 아무 표도 가리키지 않는 옛 행(1~5, 5004~5099, 101xx·103xx, 201xx·203xx)은 넣지 않았다.
 워프석 반지(4000·4001)는 여기 없다 — 스토리 도감 items.warp_ring 이 원본이다(도감 4060·4061 과 같은 길).
 """
@@ -86,21 +86,21 @@ TEXT = {
           "A thick piece of meat.\\nIt gives strength to adventurers\\nwho are exhausted from hunger.\\nRestores HP <color=#00FF7F><b>+30%</b></color>",
           "分厚い肉の塊。\\n空腹で疲れ果てた冒険者に\\n力を与えてくれる。\\n体力回復 <color=#00FF7F><b>+30%</b></color>",
           "厚实的肉块。\\n能让饿得筋疲力尽的冒险者\\n重新充满力气。\\n生命值恢复 <color=#00FF7F><b>+30%</b></color>"),
-    126: ("작은 병에 담긴 물약.\\n흔한 약초를 달여 만들었지만\\n빠르게 체력을 회복시켜준다..\\n체력회복 <color=#00FF7F><b>+40%</b></color>",
-          "A potion in a small bottle.\\nIt is made by boiling common herbs^\\nbut it quickly restores health..\\nRestores HP <color=#00FF7F><b>+40%</b></color>",
+    126: ("작은 병에 담긴 물약.\\n흔한 약초를 달여 만들었지만\\n빠르게 체력을 회복시켜준다.\\n체력회복 <color=#00FF7F><b>+40%</b></color>",
+          "A potion in a small bottle.\\nIt is made by boiling common herbs^\\nbut it quickly restores health.\\nRestores HP <color=#00FF7F><b>+40%</b></color>",
           "小瓶に入ったポーション。\\nありふれた薬草を煎じたものだが\\nすばやく体力を回復してくれる。\\n体力回復 <color=#00FF7F><b>+40%</b></color>",
           "装在小瓶里的药水。\\n虽然只是用常见草药熬成的\\n却能迅速恢复生命值。\\n生命值恢复 <color=#00FF7F><b>+40%</b></color>"),
-    127: ("넉넉한 병에 담긴 물약.\\n비싼 약초가 사용되어 비싸게 거래된다.\\n지친 모험가도 즉시 회복시켜줄 수 있다..\\n체력회복 <color=#00FF7F><b>+50%</b></color>",
-          "A potion in a generous bottle.\\nIt is traded at a high price because it uses expensive herbs.\\nIt can instantly restore even exhausted adventurers..\\nRestores HP <color=#00FF7F><b>+50%</b></color>",
+    127: ("넉넉한 병에 담긴 물약.\\n비싼 약초가 사용되어 비싸게 거래된다.\\n지친 모험가도 즉시 회복시켜줄 수 있다.\\n체력회복 <color=#00FF7F><b>+50%</b></color>",
+          "A potion in a generous bottle.\\nIt is traded at a high price because it uses expensive herbs.\\nIt can instantly restore even exhausted adventurers.\\nRestores HP <color=#00FF7F><b>+50%</b></color>",
           "大きめの瓶に入ったポーション。\\n高価な薬草を使うため高値で取引される。\\n疲れ果てた冒険者もたちまち回復させる。\\n体力回復 <color=#00FF7F><b>+50%</b></color>",
           "装在大瓶里的药水。\\n用了名贵的草药，因此售价不菲。\\n能让精疲力竭的冒险者立刻恢复。\\n生命值恢复 <color=#00FF7F><b>+50%</b></color>"),
     # +70% 였다 — ConsumableItemData 7 의 Heal 은 60 이다 (4층 분열 슬라임이 떨군다).
-    128: ("귀한 약초로 약사가 특별하게 제조하여\\n실신한 사람도 벌떡 일어나게 만든다..\\n체력회복 <color=#00FF7F><b>+60%</b></color>",
-          "Specially brewed by an apothecary from rare herbs^\\nit gets even the fainted back on their feet..\\nRestores HP <color=#00FF7F><b>+60%</b></color>",
+    128: ("귀한 약초로 약사가 특별하게 제조하여\\n실신한 사람도 벌떡 일어나게 만든다.\\n체력회복 <color=#00FF7F><b>+60%</b></color>",
+          "Specially brewed by an apothecary from rare herbs^\\nit gets even the fainted back on their feet.\\nRestores HP <color=#00FF7F><b>+60%</b></color>",
           "薬師が貴重な薬草で特別に調合したもの。\\n気を失った者さえ飛び起きるという。\\n体力回復 <color=#00FF7F><b>+60%</b></color>",
           "药师用珍贵草药特别调制而成，\\n连昏倒的人都能一下子跳起来。\\n生命值恢复 <color=#00FF7F><b>+60%</b></color>"),
-    129: ("신비로운 빛이 나는 물약.\\n죽은 사람도 살린다는 기적의 물약으로\\n제조법을 찾기 위한 약사들이 앞다퉈 연구 중이다..\\n체력회복 <color=#00FF7F><b>+100%</b></color>",
-          "A potion with a mysterious glow.\\nIt is a miraculous potion that can even revive the dead.\\nPharmacists are racing to find the recipe..\\nRestores HP <color=#00FF7F><b>+100%</b></color>",
+    129: ("신비로운 빛이 나는 물약.\\n죽은 사람도 살린다는 기적의 물약으로\\n제조법을 찾기 위한 약사들이 앞다퉈 연구 중이다.\\n체력회복 <color=#00FF7F><b>+100%</b></color>",
+          "A potion with a mysterious glow.\\nIt is a miraculous potion that can even revive the dead.\\nPharmacists are racing to find the recipe.\\nRestores HP <color=#00FF7F><b>+100%</b></color>",
           "神秘的な光を放つポーション。\\n死者さえ蘇らせるという奇跡の薬で\\n薬師たちが競って製法を研究している。\\n体力回復 <color=#00FF7F><b>+100%</b></color>",
           "散发着神秘光芒的药水。\\n传说是能起死回生的奇迹之药\\n药师们正争相研究它的配方。\\n生命值恢复 <color=#00FF7F><b>+100%</b></color>"),
     130: ("파괴의 힘이 담긴 마석.\\n마법으로 새겨진 고대 문자가 빛나고 있다.\\n내면에서 파괴의 힘이 솟아난다.",
