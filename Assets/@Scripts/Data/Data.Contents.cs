@@ -61,6 +61,9 @@ namespace Data
         public string Shadow { get; set; }
         public int MonsterNameId { get; set; }
         public int MonsterDescId { get; set; }
+        // 기준 값(par): 설계한 플레이어(그 층 목표 레벨, 치명 횟수 0, 체력 가득)가 이 몬스터에게
+        // 잃는 HP, 절대값. 생성 몬스터만 있고 1~4층 몬스터는 0 이다 (generate_content.build_monsters).
+        public float ParLoss { get; set; }
     }
 
     [Serializable]
@@ -256,6 +259,20 @@ namespace Data
         public int EXP;
         public string BGM;
         public int DungeonNameScriptID;
+        // 기준 레벨: 정답 경로가 이 층에 들어설 때·떠날 때의 레벨 (1~4층은 0).
+        public int ParLevelIn;
+        public int ParLevelOut;
+        // 계단의 제단 (띠의 마지막 층에만, 없으면 전부 0). 한 번에 공격 AltarAtk 또는 방어 AltarDef.
+        // n 번째 구매의 값 = AltarPrice + AltarPriceStep·n(n−1) (최대 HP 의 %),
+        // 내고 나서 AltarReserve % (탑의 법이면 AltarReserveTower %)가 안 남으면 팔지 않는다
+        // (generate_content.altar_sells). 문턱은 층마다 다르다 — 그 HP 로 다음 층 입구(체크포인트)에
+        // 서도 100층까지 갈 수 있는 값이다(altar_reserves). 낮춰 쓰면 그 입구에서 영영 갇힌다.
+        public float AltarAtk;
+        public float AltarDef;
+        public float AltarPrice;
+        public float AltarPriceStep;
+        public float AltarReserve;
+        public float AltarReserveTower;
     }
 
     [Serializable]

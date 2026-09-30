@@ -979,9 +979,9 @@ public static class GeneratedStory
     {
         -1, -1, -1, -1, -1, 23, -1, -1, 44, -1, -1, -1, 79, -1, -1, -1, 111, -1, -1, -1,
         151, -1, -1, -1, 180, -1, -1, -1, -1, 222, -1, -1, 248, -1, -1, -1, 282, -1, -1, -1,
-        320, -1, -1, -1, 352, -1, -1, -1, 382, -1, -1, -1, -1, 425, -1, -1, 451, -1, -1, -1,
-        486, -1, -1, -1, 522, -1, -1, -1, 555, -1, -1, -1, 586, -1, -1, -1, -1, 629, -1, -1,
-        654, -1, -1, -1, 686, -1, -1, -1, 720, -1, -1, -1, 755, -1, -1, -1, 791, -1, -1, -1,
+        322, -1, -1, -1, 354, -1, -1, -1, 384, -1, -1, -1, -1, 427, -1, -1, 453, -1, -1, -1,
+        490, -1, -1, -1, 526, -1, -1, -1, 559, -1, -1, -1, 590, -1, -1, -1, -1, 633, -1, -1,
+        658, -1, -1, -1, 692, -1, -1, -1, 726, -1, -1, -1, 761, -1, -1, -1, 797, -1, -1, -1,
         -1,
     };
     // 둘 중 하나 보상(칸 끝의 ~)이 있는 층
@@ -989,9 +989,9 @@ public static class GeneratedStory
     {
         false, false, false, false, false, false, false, false, false, true, false, false, false, false, true, false, false, false, false, true,
         false, false, false, false, true, false, false, false, false, true, false, false, false, false, true, false, false, false, false, true,
-        false, false, false, false, true, false, false, false, false, true, false, false, false, false, true, false, false, false, false, true,
-        false, false, false, false, true, false, false, false, false, true, false, false, false, false, true, false, false, false, false, true,
-        false, false, false, false, true, false, false, false, false, true, false, false, false, false, true, false, false, false, false, true,
+        true, false, false, false, true, false, false, false, false, true, false, false, false, false, true, false, false, false, false, true,
+        true, false, false, false, true, false, false, false, false, true, false, false, false, false, true, false, false, false, false, true,
+        true, false, false, false, true, false, false, false, false, true, false, false, false, false, true, false, false, false, false, true,
         false,
     };
     // 들어설 때 뜨는 층 유형 바크(Scenes 의 번호), 없으면 -1 — story_gen.bark_schedule (바이블 R13·R15)

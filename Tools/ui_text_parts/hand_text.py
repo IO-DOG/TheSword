@@ -141,10 +141,15 @@ TEXT = {
     4011: ("에온의 고리", "Aeon's Ring", "アイオーンの輪", "埃昂之环"),
     4012: ("키르케의 시계추", "Circe's Pendulum", "キルケーの振り子", "喀耳刻的钟摆"),
     4013: ("크로노스의 시계", "Chronos's Clock", "クロノスの時計", "克洛诺斯之钟"),
-    4014: ("마법의 모래시계로 만든 목걸이.\\n시간의 흐름을 이용하여 전투 시간을 앞당긴다.",
-           "A necklace made from a magic hourglass.\\nUtilizes the flow of time to advance battle time.",
-           "魔法の砂時計で作った首飾り。\\n時の流れを利用して戦闘の時間を早める。",
-           "用魔法沙漏制成的项链。\\n利用时间的流动，加快战斗进程。"),
+    # 킹 슬라임이 떨구는 기념품이다. 예전 문구는 "전투 시간을 앞당긴다" 였는데 전투 배속은 이제
+    # 설정(B1)에서 고른다 — 목걸이가 약속할 것이 없다. 40·60·80층 보스의 배속 목걸이(4015~4017)는
+    # 더 이상 아무도 떨구지 않는다(generate_content.BOSS_REWARD).
+    # 배속이 "없다" 고도 쓰지 않는다. B1 이 없는 판에서는 이 목걸이가 여전히 2배속이고, B1 도 배속을
+    # max(설정, 목걸이) 로 읽어 1배 설정이면 2배로 끌어올린다 — 어느 쪽이든 거짓이 되지 않게 둔다.
+    4014: ("킹 슬라임이 품고 있던 모래시계 목걸이.\\n처음 쓰러뜨린 왕의 증표.",
+           "A sandglass necklace King Slime was carrying.\\nA keepsake from the first king you felled.",
+           "キングスライムが抱えていた砂時計の首飾り。\\n最初に倒した王の証。",
+           "史莱姆王怀里的沙漏项链。\\n击倒第一位王的纪念。"),
     4015: ("시간 여행자인 에온의 고리로 만든 목걸이.\\n시간의 흐름을 제어하여 전투 시간을 신속하게 앞당긴다.",
            "A necklace made from the ring of the time traveler Aeon.\\nControls the flow of time to quickly advance battle time.",
            "時の旅人アイオーンの輪で作った首飾り。\\n時の流れを制御し、戦闘の時間を素早く進める。",

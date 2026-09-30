@@ -92,7 +92,10 @@ public static class MonsterTint
         // 생성 몬스터 id = 1000 + 층*8 + 서열. 층을 되짚어 색 갈래를 정한다.
         int order = SpeciesRank[Mathf.Clamp(monsterId % 8, 0, SpeciesRank.Length - 1)];
         int floor = (monsterId - 1000) / 8;
-        int variant = (floor / 5) % VariantHue.Length;   // 다섯 층마다 갈린다
+        // 다섯 층마다 갈린다 — 1~5, 6~10 … 16~20 층. 특성 띠(generate_content.BAND_TRAITS)와
+        // 같은 경계라야 색이 바뀔 때 규칙도 바뀐다. 예전 floor/5 는 한 층 어긋나(5~9, 10~14 …)
+        // 띠의 마지막 층 몹만 다음 띠의 색을 입었다.
+        int variant = ((floor - 1) / 5) % VariantHue.Length;
         return For(md.Chapter, order, variant);
     }
 }

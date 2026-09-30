@@ -339,18 +339,31 @@ def bark_schedule(scenes, speaker_rows, facts):
     taken = entry_floors(scenes) | {20 * (c + 1) for c in range(CHAPTERS)}
     free = [f for f in range(gc.HANDMADE_FLOORS + 1, gc.TOTAL_FLOORS + 1)
             if facts[f]["type"] in pools and f not in taken]
+    def fits(i, floor):
+        quiet = SWORD_QUIET[0] <= floor <= SWORD_QUIET[1]
+        return not (quiet and speaker_rows[scenes[i]["lines"][0][0]][0] == "sword")
+
     plan = [-1] * (gc.TOTAL_FLOORS + 1)
     for phase in range(BARK_EVERY):
         plan, turn = [-1] * (gc.TOTAL_FLOORS + 1), {}
         for floor in free[phase::BARK_EVERY]:
             kind = facts[floor]["type"]
-            quiet = SWORD_QUIET[0] <= floor <= SWORD_QUIET[1]
-            usable = [i for i in pools[kind] if not (quiet and speaker_rows[scenes[i]["lines"][0][0]][0] == "sword")]
+            usable = [i for i in pools[kind] if fits(i, floor)]
             if usable:
                 plan[floor] = usable[turn.get(kind, 0) % len(usable)]
                 turn[kind] = turn.get(kind, 0) + 1
         if all(i in plan for pool in pools.values() for i in pool):
             break
+    # 어느 위상으로도 변주가 다 안 서면, 빠진 변주를 그 유형의 남은 빈 층 중 가장 이른 곳에 세운다.
+    # 띠마다 새 특성이 띠의 첫 층(늘 인색 층)에서 소개되어 인색 층이 특성 수업으로 많이 찬다
+    # (generate_content.BAND_TRAITS) — 셋에 하나 간격만으로는 인색 변주가 다 못 섰다.
+    for kind, pool in pools.items():
+        for i in pool:
+            if i not in plan:
+                spot = next((f for f in free if facts[f]["type"] == kind
+                             and plan[f] == -1 and fits(i, f)), None)
+                if spot is not None:
+                    plan[spot] = i
     return plan
 
 
