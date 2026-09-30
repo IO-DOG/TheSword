@@ -260,20 +260,15 @@ def check_grants(stages, maps, monsters, equips):
             errors.append(f"없는 장비 {eid}: {where[0]}")
 
 
-def check_level_headroom(players, monsters):
-    """출고 데이터로 5~100층을 완주시켜 마지막 레벨을 얻고, 레벨 표가 넉넉한지.
+def shipped_ptable(players):
+    return {lv: dict(need_exp=p["NeedExp"], total_exp=p["TotalExp"], atk=p["Attack"],
+                     dfn=p["Defence"], hp=p["MaxHP"], aspd=p["AttackSpeed"],
+                     dspd=p["DefenceSpeed"], crit=p["Critical"], crit_atk=p["CriticalAttack"],
+                     mspd=p["MoveSpeed"]) for lv, p in players.items()}
 
-    CurExp 세터가 PlayerDic[Level+1] 을 읽는다. 생성기와 같은 시뮬레이터를 쓰되
-    표는 게임이 읽는 JSON 에서 만든다.
-    """
-    ptable = {lv: dict(need_exp=p["NeedExp"], total_exp=p["TotalExp"], atk=p["Attack"],
-                       dfn=p["Defence"], hp=p["MaxHP"], aspd=p["AttackSpeed"],
-                       dspd=p["DefenceSpeed"], crit=p["Critical"], crit_atk=p["CriticalAttack"],
-                       mspd=p["MoveSpeed"]) for lv, p in players.items()}
-    start, err = G.simulate_handmade(ptable)
-    if err:
-        errors.append(f"도입부 시뮬레이션 실패: {err}")
-        return None
+
+def as_run(monsters):
+    """출고 몬스터 표 -> simulate_run 이 받는 목록 (층·자리는 id 에서 되짚는다)."""
     run = []
     for mid, m in monsters.items():
         if mid >= G.MOB_ID_BASE:
@@ -282,6 +277,21 @@ def check_level_headroom(players, monsters):
         elif G.BOSS_ID_BASE <= mid < G.BOSS_ID_BASE + len(G.CHAPTER_THEMES):
             run.append(dict(m, _floor=(mid - G.BOSS_ID_BASE + 1) * G.FLOORS_PER_CHAPTER,
                             _boss=True))
+    return run
+
+
+def check_level_headroom(players, monsters):
+    """출고 데이터로 5~100층을 완주시켜 마지막 레벨을 얻고, 레벨 표가 넉넉한지.
+
+    CurExp 세터가 PlayerDic[Level+1] 을 읽는다. 생성기와 같은 시뮬레이터를 쓰되
+    표는 게임이 읽는 JSON 에서 만든다.
+    """
+    ptable = shipped_ptable(players)
+    start, err = G.simulate_handmade(ptable)
+    if err:
+        errors.append(f"도입부 시뮬레이션 실패: {err}")
+        return None
+    run = as_run(monsters)
     ok, log, err = G.simulate_run(ptable, run, start, verbose=False)
     if not ok:
         errors.append(f"출고 데이터로 완주하지 못한다: {err}")
@@ -291,6 +301,112 @@ def check_level_headroom(players, monsters):
         errors.append(f"PlayerData 최대 레벨 {max(players)} — 완주 레벨 {final} 보다 "
                       f"{G.LEVEL_HEADROOM} 이상 커야 한다 (CurExp 세터가 Level+1 을 읽는다)")
     return final
+
+
+# 탑의 법 표에서 달라도 되는 것은 싸움의 값뿐이다. 나머지가 다르면 같은 MapData 위에서
+# 다른 몬스터가 된다(이름·그림·특성·경험치·떨구는 것).
+TOWER_SAME = ("Chapter", "Ability", "Name", "RewardExp", "RewardItem", "IdleAnimStr",
+              "AttackAnimStr", "BattleParticleAttack", "BattleParticleHit", "Shadow",
+              "MonsterNameId", "MonsterDescId", "Critical", "CriticalAttack")
+
+
+def check_tower(players, monsters):
+    """MonsterData_Tower.json — 같은 줄, 같은 모양, 그리고 보이는 대로 마시면 완주한다."""
+    path = os.path.join(JSOND, G.TOWER_TABLE + ".json")
+    if not os.path.exists(path):
+        errors.append(f"{G.TOWER_TABLE}.json 없음 — generate_content.py --write")
+        return None
+    tower = {m["id"]: m for m in load(G.TOWER_TABLE, "creatures")}
+    if set(tower) != set(monsters):
+        errors.append(f"탑의 법 표의 몬스터 id 가 MonsterData 와 다르다 "
+                      f"({len(set(tower) ^ set(monsters))}개)")
+        return None
+    for mid, m in monsters.items():
+        diff = [k for k in TOWER_SAME if tower[mid].get(k) != m.get(k)]
+        if diff:
+            errors.append(f"탑의 법 몬스터 {mid}: {', '.join(diff)} 가 기본 표와 다르다")
+            return None
+    for name, table in (("MonsterData", monsters), (G.TOWER_TABLE, tower)):
+        missing = [mid for mid in table if mid >= 100 and "ParLoss" not in table[mid]]
+        if missing:
+            errors.append(f"{name}: 생성 몬스터 {len(missing)}종에 ParLoss 가 없다 (예: {missing[0]})")
+    ptable = shipped_ptable(players)
+    start, err = G.simulate_handmade(ptable)
+    if err:
+        return None
+    ok, log, err = G.simulate_run(ptable, as_run(tower), start, verbose=False, greedy=True)
+    if not ok:
+        errors.append(f"탑의 법: 물약을 보이는 대로 마셔도 완주하지 못한다 — {err}")
+        return None
+    return G.chapter_lows(log)
+
+
+def check_consumables(items, scripts):
+    """룬 줄이 C# 의 ConsumableItem.NUM_OF_RUNES 안에 드는가, 이름·설명이 있는가.
+
+    크기 룬(12~)은 생성기가 늘리고 C# 상수는 사람이 늘린다 — 둘이 어긋나면 NUM_OF_RUNES 밖의
+    룬이 물약도 룬도 아닌 것으로 주워져 아무 일도 안 일어난다.
+    """
+    with open(os.path.join(ASSETS, "@Scripts", "Item", "ConsumableItem.cs"), encoding="utf-8-sig") as f:
+        src = f.read()
+    consts = {}
+    for name in ("NUM_OF_KEYS", "NUM_OF_POTIONS", "NUM_OF_RUNES"):
+        expr = re.search(rf"const int {name}\s*=\s*([^;]+);", src).group(1)
+        # "NUM_OF_POTIONS + 3 + 8" 꼴 — 앞 상수와 정수의 합만 읽는다.
+        consts[name] = sum(consts[t.strip()] if t.strip() in consts else int(t) for t in expr.split("+"))
+    for iid, it in sorted(items.items()):
+        gains = [it["AttackUp"], it["DefenceUp"], it["HPUp"]]
+        if iid >= consts["NUM_OF_POTIONS"]:
+            if iid >= consts["NUM_OF_RUNES"]:
+                errors.append(f"소비 아이템 {iid}: ConsumableItem.NUM_OF_RUNES({consts['NUM_OF_RUNES']}) 밖이다"
+                              " — 주워도 아무 일이 없다")
+            if it["Heal"] or sum(1 for g in gains if g > 0) != 1:
+                errors.append(f"소비 아이템 {iid}: 룬은 공격·방어·체력 중 하나만 올려야 한다 {gains}")
+        for field in ("ScriptNameId", "ScriptDescriptionId"):
+            row = scripts.get(it[field])
+            if row is None or not all((row.get(c) or "").strip() for c in bestiary.COLUMNS):
+                errors.append(f"소비 아이템 {iid} {field}: ScriptData {it[field]} 가 없거나 빈 언어가 있다")
+    return consts["NUM_OF_RUNES"] - consts["NUM_OF_POTIONS"]
+
+
+def check_stage_extra(stages, players, monsters):
+    """기준 레벨·제단 열. 제단은 띠의 마지막 층 계단에만 있다 (generate_content.altar_at).
+
+    문턱(AltarReserve / 탑의 법 AltarReserveTower)은 출고 표로 다시 잰다 — 그 HP 를 남기고 다음 층
+    입구(체크포인트)에 서도 보이는 대로 마시면 100층까지 가야 한다. 모자라면 그 입구에서 영영 갇힌다.
+    몬스터 표만 다시 뽑고 StageInfoData 를 안 쓰면 여기서 걸린다."""
+    for sid, s in sorted(stages.items()):
+        floor = sid + 1
+        want = G.altar_at(floor)
+        have = (s.get("AltarAtk", 0), s.get("AltarDef", 0))
+        if (want or (0, 0)) != have:
+            errors.append(f"{s['DungeonID']}: 제단 {have} (기대 {want})")
+        if floor > G.HANDMADE_FLOORS and not 0 < s.get("ParLevelIn", 0) <= s.get("ParLevelOut", 0):
+            errors.append(f"{s['DungeonID']}: 기준 레벨 {s.get('ParLevelIn')}→{s.get('ParLevelOut')}")
+
+    ptable = shipped_ptable(players)
+    start, err = G.simulate_handmade(ptable)
+    ok, log, _ = G.simulate_run(ptable, as_run(monsters), start, verbose=False) if not err else (False, None, None)
+    if not ok:
+        return                      # check_level_headroom 이 이미 알렸다
+    tables = [("AltarReserve", monsters)]
+    if os.path.exists(os.path.join(JSOND, G.TOWER_TABLE + ".json")):
+        tables.append(("AltarReserveTower", {m["id"]: m for m in load(G.TOWER_TABLE, "creatures")}))
+    for col, table in tables:
+        run = as_run(table)
+        for sid, s in sorted(stages.items()):
+            floor, pct = sid + 1, s.get(col, 0)
+            if not G.altar_at(floor):
+                if pct:
+                    errors.append(f"{s['DungeonID']}: 제단이 없는데 {col} {pct}")
+                continue
+            if pct <= 0:
+                errors.append(f"{s['DungeonID']}: {col} 가 없다")
+                continue
+            ok, _, err = G.simulate_run(ptable, run, G.altar_entry(ptable, log, floor, pct),
+                                        verbose=False, greedy=True, first=floor + 1)
+            if not ok:
+                errors.append(f"{s['DungeonID']}: 제단에서 {col} {pct:.0f}% 를 남기고 올라가면 {err}")
 
 
 def prefab_names():
@@ -438,12 +554,15 @@ def main():
         if key not in prefabs:
             errors.append(f"공통 프리팹 없음 '{key}'")
 
-    # ---- 레벨 테이블 · 문자열 · 특성 · 장비
+    # ---- 레벨 테이블 · 문자열 · 특성 · 장비 · 룬 · 탑의 법
     final_level = check_level_headroom(players, monsters)
     check_scripts(stages, monsters, classes, equips, load("EventData", "events"), scripts)
     check_ui_text(scripts)
     check_traits(classes, monsters)
     check_grants(stages, maps, monsters, equips)
+    runes = check_consumables(items, scripts)
+    check_stage_extra(stages, players, monsters)
+    tower_lows = check_tower(players, monsters)
 
     # ---- 몬스터 그림은 맵·전투창 두 애니메이터에 상태가 있어야 한다
     for rel in CONTROLLERS:
@@ -486,6 +605,7 @@ def main():
         return 1
     print(f"  통과 — 스테이지 {len(stages)}층, 맵 {len(maps)}개, 몬스터 {len(monsters)}종, "
           f"완주 레벨 {final_level} / 레벨 표 {max(players)} (경고 {len(warnings)}건)")
+    print(f"         룬 {runes}종(계단 3 + 크기 {runes - 3}) · 탑의 법 표 완주, 챕터별 최저 HP {tower_lows}")
     return 0
 
 

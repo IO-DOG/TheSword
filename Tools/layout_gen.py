@@ -315,7 +315,7 @@ def _carve_alcove(grid, rooms, rng, avoid=()):
 
 def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
                        with_down_stairs=True, equip_id=None, potions=None, rune=None,
-                       alcove=None, layout_kind=0):
+                       alcove=None, layout_kind=0, choice=None):
     """한 층의 격자를 만든다.
 
     mob_ids : 이 층의 몬스터 id 들. 약한 놈부터 정렬돼 있어야 한다.
@@ -324,6 +324,10 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     alcove  : 골방의 쓰임새 (종류, 색, 놓을 셀코드). None 이면 파수꾼 + 물약.
               "key"   파수꾼 뒤에 <b>여분 열쇠</b>를 둔다 — 잡아야 얻는다.
               "vault" 골방 입구가 <b>네 번째 문</b>이 되고 안에 보상이 있다.
+    choice  : "둘 중 하나" 보상 (셀코드, 셀코드, 놓는 곳). 하나를 주우면 짝이 사라진다.
+              "region" 마지막 구역의 곁길 칸 — 보물 층
+              "stairs" 계단 방 — 보스를 잡아야 닿는다(40·60·80층, 예전 목걸이 자리)
+              둘 다 길을 끊지 않는 칸에만 놓는다. 밟고 지나가며 저절로 줍게 되면 고른 것이 아니다.
 
     (grid, 구역별 방 목록, 문 좌표들) 반환. 문 좌표는 큰길 문 셋뿐이다 —
     금고 문은 진행을 강제하지 않으므로 도달 가능성 검사에 넣지 않는다.
@@ -644,15 +648,22 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
         place[alcove_prize] = alcove[2] if alcove else POTION_20
         used.add(alcove_prize)
 
-    if layout_kind == 4:
-        # A bonus choice, outside the guaranteed healing/rune budget. Both cells are optional.
-        pool = [c for c in free_in(regions[3]) if not _cuts_path(grid, spawn, up, c)]
+    if choice is not None:
+        # 완주 계산 밖의 덤이다. 두 칸 다 곁길이어야 한다.
+        first, second, where = choice
+        if where == "stairs":
+            if before_boss is None:
+                return None, None, None
+            pool = [c for c in free_in([order[-1]]) if c not in before_boss]
+        else:
+            pool = free_in(regions[3])
+        pool = [c for c in pool if not _cuts_path(grid, spawn, up, c)]
         pairs = [(a, b) for a in pool for b in pool if a < b and
                  abs(a[0] - b[0]) + abs(a[1] - b[1]) == 2]
         if not pairs:
             return None, None, None
         a, b = rng.choice(pairs)
-        place[a], place[b] = POTION_30 + "~", rune + "~"
+        place[a], place[b] = first + "~", second + "~"
         used.update((a, b))
 
     if equip_id is not None:

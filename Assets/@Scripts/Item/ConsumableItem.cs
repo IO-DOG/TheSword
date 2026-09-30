@@ -9,7 +9,9 @@ public class ConsumableItem : MonoBehaviour
 {
     public const int NUM_OF_KEYS = 3;
     public const int NUM_OF_POTIONS = NUM_OF_KEYS + 6;
-    public const int NUM_OF_RUNES = NUM_OF_POTIONS + 3;
+    // 룬: 9~11 계단 룬(+1), 12~ 크기 룬(금고·둘 중 하나 — generate_content.SIZED_RUNES 의 행 수).
+    // 표에 행이 늘면 여기도 늘린다 — validate_content 가 대조한다.
+    public const int NUM_OF_RUNES = NUM_OF_POTIONS + 3 + 7;
     public int id;
     public int _itemIndex_forActive;
     public ConsumableItem ChoicePartner;
@@ -27,8 +29,33 @@ public class ConsumableItem : MonoBehaviour
             _choiceLine.SetPosition(0, transform.position + Vector3.up * 0.06f);
             _choiceLine.SetPosition(1, ChoicePartner.transform.position + Vector3.up * 0.06f);
         }
-        GetComponent<Animator>().Play($"ConsumableItem_{id}");
+        int art = ArtId(id);
+        GetComponent<Animator>().Play($"ConsumableItem_{art}");
         GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>(Managers.Data.ConsumableItemDic[id].Shadow);
+        // 크기 룬은 기본 룬 그림을 빌려 써서 맵에서 계단 룬(+1)과 똑같아 보였다 — 금고를 열어야
+        // 할지 겉보기로 알 수 없다. 제 능력치 색으로 더 진하게 칠한다(몬스터처럼 "진하면 세다").
+        // 룬 클립은 m_Sprite 만 움직이므로 색이 덮이지 않는다.
+        // ponytail: 임시 표시다. 등급별 룬 그림이 오면 ItemAnimator 상태로 바꾸고 이 줄을 지운다.
+        if (art != id)
+            GetComponent<SpriteRenderer>().color = SizedRuneTint[art - NUM_OF_POTIONS];
+    }
+
+    static readonly Color[] SizedRuneTint =
+    {
+        new Color(1f, 0.55f, 0.55f),    // 공격 — 더 붉게
+        new Color(0.55f, 0.7f, 1f),     // 방어 — 더 푸르게
+        new Color(0.55f, 1f, 0.55f),    // 체력 — 더 짙은 초록
+    };
+
+    /// <summary>맵 위 그림의 애니메이션 상태. 크기 룬(12~)은 그림이 따로 없어서 같은 능력치의
+    /// 기본 룬(9 공격 · 10 방어 · 11 체력) 것을 튼다 — ItemAnimator 에 12~ 상태가 없고,
+    /// 없는 상태를 틀면 경고만 찍히고 그림이 안 나온다(보이지 않는 룬이 길을 막는다).</summary>
+    static int ArtId(int id)
+    {
+        Data.ConsumableItemData d;
+        if (id < NUM_OF_POTIONS + 3 || Managers.Data.ConsumableItemDic.TryGetValue(id, out d) == false)
+            return id;
+        return d.AttackUp > 0 ? NUM_OF_POTIONS : d.DefenceUp > 0 ? NUM_OF_POTIONS + 1 : NUM_OF_POTIONS + 2;
     }
 
     public void PickUp()
