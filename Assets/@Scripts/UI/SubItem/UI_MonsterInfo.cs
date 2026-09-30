@@ -77,7 +77,8 @@ public class UI_MonsterInfo : UI_Base
 
     void SetInfo()
     {
-        int id = gameObject.transform.parent.GetComponent<MonsterController>().id;
+        _owner = gameObject.transform.parent.GetComponent<MonsterController>();
+        int id = _owner.id;
         int stageId = Managers.Game.PlayerData.CurStageid;
 
         //Debug.Log(Managers.Data.MonsterDic[id].MonsterNameId);
@@ -175,31 +176,41 @@ public class UI_MonsterInfo : UI_Base
     }
     #endregion
 
+    // 이 창을 띄운 몬스터(ShowInfo 가 Util.Find 로 찾아 부모로 삼았다)와, 광선이 마지막으로 맞힌 것이 그놈인가.
+    MonsterController _owner;
+    Collider _lastHit;
+    bool _lastHitIsOwner;
+
+    // 마우스가 이 몬스터를 벗어나면 닫는다 — 옆 칸 몬스터로 곧장 옮겨 가도. 몬스터 콜라이더는 한 칸 폭에
+    // 16칸 높이라(MapBuilder.FitColliderToCell) 바닥을 안 거치고 넘어가서, A 의 이름·예측이 B 를 가리키는
+    // 채 남았다(못 이기는 B 위에 A 의 "-12" 가). 닫으면 UI_GameScene.ShowInfo 가 B 의 창을 새로 띄운다.
     private void Update()
     {
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        bool raycastHit = Physics.Raycast(ray, out hit, 1000.0f, _mask);
+        if (Physics.Raycast(ray, out hit, 1000.0f, _mask) && IsOwner(hit.collider))
+            return;
 
-        if (raycastHit)
+        Release();
+        Destroy(gameObject);
+    }
+
+    // 같은 콜라이더면 다시 찾지 않는다. Util.Find 는 자식을 훑을 때 배열을 만든다(마우스를 올린 동안 매 프레임).
+    bool IsOwner(Collider hitCollider)
+    {
+        if (hitCollider != _lastHit)
         {
-            //Debug.Log(hit.collider.gameObject.layer);
-            if (hit.collider.gameObject.layer != (int)Define.Layer.Monster)
-            {
-                Release();
-                Destroy(gameObject);
-            }
+            _lastHit = hitCollider;
+            _lastHitIsOwner = hitCollider.gameObject.layer == (int)Define.Layer.Monster
+                && Util.Find<MonsterController>(hitCollider.gameObject) == _owner;
         }
-        else
-        {
-            Release();
-            Destroy(gameObject);
-        }
+        return _lastHitIsOwner;
     }
 
     // 이 창은 몬스터의 자식이다. 마우스를 올린 채 그 몬스터와 싸우면 몬스터가 통째로 꺼지거나 부서져
     // 위의 Update 가 돌지 않았고, "정보 창이 떠 있다" 표시가 켜진 채 남아 그 뒤로 전투 예측이 영영 안 떴다.
     // 표시는 한 번만 내린다 — 부서질 때도 OnDisable 이 오는데, 그 사이 새로 뜬 창의 표시를 지우면 안 된다.
+    // 플레이를 끄는 중이면(매니저가 먼저 사라졌으면) 건드리지 않는다 — 부르면 @Managers 를 새로 세운다.
     bool _released;
 
     void Release()
@@ -207,7 +218,7 @@ public class UI_MonsterInfo : UI_Base
         if (_released)
             return;
         _released = true;
-        if (Managers.Game.GameScene != null)
+        if (Managers.IsAlive && Managers.Game.GameScene != null)
             Managers.Game.GameScene.isOpenInfoPopup = false;
     }
 

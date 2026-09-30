@@ -285,6 +285,9 @@ Unity.exe -projectPath . -executeMethod MapDecoSetup.Build
 | 사슬 | 2.2 x 6.2 칸 | 0.2 x 0.6 칸 |
 | 화로 | 5.9 x 5.9 칸 | 0.6 x 0.6 칸 |
 
+**레이아웃을 다시 뽑으면 장식도 다시 굽는다**(`MapDecoSetup.Build`, 한 층만이면 `BuildOne` 을 리플렉션으로).
+`validate_content` 가 장식이 옛 격자로 구워진 층을 경고한다.
+
 높이도 같이 맞는다. 벽은 y 0.2~0.5 를 차지하고, 이 팩의 장식은 y 2.0 부터
 그려져 있어서 0.1 을 곱하면 벽면 아래쪽에 정확히 걸린다. 0.3 으로 두면 벽 위로 뜬다.
 
@@ -296,9 +299,22 @@ Unity.exe -projectPath . -executeMethod MapDecoSetup.Build
 
 ### 전투 예측은 전투 코드를 그대로 돌린다
 
-몬스터를 클릭하면 "이놈을 잡으면 HP 를 얼마 잃는가" 가 뜬다(`BattleForecast`).
-게이지식 전투에 특성 8종이 얽혀 사람이 암산할 수 없으니, 이 표시가 없으면
-완전 정보 위에서 계산한다는 설계가 성립하지 않는다.
+"이놈을 잡으면 HP 를 얼마 잃는가" 가 이 게임의 간판이다(`BattleForecast`). 게이지식 전투에 특성 8종이
+얽혀 사람이 암산할 수 없으니, 이 표시가 없으면 완전 정보 위에서 계산한다는 설계가 성립하지 않는다.
+이야기로는 **마검의 외눈**이 보는 값이라, 3층 계약 뒤부터만 보인다(`PlayerData.IsContractedSword`).
+
+| 어디에 | 무엇을 | 파일 |
+|---|---|---|
+| 맵 위 몬스터 머리 위 | `-58` (현재 HP 대비 몫으로 초록·노랑·주황), 못 이기면 빨간 `X`, 잡으면 레벨업이면 표시. V 로 끄고 켠다 | `ForecastOverlay` |
+| 몬스터 도감 (M, HUD 검 단추) | 층의 종마다 공방체·경험치·남은 수·다음 싸움 값·맞는 횟수·"공격 +k → 한 대 덜" | `UI_MonsterManualPopup` |
+| 부딪히기 직전 | 못 이기는 싸움이면 "그래도 싸울까" (`FightGate` 순서 100). 스토리의 첫 ✖ 수업이 50 | `FatalFightGuard` |
+| HUD | 치명까지 N타, 방패 준비 | `UI_GameScene` |
+| 마우스 올리기 | 예측 두 줄 + 특성 이름, 물약은 "회복 +X (넘침 Y)" | `UI_MonsterInfo`, `UI_CItemInfo` |
+
+`Result.Damage` 는 **이길 때까지 치르는 값 전부**다 — 지는 싸움에서도 그렇다. `Win = Kills && Damage < CurHP`.
+치명 횟수·방어 게이지가 전투 사이에 이어지므로 모든 숫자는 "다음에 싸우면" 이고, `GameEvents` 가 알릴 때마다
+다시 잰다(매 프레임 재지 않는다). 코드로 만든 UI 는 `CodeUI` 로 기존 프리팹의 글꼴·틀을 빌려 쓴다 —
+어드레서블에 없는 그림은 빌드에서 못 읽는다. 검·워프 단추는 예전 `ISOPEN*` 설정이 아니라 계약 여부로 보인다.
 
 **예측을 새로 구현하지 마라.** 전투 시계는 `BattleStepper` 하나다 — 실제 전투
 (`UI_BattlePopup.FixedUpdate`)와 예측이 같은 것을 돌린다. 카드는 그림만 그린다
@@ -338,6 +354,44 @@ var r = BattleForecast.Of(902, 59);   // 몬스터 id, CurStageid(0부터)
 **장비는 한 번씩만 준다.** 부츠 1~4 = 19·39·59·79층 바닥, 목걸이 5 = 킹 슬라임, 워프석 반지 32 = 20층 보스
 (매직 타워의 층 이동처럼 일찍 준다 — 아래층 금고로 돌아갈 이유가 생긴다), 목걸이 6/7/8 = 40/60/80층 보스,
 100층 보스는 없음(`-1`, C# 은 `RewardItem <= 0` 을 건너뛴다). `validate_content` 가 두 번 주는 것을 막는다.
+
+### 이야기는 대본 파일에서 굽는다
+
+스토리는 `Tools/story/` 에 있다 — `STORY_BIBLE.md`(설정·반전·결말·장면 목록이 계약), `FORMAT.md`(형식),
+`story_kr.json` 과 같은 키의 `story_en/jp/cn.json`, 검사기 `check_story.py`, 용어집 `GLOSSARY.md`.
+**게임 데이터를 손으로 고치지 않는다.** `python Tools/story_gen.py` 가 검사를 통과해야만 ScriptData(300000~309999
+와 프롤로그 제자리 개작 900000~, 100011~, 7, 8, 4029, 이름 6·4018)와 `GeneratedStory.cs`(장면 표·연출 큐·층 사실:
+금고·여분 열쇠·둘 중 하나·특성이 처음 나오는 층)를 쓴다. 그 뒤 `generate_content.py --write` 를 돌려도
+지워지지 않는다(구간이 다르다). 대본을 고치면: `check_story.py` → `check_story.py en|jp|cn` → `story_gen.py`.
+
+`StoryDirector` 가 `GameEvents`·`FightGate` 를 듣고 장면을 고른다. 1~4층 프롤로그만은 손으로 짠 연출
+(`DirectingManager`)이 제 차례에 부른다. 한 층에 여러 장면이 걸리면 마을 → 챕터 시작 → 특성 수업 → 층 장면.
+첫 경험 수업과 죽음 바크는 **계약 뒤부터** 센다(검이 없을 때 "마검의 잔소리" 가 나오면 안 된다).
+본 장면은 `StorySeen.json` 에 **틀기 시작할 때** 적는다 — 죽거나 불러와도 다시 안 뜬다. 새 게임이 지운다.
+
+결말은 100층 보스 뒤 선택 하나: 봉인(`seal`) / 놓지 않는다(`hold`). `hold` 이고 레벨이 `StoryDirector.DawnLevel`
+이상이면 참 결말 새벽(`dawn`) — 마검의 배부름 = 데미안이 벤 만큼 = 레벨이다(바이블 6.1). 문턱은 봇이 전부 잡는 길로
+100층 보스를 잡은 직후 레벨에서 3 을 뺀다. `Ending` 그림(Thank You For Playing)은 새벽 뒤에만 뜬다.
+봇 실행 중(`GameEvents.IsAutoPlaying`)에는 대사가 스스로 넘어가고 결말은 `hold` 를 고른다.
+
+- 전투 중 수업(첫 치명타)은 `OnBattle` 을 끄지 않고 `StoryDirector.HoldsBattle` 로 전투 시계만 세운다 — 끄면 같은
+  몬스터에 다시 부딪혀 두 번째 전투가 열렸다.
+- 씬이 바뀌거나 메뉴에서 다시 시작·타이틀로 갈 때 `StoryDirector.AbortAll()` 이 대기 중인 장면·바크와 쥐고 있던
+  잠금을 전부 푼다. 층 입장 장면이 도중에 끊겼으면 다음에 그 층을 불러올 때 남은 장면부터 다시 건다.
+- 층 바크는 `story_gen` 이 층마다 미리 정한 표(`GeneratedStory.FloorBarks`)다 — 변주가 전부 한 번 이상 나오고,
+  이야기·보스 층은 건너뛰며, 81~89층은 마검이 입을 다문다(바이블 R13).
+
+### 에디터의 정적 값은 플레이 사이에 남는다
+
+이 프로젝트는 Enter Play Mode Options 로 **도메인·씬 리로드를 끈다**(`EditorSettings` 의 3). 그래서 정적 필드가
+지난 플레이에서 그대로 넘어온다 — 파괴된 오브젝트에 묶인 이벤트 구독자, 지난 판의 `FightGate` 관문,
+죽은 글꼴이 든 TMP 대체 목록. 두 번째 플레이가 검은 화면이 되기도 했다(끄는 중 `OnDestroy` 가 매니저를 불러
+`@Managers` 를 새로 만들고, 다음 플레이가 그 빈 껍데기를 집었다). 규칙 둘:
+
+- 정적 상태를 두면 `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]` 에서 비운다
+  (`GameEvents`·`FightGate`·`GameSettings`·`Managers`·`StoryDirector`·`FontFallback` 가 그렇게 한다).
+- `OnDestroy`/`OnDisable` 에서 매니저를 만질 때는 `Managers.IsAlive` 를 먼저 본다. 끄는 중에는 `Managers.Init` 이
+  아무것도 만들지 않는다. 빌드에는 영향이 없다.
 
 ### 이펙트가 없어도 게임은 굴러가야 한다
 
@@ -419,6 +473,10 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
 
 ### 강제와 선택은 <b>세어서</b> 확인한다
 
+**보스층의 큰 물약(50%)은 보스 앞에 둔다.** 완주 계산은 보스 직전에 마신다고 셈하는데 40·60·80·100층은 그 물약이
+보스 뒤 방에 놓여 있었다 — 입장 체크포인트가 빈사면 그 층을 영영 못 넘는다. 레이아웃 검사가 스폰에서 보스 칸을
+막고 BFS 로 닿는지 잰다. 계단 앞 물약(20%)은 보스 뒤가 맞다(싸운 뒤 채우는 몫).
+
 층마다 다섯 마리 중 **셋은 관문, 둘은 곁길**이다(`MIN_TOLLS`). 관문은 그 칸을 벽으로
 막으면 `validate_layout` 이 실패하는 자리고, 곁길은 막아도 길이 남는 자리다.
 `layout_gen.floor_choices()` 가 완성된 격자에서 이걸 다시 재고
@@ -498,6 +556,10 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
   30010+i 설명)·도감(4060/4061)만** 네 언어로 덮어쓰고, 구간 안의 옛 행은 지운다. 원본은
   `Tools/story/story_*.json` 의 `bestiary`, 빈 항목은 `Tools/bestiary.py` 의 내장 문구. 생성 행의
   영/일/중에 한글이 있으면 `validate_content` 오류. 종·보스 이름이 언어 안에서 겹치면 `[2/7]` 에서 멈춘다.
+  워프석 반지(4000/4001)도 같은 길이다 — 새긴 글 "렌에게. 해 지기 전에." 가 이야기의 일부다.
+- **손으로 쓴 옛 행**(메뉴·능력치·물약·장비·1~4층 이름·도입부 몬스터: 9~24, 100~132, 4002~4059 중 4018·4029 제외,
+  5000~5003, 10000~10008, 20000~20008)의 원본은 `Tools/ui_text_parts/hand_text.py` 다. ScriptData 를 직접 고치면
+  `generate_content --write` 가 되돌린다. 생성기와 ui_text 가 같은 id 를 쓰면 생성기가 멈춘다.
 - 테이블 원본: `Assets/@Resources/Data/Excel/*.csv` → 변환된 `Assets/@Resources/Data/JsonData/*.json`(Addressable TextAsset)을 `DataManager.Init()`이 Newtonsoft.Json + `ILoader<Key,Value>` 패턴으로 로드. 새 테이블 추가 시 `Data.Contents.cs`에 Data 클래스+Loader 정의 후 `DataManager`에 딕셔너리·로드 라인 추가.
 - 던전 맵: `Assets/StreamingAssets/Data/Excel/Dungeon_*.csv` 그리드를 `Tools/mapdata_gen.py` 가 런타임 `MapData.json` 으로 굽는다. `DataManager.ResetActiveDic()` 은 같은 CSV 에서 활성화 딕셔너리만 만든다(카운터 순서가 같아야 한다). 셀 코드: `I`=소비 아이템, `E`=장비, `M`=몬스터, `B`=보스, `W`=벽, 숫자 3~8=문, 11=스폰 지점, 12=레버, 13=기둥, 14~16=포탈. 끝의 `~` 는 "둘 중 하나" 보상(보물 층에 한 쌍, `ChoiceGroup`) — 하나를 주우면 짝이 사라진다.
 - 세이브: `SaveStore` 가 플레이어·오브젝트 활성화·진행 플래그를 **`Checkpoint.json` 하나**에 쓴다. `MapData` 해시를 같이 적어, 데이터를 다시 뽑은 뒤의 옛 세이브는 섞지 않고 거부한다 — **거부해도 지우지 않는다**(타이틀이 "원본은 보존됩니다" 를 띄운다). 예전 방식(`SaveData.json` + `*ActiveData.json`)은 이어하기 때 한 번 옮겨 적는다.
@@ -528,6 +590,13 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
 게임이라 층 입구가 자연스러운 단위다 — 예전에는 층 이동 저장이 전부 주석이라 5층부터는 저장이 한 번도
 안 됐고, 60층에서 죽으면 도입부로 돌아갔다(봇은 녹화기가 대신 저장해 줘서 드러나지 않았다).
 죽은 횟수·플레이 시간은 체크포인트를 불러도 줄지 않는다.
+
+- **체크포인트에 들어갈 진행 플래그는 저장보다 먼저 쓴다.** 계약 저장이 인벤토리 해금보다 먼저여서, 그 사이에
+  불러오면 인벤토리 단추가 영영 사라졌다. 지금 단추는 플래그가 아니라 계약 여부(`IsContractedSword`)를 따른다.
+- 보스가 떨군 장비는 저장·맵 재구성 직전에 주워진다(`GameManager.CollectDrops`) — 처치는 저장되는데 떨군 것은
+  안 저장돼서, 안 줍고 워프하거나 죽으면 반지가 영영 사라졌다.
+- 챕터 첫 층(21·41·61·81)에서 **내려가는** 계단도 앞 챕터의 맵을 다시 짓는다. 올라가는 쪽만 짓고 있었다.
+- 킹 슬라임(9001)·분열 슬라임과 그 물약도 제 활성 인덱스를 쓴다 — 0 을 빌려 쓰다 1층 몬스터 0번이 죽은 것으로 저장됐다.
 
 ### 일어난 일은 GameEvents, 전투 직전은 FightGate
 

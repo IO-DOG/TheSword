@@ -9,10 +9,11 @@ sign; Japanese and Chinese punctuation is drawn by the runtime fallback (FontFal
 TEXT = {
     # UI_MonsterManualPopup
     260: ("몬스터 도감", "Monster Manual", "モンスター図鑑", "怪物图鉴"),
-    261: ("숫자 = 다음에 싸우면 잃는 체력 (스킬 제외)   X = 진다   LV+ = 레벨 업",
-          "Number = HP lost if you fight it next (no skills)   X = you lose   LV+ = level up",
-          "数字 = 次に戦うと失う体力 (スキル抜き)   X = 負ける   LV+ = レベルアップ",
-          "数字 = 下一战损失的生命 (不计技能)   X = 会输   LV+ = 升级"),
+    # ★ = ForecastUI.LevelUpMark (one glyph: "LV+" ran into the next number on the map)
+    261: ("숫자 = 다음에 싸우면 잃는 체력 (스킬 제외)   X = 진다   ★ = 레벨 업",
+          "Number = HP lost if you fight it next (no skills)   X = you lose   ★ = level up",
+          "数字 = 次に戦うと失う体力 (スキル抜き)   X = 負ける   ★ = レベルアップ",
+          "数字 = 下一战损失的生命 (不计技能)   X = 会输   ★ = 升级"),
     262: ("{0}마리", "x{0}", "{0}体", "{0}只"),                        # {0} = alive on this floor
     263: ("다음에 싸우면", "If fought next", "次に戦うと", "下一战"),
     264: ("{0}대 맞음", "{0} hits taken", "被弾 {0}回", "挨打 {0}次"),

@@ -34,6 +34,14 @@ public class WarpUI : MonoBehaviour
 
     public bool IsOpen => _panel != null;
 
+    // 에디터는 도메인 리로드 없이 플레이를 되풀이한다 — 지난 플레이의 (부서진) 창과 바꿔 둔 키를 넘기지 않는다.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics()
+    {
+        _instance = null;
+        OpenKey = KeyCode.Tab;
+    }
+
     public static void Spawn()
     {
         if (_instance != null)

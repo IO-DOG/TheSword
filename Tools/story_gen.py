@@ -19,7 +19,7 @@ ScriptData 에서 이 도구가 쓰는 자리 — generate_content.py --write �
     그 밖의 id 는 읽기만 한다.
 
 GeneratedStory.cs 에는 장면 표(트리거는 형식을 갖춰 푼다), 화자 표, 연출 신호(아래 CUES),
-그리고 트리거가 쓰는 층별 사실(층 유형·특성·금고 문·여분 열쇠·둘 중 하나)을 싣는다.
+그리고 트리거가 쓰는 층별 사실(층 유형·특성·금고 문·여분 열쇠·둘 중 하나)과 층 바크 일정(bark_schedule)을 싣는다.
 층별 사실은 실제로 나가는 데이터(Dungeon CSV·MapData·MonsterData)에서 잰다.
 """
 
@@ -108,8 +108,8 @@ IMAGE_ADDRESS = dict(
 #   Hands / VortexIn / VortexStop / Walk   결말의 왕좌의 입
 #   Backdrop     바로 앞 카드 그림을 깔아 둔 채 대화 (장면 전체)
 CUES = {
-    "pro_contract_after": [(1, "Flash"), (2, "Emote", "SweatDrop")],
-    "mech_forecast": [(0, "CamMonster"), (2, "CamPlayer"), (5, "Emote", "Question")],
+    "pro_contract_after": [(0, "Flash"), (2, "Emote", "SweatDrop")],      # "01 직전" 번쩍 — 대화창보다 먼저
+    "mech_forecast": [(5, "Emote", "Question")],          # 3층에는 몬스터가 없다 — 카메라는 데미안에게 (R11)
     "pro_kingslime_reveal": [(1, "Shake"), ("end", "Pose", "DrawSword")],
     "pro_kingslime_clear": [(0, "BgmStop"), (3, "Fx", "FX_PowerWave"), (6, "Dark"), (7, "Clear"),
                             (10, "Emote", "Sleepy"), ("end", "BgmFloor")],
@@ -124,7 +124,7 @@ CUES = {
                       (6, "Emote", "Angry")],
     "f31_trust": [(0, "CamMonster"), (1, "CamPlayer"), (5, "Emote", "Grinning")],
     "f35_suspect": [(3, "Emote", "Question"), (4, "Emote", "SweatDrop")],
-    "boss1_intro": [(3, "Emote", "Surprise"), (8, "Emote", "Angry"), ("end", "Pose", "DrawSword")],
+    "boss1_intro": [(8, "Emote", "Angry"), ("end", "Pose", "DrawSword")],    # 03 은 놀라지 않는다 (R11)
     "boss1_defeat": [(3, "Boom"), (3, "BgmFloor")],
     "ch2_start": [(0, "CamUp")],
     "f45_forge": [(2, "Emote", "Question"), (5, "Emote", "SweatDrop")],
@@ -134,7 +134,8 @@ CUES = {
     "boss2_defeat": [(0, "BgmStop"), (3, "Boom"), (3, "White"), (6, "Clear"), ("end", "BgmFloor")],
     "f66_awake": [(4, "Emote", "Sleepy")],
     "f72_enough": [(0, "CamClose"), (3, "CamPlayer")],
-    "boss3_intro": [(5, "Shake"), (9, "CamClose"), (10, "CamBoss"), ("end", "Pose", "DrawSword")],
+    # 09 "네 머리 위에도 숫자가 있다" 에 데미안 머리 위로, 기사가 다시 말하는 12 에 기사에게 돌아온다.
+    "boss3_intro": [(5, "Shake"), (9, "CamClose"), (12, "CamBoss"), ("end", "Pose", "DrawSword")],
     "boss3_defeat": [(0, "BgmStop"), (4, "Soul"), (6, "CamPlayer"), ("end", "BgmFloor")],
     "ch4_card": [(0, "BgmStop")],
     "ch4_start": [(1, "CamUp"), (1, "BgmFloor")],
@@ -149,7 +150,7 @@ CUES = {
                     (3, "Shake"), (8, "Walk"), (13, "Flash"), (13, "Dark")],
     "ending_dawn": [(0, "Hands"), (3, "Shake"), (11, "Pose", "ContractSword"), (11, "Fx", "FX_ContractSwordEffect"),
                     (11, "VortexIn"), (11, "Bgm", "MainTitle_BGM"), (13, "White"), (14, "Clear"), (14, "Pose", "Idle")],
-    "mech_warp": [(0, "CamBoss")],
+    # mech_warp 은 반지를 주울 때 뜬다(R14) — 데미안이 반지 자리에 서 있으니 카메라는 그대로 둔다.
 }
 CUE_KINDS = ("Emote", "Shake", "Flash", "White", "Dark", "Clear", "CamUp", "CamClose", "CamPlayer",
              "CamMonster", "CamBoss", "Pose", "Bgm", "BgmStop", "BgmFloor", "Fx", "Boom", "Soul",
@@ -157,6 +158,10 @@ CUE_KINDS = ("Emote", "Shake", "Flash", "White", "Dark", "Clear", "CamUp", "CamC
 CUE_NEEDS_ARG = {"Emote", "Pose", "Bgm", "Fx"}
 POSES = ("DrawSword", "ContractSword", "Idle")
 CUE_END = 999                     # "end" — 장면이 끝난 뒤
+
+# ---------------------------------------------------------------- 층 바크 (바이블 R13·R15)
+SWORD_QUIET = (81, 89)            # 이 층들의 마검은 값만 말한다 — 층·죽음 바크는 데미안 것만 (R13)
+BARK_EVERY = 3                    # 바크가 설 수 있는 층 셋에 하나꼴 (예전 BarkChance 0.35 와 비슷하다)
 
 
 # ---------------------------------------------------------------- 읽기
@@ -297,6 +302,60 @@ def floor_facts():
         if (fact["vault"] == -1) != (not vaults) or (fact["spare"] == -1) != (not spare):
             problems.append(f"{floor}층: 금고 문/여분 열쇠가 MapData 에 없다 (mapdata_gen 을 다시 돌릴 것)")
     return facts, problems
+
+
+def chapter_first_floor(chapter):
+    """챕터 카드가 뜨는 층 — 챕터의 첫 생성 층 (챕터 0 은 손수 만든 1~4층 다음)."""
+    return max(gc.HANDMADE_FLOORS + 1, chapter * gc.FLOORS_PER_CHAPTER + 1)
+
+
+def entry_floors(scenes, facts):
+    """들어설 때 장면이 걸리는 층 (StoryDirector.FloorChain 과 같은 규칙). 그 층은 바크 대신 장면이 뜬다."""
+    first_trait = {}
+    for floor in sorted(facts):
+        for bit in range(1, 9):
+            if facts[floor]["traits"] >> bit & 1:
+                first_trait.setdefault(bit, floor)
+    floors = set()
+    for s in scenes:
+        t, a = s["trigger"], s["arg"]
+        if t == "Village":
+            floors.add(gc.HANDMADE_FLOORS + 1)
+        elif t == "ChapterStart":
+            floors.add(chapter_first_floor(a))
+        elif t == "FloorFirst":
+            floors.add(a)
+        elif t == "TraitFirst" and a in first_trait:
+            floors.add(first_trait[a])
+    return floors
+
+
+def bark_schedule(scenes, speaker_rows, facts):
+    """층(0~100) -> 들어설 때 뜨는 층 유형 바크(scenes 의 번호), 없으면 -1. GeneratedStory.FloorBarks 가 된다.
+
+    바크가 설 수 있는 층(이야기 장면·보스가 없는 층) BARK_EVERY 개에 하나씩 고르게 세우고, 유형마다 변주를 파일
+    순서대로 돌린다(R15 — 예전의 층 번호 씨앗 난수로는 두 변주가 한 번도 안 뽑혔다). SWORD_QUIET 층에서는 마검
+    변주를 건너뛴다(R13). 몇 번째 층부터 셀지(위상)는 변주가 다 뜨는 첫 것 — 안 되면 check 가 실패로 잡는다."""
+    pools = {}
+    for i, s in enumerate(scenes):
+        if s["trigger"] == "FloorType":
+            pools.setdefault(s["arg"], []).append(i)
+    taken = entry_floors(scenes, facts) | {20 * (c + 1) for c in range(CHAPTERS)}
+    free = [f for f in range(gc.HANDMADE_FLOORS + 1, gc.TOTAL_FLOORS + 1)
+            if facts[f]["type"] in pools and f not in taken]
+    plan = [-1] * (gc.TOTAL_FLOORS + 1)
+    for phase in range(BARK_EVERY):
+        plan, turn = [-1] * (gc.TOTAL_FLOORS + 1), {}
+        for floor in free[phase::BARK_EVERY]:
+            kind = facts[floor]["type"]
+            quiet = SWORD_QUIET[0] <= floor <= SWORD_QUIET[1]
+            usable = [i for i in pools[kind] if not (quiet and speaker_rows[scenes[i]["lines"][0][0]][0] == "sword")]
+            if usable:
+                plan[floor] = usable[turn.get(kind, 0) % len(usable)]
+                turn[kind] = turn.get(kind, 0) + 1
+        if all(i in plan for pool in pools.values() for i in pool):
+            break
+    return plan
 
 
 # ---------------------------------------------------------------- 대본 풀기
@@ -535,12 +594,20 @@ def build(story, translations, current, facts, checks):
 
 # ---------------------------------------------------------------- 검사
 
-def check(scenes, speaker_rows, facts, fact_problems, checks):
+def check(scenes, speaker_rows, facts, fact_problems, checks, plan):
     errors, warnings = checks["errors"], checks["warnings"]
     errors.extend(fact_problems)
     by = {}
     for s in scenes:
         by.setdefault((s["trigger"], s["arg"]), []).append(s)
+
+    # 층 바크는 변주마다 적어도 한 층에서 뜬다(R15). 81~89층의 죽음 바크는 데미안 것만 뜬다(R13).
+    for i, s in enumerate(scenes):
+        if s["trigger"] == "FloorType" and i not in plan:
+            errors.append(f"{s['id']}: 이 바크가 뜨는 층이 없다 (bark_schedule — 변주보다 설 층이 적다)")
+    speaker_of = lambda s: speaker_rows[s["lines"][0][0]][0] if s["lines"] else None
+    if by.get(("Death", 0)) and all(speaker_of(s) == "sword" for s in by[("Death", 0)]):
+        errors.append(f"death 바크가 전부 마검 것이다 — {SWORD_QUIET[0]}~{SWORD_QUIET[1]}층에서 뜰 것이 없다 (R13)")
 
     # 트리거가 실제로 걸릴 수 있는가
     for s in scenes:
@@ -632,7 +699,7 @@ def cs(value):
     return "null" if value is None else json.dumps(value, ensure_ascii=False)
 
 
-def emit_cs(scenes, speaker_rows, facts, source):
+def emit_cs(scenes, speaker_rows, facts, source, plan):
     out = ["// Tools/story_gen.py 가 Tools/story/ 대본에서 굽는다. 손으로 고치지 않는다.",
            f"// 대본: {source}. 문구는 ScriptData 에 있다 (화자 300000~, 챕터 300100~, 선택지 300200~, 대사 301000~).",
            "public static class GeneratedStory", "{",
@@ -681,8 +748,12 @@ def emit_cs(scenes, speaker_rows, facts, source):
           "여분 열쇠의 ConsumableItem._itemIndex_forActive, 없으면 -1")
     array("bool", "ChoiceFloors", (("true" if facts[f]["choice"] else "false") if f else "false" for f in floors),
           "둘 중 하나 보상(칸 끝의 ~)이 있는 층")
+    array("int", "FloorBarks", (str(v) for v in plan),
+          "들어설 때 뜨는 층 유형 바크(Scenes 의 번호), 없으면 -1 — story_gen.bark_schedule (바이블 R13·R15)")
+    out.append("    // 마검이 값만 말하는 층 — 죽음 바크는 데미안 것만 (바이블 R13)")
+    out.append(f"    public const int SwordQuietFrom = {SWORD_QUIET[0]}, SwordQuietTo = {SWORD_QUIET[1]};")
     bosses = [facts[20 * (c + 1)]["boss"] for c in range(CHAPTERS)]
-    firsts = [max(gc.HANDMADE_FLOORS + 1, c * gc.FLOORS_PER_CHAPTER + 1) for c in range(CHAPTERS)]
+    firsts = [chapter_first_floor(c) for c in range(CHAPTERS)]
     out.append("    // 챕터 c 의 보스(MonsterData id)와 첫 생성 층, 챕터 카드 문구")
     out.append(f"    public static readonly int[] BossIds = {{ {', '.join(str(b) for b in bosses)} }};")
     out.append(f"    public static readonly int[] ChapterFirstFloors = {{ {', '.join(map(str, firsts))} }};")
@@ -736,7 +807,8 @@ def main():
 
     checks = {"errors": [], "warnings": []}
     book, speaker_rows, scenes = build(story, translations, current, facts, checks)
-    check(scenes, speaker_rows, facts, fact_problems, checks)
+    plan = bark_schedule(scenes, speaker_rows, facts)
+    check(scenes, speaker_rows, facts, fact_problems, checks, plan)
 
     story_check = run_story_check()
 
@@ -744,7 +816,8 @@ def main():
     print(f"            트리거: {coverage(scenes)}")
     print(f"            층 사실: 금고 {sum(f['vault'] >= 0 for f in facts.values())}층, "
           f"여분 열쇠 {sum(f['spare'] >= 0 for f in facts.values())}층, "
-          f"둘 중 하나 {sum(f['choice'] for f in facts.values())}층")
+          f"둘 중 하나 {sum(f['choice'] for f in facts.values())}층, "
+          f"층 바크 {sum(v >= 0 for v in plan)}층")
     have = [lang for lang in LANGS[1:] if translations[lang]]
     print(f"            번역 파일: {', '.join(have) or '없음'} — 빠진 칸 "
           + ", ".join(f"{lang} {n}" for lang, n in book.missing.items())
@@ -768,7 +841,7 @@ def main():
         return 0
 
     emit_scripts(book, current_rows)
-    emit_cs(scenes, speaker_rows, facts, source)
+    emit_cs(scenes, speaker_rows, facts, source, plan)
     print(f"[story_gen] 썼다: {os.path.relpath(SCRIPT_JSON, ROOT)}, {os.path.relpath(SCRIPT_CSV, ROOT)}, "
           f"{os.path.relpath(OUT_CS, ROOT)}")
     return 0
@@ -793,6 +866,14 @@ def _self_check():
     row = book.rows[301000]
     assert row["ScriptKr"] == "안녕^ 너" and row["ScriptEn"] == "Hi^ you" and row["ScriptJp"] == "Hi^ you"
     assert book.missing == {"en": 0, "jp": 1, "cn": 1}
+    # 층 바크: 변주(마검·데미안·마검)가 다 뜨고, 보스층·81~89층의 마검 바크는 없다 (R13·R15)
+    rows = [("damian", 6, "Damian", 0), ("sword", 4018, "Sword", 0)]
+    fake = [dict(trigger="FloorType", arg=0, lines=[(spk, None, 0, None)]) for spk in (1, 0, 1)]
+    fake_facts = {f: dict(type=0 if f > gc.HANDMADE_FLOORS else -1, traits=0) for f in range(1, gc.TOTAL_FLOORS + 1)}
+    plan = bark_schedule(fake, rows, fake_facts)
+    assert {0, 1, 2} <= set(plan), plan
+    assert all(plan[f] == -1 for f in (20, 40, 60, 80, 100))
+    assert all(plan[f] in (-1, 1) for f in range(SWORD_QUIET[0], SWORD_QUIET[1] + 1))
     print("story_gen 자체 점검 통과")
 
 

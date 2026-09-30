@@ -28,7 +28,7 @@ public static class GeneratedStory
                 new StoryLine(1, "Illust_MagicalSword_Smile", 301005, null),
             },
             null,
-            new[] { new StoryCue(1, StoryCueKind.Flash, null), new StoryCue(2, StoryCueKind.Emote, "SweatDrop") }),
+            new[] { new StoryCue(0, StoryCueKind.Flash, null), new StoryCue(2, StoryCueKind.Emote, "SweatDrop") }),
         new StoryScene("mech_forecast", StoryKind.Dialogue, StoryTrigger.Mechanic, 0,
             new[]
             {
@@ -40,7 +40,7 @@ public static class GeneratedStory
                 new StoryLine(1, "Illust_MagicalSword_Nerve", 301045, null),
             },
             null,
-            new[] { new StoryCue(0, StoryCueKind.CamMonster, null), new StoryCue(2, StoryCueKind.CamPlayer, null), new StoryCue(5, StoryCueKind.Emote, "Question") }),
+            new[] { new StoryCue(5, StoryCueKind.Emote, "Question") }),
         new StoryScene("mech_crit", StoryKind.Dialogue, StoryTrigger.Mechanic, 10,
             new[]
             {
@@ -281,7 +281,7 @@ public static class GeneratedStory
                 new StoryLine(1, null, 301924, null),
             },
             null,
-            new[] { new StoryCue(0, StoryCueKind.CamBoss, null) }),
+            null),
         new StoryScene("ch1_start", StoryKind.Dialogue, StoryTrigger.ChapterStart, 1,
             new[]
             {
@@ -350,7 +350,7 @@ public static class GeneratedStory
                 new StoryLine(1, "Illust_MagicalSword_Angry", 302167, null),
             },
             null,
-            new[] { new StoryCue(3, StoryCueKind.Emote, "Surprise"), new StoryCue(8, StoryCueKind.Emote, "Angry"), new StoryCue(999, StoryCueKind.Pose, "DrawSword") }),
+            new[] { new StoryCue(8, StoryCueKind.Emote, "Angry"), new StoryCue(999, StoryCueKind.Pose, "DrawSword") }),
         new StoryScene("boss1_defeat", StoryKind.Dialogue, StoryTrigger.BossDefeat, 1,
             new[]
             {
@@ -541,7 +541,7 @@ public static class GeneratedStory
                 new StoryLine(0, null, 302815, null),
             },
             null,
-            new[] { new StoryCue(5, StoryCueKind.Shake, null), new StoryCue(9, StoryCueKind.CamClose, null), new StoryCue(10, StoryCueKind.CamBoss, null), new StoryCue(999, StoryCueKind.Pose, "DrawSword") }),
+            new[] { new StoryCue(5, StoryCueKind.Shake, null), new StoryCue(9, StoryCueKind.CamClose, null), new StoryCue(12, StoryCueKind.CamBoss, null), new StoryCue(999, StoryCueKind.Pose, "DrawSword") }),
         new StoryScene("boss3_defeat", StoryKind.Dialogue, StoryTrigger.BossDefeat, 3,
             new[]
             {
@@ -986,8 +986,8 @@ public static class GeneratedStory
     {
         -1, -1, -1, -1, -1, 23, -1, -1, 44, -1, -1, -1, 79, -1, -1, -1, 111, -1, -1, -1,
         151, -1, -1, -1, 180, -1, -1, -1, -1, 222, -1, -1, 248, -1, -1, -1, 282, -1, -1, -1,
-        318, -1, -1, -1, 352, -1, -1, -1, 382, -1, -1, -1, -1, 425, -1, -1, 451, -1, -1, -1,
-        487, -1, -1, -1, 522, -1, -1, -1, 555, -1, -1, -1, 586, -1, -1, -1, -1, 629, -1, -1,
+        320, -1, -1, -1, 352, -1, -1, -1, 382, -1, -1, -1, -1, 425, -1, -1, 451, -1, -1, -1,
+        486, -1, -1, -1, 522, -1, -1, -1, 555, -1, -1, -1, 586, -1, -1, -1, -1, 629, -1, -1,
         654, -1, -1, -1, 686, -1, -1, -1, 720, -1, -1, -1, 755, -1, -1, -1, 791, -1, -1, -1,
         -1,
     };
@@ -1001,6 +1001,18 @@ public static class GeneratedStory
         false, false, false, false, true, false, false, false, false, true, false, false, false, false, true, false, false, false, false, true,
         false,
     };
+    // 들어설 때 뜨는 층 유형 바크(Scenes 의 번호), 없으면 -1 — story_gen.bark_schedule (바이블 R13·R15)
+    public static readonly int[] FloorBarks =
+    {
+        -1, -1, -1, -1, -1, -1, -1, 70, -1, -1, 64, -1, -1, -1, 76, -1, -1, -1, 73, -1,
+        -1, -1, -1, 74, -1, -1, 67, -1, -1, -1, 65, -1, -1, -1, 77, -1, -1, -1, 75, -1,
+        -1, -1, -1, 73, -1, -1, -1, 71, -1, -1, -1, 68, -1, -1, 78, -1, -1, -1, 74, -1,
+        -1, -1, -1, 75, -1, -1, -1, 72, -1, -1, 66, -1, -1, -1, 76, -1, -1, -1, 73, -1,
+        -1, -1, -1, 74, -1, -1, -1, 71, -1, -1, -1, 69, -1, -1, 77, -1, -1, -1, 75, -1,
+        -1,
+    };
+    // 마검이 값만 말하는 층 — 죽음 바크는 데미안 것만 (바이블 R13)
+    public const int SwordQuietFrom = 81, SwordQuietTo = 89;
     // 챕터 c 의 보스(MonsterData id)와 첫 생성 층, 챕터 카드 문구
     public static readonly int[] BossIds = { 900, 901, 902, 903, 904 };
     public static readonly int[] ChapterFirstFloors = { 5, 21, 41, 61, 81 };

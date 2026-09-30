@@ -65,12 +65,13 @@ public class UI_StoryCardPopup : UI_Popup
     }
 
     /// <summary>챕터 카드 — 까만 화면에 챕터 이름, 장식선, 부제. 잠깐 두었다가(누르면 바로) 걷힌다.</summary>
-    public static void ShowTitle(int titleId, int subtitleId, Action onDone)
+    public static UI_StoryCardPopup ShowTitle(int titleId, int subtitleId, Action onDone)
     {
         UI_StoryCardPopup popup = StoryUI.NewPopup<UI_StoryCardPopup>();
         popup._onDone = onDone;
         popup.BuildTitle(titleId, subtitleId);
         popup.StartCoroutine(popup.CoTitle());
+        return popup;
     }
 
     /// <summary>깔아 둔 카드를 걷는다.</summary>

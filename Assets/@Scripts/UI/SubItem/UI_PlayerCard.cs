@@ -219,7 +219,8 @@ public class UI_PlayerCard : UI_BaseCard
     {
         int swordId = Managers.Game.PlayerData.CurSword;
         string attackFX = Managers.Data.EquipDic[swordId].AttackFX;
-        GameObject go = Managers.Resource.Instantiate(attackFX, GetImage((int)GameObjects.AttackFX).transform);
+        // 예전에는 GameObjects.AttackFX(0) 를 GetImage 에 넣어 결국 0 번 그림(CreatureImage) 밑에 떴다. 그 자리 그대로다.
+        GameObject go = Managers.Resource.Instantiate(attackFX, GetImage((int)Images.CreatureImage).transform);
 
         // 파티클이 없는 장비도 있다(EquipData 의 FX 칸이 "-"). 여기서 예외가 나면
         // Attack() 을 부르는 CoDelayAttack 코루틴이 그대로 죽어서, 플레이어가 그

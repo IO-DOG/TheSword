@@ -85,7 +85,10 @@ public class PlayerController : MonoBehaviour
     // 그쪽이 먼저 불려 MissingReference 로 뒤따르는 구독까지 끊겼다 — 다시 올린 뒤 첫 키가 먹지 않았다.
     void OnDestroy()
     {
-        Managers.Input.KeyAction -= OnKeyboard;
+        // 플레이를 끄는 중이면 매니저가 먼저 부서져 있다. 그때 부르면 @Managers 를 새로 만들어
+        // 다음 플레이의 첫 씬 전환이 죽었다(스모크 P1-2).
+        if (Managers.IsAlive)
+            Managers.Input.KeyAction -= OnKeyboard;
     }
 
     // 꺼졌다 켜진 애니메이터는 기본 상태로 돌아간다. 틀어 둔 것을 잊고 다시 튼다.
@@ -98,8 +101,9 @@ public class PlayerController : MonoBehaviour
     static bool IsBusy()
     {
         GameManager g = Managers.Game;
+        // 치명 수업이 전투를 붙들고 말하는 동안(StoryDirector.HoldsBattle)도 전투 중이다.
         return g.OnBattle || g.OnConversation || g.OnLever || g.OnFade || g.OnDirect || g.OnInteract
-            || g.OnInputLock || g.IsPlayerDead;
+            || g.OnInputLock || g.IsPlayerDead || StoryDirector.HoldsBattle;
     }
 
     /// <summary>창이 떠서 잠깐 멈췄다 — 메뉴(시간이 멈춘다), 확인 창, 전투 직전 관문.
@@ -381,6 +385,11 @@ public class PlayerController : MonoBehaviour
     #region Moving
     public void Moving(Define.MoveDir moveDir, bool isDirecting)
     {
+        // 흐름이 캐릭터를 쥐고 있으면 걷지도 싸우지도 않는다. 키 입력은 OnKeyboard 가 먼저 거르지만 봇은 여기를
+        // 바로 부른다 — 예전에 치명 수업이 OnBattle 을 내린 프레임에 봇이 싸우던 몬스터를 다시 밀어 전투창이 둘 떴다.
+        if (isDirecting == false && IsBusy())
+            return;
+
         if (_isMoving && !isDirecting)
         {
             return;

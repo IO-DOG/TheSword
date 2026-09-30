@@ -272,7 +272,6 @@ public class Events : MonoBehaviour
         yield return StoryDirector.CoPrologue(StoryPrologue.ContractAfter);
 
         Managers.Game.OnDirect = false;
-        Managers.Game.GameScene?.OnUIInventory();
         Managers.UI.ShowGameSceneUI();
         Managers.Sound.FadeAndPlayBGM("Chapter0_BGM", 0.8f);
     }
@@ -315,6 +314,11 @@ public class Events : MonoBehaviour
         // 만났다는 표시는 계약이 끝난 뒤에 남긴다. 예전에는 연출을 시작할 때 남겨서, 연출이 죽으면
         // 검 없이 열쇠만 되살아났다 (UI_GameScene.RestoreMagicSwordKey 가 이것을 본다).
         PlayerPrefs.SetInt("ISMEETSWORD", 1);
+        // 인벤토리 단추(ISOPENINVENUI)도 체크포인트보다 먼저 연다. 예전에는 계약 뒤 대화가 끝난 다음에 열어서, 그 사이에
+        // 저장된 체크포인트가 0 을 쥐었다 — 다음 계단 전에 불러오면 단추가 판 끝까지 사라졌다. 연출이 끊긴 길(finally)도 같다.
+        // HUD 는 아직 숨겨져 있어 단추는 연출이 끝나 HUD 가 돌아올 때 보인다.
+        if (game.GameScene != null)
+            game.GameScene.OnUIInventory();
         game.SaveGame();
     }
 
@@ -869,7 +873,11 @@ public class Events : MonoBehaviour
             slime.transform.position = pos.transform.position;
         MonsterController monster = slime.GetComponent<MonsterController>();
         if (monster != null)
+        {
             monster.id = id;
+            // 맵 데이터에 없는 몬스터다. 프리팹의 0 을 그대로 두면 잡을 때 1층 0번 몬스터가 죽은 것으로 저장됐다.
+            monster._monsterIndex_forActive = GameManager.SplitSlimeActiveIndex + index;
+        }
         if (effects == false)
             return slime;
 
@@ -897,6 +905,8 @@ public class Events : MonoBehaviour
         if (item == null)
             return;
         item.id = 7;
+        // 맵 데이터에 없는 물약이다. 프리팹의 0 을 그대로 두면 마실 때 1층 0번 물약이 먹은 것으로 저장됐다.
+        item._itemIndex_forActive = GameManager.SplitPotionActiveIndex;
         float x = yellowSlime != null ? yellowSlime.transform.position.x : potion.transform.position.x;
         potion.transform.position = new Vector3(x, 0f, -4.05f);
         potion.transform.localScale = new Vector3(1f, 2f, 1f);

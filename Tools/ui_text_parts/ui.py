@@ -41,4 +41,20 @@ TEXT = {
           "Starting a new game erases your current save. Start anyway?",
           "ニューゲームを始めると現在のセーブが消えます。始めますか？",
           "开始新游戏将删除当前存档。确定开始吗？"),
+    # UI_BattlePopup skill bar (keys 1/2/3), BattleSkills.Kind order. Names follow Tools/story/GLOSSARY.md.
+    191: ("강타", "Smash", "強打", "强击"),
+    192: ("철벽", "Bulwark", "鉄壁", "铁壁"),
+    193: ("흡혈", "Drain", "吸血", "吸血"),
+    # UI_InvenPopup short stat labels beside the numbers (the long names 100-108 are the hover info).
+    # The column is narrow: a space is a line break, and only the two-line slots (CRI ATK, the three
+    # speeds) may contain one - each line at most two CJK glyphs.
+    194: ("공격", "ATK", "攻撃", "攻击"),
+    195: ("방어", "DEF", "防御", "防御"),
+    196: ("체력", "HP", "体力", "生命"),
+    197: ("치명", "CRI", "会心", "暴击"),
+    198: ("치명 공격", "CRI ATK", "会心 威力", "暴击 伤害"),
+    199: ("레벨", "LV", "Lv", "等级"),
+    200: ("공격 속도", "ATK SPEED", "攻撃 速度", "攻击 速度"),
+    201: ("방어 속도", "DEF SPEED", "防御 速度", "防御 速度"),
+    202: ("이동 속도", "MOVE SPEED", "移動 速度", "移动 速度"),
 }

@@ -186,6 +186,11 @@ public class Effects_00 : MonoBehaviour
         {
             Managers.Game.DirectionalLight.color = new Color(255/255f, 244/255f, 214/255f);
             Managers.Game.DirectionalLight.intensity = 1.5f;
+
+            // 워프는 씬을 다시 올리지 않아 카메라 볼륨이 앞 챕터의 색 필터(파랑·주황·보라)를 든 채 온다.
+            // 다른 손수 만든 층처럼 기본 필터로 되돌린다.
+            if (postProcessingVolume.profile.TryGet<ColorAdjustments>(out colorAdjustments))
+                colorAdjustments.colorFilter.Override(new Color(255 / 255f, 231 / 255f, 206 / 255f));
         }
         else if(Managers.Game.PlayerData.CurStageid == 2)
         {

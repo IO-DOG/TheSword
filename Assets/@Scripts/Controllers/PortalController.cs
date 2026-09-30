@@ -111,7 +111,25 @@ public class PortalController : MonoBehaviour
         {
             PortalController tartgetPortal = SearchPortal(_mapId - 1, Type.UpStairs);
             if (tartgetPortal == null)
+            {
+                // 챕터 첫 층(21·41·61·81층)의 아래 계단. 아래 챕터 맵은 아직 없어서 못 찾는다 — 예전에는 여기서
+                // 끝나 계단을 밟아도 아무 일이 없었다(금고용 여분 열쇠를 들고 20층으로 돌아갈 길이 없었다).
+                // 위 계단의 챕터 경계와 같은 절차: 내딛는 한 발을 기다린 뒤 그 챕터를 새로 짓고 한 번에 옮긴다.
+                int prevStage = Managers.Game.PlayerData.CurStageid - 1;
+                if (Managers.Data.StageInfoDic.ContainsKey(prevStage) == false   // 1층: 내려갈 곳이 없다
+                    || Managers.Game.Maps.ContainsKey(prevStage))                // 같은 챕터인데 없다: 데이터 고장
+                    yield break;
+
+                Managers.Game.OnInteract = true;
+                yield return new WaitForSeconds(0.2f);
+                // GenerateMap 이 이 계단까지 부순다(프레임 끝). 여기서부터는 yield 없이 끝낸다.
+                // CurStageid 는 LoadingAndWarp 의 SetStageID() 가 내린다 — 여기서 내리면 두 칸 내려간다.
+                Managers.Game.GenerateMap(prevStage);
+                PortalController up = SearchPortal(prevStage, Type.UpStairs);
+                Transform arrival = up != null ? up.transform : Managers.Game.ArrivalPoint(prevStage);
+                LoadingAndWarp(arrival != null ? arrival.position : Managers.Game.Player.transform.position, false);
                 yield break;
+            }
 
             nextPos = tartgetPortal.transform.position;
             CoStartWait(nextPos, false);

@@ -30,6 +30,8 @@ public static class GameEvents
     public static event Action Respawned;
     // HUD 가 다시 그려졌다 (전투·아이템·장비·층 이동 뒤). 맵 위 표시를 새로 칠할 때.
     public static event Action HudRefreshed;
+    // 장비를 주웠다 (EquipData id). 워프석 반지(32)를 주울 때 반지의 새긴 글을 읽는 장면이 여기서 걸린다.
+    public static event Action<int> EquipPicked;
 
     // 자동 플레이(완주 녹화 봇)가 돌고 있다. 확인 창은 스스로 "예" 를 고르고,
     // 대사는 기다리지 않고 넘어가야 한다.
@@ -48,6 +50,18 @@ public static class GameEvents
     public static void RaiseBattleEnded(int monsterId, bool won) => Safe(BattleEnded, h => h(monsterId, won));
     public static void RaiseRespawned() => Safe(Respawned, h => h());
     public static void RaiseHudRefreshed() => Safe(HudRefreshed, h => h());
+    public static void RaiseEquipPicked(int equipId) => Safe(EquipPicked, h => h(equipId));
+
+    // 에디터는 플레이할 때 도메인·씬을 다시 읽지 않는다(Enter Play Mode Options). 정적 값이 지난 플레이에서
+    // 그대로 넘어와, 파괴된 오브젝트에 묶인 구독자가 남는다 — 플레이를 시작할 때마다 비운다. 빌드에는 영향이 없다.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics()
+    {
+        FloorEntered = null; BossDefeated = null; LevelUp = null; ItemPicked = null; DoorBlocked = null;
+        DoorOpened = null; BattleEnded = null; Respawned = null; HudRefreshed = null; EquipPicked = null;
+        IsAutoPlaying = false;
+        RespawnPending = false;
+    }
 
     static void Safe<T>(T handlers, Action<T> call) where T : Delegate
     {

@@ -9,7 +9,8 @@ using UnityEngine.UI;
 /// 대화창. 두 길이 있다.
 ///   이야기 — StoryDirector 가 ShowStory 로 연다. 화자 표(GeneratedStory.Speakers)를 따른다:
 ///            데미안은 왼쪽 초상화, 마검은 오른쪽, 보스는 오른쪽 자리에 제 전투 그림(색조 입힘),
-///            촌장 같은 이는 이름만, 내레이션은 초상화도 이름도 없이 가운데. choice 장면은 마지막 줄 뒤에 선택지.
+///            촌장 같은 이는 이름만, 내레이션은 이름도 없이 가운데 — 둘 다 곁의 초상화를 어둡게 세운다.
+///            choice 장면은 마지막 줄 뒤에 선택지.
 ///   예전 대사 — CurEventID 를 정하고 ShowPopupUI 로 연다. EventData 를 Class 2 까지 넘긴다 (1~4층 연출).
 /// Enter·Space·클릭으로 넘기고, Esc 는 삼킨다(대사를 끝까지 넘겨야 다음 연출로 이어진다).
 /// 자동 플레이 중에는 스스로 넘기고, 선택지는 "놓지 않는다(hold)" 를 고른다.
@@ -65,18 +66,19 @@ public class UI_ConversationPopup : UI_Popup
     float _choiceOpenedAt;
 
     /// <summary>이야기 장면 하나를 연다. onLine 은 줄이 뜰 때(1부터), onDone 은 닫힐 때 한 번 (고른 선택지, 없으면 null).
-    /// 창을 못 띄워도 onDone 은 부른다 — 기다리는 연출이 굳지 않게.</summary>
-    public static void ShowStory(StoryScene scene, Action<int> onLine, Action<StoryChoice> onDone)
+    /// 창을 못 띄워도 onDone 은 부른다 — 기다리는 연출이 굳지 않게. 그때는 null 을 돌려준다.</summary>
+    public static UI_ConversationPopup ShowStory(StoryScene scene, Action<int> onLine, Action<StoryChoice> onDone)
     {
         if (scene == null || scene.Lines.Length == 0 || Managers.Resource.Load<GameObject>(nameof(UI_ConversationPopup)) == null)
         {
             onDone?.Invoke(null);
-            return;
+            return null;
         }
         UI_ConversationPopup popup = Managers.UI.ShowPopupUI<UI_ConversationPopup>();
         popup._story = scene;
         popup._onLine = onLine;
         popup._onDone = onDone;
+        return popup;
     }
 
     public override bool Init()
@@ -178,6 +180,8 @@ public class UI_ConversationPopup : UI_Popup
             ShowCurrentScript();
     }
 
+    // 이름표는 줄마다 말하는 쪽(IllustLeft = 데미안, IllustRight = 마검)에서 정한다. EventData 1~27 은 줄마다 한쪽만 채운다.
+    // 초상화를 먼저 켠다 — 감정 아이콘이 그 자식이라, 꺼진 채 튼 감정은 버려지고 켜질 때 기본 상태(AHA)가 떴다.
     private void ShowCurrentScript()
     {
         if (!string.IsNullOrEmpty(Managers.Data.EventDic[Managers.Game.CurEventID].IllustLeft))
@@ -185,17 +189,13 @@ public class UI_ConversationPopup : UI_Popup
             string[] speaker = Managers.Data.EventDic[Managers.Game.CurEventID].IllustLeft.Split('_');
 
             GetObject((int)GameObjects.RightEmoji).SetActive(false);
-            if (speaker[2] == "Normal")
-                GetObject((int)GameObjects.LeftEmoji).SetActive(false);
-            else
-                GetObject((int)GameObjects.LeftEmoji).SetActive(true);
-
             GetImage((int)Images.LeftPortrait).gameObject.SetActive(true);
+            PlayEmotion(GetObject((int)GameObjects.LeftEmoji),
+                speaker[2] == "Normal" ? null : Managers.Data.EventDic[Managers.Game.CurEventID].IllustLeft);
+
             GetImage((int)Images.LeftPortrait).sprite = Managers.Resource.Load<Sprite>(speaker[1]);
             GetImage((int)Images.RightPortrait).color = Color.gray;
             GetImage((int)Images.LeftPortrait).color = Color.white;
-
-            GetObject((int)GameObjects.LeftEmoji).GetComponent<Animator>().Play(Managers.Data.EventDic[Managers.Game.CurEventID].IllustLeft);
 
             GetText((int)Texts.SpeakerText).text = Managers.GetString(Define.PLAYER_DEFAULT_NAME);
         }
@@ -205,18 +205,14 @@ public class UI_ConversationPopup : UI_Popup
             string[] speaker = Managers.Data.EventDic[Managers.Game.CurEventID].IllustRight.Split('_');
 
             GetObject((int)GameObjects.LeftEmoji).SetActive(false);
-            if (speaker[2] == "Normal")
-                GetObject((int)GameObjects.RightEmoji).SetActive(false);
-            else
-                GetObject((int)GameObjects.RightEmoji).SetActive(true);
-
             GetImage((int)Images.RightPortrait).gameObject.SetActive(true);
+            PlayEmotion(GetObject((int)GameObjects.RightEmoji),
+                speaker[2] == "Normal" ? null : Managers.Data.EventDic[Managers.Game.CurEventID].IllustRight);
+
             GetImage((int)Images.RightPortrait).sprite = Managers.Resource.Load<Sprite>(speaker[1]);
             GetImage((int)Images.RightPortrait).SetNativeSize();
             GetImage((int)Images.LeftPortrait).color = Color.gray;
             GetImage((int)Images.RightPortrait).color = Color.white;
-
-            GetObject((int)GameObjects.RightEmoji).GetComponent<Animator>().Play(Managers.Data.EventDic[Managers.Game.CurEventID].IllustRight);
 
             GetText((int)Texts.SpeakerText).text = Managers.GetString(Define.SWORD_DEFAULT_NAME);
         }
@@ -235,9 +231,23 @@ public class UI_ConversationPopup : UI_Popup
         Managers.Game.CurEventID++;
     }
 
-    /// <summary>다음 줄. 마지막 줄 뒤에는 선택지를 띄우거나 닫는다. 자동 플레이 봇이 직접 부른다.</summary>
+    /// <summary>넘기기 한 번 — 사람의 Enter 와 같다. 줄이 다 안 보였으면 먼저 다 보이고, 다 보였으면 다음 줄.
+    /// 마지막 줄 뒤에는 선택지를 띄우거나 닫는다. 자동 플레이 봇이 직접 부른다.</summary>
     public void ShowNextScript()
     {
+        // 첫 줄은 Init(Start)이 띄운다. 그 전에 불리면 첫 줄이 두 번 돈다(연출 신호도 두 번).
+        if (_init == false)
+            return;
+        // 봇은 방금 바뀐 줄도 곧장 넘겼다. 이름표·초상화는 바로 바뀌는데 타자기 글은 한두 프레임 늦어서, 마검 이름표가
+        // 데미안의 "뭐야?!" 위에 찍힌 프레임이 녹화에 남았다. 사람처럼 한 번은 다 보이게 한다.
+        if (_isAllTextShown == false && _choosing == false)
+        {
+            GetText((int)Texts.ConversationText).GetComponent<TextAnimator_TMP>().SetVisibilityEntireText(true);
+            _isAllTextShown = true;
+            return;
+        }
+        _isAllTextShown = false;
+        _autoTimer = 0f;
         if (_story != null)
         {
             NextStoryLine();
@@ -305,8 +315,7 @@ public class UI_ConversationPopup : UI_Popup
         switch (who.Portrait)
         {
             case StoryPortrait.Damian:
-                left.gameObject.SetActive(true);
-                left.sprite = Managers.Resource.Load<Sprite>("Adventurer");
+                SetLeftDamian(left);
                 PlayEmotion(leftEmoji, line.Emotion);
                 break;
             case StoryPortrait.Sword:
@@ -316,11 +325,13 @@ public class UI_ConversationPopup : UI_Popup
             case StoryPortrait.Boss:
                 SetRightBoss(right, who.Chapter);
                 break;
-        }
-        if (narration)
-        {
-            left.gameObject.SetActive(false);
-            right.gameObject.SetActive(false);
+            default:
+                // 초상화가 없는 화자(촌장·내레이션): 곁의 둘을 늘 어둡게 세운다. 예전에는 앞 줄에 누가 떴느냐에 따라
+                // 비어 있거나 한쪽만 어두웠다. 오른쪽에 보스가 서 있으면 그대로 둔다.
+                SetLeftDamian(left);
+                if (right.gameObject.activeSelf == false)
+                    SetRightSword(right);
+                break;
         }
         left.color = who.Portrait == StoryPortrait.Damian ? Color.white : Dim;
         right.color = who.Portrait == StoryPortrait.Sword || who.Portrait == StoryPortrait.Boss ? _rightColor : _rightColor * Dim;
@@ -339,15 +350,22 @@ public class UI_ConversationPopup : UI_Popup
         catch (Exception e) { Debug.LogException(e); }
     }
 
-    // 감정 아이콘. Normal 이나 없는 감정은 아이콘을 띄우지 않는다 (story_gen 이 상태 이름을 확인해 둔다).
+    // 감정 아이콘. null 이면(Normal — 마검에는 Normal 상태 자체가 없다) 끈다. 켠 뒤에 튼다 — 꺼진 애니메이터에 Play 를
+    // 부르면 "Game object with animator is inactive" 경고만 찍히고 버려진다. 아이콘은 초상화의 자식이라 부르는 쪽이
+    // 초상화를 먼저 켠다(activeSelf 로 보면 부모가 꺼진 것을 못 본다). 이야기의 상태 이름은
+    // story_gen 이 Emoji.controller 와 대조해 둔다.
     static void PlayEmotion(GameObject emoji, string state)
     {
-        if (string.IsNullOrEmpty(state))
-            return;
-        emoji.SetActive(true);
         Animator animator = emoji.GetComponent<Animator>();
-        if (animator != null)
+        emoji.SetActive(string.IsNullOrEmpty(state) == false && animator != null);
+        if (emoji.activeInHierarchy)
             animator.Play(state);
+    }
+
+    static void SetLeftDamian(Image left)
+    {
+        left.gameObject.SetActive(true);
+        left.sprite = Managers.Resource.Load<Sprite>("Adventurer");
     }
 
     void SetRightSword(Image right)

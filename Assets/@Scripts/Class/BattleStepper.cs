@@ -91,7 +91,14 @@ public sealed class BattleStepper : IDisposable
         int damage = attacker.Trait.ExecuteAttack(attacker, target);
         bool critical = attacker.IsCritical;
         bool guarded = target.IsDefence;
+        float before = target.CurHP;
         target.Trait.ExcuteOnHit(attacker, target, damage);
+        // 전투창 숫자는 맞은 쪽이 실제로 잃은 HP 다(스킬 BattleSkills.Strike 와 같다). 공격 값을 그대로 띄우면 불사(20%)·
+        // 은신한 암살·갑옷 껍질 앞에서 체력 막대와 따로 놀았고, 야수가 방어력 아래로 때리면 -5 가 떴다.
+        // 야수만은 맞은 뒤 제 손으로 회복해 차이가 줄어든다 — 그 특성은 회복 전 몫(0 아래는 0, 남은 HP 까지)을 띄운다.
+        int dealt = target.Trait is CreatureClass.BeastTrait
+            ? (int)Math.Min(Math.Max(0, damage), Math.Ceiling(Math.Max(0f, before)))
+            : (int)Math.Round(Math.Max(0f, before - target.CurHP));
         attacker.IsCritical = false;
         if (guarded)
         {
@@ -99,7 +106,7 @@ public sealed class BattleStepper : IDisposable
             if (fromPlayer) MonsterDefenceTime = 0; else PlayerDefenceTime = 0;
             target.OnDefenceAction?.Invoke();
         }
-        OnStrike?.Invoke(fromPlayer, damage, critical, guarded);
+        OnStrike?.Invoke(fromPlayer, dealt, critical, guarded);
     }
 
     public void Dispose()

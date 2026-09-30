@@ -36,8 +36,8 @@ from thesword_balance import (
     TRAIT_NAME,
 )
 from layout_gen import (build_floor_layout, validate_layout, check_doors,
-                        check_sealed_by_portal, check_vault_safe, floor_choices,
-                        key_economy, KEY_ITEM, MIN_TOLLS)
+                        check_sealed_by_portal, check_vault_safe, check_behind_boss,
+                        floor_choices, key_economy, KEY_ITEM, MIN_TOLLS)
 
 # 층마다 반드시 치러야 하는 전투의 수. layout_gen 이 배치로 보장하는 값이고,
 # 여기서는 "곁길을 전부 건너뛴다" 는 나쁜 선택을 재현할 때 쓴다 — 관문 셋만
@@ -753,6 +753,8 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
         # 보스층은 보스 직전에 쓸 큰 물약과, 올라가기 전에 채울 물약을 따로 둔다.
         # 큰 것 하나만 두면 보스를 잡고 빈사로 다음 층에 올라가 그대로 죽는다.
         # 이 둘은 구역3(계단 앞)이라 <b>반드시 밟는다</b> — skip_potions 로도 안 빠진다.
+        # 큰 물약은 보스 앞, 계단 앞 물약은 보스 뒤에 놓인다 — build_floor_layout 이
+        # 그렇게 놓고 check_behind_boss 가 완성된 격자에서 다시 잰다([4/7]).
         if boss:
             potions.append((BOSS_FLOOR_POTIONS[0], len(fights) - 1))
         potions.append((EXIT_POTION, len(fights)))
@@ -1154,7 +1156,7 @@ def emit_layouts(monsters, write=True):
     for m in monsters:
         by_floor.setdefault(m["_floor"], []).append(m)
 
-    written, failures, bad_doors, sealed_off, unsafe_vaults = 0, [], [], [], []
+    written, failures, bad_doors, sealed_off, unsafe_vaults, behind_boss = 0, [], [], [], [], []
     choices, econ = {}, {}
     for floor in range(HANDMADE_FLOORS + 1, TOTAL_FLOORS + 1):
         did, ch, _ = dungeon_id(floor)
@@ -1164,6 +1166,7 @@ def emit_layouts(monsters, write=True):
         walls = CHAPTER_THEMES[ch][1]
 
         # 구역별 회복 아이템 (없는 구역은 None)
+        # 보스층 구역3 은 [보스 앞, 보스 뒤] 순서다 — build_floor_layout 이 첫째만 보스 앞에 놓는다.
         region3 = [POTION_BY_HEAL[EXIT_POTION]]
         if boss:
             region3.insert(0, POTION_BY_HEAL[BOSS_FLOOR_POTIONS[0]])
@@ -1208,6 +1211,11 @@ def emit_layouts(monsters, write=True):
             unsafe_vaults.append(
                 f"Dungeon_{did} ({cx}, {cy}) 금고 {what} — 세 문을 열기 전에 닿는다")
 
+        # 완주 계산은 층의 몹과 큰 물약을 보스 <b>앞에서</b> 쓴다(simulate_run).
+        for cell, what in check_behind_boss(grid, (POTION_BY_HEAL[BOSS_FLOOR_POTIONS[0]],)):
+            behind_boss.append(f"Dungeon_{did} {what} " +
+                               (f"{cell} — 보스를 잡아야 닿는다" if cell else "— 층에 없다"))
+
         econ[floor] = key_economy(grid, doors)
 
         # 강제/선택은 배치 <b>의도</b>가 아니라 완성된 격자에서 다시 잰다.
@@ -1221,7 +1229,7 @@ def emit_layouts(monsters, write=True):
                 for row in grid:
                     f.write(",".join(row) + "\n")
         written += 1
-    return written, failures, bad_doors, choices, sealed_off, unsafe_vaults, econ
+    return written, failures, bad_doors, choices, sealed_off, unsafe_vaults, behind_boss, econ
 
 
 def report_choices(choices):
@@ -1407,7 +1415,7 @@ def build_all(dry_run=False):
 
     print("[4/7] 층 레이아웃 생성 + 도달 가능성 검사")
     (written, failures, bad_doors, choices, sealed_off,
-     unsafe_vaults, econ) = emit_layouts(monsters, write=False)
+     unsafe_vaults, behind_boss, econ) = emit_layouts(monsters, write=False)
     print(f"      {written}/{TOTAL_FLOORS - HANDMADE_FLOORS} 층 생성 "
           f"(1~{HANDMADE_FLOORS}층은 원본 유지)")
     if failures:
@@ -1431,6 +1439,12 @@ def build_all(dry_run=False):
         print(f"      열쇠를 잘못 써서 갇힐 수 있는 금고 {len(unsafe_vaults)}건")
         return False
     print("      앞 구역에 앉은 금고 0건 (열쇠를 잘못 써서 갇히는 수가 없다)")
+    if behind_boss:
+        for line in behind_boss[:10]:
+            print(f"  [실패] {line}")
+        print(f"      보스 뒤에 앉은 몬스터·큰 물약 {len(behind_boss)}건")
+        return False
+    print("      보스 뒤에 앉은 몬스터·큰 물약 0건 (완주 계산은 둘 다 보스 앞에서 쓴다)")
 
     print("[5/7] 강제와 선택 세기")
     broken = report_choices(choices)

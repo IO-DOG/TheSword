@@ -57,6 +57,11 @@ public class BossDoor : PortalController
 
         yield return new WaitForSeconds(5f);
 
+        // 보스방으로 옮기는 포탈 코루틴(삽화 포함)도 이 문 위에서 돈다. 삽화는 2 + 1~2 + 1초라 느린 프레임이면
+        // 5.2초를 넘기는데, 그 전에 끄면 같이 죽어 방에 못 들어가고 OnInteract·OnInputLock 이 켜진 채 굳었다.
+        // 그 코루틴이 UsePortal 에서 켜고 LoadingAndWarp 에서 끄는 OnInteract 가 내려갈 때까지 기다린다.
+        yield return new WaitWhile(() => Managers.Game.OnInteract);
+
         gameObject.SetActive(false);
     }
 }

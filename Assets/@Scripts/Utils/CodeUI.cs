@@ -88,6 +88,10 @@ public static class CodeUI
     }
 
     // 에디터는 도메인 리로드 없이 플레이를 되풀이한다 — 지난 플레이에서 받아 둔 것은 이미 부서졌을 수 있다.
+    // 부서진 것은 Cached 가 거르지만, 살아남은 것(코드로 만든 재질·스프라이트)도 새 판에 넘기지 않는다.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() => s_cache.Clear();
+
     static bool Cached<T>(string id, out T value) where T : Object
     {
         value = s_cache.TryGetValue(id, out Object found) ? found as T : null;

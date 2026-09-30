@@ -19,6 +19,15 @@ public static class GameSettings
     // GetString 이 글자마다 부른다. Windows 의 PlayerPrefs 는 레지스트리라 한 번만 읽어 둔다.
     static Define.ScriptType? s_language;
 
+    // 에디터는 플레이할 때 도메인·씬을 다시 읽지 않는다(Enter Play Mode Options). 정적 값이 지난 플레이에서
+    // 그대로 넘어와, 파괴된 오브젝트에 묶인 구독자가 남는다 — 플레이를 시작할 때마다 비운다. 빌드에는 영향이 없다.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics()
+    {
+        s_language = null;
+        Changed = null;
+    }
+
     // 처음 켜면 OS 언어를 따른다. 고르면 그 값이 남는다.
     public static Define.ScriptType Language
     {

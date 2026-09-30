@@ -121,7 +121,8 @@ public class UI_GameOverPopup : UI_Popup
     {
         // 연출 도중에 창이 사라졌다(Esc·창 정리). 이 창이 되살리기를 맡고 있어서, 그대로 두면
         // 죽은 채 입력 잠금(OnInputLock)이 걸린 채로 멈춘다. 씬이 내려가는 중이면 그쪽에 맡긴다.
-        if (_respawned || gameObject.scene.isLoaded == false)
+        // 플레이를 끄는 중(매니저가 먼저 부서졌다)에도 끼어들지 않는다 — 되살리기가 @Managers 를 새로 만든다.
+        if (_respawned || gameObject.scene.isLoaded == false || Managers.IsAlive == false)
             return;
         CoroutineManager.StartCoroutine(CoRestartIfStranded());
     }

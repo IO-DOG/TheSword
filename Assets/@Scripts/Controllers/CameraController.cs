@@ -45,6 +45,15 @@ public class CameraController : MonoBehaviour
     // 메인 카메라의 픽셀 퍼펙트. 예전에는 매 프레임 두세 번씩 GetComponent 했다.
     PixelPerfectCamera _pixelPerfect;
 
+    // 에디터는 도메인 리로드 없이 플레이를 되풀이한다 — 연출(DirectingManager·StoryDirector)이 지난 플레이의
+    // 부서진 가상 카메라를 붙잡지 않게 비운다. 새 카메라의 Awake/Start 가 다시 채운다.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics()
+    {
+        _transposer = null;
+        _vCam = null;
+    }
+
     private void Awake()
     {
         Managers.Game.MainCamera = this.transform.parent.GetComponent<Camera>();

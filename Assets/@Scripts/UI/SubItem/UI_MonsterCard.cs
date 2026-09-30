@@ -256,6 +256,7 @@ public class UI_MonsterCard : UI_BaseCard
     ///
     /// 기획서 34·107쪽 — 장비는 맵 바닥에 떨어진 상태로 남고, 지나가면 줍는다.
     /// 원래 코드가 있었지만 주석 처리되어 있어서 아무것도 떨어지지 않았다.
+    /// 떨군 것은 체크포인트에 없다 — 줍지 않고 층을 떠나면 GameManager.CollectDrops 가 대신 줍는다.
     /// </summary>
     void DropReward()
     {

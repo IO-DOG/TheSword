@@ -242,9 +242,11 @@ public class UI_ConfirmPopup : UI_Popup
 
     // 답을 받기 전에 사라졌다(연출이 창을 모두 걷었거나 씬이 바뀌었다). 묻던 쪽이 답을 기다리며
     // 굳지 않게 "아니오" 로 끝낸다 — 전투 관문이 그 답으로 전투를 거둔다.
+    // 플레이를 끄는 중이면(매니저가 먼저 사라졌으면) 기다리는 쪽도 없다. 답이 매니저를 부르면 @Managers 가
+    // 새로 서서 다음 플레이가 깨진다(도메인 리로드가 꺼져 있다).
     void OnDestroy()
     {
-        if (_answered)
+        if (_answered || Managers.IsAlive == false)
             return;
         _answered = true;
 

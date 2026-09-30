@@ -36,6 +36,7 @@ SPAWN = "11"
 # 즉 F+1 층에 15 가 없으면 엔딩 처리가 되므로 1층을 뺀 모든 층에 15 가 필요하다.
 STAIRS_UP = "14"
 STAIRS_DOWN = "15"
+PORTAL_CELLS = frozenset((STAIRS_UP, STAIRS_DOWN, "16"))   # 런타임에 못 지나간다
 # 문 셀 id. 색(열쇠)과 방향 두 가지로 갈린다 — 손수 만든 맵에서 확인한 규칙이다.
 #
 #   3 / 4 / 5   가로문 : 문의 <b>좌우</b>가 벽이어야 한다. 세로로 지나간다.
@@ -256,8 +257,11 @@ def _touches_floor(grid, cell, allow):
     return False
 
 
-def _carve_alcove(grid, rooms, rng):
+def _carve_alcove(grid, rooms, rng, avoid=()):
     """방 가장자리에서 밖으로 두 칸을 파 <b>막다른 골방</b>을 만든다.
+
+    avoid 의 방에는 파지 않는다. 후보 목록에서 빼지 않고 <b>건너뛰기만</b> 한다 —
+    목록 길이가 같아야 섞는 데 쓰는 씨앗 수가 같고, 그래야 다른 층이 안 바뀐다.
 
     왜 필요한가
     -----------
@@ -284,11 +288,13 @@ def _carve_alcove(grid, rooms, rng):
         for x in range(ox, ox + 2 * hw + 1):
             if x == cx:
                 continue                       # 통로가 지나는 줄은 피한다
-            cands.append(((x, oy), (0, -1)))                 # 위로
-            cands.append(((x, oy + 2 * hh), (0, 1)))         # 아래로
+            cands.append(((x, oy), (0, -1), room))                 # 위로
+            cands.append(((x, oy + 2 * hh), (0, 1), room))         # 아래로
     rng.shuffle(cands)
 
-    for (bx, by), (dx, dy) in cands:
+    for (bx, by), (dx, dy), room in cands:
+        if room in avoid:
+            continue
         gate = (bx + dx, by + dy)
         prize = (bx + 2 * dx, by + 2 * dy)
         # 한 칸 안쪽까지만 판다. 테두리까지 파면 그 바깥에 벽을 둘 자리가 없다.
@@ -408,8 +414,12 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
                 return None, None, None
 
     vault_color = alcove[1] if alcove and alcove[0] == "vault" else None
+    # 보스층은 계단 방에 골방을 파지 않는다. 보스가 그 방 입구를 막고 서므로 파수꾼이
+    # 보스 <b>뒤</b>가 되는데, 완주 계산은 층의 몹 다섯을 보스 앞에서 잡는다 —
+    # 40층 파수꾼이 그랬다(check_behind_boss).
     alcove_gate, alcove_prize, alcove_base = _carve_alcove(
-        grid, regions[3] if vault_color is not None else [r for region in regions for r in region], rng)
+        grid, regions[3] if vault_color is not None else [r for region in regions for r in region], rng,
+        avoid=(order[-1],) if boss_id is not None else ())
     if vault_color is not None and alcove_gate is None:
         return None, None, None
 
@@ -477,12 +487,16 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     # 예전에는 "계단에서 가장 가까운 빈 칸" 이었는데, 방이 7x5 열린 홀이라 어떤
     # 칸도 길을 끊지 못했다 — 재 보니 챕터 보스 다섯이 전부 그냥 지나칠 수 있는
     # 상대였다(관문인 보스 0/5). 보스를 안 잡고 다음 챕터로 올라갈 수 있었다.
+    before_boss = None
     if boss_id is not None:
         if not last_neck:
             return None, None, None
         cell = last_neck.pop(0)
         place[cell] = f"B_{boss_id:03d}"
         used.add(cell)
+        # 보스를 잡기 전에 닿는 칸 — 아래 구역3 물약이 보스 앞/뒤를 가를 때 쓴다.
+        before_boss = _flood_locked(
+            grid, spawn, {cell} | {c for c, v in place.items() if v in PORTAL_CELLS})
 
     # 룬도 같은 자리에. 룬은 얻을지 말지가 흔들리면 완주 보장을 계산할 수 없다
     # (기획서 65·81쪽, CLAUDE.md "계단 앞 구역에 둔다").
@@ -598,8 +612,17 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
 
     potions = potions or [[], [POTION_20], [POTION_30], [POTION_30]]
     for r, pots in enumerate(potions[:4]):
-        for pot in (pots or []):
+        for k, pot in enumerate(pots or []):
             pool = free_in(regions[r])
+            # 보스층 구역3 의 물약은 [보스 앞, 보스 뒤] 순서다 — 큰 물약은 보스 직전에,
+            # 계단 앞 물약은 잡고 나서 마신다(simulate_run 이 그렇게 센다). 구역3 은 계단
+            # 방까지 품어서 아무 칸이나 고르면 큰 물약이 보스 뒤에 앉는다: 40·60·80·100층이
+            # 그랬고, 그 자리대로 셈하면 100층 보스에서 죽는다. 섞은 뒤에 가리기만 하므로
+            # 씨앗이 굴리는 수는 그대로다 — 벽은 한 칸도 안 바뀐다.
+            if r == 3 and before_boss is not None:
+                pool = [c for c in pool if (c in before_boss) == (k == 0)]
+                if not pool:
+                    return None, None, None
             if not pool:
                 continue
             place[pool[0]] = pot
@@ -684,7 +707,7 @@ def check_sealed_by_portal(grid):
 
     막힌 (좌표, 셀) 목록. 빈 목록이면 정상이다.
     """
-    portals = {STAIRS_UP, STAIRS_DOWN, "16"}
+    portals = PORTAL_CELLS
 
     def cell_at(c):
         return grid[c[1]][c[0]].strip()
@@ -909,6 +932,27 @@ def check_vault_safe(grid, doors):
     return [(c, grid[c[1]][c[0]]) for c in extra if c in reach]
 
 
+def check_behind_boss(grid, must_reach):
+    """보스를 잡기 <b>전에</b> 써야 하는데 보스 뒤에 있는 것. (좌표, 셀) 목록.
+
+    완주 계산(generate_content.simulate_run)은 층의 몹을 다 잡고, 모자라면 큰 물약을
+    마신 뒤에 보스와 싸운다. 그런데 보스는 계단 방 입구를 막고 서서 그 방은 보스를
+    잡아야 닿는다 — 40·60·80·100층의 큰 물약이 거기 있었고, 40층은 골방 파수꾼까지
+    그랬다. 보스와 포탈을 벽으로 치고(문은 연다) 스폰에서 훑는다.
+    must_reach 가 층에 아예 없으면 (None, 셀) 이다 — 안 놓인 것도 같은 사고다.
+    보스가 없는 층은 빈 목록.
+    """
+    cells = {(x, y): v.strip() for y, row in enumerate(grid) for x, v in enumerate(row)}
+    spawn = next((c for c, v in cells.items() if v == SPAWN), None)
+    boss = {c for c, v in cells.items() if v.startswith("B_")}
+    if spawn is None or not boss:
+        return []
+    seen = _flood_locked(grid, spawn, boss | {c for c, v in cells.items() if v in PORTAL_CELLS})
+    bad = [(c, v) for c, v in sorted(cells.items())
+           if c not in seen and (v.startswith("M_") or v in must_reach)]
+    return bad + [(None, code) for code in must_reach if code not in cells.values()]
+
+
 def key_economy(grid, doors):
     """격자에서 직접 센다. (색깔별 열쇠, 큰길 문, 금고 문, 파수꾼 뒤의 열쇠).
 
@@ -1113,6 +1157,9 @@ def _shape_self_check(seeds=40):
         assert not check_sealed_by_portal(grid), f"씨앗 {seed} 포탈이 막았다"
         unsafe = check_vault_safe(grid, doors)
         assert not unsafe, f"씨앗 {seed} 금고가 앞 구역에 있다 {unsafe}"
+        # 기본 물약표에서 구역3 의 첫 물약은 POTION_30 — 보스 앞이어야 한다.
+        behind = check_behind_boss(grid, (POTION_30,))
+        assert not behind, f"씨앗 {seed} 보스 뒤 {behind}"
         keys, main, vault, guarded = key_economy(grid, doors)
         assert main == [1, 1, 1], f"씨앗 {seed} 큰길 문 {main}"
         if alcove is None:

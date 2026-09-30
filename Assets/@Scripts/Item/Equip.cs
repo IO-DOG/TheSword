@@ -55,5 +55,7 @@ public class Equip : MonoBehaviour
         // 무조건 갈아입지 않는다. 더 나을 때만 착용하고, 아니면 인벤토리에 남는다.
         Managers.Game.EquipIfBetter(Id);
         Managers.Game.GameScene.Refresh();
+        // 워프석 반지(32)를 주우면 반지에 새긴 글을 읽는 장면이 뜬다 (StoryDirector, 바이블 R14).
+        GameEvents.RaiseEquipPicked(Id);
     }
 }

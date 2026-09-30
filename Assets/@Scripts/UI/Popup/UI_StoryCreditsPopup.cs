@@ -20,17 +20,18 @@ public class UI_StoryCreditsPopup : UI_Popup
     RectTransform _content;
     float _lastCenter;              // 맨 위에서 마지막 줄 가운데까지
 
-    public static void Show(StoryScene scene, Action onDone)
+    public static UI_StoryCreditsPopup Show(StoryScene scene, Action onDone)
     {
         if (scene == null || scene.Lines.Length == 0)
         {
             onDone?.Invoke();
-            return;
+            return null;
         }
         UI_StoryCreditsPopup popup = StoryUI.NewPopup<UI_StoryCreditsPopup>();
         popup._onDone = onDone;
         popup.Build(scene);
         popup.StartCoroutine(popup.CoRoll());
+        return popup;
     }
 
     public override bool OnEscape() => true;       // Esc 는 누르고 있으면 빨라질 뿐 닫지 않는다

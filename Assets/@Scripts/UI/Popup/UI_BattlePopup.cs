@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.UI;
 
 public class UI_BattlePopup : UI_Popup
 {
@@ -18,6 +20,9 @@ public class UI_BattlePopup : UI_Popup
     }
 
     #endregion
+
+    // 스킬 이름 (Tools/ui_text_parts/ui.py). BattleSkills.Kind 순서 — 강타·철벽·흡혈.
+    public static readonly int[] SkillTextIds = { 191, 192, 193 };
 
     BattleStepper _battle;
     bool _ending;
@@ -88,8 +93,64 @@ public class UI_BattlePopup : UI_Popup
         };
         _battle.OnGuard = player => { if (player) playerCard.Defence(); else monsterCard.Defence(); };
 
+        BuildSkillBar();
         return true;
     }
+
+    #region 스킬 막대
+    // 1/2/3 이 무엇인지 화면에 없어서 계약 대사로만 알 수 있었다. 전투창 아래 가운데에 셋을 늘어놓고,
+    // 쓴 것(전투마다 한 번)은 흐리게 한다. 프리팹을 고치지 않고 메뉴 단추 그림·HUD 글꼴을 빌린다(CodeUI).
+    const float SkillWidth = 230f, SkillHeight = 56f, SkillGap = 16f, SkillBottom = 36f;
+
+    CanvasGroup[] _skillSlots;
+    readonly bool[] _skillPainted = new bool[BattleSkills.Count];   // 칠해 둔 "썼다"
+
+    void BuildSkillBar()
+    {
+        if (BattleSkills.Unlocked == false)
+            return;
+
+        TMP_FontAsset font = CodeUI.NumberFont;
+        Material outline = CodeUI.Outlined(font, 0.2f);
+        Sprite art = CodeUI.Sliced(CodeUI.PrefabSprite("UI_MenuPopup", "SystemUI_Button"), new Vector4(24f, 0f, 24f, 0f));
+        float width = SkillWidth * BattleSkills.Count + SkillGap * (BattleSkills.Count - 1);
+        RectTransform bar = CodeUI.Place(CodeUI.NewRect(transform, "SkillBar"),
+            new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, SkillBottom), new Vector2(width, SkillHeight));
+
+        _skillSlots = new CanvasGroup[BattleSkills.Count];
+        for (int i = 0; i < BattleSkills.Count; i++)
+        {
+            Image slot = CodeUI.NewImage(bar, $"Skill{i + 1}", art, art != null ? Color.white : new Color(0.1f, 0.12f, 0.18f, 0.9f), true);
+            CodeUI.Place(slot.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(i * (SkillWidth + SkillGap), 0f),
+                new Vector2(SkillWidth, SkillHeight));
+
+            TextMeshProUGUI label = CodeUI.NewText(slot.transform, "Label", font, 26f, Color.white, TextAlignmentOptions.Center);
+            label.fontSharedMaterial = outline;
+            CodeUI.Stretch(label.rectTransform).offsetMin = new Vector2(20f, 0f);
+            label.rectTransform.offsetMax = new Vector2(-20f, 0f);
+            CodeUI.Fit(label, 14f).text = $"<color=#F0D28A>{i + 1}</color>  {Managers.GetString(SkillTextIds[i])}";
+
+            _skillSlots[i] = slot.gameObject.AddComponent<CanvasGroup>();
+            _skillPainted[i] = !BattleSkills.IsUsed(i);     // 처음 한 번은 반드시 칠한다
+        }
+        PaintSkills();
+    }
+
+    // 누가 썼든(사람 키·봇의 BattleSkills.Use) 여기서 본다. 셋뿐이라 매 프레임 견줘도 싸다.
+    void PaintSkills()
+    {
+        if (_skillSlots == null)
+            return;
+        for (int i = 0; i < _skillSlots.Length; i++)
+        {
+            bool used = BattleSkills.IsUsed(i);
+            if (used == _skillPainted[i])
+                continue;
+            _skillPainted[i] = used;
+            _skillSlots[i].alpha = used ? 0.35f : 1f;
+        }
+    }
+    #endregion
 
     /// <summary>전투 중 액티브 스킬 입력. 1 강타 / 2 철벽 / 3 흡혈.
     ///
@@ -97,6 +158,10 @@ public class UI_BattlePopup : UI_Popup
     /// 셋 다 전투당 한 번뿐이라, 아낄지 지금 쓸지가 유일한 판단거리가 된다.</summary>
     void Update()
     {
+        PaintSkills();
+        // 치명타 수업(StoryDirector)이 전투를 세워 두고 말하는 동안은 키도 받지 않는다 — 시계는 멈췄는데 스킬만 들어가면 안 된다.
+        if (StoryDirector.HoldsBattle)
+            return;
         if (BattleSkills.Unlocked == false || Managers.Game.OnBattle == false || Managers.UI.IsPaused)
             return;
 
@@ -112,6 +177,8 @@ public class UI_BattlePopup : UI_Popup
 
     void FixedUpdate()
     {
+        // 치명타 수업(StoryDirector)이 말하는 동안 전투 시계를 세운다. 게이지·치명 횟수가 그 자리에 머문다.
+        if (StoryDirector.HoldsBattle) return;
         if (_battle == null || _ending || !Managers.Game.OnBattle) return;
         for (int i = 0; i < Mathf.Max(1, Managers.Game.GameSpeed) && !_battle.Finished; i++)
             _battle.Step(Time.fixedDeltaTime);

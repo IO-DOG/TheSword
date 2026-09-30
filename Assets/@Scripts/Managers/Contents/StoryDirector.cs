@@ -75,7 +75,8 @@ public sealed class StoryScene
 /// 손으로 짠 연출(DirectingManager)이 제 차례에 CoPrologue 를 부른다.
 ///
 /// 한 번 튼 장면은 StorySeen.json 에 적는다 — 틀기 시작할 때 적으므로 죽어도, 불러와도 다시 뜨지 않는다
-/// (도는 중에 꺼지면 그 장면은 잃는다. 되풀이되는 것보다 낫다). 새 게임이 지운다(GameManager.DeleteGameData).
+/// (도는 중에 꺼지면 그 장면은 잃는다. 되풀이되는 것보다 낫다. 층 입구에 줄 선 뒷장면은 다음에 씬을 올릴 때 잇는다).
+/// 새 게임이 지운다(GameManager.DeleteGameData).
 /// </summary>
 public class StoryDirector : MonoBehaviour
 {
@@ -89,16 +90,21 @@ public class StoryDirector : MonoBehaviour
     public const string ClearedEndingKey = "CLEARED_ENDING";
 
     const int VillageFloor = 5;             // "4층 계단을 올라 5층에 처음 들어설 때" (FORMAT 트리거 표)
-    const float BarkChance = 0.35f;         // 층 유형 바크는 가끔 — 층마다 한 번, 층 번호로 정해진다
     const string SeenFile = "StorySeen.json";
 
     static StoryDirector s_instance;
     static HashSet<string> s_seen;
     static Dictionary<(StoryTrigger, int), List<StoryScene>> s_index;
     static int s_hold;                      // OnDirect 를 이 도구가 쥐고 있는 겹 수
+    static int s_epoch;                     // AbortAll 이 올린다. 그 전에 시작한 장면은 다음 걸음에서 멈춘다 (Safe)
 
     /// <summary>이야기가 흐름을 쥐고 있다 (장면·연출이 도는 중).</summary>
     public static bool IsPlaying => s_instance != null && s_instance._running > 0;
+
+    /// <summary>치명타 수업(mechanic_first:crit)이 전투를 붙들고 있다. 전투창은 이동안 시계를 세지 않는다
+    /// (UI_BattlePopup.FixedUpdate·Update). OnBattle 은 켠 채 둔다 — 캐릭터·봇·메뉴가 계속 전투 중으로 본다.
+    /// 예전에는 OnBattle 을 꺼서 멈췄고, 그 틈에 같은 몬스터와 두 번째 전투가 열려 두 창이 같이 때렸다.</summary>
+    public static bool HoldsBattle { get; private set; }
 
     /// <summary>방금 본 결말. 엔딩 씬이 그림을 고를 때 읽는다.</summary>
     public static StoryEnding LastEnding
@@ -115,7 +121,9 @@ public class StoryDirector : MonoBehaviour
     readonly List<Job> _jobs = new List<Job>();
     int _running;
     StoryChoice _lastChoice;
+    UI_Popup _popup;                        // 지금 띄운 이야기 창 — AbortAll 이 닫는다
     UI_StoryCardPopup _backdrop;
+    bool _letterbox;                        // 레터박스를 이 도구가 내렸다
     bool _levelUpPending;
     bool _endingRunning;
     float _nextWatch;
@@ -128,16 +136,24 @@ public class StoryDirector : MonoBehaviour
     static GameObject s_bossObject;
 
     #region 설치
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-    static void Install()
+    // 에디터는 플레이할 때 도메인·씬을 다시 읽지 않는다(Enter Play Mode Options). 정적 값이 지난 플레이에서
+    // 그대로 넘어온다 — 첫 씬이 뜨기 전에 비운다. 빌드에는 영향이 없다.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics()
     {
-        // 에디터는 도메인 리로드를 끄고 돈다 — 지난 플레이의 정적 값을 비운다.
+        s_instance = null;
         s_seen = null;
         s_index = null;
         s_hold = 0;
         s_lastEnding = null;
         s_bossPos = null;
         s_bossObject = null;
+        HoldsBattle = false;
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void Install()
+    {
         if (s_instance != null)
             return;
         GameObject go = new GameObject("@StoryDirector");
@@ -154,6 +170,7 @@ public class StoryDirector : MonoBehaviour
         GameEvents.DoorBlocked += OnDoorBlocked;
         GameEvents.Respawned += OnRespawned;
         GameEvents.BattleEnded += OnBattleEnded;
+        GameEvents.EquipPicked += OnEquipPicked;
         FightGate.Add(BossIntroGate, 0);
         FightGate.Add(FatalGate, 50);
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -168,19 +185,61 @@ public class StoryDirector : MonoBehaviour
         GameEvents.DoorBlocked -= OnDoorBlocked;
         GameEvents.Respawned -= OnRespawned;
         GameEvents.BattleEnded -= OnBattleEnded;
+        GameEvents.EquipPicked -= OnEquipPicked;
         FightGate.Remove(BossIntroGate);
         FightGate.Remove(FatalGate);
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    // 씬이 바뀌면(죽어서 다시 올림·타이틀) 기다리던 장면은 버린다 — 체크포인트가 그 일을 되돌렸다.
+    // 씬이 바뀌면(죽어서 다시 올림·타이틀·엔딩) 도는 장면·기다리던 장면·늦게 뜰 바크를 버린다 — 체크포인트가 그 일을
+    // 되돌렸다. 예전에는 줄만 비워서 기다리던 바크가 타이틀 화면에 떴다.
+    // 체크포인트는 이 층을 이미 다녀간 것으로 적었으니 FloorEntered(처음)는 다시 오지 않는다. 지난번에 층 입구 장면
+    // 도중에 꺼졌으면(창을 닫았다·녹화 조각이 끊겼다) 남은 것을 여기서 잇는다. 바크는 없다.
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        _jobs.Clear();
-        _levelUpPending = false;
-        _backdrop = null;
+        AbortAll();
         s_bossObject = null;
-        s_hold = 0;         // 새 판의 OnDirect 는 불러오기가 이미 풀었다 (GameManager.ResetTransientState)
+        if (scene.name == nameof(Define.Scene.GameScene) && Contracted && CurFloor >= VillageFloor)
+            EnqueueScenes(FloorChain(CurFloor), false, 0.5f);
+    }
+
+    /// <summary>
+    /// 이야기를 전부 거둔다: 도는 장면, 줄 선 장면, 늦게 뜰 바크. 쥐고 있던 것(캐릭터 OnDirect·전투 멈춤·전투 관문·
+    /// 레터박스·HUD·카메라)을 놓고 제 창을 닫는다. 씬이 바뀔 때 스스로 부르고, 메뉴가 "이 층 다시"·"체크포인트"·
+    /// "타이틀로" 앞에서 부른다. 코루틴을 멈추면 finally 가 돌지 않아서 여기서 하나하나 되돌린다.
+    /// </summary>
+    public static void AbortAll()
+    {
+        s_epoch++;          // DirectingManager 가 돌리던 프롤로그 장면도 다음 걸음에서 멈춘다 (Safe)
+        HoldsBattle = false;
+        bool held = s_hold > 0;
+        s_hold = 0;
+        if (held && Managers.IsAlive && Managers.Game != null)
+            Managers.Game.OnDirect = false;
+        UI_StoryBark.Clear();
+        if (s_instance != null)
+            s_instance.Abort(held);
+    }
+
+    void Abort(bool held)
+    {
+        held |= _running > 0;
+        StopAllCoroutines();
+        _jobs.Clear();
+        _running = 0;
+        _levelUpPending = false;
+        _endingRunning = false;
+        if (held == false || Managers.IsAlive == false)
+            return;     // 줄만 서 있었다 — 화면은 건드린 적이 없다
+        if (_popup != null)
+            Managers.UI.ClosePopupUI(_popup);   // 대화창은 닫히며 제 OnConversation 을 푼다
+        if (_backdrop != null)
+            Managers.UI.ClosePopupUI(_backdrop);
+        _popup = _backdrop = null;
+        Letterbox(false);
+        if (FightGate.Pending)
+            FightGate.Cancel();     // 보스 등장·첫 ✖ 수업이 전투 관문을 쥐고 있었다
+        Restore();
     }
     #endregion
 
@@ -328,10 +387,15 @@ public class StoryDirector : MonoBehaviour
     /// 이펙트 하나가 null 이라서 결말·전투 관문·HUD 복구가 통째로 멈추는 일을 이 프로젝트는 세 번 겪었다.</summary>
     public static IEnumerator Safe(IEnumerator root)
     {
+        int epoch = s_epoch;
         Stack<IEnumerator> stack = new Stack<IEnumerator>();
         stack.Push(root);
         while (stack.Count > 0)
         {
+            // AbortAll 뒤다. 남의 코루틴이 돌리던 것(DirectingManager 가 기다리는 프롤로그)은 StopAllCoroutines 가
+            // 못 멈춘다 — 여기서 끝낸다. 닫힌 대화창이 알린 "끝" 을 받고 다음 장면을 띄우지 않게.
+            if (epoch != s_epoch)
+                yield break;
             IEnumerator top = stack.Peek();
             bool moved;
             try { moved = top.MoveNext(); }
@@ -365,13 +429,9 @@ public class StoryDirector : MonoBehaviour
     #endregion
 
     #region 게임이 알린 일
-    static void OnFloorEntered(int stageId, bool firstVisit)
+    // 층에 들어설 때의 장면 중 아직 안 본 것. R2: village → chapter_start → trait_first(목록 순서) → floor_first
+    static List<StoryScene> FloorChain(int floor)
     {
-        if (s_instance == null || firstVisit == false || Contracted == false)
-            return;
-        int floor = stageId + 1;
-
-        // R2: village → chapter_start → trait_first(목록 순서) → floor_first
         List<StoryScene> chain = new List<StoryScene>();
         if (floor == VillageFloor)
             chain.AddRange(Unseen(StoryTrigger.Village, 0));
@@ -385,28 +445,31 @@ public class StoryDirector : MonoBehaviour
                 chain.Add(s);
         }
         chain.AddRange(Unseen(StoryTrigger.FloorFirst, floor));
+        return chain;
+    }
 
+    static void OnFloorEntered(int stageId, bool firstVisit)
+    {
+        if (s_instance == null || firstVisit == false || Contracted == false)
+            return;
+        List<StoryScene> chain = FloorChain(stageId + 1);
         if (chain.Count > 0)
         {
             Acquire();      // 들어서자마자 붙잡는다 — 층 이름이 걷히는 사이에 걸어가 버리지 않게
             s_instance.StartNow(s_instance.CoFloorChain(chain));
             return;
         }
-        s_instance.FloorBark(floor);
+        s_instance.FloorBark(stageId + 1);
     }
 
-    // 층 유형 바크. 이야기가 없는 층에서 가끔, 층마다 정해진 대로 (같은 층은 늘 같다).
+    // 층 유형 바크. 어느 층에서 무엇이 뜰지는 story_gen 이 정해 굽는다(GeneratedStory.FloorBarks) — 유형마다 변주를
+    // 돌려 가며 다 한 번은 뜨게, 이야기 장면·보스가 있는 층은 비우고, 81~89층은 데미안 것만 (바이블 R13·R15).
+    // 예전의 층 번호 씨앗 난수로는 두 변주가 한 번도 뽑히지 않았다.
     void FloorBark(int floor)
     {
-        int type = floor >= 0 && floor < GeneratedStory.FloorTypes.Length ? GeneratedStory.FloorTypes[floor] : -1;
-        if (type < 0)
-            return;
-        System.Random rng = new System.Random(floor * 7919 + 17);
-        List<StoryScene> barks = All(StoryTrigger.FloorType, type);
-        if (barks.Count == 0 || rng.NextDouble() >= BarkChance)
-            return;
-        StoryScene bark = barks[rng.Next(barks.Count)];
-        StartCoroutine(CoBarkLater(bark.Lines[0], 2f));
+        int scene = FloorFact(GeneratedStory.FloorBarks, floor, -1);
+        if (scene >= 0)
+            StartCoroutine(CoBarkLater(GeneratedStory.Scenes[scene].Lines[0], 2f));
     }
 
     static IEnumerator CoBarkLater(StoryLine line, float delay)
@@ -427,12 +490,18 @@ public class StoryDirector : MonoBehaviour
             return;
         }
         List<StoryScene> chain = Unseen(StoryTrigger.BossDefeat, chapter);
-        if (chapter == 0)
-            chain.AddRange(Unseen(StoryMechanic.Warp));     // 늑대가 떨군 반지 (바이블 9.1)
         if (chain.Count == 0)
             return;
         Acquire();
         s_instance.StartNow(s_instance.CoBossScenes(chain, null, null));
+    }
+
+    // 늑대가 떨군 반지를 주웠다 — 그때 반지 안쪽의 글을 읽는다 (바이블 R14). 예전에는 늑대가 쓰러진 장면 뒤에
+    // 곧장 붙어, 줍지도 않은 반지를 읽고 설명했다.
+    static void OnEquipPicked(int equipId)
+    {
+        if (s_instance != null && Contracted && EquipUtility.AbilityOf(equipId) == EquipUtility.AbilityWarp)
+            s_instance.EnqueueScenes(Unseen(StoryMechanic.Warp), true, 0.5f);
     }
 
     static void OnLevelUp(int level)
@@ -502,14 +571,17 @@ public class StoryDirector : MonoBehaviour
             return;
         }
         List<StoryScene> barks = All(StoryTrigger.Death, 0);
+        // R13: 81~89층의 마검은 값만 말한다 — 죽음 바크도 데미안 것만.
+        if (CurFloor >= GeneratedStory.SwordQuietFrom && CurFloor <= GeneratedStory.SwordQuietTo)
+            barks = barks.FindAll(b => b.Lines[0].Who.Portrait != StoryPortrait.Sword);
         if (barks.Count > 0)
             s_instance.StartCoroutine(CoBarkLater(barks[UnityEngine.Random.Range(0, barks.Count)].Lines[0], 1.5f));
     }
     #endregion
 
     #region 지켜보는 것 — 치명타 한 대 전, 금고 문 앞, 둘 중 하나 앞
-    // 첫 진심은 "한 대 전" 에 전투창 위로 가르친다. 전투 시계는 OnBattle 일 때만 걷는다(UI_BattlePopup.FixedUpdate)
-    // — 그동안 멈춰 두고, 닫히면 바로 그 진심이 나간다. AttackCount 는 전투창이 걸음마다 옮겨 적는다.
+    // 첫 진심은 "한 대 전" 에 전투창 위로 가르친다. 그동안 HoldsBattle 로 전투 시계를 멈춰 두고(UI_BattlePopup 이 본다),
+    // 닫히면 바로 그 진심이 나간다. AttackCount 는 전투창이 걸음마다 옮겨 적는다.
     void WatchCrit()
     {
         GameManager g = Managers.Game;
@@ -525,16 +597,12 @@ public class StoryDirector : MonoBehaviour
         StartNow(CoCrit(scenes));
     }
 
+    // OnBattle 은 건드리지 않는다 — 켜져 있어야 캐릭터 입력·봇·메뉴가 막히고 같은 몬스터와 다시 부딪혀도 전투가 안 열린다.
     IEnumerator CoCrit(List<StoryScene> scenes)
     {
-        Managers.Game.OnBattle = false;
+        HoldsBattle = true;
         try { yield return CoChain(scenes); }
-        finally
-        {
-            UI_BattlePopup battle = Managers.UI.FindPopup<UI_BattlePopup>();
-            if (battle != null && battle.BattleOver == false)
-                Managers.Game.OnBattle = true;
-        }
+        finally { HoldsBattle = false; }
     }
 
     void WatchFloor()
@@ -756,20 +824,30 @@ public class StoryDirector : MonoBehaviour
             Managers.Game.Player.SetIdleState(Managers.Game.Player._moveDir);
             Managers.UI.CloseGameSceneUI();
             if (letterbox)
-                Managers.Directing.PlayLetterBox();
+                Letterbox(true);
             yield return CoChain(chain);
             if (letterbox)
             {
-                Managers.Directing.CloseLetterBox();
+                Letterbox(false);
                 yield return new WaitForSeconds(StoryUI.Auto ? 0.2f : 1f);
             }
         }
         finally
         {
-            Managers.Directing.CloseLetterBox();
+            Letterbox(false);
             Restore();
             Release();
         }
+    }
+
+    // 레터박스는 제가 내린 것만 걷는다 — 손수 짠 연출(DirectingManager)의 것을 걷지 않게.
+    void Letterbox(bool on)
+    {
+        if (on)
+            Managers.Directing.PlayLetterBox();
+        else if (_letterbox)
+            Managers.Directing.CloseLetterBox();
+        _letterbox = on;
     }
 
     // 층에 들어섰을 때 (Acquire 는 부른 쪽이 이미 했다).
@@ -802,7 +880,7 @@ public class StoryDirector : MonoBehaviour
             if (boss == null)
                 yield return WaitSettled(false);
             Managers.UI.CloseGameSceneUI();
-            Managers.Directing.PlayLetterBox();
+            Letterbox(true);
             FollowBoss();
             if (boss != null)
             {
@@ -819,14 +897,14 @@ public class StoryDirector : MonoBehaviour
                 yield return new WaitForSeconds(StoryUI.Auto ? 0.2f : 0.8f);
             }
             yield return CoChain(chain);
-            Managers.Directing.CloseLetterBox();
+            Letterbox(false);
             FollowPlayer();
             // 레터박스가 걷히기를 기다린다 — 전투창이 이 화면을 찍어 배경으로 쓴다.
             yield return new WaitForSeconds(StoryUI.Auto ? 0.3f : 1f);
         }
         finally
         {
-            Managers.Directing.CloseLetterBox();
+            Letterbox(false);
             Restore();
             Release();
             // 등장 연출이 어디서 끊겼든 전투는 연다 — 관문을 쥔 채 두면 캐릭터가 굳는다.
@@ -861,7 +939,7 @@ public class StoryDirector : MonoBehaviour
         if (chapter < 0 || chapter >= GeneratedStory.ChapterNameIds.Length)
             yield break;
         bool done = false;
-        UI_StoryCardPopup.ShowTitle(GeneratedStory.ChapterNameIds[chapter], GeneratedStory.ChapterSubtitleIds[chapter], () => done = true);
+        _popup = UI_StoryCardPopup.ShowTitle(GeneratedStory.ChapterNameIds[chapter], GeneratedStory.ChapterSubtitleIds[chapter], () => done = true);
         while (done == false)
             yield return null;
     }
@@ -876,15 +954,17 @@ public class StoryDirector : MonoBehaviour
             case StoryKind.Dialogue:
             case StoryKind.Choice:
                 _lastChoice = null;
-                UI_ConversationPopup.ShowStory(scene, n => Cue(scene, n), c => { _lastChoice = c; done = true; });
+                _popup = UI_ConversationPopup.ShowStory(scene, n => Cue(scene, n), c => { _lastChoice = c; done = true; });
                 break;
             case StoryKind.Card:
                 UI_StoryCardPopup card = UI_StoryCardPopup.Show(scene, n => Cue(scene, n), () => done = true, keepCard);
                 if (keepCard)
                     _backdrop = card;
+                else
+                    _popup = card;
                 break;
             case StoryKind.Credits:
-                UI_StoryCreditsPopup.Show(scene, () => done = true);
+                _popup = UI_StoryCreditsPopup.Show(scene, () => done = true);
                 break;
             default:
                 if (scene.Lines.Length > 0)
@@ -966,7 +1046,7 @@ public class StoryDirector : MonoBehaviour
             // 왕좌의 입: 쓰러진 자리에 보스 포탈(검은 손)과 보라 소용돌이. 화면이 흔들리고 레터박스, 카메라는 내려다본다.
             OpenThroneMouth();
             StartCoroutine(Safe(CameraController.CoShakeCamera(0.8f, 0.6f)));
-            Managers.Directing.PlayLetterBox();
+            Letterbox(true);
             MoveOffset(new Vector3(0f, 14f, -3f), 2f);
             yield return new WaitForSeconds(StoryUI.Auto ? 0.3f : 2f);
 
@@ -988,7 +1068,7 @@ public class StoryDirector : MonoBehaviour
             PlayerPrefs.Save();
 
             yield return CoChain(All(StoryTrigger.Ending, (int)ending));
-            Managers.Directing.CloseLetterBox();
+            Letterbox(false);
             yield return CoChain(All(StoryTrigger.Epilogue, (int)ending));
             yield return CoCredits(ending);
         }
@@ -1103,6 +1183,8 @@ public class StoryDirector : MonoBehaviour
                 StartCoroutine(Safe(CoCamUp()));
                 return 2.2f;
             case StoryCueKind.CamClose:
+                // 데미안 머리 위로. 보스 장면은 카메라가 보스를 따라가고 있어서, 오프셋만 당기면 보스에게 붙었다(80층 09).
+                FollowPlayer();
                 MoveOffset(new Vector3(0f, 6.5f, -3.2f), 1.5f);
                 return 1.5f;
             case StoryCueKind.CamPlayer:
@@ -1115,6 +1197,8 @@ public class StoryDirector : MonoBehaviour
                 return 1f;
             case StoryCueKind.CamBoss:
                 FollowBoss();
+                if (_offsetMoved)
+                    MoveOffset(Define.DEFALUT_CAMERA_OFFSET, 0.8f);
                 return 1f;
             case StoryCueKind.Pose:
                 StartCoroutine(Safe(CoPose(cue.Arg)));
@@ -1141,7 +1225,16 @@ public class StoryDirector : MonoBehaviour
                 {
                     GameObject soul = Spawn("DeathSoulPurple", null, Vector3.zero, 4f);
                     if (soul != null)
+                    {
                         soul.transform.position = s_bossPos.Value;
+                        // 넋은 제자리에서 스러진다 (바이블 R17 — 위로 오르면 검은 태양에 빨려 드는 것으로 읽힌다).
+                        // 이 파티클은 중력이 음수라 스스로 떠오른다. 이 한 벌만 끈다 — 몬스터가 쓰러질 때(UI_MonsterCard)도 쓴다.
+                        foreach (ParticleSystem ps in soul.GetComponentsInChildren<ParticleSystem>())
+                        {
+                            ParticleSystem.MainModule main = ps.main;
+                            main.gravityModifier = 0f;
+                        }
+                    }
                 }
                 return 0.5f;
             case StoryCueKind.Hands:

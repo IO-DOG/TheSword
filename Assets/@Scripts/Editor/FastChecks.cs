@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
@@ -39,6 +40,9 @@ using Object = UnityEngine.Object;
 ///      표를 또 적지 않는다. <b>MapBuilder.BuildDoor 를 실제로 돌려</b> 놓인 문틀의
 ///      긴 축을 재고, 벽이 있는 축과 같은지 본다. 파이썬의 door_art 는 어디까지나
 ///      파이썬의 사본이라, C# 쪽이 어긋나도 파이썬은 0건이라고 답한다.
+///   5) 코드에 적은 화면 문구 id 가 ScriptData 에 있는가
+///      도감·치명 확인 창의 260~300 이 표에서 빠진 채 나가 빈 상자로 떴다. 따로도 돈다:
+///      FastChecks.MissingUiText()  (빈 목록이면 통과)
 /// </summary>
 public static class FastChecks
 {
@@ -85,6 +89,8 @@ public static class FastChecks
 
     static void Execute(StringBuilder sb)
     {
+        CheckUiText(sb);
+
         Data.MonsterDataLoader monsters = Json<Data.MonsterDataLoader>("MonsterData");
         Data.EquipDataLoader equips = Json<Data.EquipDataLoader>("EquipData");
         Data.ConsumableItemDataLoader items = Json<Data.ConsumableItemDataLoader>("ConsumableItemData");
@@ -796,6 +802,83 @@ public static class FastChecks
 
         if (tone != keyIndex && Reported.Add($"doorcolor|{obj.Id}"))
             Errors.Add($"{dungeonId}: 셀 {obj.Id} 문의 그림 색({KeyTones[tone]})이 열쇠 색({keyIndex})과 다르다");
+    }
+
+    // ------------------------------------------------------------------ 5) 화면 문구 id
+
+    // ScriptData id 를 코드에 적어 둔 곳. 상수(const int)와 이름이 "TextIds" 로 끝나는 int[] 를 읽는다 —
+    // 목록을 여기 또 적지 않는다(두 벌이면 같은 방식으로 다시 어긋난다).
+    static readonly System.Type[] TextIdOwners =
+    {
+        typeof(ForecastUI), typeof(StoryUI), typeof(UI_MenuPopup), typeof(UI_TitleScene), typeof(UI_ConfirmPopup),
+        typeof(UI_SettingPopup), typeof(UI_BattlePopup), typeof(UI_InvenPopup),
+    };
+
+    static void CheckUiText(StringBuilder sb)
+    {
+        int count;
+        List<string> missing = MissingUiText(out count);
+        Errors.AddRange(missing);
+        sb.AppendLine($"  화면 문구 id: {count}곳 확인, 빠진 것 {missing.Count}건");
+    }
+
+    /// <summary>에디터 eval 용. 빠진 문구마다 한 줄, 빈 목록이면 통과.</summary>
+    public static List<string> MissingUiText() => MissingUiText(out _);
+
+    /// <summary>
+    /// 코드가 부르는 화면 문구가 ScriptData 와 선로드 전 사본(GeneratedUiText)에 다 있는가.
+    /// GetString 은 없는 id 에 빈 문자열을 주고 경고만 찍는다 — 창은 빈 상자로 뜨고 아무것도 멈추지 않아서,
+    /// 260~300 이 표에서 빠진 채 돌려 보고서야 알았다(도감 글자·치명 확인 창·HUD 힌트가 비었다).
+    /// </summary>
+    public static List<string> MissingUiText(out int count)
+    {
+        List<string> missing = new List<string>();
+        count = 0;
+        if (Preload.Count == 0)
+            BuildAddressIndex();
+        Data.ScriptDataLoader loader = Json<Data.ScriptDataLoader>("ScriptData");
+        if (loader == null || loader.scripts == null)
+        {
+            missing.Add("ScriptData 를 못 읽어 화면 문구 id 를 못 봤다");
+            return missing;
+        }
+
+        // MakeDict 는 같은 id 가 둘이면 던진다. 여기서는 문구가 있는지만 본다.
+        Dictionary<int, Data.ScriptData> scripts = new Dictionary<int, Data.ScriptData>();
+        foreach (Data.ScriptData s in loader.scripts)
+            scripts[s.id] = s;
+
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly;
+        foreach (System.Type owner in TextIdOwners)
+        {
+            foreach (FieldInfo f in owner.GetFields(flags))
+            {
+                string where = $"{owner.Name}.{f.Name}";
+                if (f.IsLiteral && f.FieldType == typeof(int))
+                {
+                    count++;
+                    RequireText(scripts, (int)f.GetRawConstantValue(), where, missing);
+                }
+                else if (f.IsInitOnly && f.FieldType == typeof(int[]) && f.Name.EndsWith("TextIds"))
+                {
+                    foreach (int id in (int[])f.GetValue(null))
+                    {
+                        count++;
+                        RequireText(scripts, id, where, missing);
+                    }
+                }
+            }
+        }
+        return missing;
+    }
+
+    static void RequireText(Dictionary<int, Data.ScriptData> scripts, int id, string where, List<string> missing)
+    {
+        Data.ScriptData s;
+        if (scripts.TryGetValue(id, out s) == false || string.IsNullOrEmpty(s.ScriptKr) || string.IsNullOrEmpty(s.ScriptEn))
+            missing.Add($"{where}: ScriptData {id} 가 없거나 한국어·영어가 비었다 — 화면에 빈칸이 뜬다 (Tools/ui_text_parts → generate_content.py --write)");
+        else if (GeneratedUiText.Get(id, 0) == null)
+            missing.Add($"{where}: {id} 가 GeneratedUiText 에 없다 — 어드레서블을 못 올린 타이틀에서 빈칸이 뜬다");
     }
 
     // ------------------------------------------------------------------ 씬 준비/정리

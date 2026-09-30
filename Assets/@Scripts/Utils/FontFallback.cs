@@ -31,8 +31,17 @@ public static class FontFallback
     static readonly List<(Define.ScriptType lang, TMP_FontAsset font)> s_system = new List<(Define.ScriptType, TMP_FontAsset)>();
     static bool s_installed;
 
-    // 켜자마자 한 번 (Managers). 에디터는 도메인 리로드를 끄고 돌아서(Enter Play Mode 옵션)
-    // 두 번째 플레이부터는 만들어 둔 것을 다시 걸기만 한다.
+    // 에디터는 도메인 리로드를 끄고 돈다(Enter Play Mode 옵션). 만든 글꼴은 플레이가 끝날 때 부서지는데 이 값들은
+    // 남아서, 두 번째 플레이부터 죽은 글꼴을 다시 걸어 ◀▶·일본어·중국어가 □ 로 나왔다. 플레이마다 새로 만든다.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics()
+    {
+        s_pixel = null;
+        s_system.Clear();
+        s_installed = false;
+    }
+
+    // 켜자마자 한 번 (Managers).
     public static void Install()
     {
         if (s_installed == false)
@@ -44,7 +53,10 @@ public static class FontFallback
                 if (font != null)
                     s_system.Add((lang, font));
             }
+            // 정적 이벤트도 플레이를 넘어 남는다 — 빼고 건다.
+            GameSettings.Changed -= Attach;
             GameSettings.Changed += Attach;
+            Application.quitting -= Detach;
             Application.quitting += Detach;
 
             // 주소도 키라서 라벨 자리에 넣어도 된다. 등록이 안 돼 있으면 예외 없이 오류 문자열만 온다.
@@ -83,6 +95,7 @@ public static class FontFallback
 
     static void Detach()
     {
-        TMP_Settings.fallbackFontAssets.RemoveAll(f => f != null && (f == s_pixel || s_system.Exists(s => s.font == f)));
+        // 부서진 글꼴(유니티 null)도 같이 걷는다. 지난 플레이의 것이 전역 목록(TMP Settings 에셋)에 남아 플레이마다 늘었다.
+        TMP_Settings.fallbackFontAssets.RemoveAll(f => f == null || f == s_pixel || s_system.Exists(s => s.font == f));
     }
 }

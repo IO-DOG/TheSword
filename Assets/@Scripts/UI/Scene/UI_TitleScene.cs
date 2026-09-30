@@ -64,6 +64,7 @@ public class UI_TitleScene : UI_Scene
         #endregion
 
         GetImage((int)Images.BlackBGImage).gameObject.SetActive(false);
+        PlacePrompt();
 
         //GetObject((int)Objects.Slider).GetComponent<Slider>().value = 0;
         GetObject((int)Objects.Slider).GetComponent<Slider>().gameObject.SetActive(false);
@@ -102,6 +103,26 @@ public class UI_TitleScene : UI_Scene
     private void Awake()
     {
         Init();
+    }
+
+    /// <summary>
+    /// "아무 키나 누르세요" 는 프리팹에서 화면 가운데 조금 아래(-200)라 빛나는 칼날 위에 얹혀 칼이 글자를 갈랐다.
+    /// 칼끝 아래 화면 아래쪽으로 내리고 검은 테두리를 둘러 풀빛 위에서도 읽히게 한다. 깜빡임(애니메이터)은 색만
+    /// 만지고 켜기(PlayOneShot)는 SetActive 만 하니 자리·재질은 그대로 남는다.
+    /// 불러오기·이어하기 실패 문구도 이 칸을 쓴다 — 한 줄로는 화면 밖으로 잘려서, 넓게 두고 넘치면 접고 줄인다.
+    /// </summary>
+    void PlacePrompt()
+    {
+        TMP_Text prompt = GetText((int)Texts.PessAnyKeyText);
+        RectTransform rt = prompt.rectTransform;
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0f);
+        rt.anchoredPosition = new Vector2(0f, 130f);    // 캔버스 높이 1080 에서 칼끝(아래에서 약 210) 밑
+        rt.sizeDelta = new Vector2(1700f, 160f);
+        prompt.fontSharedMaterial = CodeUI.Outlined(prompt.font, 0.4f);   // 글꼴 여백(5)이 얇아 0.4 라야 2px 남짓
+        prompt.textWrappingMode = TextWrappingModes.Normal;
+        prompt.fontSizeMax = prompt.fontSize;
+        prompt.fontSizeMin = 36f;
+        prompt.enableAutoSizing = true;
     }
 
     private void Start()

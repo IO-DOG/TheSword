@@ -258,21 +258,22 @@ public class CreatureClass : MonoBehaviour
             hitCount++;
 
             target.CurHP -= damage;
-            if (target.CurHP <= 0)
-            {
-                ExcuteOnDead(target);
-            }
 
             // 5번째 대에 쓰러져도 포효한다 (thesword_balance.apply_hit 과 같다).
+            // 쓰러짐 처리보다 먼저 한다. 쓰러짐(UI_MonsterCard.Dead)이 경험치를 주고 레벨업이 플레이어의 HP·방어를
+            // 올리는데, 그 뒤에 포효하면 오른 방어로 깎고 늘어난 HP 에 넣어 실제 전투가 예측(BattleForecast)·
+            // 시뮬레이터보다 덜 아팠다 — 같이 쓰러지는 싸움을 이긴 적도 있다.
             if (hitCount == 5)
             {
                 hitCount = 0;
                 int roarDamage = Roar(target, attacker);
                 if (roarDamage > 0)
                     attacker.Trait.ExcuteOnHit(target, attacker, roarDamage);
+            }
 
-                //Vector3 pos = GetImage((int)Images.CreatureImage).gameObject.transform.position;
-                //Managers.Object.ShowDamageFont(pos, damage, 0, attacker., attacker.IsCritical);
+            if (target.CurHP <= 0)
+            {
+                ExcuteOnDead(target);
             }
 
             target.OnHitAction.Invoke();

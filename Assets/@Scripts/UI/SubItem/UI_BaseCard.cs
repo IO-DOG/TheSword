@@ -34,11 +34,6 @@ public class UI_BaseCard : UI_Base
         DefenceStatusText,
     }
 
-    protected enum GameObjects
-    {
-        AttackFX,
-    }
-
     //public CreatureClass.IEffect effect;
     public CreatureData _creature;
     public float _defenceCoolTime = 0f;
@@ -61,9 +56,10 @@ public class UI_BaseCard : UI_Base
     {
         _creature = creature;
         #region Bind
+        // 카드 프리팹에는 AttackFX 자식이 없다 — 묶으면 전투마다 "Failed to bind(AttackFX)" 만 두 줄씩 남았다.
+        // 공격 이펙트는 그림(CreatureImage) 밑에 뜬다(UI_PlayerCard.CreatePlayerAttackParticle).
         BindImage(typeof(Images));
         BindText(typeof(Texts));
-        BindObject(typeof(GameObjects));
         #endregion
         SetUI();
     }

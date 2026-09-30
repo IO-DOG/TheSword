@@ -36,6 +36,14 @@ public class UI_StoryBark : MonoBehaviour
         s_instance._queue.Enqueue(line);
     }
 
+    /// <summary>떠 있는 것과 줄 선 것을 걷는다 (StoryDirector.AbortAll — 메뉴의 "이 층 다시"·"타이틀로" 앞).</summary>
+    public static void Clear()
+    {
+        if (s_instance != null)
+            Destroy(s_instance.gameObject);
+        s_instance = null;
+    }
+
     void Build()
     {
         Canvas canvas = gameObject.AddComponent<Canvas>();

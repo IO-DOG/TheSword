@@ -198,10 +198,30 @@ public class AutoPlayer : MonoBehaviour
 
     void OnDestroy()
     {
+        if (Instance == this)
+            Instance = null;
         GameEvents.IsAutoPlaying = false;
         FightGate.Remove(RecordForecast);
         GameEvents.BattleEnded -= CompareForecast;
         GameEvents.HudRefreshed -= ForgetForecasts;
+
+        // 봇이 올려 둔 이동 12배·전투 8배를 걷는다. 봇을 내리고 사람이 이어서 하면 그대로 남아 인벤토리에
+        // 이동 속도 12 가 찍혔다. 낀 장비가 정하는 값으로 되돌린다(LoadGame 과 같다). 플레이를 끄는 중이면
+        // 매니저를 새로 만들지 않도록 건드리지 않는다.
+        if (Managers.IsAlive && Managers.Game.PlayerData != null)
+        {
+            Managers.Game.GameSpeed = 1;
+            EquipUtility.Apply();
+        }
+    }
+
+    // 에디터는 플레이할 때 도메인을 다시 읽지 않는다(Enter Play Mode Options) — 지난 플레이의 봇이 남지 않게 비운다.
+    // 녹화기(PlaythroughRecorder)는 플레이가 뜬 뒤에 둘 다 다시 채운다.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics()
+    {
+        Instance = null;
+        ResumeFromSave = false;
     }
 
     IEnumerator CoRun()
@@ -619,8 +639,9 @@ public class AutoPlayer : MonoBehaviour
         ApplySpeed(g);
 
         // 전투/연출/페이드 중에는 손대지 않는다. 전투는 알아서 끝난다.
+        // 치명 수업이 전투를 붙들고 말하는 동안(StoryDirector.HoldsBattle)도 전투 중이다.
         if (g.OnBattle || g.OnConversation || g.OnLever || g.OnFade
-            || g.OnDirect || g.OnInteract || g.OnInputLock)
+            || g.OnDirect || g.OnInteract || g.OnInputLock || StoryDirector.HoldsBattle)
         {
             Progress($"busy:{g.PlayerData.CurStageid}");
             WatchLocks(g);

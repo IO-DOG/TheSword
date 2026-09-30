@@ -19,7 +19,8 @@ public class UI_Fade : UI_Base
         // 트윈이 끝나기 전에 이 오브젝트가 사라지면 OnComplete 가 안 돈다.
         // 그러면 OnFade 가 켜진 채 남고, CoUsePortal 은 OnFade 면 그냥
         // 빠져나오기 때문에 계단이 영영 안 먹는다 (9층에서 그렇게 멈췄다).
-        if (Managers.Game != null)
+        // 플레이를 끄는 중이면 매니저가 먼저 부서져 있다 — Managers.Game 을 부르면 @Managers 를 새로 만든다.
+        if (Managers.IsAlive)
             Managers.Game.OnFade = false;
     }
 

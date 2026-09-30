@@ -69,6 +69,9 @@ public static class BattleSkills
             return false;
         if (Managers.Game.OnBattle == false || monsterCard == null || playerCard == null)
             return false;
+        // 치명 수업이 전투 시계를 세워 두고 말하는 동안은 쓰지 않는다. 사람 키는 전투창이 막지만 봇은 여기로 바로 온다.
+        if (StoryDirector.HoldsBattle)
+            return false;
         // 승부가 난 뒤 창이 닫히기까지 0.3초 동안 OnBattle 은 아직 켜져 있다. 그 사이에 흡혈로
         // 죽은 상대에게서 피를 받거나 강타가 죽은 야수를 건드리지 못하게 전투 시계에 묻는다.
         // 사람(1/2/3 키)도 봇(직접 호출)도 여기를 지나므로 여기서 한 번 막는다.

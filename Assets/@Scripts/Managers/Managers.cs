@@ -13,6 +13,23 @@ public class Managers : MonoBehaviour
     // 앱을 끄는 중에 OnDestroy 에서 매니저를 부르면 Init 이 @Managers 를 새로 만든다 — 있는지만 볼 때 쓴다.
     public static bool IsAlive => s_instance != null;
 
+    // 에디터는 플레이할 때 도메인·씬을 다시 읽지 않는다(Enter Play Mode Options). 정적 값이 지난 플레이에서
+    // 그대로 넘어와, 파괴된 오브젝트에 묶인 구독자가 남는다 — 플레이를 시작할 때마다 비운다. 빌드에는 영향이 없다.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics()
+    {
+        s_instance = null;
+        Cursor = null;                  // 지난 플레이의 파괴된 CursorManager 를 가리키고 있다 — 타이틀이 다시 채운다
+        s_quitting = false;
+        Application.quitting -= MarkQuitting;
+        Application.quitting += MarkQuitting;
+    }
+
+    // 끄는 중(에디터는 플레이를 멈출 때도)에 누가 OnDestroy 에서 매니저를 부르면 Init 이 @Managers 를
+    // 새로 만들어 DontDestroyOnLoad 로 남긴다 — 다음 플레이가 그 빈 껍데기를 집어 씬 UI 를 못 읽고 검은 화면이 됐다.
+    static bool s_quitting;
+    static void MarkQuitting() => s_quitting = true;
+
     #region Contents
     GameManager _game = new GameManager();
     DirectingManager _directing = new DirectingManager();
@@ -46,6 +63,8 @@ public class Managers : MonoBehaviour
 
     public static void Init()
     {
+        if (s_quitting)
+            return;
         if (s_instance == null)
         {
             GameObject go = GameObject.Find("@Managers");

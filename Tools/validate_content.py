@@ -9,15 +9,21 @@ Unity 에디터가 프로젝트를 점유 중이어도 돌릴 수 있다.
 import collections
 import json
 import os
+import re
 import sys
+import tempfile
 
 import bestiary
 import generate_content as G
+import ui_text
+from layout_gen import check_behind_boss, STAIRS_UP
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
 JSOND = os.path.join(ROOT, "Assets", "@Resources", "Data", "JsonData")
 ASSETS = os.path.join(ROOT, "Assets")
+DECO_DIR = os.path.join(ASSETS, "@Resources", "Maps", "Deco")
+TILE = 0.32                     # MapDecoSetup.TileSize — 장식 좌표 -> 칸
 
 EXPECTED_FLOORS = 100
 NUM_OF_KEYS = 3
@@ -137,6 +143,79 @@ def check_scripts(stages, monsters, classes, equips, events, scripts):
                         + ", ".join(f"story_{lang}.json" for lang in missing))
 
 
+def check_ui_text(scripts):
+    """Tools/ui_text_parts 의 문구가 ScriptData 와 GeneratedUiText.cs 에 구워졌는가.
+
+    문구만 고치고 generate_content --write 를 안 돌리면 화면이 빈칸이나 옛 문구로 뜬다 —
+    191~202(전투 스킬·인벤토리 능력치)가 빠지고 261 이 옛 범례(LV+)로 남은 채 통과했다.
+    생성기와 <b>같은 함수로</b> 다시 구워 대조한다. 형식을 여기 또 적으면 두 벌이 된다.
+    """
+    rows = [dict(r) for r in scripts.values()]
+    ui_text.append_rows(rows)
+    stale = sorted(r["id"] for r in rows if scripts.get(r["id"]) != r)
+    if stale:
+        errors.append(f"ScriptData 가 Tools/ui_text_parts 보다 옛것이다 {len(stale)}건 "
+                      f"(예: {', '.join(map(str, stale[:8]))}) — generate_content.py --write")
+    with tempfile.TemporaryDirectory() as tmp:
+        os.makedirs(os.path.join(tmp, "Assets", "@Scripts", "Data"))
+        ui_text.emit_bootstrap(tmp)
+        with open(os.path.join(tmp, "Assets", "@Scripts", "Data", "GeneratedUiText.cs"), encoding="utf-8") as f:
+            want = f.read()
+    with open(os.path.join(ASSETS, "@Scripts", "Data", "GeneratedUiText.cs"), encoding="utf-8") as f:
+        if f.read() != want:
+            errors.append("GeneratedUiText.cs 가 Tools/ui_text_parts 보다 옛것이다 "
+                          "(어드레서블 전 타이틀 문구) — generate_content.py --write")
+
+
+def address_guid(address):
+    """어드레서블 주소 -> 에셋 guid. 주소는 파일 이름과 다를 수 있다 (MapDecoSetup.FindByAddress)."""
+    path = os.path.join(ASSETS, "AddressableAssetsData", "AssetGroups", "Prefabs.asset")
+    with open(path, encoding="utf-8") as f:
+        m = re.search(r"m_GUID: (\w+)\s+m_Address: " + re.escape(address) + r"\s", f.read())
+    return m.group(1) if m else None
+
+
+def check_deco(did, grid, godray):
+    """장식 프리팹이 <b>지금</b> 격자로 구워졌는가. MapDecoSetup.Build 는 에디터에서만 돈다.
+
+    생성기가 격자를 다시 뽑아도 장식은 옛 격자대로 남는다 — 40층 빛기둥(위층 계단 표시)이
+    옛 계단 자리에 서 있었다. BuildOne 이 고르는 자리와 대조한다: 빛기둥은 위층 계단(14)
+    위, 나머지(불·소품·광원)는 길에 면한 벽이나 벽에 붙은 바닥. 그림만 틀리고 길은 안
+    막으므로(콜라이더 없음) 경고다.
+    """
+    path = os.path.join(DECO_DIR, f"Deco_{did}.prefab")
+    if not os.path.exists(path):
+        warnings.append(f"{did}: 장식 프리팹 없음 — 에디터를 닫고 MapDecoSetup.Build")
+        return
+    cells = {(x, y): v for y, row in enumerate(grid) for x, v in enumerate(row)}
+
+    def kind(c):                    # MapDecoSetup.IsWall / IsOpen
+        v = cells.get(c, "")
+        return "wall" if v.startswith("W") else "void" if v in ("", "0") else "open"
+
+    def touches(c, k):
+        x, y = c
+        return any(kind(n) == k for n in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)))
+
+    rays, astray = set(), 0
+    with open(path, encoding="utf-8") as f:
+        blocks = f.read().split("--- !u!")
+    for b in blocks:
+        if not b.startswith("1001 "):           # PrefabInstance — 장식 하나
+            continue
+        src = re.search(r"m_SourcePrefab: \{fileID: \d+, guid: (\w+)", b).group(1)
+        pos = dict(re.findall(r"m_LocalPosition\.([xz])\s+value: (\S+)", b))
+        c = (round(float(pos.get("x", 0)) / TILE), round(-float(pos.get("z", 0)) / TILE))
+        if src == godray:
+            rays.add(c)
+        elif not (kind(c) == "wall" and touches(c, "open") or kind(c) == "open" and touches(c, "wall")):
+            astray += 1
+    stairs = {c for c, v in cells.items() if v == STAIRS_UP}
+    if rays != stairs or astray:
+        warnings.append(f"{did}: 장식이 옛 격자로 구워졌다 (빛기둥 {sorted(rays)}, 위층 계단 {sorted(stairs)}, "
+                        f"자리 밖 장식 {astray}개) — 에디터를 닫고 MapDecoSetup.Build")
+
+
 def check_traits(classes, monsters):
     """특성 id = MonsterClassData 행 번호 = Define.Trait. 아이콘·이름이 그 줄을 따라간다."""
     ids = sorted(c["id"] for c in classes)
@@ -233,6 +312,9 @@ def main():
     equips = load("EquipData", "equips")
     scripts = {s["id"]: s for s in load("ScriptData", "scripts")}
     prefabs = prefab_names()
+    godray = address_guid("Deco_GodRay")
+    if godray is None:
+        warnings.append("어드레서블 주소 'Deco_GodRay' 가 없다 — 장식을 다시 구워도 계단 빛기둥이 빠진다")
     tower = dict(doors=[0] * NUM_OF_KEYS, keys=[0] * NUM_OF_KEYS,
                  vaults=[0] * NUM_OF_KEYS, spares=[0] * NUM_OF_KEYS)
 
@@ -274,6 +356,17 @@ def main():
         # 손수 만든 층은 프리팹이 실물이다. CSV 구조로 판정하지 않는다.
         if did in HAND_AUTHORED:
             continue
+
+        with open(os.path.join(G.STREAM, f"Dungeon_{did}.csv"), encoding="utf-8-sig") as f:
+            grid = [[c.strip() for c in line.split(",")] for line in f.read().splitlines()]
+        check_deco(did, grid, godray)
+
+        # 완주 계산은 층의 몹과 큰 물약을 보스 <b>앞에서</b> 쓴다. 보스 뒤에 있으면 체크포인트
+        # (층 입구)에서 빈사로 보스 앞에 선 사람은 영영 못 넘는다.
+        if s["Type"] == DUNGEON_BOSS:
+            for cell, what in check_behind_boss(grid, (G.POTION_BY_HEAL[G.BOSS_FLOOR_POTIONS[0]],)):
+                errors.append(f"{did}: {what} " + (f"{cell} 가 보스 뒤다" if cell else "가 없다")
+                              + " — 완주 계산은 보스 앞에서 쓴다")
 
         n = dict(floor=0, spawn=0, up=0, down=0, mob=0, potion=0)
         keys, doors = [0] * NUM_OF_KEYS, [0] * NUM_OF_KEYS
@@ -348,6 +441,7 @@ def main():
     # ---- 레벨 테이블 · 문자열 · 특성 · 장비
     final_level = check_level_headroom(players, monsters)
     check_scripts(stages, monsters, classes, equips, load("EventData", "events"), scripts)
+    check_ui_text(scripts)
     check_traits(classes, monsters)
     check_grants(stages, maps, monsters, equips)
 

@@ -46,7 +46,9 @@ public static class ForecastUI
     public static readonly Color Danger = new Color32(255, 150, 60, 255);   // 그 위, 살아남는다
     public static readonly Color Fatal = new Color32(255, 70, 70, 255);     // 진다
     public static readonly Color Unknown = new Color32(170, 170, 170, 255);
-    public const string LevelUpMark = "<size=75%><color=#FFD84A>LV+</color></size>";   // 이 싸움으로 레벨이 오른다
+    // 이 싸움으로 레벨이 오른다. 글자 하나다 — "LV+" 는 맵에서 옆 칸 숫자에 붙어 "-42 Lv42" 로 읽혔다.
+    // 두 픽셀 글꼴에 화살표(↑▲)가 없어 ★ 을 쓴다. 도감 머리말(261)이 같은 표로 풀어 준다.
+    public const string LevelUpMark = "<size=80%><color=#FFD84A>★</color></size>";
 
     /// <summary>다음 치명타가 몇 번째 공격인가 (1 = 바로 다음). 치명 주기가 없으면 0.
     /// 치명 횟수는 전투 사이에 이어진다(UI_BattlePopup) — BattleStepper 가 ">=" 로 세는 것과 같다.</summary>
@@ -57,6 +59,10 @@ public static class ForecastUI
     }
 
     static readonly List<Collider> s_colliders = new List<Collider>();
+
+    // 에디터는 도메인 리로드 없이 플레이를 되풀이한다 — 지난 플레이의 부서진 콜라이더를 쥐고 있지 않게.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() => s_colliders.Clear();
 
     /// <summary>
     /// 맵에 서 있는(싸울 수 있는) 몬스터인가. 쓰러진 보스는 연출이 끝날 때까지 켜져 있지만 콜라이더를 잃고

@@ -299,7 +299,10 @@ public class GameManager
     public void GenerateMap(int mapId)
     {
         if (ParentMap != null)
+        {
+            CollectDrops();   // 워프·챕터 경계: 떨군 보상이 맵과 함께 부서지기 전에
             Managers.Resource.Destroy(ParentMap);
+        }
         Maps.Clear();
 
         int count = 0;
@@ -406,6 +409,26 @@ public class GameManager
 
     /// <summary>킹 슬라임만 쓰는 활성 번호. 맵 데이터의 카운터(수백 번대)와 마검 열쇠(9000)를 피한다.</summary>
     const int KingSlimeActiveIndex = 9001;
+
+    /// <summary>분열 슬라임 셋(몬스터 9002~9004)과 노랑이 품은 물약(아이템 9001)의 활성 번호.
+    /// 킹 슬라임이 죽을 때 연출이 새로 세우는 것이라(DirectingManager.SpawnSplitSlime/SpawnSplitPotion) 맵 데이터 번호가 없다.
+    /// 프리팹의 0 번을 그대로 쓰면 잡거나 마실 때 1층 첫 몬스터·첫 아이템이 없어진 것으로 저장된다.</summary>
+    public const int SplitSlimeActiveIndex = 9002;
+    public const int SplitPotionActiveIndex = 9001;
+
+    /// <summary>
+    /// 잡은 몬스터가 떨군 장비(DropItems, 활성 번호 -1)를 지금 줍는다. 떨군 것은 체크포인트에 없는데 잡은 것은 남아서,
+    /// 줍지 않고 층을 떠난 뒤 워프·죽음·불러오기를 거치면 보스는 죽은 채 보상만 영영 사라졌다(킹 슬라임의 모래시계
+    /// 목걸이, 20층의 워프석 반지). 층을 떠날 때(체크포인트를 쓸 때)와 맵을 부수기 전에 부른다 — 줍는 길은 발로 밟을 때와 같다.
+    /// 씬을 다시 올린 뒤에는 옛 맵과 함께 이미 부서져(DropItems 가 유니티 null) 아무것도 안 한다: 불러온 판에 옛 판의 것을 섞지 않는다.
+    /// </summary>
+    void CollectDrops()
+    {
+        if (DropItems == null || GameScene == null)
+            return;
+        foreach (Equip drop in DropItems.GetComponentsInChildren<Equip>())   // 주운 것은 꺼져 있어 안 잡힌다
+            drop.PickUp();
+    }
 
     /// <summary>
     /// 손수 만든 4층의 킹 슬라임이 죽은 것을 기억하게 한다.
@@ -791,6 +814,9 @@ public class GameManager
 
     public void SaveGame()
     {
+        // 잡고 두고 온 보상은 여기서 줍는다 — 안 그러면 체크포인트에 "잡았다" 만 남고 보상은 빠진다.
+        CollectDrops();
+
         // 칸 자리(_cellPos)를 적는다. transform 은 레버를 당기는 동안 레버 쪽으로 반 칸 떠 있고
         // 걷는 도중에는 칸 사이에 있다 — 그 자리를 적으면 이어하기 때 칸에서 어긋나 선다.
         Vector3 pos = Managers.Game.Player != null ? Managers.Game.Player._cellPos : Vector3.zero;

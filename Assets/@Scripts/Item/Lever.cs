@@ -42,6 +42,10 @@ public class Lever : MonoBehaviour
 
     public void Open()
     {
+        // 당겼다는 표시를 먼저 남긴다. 체크포인트는 Pillar.Open 안에서 쓰이는데, 예전에는 그 뒤에 표시해서
+        // 기둥은 열리고 레버는 안 당긴 채로 저장됐다 — 죽거나 불러오면 레버가 도로 서서 기둥 연출이 다시 돌았다.
+        Managers.Data.LeverActiveDic[_leverIndex_forActive] = false;
+
         GameObject stage = gameObject.transform.parent.parent.parent.gameObject;
         Debug.Log(stage.name);
         foreach (Transform child in stage.transform)
@@ -50,9 +54,6 @@ public class Lever : MonoBehaviour
             {
                 child.GetComponentInChildren<Pillar>().Open(1.0f);
                 StartCoroutine(Managers.Sound.CoPlay(Define.Sound.Effect, "Gimic_leverDown_SFX", 1, 0.2f));
-
-                Managers.Data.LeverActiveDic[_leverIndex_forActive] = false ;
-                //Managers.Game.SaveGame();
             }
         }
     }

@@ -16,7 +16,7 @@ public static class GeneratedUiText
             case 145: return new[] { "Could not restore your save. The original is preserved. Press any key to return.", "저장을 복구하지 못했습니다. 원본은 보존됩니다. 아무 키나 눌러 돌아가세요.", "Could not restore your save. The original is preserved. Press any key to return.", "セーブを復元できませんでした。元のデータは保持されます。何かキーを押して戻ります。", "无法恢复存档。原始存档已保留。请按任意键返回。" }[language >= 0 && language <= 4 ? language : 0];
             case 146: return new[] { "Taking one reward removes the other.", "둘 중 하나를 얻으면 다른 보상은 사라집니다.", "Taking one reward removes the other.", "片方を取ると、もう片方の報酬は消えます。", "领取一个奖励后，另一个奖励将消失。" }[language >= 0 && language <= 4 ? language : 0];
             case 260: return new[] { "Monster Manual", "몬스터 도감", "Monster Manual", "モンスター図鑑", "怪物图鉴" }[language >= 0 && language <= 4 ? language : 0];
-            case 261: return new[] { "Number = HP lost if you fight it next (no skills)   X = you lose   LV+ = level up", "숫자 = 다음에 싸우면 잃는 체력 (스킬 제외)   X = 진다   LV+ = 레벨 업", "Number = HP lost if you fight it next (no skills)   X = you lose   LV+ = level up", "数字 = 次に戦うと失う体力 (スキル抜き)   X = 負ける   LV+ = レベルアップ", "数字 = 下一战损失的生命 (不计技能)   X = 会输   LV+ = 升级" }[language >= 0 && language <= 4 ? language : 0];
+            case 261: return new[] { "Number = HP lost if you fight it next (no skills)   X = you lose   ★ = level up", "숫자 = 다음에 싸우면 잃는 체력 (스킬 제외)   X = 진다   ★ = 레벨 업", "Number = HP lost if you fight it next (no skills)   X = you lose   ★ = level up", "数字 = 次に戦うと失う体力 (スキル抜き)   X = 負ける   ★ = レベルアップ", "数字 = 下一战损失的生命 (不计技能)   X = 会输   ★ = 升级" }[language >= 0 && language <= 4 ? language : 0];
             case 262: return new[] { "x{0}", "{0}마리", "x{0}", "{0}体", "{0}只" }[language >= 0 && language <= 4 ? language : 0];
             case 263: return new[] { "If fought next", "다음에 싸우면", "If fought next", "次に戦うと", "下一战" }[language >= 0 && language <= 4 ? language : 0];
             case 264: return new[] { "{0} hits taken", "{0}대 맞음", "{0} hits taken", "被弾 {0}回", "挨打 {0}次" }[language >= 0 && language <= 4 ? language : 0];
@@ -192,6 +192,18 @@ public static class GeneratedUiText
             case 188: return new[] { "No checkpoints yet.", "아직 돌아갈 체크포인트가 없습니다.", "No checkpoints yet.", "まだチェックポイントがありません。", "还没有可以返回的检查点。" }[language >= 0 && language <= 4 ? language : 0];
             case 189: return new[] { "Could not load the checkpoint. Your current progress is unchanged.", "체크포인트를 불러오지 못했습니다. 지금 진행은 그대로입니다.", "Could not load the checkpoint. Your current progress is unchanged.", "チェックポイントを読み込めませんでした。現在の進行はそのままです。", "无法读取检查点。当前进度保持不变。" }[language >= 0 && language <= 4 ? language : 0];
             case 190: return new[] { "Starting a new game erases your current save. Start anyway?", "새 게임을 시작하면 지금 저장이 지워집니다. 시작할까요?", "Starting a new game erases your current save. Start anyway?", "ニューゲームを始めると現在のセーブが消えます。始めますか？", "开始新游戏将删除当前存档。确定开始吗？" }[language >= 0 && language <= 4 ? language : 0];
+            case 191: return new[] { "Smash", "강타", "Smash", "強打", "强击" }[language >= 0 && language <= 4 ? language : 0];
+            case 192: return new[] { "Bulwark", "철벽", "Bulwark", "鉄壁", "铁壁" }[language >= 0 && language <= 4 ? language : 0];
+            case 193: return new[] { "Drain", "흡혈", "Drain", "吸血", "吸血" }[language >= 0 && language <= 4 ? language : 0];
+            case 194: return new[] { "ATK", "공격", "ATK", "攻撃", "攻击" }[language >= 0 && language <= 4 ? language : 0];
+            case 195: return new[] { "DEF", "방어", "DEF", "防御", "防御" }[language >= 0 && language <= 4 ? language : 0];
+            case 196: return new[] { "HP", "체력", "HP", "体力", "生命" }[language >= 0 && language <= 4 ? language : 0];
+            case 197: return new[] { "CRI", "치명", "CRI", "会心", "暴击" }[language >= 0 && language <= 4 ? language : 0];
+            case 198: return new[] { "CRI ATK", "치명 공격", "CRI ATK", "会心 威力", "暴击 伤害" }[language >= 0 && language <= 4 ? language : 0];
+            case 199: return new[] { "LV", "레벨", "LV", "Lv", "等级" }[language >= 0 && language <= 4 ? language : 0];
+            case 200: return new[] { "ATK SPEED", "공격 속도", "ATK SPEED", "攻撃 速度", "攻击 速度" }[language >= 0 && language <= 4 ? language : 0];
+            case 201: return new[] { "DEF SPEED", "방어 속도", "DEF SPEED", "防御 速度", "防御 速度" }[language >= 0 && language <= 4 ? language : 0];
+            case 202: return new[] { "MOVE SPEED", "이동 속도", "MOVE SPEED", "移動 速度", "移动 速度" }[language >= 0 && language <= 4 ? language : 0];
             default: return null;
         }
     }

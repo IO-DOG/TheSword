@@ -35,10 +35,11 @@ public class UI_GameScene : UI_Scene
         MainUIMapNameText,
     }
 
+    // MainUIAuxiliaryHPGaugeImage 는 뺐다 — 쓰는 곳이 없는데(HP 는 PlayerHPBarGauge 가 그린다) 묶이지도 않아
+    // 씬마다 "Failed to bind" 만 남겼다.
     enum Images
     {
         MainUIEXPGaugeImage,
-        MainUIAuxiliaryHPGaugeImage,
         MainUIOptionAImage,
         MainUIOptionBImage,
         MainUIInventoryAImage,
@@ -152,10 +153,7 @@ public class UI_GameScene : UI_Scene
         if (PlayerPrefs.GetInt("ISOPENREDKEY") == 0)
             GetObject((int)GameObjects.RedKey).SetActive(false);
 
-        // UI 활성화 여부 체크
-        if (PlayerPrefs.GetInt("ISOPENINVENUI") == 0) // 인벤 활성화 x
-            OffUIInventory();
-        // 워프·마검 단추는 Refresh 가 정한다(반지를 꼈는가, 계약했는가). 예전의 ISOPENWARPUI·ISOPENPORTAL·
+        // 인벤토리·워프·마검 단추는 Refresh 가 정한다(계약했는가, 반지를 꼈는가). 예전의 ISOPENWARPUI·ISOPENPORTAL·
         // ISOPENSWORD·ISOPENCLASSUI 는 1 로 켜 주는 곳이 없어서, 씬을 올릴 때마다 단추를 도로 숨겼다.
 
         GetImage((int)Images.MainUIOptionAImage).gameObject.BindEvent(() =>
@@ -290,6 +288,7 @@ public class UI_GameScene : UI_Scene
     {
         RefreshWarpButton();
         RefreshSwordButton();
+        RefreshInventoryButton();
         GetText((int)Texts.MainUIMapNameText).text = Managers.GetString(Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid].DungeonNameScriptID);
         GetText((int)Texts.PlayerLevelText).text = Managers.Game.PlayerData.Level.ToString();
         int level = Managers.Game.PlayerData.Level;
@@ -301,7 +300,6 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUIEXPGaugeImage).fillAmount = Managers.Data.PlayerDic.TryGetValue(level + 1, out next) && next.NeedExp > 0f
             ? Managers.Game.PlayerData.CurExp / next.NeedExp : 1f;
         float hpRatio = Managers.Game.PlayerData.CurHP / Managers.Game.PlayerData.MaxHP;
-        //GetImage((int)Images.MainUIAuxiliaryHPGaugeImage).fillAmount = hpRatio;
         GameObject hpGauge = GameObject.Find("PlayerHPBarGauge");   // 게임오버 연출 중에는 꺼져 있다
         if (hpGauge != null)
             hpGauge.GetComponent<Image>().fillAmount = hpRatio;
@@ -546,7 +544,8 @@ public class UI_GameScene : UI_Scene
     // 에디터에서는 인스펙터를 누를 때마다 멈추면 일을 못 하고, 자동 플레이는 멈추면 안 된다.
     void OnApplicationFocus(bool focus)
     {
-        if (focus || Application.isEditor || GameEvents.IsAutoPlaying)
+        // 앱을 끄는 중에도 포커스를 잃는다 — 매니저가 먼저 부서졌으면 건드리지 않는다.
+        if (focus || Application.isEditor || GameEvents.IsAutoPlaying || Managers.IsAlive == false)
             return;
         TryOpenMenu();
     }
@@ -701,6 +700,17 @@ public class UI_GameScene : UI_Scene
         GetImage((int)Images.MainUIWarpAImage).gameObject.SetActive(on);
         if (on == false)
             GetImage((int)Images.MainUIWarpBImage).gameObject.SetActive(false);
+    }
+
+    /// <summary>인벤토리 단추는 계약 뒤에만 보인다. 계약 여부는 체크포인트마다 PlayerData 에 실린다 — 예전의
+    /// ISOPENINVENUI 는 계약 연출이 체크포인트를 쓴 "뒤" 에야 1 이 돼서, 계약 직후 죽거나 불러오면 0 이 되살아나
+    /// 단추가 판 끝까지 사라졌다(단축키도 없어 능력치·장비를 다시 볼 길이 없었다).</summary>
+    public void RefreshInventoryButton()
+    {
+        bool on = Managers.Game.PlayerData.IsContractedSword;
+        GetImage((int)Images.MainUIInventoryAImage).gameObject.SetActive(on);
+        if (on == false)
+            GetImage((int)Images.MainUIInventoryBImage).gameObject.SetActive(false);
     }
 
     /// <summary>마검 단추(몬스터 도감)는 계약 뒤에만 보인다 — 도감은 마검의 눈이다.</summary>

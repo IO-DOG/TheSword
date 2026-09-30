@@ -18,6 +18,14 @@ public static class FatalFightGuard
     static MonsterController s_declined;
     static float s_declinedUntil;
 
+    // 에디터는 도메인 리로드 없이 플레이를 되풀이한다 — 지난 플레이의 (부서진) 몬스터와 기한을 넘기지 않는다.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics()
+    {
+        s_declined = null;
+        s_declinedUntil = 0f;
+    }
+
     public static bool Ask(MonsterController monster, Action proceed)
     {
         GameManager g = Managers.Game;

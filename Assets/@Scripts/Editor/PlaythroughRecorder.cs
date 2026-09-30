@@ -318,7 +318,9 @@ public static class PlaythroughRecorder
             // 아니라 "잠겨 있던 시간이 쌓였는가" 로 본다. 전투는 스스로 끝나므로 뺀다.
             bool locked = g.OnConversation || g.OnDirect || g.OnInteract
                           || g.OnInputLock || g.OnFade || g.OnLever;
-            if (g.OnBattle)
+            // 이야기 장면도 스스로 끝난다 — 결말은 자동 진행으로도 25~30초다. 도중에 풀면 장면이 반쯤 끊기고
+            // 잡고 있던 레터박스·HUD 가 어긋난다 (AutoPlayer.WatchLocks 도 같은 까닭으로 건너뛴다).
+            if (g.OnBattle || StoryDirector.IsPlaying)
             {
                 _lockedTime = 0.0;
                 return;

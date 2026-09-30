@@ -46,7 +46,10 @@ public class UIManager
     public void SetCanvas(GameObject go, bool sort = true, int sortOrder = 0, bool isToast = false)
     {
         Canvas canvas = Util.GetOrAddComponent<Canvas>(go);
-        if (canvas == null)
+        // 코드로 만든 팝업(이야기 카드·크레딧·몬스터 도감)은 캔버스를 새로 붙이는데, AddComponent 의
+        // 기본값이 WorldSpace 라 화면에 안 보이면서 시간·입력만 멈췄다. 프리팹 팝업은 저장된 모드
+        // (오버레이, 타이틀만 카메라)를 그대로 쓰므로 WorldSpace 일 때만 바꾼다 — 월드 공간 팝업 프리팹은 없다.
+        if (canvas.renderMode == RenderMode.WorldSpace)
         {
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.overrideSorting = true;

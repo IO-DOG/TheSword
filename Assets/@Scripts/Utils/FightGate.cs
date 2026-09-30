@@ -72,4 +72,13 @@ public static class FightGate
 
     // 끼어든 쪽이 전투를 아예 취소할 때 (확인 창에서 "아니오").
     public static void Cancel() => Pending = false;
+
+    // 에디터는 플레이할 때 도메인·씬을 다시 읽지 않는다(Enter Play Mode Options). 정적 값이 지난 플레이에서
+    // 그대로 넘어와, 파괴된 오브젝트에 묶인 구독자가 남는다 — 플레이를 시작할 때마다 비운다. 빌드에는 영향이 없다.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics()
+    {
+        s_entries.Clear();
+        Pending = false;
+    }
 }

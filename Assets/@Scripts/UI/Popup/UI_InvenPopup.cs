@@ -127,7 +127,23 @@ public class UI_InvenPopup : UI_Popup
         ATKSPEEDInfoText,
         DEFSPEEDInfoText,
         MOVESPEEDInfoText,
+        // 능력치 칸 이름과 플레이어 이름. 프리팹에 영어로 박혀 있어 Init 이 언어대로 다시 쓴다.
+        // 아래 아홉 줄은 StatLabelTextIds 와 같은 순서다.
+        ATKText,
+        DEFText,
+        HPText,
+        CRIText,
+        CRIATKText,
+        LVText,
+        ATKSPEEDText,
+        DEFSPEEDText,
+        MOVESPEEDText,
+        UserName,
     }
+
+    // 능력치 칸 이름 (Tools/ui_text_parts/ui.py). 칸이 좁아 짧은 이름을 따로 둔다 — 100~108 은 긴 이름이라
+    // 마우스를 올렸을 때 뜨는 설명(…InfoText)이 쓴다. 띄어쓰기는 두 줄 칸(ATK SPEED 등)의 줄바꿈이다.
+    public static readonly int[] StatLabelTextIds = { 194, 195, 196, 197, 198, 199, 200, 201, 202 };
 
     enum GameObjects
     {
@@ -181,6 +197,19 @@ public class UI_InvenPopup : UI_Popup
         GetText((int)Texts.ATKSPEEDInfoText).text = Managers.GetString(Define.STAT_INFO_SCRIPT + i++);
         GetText((int)Texts.DEFSPEEDInfoText).text = Managers.GetString(Define.STAT_INFO_SCRIPT + i++);
         GetText((int)Texts.MOVESPEEDInfoText).text = Managers.GetString(Define.STAT_INFO_SCRIPT + i++);
+
+        // 한국어로 해도 "Demian", "ATK" 가 떴다. 두 줄 칸은 프리팹이 줄 간격을 좁혀 두어 줄바꿈만 넣으면 제자리다.
+        // 이름표 하나를 못 찾았다고 창(장비 칸·목록)이 통째로 안 서면 안 된다 — 없으면 건너뛴다.
+        // 문구가 표에 없으면(빈 문자열) 프리팹 글자를 둔다. 빈칸보다 영어가 낫다.
+        void Label(Texts slot, string text)
+        {
+            var label = GetText((int)slot);
+            if (label != null && text.Length > 0)
+                label.text = text;
+        }
+        Label(Texts.UserName, Managers.GetString(Define.USER_NAME_INDEX));
+        for (int k = 0; k < StatLabelTextIds.Length; k++)
+            Label(Texts.ATKText + k, Managers.GetString(StatLabelTextIds[k]).Replace(' ', '\n'));
 
         OnClickInventory_MyInfo_On();
         SortInven();
