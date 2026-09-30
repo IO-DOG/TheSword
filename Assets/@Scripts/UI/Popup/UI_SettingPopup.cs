@@ -293,6 +293,13 @@ public class UI_SettingPopup : UI_Popup
         board.rectTransform.sizeDelta = new Vector2(board.rectTransform.sizeDelta.x, top - bottom);
         foreach (Transform block in new[] { screen, sound, game })
             Shift(block, -(top + bottom) / 2f);
+
+        // 줄 글자(13·15)가 판 배율 2 에서도 옆 메뉴 단추 글자(72)의 3분의 1 남짓이라 960x540 창에서는 깨알 같았다.
+        // 판째로 1.3배 키운다(늘린 판이 화면 높이의 84%). 다만 옆으로 비킨 메뉴 단추(폭 480, 화면 폭 36.5%)와 판 가운데
+        // (64.5%) 사이에 드는 만큼만 — 4:3 에서는 덜 키워야 판이 단추 끝을 덮지 않는다.
+        float canvasWidth = Screen.width / GetComponent<Canvas>().scaleFactor;
+        float room = ((0.645f - 0.365f) * canvasWidth - 240f - 16f) / (board.rectTransform.sizeDelta.x * board.transform.localScale.x / 2f);
+        board.transform.localScale *= Mathf.Clamp(room, 1f, 1.3f);
     }
 
     // 값은 이름 옆에 붙인다 — 소리 줄의 오른쪽 칸(너비 15)에는 "1920 x 1080" 이 안 들어간다.

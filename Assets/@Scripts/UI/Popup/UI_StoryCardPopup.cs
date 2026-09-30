@@ -19,6 +19,7 @@ public class UI_StoryCardPopup : UI_Popup
 {
     const float FadeTime = 0.6f;
     const float PanSeconds = 9f;
+    const float PanStopFromTop = 0.37f;     // 화면 가운데에 올 Intro05 의 높이 (위끝에서 잰 비율). 해는 29~41% — 글 바로 위에 앉는다
     const float TitleHold = 2.4f;
 
     StoryScene _scene;
@@ -240,8 +241,11 @@ public class UI_StoryCardPopup : UI_Popup
         _front.color = new Color(1f, 1f, 1f, 0f);
         if (IsTall(sprite))
         {
-            float travel = _back.rectTransform.sizeDelta.y - ((RectTransform)transform).rect.height;
-            _pan = _back.rectTransform.DOAnchorPosY(-Mathf.Max(0f, travel), StoryUI.Auto ? 1.2f : PanSeconds)
+            // 검은 해가 화면에 다 들어오면 멈춘다 (R6: 벼랑 위 후드 → 기둥 → 꿰뚫린 검은 해와 초승달). 예전에는 그림 위끝까지
+            // 올려서 해를 지나쳐 빈 밤하늘에서 멈췄고, 해를 보며 할 "외눈과, 휜 칼날" 이 거의 까만 화면 위에 떴다.
+            float height = _back.rectTransform.sizeDelta.y, screen = ((RectTransform)transform).rect.height;
+            float travel = Mathf.Clamp(height * (1f - PanStopFromTop) - screen * 0.5f, 0f, height - screen);
+            _pan = _back.rectTransform.DOAnchorPosY(-travel, StoryUI.Auto ? 1.2f : PanSeconds)
                 .SetEase(Ease.InOutSine).SetLink(gameObject);
         }
     }

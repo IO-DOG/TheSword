@@ -241,7 +241,10 @@ public class ForecastOverlay : MonoBehaviour
             if (on)
             {
                 label.Want = cam.WorldToScreenPoint(mc.transform.position + label.Head);
-                on = label.Want.z > 0f;
+                // 몸의 가운데가 화면 밖이면 숨긴다. 화면 아래 가장자리에 머리만 걸친 몬스터는 몸이 안 보이는데 숫자만
+                // 떠서, HUD 의 "치명까지" 글자 사이로 비쳐 보였다.
+                Vector3 body = cam.WorldToScreenPoint(mc.transform.position + label.Head * 0.5f);
+                on = label.Want.z > 0f && body.x >= 0f && body.x <= Screen.width && body.y >= 0f && body.y <= Screen.height;
             }
             SetShown(label, on);
             if (on == false)

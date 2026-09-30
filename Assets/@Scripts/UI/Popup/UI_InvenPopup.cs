@@ -144,6 +144,8 @@ public class UI_InvenPopup : UI_Popup
     // 능력치 칸 이름 (Tools/ui_text_parts/ui.py). 칸이 좁아 짧은 이름을 따로 둔다 — 100~108 은 긴 이름이라
     // 마우스를 올렸을 때 뜨는 설명(…InfoText)이 쓴다. 띄어쓰기는 두 줄 칸(ATK SPEED 등)의 줄바꿈이다.
     public static readonly int[] StatLabelTextIds = { 194, 195, 196, 197, 198, 199, 200, 201, 202 };
+    // 장비 능력치 줄(PrintEquipAbilityAndDesc 의 순서: 공·방·체·공속·방속·치명·치명공격·이동속도) → 위 표의 자리.
+    static readonly int[] EquipStatLabel = { 0, 1, 2, 6, 7, 3, 4, 8 };
 
     enum GameObjects
     {
@@ -201,11 +203,15 @@ public class UI_InvenPopup : UI_Popup
         // 한국어로 해도 "Demian", "ATK" 가 떴다. 두 줄 칸은 프리팹이 줄 간격을 좁혀 두어 줄바꿈만 넣으면 제자리다.
         // 이름표 하나를 못 찾았다고 창(장비 칸·목록)이 통째로 안 서면 안 된다 — 없으면 건너뛴다.
         // 문구가 표에 없으면(빈 문자열) 프리팹 글자를 둔다. 빈칸보다 영어가 낫다.
+        // 칸 폭(17)이 한 글자 폭이라, 자동 줄바꿈이 켜진 칸(공격·방어·체력·치명·레벨)은 한글·한자가 한 자씩 세로로
+        // 쌓였고 "치명 공격" 은 네 줄이 되어 창 밑으로 삐져나갔다. 줄은 위에서 넣는 줄바꿈으로만 나눈다.
         void Label(Texts slot, string text)
         {
             var label = GetText((int)slot);
-            if (label != null && text.Length > 0)
-                label.text = text;
+            if (label == null || text.Length == 0)
+                return;
+            label.text = text;
+            label.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
         }
         Label(Texts.UserName, Managers.GetString(Define.USER_NAME_INDEX));
         for (int k = 0; k < StatLabelTextIds.Length; k++)
@@ -740,48 +746,61 @@ public class UI_InvenPopup : UI_Popup
                 UI_StatusInfo statusInfo = Managers.UI.MakeSubItem<UI_StatusInfo>(GetObject((int)GameObjects.StatusInfoList).transform);
                 statusInfo.Init();
                 statusInfo.Refresh(equipId, i);
+                // 이름은 UI_StatusInfo 가 영어로 박아 쓴다("ATK", "DEF \n SPEED") — 한국어로 해도 장비 칸만 영어였다.
+                // 왼쪽 능력치 칸과 같은 문구로 덮는다.
+                statusInfo._statNameText.text = Managers.GetString(StatLabelTextIds[EquipStatLabel[i]]).Replace(' ', '\n');
             }
         }
     }
 
+    /// <summary>
+    /// 줄마다 위 = 합, 아래 = 맨몸 + 낀 장비가 더한 몫(초록). 예전에는 셋 다 합을 찍어 "228 + 228" 위에 228 이 섰다.
+    /// 장비 몫은 SwapEquip 이 더하는 표 값의 합이다. 이동 속도만은 부츠가 배수로 정해서(EquipUtility.Apply) 기준 1 을 뺀
+    /// 나머지다. 체력·레벨 줄은 "지금 / 최대" 라 그대로 둔다.
+    /// </summary>
     void SetPlayerStatusInfo()
     {
-        GetText((int)Texts.TotalATK).text = Managers.Game.PlayerData.Attack.ToString();
-        GetText((int)Texts.AddATK).text = Managers.Game.PlayerData.Attack.ToString();
-        GetText((int)Texts.BaseATK).text = Managers.Game.PlayerData.Attack.ToString();
+        GameManager.CurPlayerData p = Managers.Game.PlayerData;
+        Split(Texts.TotalATK, Texts.BaseATK, Texts.AddATK, p.Attack, Equipped(e => e.ATK));
+        Split(Texts.TotalDEF, Texts.BaseDEF, Texts.AddDEF, p.Defence, Equipped(e => e.DEF));
+        Split(Texts.TotalCRI, Texts.BaseCRI, Texts.AddCRI, p.Critical, Equipped(e => e.CRI));
+        Split(Texts.TotalCRIATK, Texts.BaseCRIATK, Texts.AddCRIATK, p.CriticalAttack, Equipped(e => e.CRIATK));
+        Split(Texts.TotalATKSPEED, Texts.BaseATKSPEED, Texts.AddATKSPEED, p.AttackSpeed, Equipped(e => e.ASPD));
+        Split(Texts.TotalDEFSPEED, Texts.BaseDEFSPEED, Texts.AddDEFSPEED, p.DefenceSpeed, Equipped(e => e.DSPD));
+        Split(Texts.TotalMOVESPEED, Texts.BaseMOVESPEED, Texts.AddMOVESPEED, p.MoveSpeed, p.MoveSpeed - 1f);
 
-        GetText((int)Texts.TotalDEF).text = Managers.Game.PlayerData.Defence.ToString();
-        GetText((int)Texts.AddDEF).text = Managers.Game.PlayerData.Defence.ToString();
-        GetText((int)Texts.BaseDEF).text = Managers.Game.PlayerData.Defence.ToString();
+        GetText((int)Texts.TotalHP).text = p.MaxHP.ToString();
+        GetText((int)Texts.AddHP).text = p.MaxHP.ToString();
+        GetText((int)Texts.BaseHP).text = p.CurHP.ToString();
 
-        GetText((int)Texts.TotalHP).text = Managers.Game.PlayerData.MaxHP.ToString();
-        GetText((int)Texts.AddHP).text = Managers.Game.PlayerData.MaxHP.ToString();
-        GetText((int)Texts.BaseHP).text = Managers.Game.PlayerData.CurHP.ToString();
-
-        GetText((int)Texts.TotalCRI).text = Managers.Game.PlayerData.Critical.ToString();
-        GetText((int)Texts.AddCRI).text = Managers.Game.PlayerData.Critical.ToString();
-        GetText((int)Texts.BaseCRI).text = Managers.Game.PlayerData.Critical.ToString();
-
-        GetText((int)Texts.TotalCRIATK).text = Managers.Game.PlayerData.CriticalAttack.ToString();
-        GetText((int)Texts.AddCRIATK).text = Managers.Game.PlayerData.CriticalAttack.ToString();
-        GetText((int)Texts.BaseCRIATK).text = Managers.Game.PlayerData.CriticalAttack.ToString();
-
-        GetText((int)Texts.TotalLV).text = Managers.Game.PlayerData.Level.ToString();
-        GetText((int)Texts.AddLV).text = Managers.Data.PlayerDic.TryGetValue(Managers.Game.PlayerData.Level + 1, out var nextLevel)
+        GetText((int)Texts.TotalLV).text = p.Level.ToString();
+        GetText((int)Texts.AddLV).text = Managers.Data.PlayerDic.TryGetValue(p.Level + 1, out var nextLevel)
             ? nextLevel.NeedExp.ToString() : "-";
-        GetText((int)Texts.BaseLV).text = Managers.Game.PlayerData.CurExp.ToString();
+        GetText((int)Texts.BaseLV).text = p.CurExp.ToString();
+    }
 
-        GetText((int)Texts.TotalATKSPEED).text = Managers.Game.PlayerData.AttackSpeed.ToString();
-        GetText((int)Texts.AddATKSPEED).text = Managers.Game.PlayerData.AttackSpeed.ToString();
-        GetText((int)Texts.BaseATKSPEED).text = Managers.Game.PlayerData.AttackSpeed.ToString();
+    void Split(Texts total, Texts own, Texts add, float value, float fromEquip)
+    {
+        GetText((int)total).text = Num(value);
+        GetText((int)own).text = Num(value - fromEquip);
+        GetText((int)add).text = Num(fromEquip);
+    }
 
-        GetText((int)Texts.TotalDEFSPEED).text = Managers.Game.PlayerData.DefenceSpeed.ToString();
-        GetText((int)Texts.AddDEFSPEED).text = Managers.Game.PlayerData.DefenceSpeed.ToString();
-        GetText((int)Texts.BaseDEFSPEED).text = Managers.Game.PlayerData.DefenceSpeed.ToString();
+    // 뺄셈이 2.2 - 0.5 = 1.7000001 로 찍히지 않게 둘째 자리에서 자른다.
+    static string Num(float v) => (Mathf.Round(v * 100f) / 100f).ToString();
 
-        GetText((int)Texts.TotalMOVESPEED).text = Managers.Game.PlayerData.MoveSpeed.ToString();
-        GetText((int)Texts.AddMOVESPEED).text = Managers.Game.PlayerData.MoveSpeed.ToString();
-        GetText((int)Texts.BaseMOVESPEED).text = Managers.Game.PlayerData.MoveSpeed.ToString();
+    /// <summary>지금 낀 장비(검·방패·목걸이·반지·부츠·책)의 그 능력치 합.</summary>
+    static float Equipped(Func<Data.EquipData, float> stat)
+    {
+        GameManager.CurPlayerData p = Managers.Game.PlayerData;
+        float sum = 0f;
+        foreach (int id in new[] { p.CurSword, p.CurShield, p.CurNecklace, p.CurRing, p.CurShoes, p.CurBook })
+        {
+            Data.EquipData eq;
+            if (id != Define.NOT_EQUIP && Managers.Data.EquipDic.TryGetValue(id, out eq))
+                sum += stat(eq);
+        }
+        return sum;
     }
 
     void OnPointerEnterImage()

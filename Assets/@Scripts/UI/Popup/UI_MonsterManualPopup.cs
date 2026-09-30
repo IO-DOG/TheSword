@@ -264,6 +264,7 @@ public class UI_MonsterManualPopup : UI_Popup
         look.preserveAspect = true;
         CodeUI.Place(look.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(52f, 0f), new Vector2(80f, 80f));
         Animate(look, e.Data.IdleAnimStr);
+        FitDrawn(look.rectTransform, look.sprite, new Vector2(92f, 0f), 80f);
 
         string count = e.Alive > 1 ? $" <size=70%><color=#9AA4B8>{string.Format(Managers.GetString(ForecastUI.Count), e.Alive)}</color></size>" : "";
         TextMeshProUGUI name = CodeUI.NewText(row, "Name", _prose, 30f, Ink);
@@ -361,6 +362,29 @@ public class UI_MonsterManualPopup : UI_Popup
             anim.Update(0f);    // Play 만으로는 이 프레임에 그림이 들어오지 않는다 (UI_MonsterCard 와 같다)
         }
         look.enabled = look.sprite != null;   // 없는 상태면 흰 네모 대신 빈칸
+    }
+
+    /// <summary>
+    /// 몹 시트는 86px 사각형의 아래쪽에 그림이 40% 남짓만 차 있어서, 사각형째 칸(80)에 넣으면 창병 고블린이 20px 로
+    /// 칸 바닥에 붙어 보였다. 그려진 곳(촘촘한 메시의 꼭짓점)이 칸을 채우게 그림을 키우고, 그 가운데를 칸 가운데로 옮긴다.
+    /// ponytail: 첫 프레임 하나로 잰다 — 대기 동작 프레임끼리의 크기 차는 몇 px 다.
+    /// </summary>
+    static void FitDrawn(RectTransform rt, Sprite sprite, Vector2 center, float box)
+    {
+        Vector2[] vertices = sprite != null ? sprite.vertices : null;
+        if (vertices == null || vertices.Length == 0)
+            return;
+        Vector2 min = vertices[0], max = min;
+        foreach (Vector2 v in vertices)
+        {
+            min = Vector2.Min(min, v);
+            max = Vector2.Max(max, v);
+        }
+        Bounds b = sprite.bounds;
+        float k = box / Mathf.Max(max.x - min.x, max.y - min.y);   // 칸 단위 / 유닛
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = (Vector2)b.size * k;
+        rt.anchoredPosition = center - ((min + max) / 2f - (Vector2)b.center) * k;
     }
 
     static string CostText(BattleForecast.Result r)

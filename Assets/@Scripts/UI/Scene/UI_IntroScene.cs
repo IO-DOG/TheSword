@@ -227,7 +227,9 @@ public class UI_IntroScene : UI_Scene
         //GetImage((int)Images.SceneFrameImage).gameObject.SetActive(true);
         GetImage((int)Images.SceneImage).sprite = Managers.Resource.Load<Sprite>("Intro05");
 
-        WaitForSeconds tick = new WaitForSeconds(0.01f);
+        // 초당 화면 높이의 1/12 (1080p 60프레임에서 예전 걸음과 같다). 예전에는 걸음마다 1.5px 이라 해상도·주사율을
+        // 따라 훑는 시간이 4초에서 11초까지 달랐다.
+        float speed = Screen.height / 12f;
 
         //GetImage((int)Images.SceneFrameImage).color = new Color(1, 1, 1, 0);
         GetImage((int)Images.SceneImage).color = new Color(1, 1, 1, 0);
@@ -249,8 +251,8 @@ public class UI_IntroScene : UI_Scene
                 StartCoroutine(CoFadeOutImage());
             }
 
-            GetImage((int)Images.SceneImage).transform.position -= new Vector3(0, 1.5f, 0);
-            yield return tick;
+            GetImage((int)Images.SceneImage).transform.position -= new Vector3(0, speed * Time.deltaTime, 0);
+            yield return null;
         }
         //yield return null;
 

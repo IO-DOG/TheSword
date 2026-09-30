@@ -97,6 +97,7 @@ public class StoryDirector : MonoBehaviour
     static Dictionary<(StoryTrigger, int), List<StoryScene>> s_index;
     static int s_hold;                      // OnDirect 를 이 도구가 쥐고 있는 겹 수
     static int s_epoch;                     // AbortAll 이 올린다. 그 전에 시작한 장면은 다음 걸음에서 멈춘다 (Safe)
+    static bool s_debug;                    // DebugPlay 가 도는 중 — 본 것으로도, 결말로도 적지 않는다
 
     /// <summary>이야기가 흐름을 쥐고 있다 (장면·연출이 도는 중).</summary>
     public static bool IsPlaying => s_instance != null && s_instance._running > 0;
@@ -145,6 +146,7 @@ public class StoryDirector : MonoBehaviour
         s_seen = null;
         s_index = null;
         s_hold = 0;
+        s_debug = false;
         s_lastEnding = null;
         s_bossPos = null;
         s_bossObject = null;
@@ -211,6 +213,7 @@ public class StoryDirector : MonoBehaviour
     public static void AbortAll()
     {
         s_epoch++;          // DirectingManager 가 돌리던 프롤로그 장면도 다음 걸음에서 멈춘다 (Safe)
+        s_debug = false;
         HoldsBattle = false;
         bool held = s_hold > 0;
         s_hold = 0;
@@ -270,7 +273,7 @@ public class StoryDirector : MonoBehaviour
 
     static void MarkSeen(StoryScene scene)
     {
-        if (Seen.Add(scene.Id) == false)
+        if (s_debug || Seen.Add(scene.Id) == false)
             return;
         // 체크포인트와 같은 방식으로 바꿔 끼운다. 쓰다 꺼져도 옛 파일은 남는다.
         try
@@ -1063,9 +1066,12 @@ public class StoryDirector : MonoBehaviour
                 && First(StoryTrigger.Ending, (int)StoryEnding.Dawn) != null)
                 ending = StoryEnding.Dawn;
             s_lastEnding = ending;
-            PlayerPrefs.SetInt(ClearedKey, 1);
-            PlayerPrefs.SetString(ClearedEndingKey, ending.ToString().ToLowerInvariant());
-            PlayerPrefs.Save();
+            if (s_debug == false)
+            {
+                PlayerPrefs.SetInt(ClearedKey, 1);
+                PlayerPrefs.SetString(ClearedEndingKey, ending.ToString().ToLowerInvariant());
+                PlayerPrefs.Save();
+            }
 
             yield return CoChain(All(StoryTrigger.Ending, (int)ending));
             Letterbox(false);
@@ -1409,4 +1415,41 @@ public class StoryDirector : MonoBehaviour
         return credits != null && credits.Lines.Length > 0 ? credits.Lines[credits.Lines.Length - 1].ScriptId : 0;
     }
     #endregion
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    /// <summary>개발용(eval): 장면 하나를 제 연출째 다시 튼다. 본 것으로도, 결말로도 적지 않는다.
+    /// 챕터 첫 장면은 챕터 카드부터, 카드 뒤에 깔고 뜨는 대화(마을 카드 → 촌장)는 같이 튼다.
+    /// 결말 선택(ending_choice)은 고른 결말·후일담·크레딧을 지나 엔딩 씬까지 간다.</summary>
+    public static void DebugPlay(string sceneId)
+    {
+        int at = Array.FindIndex(GeneratedStory.Scenes, s => s.Id == sceneId);
+        if (s_instance == null || at < 0 || Managers.Game.Player == null)
+        {
+            Debug.LogWarning($"[Story] DebugPlay: '{sceneId}' 를 틀 수 없다 (게임 씬에서, 있는 id 로)");
+            return;
+        }
+        AbortAll();
+        StoryScene scene = GeneratedStory.Scenes[at];
+        if (scene.Kind == StoryKind.Bark)
+        {
+            UI_StoryBark.Show(scene.Lines[0]);
+            return;
+        }
+        List<StoryScene> chain = new List<StoryScene> { scene };
+        if (scene.Kind == StoryKind.Card && at + 1 < GeneratedStory.Scenes.Length && HasCue(GeneratedStory.Scenes[at + 1], StoryCueKind.Backdrop))
+            chain.Add(GeneratedStory.Scenes[at + 1]);
+        s_debug = true;
+        Acquire();
+        IEnumerator job = scene.Kind == StoryKind.Choice ? s_instance.CoEnding()
+            : scene.Trigger == StoryTrigger.BossIntro || scene.Trigger == StoryTrigger.BossDefeat ? s_instance.CoBossScenes(chain, null, null)
+            : s_instance.CoFloorChain(chain);
+        s_instance.StartNow(CoDebug(job));
+    }
+
+    static IEnumerator CoDebug(IEnumerator job)
+    {
+        try { yield return job; }
+        finally { s_debug = false; }
+    }
+#endif
 }

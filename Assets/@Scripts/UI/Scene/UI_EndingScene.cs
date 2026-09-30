@@ -2,12 +2,13 @@ using DG.Tweening;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
 /// 크레딧 뒤의 엔딩 씬 (바이블 6.7, R5). "Thank You For Playing" 그림(Ending)은 새벽(dawn) 결말 뒤에만 한 번 띄운다.
-/// 봉인·동반 결말 뒤에는 까만 화면에 크레딧의 마지막 인사만 몇 초. 그다음 타이틀로 — Managers.Scene 을 거쳐야
-/// Managers.Clear 가 돌아 지난 판의 창·소리가 남지 않는다.
+/// 봉인·동반 결말 뒤에는 까만 화면에 크레딧의 마지막 인사만 몇 초. 그다음 타이틀로 — 창·소리·풀을 비우고 간다
+/// (Managers.Clear 와 같은 일. 이 씬에는 BaseScene 이 없어 그것을 그대로 부를 수 없다).
 /// </summary>
 public class UI_EndingScene : UI_Scene
 {
@@ -41,6 +42,7 @@ public class UI_EndingScene : UI_Scene
         StoryUI.Stretch(fade.rectTransform);
         fade.color = Color.black;
         StoryUI.Stretch(art.rectTransform);
+        art.rectTransform.localScale = Vector3.one;     // 프리팹은 0.5 — 화면에 맞춘 그림이 반으로 줄어 가운데에 작게 떴다
         art.preserveAspect = true;
 
         // 씬을 옮기며 소리가 다 멎었다. 크레딧의 곡을 잇는다 (dawn·seal 타이틀곡, hold 마검 조우곡).
@@ -68,7 +70,13 @@ public class UI_EndingScene : UI_Scene
             yield return line.DOFade(0f, 1.5f).SetLink(gameObject).WaitForCompletion();
         }
 
-        Managers.Scene.LoadScene(Define.Scene.TitleScene);
+        // 엔딩 씬 파일에는 BaseScene(EndingScene)이 없고 이 UI 만 놓여 있다. Managers.Scene.LoadScene 과 Managers.Clear 는
+        // 지금 씬(CurrentScene)부터 찾아서 여기서는 null 예외로 멈췄고, 결말 뒤 까만 화면에서 영영 못 나갔다.
+        // 씬 없이 같은 것을 비운다.
+        Managers.Sound.Clear();
+        Managers.UI.Clear();
+        Managers.Pool.Clear();
+        SceneManager.LoadScene(nameof(Define.Scene.TitleScene));
     }
 
     // 기다린다. 2초가 지나면 아무 키로나 넘길 수 있다.

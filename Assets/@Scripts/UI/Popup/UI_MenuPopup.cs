@@ -420,6 +420,8 @@ public class UI_MenuPopup : UI_Popup
             Row row = CloneRow(template, $"Checkpoint_{info.Stage + 1:000}", -1, () => AskCheckpoint(picked), _list.transform, ListRowScale);
             row.Text.text = string.Format(Managers.GetString(CHECKPOINT_ROW), info.Stage + 1, info.Level, info.Hp, info.MaxHp)
                 + "\n" + info.SavedAt.ToString("MM/dd HH:mm");
+            // 글 칸(50)이 단추 그림(48)보다 높아서 두 줄을 채우면 첫 줄이 윗테두리에 닿았다. 테두리만큼 비운다.
+            row.Text.margin = new Vector4(0f, 5f, 0f, 5f);
             _listRows.Add(row);
         }
         for (int i = 0; i < _listRows.Count; i++)

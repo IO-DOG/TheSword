@@ -40,7 +40,9 @@ public class UI_ConversationPopup : UI_Popup
     }
 
     const float ChoiceGuard = 0.6f;         // 선택지가 뜬 뒤 이 시간 동안은 누르지 않는다 — 대사를 넘기던 Enter 연타가 고르지 않게
-    const float BossPortraitSize = 900f;
+    const float BossBodyHeight = 460f;      // 보스 초상화에서 그려진 몸의 키 (캔버스 단위)
+    const float BossBodyWidth = 620f;       // 넓은 놈(검은 태양)은 이 폭에서 멈춘다
+    const float BossFromRight = 480f;       // 화면 오른끝에서 몸 한가운데까지 — 대화 상자 오른끝 안쪽에 선다
     static readonly Color Dim = new Color(0.5f, 0.5f, 0.5f, 1f);
 
     // 이야기 대사. null 이면 예전 EventData 대사다.
@@ -121,6 +123,16 @@ public class UI_ConversationPopup : UI_Popup
         #endregion
 
         StoryUI.ApplyTextSpeed(GetText((int)Texts.ConversationText));
+
+        // 이름표는 한 줄. 긴 이름(Shieldbearer of the Aqueduct)은 두 줄로 꺾여 대화 상자 테두리에 걸렸다 — 넘치면 줄여 넣는다.
+        // 자동 크기는 높이에도 맞추는데 프리팹 칸(높이 50)은 글자보다 낮아서 모든 이름이 최소 크기가 됐다 — 글자 높이만큼
+        // 늘린다 (가운데 정렬이라 글 자리는 그대로다).
+        TMP_Text speaker = GetText((int)Texts.SpeakerText);
+        speaker.textWrappingMode = TextWrappingModes.NoWrap;
+        speaker.fontSizeMax = speaker.fontSize;
+        speaker.fontSizeMin = 30f;
+        speaker.enableAutoSizing = true;
+        speaker.rectTransform.sizeDelta += new Vector2(0f, speaker.fontSize);
     }
 
     private void Update()
@@ -376,10 +388,16 @@ public class UI_ConversationPopup : UI_Popup
         right.sprite = Managers.Resource.Load<Sprite>("MagicalSword");
         right.preserveAspect = false;
         right.SetNativeSize();
+        RectTransform rt = right.rectTransform;     // 프리팹 자리로 (보스가 옮겨 둔다)
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(1f, 0.5f);
+        rt.anchoredPosition = Vector2.zero;
         _rightColor = Color.white;
     }
 
     // 보스의 초상화 자리 = 그 보스의 전투 그림 (대기 애니메이션, 맵과 같은 색조).
+    // 몹 그림은 86px 칸의 아래쪽에 작게 서 있다(칸 높이의 35~80%). 칸을 한 크기로 키웠더니 작은 놈은 머리만
+    // 대화 상자 위로 내밀고, 검은 태양은 화면을 넘었다 — 첫 장의 그려진 부분(촘촘한 메시)으로 배율을 정하고
+    // 그 발밑을 대화 상자 위에 세운다. 배율은 정수로 — 도트가 고르게.
     void SetRightBoss(Image right, int chapter)
     {
         int id = chapter >= 0 && chapter < GeneratedStory.BossIds.Length ? GeneratedStory.BossIds[chapter] : -1;
@@ -399,8 +417,28 @@ public class UI_ConversationPopup : UI_Popup
         _bossAnim.Play(data.IdleAnimStr);
         _bossAnim.Update(0f);       // Play 만으로는 이 프레임에 그림이 바뀌지 않는다
         right.preserveAspect = true;
-        right.rectTransform.sizeDelta = new Vector2(BossPortraitSize, BossPortraitSize);
         _rightColor = MonsterTint.Of(id);
+        _rightColor.a = 1f;         // ForBoss 는 알파까지 0.8 을 곱한다 — 초상화 너머로 맵이 비쳤다
+
+        Sprite s = right.sprite;
+        if (s == null)
+            return;
+        Vector2 min = Vector2.positiveInfinity, max = Vector2.negativeInfinity;
+        foreach (Vector2 v in s.vertices)
+        {
+            min = Vector2.Min(min, v);
+            max = Vector2.Max(max, v);
+        }
+        min = min * s.pixelsPerUnit + s.pivot;      // 칸 왼쪽 아래 기준 픽셀
+        max = max * s.pixelsPerUnit + s.pivot;
+        Vector2 body = max - min;
+        float k = Mathf.Max(1f, Mathf.Floor(Mathf.Min(BossBodyHeight / body.y, BossBodyWidth / body.x)));
+        RectTransform rt = right.rectTransform;
+        RectTransform box = (RectTransform)GetObject((int)GameObjects.Speaker).transform.parent;   // CoversationBox
+        rt.anchorMin = rt.anchorMax = new Vector2(1f, 0f);
+        rt.pivot = new Vector2((min.x + max.x) * 0.5f / s.rect.width, min.y / s.rect.height);    // 몸의 발밑 가운데
+        rt.anchoredPosition = new Vector2(-BossFromRight, box.rect.height);
+        rt.sizeDelta = s.rect.size * k / rt.localScale.y;
     }
 
     void Finish(StoryChoice choice)
@@ -417,7 +455,8 @@ public class UI_ConversationPopup : UI_Popup
     #endregion
 
     #region 선택지
-    // 마지막 대사를 둔 채 대화 상자 위에 둘을 쌓는다. 틀은 이름표 그림, 표시는 대화창 화살표를 빌린다.
+    // 마지막 대사를 둔 채 대화 상자 위에 둘을 쌓는다. 틀은 대화 상자 그림, 표시는 대화창 화살표를 빌린다.
+    // 이름표 그림을 틀로 썼더니 오른쪽이 투명하게 빠져서, 가운데 놓은 글의 뒷반이 맵 위에 떠 읽히지 않았다.
     void OpenChoices()
     {
         _choosing = true;
@@ -427,17 +466,16 @@ public class UI_ConversationPopup : UI_Popup
 
         int count = _story.Choices.Length;
         Transform box = GetObject((int)GameObjects.Speaker).transform.parent;   // CoversationBox
-        Image plate = GetObject((int)GameObjects.Speaker).GetComponent<Image>();
-        Sprite frame = plate != null ? plate.sprite : null;
+        Sprite frame = box.GetComponent<Image>().sprite;
         Sprite arrow = GetImage((int)Images.ConversationArrow).sprite;
         TMP_FontAsset font = GetText((int)Texts.ConversationText).font;
 
-        // 아무것도 골라져 있지 않아 Enter 만으로는 넘어가지 않는다 — 어떻게 고르는지 적어 둔다.
-        TMP_Text hint = StoryUI.NewText(box, "ChoiceHint", font, 36f, TextAlignmentOptions.Center);
-        hint.rectTransform.anchorMin = hint.rectTransform.anchorMax = new Vector2(0.5f, 1f);
-        hint.rectTransform.pivot = new Vector2(0.5f, 0f);
+        // 아무것도 골라져 있지 않아 Enter 만으로는 넘어가지 않는다 — 어떻게 고르는지 대화 상자 오른쪽 아래(넘기기 화살표
+        // 자리)에 적는다. 선택지 위 맵에 두었더니 밝은 바닥에서는 읽히지 않았다.
+        TMP_Text hint = StoryUI.NewText(box, "ChoiceHint", font, 36f, TextAlignmentOptions.BottomRight);
+        hint.rectTransform.anchorMin = hint.rectTransform.anchorMax = hint.rectTransform.pivot = new Vector2(1f, 0f);
         hint.rectTransform.sizeDelta = new Vector2(1200f, 50f);
-        hint.rectTransform.anchoredPosition = new Vector2(0f, 110f + count * 116f);
+        hint.rectTransform.anchoredPosition = new Vector2(-60f, 26f);
         hint.color = new Color(0.8f, 0.8f, 0.8f, 1f);
         hint.text = Managers.GetString(StoryUI.ChoiceHint);
 
@@ -450,8 +488,8 @@ public class UI_ConversationPopup : UI_Popup
             RectTransform rt = StoryUI.Child(box, $"Choice{i}");
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
             rt.pivot = new Vector2(0.5f, 0f);
-            rt.sizeDelta = new Vector2(860f, 100f);
-            rt.anchoredPosition = new Vector2(0f, 110f + (count - 1 - i) * 116f);
+            rt.sizeDelta = new Vector2(860f, 110f);
+            rt.anchoredPosition = new Vector2(0f, 110f + (count - 1 - i) * 126f);
             Image image = rt.gameObject.AddComponent<Image>();
             image.sprite = frame;
             image.raycastTarget = true;

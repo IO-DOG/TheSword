@@ -122,7 +122,7 @@ public class UI_ConfirmPopup : UI_Popup
         text.fontSizeMax = text.fontSize;
         text.fontSizeMin = Mathf.Min(24f, text.fontSize);
         text.enableAutoSizing = true;
-        text.text = message;
+        text.text = OneSentencePerLine(message);
 
         Button yes = GetButton((int)Buttons.YesBtn);
         Button no = GetButton((int)Buttons.NoBtn);
@@ -148,6 +148,12 @@ public class UI_ConfirmPopup : UI_Popup
 
         Paint();
     }
+
+    // 문장마다 한 줄. 상자 폭에 맡겨 접으면 "Expected damage 78" 다음 줄이 "/ HP 60." 으로, 중국어는 "吗?" 한 글자만
+    // 다음 줄로 떨어졌다. 한 문장이 상자보다 길면 그 안에서는 여전히 접힌다.
+    static string OneSentencePerLine(string s) =>
+        s.Replace(". ", ".\n").Replace("? ", "?\n").Replace("! ", "!\n")
+         .Replace("。", "。\n").Replace("？", "？\n").Replace("！", "！\n").TrimEnd('\n');
 
     // 뒤를 어둡게 덮는다. 상자 밖을 눌러도 밑의 메뉴·타이틀 버튼이 눌리지 않는다.
     void AddDim()

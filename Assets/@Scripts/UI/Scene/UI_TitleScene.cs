@@ -50,6 +50,7 @@ public class UI_TitleScene : UI_Scene
     bool _loading;
     bool _loadFailed;
     Define.ScriptType _language;
+    CanvasGroup _buttons;       // 타이틀 메뉴 글자 묶음. 창이 떠 있는 동안 가린다
 
     public override bool Init()
     {
@@ -65,6 +66,7 @@ public class UI_TitleScene : UI_Scene
 
         GetImage((int)Images.BlackBGImage).gameObject.SetActive(false);
         PlacePrompt();
+        StyleButtons();
 
         //GetObject((int)Objects.Slider).GetComponent<Slider>().value = 0;
         GetObject((int)Objects.Slider).GetComponent<Slider>().gameObject.SetActive(false);
@@ -123,6 +125,22 @@ public class UI_TitleScene : UI_Scene
         prompt.fontSizeMax = prompt.fontSize;
         prompt.fontSizeMin = 36f;
         prompt.enableAutoSizing = true;
+    }
+
+    /// <summary>
+    /// 메뉴 글자는 빛나는 칼날 한가운데에 선다. 안 고른 줄(회색)이 칼날 빛에 묻혀 읽히지 않았다 — 같은 테두리를 두른다.
+    /// "설정" 만 프리팹에서 작게(35.7) 잡혀 있어 한 줄만 작아 보였다. 첫 줄 크기로 맞춘다.
+    /// </summary>
+    void StyleButtons()
+    {
+        _buttons = GetImage((int)Images.Buttons).gameObject.GetOrAddComponent<CanvasGroup>();
+        TMP_Text first = GetText((int)Texts.NewGameText);
+        foreach (Texts t in new[] { Texts.NewGameText, Texts.LoadGameText, Texts.SettingText, Texts.ExitText })
+        {
+            TMP_Text label = GetText((int)t);
+            label.fontSharedMaterial = CodeUI.Outlined(label.font, 0.3f);
+            label.fontSize = first.fontSize;
+        }
     }
 
     private void Start()
@@ -194,6 +212,10 @@ public class UI_TitleScene : UI_Scene
             if (_loadFailed && Input.GetKeyDown(KeyCode.Escape)) Application.Quit();
             return;
         }
+        // 창이 떠 있는 동안 타이틀 메뉴 글자를 가린다. 설정 메뉴에는 어둡게 덮는 판이 없어서, 그 단추 사이로
+        // "- 이어하기 -" 가 비쳐 보였다. 켜고 끄기(SetActive)는 "아무 키나" 가 맡으니 투명도만 만진다.
+        _buttons.alpha = Managers.UI.GetPopupCount() > 0 ? 0f : 1f;
+
         // 창(설정 메뉴·확인 창)이 떠 있으면 타이틀 키는 쉰다 — 설정 창 밑에서 Enter 가 "새 게임" 을 눌러
         // 저장을 지운 적이 있다. 창을 닫은 그 Enter 도 같은 프레임에 여기서 다시 먹히면 안 된다.
         // Esc 는 맨 위 창에 넘긴다(메뉴·확인 창이 제 닫는 길로 닫힌다).

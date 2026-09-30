@@ -24,6 +24,12 @@ public class UI_BattlePopup : UI_Popup
     // 스킬 이름 (Tools/ui_text_parts/ui.py). BattleSkills.Kind 순서 — 강타·철벽·흡혈.
     public static readonly int[] SkillTextIds = { 191, 192, 193 };
 
+    // 카드 배율. 카드는 이 창 캔버스의 자식이라 캔버스가 이미 화면 높이(1080 기준)만큼 늘고 준다. 예전에는 여기서
+    // 화면 폭·높이를 한 번 더 곱해서(창 모드 8, 전체 화면 4.5) 두 번 커졌다 — 1280x720 창에서는 스킬 막대가 카드
+    // 이름을 덮었고, 그보다 큰 창·1440p 이상 전체 화면에서는 카드가 화면을 넘쳐 이름·능력치가 잘렸다. 가로세로를
+    // 따로 곱해서 4:3·16:10 에서는 그림이 찌그러졌다. 배율은 하나다 (1080p 전체 화면에서 보던 크기).
+    const float CardScale = 4.5f;
+
     BattleStepper _battle;
     bool _ending;
     int _monsterId;
@@ -54,10 +60,7 @@ public class UI_BattlePopup : UI_Popup
         float width = Screen.width;
         float height = Screen.height;
         playerCard.transform.position = new Vector3(width * 0.3f, height * 0.6f, 0);
-        if (Managers.Game.ScreenType == Define.ScreenType.Window)
-            playerCard.transform.localScale = new Vector3(width / 1920 * 8f, height / 1080 * 8f, 1);
-        else
-            playerCard.transform.localScale = new Vector3(width / 1920 * 4.5f, height / 1080 * 4.5f, 1);
+        playerCard.transform.localScale = new Vector3(CardScale, CardScale, 1);
         //playerCard.Data = Managers.Game.Player.Data;
 
         for (int i = 0; i < Managers.Game.MonsterData.Count; i++)
@@ -65,10 +68,7 @@ public class UI_BattlePopup : UI_Popup
             monsterCard = Managers.UI.SetBattleCard<UI_MonsterCard>(gameObject.transform, Managers.Game.MonsterData[i]);
 
             monsterCard.transform.position = new Vector3(width * 0.7f, height * 0.6f, 0);
-            if (Managers.Game.ScreenType == Define.ScreenType.Window)
-                monsterCard.transform.localScale = new Vector3(width / 1920 * 8f, height / 1080 * 8f, 1);
-            else
-                monsterCard.transform.localScale = new Vector3(width / 1920 * 4.5f, height / 1080 * 4.5f, 1);
+            monsterCard.transform.localScale = new Vector3(CardScale, CardScale, 1);
         }
 
         //monsterCard.Data = Managers.Game.MonsterData;

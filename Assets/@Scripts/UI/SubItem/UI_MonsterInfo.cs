@@ -42,17 +42,11 @@ public class UI_MonsterInfo : UI_Base
         {
             return _position;
         }
+        // 값은 화면 가운데에서 마우스까지(픽셀, Util.ScreenToWorldCood). 마우스 옆 화면 가운데 쪽에, 화면 안으로 붙잡아 세운다.
         set
         {
             _position = value;
-            if (_position.x < (Input.mousePosition.x - Screen.width / 2) / 2)
-                GetComponentsInChildren<UnityEngine.UI.Image>()[0].GetComponent<RectTransform>().anchoredPosition = _position +
-                    new Vector3((float)(GetComponentsInChildren<BoxCollider>()[0].bounds.max.x - GetComponentsInChildren<BoxCollider>()[0].bounds.min.x) / 2 + 50, 0, 0);
-            else if (_position.x > (Input.mousePosition.x - Screen.width / 2) / 2)
-                GetComponentsInChildren<UnityEngine.UI.Image>()[0].GetComponent<RectTransform>().anchoredPosition = _position -
-                    new Vector3((float)(GetComponentsInChildren<BoxCollider>()[0].bounds.max.x - GetComponentsInChildren<BoxCollider>()[0].bounds.min.x) / 2 + 50, 0, 0);
-
-            //GetImage((int)Images.BGImage).gameObject.GetComponent<RectTransform>().anchoredPosition = Input.mousePosition;
+            CodeUI.PlaceBeside(GetComponentsInChildren<UnityEngine.UI.Image>()[0].rectTransform, value, 80f);
         }
     }
 

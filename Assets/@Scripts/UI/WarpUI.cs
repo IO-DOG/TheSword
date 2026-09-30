@@ -160,21 +160,27 @@ public class WarpUI : MonoBehaviour
 
         TextMeshProUGUI number = CodeUI.NewText(cell.transform, "Floor", CodeUI.NumberFont, 24f, Color.white);
         CodeUI.Place(number.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(12f, -6f), new Vector2(Cell.x - 24f, 28f));
-        number.text = string.Format(Managers.GetString(ForecastUI.FloorN), stageId + 1);
+        string floor = string.Format(Managers.GetString(ForecastUI.FloorN), stageId + 1);
+        number.text = floor;
 
         Data.StageInfoData info;
-        TextMeshProUGUI name = CodeUI.NewText(cell.transform, "Name", CodeUI.ProseFont, 18f, Soft);
-        CodeUI.Place(name.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(12f, -34f), new Vector2(Cell.x - 24f, 24f));
-        CodeUI.Fit(name, 10f).text = Managers.Data.StageInfoDic.TryGetValue(stageId, out info)
-            ? Managers.GetString(info.DungeonNameScriptID) : "";
+        TextMeshProUGUI name = CodeUI.NewText(cell.transform, "Name", CodeUI.ProseFont, 22f, Soft);
+        CodeUI.Place(name.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(12f, -34f), new Vector2(Cell.x - 24f, 26f));
+        CodeUI.Fit(name, 12f).text = Managers.Data.StageInfoDic.TryGetValue(stageId, out info)
+            ? WithoutFloor(Managers.GetString(info.DungeonNameScriptID), floor) : "";
 
         if (HasClosedVault(stageId))
         {
-            TextMeshProUGUI vault = CodeUI.NewText(cell.transform, "Vault", CodeUI.ProseFont, 20f, Gold, TextAlignmentOptions.TopRight);
-            CodeUI.Place(vault.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-10f, -6f), new Vector2(70f, 26f));
-            CodeUI.Fit(vault, 10f).text = Managers.GetString(ForecastUI.Vault);
+            TextMeshProUGUI vault = CodeUI.NewText(cell.transform, "Vault", CodeUI.ProseFont, 24f, Gold, TextAlignmentOptions.TopRight);
+            CodeUI.Place(vault.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-10f, -6f), new Vector2(70f, 28f));
+            CodeUI.Fit(vault, 12f).text = Managers.GetString(ForecastUI.Vault);
         }
     }
+
+    // 층 이름에는 층 번호가 붙어 있다("이끼 낀 지하 묘소 5층") — 칸 위의 큰 번호와 겹쳐 "5층" 이 두 번 나왔고, 긴 이름을
+    // 칸 폭에 넣느라 글자가 깨알이 됐다(960x540 에서 읽을 수 없었다). 끝의 번호만 뗀다. 중국어 이름은 "第5层" 이다.
+    static string WithoutFloor(string name, string floor) =>
+        name.EndsWith(floor, System.StringComparison.Ordinal) ? name.Substring(0, name.Length - floor.Length).TrimEnd(' ', '第') : name;
 
     /// <summary>
     /// 아직 안 연 금고(네 번째 문)가 남은 층인가. 큰길 문 셋은 위층 계단 앞을 차례로 막고 있어서, 위층에 한 번이라도

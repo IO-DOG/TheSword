@@ -82,6 +82,10 @@ public static class CodeUI
         if (Cached(id, out Material material))
             return material;
         material = new Material(font.material) { name = font.name + " Outline" };
+        // TMP 테두리는 획 가장자리에 걸쳐 절반이 안으로 먹는다. 픽셀 글꼴은 획이 가늘어 글자 몸이 통째로 테두리색이
+        // 됐다 — 타이틀의 "아무 키나 누르세요" 가 흰 글자가 아니라 검은 글자였고, 숫자 글꼴에 섞인 한자(会心·距暴击)는
+        // 회색 덩어리였다. 몸을 같은 만큼 부풀려 테두리를 바깥으로만 두른다.
+        material.SetFloat(ShaderUtilities.ID_FaceDilate, width);
         material.SetFloat(ShaderUtilities.ID_OutlineWidth, width);
         material.SetColor(ShaderUtilities.ID_OutlineColor, new Color(0f, 0f, 0f, 0.95f));
         return Remember(id, material);
@@ -119,6 +123,25 @@ public static class CodeUI
         rt.anchoredPosition = pos;
         rt.sizeDelta = size;
         return rt;
+    }
+
+    /// <summary>
+    /// 마우스 옆, 화면 가운데 쪽에 창(frame)을 세우고 화면 밖으로 나가지 않게 붙잡는다. fromCenter 는 화면 가운데에서
+    /// 마우스까지의 거리(픽셀), gap 은 마우스와 창 사이(캔버스 단위). frame 은 가운데 앵커·가운데 피벗이어야 한다.
+    /// 몬스터·아이템 정보 창이 쓴다 — 예전에는 픽셀을 캔버스 단위로 그대로 써서 1080p 에서 창이 가리키는 몬스터를
+    /// 덮었고(960x540 에서는 반대로 멀리 떨어졌다), 위아래로는 마우스 높이 그대로라 윗줄 몬스터의 창은 이름째 잘렸다.
+    /// </summary>
+    public static void PlaceBeside(RectTransform frame, Vector2 fromCenter, float gap)
+    {
+        const float Margin = 8f;
+        float scale = frame.GetComponentInParent<Canvas>().rootCanvas.scaleFactor;
+        Vector2 half = new Vector2(Screen.width, Screen.height) / (2f * scale);
+        Vector2 box = Vector2.Scale(frame.rect.size, frame.localScale) / 2f;
+        Vector2 at = fromCenter / scale;
+        at.x += at.x >= 0f ? -(gap + box.x) : gap + box.x;
+        at.x = Mathf.Clamp(at.x, -half.x + box.x + Margin, half.x - box.x - Margin);
+        at.y = Mathf.Clamp(at.y, -half.y + box.y + Margin, half.y - box.y - Margin);
+        frame.anchoredPosition = at;
     }
 
     public static RectTransform Stretch(RectTransform rt)

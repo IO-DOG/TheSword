@@ -40,16 +40,11 @@ public class UI_CItemInfo : UI_Base
         {
             return _position;
         }
+        // 몬스터 정보 창(UI_MonsterInfo)과 같다. 틀은 SetInfo 가 글 길이에 맞춰 늘린 뒤 한 번 더 세운다.
         set
         {
             _position = value;
-            if (_position.x < (Input.mousePosition.x - Screen.width / 2) / 2)
-                GetComponentsInChildren<UnityEngine.UI.Image>()[0].GetComponent<RectTransform>().anchoredPosition = _position +
-                    new Vector3((float)(GetComponentsInChildren<BoxCollider>()[0].bounds.max.x - GetComponentsInChildren<BoxCollider>()[0].bounds.min.x) / 2 + 50, 0, 0);
-            else if (_position.x > (Input.mousePosition.x - Screen.width / 2) / 2)
-                GetComponentsInChildren<UnityEngine.UI.Image>()[0].GetComponent<RectTransform>().anchoredPosition = _position -
-                    new Vector3((float)(GetComponentsInChildren<BoxCollider>()[0].bounds.max.x - GetComponentsInChildren<BoxCollider>()[0].bounds.min.x) / 2 + 50, 0, 0);
-            //GetImage((int)Images.BGImage).gameObject.GetComponent<RectTransform>().anchoredPosition = Input.mousePosition;
+            CodeUI.PlaceBeside(GetComponentsInChildren<UnityEngine.UI.Image>()[0].rectTransform, value, 80f);
         }
     }
 
@@ -86,6 +81,27 @@ public class UI_CItemInfo : UI_Base
         GetText((int)Texts.MonsterDescText).text = (item.ChoicePartner != null
             ? Managers.GetString(Define.REWARD_CHOICE) + "\n\n" : "") + Overflow(id, heal) +
             Managers.GetString(Managers.Data.ConsumableItemDic[id].ScriptDescriptionId);
+        FitFrame();
+    }
+
+    /// <summary>
+    /// 틀(BGImage)이 설명 칸보다 작다 — 프리팹의 보기 창(167)이 틀(140) 밑으로 삐져 있어서, 넘침 한 줄이나 "둘 중 하나"
+    /// 안내가 붙으면 설명 끝줄이 틀 밖 바닥에 그려졌다(가득 찬 체력의 사과는 한 줄, 선택 보상은 두세 줄). 글이 끝나는
+    /// 자리까지 틀을 늘린다. 틀은 가운데 기준이라 위아래로 반씩 늘고, 위에 붙은 글도 같이 올라가서 늘린 만큼 다 번다.
+    /// </summary>
+    void FitFrame()
+    {
+        const float Bottom = 8f;    // 틀 아래 테두리 안쪽 여백 (틀 단위)
+        TMPro.TMP_Text desc = GetText((int)Texts.MonsterDescText);
+        RectTransform frame = GetImage((int)Images.BGImage).rectTransform;
+        desc.ForceMeshUpdate();
+        float textBottom = frame.InverseTransformPoint(desc.transform.TransformPoint(desc.textBounds.min)).y;
+        float lack = frame.rect.yMin + Bottom - textBottom;
+        if (lack > 0f)
+        {
+            frame.sizeDelta += new Vector2(0f, lack);
+            Position = _position;   // 늘어난 높이로 화면 안에 다시 붙잡는다
+        }
     }
 
     /// <summary>
