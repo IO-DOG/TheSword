@@ -1128,6 +1128,13 @@ public class StoryDirector : MonoBehaviour
         {
             Managers.Sound.FadeAndStopBGM(1f);
             yield return WaitSettled(false);
+            // 100층 보스를 쓰러뜨리면 계단을 밟지 않고 곧장 여기로 온다 — 마지막 띠를 닫고 판의 점수를 낸다(장부·순위표·판 카드).
+            // 계단 쪽(PortalController)과 겹쳐도 장부가 같은 띠·같은 판을 두 번 세지 않는다. DebugPlay 는 판이 아니다.
+            if (s_debug == false)
+            {
+                yield return SwordLedger.CoCloseBand(Managers.Game.PlayerData.CurStageid);
+                SwordLedger.FinishRun();
+            }
             Managers.UI.CloseGameSceneUI();
             yield return new WaitForSeconds(StoryUI.Auto ? 0.3f : 1.5f);   // 거수의 폭발·흰 빛은 전투 결말이 튼다
 

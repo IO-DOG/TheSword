@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using static PathMover;   // 격자·길찾기(Tile, Dirs, Cell, 마스크 …)는 PathMover 에 있다 — 클릭 이동과 같이 쓴다
 
 /// <summary>
 /// 게임을 처음부터 끝까지 스스로 플레이한다. 녹화(PlaythroughRecorder)가 이 봇을 띄운다.
@@ -24,6 +25,10 @@ public class AutoPlayer : MonoBehaviour
     /// 플레이를 시작하면 비워지므로(ResetStatics) 플레이가 뜬 뒤 에디터 eval 로 켠다: AutoPlayer.ForceSkipAll = true;
     /// </summary>
     public static bool ForceSkipAll;
+
+    /// <summary>봇이 새 게임을 고를 때의 규칙(UI_TitleScene 이 읽는다). 기본은 보통 — 탑의 법 완주를 재려면 플레이가 뜬 뒤
+    /// eval 로 AutoPlayer.StartMode = GameMode.Tower; 를 넣고 봇을 띄운다. 플레이를 시작하면 보통으로 돌아간다.</summary>
+    public static GameMode StartMode;
 
     public bool Finished;
     public bool Failed;
@@ -85,8 +90,6 @@ public class AutoPlayer : MonoBehaviour
     // 전투 배속은 결과를 바꾸므로 손대면 안 되고, 이동만 올린다.
     public float MoveSpeedScale = 12f;
 
-    const float Tile = 0.32f;
-
     // 목표 우선순위 (작을수록 먼저)
     const int PriHeal = 0;      // 위급 — 포션 먼저
     const int PriKey = 1;
@@ -107,11 +110,10 @@ public class AutoPlayer : MonoBehaviour
     string _progressKey = "";
     int _maxFloor = 1;
 
-    // BFS 재사용 버퍼
-    readonly Dictionary<Vector2Int, Vector2Int> _from = new Dictionary<Vector2Int, Vector2Int>();
-    readonly Dictionary<Vector2Int, int> _dist = new Dictionary<Vector2Int, int>();
-    readonly Queue<Vector2Int> _queue = new Queue<Vector2Int>();
-    readonly Dictionary<Vector2Int, bool> _solid = new Dictionary<Vector2Int, bool>();
+    // 격자와 BFS 는 PathMover 가 쥔다(클릭 이동이 같은 것을 쓴다). 봇의 셈은 예전 이름 그대로 읽는다.
+    readonly PathMover _grid = new PathMover();
+    Dictionary<Vector2Int, int> _dist => _grid.Dist;
+    Vector3 CellCenter(Vector2Int cell) => _grid.CellCenter(cell);
     readonly HashSet<Vector2Int> _visited = new HashSet<Vector2Int>();
     /// <summary>밀어도 아무 일이 없던 목표들. 같은 자리에서 헛돌지 않게 기억해 둔다.</summary>
     readonly HashSet<Vector2Int> _deadTargets = new HashSet<Vector2Int>();
@@ -147,36 +149,13 @@ public class AutoPlayer : MonoBehaviour
     bool _wasBattle;
     float _hpBefore;
 
-    GameObject _map;
-    float _probeY;
     string _plan = "";
     string _bossInfo = "";
     /// <summary>보스방 입구를 지금 갈 수 있는지 (로그용).</summary>
     public string BossInfo { get { return _bossInfo; } }
 
-    // 길에 두면 "지나가다" 건드려 버리는 것들. 전부 막고, 목표일 때만 옆에서 부딪힌다.
-    // 이걸 안 막으면 포션을 향해 가다 몬스터를 밟아 원치 않는 전투가 나고,
-    // 계단을 밟아 층을 건너뛰기도 한다 — 1층에서 죽던 진짜 원인이었다.
-    static readonly int BlockMask = (1 << (int)Define.Layer.Wall)
-                                  | (1 << (int)Define.Layer.InteractObjects)
-                                  | (1 << (int)Define.Layer.BossDoor)
-                                  | (1 << (int)Define.Layer.Monster)
-                                  | (1 << (int)Define.Layer.CItem)
-                                  | (1 << (int)Define.Layer.EItem)
-                                  | (1 << (int)Define.Layer.Portal)
-                                  | (1 << (int)Define.Layer.Lever);
-    static readonly int DoorMask = 1 << (int)Define.Layer.Door;
-    static readonly int WallMask = 1 << (int)Define.Layer.Wall;
-    static readonly int ItemMask = (1 << (int)Define.Layer.CItem)
-                                 | (1 << (int)Define.Layer.EItem);
     static readonly int PushMask = (1 << (int)Define.Layer.InteractObjects)
                                  | (1 << (int)Define.Layer.BossDoor);
-
-    static readonly Vector2Int[] Dirs =
-    {
-        new Vector2Int(0, 1), new Vector2Int(0, -1),
-        new Vector2Int(-1, 0), new Vector2Int(1, 0),
-    };
 
     public static AutoPlayer Spawn()
     {
@@ -230,6 +209,7 @@ public class AutoPlayer : MonoBehaviour
         Instance = null;
         ResumeFromSave = false;
         ForceSkipAll = false;
+        StartMode = GameMode.Normal;
     }
 
     IEnumerator CoRun()
@@ -839,28 +819,24 @@ public class AutoPlayer : MonoBehaviour
     /// <summary>지금 층에서 다음에 밟을 한 칸. 목표가 없으면 None.</summary>
     Define.MoveDir PlanStep(GameObject map, GameManager g)
     {
-        _map = map;
-        _probeY = g.Player.transform.position.y + Tile * 0.5f;
-        _solid.Clear();
-        UpdateBounds(map);
+        _grid.Begin(map, g.Player.transform.position.y + Tile * 0.5f);
 
         // 씬이 뜬 직후에는 플레이어가 아직 던전 안으로 옮겨지기 전이다.
         // 그때 세운 계획은 맵 밖 허공을 가리키고, 거기엔 벽이 없어서
         // 봇이 한 방향으로 끝없이 걸어 나갔다 (한 번은 80000칸을 갔다).
-        if (InsidePlayArea(g.Player.transform.position) == false)
+        if (_grid.InsidePlayArea(g.Player.transform.position) == false)
         {
             // 층이 아직 다 조립되기 전에 잰 범위일 수 있다. 캐시까지 버리고 다시 잰다.
             // 예전에는 맵별 캐시가 그대로 남아, 한 번 작게 잡히면 그 층에서는
             // 영영 "던전 밖" 이 되어 10분을 기다렸다 (22층).
-            _wallBounds.Remove(map);
-            _hasBounds = false;
+            _grid.ForgetBounds(map);
             _waitingForGame = true;
             _plan = "던전 밖 — 자리 잡기를 기다린다";
             return Define.MoveDir.None;
         }
 
         Vector2Int start = Cell(map, g.Player.transform.position);
-        Flood(start);
+        _grid.Flood(start);
 
         // 계단도 몬스터도 아이템도 하나같이 안 닿으면 던전 안에 있는 게 아니다.
         // 콜라이더 경계 상자는 실제 놀이 공간보다 커서 그것만으로는 못 거른다.
@@ -1122,7 +1098,7 @@ public class AutoPlayer : MonoBehaviour
                                     $" {(cols[k].isTrigger ? "trig" : "solid")}" +
                                     $" y{cols[k].bounds.min.y:0.0}~{cols[k].bounds.max.y:0.0}" +
                                     $" x{cols[k].bounds.center.x:0.0}z{cols[k].bounds.center.z:0.0})");
-                    info.Append($" 탐침{CellCenter(c).x:0.0}/{_probeY:0.00}/{CellCenter(c).z:0.0}]");
+                    info.Append($" 탐침{CellCenter(c).x:0.0}/{_grid.ProbeY:0.00}/{CellCenter(c).z:0.0}]");
                 }
             }
             // 꺼진 문까지 본다. 문이 열린 것인지 애초에 안 보이는 것인지
@@ -1231,7 +1207,7 @@ public class AutoPlayer : MonoBehaviour
             {
                 Define.MoveDir toStairs = (hasBump && best == start)
                     ? ToDir(bump - start)
-                    : FirstStep(start, best);
+                    : _grid.FirstStep(start, best);
                 _plan = $"[{map.name}] 갇혀서 계단을 탄다 {best}+{bump} {toStairs}";
                 if (toStairs != Define.MoveDir.None)
                     return toStairs;
@@ -1270,7 +1246,7 @@ public class AutoPlayer : MonoBehaviour
         // 목표 옆에 이미 서 있으면 그대로 부딪힌다.
         Define.MoveDir dir = (hasBump && best == start)
             ? ToDir(bump - start)
-            : FirstStep(start, best);
+            : _grid.FirstStep(start, best);
 
         // 같은 목표를 계속 잡고 있는 동안만 센다.
         // 예전에는 "지금 밀고 있지 않으면" 리셋해서, 한 칸 물러섰다 미는 것을
@@ -1329,15 +1305,6 @@ public class AutoPlayer : MonoBehaviour
             _plan = $"{start} -> {c} 밀기";
             return ToDir(Dirs[_pushDir]);
         }
-        return Define.MoveDir.None;
-    }
-
-    static Define.MoveDir ToDir(Vector2Int step)
-    {
-        if (step.y > 0) return Define.MoveDir.Up;
-        if (step.y < 0) return Define.MoveDir.Down;
-        if (step.x < 0) return Define.MoveDir.Left;
-        if (step.x > 0) return Define.MoveDir.Right;
         return Define.MoveDir.None;
     }
 
@@ -1465,7 +1432,7 @@ public class AutoPlayer : MonoBehaviour
         // 맵이 겹칠 때 엉뚱한 층을 잡는다 (29층에서 어느 격자와도 안 맞는 좌표).
         Vector3 p = g.Player.transform.position;
         Bounds b;
-        if (byStage != null && TryWallBounds(byStage, out b) && InsideXZ(b, p))
+        if (byStage != null && _grid.TryWallBounds(byStage, out b) && InsideXZ(b, p))
             return byStage;
 
         // 그 맵이 플레이어를 품지 않는 순간(워프 직후 등)에는 실제로 품는 맵을 쓴다.
@@ -1473,7 +1440,7 @@ public class AutoPlayer : MonoBehaviour
         {
             if (pair.Value == null)
                 continue;
-            if (TryWallBounds(pair.Value, out b) == false || InsideXZ(b, p) == false)
+            if (_grid.TryWallBounds(pair.Value, out b) == false || InsideXZ(b, p) == false)
                 continue;
 
             // 층 번호와 실제 서 있는 맵이 갈라졌다. 이 상태에서는 카메라 경계와
@@ -1684,191 +1651,6 @@ public class AutoPlayer : MonoBehaviour
              + Math.Min(d, 999);
     }
 
-    /// <summary>목표까지의 경로를 되짚어 첫 한 칸의 방향을 낸다.</summary>
-    Define.MoveDir FirstStep(Vector2Int start, Vector2Int goal)
-    {
-        Vector2Int cur = goal;
-        while (true)
-        {
-            Vector2Int prev;
-            if (_from.TryGetValue(cur, out prev) == false)
-                return Define.MoveDir.None;   // 시작점이거나 경로가 끊겼다
-            if (prev == start)
-                break;
-            cur = prev;
-        }
-
-        Vector2Int step = cur - start;
-        if (step.y > 0) return Define.MoveDir.Up;
-        if (step.y < 0) return Define.MoveDir.Down;
-        if (step.x < 0) return Define.MoveDir.Left;
-        if (step.x > 0) return Define.MoveDir.Right;
-        return Define.MoveDir.None;
-    }
-
-    /// <summary>탐색 상자의 반지름. 층이 23x27 이라 32 면 어디서 재도 전부 들어온다.</summary>
-    const int FloodRadius = 32;
-
-    GameObject _boundsMap;
-    Bounds _mapBounds;
-    bool _hasBounds;
-
-    /// <summary>
-    /// 이 층이 실제로 차지하는 범위. 콜라이더를 전부 감싸서 잰다.
-    /// 층마다 한 번만 계산한다 — 맵 오브젝트가 바뀔 때까지 그대로다.
-    /// </summary>
-    readonly Dictionary<GameObject, Bounds> _wallBounds = new Dictionary<GameObject, Bounds>();
-
-    /// <summary>
-    /// 이 맵이 벽으로 두르는 범위. 맵마다 한 번만 재서 들고 있는다.
-    /// 벽만 센다 — 콜라이더를 전부 감싸면 연출용 트리거나 카메라 영역까지 들어와서
-    /// 상자가 던전보다 훨씬 커지고, 맵 밖 (24,-23) 에 서 있어도 안으로 쳤다.
-    /// </summary>
-    bool TryWallBounds(GameObject map, out Bounds bounds)
-    {
-        if (_wallBounds.TryGetValue(map, out bounds))
-            return true;
-
-        bool found = false;
-        Bounds acc = new Bounds();
-        foreach (Collider c in map.GetComponentsInChildren<Collider>(false))
-        {
-            if (c.gameObject.layer != (int)Define.Layer.Wall)
-                continue;
-            if (found == false)
-            {
-                acc = c.bounds;
-                found = true;
-            }
-            else
-            {
-                acc.Encapsulate(c.bounds);
-            }
-        }
-
-        if (found == false)
-            return false;   // 아직 조립 중이다. 다음 프레임에 다시 잰다.
-
-        _wallBounds[map] = acc;
-        bounds = acc;
-        return true;
-    }
-
-    static bool InsideXZ(Bounds b, Vector3 world)
-    {
-        return world.x >= b.min.x && world.x <= b.max.x
-               && world.z >= b.min.z && world.z <= b.max.z;
-    }
-
-    void UpdateBounds(GameObject map)
-    {
-        if (ReferenceEquals(_boundsMap, map) && _hasBounds)
-            return;
-
-        _boundsMap = map;
-        _hasBounds = TryWallBounds(map, out _mapBounds);
-    }
-
-    /// <summary>탐색이 볼 수 있는 범위. 벽 칸 자체는 안에 들어야 한다.</summary>
-    bool InsideMap(Vector3 world)
-    {
-        return Within(world, Tile);
-    }
-
-    /// <summary>
-    /// 플레이어가 정말 던전 안에 서 있는가.
-    /// 바깥 테두리는 벽이니, 제대로 배치됐다면 벽보다 한 칸은 안쪽에 있다.
-    /// 탐색 범위와 같은 여유를 주면 딱 한 칸 밖 (-1,-23) 으로 새어 나갔다.
-    /// </summary>
-    bool InsidePlayArea(Vector3 world)
-    {
-        return Within(world, -Tile);
-    }
-
-    bool Within(Vector3 world, float margin)
-    {
-        if (_hasBounds == false)
-            return true;
-        return world.x >= _mapBounds.min.x - margin && world.x <= _mapBounds.max.x + margin
-               && world.z >= _mapBounds.min.z - margin && world.z <= _mapBounds.max.z + margin;
-    }
-
-    void Flood(Vector2Int start)
-    {
-        _from.Clear();
-        _dist.Clear();
-        _queue.Clear();
-
-        _dist[start] = 0;
-        _queue.Enqueue(start);
-
-        while (_queue.Count > 0)
-        {
-            Vector2Int cur = _queue.Dequeue();
-            int d = _dist[cur];
-
-            for (int i = 0; i < Dirs.Length; i++)
-            {
-                Vector2Int next = cur + Dirs[i];
-
-                // 층 하나는 아무리 커도 23x27 이다. 어느 칸에서 재도 반대쪽 끝까지
-                // Radius 안에 들어온다. 이 상자를 벽으로 쳐서 밖으로 새는 것을 막는다.
-                // 3층 (17,-9) 처럼 경계가 뚫린 자리가 있고, 예전에는 거기서
-                // 3200만 칸까지 퍼져 한 프레임이 몇 분씩 걸렸다.
-                if (Mathf.Abs(next.x - start.x) > FloodRadius
-                    || Mathf.Abs(next.y - start.y) > FloodRadius)
-                    continue;
-
-                // 층이 실제로 차지하는 범위 밖은 벽으로 친다.
-                // 3층 (17,-9) 처럼 경계가 뚫린 자리가 있다.
-                if (InsideMap(CellCenter(next)) == false)
-                    continue;
-
-                if (_dist.ContainsKey(next) || Solid(next))
-                    continue;
-                _dist[next] = d + 1;
-                _from[next] = cur;
-                _queue.Enqueue(next);
-            }
-        }
-    }
-
-    /// <summary>
-    /// 그 칸을 지나갈 수 없는가. 콜라이더를 직접 재 본다 —
-    /// 손수 만든 층은 벽 하나가 여러 칸을 덮기도 해서 오브젝트 위치로 세면 구멍이 난다.
-    ///
-    /// 열쇠가 없는 문도 벽으로 친다. 이 규칙이 방 순서 = 전투 순서를 강제한다.
-    /// </summary>
-    bool Solid(Vector2Int cell)
-    {
-        bool cached;
-        if (_solid.TryGetValue(cell, out cached))
-            return cached;
-
-        Vector3 world = CellCenter(cell);
-        Vector3 half = ProbeHalf;
-
-        // 막혔을 때는 아이템과 몬스터 칸을 밟을 수 있다고 치고 다시 훑는다.
-        // 아이템은 밟으면 주워지고, 몬스터는 부딪히면 싸움이 시작된다 —
-        // 둘 다 그 자리를 비우는 길이다.
-        //  - 9층: 아이템 하나가 한 칸 통로를 봉해 27칸에 갇혔다.
-        //  - 20층: 보스의 큰 콜라이더가 제 주변 칸을 다 막아 아무도 못 다가갔다.
-        int mask = _passItems
-            ? (BlockMask & ~ItemMask & ~(1 << (int)Define.Layer.Monster))
-            : BlockMask;
-        bool blocked = Physics.CheckBox(world, half, Quaternion.identity, mask,
-                                        QueryTriggerInteraction.Collide);
-
-        if (blocked == false && Physics.CheckBox(world, half, Quaternion.identity, DoorMask,
-                                                 QueryTriggerInteraction.Collide))
-        {
-            blocked = HasKeyFor(world, half) == false;
-        }
-
-        _solid[cell] = blocked;
-        return blocked;
-    }
-
     /// <summary>그 칸에 실제로 놓인 것들을 이름과 레이어로 적는다. 진단용.</summary>
     string DescribeCell(Vector2Int cell)
     {
@@ -1898,10 +1680,10 @@ public class AutoPlayer : MonoBehaviour
     {
         var walkable = new HashSet<Vector2Int>(_dist.Keys);
 
-        _passItems = true;
-        _solid.Clear();
-        Flood(start);
-        _passItems = false;
+        _grid.PassItems = true;
+        _grid.ForgetSolid();
+        _grid.Flood(start);
+        _grid.PassItems = false;
 
         Vector2Int target = start;
         int bestDist = int.MaxValue;
@@ -1919,12 +1701,12 @@ public class AutoPlayer : MonoBehaviour
         if (bestDist == int.MaxValue)
         {
             // 아이템을 치워도 갈 데가 없다. 원래 탐색으로 되돌려 놓는다.
-            _solid.Clear();
-            Flood(start);
+            _grid.ForgetSolid();
+            _grid.Flood(start);
             return Define.MoveDir.None;
         }
 
-        Define.MoveDir dir = FirstStep(start, target);
+        Define.MoveDir dir = _grid.FirstStep(start, target);
         // 밟아도 사라지지 않는 것을 밀며 제자리를 왕복하는 일이 있었다. 그때
         // 그 칸에 무엇이 있는지 이름과 레이어로 봐야 짐작을 그만둘 수 있다.
         _plan = $"길 막은 것(아이템/몬스터) 넘어가기 {start}->{target} d={bestDist} {dir}"
@@ -2009,40 +1791,6 @@ public class AutoPlayer : MonoBehaviour
     }
 
     static readonly Collider[] _hits = new Collider[8];
-
-    bool HasKeyFor(Vector3 world, Vector3 half)
-    {
-        List<int> keys = Managers.Game.KeyInventory != null ? Managers.Game.KeyInventory._keys : null;
-        if (keys == null)
-            return false;
-
-        int n = Physics.OverlapBoxNonAlloc(world, half, _hits, Quaternion.identity, DoorMask,
-                                           QueryTriggerInteraction.Collide);
-        for (int i = 0; i < n; i++)
-        {
-            Door door = Door.Find(_hits[i].gameObject);
-            if (door == null)
-                continue;
-            int idx = door._keyIndex;
-            return idx >= 0 && idx < keys.Count && keys[idx] > 0;
-        }
-        return false;
-    }
-
-    Vector3 CellCenter(Vector2Int cell)
-    {
-        Vector3 world = _map.transform.TransformPoint(new Vector3(cell.x * Tile, 0f, cell.y * Tile));
-        world.y = _probeY;
-        return world;
-    }
-
-    static readonly Vector3 ProbeHalf = new Vector3(Tile * 0.3f, Tile * 0.3f, Tile * 0.3f);
-
-    static Vector2Int Cell(GameObject map, Vector3 world)
-    {
-        Vector3 local = map.transform.InverseTransformPoint(world);
-        return new Vector2Int(Mathf.RoundToInt(local.x / Tile), Mathf.RoundToInt(local.z / Tile));
-    }
     #endregion
 
     #region 진행 감시
@@ -2065,9 +1813,6 @@ public class AutoPlayer : MonoBehaviour
 
     /// <summary>이번 프레임에 일부러 손을 놓고 게임을 기다렸는가.</summary>
     bool _waitingForGame;
-
-    /// <summary>이번 탐색에서 아이템 칸을 밟을 수 있다고 볼 것인가.</summary>
-    bool _passItems;
 
     float _lastStageMismatchLog;
 

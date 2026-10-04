@@ -136,11 +136,15 @@
 | 물약 | 밟는 즉시 마신다 | potion | ポーション | 药水 |
 | 열쇠 (초록·노랑·빨강) | 같은 색 문 하나 | key (green / yellow / red) | 鍵 (緑・黄・赤) | 钥匙 (绿·黄·红) |
 | 여분 열쇠 | 골방 파수꾼 뒤의 열쇠 | spare key | 予備の鍵 | 备用钥匙 |
-| 금고 | 마지막 구역의 네 번째 문. 안에 룬 | vault | 金庫 | 金库 |
+| 금고 | 마지막 구역의 네 번째 문. 안에 크기 룬 | vault | 金庫 | 金库 |
+| 크기 룬 | 금고·둘 중 하나·40/60/80층 보스 뒤의 큰 룬. 게임 이름은 기본 룬 이름(☆) 뒤에 크기를 붙인다("공격 룬 +3") | sized rune ("Attack Rune +3") | 大きいルーン (「攻撃のルーン +3」) | 大符文 (“攻击符文 +3”) |
 | 골방 | 입구가 한 칸뿐인 막다른 곳 | alcove | 小部屋 | 小隔间 |
 | 구역 | 문이 잘라 놓은 층의 한 부분 | zone | 区画 | 区域 |
 | 곁길 | 지나쳐도 되는 길 | side path | 脇道 | 岔路 |
-| 둘 중 하나 | 하나를 집으면 짝이 사라지는 보상 | either-or reward | 二者択一 | 二选一 |
+| 둘 중 하나 | 하나를 집으면 짝이 사라지는 보상. 보물 층(물약 대 크기 룬)과 40·60·80층 보스 뒤 계단 방(공격 대 방어) | either-or reward | 二者択一 | 二选一 |
+| 제단 | 띠의 마지막 층(5·10·…·95) 계단에서 체력을 내고 공격·방어를 사는 물음. 이야기에는 나오지 않는다 (제안) | altar | 祭壇 | 祭坛 |
+| 탑의 법 | 새 게임에서 고르는 어려운 표. `Steam/achievements.csv` 의 업적 이름, 게임 안의 이름(ScriptData 533·492)과 같게. 번체는 塔之法則 | The Tower's Law | 塔の掟 | 塔之法则 |
+| 예언 | 싸우기 전에 보인 값의 합(장부, 업적 "예언보다 싸게"). 대사의 "숫자" 와 같은 것 | foretold | 予言 | 预言 |
 | 층 유형: 기본·인색·관문·넉넉·보물 | 다섯 층 주기 | Basic · Stingy · Gate · Plenty · Treasure | 基本・倹約・関門・潤沢・宝物 | 普通・吝啬・关卡・富足・宝藏 |
 | 워프석 반지 | 20층 보스가 떨군다 | Warpstone Ring ☆ | ワープ石の指輪 ☆ | 传送石戒指 ☆ |
 | 몬스터 도감 / 책 | 마검의 눈이 알아보는 것을 옮긴 책. 마검은 대사에서 "책" 이라 부른다(`mech_forecast.06`) | Monster Manual ☆ / the book | モンスター図鑑 ☆ / 本 | 怪物图鉴 ☆ / 书 |
@@ -156,7 +160,7 @@
 | 의뢰 / 의뢰서 | 길드의 낡은 의뢰. 의뢰서는 데미안이 떼어 품었다(900005). 하사품 공고와 다르다 | request / request slip | 依頼 / 依頼書 | 委托 / 委托书 |
 | 왕국 조사관 | 브람의 직함 | Royal Investigator | 王国調査官 | 王国调查官 |
 | 가브 풍습 | 전사의 무덤에 그가 쓰던 칼을 꽂는다 | the Gabu custom | ガブの習わし | 加布的习俗 |
-| 뱉다 / 뱉어 내다 | 탑이 돌아오지 않는 자의 칼(과 반지)을 밑동 무덤 사이로 내놓는 것(`village_chief.05` `epilogue_hold.02`) | spit out | 吐き出す | 吐出 |
+| 뱉다 / 뱉어 내다 | 탑이 돌아오지 않는 자의 칼(과 반지)을 밑동 무덤 사이로 내놓는 것(`village_chief.04` `epilogue_hold.02`) | spit out | 吐き出す | 吐出 |
 
 ## 7. 말투
 
@@ -180,7 +184,7 @@
 | 한국어 | 처음 | 되받는 곳 |
 |---|---|---|
 | 숫자부터 봐라 | 개작 100031 | `pro_kingslime_clear.01`~`02` `bark_gate_1.01` |
-| 해 지기 전에 | `village_chief.08` | `f16_nap.01` `boss0_defeat.01` `boss0_defeat.08` `mech_warp.02`, 도감 `warp_ring` |
+| 해 지기 전에 | `village_chief.07` | `f16_nap.01` `boss0_defeat.01` `boss0_defeat.08` `mech_warp.02`, 도감 `warp_ring` |
 | 이몸을 만난 건 행운이다 | 개작 100026 | `boss3_intro.08` |
 | 배부르면? / 그런 날은 안 온다 | `pro_contract_after.05`~`06` | `ending_dawn.05` |
 | 네 목숨은 이몸 거다 / 이몸 허락 없이는 못 죽는다 | `pro_contract_after.04` | `mech_death.02` `boss3_defeat.15` |
@@ -196,7 +200,7 @@
 | 굶주림은 굶주림으로만 묶인다 | `f45_forge.01` | `boss3_intro.13` `f95_price.02` |
 | 넌 내 이름도 안 물었지 / 필요 없다 | `f50_leftovers.07`~`08` | `ending_choice.11`~`13` |
 | …네… 값… | `boss2_defeat.01` | `boss3_intro.10` |
-| 값을 먼저 물어보시오 → 얼마야, 나. | `village_chief.11` | `boss3_defeat.07` `ending_dawn.14` |
+| 값을 먼저 물어보시오 → 얼마야, 나. | `village_chief.10` | `boss3_defeat.07` `ending_dawn.14` |
 | 그 검이 네 이름을 부르거든, 그땐 끝이다 | `boss3_intro.14` | `ending_choice.11` `ending_hold.10` `ending_dawn.11`~`12` |
 | 이번엔, 놓지 마라 | `boss3_defeat.03` | 선택지 `ending_choice.hold` "검을 놓지 않는다" |
 | 계약은 둘 중 하나가 부서져야 끝난다 | `boss3_defeat.14` | `ending_choice.07` `ending_dawn.16` ("배고픈 이몸은 방금 부서졌으니까") |
@@ -206,22 +210,23 @@
 | 빈 왕좌는 제 자물쇠를 도로 부른다 | `boss3_intro.12` | `boss4_intro.02` `boss4_intro.05` ("돌아와라") |
 | 넘친 만큼은 버려졌다 | `mech_overflow.01` | `f90_rule.01` ("넘치면 버려지니") `ending_dawn.07` `ending_dawn.10` `ending_dawn.13` |
 | 배부른 것만이 굶주림을 끝낸다 | `f95_price.03` | `ending_dawn.09`~`10` |
-| 사람은 안 돌아오오. 칼만 탑이 뱉어 내지 | `village_chief.05` | `epilogue_hold.02` ("뱉어져 있었다"), 도감 `0:6` |
+| 사람은 안 돌아오오. 칼만 탑이 뱉어 내지 | `village_chief.04` | `epilogue_hold.02` ("뱉어져 있었다"), 도감 `0:6` |
 | 값은 머리 위에 떠 있다 | `mech_forecast.05` | `boss0_intro.06` ("머리 위에 떠 있잖나") |
 | 얼마? | `mech_forecast.04` | `boss0_intro.05` `f31_trust.01` `boss2_intro.05` `boss3_defeat.07` `f95_price.08` `boss4_intro.07` `ending_dawn.14` `epilogue_dawn.08` |
-| 무덤이야. 먹지 마. | `village_chief.07` | `pro_contract_after.02` "내 칼은 먹지 마." 와 짝 |
+| 무덤이야. 먹지 마. | `village_chief.06` | `pro_contract_after.02` "내 칼은 먹지 마." 와 짝 |
+| 껍질이 먼저 다 받는다 / (흡혈은) 껍질 깬 다음이다 | `trait_armor.01` `trait_armor.03` (26층, 마검) | `ch4_start.05` (81층, 데미안이 마검의 말투로 되읊는다) |
 
 ## 9. 말장난과 함정
 
 - **허접 → two-bit.** 값 모티프와 겹치게 고른 제안이다. 몸값이 싸다는 뜻이 함께 들린다.
 - **저녁밥** (`boss0_intro.06`). 늑대가 "해가 진다" 고 한 바로 뒤다. 해 질 녘은 저녁밥 때다.
 - **묻다** (`epilogue_hold.03`). "반지를 묻었다(bury)" 와 "이름은 끝내 묻지 못했다(ask)" 가 짝이다.
-  둘 다 살리기 어려우면 뒤쪽을 지킨다. 촌장의 약속(`village_chief.10`)을 되받는 줄이다.
+  둘 다 살리기 어려우면 뒤쪽을 지킨다. 촌장의 약속(`village_chief.09`)을 되받는 줄이다.
 - **눈** (도감 `3:8`). 눈(雪)을 뒤집어쓰고도 붉은 눈(目)만은 식지 않았다.
 - **칼과 검.** 둘 다 sword 다. "칼" 은 일상어(촌장, 가브 풍습)고 "검" 은 격식어(세드릭, 마검)다.
   `ending_seal.02` 의 "제가 쓰던 칼" 은 마검이고, `epilogue_seal.07` 의 "허리에 차던 제 칼" 은 데미안의 평범한 칼이다.
 - **위와 발밑.** 탑 안의 "머리 위" 는 늘 검은 태양 쪽이다(5층 잎, 21층 물, 81층 티끌). 땅거죽(숲)은 발밑이다. "머리 위" 를 surface 쪽으로 옮기지 않는다.
-- **뱉다** (`village_chief.05`). 탑이 무덤 사이로 칼을 내놓는다는 뜻이다. 토한다(vomit)로 옮기지 않는다.
+- **뱉다** (`village_chief.04`). 탑이 무덤 사이로 칼을 내놓는다는 뜻이다. 토한다(vomit)로 옮기지 않는다.
 - **검은 태양 / 검은 해 / 까만 해.** 모두 같은 것이다. "검은 태양" 은 이름(보스, 세드릭)이고 "검은 해" 는 서술이다.
   "까만 해" 는 4층에서 마검이 처음 떠올린 흐릿한 그림이라 이름이 아니라 모양으로 옮긴다(a black sun).
 - **주어 생략.** `boss2_defeat.08` "녹이려다 그 꼴이 됐으니" 의 주어는 엘린이다. 마검은 자신을 "이몸" 으로만 부른다.

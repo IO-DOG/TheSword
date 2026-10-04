@@ -1,6 +1,6 @@
 # SteamPipe 스크립트
 
-`upload.ps1` 이 이 폴더의 VDF 로 `Build\Windows` 를 올린다. 처음 한 번 꺾쇠 자리표시를 숫자로 바꾼다.
+`upload.ps1` 이 이 폴더의 VDF 로 `Build\Windows`(데모는 `Build\WindowsDemo`)를 올린다. 처음 한 번 꺾쇠 자리표시를 숫자로 바꾼다.
 자리표시가 하나라도 남아 있으면 `upload.ps1` 은 올리지 않고 멈춘다.
 
 | 파일 | 바꿀 것 | 무엇 |
@@ -37,7 +37,7 @@
 
 | 키 | 값 | 까닭 |
 |---|---|---|
-| `ContentRoot` | `..\..\Build\Windows\` | 경로는 **이 VDF 파일 기준**이다. 저장소 루트의 `Build\Windows` |
+| `ContentRoot` | `..\..\Build\Windows\` (데모 `..\..\Build\WindowsDemo\`) | 경로는 **이 VDF 파일 기준**이다. 저장소 루트의 `Build\Windows` — `GameBuild` 가 굽는 폴더와 같아야 한다(`check_steam.py`) |
 | `BuildOutput` | `..\output\` | steamcmd 로그·캐시 → `Steam\output` (.gitignore). 지워도 되지만 다음 업로드가 느려진다 |
 | `SetLive` | `beta` | **default 브랜치는 스크립트로 못 켠다** — App Admin 에서 올린다. `beta` 브랜치를 먼저 만들어 둔다 |
 | `FileExclusion` | `*.pdb`, `steam_appid.txt`, `*_DoNotShip*`, `*_ButDontShipItWithYourGame*` | 디버그 기호와 개발용 파일은 내보내지 않는다. 기호 폴더는 `GameBuild` 가 이미 `Build\Symbols` 로 옮기지만 한 겹 더 막는다 |
@@ -54,4 +54,5 @@ powershell -ExecutionPolicy Bypass -File Steam\scripts\upload.ps1 -Preview      
 그 목록에 `.pdb`·`steam_appid.txt`·`*_DoNotShip` 폴더가 없는지 본다. 제외 규칙이 폴더에 안 먹으면 여기서 드러난다.
 
 데모는 `-Demo` 를 붙인다. **데모 앱에는 DEMO 정의로 구운 빌드만** 올린다(MASTER_PLAN D1). 본편 빌드를 데모 앱에 올리면
-본편 전체가 무료로 풀린다 — 파일로는 가릴 수 없어서 `upload.ps1 -Demo` 는 올리기 전에 `demo` 를 쳐서 확인하게 한다.
+본편 전체가 무료로 풀린다 — 그래서 데모는 폴더가 따로다. `Build\WindowsDemo` 는 `GameBuild.WindowsDemo`(DEMO 정의로 굽는다)만 쓰고,
+`-Demo` 는 그 폴더만 올린다. 본편 빌드를 그 폴더에 손으로 옮기지 않는다.

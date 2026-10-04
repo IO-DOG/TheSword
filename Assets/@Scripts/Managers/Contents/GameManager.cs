@@ -164,6 +164,13 @@ public class GameManager
         //public bool HasGetWarp { get; set; } // 워프 UI 개방용
         //public bool HasGetClass { get; set; } // 특성을 얻었는지 -> 특성 UI 개방용
         public List<bool> FirstEnterMapCheck = new List<bool>();
+        // 판의 규칙(일반·탑의 법). 새 게임 흐름이 Clear 뒤에 고른 값을 적고, 체크포인트에 같이 남는다 —
+        // 불러올 때 이것으로 몬스터 표(MonsterData / MonsterData_Tower)를 고른다.
+        public GameMode Mode { get; set; }
+        // 이번 판에 제단에서 산 횟수. n 번째 값 = AltarPrice + AltarPriceStep·n(n−1) % (StageInfoData, generate_content.altar_sells)
+        public int AltarBought { get; set; }
+        // 마검의 장부(SwordLedger) — 체크포인트와 같이 저장되고, 층을 다시 시작하면 그 입구의 장부로 돌아간다.
+        public LedgerState Ledger { get; set; } = new LedgerState();
 
         public void Clear()
         {
@@ -183,6 +190,9 @@ public class GameManager
             Managers.Game.PlayerData.CurStageid = 0;
             Managers.Game.PlayerData.CurPosition = new MyVector3() { X = 0, Y = 1.5f, Z = 0 };
             Managers.Game.PlayerData.IsContractedSword = false;
+            Managers.Game.PlayerData.Mode = GameMode.Normal;        // 새 게임 흐름이 고른 규칙을 이 뒤에 적는다
+            Managers.Game.PlayerData.AltarBought = 0;
+            Managers.Game.PlayerData.Ledger = new LedgerState { RunId = Guid.NewGuid().ToString("N") };   // 새 판의 이름
 
             EnsureLists();
         }
@@ -197,6 +207,10 @@ public class GameManager
         /// </summary>
         public void EnsureLists()
         {
+            if (Ledger == null)                     // 장부가 없던 옛 체크포인트
+                Ledger = new LedgerState();
+            if (Ledger.BandStars == null)
+                Ledger.BandStars = new List<int>();
             if (FirstEnterMapCheck == null)
                 FirstEnterMapCheck = new List<bool>();
             while (FirstEnterMapCheck.Count < 110)
@@ -482,8 +496,8 @@ public class GameManager
     /// <summary>
     /// 챕터 BGM. StageInfoData 의 BGM 열을 쓴다.
     ///
-    /// 지금 실재하는 BGM 은 챕터 0 것뿐이라 대부분 폴백으로 떨어진다.
-    /// 챕터 음악을 새로 넣으면 StageInfoData 의 BGM 값(BGM_100 …)에 맞춰
+    /// 지금 실재하는 BGM 은 챕터 0 것(Chapter0_BGM)뿐이라 생성 층은 전부 폴백으로 떨어진다.
+    /// 챕터 음악을 새로 넣으면 StageInfoData 의 BGM 값(생성 층은 챕터마다 BGM_CH0~BGM_CH4)에 맞춰
     /// 어드레서블만 추가하면 이 코드가 그대로 집어간다.
     /// </summary>
     void PlayChapterBGM(int mapId)
@@ -850,6 +864,7 @@ public class GameManager
         File.Exists(Path.Combine(SaveStore.DirectoryPath, "SaveData.json"));
 
     // MapData 는 5MB 가 넘는다. 층마다 저장하면서 매번 해시하면 계단마다 끊긴다. 실행 중엔 안 바뀐다.
+    // 해시는 지도만 본다 — 몬스터 표(보통·탑의 법)는 넣지 않는다. 싸움의 값만 고친 패치가 저장을 거절하면 안 된다.
     string _contentHash;
     string CurrentContentHash() =>
         _contentHash ??= SaveStore.Hash(Managers.Resource.Load<TextAsset>("MapData").text);
@@ -865,6 +880,9 @@ public class GameManager
         if (!Managers.Data.StageInfoDic.ContainsKey(snapshot.Player.CurStageid) ||
             !Managers.Data.PlayerDic.ContainsKey(snapshot.Player.Level))
             throw new InvalidDataException("Checkpoint stage or level is unavailable.");
+        // 탑의 법 판을 보통 표로 돌리지 않는다. 표가 없으면(잘못 구운 빌드) 거절만 한다 — 지우지 않는다.
+        if (!Managers.Data.HasMonsterTable(snapshot.Player.Mode))
+            throw new InvalidDataException("This checkpoint needs the Tower's Law monster table, which is missing.");
     }
 
     /// <summary>체크포인트를 불러 지금 판에 입힌다. file 이 null 이면 Checkpoint.json(없으면 .bak),
@@ -908,6 +926,10 @@ public class GameManager
             }
         }
         PlayerData = snapshot.Player;
+        PlayerData.EnsureLists();       // 장부(Ledger)가 없던 옛 체크포인트
+        // 몬스터 표는 불러온 판의 규칙을 따른다(Mode 가 없던 옛 체크포인트는 보통). 이어하기·다시 시작·체크포인트·죽음이
+        // 전부 여기를 거쳐 씬을 올리므로, 맵·몬스터·예측이 서기 전에 바뀐다.
+        Managers.Data.UseMonsterTable(PlayerData.Mode);
         Managers.Data.ApplyActive(snapshot.Active);
         foreach (var key in SaveStore.ProgressKeys)
         {
@@ -923,7 +945,8 @@ public class GameManager
         DefenceCoolTime = snapshot.DefenceCoolTime;
         KeyInventory.InitKeyInventory();
         ResetTransientState();
-        // 배속은 낀 목걸이가 정한다. 불러온 판에 없는 목걸이의 배속이 남지 않게 되돌린 뒤 다시 건다.
+        // 봇이 올려 둔 배속(GameSpeed 는 이제 봇 몫뿐이다 — 사람의 배속은 설정과 목걸이, UI_BattlePopup.Speed)을 걷고,
+        // 이동 속도를 불러온 판의 부츠로 다시 잰다.
         GameSpeed = 1;
         EquipUtility.Apply();
 
@@ -982,12 +1005,22 @@ public class GameManager
         Managers.Data.ResetActiveDic();
         PlayerData = new CurPlayerData();
         PlayerData.Clear();
+        Managers.Data.UseMonsterTable(PlayerData.Mode);     // 보통. 새 게임 흐름이 고른 규칙은 SetMode 가 건다
         KeyInventory.InitKeyInventory();
         AttackCount = 0;
         DefenceCoolTime = 0;
         PlayTime = 0;
         GameSpeed = 1;
         ResetTransientState();
+    }
+
+    /// <summary>새 판의 규칙(보통·탑의 법)을 정하고 몬스터 표를 그 규칙으로 바꾼다. 새 게임 흐름(UI_TitleScene)이
+    /// 판을 새로 세운 뒤(DeleteGameData → Clear 가 보통으로 되돌린 뒤)에 부른다. 체크포인트에 같이 남는다.
+    /// 적는 것은 표가 실제로 건 규칙이다 — 탑의 법 표 없이 탑의 법이라 적으면 보통 표로 돈 판의 체크포인트를
+    /// ValidateCheckpoint 가 거절해 첫 죽음에서 판이 막힌다. 규칙 창을 거치지 않는 길(봇·도구가 _mode 를 곧장 채운다)도 여기를 지난다.</summary>
+    public void SetMode(GameMode mode)
+    {
+        PlayerData.Mode = Managers.Data.UseMonsterTable(mode);
     }
 
     #endregion

@@ -8,9 +8,10 @@
 | 파일 | 무엇 |
 |---|---|
 | `README.md` | 이 문서 |
-| `achievements.csv` · `achievements.md` | 업적 20개(연결 15, 예정 5) — 다섯 언어 이름·설명, 숨김, 아이콘 파일 이름 |
+| `achievements.csv` · `achievements.md` | 업적 20개(모두 연결) — 다섯 언어 이름·설명, 숨김, 아이콘 파일 이름 |
+| `leaderboards.md` | 순위표 2개(보통·탑의 법) — 이름, 정렬, 점수의 자세한 값, 콘텐츠 버전마다 `_V` 올리기 |
 | `stats.md` | 통계 4개 |
-| `rich_presence/*.vdf` | 친구 목록에 "이끼 낀 지하 묘소 12층" 을 띄우는 언어별 파일 5개 |
+| `rich_presence/*.vdf` | 친구 목록에 "이끼 낀 지하 묘소 12층"(탑의 법이면 "탑의 법 · …")을 띄우는 언어별 파일 5개 |
 | `scripts/` | SteamPipe 업로드 — VDF 템플릿(본편·데모), `upload.ps1`, 채우는 법 |
 | `store/*.md` | 스토어 문구 — 한국어·영어·간체·번체·일본어 |
 | `deck.md` | Steam Deck 조작표, 글자 크기·fps 점검, 알려진 틈 |
@@ -34,8 +35,9 @@
 - [ ] 본편 앱: *Create new app* → **AppID** 를 적어 둔다.
 - [ ] 데모 앱: 본편 앱 랜딩 페이지 → *All associated packages, DLC, demos and tools* → **Add Demo** [S3]. AppID 가 따로 나온다.
       ('Create new app' 이 아니어서 크레딧을 쓰지 않는 것으로 알려져 있지만 공식 문서에 명시는 없다 — 만들 때 확인.)
-- [ ] 코드: `Assets/@Scripts/Managers/Core/SteamManager.cs` 의 **`AppId` 상수**(지금 0)를 본편 AppID 로 바꾼다.
-      0 이 아니면 릴리스 빌드를 Steam 밖에서 켰을 때 Steam 을 거쳐 다시 켜진다(`RestartAppIfNecessary`). 데모 AppID 는 D1(DEMO 정의)이 들어올 때.
+- [ ] 코드: `Assets/@Scripts/Managers/Core/SteamManager.cs` 의 **`GameAppId`**(본편)·**`DemoAppId`**(데모) 상수(지금 둘 다 0)에 적는다.
+      빌드가 쓰는 번호(`AppId`)는 DEMO 정의가 고른다. 0 이 아니면 릴리스 빌드를 Steam 밖에서 켰을 때 Steam 을 거쳐 다시 켜진다(`RestartAppIfNecessary`).
+      `GameAppId` 는 데모 끝 카드의 **찜하기** 단추도 쓴다 — 0 이면 단추가 없다(2.2). 둘이 같으면 `check_steam.py` 가 FAIL.
 - [ ] 저장소 루트 `steam_appid.txt`(지금 **480** = Valve 테스트 앱 Spacewar, Steamworks.NET 이 처음 깔릴 때 적었다)를 본편 AppID 로 바꾼다.
       에디터·로컬 시험 전용이다. 배포 depot 은 이 파일을 뺀다(`scripts/depot_build_*.vdf`).
 - [ ] **Depot**: App Admin → SteamPipe → Depots. 본편 하나, 데모 하나. OS Windows.
@@ -71,7 +73,8 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
 - [ ] Steam 클라이언트: 라이브러리 → TheSword → 속성 → 베타 → `beta`(비밀번호) → 받아서 2.1 을 한다.
 - [ ] 통과하면 App Admin → SteamPipe → Builds 에서 그 빌드를 **default** 에 켠다. 스크립트의 `SetLive` 로는 default 를 켤 수 없다 [S4].
       빌드 검토 전에 default 에 거의 최종 빌드가 있어야 한다 [S7].
-- 데모: 같은 순서에 `-Demo`. **DEMO 정의로 구운 빌드만** 올린다 — 본편을 데모 앱에 올리면 본편 전체가 무료로 풀린다. `upload.ps1 -Demo` 가 `demo` 를 쳐서 확인하게 한다.
+- 데모: 2.2 대로 `Build\WindowsDemo` 를 굽고 같은 순서에 `-Demo`. 본편을 데모 앱에 올리면 본편 전체가 무료로 풀린다 — 그래서 데모는 폴더가 따로다:
+  `Build\WindowsDemo` 는 DEMO 정의로 굽는 `GameBuild.WindowsDemo` 만 쓰고, `-Demo` 는 그 폴더만 올린다(`app_build_DEMO_APPID.vdf` 의 ContentRoot, `check_steam.py` 가 본다).
 
 ### 2.1 beta 스모크 테스트
 
@@ -83,6 +86,40 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
 - [ ] 처음 켤 때의 언어: 레지스트리 `HKCU\Software\CozyByte\TheSword` 에서 `SET_LANGUAGE` 로 시작하는 값을 지우고, Steam 의 게임 언어(게임 속성 → 일반 → 언어)를
       바꿔 켜면 그 언어로 뜬다(`SteamManager.DefaultLanguage`).
 - [ ] 클라우드(4절). Deck(`deck.md`).
+
+### 2.2 체험판 (MASTER_PLAN D1)
+
+같은 콘텐츠(지도·몬스터 표·이야기)에 **DEMO 정의**만 얹은 빌드다. 1단계는 본편과 같고, 2단계만 바꾼다:
+
+```bash
+Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.Prepare
+Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.WindowsDemo    # -> Build/WindowsDemo
+```
+
+- 에디터 메뉴로는 **TheSword → Build Windows Demo Player**.
+- DEMO 는 그 빌드의 스크립트 컴파일에만 붙는다(`BuildPlayerOptions.extraScriptingDefines`). 플레이어 설정의 정의 목록은 건드리지 않아서
+  되돌릴 것이 없다 — 에디터와 본편 빌드에는 DEMO 가 없다. 기호 폴더는 `Build/Symbols/<버전>-demo/` 로 따로 간다.
+- AppID: `SteamManager.DemoAppId`(데모 빌드가 Steam 을 거쳐 다시 켜질 때), `SteamManager.GameAppId`(찜하기가 여는 본편 스토어). 1절.
+
+**체험판에 든 것**
+- 1~20층 전부 — 숲(1~4층, 계약·킹 슬라임), 챕터 0 이끼 낀 지하 묘소(5~20층), 20층 보스와 렌의 반지(워프석)까지. 본편과 같은 판이다.
+- 20층에서 계단을 올라 **21층에 서면 끝 카드**(`UI_DemoEndPopup`, `DemoGate`): "체험판은 여기까지", 이번 판의 마검의 장부(예언·싸움에서
+  치른 값 — 스킬 없이 싸웠으면 둘이 같다. 제단에 바쳤으면 셋째 숫자 "제단" 으로 따로),
+  **찜 목록에 추가**(Steam 오버레이로 본편 스토어, Steam 이 없으면 브라우저, `GameAppId` 가 0 이면 단추 없음), **타이틀로**.
+  21층 체크포인트를 이어 해도 같은 카드가 뜬다. Esc·메뉴·워프·도감은 막힌다. 봇(`IsAutoPlaying`)은 막지 않는다.
+- 업적·통계·순위표·Rich Presence 는 **하나도 올리지 않는다**(`SteamHooks.Active`). 데모 앱에는 그것들을 만들지 않는다.
+- **저장은 본편이 잇는다 — 지도가 같은 동안만.** 체험판도 `LocalLow\CozyByte\TheSword` 에 쓴다(회사·제품 이름이 같다). 계단으로 오면 끝 카드는
+  `EnterFloor` 바로 앞의 HUD 갱신에서 뜨고, 21층 입구 체크포인트는 같은 호출 안에서 그 뒤에 적힌다.
+  같은 PC 에서 본편을 켜고 이어하기를 누르면 21층에서 계속된다 — **본편의 MapData 해시가 체험판과 같을 때만**이다. `ValidateCheckpoint` 는 해시가
+  다른 체크포인트를 거절한다(지우지는 않는다). 체험판을 낸 뒤 본편의 지도를 한 칸이라도 고치면 모든 체험판 저장이 막히므로 **K1(옛 MapData 를
+  해시별로 실어 맞는 것을 읽는다)이 체험판 출시를 막는 일이다** — 아니면 본편 지도를 체험판 것으로 얼린다. 그래서 끝 카드는 잇는다고 약속하지
+  않고 "저장은 21층 입구에 남아 있습니다" 라고만 한다(`Tools/ui_text_parts/steam2.py` 561, K1 이 들어오면 되돌린다). 이을 수 있으면 챕터 1 을 여는 이야기가 뜬다
+  (체험판은 그 장면을 틀기 전에 걷는다). 체험판에서 한 계약·잡은 보스(킹 슬라임·20층)·챕터 0 의 ★★★ 는 본편이 그 저장으로 층을 옮길 때 업적으로 풀린다.
+  다른 PC 로는 본편 출시 뒤 클라우드를 이을 때부터 넘어간다(4절).
+- 같은 폴더를 쓰니 본편을 하던 사람이 체험판에서 **새 게임**을 누르면 본편 저장이 지워진다 — 새 게임 확인 창("지금 저장이 지워집니다")이 막는 전부다.
+- 시험: 체험판 빌드로 새 게임 → 20층 보스 → 반지 → 계단 → 끝 카드. 장부 숫자(예언·치름, 제단을 샀으면 제단)가 뜨는지(스킬 없이 싸웠으면
+  예언 = 치름), 찜하기가 스토어를 여는지,
+  타이틀로 → 이어하기 → 다시 카드. 그다음 **본편 빌드**로 이어하기 → 21층에서 챕터 1 장면과 함께 계속된다.
 
 ## 3. 일정
 
@@ -144,16 +181,17 @@ App Admin → Application → **Steam Cloud** [S9].
 ## 5. 업적·통계·Rich Presence
 
 - [ ] **통계 먼저**(업적의 진행 통계가 통계를 가리킨다): `stats.md` 의 표대로 넷 → Publish.
-- [ ] **업적**: `achievements.md` 순서대로. 연결된 15개만 만든다. 아이콘 256×256 × 2장씩(아직 없다 — 임시 아이콘으로 먼저 넣어도 된다) → Publish.
+- [ ] **업적**: `achievements.md` 순서대로 20개. 아이콘 256×256 × 2장씩(아직 없다 — 임시 아이콘으로 먼저 넣어도 된다) → Publish.
+- [ ] **순위표**: `leaderboards.md` 대로 둘(오름차순·숫자, Trusted 끔, Community Name) → Publish.
 - [ ] **Rich Presence**: App Admin → Community → Rich Presence 에서 `rich_presence/` 의 다섯 파일을 하나씩 올린다 → Publish.
       언어별 파일(`"lang" { "Language" … "Tokens" { … } }`)도, 여러 언어를 한 파일에 넣어 한 번에 올리는 것도 문서에 있다 — 올린 파일에 든 언어만
       덮어쓴다 [S11]. 번역을 고친 언어만 다시 올리기 쉽게 나눠 두었다. 언어 이름은 `english`·`koreana`·`schinese`·`tchinese`·`japanese` [S12].
-- 게임이 보내는 키(`SteamHooks`): `steam_display` = `#S_Floor`, `floor` = 1~100, `chapter` = 0~4. (`mode` 도 보내지만 지금 파일은 쓰지 않는다.)
-  - `#S_Floor` → "{챕터 이름} {층}층". 게임 화면의 층 이름(ScriptData 5105~5200)과 같은 모양이다.
-  - `#S_Forest` → 1~4층(마물의 숲·잊혀진 숲·숲의 유적, ScriptData 5000~5003) 이름. **아직 코드가 쓰지 않는다** — stageId 0~3 에서 `steam_display` 를
-    `#S_Forest` 로 보내면 쓰인다. 그 전에는 1~4층이 "이끼 낀 지하 묘소 N층" 으로 보인다.
-  - `steam_display` 가 가리키는 토큰이 없으면 Rich Presence 가 아예 안 보인다 [S11]. 빈 문자열 토큰은 쓰지 않았다(되는지 문서에 없다).
-  - 탑의 법(L4)이 들어오면 `"#S_FloorTower" "탑의 법 · {#C_%chapter%} %floor%층"` 같은 줄을 다섯 파일에 더하고 코드가 그 토큰을 보내게 한다.
+- 게임이 보내는 키(`SteamHooks`): `steam_display`, `floor` = 1~100, `chapter` = 0~4, `mode` = `normal` · `tower`(`PlayerData.Mode`).
+  - `#S_Floor` → "{챕터 이름} {층}층" (5~100층). 게임 화면의 층 이름(ScriptData 5105~5200)과 같은 모양이다.
+  - `#S_Forest` → 1~4층(마물의 숲·잊혀진 숲·숲의 유적, ScriptData 5000~5003) 이름.
+  - 탑의 법이면 `#S_FloorTower` · `#S_ForestTower` — 앞에 규칙 이름(ScriptData 533, 새 게임의 규칙 고르기와 같은 글)과 " · " 를 붙인 것.
+    `mode` 는 토큰이 쓰지 않고 따로 보낸다 — 규칙마다 토큰을 따로 둔 까닭은 아래 줄.
+  - `steam_display` 가 가리키는 토큰이 없으면 Rich Presence 가 아예 안 보인다 [S11]. 빈 문자열 토큰(`{#M_%mode%}` 에 보통은 "")은 쓰지 않았다(되는지 문서에 없다).
 - [ ] `python Steam/check_steam.py` — 이름이 코드·게임 데이터와 어긋나면 FAIL.
 - 봇 실행과 데모는 아무것도 올리지 않는다(`SteamHooks.Active`).
 
@@ -234,12 +272,12 @@ App Admin → Application → **Steam Cloud** [S9].
 
 ## 9. 출시 체크리스트
 
-- [ ] K0 `CozyByte` 커밋, `SteamManager.AppId`·`steam_appid.txt` 에 본편 AppID
+- [ ] K0 `CozyByte` 커밋, `SteamManager.GameAppId`·`DemoAppId`, `steam_appid.txt` 에 본편 AppID
 - [ ] 세이브가 패치를 견딘다(K1 — 층 배치를 고친 패치가 옛 세이브를 거부하지 않는다). 안 되면 출시 뒤 첫 패치가 모든 진행을 막는다
 - [ ] 크레딧·고지: Silver 글꼴(Poppy Works, **CC BY 4.0 — 표기 의무**), DNF BitBit(표기 권장), MIT 고지(UIEffect, ParticleEffectForUGUI, **Steamworks.NET**)를
       크레딧이나 게임 폴더의 고지 파일로 싣는다(r07 — 지금 크레딧은 6줄뿐이다)
 - [ ] 버전 번호가 타이틀이나 메뉴에 보인다(r07)
-- [ ] 통계 4 → 업적 15 → Rich Presence 5 → Publish, `check_steam.py` 통과, 봇 한 판 뒤 풀린 업적 0
+- [ ] 통계 4 → 업적 20 → 순위표 2 → Rich Presence 5 → Publish, `check_steam.py` 통과, 봇 한 판 뒤 풀린 업적 0·순위표 기록 0
 - [ ] Steam Cloud 5줄, 두 PC 시험 1~4. 데모의 Shared cloud APP ID 는 0 — **출시일에** 본편 AppID 로 바꾸고 시험 5(4절)
 - [ ] Steam Input 공식 설정, Deck 점검(`deck.md`), 호환성 검토 신청(링크가 열려 있으면 — 6절)
 - [ ] 스토어: 문구 4~5개 언어, 캡슐·라이브러리 그림, 스크린샷 5장 이상, 트레일러, 태그, 지원 언어, 시스템 요구 사항(측정값)

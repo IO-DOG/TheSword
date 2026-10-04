@@ -53,7 +53,7 @@
 - 1~4층은 손수 만든 도입부라 `MapBuilder.IsHandAuthored`가 건너뛴다.
   `DirectingManager`가 그 층의 오브젝트를 **이름으로 직접** 찾으므로(`Items/CItem13`,
   `SpawnKingSlime`, `YellowSlimePos` …) 레이아웃을 새로 생성하면 인트로가 통째로 깨진다
-- 우두머리는 그림이 아니라 **덩치**(`MonsterBulk`: 정예 1.2, 보스 1.45)와 색으로 구분한다.
+- 우두머리는 그림이 아니라 **덩치**(`MonsterBulk`: 정예 1.2, 보스 2)와 색으로 구분한다.
   `Boss_C0_*` 애니메이션은 킹슬라임/분열 전용 — 생성 층에 내보내지 않는다
 - 챕터 분위기는 타일 틴트 + `DirectionalLight` 색 + BGM. **벽 아트와 BGM은 챕터 00 세트만 실재**한다.
   음악을 추가하면 `StageInfoData`의 BGM 열에 맞춰 어드레서블만 등록하면 `GameManager.PlayChapterBGM`이 집어간다

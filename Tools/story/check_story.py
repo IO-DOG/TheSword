@@ -44,6 +44,11 @@ CHAPTER_FIRST = {5, 21, 41, 61, 81}               # 이 층은 chapter_start 를
 MAX_LINES, SOFT_WIDTH = 3, 26
 TYPOS = ("외뢰서", "버텨기", "있을꺼야", "받친다")    # BRIEF 4절
 ITEMS = ("monster_book", "warp_ring", "key", "potion", "rune")
+# 도감 설명은 한 벌씩 따로 쓴다(STORY_BIBLE 13절). 예전 mob_desc 는 특성 문장 틀을 되풀이해 기계가 쓴 것처럼
+# 읽혔다 — 간혹 40번, 그중에는 40번. 그리고 같은 챕터·같은 그림도 띠마다 특성이 달라서
+# (generate_content.BAND_TRAITS) 설명에 규칙을 적으면 바로 위 특성 줄과 어긋난다. 규칙은 특성 줄이 말한다.
+DESC_TEMPLATES = ("간혹", "그중에는", "개중에는", "덩치 큰 놈", "셋이 함께", "셋이 설 때", "셋으로 나오는", "세 마리가 한 층")
+DESC_RULE_WORDS = ("치명타", "%", "예상 피해", "강타", "흡혈", "철벽", "방어력", "체력")
 SCENE_FIELDS = {"id", "kind", "trigger", "staging", "lines", "choices"}
 LINE_FIELDS = {"key", "speaker", "emotion", "image", "kr"}
 
@@ -54,6 +59,24 @@ def _nlines(text):
 
 def _text(v):
     return isinstance(v, str) and v.strip() != ""
+
+
+def repeated_sentences(texts):
+    """{자리: 문구} 에서 두 자리가 같이 쓰는 문장. 도감을 이어 읽으면 같은 문장이 틀로 보인다."""
+    seen, out = {}, []
+    for where, text in texts.items():
+        for s in re.split(r"(?<=[.!?。！？])\s*|\n", text if isinstance(text, str) else ""):
+            s = s.strip()
+            if s and seen.setdefault(s, where) != where:
+                out.append(f"'{s}' 가 {seen[s]} 와 {where} 에 같이 있다")
+    return out
+
+
+def _descs(b):
+    """도감에서 이어 읽히는 설명 — 몬스터(챕터:그림)와 보스."""
+    out = {f"mob_desc['{k}']": v for k, v in (b.get("mob_desc") or {}).items()}
+    out.update({f"bosses[chapter {r.get('chapter')}].desc": r.get("desc") for r in b.get("bosses") or []})
+    return out
 
 
 def trigger_error(trigger):
@@ -264,6 +287,16 @@ def check_bestiary(b, speakers):
         err.append(f"bestiary.mob_desc['{k}']: 모르는 키 (챕터 0~4 : 그림 0~9)")
     for k in sorted(want & set(mob)):
         need(mob, (k,), "mob_desc")
+        if not _text(mob[k]):
+            continue
+        for w in DESC_TEMPLATES:
+            if w in mob[k]:
+                err.append(f"bestiary.mob_desc['{k}']: 틀 문구 '{w}' — 설명은 그 종만의 것으로 쓴다")
+        for w in DESC_RULE_WORDS:
+            if w in mob[k]:
+                err.append(f"bestiary.mob_desc['{k}']: 규칙 낱말 '{w}' — 규칙은 특성 줄이 말한다 (띠마다 특성이 다르다)")
+        if _nlines(mob[k]) > 2:
+            warn.append(f"bestiary.mob_desc['{k}']: {_nlines(mob[k])}줄 — 한두 문장")
 
     bosses = b.get("bosses") or []
     if sorted(r.get("chapter") for r in bosses) != list(range(5)):
@@ -274,6 +307,7 @@ def check_bestiary(b, speakers):
         spoken = (speakers.get(f"boss{c}") or {}).get("kr")
         if spoken and row.get("name") and spoken != row["name"]:
             warn.append(f"bestiary.bosses[chapter {c}]: 이름 '{row['name']}' 이 화자 이름 '{spoken}' 과 다르다")
+    err += [f"bestiary: {x}" for x in repeated_sentences(_descs(b))]
 
     traits = b.get("traits") or []
     if [r.get("id") for r in traits] != list(range(9)):
@@ -356,6 +390,7 @@ def check_translation(kr, tr, lang):
     for k in kb.get("items", {}):
         for f in ("name", "desc"):
             field(f"items.{k}.{f}", ((tb.get("items") or {}).get(k) or {}).get(f))
+    err += [f"{lang}.bestiary: {x}" for x in repeated_sentences(_descs(tb))]
     return err, warn
 
 
@@ -395,6 +430,9 @@ def selftest():
         "네 줄": lambda d: first(d)["lines"][0].update(kr="가\n나\n다\n라"),
         "없는 화자": lambda d: first(d)["lines"][0].update(speaker="nobody"),
         "도감 빈칸": lambda d: d["bestiary"]["mob_desc"].pop("3:7"),
+        "도감 틀 문구": lambda d: d["bestiary"]["mob_desc"].update({"0:0": "간혹 이런 놈이 섞여 있다."}),
+        "도감 규칙 낱말": lambda d: d["bestiary"]["mob_desc"].update({"0:0": "평타는 20%만 들어간다."}),
+        "도감 같은 문장": lambda d: d["bestiary"]["mob_desc"].update({"0:1": d["bestiary"]["mob_desc"]["0:0"]}),
         "개작 빠짐": lambda d: d["prologue_rewrites"].pop("100031"),
         "개작 줄 수": lambda d: d["prologue_rewrites"].update({"100011": "뭐야?!\n뭐야?!"}),
         "결말 없는 선택지": lambda d: choice(d)["choices"].append({"id": "flee", "kr": "도망친다"}),
@@ -404,8 +442,13 @@ def selftest():
     e, _ = check_translation(doc, tr, "en")
     if not any("lines" in x for x in e):
         failed.append("번역 빈칸")
+    en = load("story_en.json")
+    twin = copy.deepcopy(en)
+    twin["bestiary"]["mob_desc"]["0:1"] = twin["bestiary"]["mob_desc"]["0:0"]
+    if len(check_translation(doc, twin, "en")[0]) <= len(check_translation(doc, en, "en")[0]):
+        failed.append("번역 도감 같은 문장")
     assert not failed, f"검사기가 못 잡았다: {failed}"
-    print(f"selftest 통과 — {len(cases) + 1}가지 고장을 모두 잡았다")
+    print(f"selftest 통과 — {len(cases) + 2}가지 고장을 모두 잡았다")
 
 
 def main(argv):

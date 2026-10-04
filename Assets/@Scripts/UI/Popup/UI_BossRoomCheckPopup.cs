@@ -62,8 +62,25 @@ public class UI_BossRoomCheckPopup : UI_Popup
         return true;
     }
 
-    // Esc 로는 닫히지 않는다. 예/아니오 중 하나를 골라야 한다.
-    public override bool OnEscape() => true;
+    // Esc 는 아니오(X) — 확인 창(UI_ConfirmPopup)과 같다. 닫는 길(NoClick)로 닫아야 대화 잠금이 풀린다.
+    // 버튼이 뜨기 전에는 마우스로도 못 고르니 삼키기만 한다.
+    public override bool OnEscape()
+    {
+        if (_locked && GetButton((int)Buttons.NoBtn).gameObject.activeSelf)
+            NoClick();
+        return true;
+    }
+
+    // Enter·Space 는 예(O) — 마우스 없이(스팀 덱의 A) 고를 수 있어야 한다. 버튼이 떠야 받는다(마우스와 같다).
+    // 맨 위일 때만, 이번 프레임에 창이 닫히지 않았을 때만 — 그 키는 닫힌 창의 것이다.
+    void Update()
+    {
+        if (_locked == false || Managers.UI.TopPopup != this || Managers.UI.ClosedThisFrame
+            || GetButton((int)Buttons.YesBtn).gameObject.activeSelf == false)
+            return;
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Space))
+            YesClick();
+    }
 
     // 이 창이 건 대화 잠금. 어떤 길로 사라지든 풀고 간다. (확인 창이 이 프리팹을 빌려 쓸 때는
     // 이 스크립트를 Init 전에 떼므로 잠금을 건 적이 없다 — 그때는 건드리지 않는다)

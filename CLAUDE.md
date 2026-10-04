@@ -106,7 +106,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 쓸 수 있는 애니메이션은 `Mob_C0_I000~I009` (대기)와 `Mob_C0_A000~A007`, `A009` (공격).
 **`Boss_C0_*` 는 킹 슬라임과 분열 3종 연출 전용이다 — 생성 층에 내보내지 않는다.**
-그래서 우두머리는 그림이 아니라 **덩치**(`MapBuilder.MonsterBulk`: 정예 1.2, 보스 1.45)와
+그래서 우두머리는 그림이 아니라 **덩치**(`MapBuilder.MonsterBulk`: 정예 1.2, 보스 2 — 정수 배라 픽셀이 고르다)와
 색으로 구분한다.
 
 같은 그림을 색으로 갈라 쓴다(`MonsterTint`): 색조=챕터, 진하기=층 안 서열,
@@ -175,6 +175,58 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
   서로 맞는지 본다.
 - **Shift 를 전투 키로 쓰지 않는다.** Shift+Tab 은 Steam 오버레이라 가속(Shift)과 건너뛰기(Tab)가 겹쳤다.
   가속은 Space 만, Deck 은 R2 → Space.
+- 업적 20개(`Steam/achievements.csv`)·통계 4·Rich Presence(`mode` normal/tower)·순위표 `LB_NORMAL_V1`/`LB_TOWER_V1`
+  (오름차순, 최고만). 점수는 받자마자 PlayerPrefs `STEAM_PENDING_SCORE` 에 적고 Steam 이 받았다고 할 때 지운다 —
+  Steam 없이 끝낸 판도 다음에 붙을 때 올라간다. 콘텐츠 판(MapData)을 바꾸면 `_V` 를 올린다.
+- **체험판**은 `GameBuild.WindowsDemo`(→ `Build/WindowsDemo`)가 `DEMO` 정의를 그 빌드에만 얹어 굽는다(플레이어 설정은
+  안 바뀐다). `DemoGate` 가 21층(20층 보스·반지 뒤)에서 끝 카드(`UI_DemoEndPopup`: 예언·치름·찜하기)를 띄운다.
+  **체험판 세이브가 본편으로 이어지려면 MapData 가 같아야 한다** — 그 사이에 레이아웃을 바꾸면 K1(옛 MapData 를 해시로
+  찾아 읽기)부터 넣는다. 그 전에는 끝 카드가 "이어진다" 고 약속하지 않는다(steam2.py 561).
+
+### 점수의 천장 — 마검의 장부·별·제단·탑의 법
+
+매직 타워 장르의 재미는 "깨기는 쉽고 만점은 어렵다" 이다(50층 H5 판은 리더보드가 64개다). 완주 보장(바닥)은 있었고
+천장이 없었다. 그래서 **치른 값을 센다.**
+
+- `SwordLedger` — 상태(`LedgerState`)는 `CurPlayerData.Ledger` 라 체크포인트와 같이 저장·복원된다. 이긴 싸움마다
+  치른 HP(`LastBattle` 의 전후 HP + 레벨업으로 는 최대 HP 보정 — 흡혈로 되찾은 것은 이미 빠져 있다), 예측, 기준 값
+  (`MonsterData.ParLoss`, 고른 표의 것)을 더한다. **기준 값이 있는 싸움만**(생성 몬스터) 센다 — 1~4층 도입부 299 HP 를
+  넣으면 모두 첫 결산부터 별 하나였다. **지나온 층의 싸움은 치른 값만** 더하고 기준 값은 안 더한다(100층 보스 뒤 워프해서
+  곁길을 쓸면 점수가 좋아지던 구멍). 제단에 낸 HP 는 `Paid`·`AltarPaid` 로 들어간다.
+- 층 닫기는 `PortalController` 가 **체크포인트를 쓰기 전에** `EnterNewFloor` 로 한다(`FloorEntered` 는 체크포인트 뒤에
+  온다 — 거기서 지우면 옛 층 합계가 체크포인트에 남아 다시 불러올 때 두 번 셌다). 처음 오는 층에서만, 워프·내려가기는 닫지 않는다.
+- **띠 결산**(`UI_TallyPopup`): 띠(다섯 층)의 마지막 층 위 계단을 처음 오를 때 — 별(★ 깸, ★★ 치름 ≤ 기준, ★★★ 치름 ≤
+  기준×0.7), 예언·치름·기준, 다음 띠의 특성(처음 나오는 것은 금색). 같은 창에 **제단**: `StageInfoData.Altar*` 로
+  `generate_content.altar_sells` 와 **같은 식**(배정밀도, 같은 순서)으로 판다 — 내는 HP 는 내림. 기본 선택은 "지나간다",
+  봇은 0.3초 만에 지나간다. 마우스는 창이 뜨고 0.4초 뒤부터 받는다(계단을 두 번 누른 클릭이 사 버렸다).
+- **판 끝**: 100층 보스를 쓰러뜨리면 계단 없이 `StoryDirector.CoEnding` 이 바로 돌므로, 거기서 마지막 띠를 닫고
+  `FinishRun` 이 점수 = round(1000·치름/기준)(낮을수록 좋다)를 **판(RunId)마다 한 번** `RunScored` 로 알린다
+  (`Records` 최고 점수·순위표·`ACH_DAWN_PAR`). 엔딩 씬이 판 카드를 보인다. 계단 쪽에도 같은 호출이 있다 — 장부가 두 번 세지 않는다.
+- HUD 의 배부름 게이지: "Lv 58 기준 56 (+2)"(`StageInfoData.ParLevelIn`), 90층부터 "왕좌에서 Lv {DawnLevel}" — 참 결말의
+  문턱이 더는 숨어 있지 않다. 탑의 법이면 배지.
+- **탑의 법**: 새 게임에서 고른다(`UI_ModePopup`, 기본 보통). `CurPlayerData.Mode` 가 체크포인트에 남고,
+  `DataManager.UseMonsterTable` 이 새 게임·이어하기·죽음·다시 시작·체크포인트 목록 **모두에서 층을 짓기 전에** 표를 바꾼다.
+  봇으로 재려면 플레이가 뜬 뒤 `AutoPlayer.StartMode = GameMode.Tower;`.
+
+- 장부의 판 번호(`LedgerState.RunId`)는 **새 게임에서만** 붙는다. 장부가 없던 옛 체크포인트를 불러온 판은 점수를 내지 않는다 —
+  불러올 때마다 새 번호가 붙어 같은 판을 몇 번이고 순위표에 올릴 수 있었다.
+
+### 클릭 이동과 패드
+
+바닥을 누르면 걸어간다(두 번 누르면 3배). 길찾기는 봇과 **같은 격자·BFS**(`PathMover`, AutoPlayer 가 쓰던 것을 옮겼다)이고
+걸음은 키보드와 같은 `Moving` 이라 줍기·문·싸움 규칙이 그대로 돈다. 몬스터·문·계단은 **지나가지 않고** 옆 칸까지 가서
+한 번 부딪힌다(싸움은 `FightGate` 를 지나니 "그래도 싸울까" 가 그대로 뜬다). 아무 키·새 클릭·창·대사·전투가 멈춘다.
+계약 창·보스방 창도 Enter/Space 로 답한다 — 앞 대사를 닫은 그 키 한 번이 계약까지 하지 않게 같은 프레임은 거른다.
+- "내가 눌렸다" 판정은 몸 스프라이트의 **그려진 픽셀**(`sprite.vertices`)로 한다. 128×128 틀 전체(키높이 2배 스케일)로 잡았더니
+  주인공 둘레 4×5 칸이 "자기 자신" 이 되어 옆의 몬스터·계단을 눌러도 멈췄다.
+- 떨어진 장비의 콜라이더는 한 칸 폭(0.32)으로 좁힌다(`Equip.Start`) — 0.5 였을 때 둘레 3×3 칸을 막아 40층 보스 뒤 룬에 클릭으로
+  갈 수 없었고, 두 칸 떨어져서도 주워졌다. 소비 아이템 콜라이더는 아직 북쪽으로 0.096 밀려 있다(봇 경로가 바뀌어 손대지 않았다).
+
+### 타이틀 선로드가 0% 에서 멈추면
+
+에디터에서 새로 플레이할 때 `LoadResourceLocationsAsync("PreLoad")` 의 콜백이 영영 안 오는 일이 있었다(3번 중 3번).
+`UI_TitleScene` 이 10초 동안 아무것도 못 읽으면 경고를 찍고 다시 부른다(`_loadRun` 으로 늦게 온 옛 콜백은 버린다).
+원인은 Addressables 안쪽으로 보이고, 이것은 우회다 — 빌드는 첫 로딩이 0.15초라 걸리지 않는다.
 
 ### MCP 가 물렸을 때
 
@@ -201,6 +253,10 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
 `MonsterTint` 가 `id % 8` 을 그대로 서열로 쓰면 같은 놈 셋이 서로 다른 진하기로 나와
 **다른 종으로 읽힌다** — `SpeciesRank` 로 묶음의 첫 자리에 되돌린다. 정예(자리 4)는
 몸집이 1.2 라 혼자 세워야 그 표시가 거짓말이 되지 않는다.
+
+**전투 이펙트는 특성이 정한다**(`generate_content.TRAIT_FX`: 베기 색 = 특성, 맞는 모양 = 특성, 정예는 더 크게, 보스는
+`FX_WeaponHit_04`). 예전에는 502줄 중 494줄이 같은 베기였다. 보스 전투는 카드가 0.5초에 걸쳐 다가오고, HP 절반에서
+한 번 붉게 맥박치며 흔들린다(`UI_MonsterCard` — 전투 시계·계산은 안 건드린다).
 
 **HP 를 지속시간으로 푸는 것이 안 되는 상대가 있다.** 암살·불사는 치명타가 아닌 공격을
 흘려서, HP 를 아무리 낮춰도 전투가 "치명타를 기다리는 시간" 만큼 걸린다. 이분 탐색이
@@ -380,7 +436,7 @@ Unity.exe -projectPath . -executeMethod MapDecoSetup.Build
 `BattleStepper` 를 한 프레임에 끝까지 돌리고(한 대마다의 연출만 끈다) 끝은 보통 전투와 같은 길(`UI_MonsterCard.Dead`
 → 경험치·드랍·`MarkDead`)로 간다 — 그래서 결과가 예측 그대로다. 치명타 수업(3~4층)을 본 뒤, 보스가 아닐 때만 열린다.
 봇은 `AutoPlayer.ForceSkipAll = true` 로 건너뛰며 돌 수 있고, 줄 끝에 "(건너뜀)" 을 붙여 예측 대조를 그대로 찍는다.
-목걸이(전투 배속)는 설정보다 낮을 때만 의미가 있다 — 설정이 자유라서. 효과음 높이는 배속을 따르되 1.3 에서 멈춘다.
+목걸이는 이제 배속을 주지 않는다 — 설정이 자유라서 1배를 고르면 1배다. 효과음 높이는 배속을 따르되 1.3 에서 멈춘다.
 
 **방어 게이지는 플레이어 전용 전역이다.** `Managers.Game.DefenceCoolTime` 은
 `UI_PlayerCard` 만 누적하는데, 부모의 `ClearDefence` 가 그것까지 지우고 있었다.

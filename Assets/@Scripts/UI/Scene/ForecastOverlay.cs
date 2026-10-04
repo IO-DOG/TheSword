@@ -427,6 +427,8 @@ public class ForecastOverlay : MonoBehaviour
                     j = -1;
                 }
             }
+            // 보스는 덩치 2 라(MapBuilder.MonsterBulk) 화면 위쪽에 서면 머리 위 숫자가 화면 밖으로 나갔다 — 위 가장자리 안에 붙든다.
+            at.y = Mathf.Min(at.y, Screen.height - label.Size.y * scale);
             if ((at - label.Last).sqrMagnitude > 0.01f || float.IsNaN(label.Last.x))
             {
                 label.Last = at;

@@ -31,7 +31,7 @@ public class UI_PlayerCard : UI_BaseCard
 
         //GetImage((int)Images.AttackIcon).sprite = Managers.Resource.Load<Sprite>(Managers.Data.MonsterClassDic[_creature.Ability].Weapon + "[" + Managers.Data.MonsterClassDic[_creature.Ability].Weapon + "_0]");
 
-        GetText((int)Texts.HPBarText).text = _creature.CurHP.ToString();
+        GetText((int)Texts.HPBarText).text = Mathf.CeilToInt(_creature.CurHP).ToString();   // 야수의 회복 등으로 소수가 남으면 "231.6" 이 찍혔다
         GetImage((int)Images.HPHar).fillAmount = _creature.CurHP / _creature.MaxHP;
         GetImage((int)Images.HPHarGauge).fillAmount = _creature.CurHP / _creature.MaxHP;
         GetImage((int)Images.CreatureSwordImage).gameObject.GetComponent<Animator>().Play($"UISword{Managers.Game.PlayerData.CurSword - Define.EQUIP_SOWRD_FIRST}IdleAnim");

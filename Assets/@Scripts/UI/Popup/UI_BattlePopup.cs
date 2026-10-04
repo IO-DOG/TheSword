@@ -67,7 +67,7 @@ public class UI_BattlePopup : UI_Popup
     /// 지금 전투 시계가 FixedUpdate 한 번에 몇 걸음 도는가. 걸음 수만 늘리므로 결과는 같다 — 예측(BattleForecast)도 같은 시계다.
     ///   봇이 돌면                   봇의 값 (AutoPlayer 가 GameManager.GameSpeed 에 8·16 을 넣는다) — 녹화·검증은 예전 그대로
     ///   Space 를 누르는 동안        8
-    ///   그 밖에는                   설정(GameSettings.BattleSpeed 1·2·4)과 낀 목걸이(EquipUtility.NecklaceSpeed) 중 큰 쪽
+    ///   그 밖에는                   설정(GameSettings.BattleSpeed 1·2·4) — 1배를 고르면 1배다(목걸이는 이제 배속을 주지 않는다)
     /// 전투 소리의 높이(SoundManager)도 이것을 따른다.
     /// </summary>
     public static int Speed
@@ -78,7 +78,7 @@ public class UI_BattlePopup : UI_Popup
                 return Mathf.Max(1, Managers.Game.GameSpeed);
             if (Input.GetKey(KeyCode.Space))
                 return HoldSpeed;
-            return Mathf.Max(GameSettings.BattleSpeed, EquipUtility.NecklaceSpeed);
+            return GameSettings.BattleSpeed;
         }
     }
 

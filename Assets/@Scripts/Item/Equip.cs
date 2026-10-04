@@ -34,6 +34,11 @@ public class Equip : MonoBehaviour
 
     private void Start()
     {
+        // 프리팹 콜라이더가 0.5 라 옆 칸 탐침(PathMover)까지 걸려 둘레 3x3 이 막혔다 — 클릭 이동이 떨군 장비 옆 칸에 서지 못해
+        // 40층 둘 중 하나 룬에 못 갔다. 두 칸 밖에서 민 광선(0.416)도 겉면(0.25)에 닿는다. 가로·깊이만 한 칸으로 — 높이는 미는 광선 몫이라 그대로.
+        BoxCollider box = GetComponent<BoxCollider>();
+        if (box != null)
+            box.size = new Vector3(Define.TILE_SIZE, box.size.y, Define.TILE_SIZE);
         GetComponent<Animator>().Play($"EquipItem_{Id}");
         GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>(Managers.Data.EquipDic[Id].Shadow);
     }

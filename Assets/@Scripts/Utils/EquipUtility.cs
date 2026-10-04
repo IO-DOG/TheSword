@@ -20,15 +20,14 @@ public static class EquipUtility
     public const int AbilityWarp = 1;          // 워프석 반지
     public const int AbilityMoveFirst = 2;     // 부츠 2~5
     public const int AbilityMoveLast = 5;
-    public const int AbilitySpeedFirst = 6;    // 목걸이 6~9
-    public const int AbilitySpeedLast = 9;
+    // 목걸이(능력 6~9)는 예전 전투 배속 등급이다. 배속이 설정(GameSettings.BattleSpeed)이 되며 효과를 뺐다 —
+    // 킹 슬라임의 모래시계 목걸이는 기념품이고(4014), 40/60/80층 목걸이는 크기 룬 둘 중 하나로 바뀌었다.
 
     // 등급별 배수. 1등급이 가장 약하다.
     static readonly float[] MoveScale = { 1.15f, 1.30f, 1.45f, 1.60f };
 
     /// <summary>부츠를 신기 전의 이동 속도 — GameScene 이 들어설 때마다 넣는 값이다.</summary>
     const float BaseMove = 1f;
-    static readonly int[] BattleSpeed = { 2, 3, 4, 5 };
 
     /// <summary>워프를 쓸 수 있는가 (워프석 반지를 끼고 있는가).</summary>
     public static bool WarpUnlocked
@@ -36,26 +35,11 @@ public static class EquipUtility
         get { return AbilityOf(Managers.Game.PlayerData.CurRing) == AbilityWarp; }
     }
 
-    /// <summary>
-    /// 낀 목걸이의 전투 배속 (없으면 1). 배속은 이제 설정(GameSettings.BattleSpeed)이 처음부터 주므로, 목걸이는
-    /// 그 설정보다 높을 때만 값을 한다 — UI_BattlePopup.Speed 가 둘 중 큰 쪽을 쓴다. 예전처럼 GameManager.GameSpeed 에
-    /// 쓰지 않는다: 그 칸은 이제 봇(AutoPlayer)의 배속만 든다.
-    /// </summary>
-    public static int NecklaceSpeed
-    {
-        get
-        {
-            GameManager.CurPlayerData p = Managers.Game.PlayerData;
-            int neck = p == null ? 0 : AbilityOf(p.CurNecklace);
-            return neck >= AbilitySpeedFirst && neck <= AbilitySpeedLast ? BattleSpeed[neck - AbilitySpeedFirst] : 1;
-        }
-    }
-
     /// <summary>착용 중인 장비의 유틸 효과를 지금 상태에 반영한다.
     ///
     /// 스탯(ATK/DEF/HP…)은 SwapEquip 이 착용/해제 때 더하고 뺀다. 여기서 다루는 것은
     /// 그렇게 누적하면 안 되는 것 — 이동 속도는 "지금 신은 것" 하나로 정해져야 해서,
-    /// 매번 기준값에서 다시 계산한다. (목걸이의 전투 배속은 NecklaceSpeed 가 그때그때 읽는다.)</summary>
+    /// 매번 기준값에서 다시 계산한다.</summary>
     public static void Apply()
     {
         GameManager.CurPlayerData p = Managers.Game.PlayerData;

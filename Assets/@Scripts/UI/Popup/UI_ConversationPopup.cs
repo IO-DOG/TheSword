@@ -1,4 +1,5 @@
 using Data;
+using DG.Tweening;
 using Febucci.UI;
 using System;
 using TMPro;
@@ -57,6 +58,16 @@ public class UI_ConversationPopup : UI_Popup
     float _autoTimer;
     // 글을 바꾼 프레임. 타자기가 새 글을 받기 전 한두 프레임은 옛 글을 두고 "다 보였다" 고 답한다.
     int _textFrame;
+
+    // 말하는 쪽 초상화(데미안·마검)가 숨을 쉰다 — 표정 그림이 들어올 때까지의 대역이다. 427줄 내내 얼굴이 굳어 있었다.
+    // 화면 픽셀 단위로 끊어 오르내린다. 캔버스 배율은 해상도마다 달라서(1280x800 0.70, 1440p 1.33) 캔버스 단위로 끊으면
+    // 한 칸이 0.7·1.33 픽셀이 되고, 그때마다 초상화의 자식인 감정 풍선(점 필터 도트)이 모양을 바꿔 떨렸다.
+    // 정수 픽셀만큼 옮긴 그림은 옮기기 전 그림과 한 점도 다르지 않다. 보스는 제 대기 애니메이션이 있어 두지 않는다.
+    const float BreathRise = 2f;            // 캔버스 단위. 화면 픽셀로 반올림한다 — 1080p 2, 800p 1, 1440p 3
+    const float BreathSeconds = 1.8f;       // 들이쉬는 데 (한 번 오가는 데 3.6초)
+    Tween _breath;
+    RectTransform _breather;
+    Vector2 _breathBase;
 
     // 오른쪽 자리는 마검과 보스가 나눠 쓴다. 보스는 전투창의 애니메이션을 그대로 튼다.
     Animator _bossAnim;
@@ -204,6 +215,7 @@ public class UI_ConversationPopup : UI_Popup
     // 초상화를 먼저 켠다 — 감정 아이콘이 그 자식이라, 꺼진 채 튼 감정은 버려지고 켜질 때 기본 상태(AHA)가 떴다.
     private void ShowCurrentScript()
     {
+        StopBreath();
         if (!string.IsNullOrEmpty(Managers.Data.EventDic[Managers.Game.CurEventID].IllustLeft))
         {
             string[] speaker = Managers.Data.EventDic[Managers.Game.CurEventID].IllustLeft.Split('_');
@@ -216,6 +228,7 @@ public class UI_ConversationPopup : UI_Popup
             GetImage((int)Images.LeftPortrait).sprite = Managers.Resource.Load<Sprite>(speaker[1]);
             GetImage((int)Images.RightPortrait).color = Color.gray;
             GetImage((int)Images.LeftPortrait).color = Color.white;
+            Breathe(GetImage((int)Images.LeftPortrait));
 
             GetText((int)Texts.SpeakerText).text = Managers.GetString(Define.PLAYER_DEFAULT_NAME);
         }
@@ -233,6 +246,7 @@ public class UI_ConversationPopup : UI_Popup
             GetImage((int)Images.RightPortrait).SetNativeSize();
             GetImage((int)Images.LeftPortrait).color = Color.gray;
             GetImage((int)Images.RightPortrait).color = Color.white;
+            Breathe(GetImage((int)Images.RightPortrait));
 
             GetText((int)Texts.SpeakerText).text = Managers.GetString(Define.SWORD_DEFAULT_NAME);
         }
@@ -325,6 +339,7 @@ public class UI_ConversationPopup : UI_Popup
         _line = index;
         StoryLine line = _story.Lines[index];
         StorySpeaker who = line.Who;
+        StopBreath();       // 마검·보스 자리를 옮기기 전에 — 늦게 되돌리면 옮긴 자리를 옛 자리로 덮는다
         Image left = GetImage((int)Images.LeftPortrait);
         Image right = GetImage((int)Images.RightPortrait);
         GameObject leftEmoji = GetObject((int)GameObjects.LeftEmoji);
@@ -356,6 +371,10 @@ public class UI_ConversationPopup : UI_Popup
         }
         left.color = who.Portrait == StoryPortrait.Damian ? Color.white : Dim;
         right.color = who.Portrait == StoryPortrait.Sword || who.Portrait == StoryPortrait.Boss ? _rightColor : _rightDim;
+        if (who.Portrait == StoryPortrait.Damian)
+            Breathe(left);
+        else if (who.Portrait == StoryPortrait.Sword)
+            Breathe(right);
 
         GetObject((int)GameObjects.Speaker).SetActive(narration == false);
         if (narration == false)
@@ -381,6 +400,31 @@ public class UI_ConversationPopup : UI_Popup
         emoji.SetActive(string.IsNullOrEmpty(state) == false && animator != null);
         if (emoji.activeInHierarchy)
             animator.Play(state);
+    }
+
+    // 숨 쉬는 트윈은 창(gameObject)에 묶여 있어 창이 닫히면(끝까지 넘기기·건너뛰기·씬 전환) 같이 멎는다.
+    void Breathe(Image portrait)
+    {
+        StopBreath();
+        if (portrait == null || portrait.gameObject.activeInHierarchy == false || portrait.canvas.scaleFactor <= 0f)
+            return;
+        float pixel = portrait.canvas.scaleFactor;     // 캔버스 단위 1 = 화면 몇 픽셀 (초상화의 부모 EntireObject 는 배율 1)
+        float rise = Mathf.Max(1f, Mathf.Round(BreathRise * pixel));
+        RectTransform rt = _breather = portrait.rectTransform;
+        Vector2 rest = _breathBase = rt.anchoredPosition;
+        // DOVirtual.Float 은 OnUpdate 로 이 콜백을 부른다 — 이 트윈에 OnUpdate 를 또 걸면 숨이 멎는다.
+        _breath = DOVirtual.Float(0f, rise, BreathSeconds, px => rt.anchoredPosition = rest + new Vector2(0f, Mathf.Round(px) / pixel))
+            .SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo).SetLink(gameObject);
+    }
+
+    // 앞 줄의 숨을 멎게 하고 제자리로 되돌린다.
+    void StopBreath()
+    {
+        _breath?.Kill();
+        _breath = null;
+        if (_breather != null)
+            _breather.anchoredPosition = _breathBase;
+        _breather = null;
     }
 
     static void SetLeftDamian(Image left)

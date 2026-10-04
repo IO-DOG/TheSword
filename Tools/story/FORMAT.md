@@ -55,7 +55,8 @@
   `TowerGraves`(탑 밑동의 무덤과 꽂힌 검) `Parchment`(양피지, 글만 보일 때) `ForestLine` `ForestColor`
   `Loading1`~`Loading6`(치비 삽화) `GameOver1` `Ending`(숲의 빛 속 검을 든 데미안)
 - `bark`: 대화창을 열지 않고 화면 위쪽에 잠깐 뜨는 한 줄. **움직임을 막지 않는다.**
-  같은 트리거에 여러 장면을 두면 그중 하나가 무작위로 나온다(변주).
+  같은 트리거에 여러 장면을 두면 변주가 된다. 층 유형 바크는 `story_gen` 이 층마다 변주를 돌려 미리 정하고(`GeneratedStory.FloorBarks`),
+  죽음 바크는 그중 하나가 무작위로 나온다.
 - `choice`: `lines` 로 상황을 말한 뒤 선택지를 띄운다.
   `"choices": [ { "id": "seal", "kr": "검을 왕좌에 꽂는다" }, { "id": "take", "kr": "..." } ]`
   선택 결과는 `ending:<choice id>` 트리거의 장면으로 이어진다.
@@ -68,10 +69,10 @@
 | `prologue:contract_after` | 계약 연출이 끝난 직후 (3층) |
 | `prologue:kingslime_reveal` | 킹 슬라임 등장 연출 직후, 전투 전 (4층) |
 | `prologue:kingslime_clear` | 분열 슬라임을 다 잡은 뒤 (4층) |
-| `village` | 4층 계단을 올라 5층에 처음 들어가기 직전. 카드 + 대화 |
+| `village` | 4층 계단을 올라 5층에 처음 들어가기 직전. 카드 셋뿐이다(탑 · 떨어진 밤 · 칼 꽂힌 무덤). 촌장과 두 번째 무덤 카드는 6층 `floor_first:6` |
 | `chapter_start:<c>` | 챕터 c(0~4)의 첫 생성 층(5·21·41·61·81)에 처음 들어섰을 때 |
 | `floor_first:<n>` | n층에 처음 들어섰을 때 (5~100, 챕터 첫 층은 위 트리거를 쓴다) |
-| `trait_first:<t>` | 특성 t 몬스터가 있는 층에 처음 들어섰을 때. t = beast magic guardian immortal knight titan assassin armor |
+| `trait_first:<t>` | 특성 t 몬스터에게 **처음 부딪혔을 때**, 싸움 직전(보스 등장 뒤, 첫 ✖ 수업 앞). 들어설 때가 아니다. 첫 층은 `generate_content.BAND_TRAITS` 가 정한다(바이블 부록 A.3). t = beast magic guardian immortal knight titan assassin armor |
 | `floor_type:<t>` | 그 유형의 층에 들어설 때 가끔 (bark 전용). t = basic stingy gate plenty treasure |
 | `mechanic_first:<m>` | m 을 처음 겪을 때. m = forecast(첫 예측 표시) fatal(처음으로 ✖ 상대에게 부딪힘) overflow(물약이 넘침) vault(금고 문 앞) spare_key(여분 열쇠 획득) choice(둘 중 하나 보상 앞) rune(첫 룬) nokey(열쇠 없이 문에 부딪힘) warp(워프석 반지 획득) death(처음 죽고 되살아났을 때) crit(치명타 한 대 전) levelup(첫 레벨업, 5층 이후) |
 | `death` | 죽고 되살아날 때마다 (bark, 변주) |
@@ -88,7 +89,7 @@
 "bestiary": {
   "chapters": [ { "name": "이끼 낀 지하 묘소", "subtitle": "챕터 카드 부제", "mob_prefix": "이끼" }, ... 5개 ],
   "species": [ { "art": 0, "name": "슬라임" }, ... art 0~9 순서 ],
-  "mob_desc": { "<chapter>:<art>": "그 챕터 그 종의 도감 설명 (2~3문장)" },
+  "mob_desc": { "<chapter>:<art>": "그 챕터 그 종의 도감 설명 (한두 문장, 규칙 없이 — 바이블 13절)" },
   "bosses": [ { "chapter": 0, "name": "보스 이름", "title": "칭호", "desc": "도감 설명" }, ... 5개 ],
   "traits": [ { "id": 0, "name": "없음", "desc": "..." }, { "id": 1, "name": "야수", "desc": "정확한 규칙 + 공략 한 줄" }, ... 0~8 ],
   "items": { "monster_book": { "name": "...", "desc": "..." }, "warp_ring": {...}, "key": {...}, "potion": {...}, "rune": {...} }

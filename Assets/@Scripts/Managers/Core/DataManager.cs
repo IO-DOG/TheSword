@@ -33,12 +33,25 @@ public class DataManager
     public Dictionary<int, bool> LeverActiveDic { get; set; } = new Dictionary<int, bool>();
     public Dictionary<int, bool> DoorActiveDic { get; set; } = new Dictionary<int, bool>();
 
+    // 몬스터 표 둘 — 보통(MonsterData)과 탑의 법(MonsterData_Tower). 같은 id·그림에 싸움의 값만 다르다(validate_content).
+    // MonsterDic 은 판의 규칙(CurPlayerData.Mode)에 맞는 쪽을 가리킨다 — UseMonsterTable.
+    const string TowerMonsterTable = "MonsterData_Tower";
+    Dictionary<int, Data.MonsterData> _normalMonsters = new Dictionary<int, Data.MonsterData>();
+    Dictionary<int, Data.MonsterData> _towerMonsters;
+
     public void Init()
     {
         //AssetDatabase.Refresh();
 
         PlayerDic = LoadJson<Data.PlayerDataLoader, int, Data.PlayerData>("PlayerData").MakeDict();
-        MonsterDic = LoadJson<Data.MonsterDataLoader, int, Data.MonsterData>("MonsterData").MakeDict();
+        _normalMonsters = LoadJson<Data.MonsterDataLoader, int, Data.MonsterData>("MonsterData").MakeDict();
+        // 탑의 법 표가 캐시에 없으면(PreLoad 를 손으로 고르는 에디터 도구, 잘못 구운 빌드) 보통만 연다. 그 판의 체크포인트는
+        // GameManager.ValidateCheckpoint 가 거절하고, 타이틀은 규칙을 묻지 않는다 — 보통 표로 탑의 법을 돌리지 않는다.
+        _towerMonsters = Managers.Resource.Load<TextAsset>(TowerMonsterTable) != null
+            ? LoadJson<Data.MonsterDataLoader, int, Data.MonsterData>(TowerMonsterTable).MakeDict() : null;
+        if (_towerMonsters == null)
+            Debug.LogWarning($"[Data] {TowerMonsterTable} 가 없다 — 탑의 법을 고를 수 없다");
+        MonsterDic = _normalMonsters;
         ConsumableItemDic = LoadJson<Data.ConsumableItemDataLoader, int, Data.ConsumableItemData>("ConsumableItemData").MakeDict();
         MonsterClassDic = LoadJson<Data.MonsterClassDataLoader, int, Data.MonsterClassData>("MonsterClassData").MakeDict();
         MapDic = LoadJson<Data.MapDataLoader, int, Data.MapData>("MapData").MakeDict();
@@ -48,6 +61,25 @@ public class DataManager
         EventDic = LoadJson<Data.EventDataLoader, int, Data.EventData>("EventData").MakeDict();
 
 
+    }
+
+    /// <summary>그 규칙의 몬스터 표가 올라와 있는가. 보통은 늘 있다.</summary>
+    public bool HasMonsterTable(GameMode mode) => mode != GameMode.Tower || _towerMonsters != null;
+
+    /// <summary>
+    /// 판의 규칙에 맞는 몬스터 표로 바꾸고, 실제로 건 규칙을 돌려준다(표가 없으면 보통). PlayerData 가 바뀌는 곳
+    /// (GameManager.LoadGame·ResetRun·SetMode)이 부른다 — 맵·몬스터·예측은 전부 MonsterDic 을 그때그때 읽으니,
+    /// 씬을 올리기 전에만 바꾸면 한 판이 한 표로 돈다.
+    /// </summary>
+    public GameMode UseMonsterTable(GameMode mode)
+    {
+        if (HasMonsterTable(mode) == false)
+        {
+            Debug.LogError($"[Data] {TowerMonsterTable} 없이 {mode} 판을 세운다 — 보통 표로 돈다");
+            mode = GameMode.Normal;
+        }
+        MonsterDic = mode == GameMode.Tower ? _towerMonsters : _normalMonsters;
+        return mode;
     }
 
     Loader LoadJson<Loader, Key, Value>(string path) where Loader : ILoader<Key, Value>

@@ -70,6 +70,8 @@ public class UI_EndingScene : UI_Scene
             yield return line.DOFade(0f, 1.5f).SetLink(gameObject).WaitForCompletion();
         }
 
+        yield return CoRunCard();
+
         // 엔딩 씬 파일에는 BaseScene(EndingScene)이 없고 이 UI 만 놓여 있다. Managers.Scene.LoadScene 과 Managers.Clear 는
         // 지금 씬(CurrentScene)부터 찾아서 여기서는 null 예외로 멈췄고, 결말 뒤 까만 화면에서 영영 못 나갔다.
         // 씬 없이 같은 것을 비운다.
@@ -77,6 +79,75 @@ public class UI_EndingScene : UI_Scene
         Managers.UI.Clear();
         Managers.Pool.Clear();
         SceneManager.LoadScene(nameof(Define.Scene.TitleScene));
+    }
+
+    // 판 카드 문구 (Tools/ui_text_parts/ledger.py)
+    const int CardTitle = 500;      // 마검의 장부
+    const int CardExtra = 501;      // 제단 {0}  넘친 회복 {1}
+    const int CardScore = 502;      // 점수 {0}
+    const int CardLower = 503;      // 낮을수록 좋다
+    const int CardChapter = 504;    // {0}장
+    const int AnyKey = 143;         // 아무 키나 누르세요 (Tools/ui_text.py)
+
+    /// <summary>
+    /// 판 카드 (기획 L2) — 끝낸 판의 장부: 예언·치름·기준, 제단에 바친 것과 넘친 회복, 점수(1000·치름/기준, 낮을수록 좋다),
+    /// 챕터마다 네 띠의 별. 100층 계단으로 판을 끝낸 때만 뜬다(SwordLedger.TakeFinishedRun) — DebugPlay 로 튼 결말에는 없다.
+    /// 기준을 매긴 싸움이 하나도 없으면(ParLoss 가 빈 자료) 적을 것이 없어 띄우지 않는다.
+    /// 까만 화면 위에 떴다가 2초 뒤부터 아무 키로 넘긴다. 점수를 알리는 것(RunScored)은 계단이 이미 했다.
+    /// </summary>
+    IEnumerator CoRunCard()
+    {
+        LedgerState run = SwordLedger.TakeFinishedRun();
+        if (run == null || run.Par <= 0)
+            yield break;
+
+        RectTransform box = CodeUI.Stretch(CodeUI.NewRect(transform, "RunCard"));
+        CanvasGroup card = box.gameObject.AddComponent<CanvasGroup>();
+        card.alpha = 0f;
+        TMP_FontAsset prose = StoryUI.ProseFont, number = CodeUI.NumberFont;
+        Color gold = new Color32(240, 210, 138, 255), soft = new Color32(174, 182, 200, 255), ink = new Color32(236, 236, 242, 255);
+
+        float y = 380f;
+        CardLine(box, prose, 72f, gold, ref y, 96f).text = Managers.GetString(CardTitle);
+        if (Managers.Game.PlayerData.Mode == GameMode.Tower)
+            CardLine(box, prose, 36f, new Color32(255, 128, 104, 255), ref y, 50f).text = Managers.GetString(UI_GameScene.TowerText);
+        CardLine(box, number, 44f, ink, ref y, 64f).text =
+            string.Format(Managers.GetString(UI_TallyPopup.TotalsText), run.Foretold, run.Paid, run.Par);
+        CardLine(box, prose, 30f, soft, ref y, 46f).text = string.Format(Managers.GetString(CardExtra), run.AltarPaid, run.Spill);
+
+        int score = SwordLedger.Score(run);
+        if (score > 0)
+        {
+            y -= 16f;
+            CardLine(box, number, 84f, gold, ref y, 104f).text = string.Format(Managers.GetString(CardScore), score);
+            CardLine(box, prose, 28f, soft, ref y, 40f).text = Managers.GetString(CardLower);
+        }
+
+        y -= 24f;
+        const int BandsPerChapter = 4;      // 챕터 20층 = 띠 넷
+        for (int chapter = 0; chapter * BandsPerChapter < run.BandStars.Count; chapter++)
+        {
+            string stars = "";
+            for (int b = chapter * BandsPerChapter; b < (chapter + 1) * BandsPerChapter && b < run.BandStars.Count; b++)
+                stars += "   " + UI_TallyPopup.StarText(run.BandStars[b]);
+            CardLine(box, number, 40f, ink, ref y, 56f).text = string.Format(Managers.GetString(CardChapter), chapter + 1) + stars;
+        }
+
+        TextMeshProUGUI hint = CodeUI.NewText(box, "AnyKey", prose, 26f, soft, TextAlignmentOptions.Center);
+        CodeUI.Place(hint.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 48f), new Vector2(1600f, 40f));
+        hint.text = Managers.GetString(AnyKey);
+
+        yield return card.DOFade(1f, 1f).SetLink(box.gameObject).WaitForCompletion();
+        yield return CoHold(20f);
+        yield return card.DOFade(0f, 1f).SetLink(box.gameObject).WaitForCompletion();
+    }
+
+    static TextMeshProUGUI CardLine(RectTransform box, TMP_FontAsset font, float size, Color color, ref float y, float height)
+    {
+        TextMeshProUGUI text = CodeUI.NewText(box, "Line", font, size, color, TextAlignmentOptions.Center);
+        CodeUI.Place(text.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(1600f, height));
+        y -= height;
+        return CodeUI.Fit(text, size * 0.5f);
     }
 
     // 기다린다. 2초가 지나면 아무 키로나 넘길 수 있다.

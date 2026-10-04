@@ -42,6 +42,15 @@ public class UI_TitleScene : UI_Scene
     public const int ASK_NEW_GAME = 190;
     // 본 결말 수 "결말 {0}/{1}" (Tools/ui_text_parts/records.py)
     public const int ENDINGS_SEEN = 440;
+    // 새 게임의 규칙 창(UI_ModePopup)과 규칙마다 최고 점수 (Tools/ui_text_parts/mode.py, 530~559)
+    public const int MODE_TITLE = 530;
+    public const int MODE_NORMAL = 531;
+    public const int MODE_NORMAL_DESC = 532;
+    public const int MODE_TOWER = 533;
+    public const int MODE_TOWER_DESC = 534;
+    public const int MODE_CONTROLS = 535;
+    public const int BEST_SCORE = 536;      // "{0} 최고 {1}" — 규칙 이름, 점수(낮을수록 좋다)
+    public const int MODE_CLEARED = 537;    // 탑의 법으로 결말까지 갔다
 
     bool isPreload = false;
     int buttonsIdx = 0;
@@ -50,12 +59,18 @@ public class UI_TitleScene : UI_Scene
     bool _isFirst = false;
     bool _loading;
     bool _loadFailed;
+    int _loadRun;               // 지금 기다리는 불러오기 — 다시 부른 뒤 늦게 온 앞 요청의 콜백은 버린다
+    float _loadAt;              // 그 불러오기를 시작한 때 (실시간)
+    const float StuckSeconds = 10f;
     Define.ScriptType _language;
     CanvasGroup _buttons;       // 타이틀 메뉴 글자 묶음. 창이 떠 있는 동안 가린다
     CanvasGroup _logo;          // 로고. 마찬가지
     Image _notice;              // 이어하기 실패 알림 — 메뉴 자리의 어두운 띠(ShowNotice)
     TMP_Text _noticeText;
-    TMP_Text _endings;          // 본 결말 수 (Records) — 메뉴 띠 오른쪽 끝
+    TMP_Text _records;          // 본 결말 수·규칙마다 최고 점수 (Records) — 메뉴 띠 오른쪽 끝
+    // 새 게임의 규칙. 규칙 창이 정하고, CoOnClickNewGameButton 이 판을 새로 세운 뒤에 적는다. 봇은 창을 거치지 않고
+    // 코루틴을 곧장 부르므로 보통이다 — 탑의 법으로 돌리려면 부르기 전에 이 칸을 채운다(AutoPlayer 는 리플렉션을 쓴다).
+    GameMode _mode = GameMode.Normal;
 
     public override bool Init()
     {
@@ -140,13 +155,14 @@ public class UI_TitleScene : UI_Scene
             label.fontSize = first.fontSize;
         }
 
-        // 본 결말 수. 띠의 자식이라 메뉴와 함께 켜지고 창이 뜨면 같이 가려진다(_buttons.alpha). 세로 줄 배치에는 끼지 않고
-        // 띠 오른쪽 끝, 칼날 빛에서 먼 어두운 잎 위에 선다 — 가운데 아래(칼끝 풀빛)는 화면에서 가장 밝다.
-        _endings = CodeUI.NewText(_buttons.transform, "Endings", first.font, 36f, new Color(0.8f, 0.8f, 0.8f), TextAlignmentOptions.Right);
-        _endings.fontSharedMaterial = CodeUI.Outlined(first.font, 0.3f);
-        _endings.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
-        CodeUI.Place(_endings.rectTransform, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-60f, 0f), new Vector2(560f, 60f));
-        _endings.gameObject.SetActive(false);
+        // 본 결말 수와 규칙마다 최고 점수(ButtonsSetting). 띠의 자식이라 메뉴와 함께 켜지고 창이 뜨면 같이 가려진다
+        // (_buttons.alpha). 세로 줄 배치에는 끼지 않고 띠 오른쪽 끝, 칼날 빛에서 먼 어두운 잎 위에 선다 — 가운데 아래
+        // (칼끝 풀빛)는 화면에서 가장 밝다. 세 줄까지 띠 높이(250) 안에 든다. 넘치면 글자를 줄인다.
+        _records = CodeUI.Fit(CodeUI.NewText(_buttons.transform, "Records", first.font, 36f, new Color(0.8f, 0.8f, 0.8f), TextAlignmentOptions.Right), 20f);
+        _records.fontSharedMaterial = CodeUI.Outlined(first.font, 0.3f);
+        _records.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
+        CodeUI.Place(_records.rectTransform, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-60f, 0f), new Vector2(560f, 240f));
+        _records.gameObject.SetActive(false);
     }
 
     private void Start()
@@ -158,6 +174,8 @@ public class UI_TitleScene : UI_Scene
     {
         if (_loading) return;
         _loading = true;
+        int run = ++_loadRun;
+        _loadAt = Time.realtimeSinceStartup;
         // 재시도일 때만 실패 문구를 걷는다. 처음부터 끄면 PlayOneShot.Start 의
         // GameObject.Find 가 꺼진 것을 못 찾아, 칼 부딪히는 소리 이벤트가 널참조로 죽는다.
         if (_loadFailed) GetText((int)Texts.PessAnyKeyText).gameObject.SetActive(false);
@@ -168,9 +186,9 @@ public class UI_TitleScene : UI_Scene
         slider.value = 0;
         GameObject.Find("MainTitle_BGAnim").GetComponent<Animator>().Play("WaitForOpening");
         Managers.Resource.LoadAllAsync<Object>("PreLoad", (key, count, total) => {
-            if (this != null) slider.value = total > 0 ? (float)count / total : 0;
+            if (this != null && run == _loadRun) slider.value = total > 0 ? (float)count / total : 0;
         }, error => {
-            if (this == null) return;
+            if (this == null || run != _loadRun) return;
             _loading = false;
             if (error != null) { LoadingFailed(error); return; }
             try
@@ -214,6 +232,16 @@ public class UI_TitleScene : UI_Scene
         if (_lock) return;
         if (!isPreload)
         {
+            // 도메인 리로드를 끈 에디터 플레이에서 첫 "PreLoad" 목록 요청의 답이 영영 안 올 때가 있다(0% 에서 멈춘다 — 어드레서블이
+            // 플레이 사이에 다시 서며 그 요청을 버리는 것으로 보인다). 다시 부르면 6~10초에 끝난다. 하나도 못 받은 채 오래면 다시 부른다.
+            // 빌드에서는 본 적이 없다. 에셋이 하나라도 오면(막대가 움직이면) 걸리지 않고, 늦게 온 앞 요청은 _loadRun 이 버린다.
+            if (_loading && Time.realtimeSinceStartup - _loadAt > StuckSeconds
+                && GetObject((int)Objects.Slider).GetComponent<Slider>().value <= 0f)
+            {
+                Debug.LogWarning("[Title] 불러오기가 0% 에서 멈췄다 — 다시 부른다");
+                _loading = false;
+                Loading();
+            }
             if (_loadFailed && Input.GetKeyDown(KeyCode.Return)) Loading();
             if (_loadFailed && Input.GetKeyDown(KeyCode.Escape)) Application.Quit();
             return;
@@ -320,12 +348,25 @@ public class UI_TitleScene : UI_Scene
 #endif
     }
 
-    // 새 게임은 저장을 지운다. 저장이 있으면 먼저 묻는다 — 처음 골라 둔 쪽은 "아니오".
-    // (자동 플레이는 CoOnClickNewGameButton 을 곧장 부른다)
+    // 새 게임은 먼저 규칙(보통·탑의 법)을 묻는다 — Esc 는 타이틀로 물러난다. 탑의 법 표가 없으면(잘못 구운 빌드)
+    // 물을 것이 없어 보통으로 간다. (자동 플레이는 CoOnClickNewGameButton 을 곧장 부른다 — 보통)
     void OnClickNewGameButton()
     {
         if (_lock || !isPreload)
             return;
+        if (Managers.Data.HasMonsterTable(GameMode.Tower) == false)
+        {
+            OnPickMode(GameMode.Normal);
+            return;
+        }
+        Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UIselect");
+        UI_ModePopup.Ask(OnPickMode);
+    }
+
+    // 규칙을 골랐다. 새 게임은 저장을 지운다 — 저장이 있으면 마지막에 묻는다. 처음 골라 둔 쪽은 "아니오".
+    void OnPickMode(GameMode mode)
+    {
+        _mode = mode;
         if (Managers.Game.HasSave == false)
         {
             StartCoroutine(CoOnClickNewGameButton());
@@ -352,6 +393,7 @@ public class UI_TitleScene : UI_Scene
         Managers.Game.PlayerData.Ability = (int)Define.Trait.None;
         Debug.Log("Cllck OnClickNewGameButton");
         Managers.Game.DeleteGameData();
+        Managers.Game.SetMode(GameEvents.IsAutoPlaying ? AutoPlayer.StartMode : _mode);   // 판을 새로 세운 뒤(Clear 가 보통으로 되돌린 뒤)에 적는다 — 몬스터 표도 같이 바뀐다
         SetPlayerInitSetting();
         Managers.Scene.LoadScene(Define.Scene.IntroScene);
     }
@@ -474,11 +516,24 @@ public class UI_TitleScene : UI_Scene
         GetText((int)Texts.SettingText).text = Managers.GetString(Define.SETTING);
         GetText((int)Texts.ExitText).text = Managers.GetString(Define.QUIT_GAME);
 
-        // 결말을 하나라도 봐야 뜬다 — 처음 켠 사람에게 "0/3" 은 숙제일 뿐이다. 언어가 바뀌어도 여기로 온다.
+        // 판을 넘어 남는 기록: 본 결말 수, 규칙마다 최고 점수(낮을수록 좋다, 없으면 그 줄을 뺀다), 탑의 법을 끝까지 갔다는 표시.
+        // 하나라도 있어야 뜬다 — 처음 켠 사람에게 "0/3" 은 숙제일 뿐이다. 언어가 바뀌어도 여기로 온다.
+        List<string> lines = new List<string>();
         int seen = Records.EndingsSeen;
-        _endings.gameObject.SetActive(seen > 0);
         if (seen > 0)
-            _endings.text = string.Format(Managers.GetString(ENDINGS_SEEN), seen, Records.EndingCount);
+            lines.Add(string.Format(Managers.GetString(ENDINGS_SEEN), seen, Records.EndingCount));
+        foreach (GameMode mode in new[] { GameMode.Normal, GameMode.Tower })
+        {
+            int best = Records.BestScore(mode);
+            bool cleared = mode == GameMode.Tower && Records.ModeCleared(mode);
+            if (best <= 0 && cleared == false)
+                continue;
+            string name = Managers.GetString(mode == GameMode.Tower ? MODE_TOWER : MODE_NORMAL);
+            string line = best > 0 ? string.Format(Managers.GetString(BEST_SCORE), name, best) : name;
+            lines.Add(cleared ? $"{line}  <color=#F0D28A>{Managers.GetString(MODE_CLEARED)}</color>" : line);
+        }
+        _records.gameObject.SetActive(lines.Count > 0);
+        _records.text = string.Join("\n", lines);
     }
 
     void SetButtonColorAndButtonsText(int index)

@@ -35,6 +35,12 @@ public static class GameEvents
     // 결말을 봤다 (seal · hold · dawn, StoryEnding 소문자). 크레디트보다 앞, DebugPlay 에서는 오지 않는다.
     // 판을 넘어 남는 기록(Records)과 업적(SteamHooks)이 듣는다.
     public static event Action<string> EndingReached;
+    // 새 층에 처음 들어서며 앞 층의 장부를 닫았다: (그 층 stageId, 치른 HP, 기준 값). 장부(SwordLedger)가 알린다.
+    public static event Action<int, int, int> FloorTallied;
+    // 다섯 층 띠를 끝냈다: (띠 번호 0 부터, 별 1~3). 장부가 알린다.
+    public static event Action<int, int> BandTallied;
+    // 판을 끝까지 마쳤다(결말 직전): 점수 = round(1000·치른 값/기준 값), 낮을수록 좋다. 장부가 알린다. 모드는 PlayerData.Mode.
+    public static event Action<int> RunScored;
 
     // 자동 플레이(완주 녹화 봇)가 돌고 있다. 확인 창은 스스로 "예" 를 고르고,
     // 대사는 기다리지 않고 넘어가야 한다.
@@ -55,6 +61,9 @@ public static class GameEvents
     public static void RaiseHudRefreshed() => Safe(HudRefreshed, h => h());
     public static void RaiseEquipPicked(int equipId) => Safe(EquipPicked, h => h(equipId));
     public static void RaiseEndingReached(string ending) => Safe(EndingReached, h => h(ending));
+    public static void RaiseFloorTallied(int stageId, int paid, int par) => Safe(FloorTallied, h => h(stageId, paid, par));
+    public static void RaiseBandTallied(int band, int stars) => Safe(BandTallied, h => h(band, stars));
+    public static void RaiseRunScored(int score) => Safe(RunScored, h => h(score));
 
     // 에디터는 플레이할 때 도메인·씬을 다시 읽지 않는다(Enter Play Mode Options). 정적 값이 지난 플레이에서
     // 그대로 넘어와, 파괴된 오브젝트에 묶인 구독자가 남는다 — 플레이를 시작할 때마다 비운다. 빌드에는 영향이 없다.
@@ -63,7 +72,7 @@ public static class GameEvents
     {
         FloorEntered = null; BossDefeated = null; LevelUp = null; ItemPicked = null; DoorBlocked = null;
         DoorOpened = null; BattleEnded = null; Respawned = null; HudRefreshed = null; EquipPicked = null;
-        EndingReached = null;
+        EndingReached = null; FloorTallied = null; BandTallied = null; RunScored = null;
         IsAutoPlaying = false;
         RespawnPending = false;
     }

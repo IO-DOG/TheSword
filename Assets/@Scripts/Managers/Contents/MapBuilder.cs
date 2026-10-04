@@ -582,19 +582,28 @@ public static class MapBuilder
 
     /// <summary>그 몬스터가 차지하는 몸집. 1 이 보통 몹이다.
     ///
-    /// 한 칸을 넘기지는 않는다 — 넘기면 옆 칸까지 콜라이더가 걸쳐서 통로를 막는다.
-    /// (FitColliderToCell 이 콜라이더는 한 칸으로 다시 맞춘다.)</summary>
+    /// 콜라이더는 몸집과 상관없이 한 칸이다 — FitColliderToCell 이 월드 배율로 나눠 다시 맞춘다. 넘기면 옆 칸까지
+    /// 걸쳐서 통로를 막는다. 예측 숫자의 자리(ForecastOverlay.HeadOf)도 그림의 윗끝을 재므로 몸집을 따라간다.
+    ///
+    /// 보스는 정수 배율(2)이다 (기획 L8). 카메라(직교 1.8)에서 몸집 1 의 한 점은 1080p 에서 가로세로 3 픽셀인데
+    /// (세로는 StretchBillboard 가 눌린 만큼 늘려 같아진다), 1.45 는 4.35 픽셀이라 점마다 4·5 픽셀이 섞여 보스만
+    /// 뭉개져 보였다. 2 면 720p·1080p·1440p 에서 4·6·8 픽셀이다. 새 보스 그림(172 칸, 점 크기는 몬스터와 같다)이
+    /// 오면 1 로 돌린다 — 차지하는 넓이가 지금의 2 와 같다. 정예 1.2 는 정수가 아니지만 1 과 2 사이에 정수가 없어
+    /// 그대로 둔다 — 정예라는 표시가 더 중요하다.</summary>
     static float MonsterBulk(int id)
     {
         if (id >= 900 && id < 1000)
-            return 1.45f;                  // 챕터 보스
+            return 2f;                     // 챕터 보스
 
-        // 생성 몬스터 id = 1000 + 층*8 + 서열. 층에서 가장 센 놈이 정예다.
-        if (id >= 1000 && id % 8 == 4)
+        if (IsElite(id))
             return 1.2f;
 
         return 1f;
     }
+
+    /// <summary>정예 — 층에서 가장 센 놈. 생성 몬스터 id = 1000 + 층*8 + 서열이고 정예는 서열 4 다
+    /// (generate_content.MOB_SPECIES_RUN 의 마지막 자리). 전투창의 맞는 이펙트 크기(UI_MonsterCard)도 이것으로 가른다.</summary>
+    public static bool IsElite(int id) => id >= 1000 && id % 8 == 4;
 
     static Transform NewContainer(GameObject root, string name)
     {

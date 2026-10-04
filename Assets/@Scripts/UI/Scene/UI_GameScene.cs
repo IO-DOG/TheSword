@@ -69,8 +69,18 @@ public class UI_GameScene : UI_Scene
     public const string KeysHintPref = "HINT_FORECAST_KEYS";
     const float HintFade = 0.6f;
     bool _keysHintShown;
+    // 클릭 이동(PlayerController·PathMover)도 한 번 알린다 — 5층부터, 앞의 키 안내가 사라진 뒤. 판이 아니라 사람에게 한 번이다.
+    const string ClickHintPref = "HINT_CLICK_MOVE";
+    const int ClickHintText = 590;  // Tools/ui_text_parts/input.py
+    bool _clickHintShown;
     TMP_Text _critText;             // 치명까지 N — 전투 사이에 이어지는 치명 횟수
     TMP_Text _guardText;            // 방패가 올라와 있다 — 다음 한 대를 막는다
+    // 마검의 배부름(기획 L3)과 탑의 법 표시 — 문구는 Tools/ui_text_parts/ledger.py
+    public const int FullnessText = 490;    // Lv {0}  기준 {1} ({2})
+    public const int ThroneText = 491;      // 왕좌에서 Lv {0}
+    public const int TowerText = 492;       // 탑의 법
+    TMP_Text _fullnessText;
+    TMP_Text _towerBadge;
     CanvasGroup _hint;
     TMP_Text _hintText;
     float _hintUntil;
@@ -129,7 +139,9 @@ public class UI_GameScene : UI_Scene
         FightGate.Add(FatalFightGuard.Ask, FatalFightGuard.Order);
         GetImage((int)Images.MainUISwordAImage).gameObject.BindEvent(UI_MonsterManualPopup.Toggle);
         BuildCombatState();
+        BuildLedgerHud();
         _keysHintShown = PlayerPrefs.GetInt(KeysHintPref, 0) == 1;
+        _clickHintShown = PlayerPrefs.GetInt(ClickHintPref, 0) == 1;
         // 언어를 바꾸면 HUD 글자(층 이름·치명 표시)를 다시 칠한다.
         GameSettings.Changed += Refresh;
 
@@ -520,6 +532,14 @@ public class UI_GameScene : UI_Scene
             PlayerPrefs.SetInt(KeysHintPref, 1);
             ShowHint(Managers.GetString(ForecastUI.HintKeys), 6f);
         }
+        else if (_clickHintShown == false && _keysHintShown && GameEvents.IsAutoPlaying == false
+            && Managers.Game.PlayerData.CurStageid >= 4 && CanOpenPanel() && Managers.UI.TopPopup == null
+            && (_hint == null || _hint.gameObject.activeSelf == false))
+        {
+            _clickHintShown = true;
+            PlayerPrefs.SetInt(ClickHintPref, 1);
+            ShowHint(Managers.GetString(ClickHintText), 6f);
+        }
 
         // 알림은 막지 않고 떠 있다가 스스로 옅어진다. 멈춘 시간(메뉴)에도 흐르게 실시간으로 잰다.
         if (_hint != null && _hint.gameObject.activeSelf)
@@ -590,6 +610,7 @@ public class UI_GameScene : UI_Scene
         imageRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, textWidth + 30f);
 
         RefreshCombatState();
+        RefreshLedgerHud();
     }
 
     /// <summary>
@@ -637,6 +658,58 @@ public class UI_GameScene : UI_Scene
         _guardText.gameObject.SetActive(guard);
         if (guard)
             _guardText.text = Managers.GetString(ForecastUI.GuardUp);
+    }
+
+    /// <summary>
+    /// 층 이름 밑에 마검의 배부름 — 지금 레벨과 이 층의 기준 레벨(ParLevelIn, 정답 경로가 이 층에 들어설 때의 레벨).
+    /// 90층부터는 새벽 결말의 문턱(StoryDirector.DawnLevel)을 한 줄 더 — 숨은 조건이던 것을 보인다.
+    /// 탑의 법이면 층 이름 옆에 작은 표시. 층 이름과 같은 자리(형제)에 두어 로딩 삽화(마지막 형제)가 같이 덮는다.
+    /// </summary>
+    void BuildLedgerHud()
+    {
+        Transform mapName = GetText((int)Texts.MainUIMapNameText).transform.parent;     // MainUIMapNameBG — 왼쪽 위, 504x84
+        _fullnessText = HudLine(mapName, "FullnessText", CodeUI.NumberFont, 24f, new Vector2(24f, -92f), new Vector2(620f, 64f));
+        // 판 밖 바닥 위에 선다 — 이야기 글꼴(Silver)은 획이 가늘어 밝은 층에서 묻혔다. 바로 밑 배부름 줄과 같은 숫자 글꼴·테두리로.
+        _towerBadge = HudLine(mapName, "TowerBadge", CodeUI.NumberFont, 24f, new Vector2(516f, -24f), new Vector2(280f, 40f));
+        _towerBadge.color = new Color32(255, 128, 104, 255);
+    }
+
+    static TMP_Text HudLine(Transform after, string name, TMP_FontAsset font, float size, Vector2 pos, Vector2 box)
+    {
+        TextMeshProUGUI text = CodeUI.NewText(after.parent, name, font, size, Color.white, TextAlignmentOptions.TopLeft);
+        text.rectTransform.SetSiblingIndex(after.GetSiblingIndex() + 1);
+        text.fontSharedMaterial = CodeUI.Outlined(text.font, 0.25f);
+        CodeUI.Place(text.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), pos, box);
+        return CodeUI.Fit(text, size * 0.5f);
+    }
+
+    // 계약 전(마검의 눈이 없다)과 기준이 없는 층(1~4층, ParLevelIn 0)에는 숨긴다.
+    void RefreshLedgerHud()
+    {
+        if (_fullnessText == null)
+            return;
+        GameManager.CurPlayerData p = Managers.Game.PlayerData;
+        bool tower = p.Mode == GameMode.Tower;
+        _towerBadge.gameObject.SetActive(tower);
+        if (tower)
+            _towerBadge.text = Managers.GetString(TowerText);
+
+        Data.StageInfoData info;
+        int par = p.IsContractedSword && Managers.Data.StageInfoDic.TryGetValue(p.CurStageid, out info) ? info.ParLevelIn : 0;
+        _fullnessText.gameObject.SetActive(par > 0);
+        if (par <= 0)
+            return;
+
+        // 기준보다 앞서면 초록, 한 레벨 뒤면 노랑, 그보다 뒤면 주황 — 맵 위 숫자와 같은 눈금색.
+        int diff = p.Level - par;
+        _fullnessText.color = diff >= 0 ? ForecastUI.Safe : diff == -1 ? ForecastUI.Caution : ForecastUI.Danger;
+        string text = string.Format(Managers.GetString(FullnessText), p.Level, par, diff.ToString("+0;-0;+0"));
+        if (p.CurStageid + 1 >= 90)
+        {
+            string gate = p.Level >= StoryDirector.DawnLevel ? "#F0D28A" : "#E6E6EC";   // 배가 찼으면 금빛
+            text += $"\n<color={gate}>{string.Format(Managers.GetString(ThroneText), StoryDirector.DawnLevel)}</color>";
+        }
+        _fullnessText.text = text;
     }
 
     /// <summary>

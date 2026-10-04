@@ -25,6 +25,13 @@ public class WarpUI : MonoBehaviour
     static readonly Color Soft = new Color32(174, 182, 200, 255);
     static readonly Color Idle = new Color(0.8f, 0.8f, 0.86f, 1f);
 
+    // 소리는 있는 것을 빌린다: 열고 닫기는 메뉴·도감과 같은 소리, 칸 위는 조용한 딸깍(칸이 99개라 훑으면 여러 번 난다),
+    // 워프는 맵이 바뀔 때의 소리. 없는 키는 SoundManager 가 조용히 건너뛴다.
+    const string OpenSound = "SettingMenuUI_SFX";
+    const string HoverSound = "SettingMenuUI_Choice_SFX";
+    const string CloseSound = "SettingMenuUI_Back_SFX";
+    const string WarpSound = "MapTransition_SFX";
+
     static WarpUI _instance;
     GameObject _panel;
     bool _lockedInput;      // 입력 잠금을 이 창이 켰다. 켠 쪽만 끈다
@@ -77,12 +84,20 @@ public class WarpUI : MonoBehaviour
         _lockedInput = Managers.Game.OnInputLock == false;
         Managers.Game.OnInputLock = true;
         Build(stages);
+        Play(OpenSound);
     }
 
-    public void Close()
+    public void Close() => Close(true);
+
+    // 워프하며 닫을 때는 닫는 소리 대신 워프 소리가 난다.
+    void Close(bool sound)
     {
         if (_panel != null)
+        {
             Destroy(_panel);
+            if (sound)
+                Play(CloseSound);
+        }
         _panel = null;
         if (_lockedInput && Managers.Game != null)
             Managers.Game.OnInputLock = false;
@@ -150,12 +165,13 @@ public class WarpUI : MonoBehaviour
         Image cell = CodeUI.NewImage(list, $"Warp_{stageId}", frame, frame != null ? Idle : new Color(0.16f, 0.16f, 0.2f, 0.95f), true);
         cell.raycastTarget = true;
         Color idle = cell.color;
-        cell.gameObject.BindEvent(() => cell.color = Color.white, type: Define.UIEvent.PointerEnter);
+        cell.gameObject.BindEvent(() => { cell.color = Color.white; Play(HoverSound); }, type: Define.UIEvent.PointerEnter);
         cell.gameObject.BindEvent(() => cell.color = idle, type: Define.UIEvent.PointerExit);
         cell.gameObject.BindEvent(() =>
         {
-            Close();
-            Managers.Game.WarpToStage(stageId);
+            Close(false);
+            if (Managers.Game.WarpToStage(stageId))
+                Play(WarpSound);
         });
 
         TextMeshProUGUI number = CodeUI.NewText(cell.transform, "Floor", CodeUI.NumberFont, 24f, Color.white);
@@ -216,4 +232,6 @@ public class WarpUI : MonoBehaviour
 
     // 틀: 인벤토리의 능력치 칸 그림(9분할, 두 배 픽셀). 도감과 같은 그림이다.
     static Sprite Frame() => CodeUI.PrefabSprite("UI_InvenPopup", "Inventory_Popup32");
+
+    static void Play(string key) => Managers.Sound.Play(Define.Sound.Effect, key);
 }

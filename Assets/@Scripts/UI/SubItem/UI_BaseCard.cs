@@ -79,7 +79,7 @@ public class UI_BaseCard : UI_Base
     protected void SetUI()
     {
         SetName(GetText((int)Texts.CreatureName), _creature.Name);
-        GetText((int)Texts.HPBarText).text = _creature.CurHP.ToString();
+        GetText((int)Texts.HPBarText).text = Mathf.CeilToInt(_creature.CurHP).ToString();   // 야수의 회복 등으로 소수가 남으면 "231.6" 이 찍혔다
         GetText((int)Texts.AttackStatusText).text = _creature.Attack.ToString();
         GetText((int)Texts.DefenceStatusText).text = _creature.Defence.ToString();
 
@@ -87,7 +87,7 @@ public class UI_BaseCard : UI_Base
         //
         // 카드의 자식 순서가 [... CreatureName, BattleHPBar, Attack, Defence,
         // CreatureImage] 라 그림이 <b>맨 마지막</b>이다. uGUI 는 뒤에 있는 자식을
-        // 위에 그리므로, 몸집이 큰 몬스터(정예 1.2배·보스 1.45배)가 올라오면
+        // 위에 그리므로, 몸집이 큰 몬스터(정예 1.2배·보스 2배)가 올라오면
         // 체력바를 덮었다. 바를 맨 뒤로 옮겨 그림보다 위에 두게 한다.
         Image hpBar = GetImage((int)Images.HPHar);
         if (hpBar != null && hpBar.transform.parent != null)
@@ -187,7 +187,7 @@ public class UI_BaseCard : UI_Base
 
     IEnumerator CoRefresh()
     {
-        GetText((int)Texts.HPBarText).text = _creature.CurHP.ToString();
+        GetText((int)Texts.HPBarText).text = Mathf.CeilToInt(_creature.CurHP).ToString();   // 야수의 회복 등으로 소수가 남으면 "231.6" 이 찍혔다
         GetImage((int)Images.HPHar).fillAmount = _creature.CurHP / _creature.MaxHP;
         yield return new WaitForSeconds(0.2f);
         GetImage((int)Images.HPHarGauge).fillAmount = _creature.CurHP / _creature.MaxHP;

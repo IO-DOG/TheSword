@@ -338,6 +338,8 @@ public class UI_StoryCardPopup : UI_Popup
 
     IEnumerator CoTitle()
     {
+        // 챕터가 바뀌는 순간에 소리 하나 — 예전엔 카드가 말없이 떴다. 챕터 스팅(STING_CH0~4)이 오면 이 키만 바꾼다.
+        Managers.Sound.Play(Define.Sound.Effect, "PopUpUI_On");
         yield return _group.DOFade(1f, Quick(0.6f)).SetLink(gameObject).WaitForCompletion();
         float hold = StoryUI.Auto ? 0.4f : TitleHold;
         for (float t = 0f; t < hold; t += Time.unscaledDeltaTime)

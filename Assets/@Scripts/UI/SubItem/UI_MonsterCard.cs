@@ -30,6 +30,7 @@ public class UI_MonsterCard : UI_BaseCard
         _creature.OnDefenceAction += ClearDefence;
         _creature.OnHitAction += Refresh;
         _creature.OnHitAction += StartDamagedMat;
+        _creature.OnHitAction += CheckEnrage;
         _creature.OnDeadAction += Dead;
         _creature.OnDataRefreshAction += Refresh;
 
@@ -37,9 +38,81 @@ public class UI_MonsterCard : UI_BaseCard
 
         //GetImage((int)Images.AttackIcon).sprite = spriteAtlas.GetSprite("BattleUI_Weppon2_0");
 
+        // 챕터 보스·킹 슬라임 (UI_BattlePopup._boss 와 같은 셈). 분열 슬라임은 보스 연출은 쓰지만 우두머리가 아니다.
+        MonsterController fought = Managers.Game.Monster;
+        _boss = fought != null && (fought.CompareTag("Boss") || fought is KingSlimeController);
+        if (_boss)
+            PushIn();
 
         return true;
     }
+
+    #region 우두머리 연출 (L8)
+    // 카드의 크기·색·흔들림·소리뿐이다 — 전투 시계(BattleStepper)는 모른다. 예측은 그대로 전투와 같다.
+    // 메뉴가 열려 시간이 멈추면(Time.timeScale 0) 트윈도 같이 멈춘다. 봇이 돌 때도 그대로 튼다 — 걸음을 늦추지 않는다.
+    const float PushInSeconds = 0.5f;      // 싸움이 열릴 때 카드가 다가온다
+    const float PushInFrom = 0.8f;
+    const float EnrageAt = 0.5f;           // 체력이 이 아래로 처음 내려간 한 대에 한 번 성낸다
+    const float PulseSeconds = 0.25f;      // 붉게 두 번 (한 번 오가는 데 0.5초 — 초당 세 번 넘게 번쩍이지 않는다)
+    // ponytail: 이미 있는 부풂 소리(2.2초)를 낮게 튼 대역이다 — 보스 울음(기획 §8 "5 boss roars")이 오면 이 키만 바꾼다.
+    const string EnrageSound = "MainTitle_Impact";
+    const float EnragePitch = 0.8f;        // 전투 배속과 상관없이 늘 이 높이다 (PlayEnrageSound)
+    // 그림 색(MonsterTint)을 이쪽으로 당긴다. 곱하면 푸른 챕터의 보스가 붉어지지 않고 어두워지기만 한다.
+    static readonly Color Blood = new Color(1f, 0.15f, 0.1f);
+
+    bool _boss;
+    bool _enraged;
+
+    void PushIn()
+    {
+        Vector3 to = transform.localScale;     // 전투창이 정한 카드 배율
+        transform.localScale = to * PushInFrom;
+        transform.DOScale(to, PushInSeconds).SetEase(Ease.OutCubic).SetLink(gameObject);
+    }
+
+    // 맞을 때마다(OnHitAction). 전투 시계의 한 걸음(BattleStepper.Strike) 안에서 불린다 — 여기서 예외가 나면 그 걸음이
+    // 도중에 끊겨 예측과 어긋난다. 연출은 무엇이든 삼킨다. 건너뛰는 중(Quiet)에는 틀지 않는다(보스는 못 건너뛴다).
+    // 야수가 광폭해 다시 절반 위로 올라와도 한 번뿐이다.
+    void CheckEnrage()
+    {
+        if (_boss == false || _enraged || Quiet)
+            return;
+        if (_creature.CurHP <= 0 || _creature.CurHP > _creature.MaxHP * EnrageAt)
+            return;
+        _enraged = true;
+        try
+        {
+            Image img = GetImage((int)Images.CreatureImage);
+            if (img != null)
+            {
+                Color calm = img.color;
+                img.DOColor(Color.Lerp(calm, Blood, 0.7f), PulseSeconds).SetLoops(4, LoopType.Yoyo).SetLink(img.gameObject)
+                    .OnComplete(() => img.color = Color.Lerp(calm, Blood, 0.25f));   // 성난 기색이 남는다
+            }
+            Shake();    // 화면 흔들림을 끈 사람에게는 흔들지 않는다 (UI_BaseCard.Shake)
+            PlayEnrageSound();
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+        }
+    }
+
+    // 효과음 소스는 하나라 그 높이는 나중에 튼 소리가 정하고, 이미 울리는 소리까지 따라 바뀐다. 이 소리는 맞는 걸음 안에서
+    // 나고 같은 걸음 뒤에 플레이어 카드가 타격 소리를 배속 높이(SoundManager.BattlePitch, 기본 2배속에서 1.3)로 내서,
+    // 낮게 튼 울음이 늘 새되게 났다. 그래서 카드에 제 소스를 단다 — 크기는 효과음 설정을 따르고, 카드와 함께 사라진다.
+    void PlayEnrageSound()
+    {
+        AudioClip clip = Managers.Resource.Load<AudioClip>(EnrageSound);
+        if (clip == null)
+            return;
+        AudioSource source = gameObject.AddComponent<AudioSource>();
+        source.playOnAwake = false;
+        source.pitch = EnragePitch;
+        source.volume = Managers.Sound.EffectVolume;
+        source.PlayOneShot(clip);
+    }
+    #endregion
 
     public override void Refresh()
     {
@@ -182,27 +255,63 @@ public class UI_MonsterCard : UI_BaseCard
         Destroy(deathSoulPurple, 10);
     }
 
+    // 몬스터의 베기. 색이 특성이다(generate_content.TRAIT_FX). 예전에는 UIParticle 없이 띄워서 오버레이 캔버스에
+    // 그려지지 않았다 — 칼 소리만 났다. 플레이어의 베기(UI_PlayerCard.CreatePlayerAttackParticle)와 같은 화면 크기를
+    // 좌우만 바꾼 자리에 띄운다. UIParticle 은 부모의 배율을 곱한다 — 플레이어 그림은 0.2 배, 몬스터 그림은 1 배라서
+    // 270 x 0.2 = 54, 자리도 (-50,-50) x 0.2 를 뒤집은 (10,-10) 이다.
+    // 자리는 더하지 않고 못박는다. 프리팹마다 뿌리 자리가 제각각이라(00 은 (0,-200), 05 는 (3.65,0)) 더하면
+    // 회색 베기만 그림 아래 900 픽셀, 화면 밖에 떴다.
+    // ponytail: 베기 그림은 좌우로 뒤집지 않는다 — 빗금 한 줄이라 방향이 읽히지 않는다. 거슬리면 ParticleSystemRenderer.flip.
+    const float SlashScale = 54f;
+    static readonly Vector3 SlashAt = new Vector3(10f, -10f, 0f);
+
     void CreateMonsterAttackParticle()
     {
-        string battleParticleAttack = _creature.BattleParticleAttack;
-
-        GameObject go = Managers.Resource.Instantiate(battleParticleAttack, GetImage((int)Images.CreatureImage).gameObject.transform);
+        Image img = GetImage((int)Images.CreatureImage);
+        GameObject go = SpawnFX(_creature.BattleParticleAttack, img != null ? img.transform : null);
+        if (go == null)
+            return;
+        go.transform.localPosition = SlashAt;
+        var uiParticle = go.GetOrAddComponent<UIParticle>();
+        uiParticle.scale = SlashScale;
+        uiParticle.Play();
     }
 
     void CreatePlayerHitParticle()
     {
-        string hitFX = _creature.BattleParticleHit;
         GameObject player = GameObject.Find("UI_PlayerCard");
         if (player == null)
             return;
         // 이펙트가 없어도(데이터의 "-") 전투는 굴러가야 한다 — 여기서 터지면 전투 시계의 그 걸음이 도중에 끊긴다.
-        GameObject go = Managers.Resource.Instantiate(hitFX, player.transform);
+        GameObject go = SpawnFX(_creature.BattleParticleHit, player.transform);
         if (go == null)
             return;
+        go.transform.localPosition = Vector3.zero;   // 카드 가운데. 02·05 는 프리팹 뿌리가 옆으로(02 는 z -12.9) 비껴 있다
         var uiParticle = go.GetOrAddComponent<UIParticle>();
 
-        uiParticle.scale = 50;
+        uiParticle.scale = HitScaleOf();
         uiParticle.Play();
+    }
+
+    // 맞는 이펙트의 크기가 서열이다 — 모양과 색은 특성(generate_content.TRAIT_FX)이 정하고, 정예·우두머리는 같은 것을
+    // 크게 친다. 맵에서 몸집(MapBuilder.MonsterBulk)으로 가르듯 전투창에서도 가른다. 졸개 50 은 예전 그대로다.
+    const float MobHitScale = 50f, EliteHitScale = 70f, BossHitScale = 75f;
+
+    float HitScaleOf()
+    {
+        if (_boss)
+            return BossHitScale;
+        CurMonsterData md = _creature as CurMonsterData;
+        return md != null && MapBuilder.IsElite(md.id) ? EliteHitScale : MobHitScale;
+    }
+
+    // 데이터의 이펙트 키로 만든다. 빈 키("-"·null)는 "없음" 이다 — null 키는 Instantiate 의 사전 조회가 예외를 던지고,
+    // 여기는 전투 시계의 한 걸음 안(OnStrike)이라 그 걸음이 끊긴다.
+    static GameObject SpawnFX(string key, Transform parent)
+    {
+        if (string.IsNullOrEmpty(key) || key == "-" || parent == null)
+            return null;
+        return Managers.Resource.Instantiate(key, parent);
     }
 
     void PlayMonsterAttackAnim()
@@ -361,6 +470,7 @@ public class UI_MonsterCard : UI_BaseCard
         _creature.OnDefenceAction -= ClearDefence;
         _creature.OnHitAction -= Refresh;
         _creature.OnHitAction -= StartDamagedMat;
+        _creature.OnHitAction -= CheckEnrage;
         _creature.OnDeadAction -= Dead;
         _creature.OnDataRefreshAction -= Refresh;
     }

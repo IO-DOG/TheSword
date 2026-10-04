@@ -382,7 +382,7 @@ public static class GeneratedStory
         new StoryScene("trait_magic", StoryKind.Dialogue, StoryTrigger.TraitFirst, 2,
             new[]
             {
-                new StoryLine(1, null, 302320, null),
+                new StoryLine(1, "Illust_MagicalSword_Angry", 302320, null),
                 new StoryLine(0, "Illust_Adventurer_Thinking", 302321, null),
             },
             null,
@@ -589,14 +589,17 @@ public static class GeneratedStory
                 new StoryLine(0, "Illust_Adventurer_Thinking", 302961, null),
                 new StoryLine(1, null, 302962, null),
                 new StoryLine(0, null, 302963, null),
+                new StoryLine(0, "Illust_Adventurer_Thinking", 302964, null),
+                new StoryLine(1, "Illust_MagicalSword_Silense", 302965, null),
             },
             null,
             new[] { new StoryCue(1, StoryCueKind.CamUp, null), new StoryCue(1, StoryCueKind.BgmFloor, null) }),
         new StoryScene("trait_armor", StoryKind.Dialogue, StoryTrigger.TraitFirst, 8,
             new[]
             {
-                new StoryLine(0, "Illust_Adventurer_Thinking", 303000, null),
-                new StoryLine(1, "Illust_MagicalSword_Silense", 303001, null),
+                new StoryLine(1, null, 303000, null),
+                new StoryLine(0, "Illust_Adventurer_Question", 303001, null),
+                new StoryLine(1, "Illust_MagicalSword_Smile", 303002, null),
             },
             null,
             null),

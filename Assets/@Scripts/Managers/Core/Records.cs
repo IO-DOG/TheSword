@@ -29,6 +29,8 @@ public static class Records
         public int NoSpillRun;
         public int? NoSpillLast;
         public bool NoSpillSpilled;
+        public Dictionary<string, int> Best = new Dictionary<string, int>();   // 판 점수 최고(낮을수록 좋다), GameMode 이름별
+        public HashSet<string> ClearedModes = new HashSet<string>();         // 결말까지 간 규칙 (GameMode 이름)
     }
 
     static Data s_data;
@@ -43,7 +45,8 @@ public static class Records
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void Hook()
     {
-        GameEvents.EndingReached += ending => Change(d => d.Endings.Add(ending));
+        GameEvents.EndingReached += ending => Change(d => d.Endings.Add(ending) | d.ClearedModes.Add(CurrentMode.ToString()));
+        GameEvents.RunScored += score => SubmitScore(CurrentMode, score);
         GameEvents.BattleEnded += (monsterId, won) => Change(d => { if (won) d.FightsWon++; else d.Deaths++; return true; });
         GameEvents.BossDefeated += (monsterId, stageId) => Change(d => d.Bosses.Add(stageId + 1));
         GameEvents.FloorEntered += (stageId, firstVisit) => Change(d =>
@@ -63,6 +66,21 @@ public static class Records
     public static int MaxFloor => Current.MaxFloor;
     // 그 층(1 부터)의 우두머리를 잡은 적이 있다. Steam 없이·체험판에서 잡은 것도 남아 업적이 뒤늦게 풀린다(SteamHooks).
     public static bool BossBeaten(int floor) => Current.Bosses.Contains(floor);
+    // 그 규칙의 최고 점수(낮을수록 좋다). 없으면 0.
+    public static int BestScore(GameMode mode) => Current.Best != null && Current.Best.TryGetValue(mode.ToString(), out int v) ? v : 0;
+    // 더 낮으면(좋으면) 적는다. 봇 판은 적지 않는다(Change).
+    public static void SubmitScore(GameMode mode, int score) => Change(d =>
+    {
+        string key = mode.ToString();
+        if (score <= 0 || (d.Best.TryGetValue(key, out int old) && old <= score))
+            return false;
+        d.Best[key] = score;
+        return true;
+    });
+    // 그 규칙으로 결말까지 간 적이 있다(탑의 법 업적·타이틀 표시).
+    public static bool ModeCleared(GameMode mode) => Current.ClearedModes != null && Current.ClearedModes.Contains(mode.ToString());
+
+    static GameMode CurrentMode => Managers.Game?.PlayerData?.Mode ?? GameMode.Normal;
 
     /// <summary>
     /// ACH_NO_SPILL 의 이어 센 값 — 넘치지 않고 끝낸 층 수, 마지막으로 센 새 층(stageId), 그 층에서 체크포인트에 굳은 넘침.

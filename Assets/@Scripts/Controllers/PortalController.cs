@@ -46,6 +46,11 @@ public class PortalController : MonoBehaviour
             int nextStage = Managers.Game.PlayerData.CurStageid + 1;
             if (Managers.Data.StageInfoDic.ContainsKey(nextStage) == false)
             {
+                // 마지막 띠의 결산 창을 보고(닫은 띠면 없다) 판을 끝낸다(점수) — 창이 떠 있는 동안 계단을 다시 밟지 않게 쥔다.
+                Managers.Game.OnInteract = true;
+                yield return SwordLedger.CoCloseBand(Managers.Game.PlayerData.CurStageid);
+                SwordLedger.FinishRun();
+                Managers.Game.OnInteract = false;
                 Managers.Directing.Events.CoStartEndingScene();
                 yield break;
             }
@@ -61,11 +66,13 @@ public class PortalController : MonoBehaviour
             bool firstVisit = Managers.Game.PlayerData.FirstEnterMapCheck[_mapId + 1] == false;
             if (firstVisit)
             {
-                Managers.Game.PlayerData.FirstEnterMapCheck[_mapId + 1] = true;
                 // 삽화가 도는 몇 초도 층을 옮기는 중이다. 표시가 LoadingAndWarp 에만 있어서 그 사이
                 // 워프(Tab·HUD)가 끼어들었고, 그 GenerateMap 이 이 계단을 부수면서 삽화 코루틴까지
                 // 같이 죽어 화면이 가려진 채 남았다. 푸는 것은 LoadingAndWarp 가 한다.
                 Managers.Game.OnInteract = true;
+                // 띠의 마지막 층(5·10·…·95)이면 떠나기 전에 결산(과 제단)을 본다. 처음 오를 때 한 번 — 닫은 띠는 장부가 기억한다.
+                yield return SwordLedger.CoCloseBand(_mapId);
+                Managers.Game.PlayerData.FirstEnterMapCheck[_mapId + 1] = true;
 
                 if (_mapId + 1 != 2)
                 {
@@ -251,6 +258,10 @@ public class PortalController : MonoBehaviour
         Managers.Game.GameScene.Refresh();
         Managers.Game.OnInteract = false;
 
+        // 처음 온 층이면 앞 층의 장부를 닫는다 — 체크포인트(EnterFloor)보다 먼저라야 이 층을 다시 해도 두 번 닫지 않는다.
+        // 처음 오는 층은 늘 여기로 온다(WaitAndWarp 는 다녀온 층 몫이다).
+        if (firstVisit)
+            SwordLedger.EnterNewFloor(nextStageID);
         Managers.Game.EnterFloor(firstVisit);
         Managers.UI.ShowStageNamePopup(1f);
     }

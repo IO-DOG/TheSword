@@ -1,9 +1,9 @@
 ﻿<#
-  TheSword 빌드(Build\Windows)를 SteamPipe 로 올린다. 처음이면 Steam\scripts\README.md 대로 AppID·DepotID 부터 채운다.
+  TheSword 빌드(Build\Windows, 데모는 Build\WindowsDemo)를 SteamPipe 로 올린다. 처음이면 Steam\scripts\README.md 대로 AppID·DepotID 부터 채운다.
 
     powershell -ExecutionPolicy Bypass -File Steam\scripts\upload.ps1            # 본편 -> beta 브랜치
     powershell -ExecutionPolicy Bypass -File Steam\scripts\upload.ps1 -Preview   # 올리지 않고 파일 목록만 (Steam\output)
-    powershell -ExecutionPolicy Bypass -File Steam\scripts\upload.ps1 -Demo      # 데모 앱 (DEMO 정의로 구운 빌드만)
+    powershell -ExecutionPolicy Bypass -File Steam\scripts\upload.ps1 -Demo      # 데모 앱 <- Build\WindowsDemo (GameBuild.WindowsDemo)
 
   steamcmd 는 $env:STEAMCMD -> Steam\steamcmd\steamcmd.exe -> PATH 순서로 찾는다.
   계정은 $env:STEAM_USER, 없으면 묻는다. 처음 한 번은 steamcmd 가 비밀번호와 Steam Guard 코드를 묻고 그 뒤로는 기억한다.
@@ -23,13 +23,17 @@ function Stop-Upload([string]$Message) {
 }
 
 # 1. 빌드 — aa 가 비면 실행 파일은 만들어져도 타이틀에서 한 발짝도 못 나간다 (CLAUDE.md "사람이 해 볼 빌드 만들기")
-$build = Join-Path $root 'Build\Windows'
+#    데모는 따로 구운 폴더다. 본편을 데모 앱에 올리면 본편 전체가 무료로 풀리는데, Build\WindowsDemo 는 DEMO 정의로 굽는
+#    GameBuild.WindowsDemo 만 쓴다 (app_build_DEMO_APPID.vdf 의 ContentRoot 와 같다 — check_steam.py 가 본다).
+$folder = if ($Demo) { 'Build\WindowsDemo' } else { 'Build\Windows' }
+$step = if ($Demo) { 'GameBuild.WindowsDemo' } else { 'GameBuild.Windows' }
+$build = Join-Path $root $folder
 if (-not (Test-Path (Join-Path $build 'TheSword.exe'))) {
-    Stop-Upload 'Build\Windows\TheSword.exe 가 없다. 에디터를 닫고 GameBuild.Prepare -> GameBuild.Windows 를 먼저 돌린다.'
+    Stop-Upload "$folder\TheSword.exe 가 없다. 에디터를 닫고 GameBuild.Prepare -> $step 을 먼저 돌린다."
 }
 $aa = Join-Path $build 'TheSword_Data\StreamingAssets\aa'
 if (-not (Test-Path $aa) -or -not (Get-ChildItem $aa -Recurse -File | Select-Object -First 1)) {
-    Stop-Upload 'Build\Windows\TheSword_Data\StreamingAssets\aa 가 없거나 비었다 - 어드레서블 콘텐츠 없이 구운 빌드다.'
+    Stop-Upload "$folder\TheSword_Data\StreamingAssets\aa 가 없거나 비었다 - 어드레서블 콘텐츠 없이 구운 빌드다."
 }
 
 # 2. 스크립트 — 자리표시(<APPID> 따위)가 하나라도 남으면 올리지 않는다
@@ -51,13 +55,7 @@ if ($text -notmatch '"AppID"\s+"(\d+)"') { Stop-Upload 'AppID 를 숫자로 읽�
 $appId = $Matches[1]
 $outDir = if ($text -match '"BuildOutput"\s+"([^"]+)"') { Join-Path (Split-Path $Script) $Matches[1] } else { Join-Path $root 'Steam\output' }
 
-# 3. 데모 앱에 본편을 올리면 본편 전체가 무료로 나간다 — 파일로는 가릴 수 없어 사람에게 묻는다
-if ($Demo -and -not $Preview) {
-    Write-Host '데모 앱에는 DEMO 정의로 구운 빌드만 올린다. 본편 빌드를 올리면 본편 전체가 무료로 풀린다.' -ForegroundColor Yellow
-    if ((Read-Host 'Build\Windows 가 데모 빌드가 맞으면 demo 라고 친다') -ne 'demo') { Stop-Upload '데모 빌드 확인을 받지 못했다.' }
-}
-
-# 4. steamcmd 와 계정
+# 3. steamcmd 와 계정
 $steamcmd = $env:STEAMCMD
 if (-not $steamcmd) {
     $local = Join-Path $root 'Steam\steamcmd\steamcmd.exe'
@@ -74,7 +72,7 @@ $user = $env:STEAM_USER
 if (-not $user) { $user = Read-Host 'Steam 빌드 계정 이름' }
 if (-not $user) { Stop-Upload '계정 이름이 없다.' }
 
-# 5. 빌드 설명 = 버전 + 올리는 순간의 커밋 (App Admin 의 Builds 목록에만 보인다)
+# 4. 빌드 설명 = 버전 + 올리는 순간의 커밋 (App Admin 의 Builds 목록에만 보인다)
 $ver = '?'
 $line = Select-String -Path (Join-Path $root 'ProjectSettings\ProjectSettings.asset') -Pattern '^\s*bundleVersion:\s*(\S+)' | Select-Object -First 1
 if ($line) { $ver = $line.Matches[0].Groups[1].Value }
@@ -82,7 +80,7 @@ $hash = ''
 try { $hash = (& git -C $root rev-parse --short HEAD 2>$null) } catch { $hash = '' }
 $desc = "TheSword-$ver" + $(if ($Demo) { '-demo' } else { '' }) + $(if ($hash) { "-$hash" } else { '' })
 
-# 6. 올린다
+# 5. 올린다
 $steamArgs = @('+login', $user, '+run_app_build')
 if ($Preview) { $steamArgs += '-preview' }
 $steamArgs += @('-desc', $desc, $Script, '+quit')
@@ -99,7 +97,7 @@ if ($Preview) {
     exit 0
 }
 
-# 7. BuildID — 로그에서 찾고, 못 찾으면 어디서 보는지 알려 준다
+# 6. BuildID — 로그에서 찾고, 못 찾으면 어디서 보는지 알려 준다
 $id = $null
 $logs = Get-ChildItem $outDir -Filter *.log -File -ErrorAction SilentlyContinue |
     Where-Object { $_.LastWriteTime -ge $started } | Sort-Object LastWriteTime -Descending

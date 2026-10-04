@@ -189,6 +189,58 @@ MOB_ART = ([(f"Mob_C0_I{i:03d}", f"Mob_C0_A{i:03d}") for i in range(8)]
 # 두 애니메이터(맵/전투창) 모두 이 상태가 있다 — validate_content 가 확인한다.
 BOSS_ART_INDEX = [4, 7, 8, 6, 9]
 
+# 전투 이펙트 (기획 L8) — 몬스터가 칠 때 제 그림 위에 뜨는 베기(BattleParticleAttack)와 플레이어 카드에
+# 뜨는 맞는 이펙트(BattleParticleHit). 예전에는 502종 중 494종이 같은 회색 베기였다 — 새 규칙이 새로
+# 보이지 않았다. 전부 Particles 어드레서블 그룹(PreLoad)의 Retro Arsenal FX_Battle 이다.
+#   베기 00~10 은 같은 빗금에 색만 다르다 → 색이 특성이다. 01(하늘색)은 에고소드의 것이라 몬스터에게 안 준다.
+#   맞는 이펙트는 모양이 여덟 갈래다. 11~18 은 00~07 을 UI 로 옮긴 사본이라 번호 % 11 이 모양이다(_hit_shape) —
+#   이빨(00·11) 폭발(01·12 — 에고소드라 안 쓴다) 보랏빛 구슬(02·13) 발톱 자국(03·14) 초승달(04 큰·15 작은)
+#   먼지 충격파(05·16) 별(06·17) 푸른 혜성(07·18).
+# 모양과 색은 특성, 크기는 서열이다 — 정예·우두머리는 제 특성의 것을 크게 친다(UI_MonsterCard.HitScaleOf).
+# 그래서 새 특성이 정예로 처음 설 때부터 제 모양으로 친다(예전에는 정예가 전부 같은 큰 초승달이라 여덟 중 일곱이
+# 베기 색만 다른 채로 첫선을 보였다). 한 층(BAND_TRAITS 한 줄)에 같이 서는 특성끼리는 모양이 겹치지 않는다 —
+# 아래 assert 가 센다. 겹치는 세 쌍(없음·갑옷의 발톱, 마법·암살의 구슬, 야수·거대의 이빨)은 한 줄에 함께 서지 않는다.
+TRAIT_FX = {
+    NONE:     ("FX_WeaponSlash_00", "FX_WeaponHit_14"),  # 회색 · 발톱 (예전 그대로)
+    BEAST:    ("FX_WeaponSlash_06", "FX_WeaponHit_11"),  # 붉은 · 이빨
+    MAGIC:    ("FX_WeaponSlash_09", "FX_WeaponHit_13"),  # 보라 · 구슬
+    GUARDIAN: ("FX_WeaponSlash_02", "FX_WeaponHit_15"),  # 금빛 · 작은 초승달 (방패로 친다)
+    IMMORTAL: ("FX_WeaponSlash_03", "FX_WeaponHit_18"),  # 녹빛 · 푸른 혜성 (넋)
+    KNIGHT:   ("FX_WeaponSlash_05", "FX_WeaponHit_17"),  # 청빛 · 별 (빠르고 가볍다)
+    # 충격파 05 는 전투창에서 카드 밖까지 뻗는 흰 띠로만 보였다(아래 BOSS_HIT 주석, 정예 70 배). 초승달(04·15)은 보스·수호의
+    # 것이라 이빨로 친다 — 야수(11)와 같은 모양이지만 둘은 한 줄에 서지 않는다.
+    TITAN:    ("FX_WeaponSlash_04", "FX_WeaponHit_00"),  # 주황 · 이빨
+    ASSASSIN: ("FX_WeaponSlash_08", "FX_WeaponHit_02"),  # 쪽빛 · 구슬
+    ARMOR:    ("FX_WeaponSlash_07", "FX_WeaponHit_03"),  # 연보라 · 발톱 (껍질 게)
+}
+# 챕터 보스의 맞는 이펙트 — 큰 초승달(쿼드 하나, 기울기는 칠 때마다 제멋대로). 베기는 제 특성의 색 그대로다.
+# 충격파(05·16)는 바닥에 눕혀 그린 고리다(RetroCylinderCentered — 고리가 메시의 XY, 높이가 Z, 시작 회전 X -90).
+# UIParticle 은 +Z 를 보는 정면 카메라로 굽으므로 그 고리는 옆모습이다: 05 는 메시라 납작한 가로 띠로 보이고, 16 은
+# 뿌리의 판이 모로 서서 안 보인다(남는 것은 가는 불티와 속도 0 으로 늘인 먼지) — 도입부 크로우의 한 대가 보스의 한 대였다.
+# 40층(수호)만 보스와 졸개(작은 초승달 15)의 모양이 같다 — 크기로 가른다(UI_MonsterCard: 우두머리 75, 졸개 50).
+BOSS_HIT = "FX_WeaponHit_04"
+
+
+def _hit_shape(fx):
+    """맞는 이펙트의 모양 갈래. 11~18 은 00~07 을 UI 로 옮긴 사본이다 — 같은 모양이다."""
+    return int(fx[-2:]) % 11
+
+
+def _preloaded(group="Particles"):
+    """어드레서블 그룹에서 PreLoad 라벨이 붙은 주소. 없는 키는 Instantiate 가 null 을 준다(이펙트만 빠진다)."""
+    import re
+    path = os.path.join(ROOT, "Assets", "AddressableAssetsData", "AssetGroups", group + ".asset")
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    return {m.group(1) for m in re.finditer(
+        r"m_Address: (\S+)\s+m_ReadOnly: \d+\s+m_SerializedLabels:\s+((?:- \S+\s+)*)", text)
+        if "- PreLoad" in m.group(2)}
+
+
+# 이름 하나를 틀리면 그 이펙트만 조용히 빠진다(로그 한 줄). 쓰기 전에 막는다.
+_FX_MISSING = sorted(({fx for row in TRAIT_FX.values() for fx in row} | {BOSS_HIT}) - _preloaded())
+assert not _FX_MISSING, f"Particles 어드레서블(PreLoad)에 없는 전투 이펙트: {_FX_MISSING}"
+
 # 벽 프리팹은 Tilemap_C00_W01 / W02 / W03 만 실재한다 (W00 은 없음).
 # 챕터별 분위기는 MapBuilder 의 틴트 + 조명 + BGM 으로 낸다.
 # 챕터 이름·몬스터 접두어·종 이름은 네 언어로 bestiary.py 가 낸다 (스토리 도감이
@@ -264,6 +316,10 @@ BAND_TRAITS = [
 ]
 assert len(BAND_TRAITS) * BAND_FLOORS == 100
 assert all(len(row) == len(MOB_SPECIES_RUN) for row in BAND_TRAITS)
+# 한 줄에 같이 서는 특성은 맞는 모양이 달라야 한다 — 같으면 전투창에서 같은 놈으로 읽힌다 (TRAIT_FX).
+for _row in BAND_TRAITS:
+    _shapes = [_hit_shape(TRAIT_FX[_t][1]) for _t in dict.fromkeys(_row)]
+    assert len(set(_shapes)) == len(_shapes), f"한 줄에 같은 모양의 맞는 이펙트: {_row}"
 # 챕터 보스의 특성. 챕터의 성격을 보스가 대표한다 — 도입(야수)·방어(수호)·
 # 화력(마법)·치명타(불사), 그리고 마지막은 가장 오래 버티는 거대.
 BOSS_TRAITS = [BEAST, GUARDIAN, MAGIC, IMMORTAL, TITAN]
@@ -911,6 +967,7 @@ def build_monsters(ptable, start_level, mob_loss=None):
             # 색이 진하고 몸집이 커서 눈에 띈다 (MonsterTint / MapBuilder.SetupLook).
             art_idx = (idx + slot) % len(MOB_ART)
             art = MOB_ART[art_idx]
+            slash, hit = TRAIT_FX[trait]    # 정예도 제 특성의 것이다 — 크기는 전투창이 서열로 키운다
             for _ in range(run):
                 monsters.append(dict(
                     id=MOB_ID_BASE + floor * 8 + k, Chapter=ch, Ability=trait,
@@ -920,8 +977,8 @@ def build_monsters(ptable, start_level, mob_loss=None):
                     Critical=99.0, CriticalAttack=200.0,
                     RewardExp=float(reward), RewardItem=-1,
                     IdleAnimStr=art[0], AttackAnimStr=art[1],
-                    BattleParticleAttack="FX_WeaponSlash_00",
-                    BattleParticleHit="FX_WeaponHit_14",
+                    BattleParticleAttack=slash,
+                    BattleParticleHit=hit,
                     Shadow="Mob_Shadow_000",
                     MonsterNameId=MOB_NAME_BASE + floor * 8 + k,
                     MonsterDescId=MOB_DESC_BASE + floor * 8 + k,
@@ -950,8 +1007,8 @@ def build_monsters(ptable, start_level, mob_loss=None):
                 # 공격력이 붙은 무기를 주면 그 뒤 층의 밸런스가 통째로 어긋난다.
                 RewardItem=BOSS_REWARD[ch % len(BOSS_REWARD)],
                 IdleAnimStr=bart[0], AttackAnimStr=bart[1],
-                BattleParticleAttack="FX_WeaponSlash_00",
-                BattleParticleHit="FX_WeaponHit_18",
+                BattleParticleAttack=TRAIT_FX[btrait][0],
+                BattleParticleHit=BOSS_HIT,
                 Shadow="Mob_Shadow_000",
                 MonsterNameId=BOSS_NAME_BASE + ch,
                 MonsterDescId=BOSS_DESC_BASE + ch,

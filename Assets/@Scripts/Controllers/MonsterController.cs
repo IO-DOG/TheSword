@@ -130,18 +130,21 @@ public class MonsterController : MonoBehaviour
         yield return null;
 
         Managers.Sound.Play(Define.Sound.Effect, "BossBattleStart_Event");
-        Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
-        ChromaticAberration chromaticAberration;
-        if (postProcessingVolume.profile.TryGet<ChromaticAberration>(out chromaticAberration))
+        // 볼륨이나 그 안의 효과가 없어도 전투창은 연다. 예전에는 여기서 널참조가 나면 OnBattle 만 켜진 채 전투창이
+        // 안 열려 영영 굳었고, 색수차만 빠진 프로필이면 끝의 널참조로 렌즈 왜곡이 -1 인 채 남았다. 효과는 있으면 쓴다.
+        Volume postProcessingVolume = Managers.Game.MainCamera != null ? Managers.Game.MainCamera.GetComponent<Volume>() : null;
+        VolumeProfile profile = postProcessingVolume != null ? postProcessingVolume.profile : null;
+        ChromaticAberration chromaticAberration = null;
+        if (profile != null && profile.TryGet<ChromaticAberration>(out chromaticAberration))
         {
             chromaticAberration.intensity.value = 1;
         }
 
-        LensDistortion lensDistortion;
+        LensDistortion lensDistortion = null;
 
         // 볼록 렌즈 효과
         float plusTime = 0.5f;
-        if (postProcessingVolume.profile.TryGet<LensDistortion>(out lensDistortion))
+        if (profile != null && profile.TryGet<LensDistortion>(out lensDistortion))
         {
             lensDistortion.active = true;
             float originalIntensity = lensDistortion.intensity.value;
@@ -159,7 +162,7 @@ public class MonsterController : MonoBehaviour
 
         // 오목 렌즈 효과
         float minusTime = 0.1f;
-        if (postProcessingVolume.profile.TryGet<LensDistortion>(out lensDistortion))
+        if (lensDistortion != null)
         {
             float originalIntensity = lensDistortion.intensity.value;
             float targetIntensity = -1f;
@@ -178,7 +181,9 @@ public class MonsterController : MonoBehaviour
 
         Managers.UI.ShowPopupUI<UI_BattlePopup>();
 
-        chromaticAberration.intensity.value = 0;
-        lensDistortion.active = false;
+        if (chromaticAberration != null)
+            chromaticAberration.intensity.value = 0;
+        if (lensDistortion != null)
+            lensDistortion.active = false;
     }
 }

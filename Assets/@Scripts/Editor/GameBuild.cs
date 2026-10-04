@@ -28,10 +28,14 @@ using Debug = UnityEngine.Debug;
 ///
 /// Windows 는 콘텐츠 검증(validate_content.py)을 통과해야 굽고, 굽기 전에 출력 폴더를 비운다.
 /// 내보내면 안 되는 디버그 기호 폴더(*_DoNotShip)는 Build/Symbols/{버전}/ 으로 옮기고, 개발용 steam_appid.txt 는 지운다.
+///
+/// 체험판은 2단계만 WindowsDemo 로 바꾼다 — 같은 콘텐츠에 DEMO 정의만 얹어 Build/WindowsDemo 에 굽는다(MASTER_PLAN D1).
 /// </summary>
 public static class GameBuild
 {
     const string OutDir = "Build/Windows";
+    const string DemoOutDir = "Build/WindowsDemo";     // Steam/scripts/app_build_DEMO_APPID.vdf 의 ContentRoot 와 같아야 한다
+    const string DemoDefine = "DEMO";
     const string ExeName = "TheSword.exe";
 
     /// <summary>1단계: 새 프리팹·데이터를 어드레서블에 등록하고 저장한다.
@@ -61,7 +65,19 @@ public static class GameBuild
     /// <summary>2단계: 콘텐츠를 굽고 실행 파일을 만든다.</summary>
     public static void Windows()
     {
-        int code = Run(BuildTarget.StandaloneWindows64);
+        int code = Run(BuildTarget.StandaloneWindows64, false);
+        if (Application.isBatchMode)
+            EditorApplication.Exit(code);
+    }
+
+    /// <summary>2단계 (체험판): 같은 콘텐츠를 DEMO 정의로 굽는다 → Build/WindowsDemo. 1단계(Prepare)는 본편과 같다.
+    ///
+    /// DEMO 는 이 빌드의 스크립트 컴파일에만 붙는다(BuildPlayerOptions.extraScriptingDefines — 플레이어 설정의 정의 목록
+    /// 뒤에 덧붙는다). 플레이어 설정은 건드리지 않으니 되돌릴 것도 없고, 에디터가 다시 컴파일하지도 않는다.
+    /// 설정의 정의를 바꿨다 되돌리면 도메인 리로드가 두 번 걸리고 ProjectSettings.asset 이 다시 쓰인다.</summary>
+    public static void WindowsDemo()
+    {
+        int code = Run(BuildTarget.StandaloneWindows64, true);
         if (Application.isBatchMode)
             EditorApplication.Exit(code);
     }
@@ -69,10 +85,16 @@ public static class GameBuild
     [MenuItem("TheSword/Build Windows Player")]
     static void MenuBuild()
     {
-        Run(BuildTarget.StandaloneWindows64);
+        Run(BuildTarget.StandaloneWindows64, false);
     }
 
-    static int Run(BuildTarget target)
+    [MenuItem("TheSword/Build Windows Demo Player")]
+    static void MenuBuildDemo()
+    {
+        Run(BuildTarget.StandaloneWindows64, true);
+    }
+
+    static int Run(BuildTarget target, bool demo)
     {
         try
         {
@@ -99,7 +121,7 @@ public static class GameBuild
             Debug.Log($"[GameBuild] 콘텐츠 빌드 {(aaResult != null ? aaResult.Duration.ToString("F1") + "초" : "완료")}");
 
             // 실행 파일. 지난 빌드에서 남은 파일(지운 씬·에셋의 데이터)이 섞이지 않게 비우고 시작한다.
-            string dir = Path.GetFullPath(OutDir);
+            string dir = Path.GetFullPath(demo ? DemoOutDir : OutDir);
             if (Directory.Exists(dir))
                 Directory.Delete(dir, true);
             Directory.CreateDirectory(dir);
@@ -111,6 +133,7 @@ public static class GameBuild
                 target = target,
                 // 압축하지 않으면 .assets/.resS 가 날것으로 들어간다 (536MB 중 텍스처가 88%).
                 options = BuildOptions.CompressWithLz4HC,
+                extraScriptingDefines = demo ? new[] { DemoDefine } : null,
             };
 
             // 콘텐츠는 위에서 한 번 구웠다. 플레이어 빌드가 또 굽지 않게 그 결과를 그대로 건넨다
@@ -136,12 +159,14 @@ public static class GameBuild
                 return 4;
             }
 
-            MoveSymbols(dir);
+            // 체험판은 DEMO 로 컴파일돼 기호가 본편과 다르다 — 같은 버전이어도 따로 둔다.
+            MoveSymbols(dir, demo ? "-demo" : "");
             // steam_appid.txt 는 개발용이다 — 남으면 Steam 을 거치지 않고 켜진다(SteamManager.AppId). 개발 빌드가 아니면 지운다.
             if ((opt.options & BuildOptions.Development) == 0)
                 File.Delete(Path.Combine(dir, "steam_appid.txt"));
-            Debug.Log("[GameBuild] 완료: " + opt.locationPathName);
-            Debug.Log("[GameBuild] Steam 에 올리기(SteamPipe, beta 브랜치): powershell -ExecutionPolicy Bypass -File Steam/scripts/upload.ps1");
+            Debug.Log("[GameBuild] 완료: " + opt.locationPathName + (demo ? " (체험판, " + DemoDefine + ")" : ""));
+            Debug.Log("[GameBuild] Steam 에 올리기(SteamPipe, beta 브랜치): powershell -ExecutionPolicy Bypass -File Steam/scripts/upload.ps1"
+                      + (demo ? " -Demo" : ""));
             return 0;
         }
         catch (Exception e)
@@ -190,9 +215,9 @@ public static class GameBuild
 
     /// <summary>Unity 가 실행 파일 옆에 늘 만드는 디버그 기호 폴더를 버전별로 옮겨 둔다.
     /// 내보내면 안 되지만 크래시를 풀 때 필요하다 (Burst 는 *_DoNotShip, IL2CPP 는 *_ButDontShipItWithYourGame).</summary>
-    static void MoveSymbols(string dir)
+    static void MoveSymbols(string dir, string suffix)
     {
-        string symbols = Path.GetFullPath($"Build/Symbols/{PlayerSettings.bundleVersion}");
+        string symbols = Path.GetFullPath($"Build/Symbols/{PlayerSettings.bundleVersion}{suffix}");
         foreach (string from in Directory.GetDirectories(dir, "*_DoNotShip")
                      .Concat(Directory.GetDirectories(dir, "*_ButDontShipItWithYourGame")))
         {
