@@ -53,8 +53,16 @@ public static class SwordLedger
 
     static LedgerState s_finished;          // 100층 계단에서 끝낸 판 — 엔딩 씬의 판 카드가 한 번 가져간다
 
+    /// <summary>방금 끝낸 판이 점수를 냈다(기록·순위표). 결말을 본 뒤 100층 입구에서 다시 끝내면 같은 판이라 내지 않는다 —
+    /// 그때 판 카드가 기록되지도 않을 점수를 보였다.</summary>
+    public static bool FinishedRunScored { get; private set; }
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStatics() => s_finished = null;
+    static void ResetStatics()
+    {
+        s_finished = null;
+        FinishedRunScored = false;
+    }
 
     // GameEvents 는 SubsystemRegistration 에서 구독자를 비우므로 그 뒤(BeforeSceneLoad)에 붙는다.
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -188,6 +196,7 @@ public static class SwordLedger
         LedgerState l = State;
         EnterNewFloor(Managers.Game.PlayerData.CurStageid + 1);    // 올라갈 층은 없지만 이 층은 닫는다
         s_finished = l;
+        FinishedRunScored = false;
         int score = Score(l);
         // 봇의 완주 기록에 남긴다 — 사람 판이면 판 카드와 같은 값이다.
         Debug.Log($"[Ledger] 완주: 예언 {l.Foretold} 치름 {l.Paid} (제단 {l.AltarPaid}) 기준 {l.Par} 넘침 {l.Spill} " +
@@ -197,6 +206,7 @@ public static class SwordLedger
             return;
         PlayerPrefs.SetString(ScoredRunKey, l.RunId);
         PlayerPrefs.Save();
+        FinishedRunScored = true;
         GameEvents.RaiseRunScored(score);
     }
 

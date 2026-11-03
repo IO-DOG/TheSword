@@ -81,6 +81,7 @@ public class UI_ConversationPopup : UI_Popup
     bool _choosing;
     int _choice = -1;
     float _choiceOpenedAt;
+    Vector2 _choiceMouse;                   // 선택지가 뜰 때의 마우스 — 가만히 있던 커서가 고르지 않게
 
     /// <summary>선택지를 띄우고 고르기를 기다린다 — 건너뛸 수 없다.</summary>
     public bool Choosing => _choosing;
@@ -530,6 +531,7 @@ public class UI_ConversationPopup : UI_Popup
         _choosing = true;
         _choice = -1;
         _choiceOpenedAt = Time.unscaledTime;
+        _choiceMouse = Input.mousePosition;
         GetImage((int)Images.ConversationArrow).gameObject.SetActive(false);
         // 마검의 감정 풍선이 첫 선택지의 오른쪽 위 모서리를 덮었다. 고르는 동안은 걷는다(고른 뒤에는 창이 닫힌다).
         GetObject((int)GameObjects.LeftEmoji).SetActive(false);
@@ -575,7 +577,9 @@ public class UI_ConversationPopup : UI_Popup
             mark.rectTransform.anchoredPosition = new Vector2(52f, 0f);
             mark.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 90f);     // 아래를 가리키던 화살표를 옆으로
 
-            rt.gameObject.BindEvent(() => Select(index), type: Define.UIEvent.PointerEnter);
+            // 마우스를 움직여 올렸을 때만 고른다(UI_TallyPopup 과 같다). 가만히 있던 — 패드면 숨은 채 화면 가운데의 — 커서가 첫 선택지
+            // ("놓지 않는다") 위에 있어 뜨자마자 골라졌고, 처음 누른 A·Enter 가 되돌릴 수 없는 결말을 굳혔다.
+            rt.gameObject.BindEvent(() => { if ((Vector2)Input.mousePosition != _choiceMouse) Select(index); }, type: Define.UIEvent.PointerEnter);
             rt.gameObject.BindEvent(() => { if (Time.unscaledTime - _choiceOpenedAt >= ChoiceGuard) Choose(index); });
 
             _choiceBoxes[i] = rt;

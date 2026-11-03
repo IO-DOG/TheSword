@@ -43,6 +43,7 @@ public class UI_ConfirmPopup : UI_Popup
 
     const float ClickDelay = 0.4f;
     float _openedAt;
+    Vector2 _openMouse;
     Action _onYes;
     Action _onNo;
     bool _yes;          // 지금 골라 둔 쪽 — Enter 가 누를 것
@@ -140,8 +141,10 @@ public class UI_ConfirmPopup : UI_Popup
         foreach (Animator a in GetComponentsInChildren<Animator>(true))
             a.updateMode = AnimatorUpdateMode.UnscaledTime;
 
-        yes.gameObject.BindEvent(() => Select(true), type: Define.UIEvent.PointerEnter);
-        no.gameObject.BindEvent(() => Select(false), type: Define.UIEvent.PointerEnter);
+        // 올리기도 마우스를 움직였을 때만 — "예" 위에 놓여 있던 커서가 되돌릴 수 없는 질문의 "아니오" 를 "예" 로 바꿔 두었다.
+        _openMouse = Input.mousePosition;
+        yes.gameObject.BindEvent(() => { if ((Vector2)Input.mousePosition != _openMouse) Select(true); }, type: Define.UIEvent.PointerEnter);
+        no.gameObject.BindEvent(() => { if ((Vector2)Input.mousePosition != _openMouse) Select(false); }, type: Define.UIEvent.PointerEnter);
         // 마우스는 창이 뜨고 ClickDelay 뒤부터 받는다(UI_TallyPopup 과 같다) — 지는 싸움 옆 칸을 두 번 누르면 첫 클릭이 부딪혀
         // "그래도 싸울까" 를 띄우고 두 번째(0.35초 안)가 그 창의 단추에 떨어졌다.
         _openedAt = Time.unscaledTime;

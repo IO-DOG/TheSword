@@ -87,6 +87,7 @@ public class UI_MenuPopup : UI_Popup
     readonly List<Row> _listRows = new List<Row>();
     List<Row> _rows;                // 지금 키보드가 고르는 목록
     int _cursor;
+    Vector2 _openMouse;             // 목록이 뜰 때의 마우스 — 가만히 있던 커서가 줄을 고르지 않게
 
     bool _inGame;
     bool _shifted;                  // 버튼이 왼쪽으로 비켜 있다 (설정·언어 창이나 체크포인트 목록)
@@ -155,6 +156,7 @@ public class UI_MenuPopup : UI_Popup
             row.Set.SetActive(false);
         }
         _rows = _main;
+        _openMouse = Input.mousePosition;
         Highlight(0);
 
         // 빌드 번호 — 게임 안에서만. 타이틀은 제 것을 이미 보인다.
@@ -237,7 +239,9 @@ public class UI_MenuPopup : UI_Popup
         Row row = rows[index];
         row.Button.BindEvent(() =>
         {
-            if (_rows != rows)
+            // 마우스를 움직여 올렸을 때만(UI_TallyPopup 과 같다) — B·Esc·창 전환으로 열면 가만히 있던(패드면 숨은) 커서 밑의
+            // 가운데 줄 "이 층 다시 시작" 이 골라져, "계속하기" 를 누르려던 A 가 다시 시작을 물었다.
+            if (_rows != rows || (Vector2)Input.mousePosition == _openMouse)
                 return;
             if (_cursor != index)
                 Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_SFX");
@@ -451,6 +455,7 @@ public class UI_MenuPopup : UI_Popup
         _list.transform.DOMoveX(Screen.width * 0.645f, SlideTime).SetUpdate(true).SetLink(_list);
 
         _rows = _listRows;
+        _openMouse = Input.mousePosition;
         Highlight(0);
     }
 

@@ -301,14 +301,16 @@ public class UI_TitleScene : UI_Scene
                 case 0:
                     OnClickNewGameButton();
                     break;
+                // 줄은 켤 때의 _isFirst 로 세웠다 — 같은 값으로 고른다. 지금의 HasSave 로 고르면 새 게임이 지우다 반쯤 실패한 뒤
+                // (줄은 넷인데 저장은 없다) "설정" 의 Enter 가 게임을 끄고 "이어하기" 의 Enter 가 설정을 열었다.
                 case 1:
-                    if (Managers.Game.HasSave) // 최초가 아니면
+                    if (_isFirst == false)
                         OnClickLoadGameButton();
                     else
                         OnClickSettingButton();
                     break;
                 case 2:
-                    if (Managers.Game.HasSave) // 최초가 아니면
+                    if (_isFirst == false)
                         OnClickSettingButton();
                     else
                         OnClickExitButton();
@@ -360,6 +362,14 @@ public class UI_TitleScene : UI_Scene
     {
         if (_lock || !isPreload)
             return;
+#if DEMO
+        if (HasFullGameSave())
+        {
+            Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UIselect");
+            UI_ConfirmPopup.Tell(Managers.GetString(UI_DemoEndPopup.FULL_SAVE));
+            return;
+        }
+#endif
         if (Managers.Data.HasMonsterTable(GameMode.Tower) == false)
         {
             OnPickMode(GameMode.Normal);
@@ -368,6 +378,15 @@ public class UI_TitleScene : UI_Scene
         Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UIselect");
         UI_ModePopup.Ask(OnPickMode);
     }
+
+#if DEMO
+    // 체험판과 본편은 같은 저장 폴더를 쓴다(같은 회사·제품 이름 — 본편이 체험판 저장을 잇는다, K1). 체험판 끝(21층)을 넘은 저장은
+    // 본편에서 온 것인데, 체험판의 새 게임이 그것을 지웠다(Steam 클라우드를 같이 쓰면 거기서도). 지도가 달라 못 잇는 것도 본편 것이라
+    // 내용 검사 없이 읽는다.
+    static bool HasFullGameSave() =>
+        SaveStore.TryRead(SaveStore.DirectoryPath, out SaveStore.Snapshot save, out _)
+        && SaveMigration.Frontier(save.Player) > DemoGate.LastStage + 1;
+#endif
 
     // 규칙을 골랐다. 새 게임은 저장을 지운다 — 저장이 있으면 마지막에 묻는다. 처음 골라 둔 쪽은 "아니오".
     void OnPickMode(GameMode mode)
@@ -407,6 +426,8 @@ public class UI_TitleScene : UI_Scene
             _lock = false;
             GetImage((int)Images.Buttons).gameObject.SetActive(false);
             ShowNotice(Managers.GetString(Define.SAVE_DELETE_FAILED));
+            Managers.Sound.Play(Define.Sound.Bgm, "MainTitle_BGM");    // 위에서 3초에 걸쳐 껐다(음량 0) — 타이틀에 남는다
+            Managers.Sound.SetBGMVolume(SoundManager.ConfiguredBgmVolume);
             yield break;
         }
         Managers.Game.SetMode(GameEvents.IsAutoPlaying ? AutoPlayer.StartMode : _mode);   // 판을 새로 세운 뒤(Clear 가 보통으로 되돌린 뒤)에 적는다 — 몬스터 표도 같이 바뀐다

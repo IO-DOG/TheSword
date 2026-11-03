@@ -198,7 +198,8 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
 - **체험판**은 `GameBuild.WindowsDemo`(→ `Build/WindowsDemo`)가 `DEMO` 정의를 그 빌드에만 얹어 굽는다(플레이어 설정은
   안 바뀐다). `DemoGate` 가 21층(20층 보스·반지 뒤)에서 끝 카드(`UI_DemoEndPopup`: 예언·치름·찜하기)를 띄운다.
   체험판 세이브는 그 사이에 본편 레이아웃을 바꿔도 이어진다(K1, 아래 데이터 파이프라인의 "세이브") — **체험판 빌드가 남긴 지도
-  보관 파일이 커밋돼 있을 때만**이다. 끝 카드가 그것을 약속한다(steam2.py 561).
+  보관 파일이 커밋돼 있을 때만**이다. 끝 카드가 그것을 약속한다(steam2.py 561). 거꾸로 체험판의 새 게임은 21층을 넘은 저장(본편 것)을
+  지우지 않고 알린다(`UI_TitleScene.HasFullGameSave` — `#if DEMO` 라 `cscheck --define=DEMO --tag demo` 로 컴파일을 본다).
 
 ### 점수의 천장 — 마검의 장부·별·제단·탑의 법
 
@@ -809,6 +810,7 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
 ```bash
 python Tools/cscheck.py          # Assets/@Scripts 의 C# 을 디스크 그대로 빌드 (런타임 + 에디터)
 python Tools/cscheck.py --warn   # 우리 스크립트의 경고까지
+python Tools/cscheck.py --define=DEMO --tag demo   # 체험판 정의로도(#if DEMO 코드는 평소 검사에 안 잡힌다)
 ```
 
 Unity 는 에디터가 새로고침할 때만 csproj 를 다시 쓰므로, 밖에서 추가한 스크립트는 `dotnet build` 에

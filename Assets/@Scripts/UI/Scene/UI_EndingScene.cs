@@ -115,8 +115,9 @@ public class UI_EndingScene : UI_Scene
             string.Format(Managers.GetString(UI_TallyPopup.TotalsText), run.Foretold, run.Paid, run.Par);
         CardLine(box, prose, 30f, soft, ref y, 46f).text = string.Format(Managers.GetString(CardExtra), run.AltarPaid, run.Spill);
 
+        // 낸 점수만 보인다 — 같은 판을 다시 끝냈거나(결말을 본 뒤 100층 입구에서) 봇 판이면 기록되지 않으니 숫자를 내걸지 않는다.
         int score = SwordLedger.Score(run);
-        if (score > 0)
+        if (score > 0 && SwordLedger.FinishedRunScored)
         {
             y -= 16f;
             CardLine(box, number, 84f, gold, ref y, 104f).text = string.Format(Managers.GetString(CardScore), score);

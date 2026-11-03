@@ -9,6 +9,7 @@ Library/ScriptAssemblies instead of their projects, and builds them.
     python Tools/cscheck.py            # errors only, exit 1 if any
     python Tools/cscheck.py --warn     # also warnings from our own scripts
     python Tools/cscheck.py --tag lane # own csproj copies and obj folder, so parallel runs don't collide
+    python Tools/cscheck.py --define=DEMO --tag demo   # also with a build define (the demo build adds DEMO)
 
 Needs the editor to have compiled once (Library/ScriptAssemblies) and the
 generated Assembly-CSharp*.csproj files to exist. The _check_*.csproj copies are
@@ -26,6 +27,7 @@ if "--tag" in sys.argv and sys.argv.index("--tag") + 1 < len(sys.argv):
 SUFFIX = f"_{TAG}" if TAG else ""
 OUT = f"obj\\cscheck{SUFFIX}"
 OUR = "Assets\\@Scripts\\"
+DEFINES = [a.split("=", 1)[1] for a in sys.argv if a.startswith("--define=")]
 
 
 def _on_disk(editor):
@@ -60,6 +62,9 @@ def _rewrite(src, dst, editor, runtime_dll=None):
     text = text.replace("<BaseDirectory>.</BaseDirectory>",
                         f"<BaseDirectory>.</BaseDirectory>"
                         f"<BaseIntermediateOutputPath>{OUT}\\obj\\{tag}\\</BaseIntermediateOutputPath>")
+    if DEFINES:  # code under #if DEMO and the like is skipped unless the define is there
+        text = re.sub(r"<DefineConstants>([^<]*)</DefineConstants>",
+                      lambda m: f"<DefineConstants>{m.group(1)};{';'.join(DEFINES)}</DefineConstants>", text)
     # the IDE analyzer only adds noise here
     text = re.sub(r'\s*<Analyzer Include="[^"]*Microsoft\.Unity\.Analyzers\.dll"\s*/>', "", text)
     open(os.path.join(ROOT, dst), "w", encoding="utf-8").write(text)

@@ -6,8 +6,9 @@ using UnityEngine;
 /// 20층 보스와 렌의 반지까지가 체험판이다. 21층에 서면 끝 카드(UI_DemoEndPopup)를 띄운다. 계단으로 올라온 때(FloorEntered)
 /// 말고 21층 체크포인트를 이어 한 때도 있어서 HUD 가 설 때(HudRefreshed)도 본다 — 이어하기에는 FloorEntered 가 오지 않는다.
 /// 계단으로 오면 카드는 EnterFloor 바로 앞의 HUD 갱신(PortalController 의 GameScene.Refresh)에서 뜨고, 21층 입구 체크포인트는
-/// 같은 호출 안에서 그 뒤에 적힌다(GameManager.EnterFloor). 본편은 같은 폴더를 읽지만 지도(MapData 해시)가 같을 때만 그 저장을
-/// 잇는다 — 체험판을 낸 뒤 본편 지도를 고치면 거절된다(지우지는 않는다). 그래서 카드는 잇는다고 약속하지 않는다(steam2.py 561).
+/// 같은 호출 안에서 그 뒤에 적힌다(GameManager.EnterFloor). 본편은 같은 폴더를 읽고, 그 사이 본편 지도를 고쳐도 체험판 빌드가 남긴
+/// 지도 보관 파일(MapDataArchive, K1)이 커밋돼 있으면 옮겨 잇는다 — 카드가 그것을 약속한다(steam2.py 561). 거꾸로 체험판의 새 게임은
+/// 이 층을 넘은 저장(본편 것)을 지우지 않는다(UI_TitleScene.HasFullGameSave).
 /// 봇(GameEvents.IsAutoPlaying)은 막지 않는다 — 카드 없이 지나간다.
 /// </summary>
 public static class DemoGate

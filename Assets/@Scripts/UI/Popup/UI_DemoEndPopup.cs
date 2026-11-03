@@ -25,6 +25,7 @@ public class UI_DemoEndPopup : UI_Popup
     public const int FORETOLD = 563;
     public const int PAID = 564;
     public const int WISHLIST = 565;
+    public const int FULL_SAVE = 566;   // 타이틀의 새 게임 — 본편 저장은 지우지 않는다(UI_TitleScene)
     const int ALTAR = 474;              // "제단" — 결산 창의 제단 제목(ledger.py, UI_TallyPopup.AltarTitle)
 
     const float Width = 1000f;
