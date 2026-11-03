@@ -28,7 +28,7 @@ The sword's single eye shows the price of every fight. It hides only one: the pr
 [*][b]An exact forecast above every monster[/b]: after the contract, every monster on the map shows the HP you'll lose if you fight it next. It's the real battle, run ahead of time, so unless you use a skill it's never off by a single point. A red X marks a fight you'd lose; a ★ marks a kill that levels you up.
 [*][b]Find the ATK that saves a hit[/b]: the Monster Manual lists every species on the floor with its stats, how many are left, the price of the next fight, the hits you'll take, and "ATK +k → one hit fewer". Hover over an ATK or DEF rune and its tooltip shows which monsters get cheaper, and from what to what, if you pick it up.
 [*][b]Eight monster traits[/b]: Beast, Magic, Guardian, Immortal, Swordsman, Titan, Assassin and Armor. Assassins dodge every plain hit until a critical hit reveals them, Armored foes hide behind a shell you have to break first, Titans roar back every fifth hit they take. Each chapter asks for a different answer.
-[*][b]Gauge combat you can read[/b]: fighters strike and guard as their gauges fill. Critical hits aren't a dice roll. They land every Nth hit, and the count carries over from one fight to the next, so who you cut first changes the price. The HUD counts down to your next crit. Slip in Smash, Bulwark and Drain once per fight to beat the forecast.
+[*][b]Gauge combat you can read[/b]: fighters strike and guard as their gauges fill. Critical hits aren't a dice roll. They land every Nth hit, and the count carries over from one fight to the next, so who you cut first changes the price. The HUD counts down to your next crit. Smash, Bulwark and Drain refill once per floor: spend them on the right fight to beat the forecast.
 [*][b]Less waiting[/b]: set battle speed to 1×, 2× or 4× in the options and hold Space for 8×. Press Tab to skip a fight and pay exactly its forecast price. Boss fights always play out.
 [/list]
 
@@ -43,7 +43,7 @@ The sword's single eye shows the price of every fight. It hides only one: the pr
 
 [h2]The Sword's Ledger[/h2]
 [list]
-[*][b]A tally every five floors[/b]: the sword sets what you paid against the par price those floors were built around, then awards ★ to ★★★: ★★ for par or better, ★★★ for coming in well under par. Par counts only the fights you actually took. What it foretold is listed alongside, and it names the traits of the next five floors.
+[*][b]A tally every five floors[/b]: the sword sets what you paid against the par price those floors were built around, then awards ★ to ★★★: ★★ for beating what a typical climber pays on those floors, ★★★ for the top quarter. The tally shows the HP you needed for each. Par counts only the fights you actually took. What it foretold is listed alongside, and it names the traits of the next five floors.
 [*][b]An altar at the stairs[/b]: pay HP (priced as a % of your max HP) for permanent ATK or DEF, one pick per visit. The price climbs with every purchase, and the altar won't sell if it would leave you too low.
 [*][b]A score that outlasts the ending[/b]: finish a run and the ledger turns it into one score (lower is better). Normal and Tower's Law each have a Steam leaderboard, and there are 20 Steam achievements.
 [*][b]Tower's Law[/b]: a rule you pick when you start a new game. Same map, but the monsters hit harder and every potion is part of your budget. If it's your first climb, start with Normal.

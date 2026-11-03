@@ -127,8 +127,6 @@ public class UI_BattlePopup : UI_Popup
         Managers.Game.OnBattleAction -= BattleEnd;
         Managers.Game.OnBattleAction += BattleEnd;
 
-        // 스킬은 전투마다 셋 다 새로 채운다.
-        BattleSkills.ResetForBattle();
         _monsterId = Managers.Game.MonsterData[0].id;
         // 챕터 보스(생성 층의 "Boss" 태그)와 킹 슬라임. 분열 슬라임은 보스 연출은 쓰지만 우두머리가 아니다.
         MonsterController fought = Managers.Game.Monster;
@@ -196,7 +194,7 @@ public class UI_BattlePopup : UI_Popup
 
     #region 스킬 막대
     // 1/2/3 이 무엇인지 화면에 없어서 계약 대사로만 알 수 있었다. 전투창 아래 가운데에 셋을 늘어놓고,
-    // 쓴 것(전투마다 한 번)은 흐리게 한다. 프리팹을 고치지 않고 메뉴 단추 그림·HUD 글꼴을 빌린다(CodeUI).
+    // 이 층에서 쓴 것(층마다 한 번)은 흐리게 한다. 프리팹을 고치지 않고 메뉴 단추 그림·HUD 글꼴을 빌린다(CodeUI).
     const float SkillWidth = 230f, SkillHeight = 56f, SkillGap = 16f, SkillBottom = 36f;
 
     CanvasGroup[] _skillSlots;
@@ -341,8 +339,8 @@ public class UI_BattlePopup : UI_Popup
 
     /// <summary>전투 중 액티브 스킬 입력. 1 강타 / 2 철벽 / 3 흡혈. Tab 은 건너뛰기.
     ///
-    /// 전투는 자동으로 굴러가므로 스킬은 "언제 끼어드느냐" 가 전부다.
-    /// 셋 다 전투당 한 번뿐이라, 아낄지 지금 쓸지가 유일한 판단거리가 된다.</summary>
+    /// 전투는 자동으로 굴러가므로 스킬은 "어디에 끼어드느냐" 가 전부다.
+    /// 셋 다 층마다 한 번뿐이라(BattleSkills), 이 싸움에 쓸지 이 층의 더 비싼 싸움에 아낄지가 판단거리가 된다.</summary>
     void Update()
     {
         PaintSkills();
@@ -477,8 +475,6 @@ public class UI_BattlePopup : UI_Popup
         // 전투 요약을 확정한다 — 두 알림을 듣는 쪽(업적·장부)이 LastBattle 에서 읽는다.
         LastBattle.Won = won;
         LastBattle.HpAfter = Managers.Game.PlayerData.CurHP;
-        for (int i = 0; i < BattleSkills.Count; i++)
-            LastBattle.SkillsUsed |= BattleSkills.IsUsed(i);
         if (won && _boss)
             GameEvents.RaiseBossDefeated(_monsterId, _stage);
         GameEvents.RaiseBattleEnded(_monsterId, won);

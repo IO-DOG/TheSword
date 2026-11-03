@@ -169,6 +169,8 @@ public class GameManager
         public GameMode Mode { get; set; }
         // 이번 판에 제단에서 산 횟수. n 번째 값 = AltarPrice + AltarPriceStep·n(n−1) % (StageInfoData, generate_content.altar_sells)
         public int AltarBought { get; set; }
+        // 이 층에서 쓴 스킬 (비트: 강타 1 · 철벽 2 · 흡혈 4). 처음 오는 층에 들어설 때 0 — 체크포인트와 같이 저장된다(BattleSkills).
+        public int SkillsUsed { get; set; }
         // 마검의 장부(SwordLedger) — 체크포인트와 같이 저장되고, 층을 다시 시작하면 그 입구의 장부로 돌아간다.
         public LedgerState Ledger { get; set; } = new LedgerState();
 
@@ -192,6 +194,7 @@ public class GameManager
             Managers.Game.PlayerData.IsContractedSword = false;
             Managers.Game.PlayerData.Mode = GameMode.Normal;        // 새 게임 흐름이 고른 규칙을 이 뒤에 적는다
             Managers.Game.PlayerData.AltarBought = 0;
+            Managers.Game.PlayerData.SkillsUsed = 0;
             Managers.Game.PlayerData.Ledger = new LedgerState { RunId = Guid.NewGuid().ToString("N") };   // 새 판의 이름
 
             EnsureLists();

@@ -7,7 +7,7 @@
   python Tools/fun_sim.py --json out.json   # 판마다의 요약 (보고서 표를 다시 뽑을 때)
 
 찍는 것: [0] 봇 기준점 · [1] 완주·죽음 · [2] 챕터 최저 HP · [3] 띠 치름/기준과 별·판 점수 · [4] 습관별 차이 ·
-[5] 지루함·임계·물약·덤 · [6] 판단 하나의 무게 · [7] 별 문턱(띠별 표) · [8] 가정: 스킬이 층마다 한 번 · [9] 가정: 몹 손실
+[5] 지루함·임계·물약·덤 · [6] 판단 하나의 무게 · [7] 별 문턱(띠별 표) · [8] 예전 규칙: 스킬이 전투마다 · [9] 가정: 몹 손실
 보고서: Documents/TheSword_재미검증_v2.md
 
 v1(재미검증 보고서 7절)은 봇의 단순 완주 한 판으로 별을 쟀다 — 20띠 중 14띠가 ★★★. 한 판으로는 문턱을
@@ -32,7 +32,8 @@ v1(재미검증 보고서 7절)은 봇의 단순 완주 한 판으로 별을 쟀
     싸움 순서는 몬스터 id 순(배치가 약한 놈부터다). 봇처럼 예측이 싼 것부터 잡아도 치름은 1% 안쪽으로만 달라졌다.
   - 스킬: 사람이 언제 누르는지는 모른다. 세 가지 습관(안 쓴다 / 시작하자마자 셋 다 / 때를 맞춘다)과 봇의 규칙을
     전투 시계 사이에 끼워 넣는다. 사람이 더 잘 누를 수 있으니 "때를 맞춘다" 도 상한은 아니다.
-    [8] 은 가정이다 — 스킬이 층마다 한 번씩만 찬다면(게임은 전투마다 다시 찬다).
+    스킬은 층마다 한 번씩 찬다(BattleSkills.RefillForFloor — 처음 오는 층에서). [8] 은 같은 사람을 예전 규칙
+    (전투마다 다시 찬다)으로 한 번 더 돌린 것이다.
   - 죽으면 층 입구(체크포인트)에서 다시 한다: 물약을 보이는 대로 마시고(생존의 지배 전략) 곁길을 덜 탄다 → 아래층에
     두고 온 물약을 마시고 온다(층에 들어설 때마다 체크포인트를 새로 쓴다) → 스킬을 꺼낸다. 다 안 되면 막힌 판이다.
   - 1~4층은 simulate_handmade 의 결과(5층 입구 Lv16)로 시작한다 — 봇 녹화 로그(F5 Lv17·F7 Lv18·F8 Lv20, 층 중간에
@@ -65,7 +66,7 @@ MAX_STEPS = bisect.bisect_left(_ELAPSED, 600.0)     # BattleForecast.MAX_SECONDS
 
 steps_of = functools.lru_cache(maxsize=None)(_steps)
 
-# 스킬 습관. 셋 다 전투마다 다시 찬다(BattleSkills.ResetForBattle) — 아낄 까닭이 없다.
+# 스킬 습관. 셋 다 층마다 한 번씩 — 처음 오는 층에 들어설 때 다시 찬다(BattleSkills.RefillForFloor).
 SKILL_NONE, SKILL_MASH, SKILL_TIMED, SKILL_BOT = "none", "mash", "timed", "bot"
 BOT_EMERGENCY_HP = 0.35         # AutoPlayer.SkillEmergencyHp — 봇은 보스가 아니면 이 아래에서만 쓴다
 BOT_DRAIN_HP = 0.6              # AutoPlayer.SkillDrainHp
@@ -142,7 +143,7 @@ def fight(ps, md, carry=FRESH, hp=None, max_hp=None, skill=SKILL_NONE, boss=Fals
                     return finish(s, True)
                 ma += m_cd
 
-    # ---- 스킬 (BattleSkills.Use) — 걸음과 걸음 사이(Update)에 끼어든다. 셋 다 전투당 한 번.
+    # ---- 스킬 (BattleSkills.Use) — 걸음과 걸음 사이(Update)에 끼어든다. kit 에 남은 것만(층마다 한 번).
     #   mash  시작하자마자 셋 다. 은신한 암살에게는 헛손질이고, 가득 찬 체력의 흡혈은 회복이 버려진다.
     #   timed 강타는 시작에(암살은 은신이 풀린 뒤), 철벽은 맨몸으로 맞기 직전, 흡혈은 잃은 HP 가 흡혈 값만큼 찼을 때.
     #   bot   AutoPlayer.TickSkills — 보스에서만(일반 전투는 HP 35% 아래부터). 철벽은 맞기 직전,
@@ -626,10 +627,10 @@ class Run:
     """한 판. 상태는 전부 이 객체에 있고 층 입구마다 통째로 떠 둔다(체크포인트)."""
 
     LIST_FIELDS = ("keys", "skipped", "stars", "bands", "fights", "lows", "floor_log", "deaths",
-                   "decisions", "potlog", "left", "extras")
+                   "decisions", "potlog", "left", "extras", "skipped_mobs")
 
     def __init__(self, world, table, persona, record_decisions=False, overrides=None, density=False,
-                 skill_scope="battle"):
+                 skill_scope="floor"):
         _WORLDS[id(world)] = world
         self.W, self.wid, self.table, self.P = world, id(world), table, persona
         self.mons = world.tables[table]
@@ -651,6 +652,8 @@ class Run:
         self.potlog = []                # (층, 회복량, 넘친 양, 쓰지 않고 둔 양)
         self.left = []                  # 지나온 층에 두고 온 물약 (층, 회복) — 막히면 내려가서 마신다
         self.retreats = 0               # 그렇게 내려간 횟수
+        self.skipped_mobs = []          # 지나친 곁길 몬스터 (층, id, 덤) — 그 층에 남아 있다. 막히면 내려가서 잡는다
+        self.grinds = 0                 # 그렇게 내려가 잡은 횟수
         self.extras = []                # 챕터 끝마다 (층, 공격, 방어, 체력) — 계단 룬 밖으로 얹은 것
         self.stuck = None
         self.rescues = 0                # 두 번 죽은 층에서 스킬을 꺼내 든 횟수 (스킬 안 쓰는 사람)
@@ -659,7 +662,7 @@ class Run:
         self.density = density          # +3 공격 임계 측정(전투마다 한 번 더 잰다)
         self.mode = "normal"
         self.snaps = {}
-        # 가정: 스킬이 전투마다가 아니라 층마다 한 번씩 찬다면("floor"). 지금 게임은 "battle"(BattleSkills.ResetForBattle).
+        # 스킬이 언제 다시 차나 — "floor" 처음 오는 층마다(지금 게임), "battle" 전투마다(예전 규칙, [8] 에서 견준다).
         self.skill_scope = skill_scope
         self.kit = (True, True, True)
         self.kit_target = None          # 층마다 한 번이면 때를 맞추는 사람은 그 층에서 가장 비싼 싸움에 아낀다
@@ -746,14 +749,15 @@ class Run:
         key = (st["atk"] + datk, st["dfn"], st["aspd"], st["dspd"], st["crit"], st["crit_atk"])
         return price(key, md["_key"], self.carry)
 
-    def battle(self, md, floor, pots, boss=False):
-        """한 판 싸운다. 지면 Died."""
+    def battle(self, md, floor, pots, boss=False, past=False):
+        """한 판 싸운다. 지면 Died. past 면 지난 층에 내려가 싸운 것 — 장부에는 치른 값만 들고(기준·띠 합 밖),
+        스킬은 안 쓴다(이 층 몫을 아낀다)."""
         st = self.stats()
         pr = self.price(md, st)
         self.pre_fight(pots, pr, floor)
         mx = st["hp"]
         hp0 = self.hp
-        skill = self.P.skill
+        skill = SKILL_NONE if past else self.P.skill
         kit = (True, True, True)
         if self.skill_scope == "floor":
             kit = self.kit
@@ -776,6 +780,7 @@ class Run:
             paid = max(0, round(loss))
             self.paid += paid
             self.foretold += max(0, round(pr[1]))
+        if par > 0 and not past:
             self.par += par
             self.band_paid += paid
             self.band_par += par
@@ -915,6 +920,28 @@ class Run:
             self.potlog.append((f, gained, round(h * mx) - gained, -round(h * mx)))
         return True
 
+    def grind(self, floor):
+        """막혔다 — 내려가서(20층 뒤로는 워프) 지나쳤던 곁길 몬스터를 잡는다. 그 층에 그대로 남아 있다.
+        경험치·레벨·덤을 얻고 장부에는 치른 값만 든다. 가까운 층부터, 두고 온 물약으로 채워 가며,
+        예측상 이기고도 최대 HP 의 25% 가 남는 것만 잡는다(더 빠듯하게 싸우면 다시 할 층에 쓸 HP 를 써 버려 더 막혔다)."""
+        fought = False
+        for item in sorted(self.skipped_mobs, reverse=True):
+            f, mid, loot = item
+            md = self.mons[mid]
+            self.retreat(floor)
+            pr = self.price(md)
+            if not pr[0] or self.hp - pr[1] < 0.25 * self.stats()["hp"]:
+                continue
+            self.skipped_mobs.remove(item)
+            self.battle(md, f, [], past=True)
+            fought = True
+            if loot and loot[0] == "key":
+                self.keys[loot[1]] += 1
+            elif loot:
+                self.drink(loot[1], f)
+        self.grinds += fought
+        return fought
+
     # ---- 층
     def play_floor(self, spec):
         f = spec["floor"]
@@ -943,6 +970,7 @@ class Run:
             for i, (mid, loot) in enumerate(reg["side"]):
                 md = self.mons[mid]
                 if not self.want_side(f, (r, i), md, loot, self.price(md)):
+                    self.skipped_mobs.append((f, mid, loot))
                     continue
                 self.battle(md, f, pots)
                 if loot and loot[0] == "key":
@@ -994,10 +1022,13 @@ class Run:
         self.leave(pots, f)
 
     def close_band(self, floor):
-        """SwordLedger.CoCloseBand — 띠의 마지막 층 위 계단을 처음 오를 때."""
+        """SwordLedger.CoCloseBand — 띠의 마지막 층 위 계단을 처음 오를 때. 문턱은 그 층의 StageInfoData 열."""
         if floor % G.BAND_FLOORS:
             return
-        self.stars.append(G_stars(self.band_paid, self.band_par))
+        row = self.W.stages.get(floor - 1, {})
+        col = "Tower" if self.table == "tower" else ""
+        self.stars.append(G_stars(self.band_paid, self.band_par,
+                                  int(row.get("StarGreat" + col, 0)), int(row.get("StarGood" + col, 0))))
         self.bands.append((G.band_of(floor), self.band_paid, self.band_par))
         self.band_paid = self.band_par = 0
 
@@ -1009,10 +1040,12 @@ class Run:
             self.snaps[f] = snap
             # 죽으면 층 입구(체크포인트)에서 다시: 조심해서(물약은 보이는 대로·곁길은 물약 지키는 놈만) → 내려가서 두고 온
             # 물약을 마시고 → 그래도 안 되면 스킬을 꺼낸다(스킬 안 쓰는 사람). 다 안 되면 그 판은 거기서 막힌다.
-            for attempt in ("normal", "careful", "retreat", "careful+"):
+            for attempt in ("normal", "careful", "retreat", "grind", "careful+"):
                 self.mode = attempt
                 try:
-                    if attempt in ("retreat", "careful+") and not self.retreat(f) and attempt == "retreat":
+                    if attempt in ("retreat", "grind", "careful+") and not self.retreat(f) and attempt == "retreat":
+                        continue
+                    if attempt in ("grind", "careful+") and not self.grind(f) and attempt == "grind":
                         continue
                     if attempt == "careful+":
                         if self.P.skill != SKILL_NONE:
@@ -1048,9 +1081,12 @@ class Run:
         return round(1000.0 * self.paid / self.par) if self.par > 0 else 0
 
 
-def G_stars(paid, par):
-    """SwordLedger.Stars — ★ 통과, ★★ 기준 이하, ★★★ 기준의 70% 이하. 정수 셈 그대로."""
-    return 0 if par <= 0 else 3 if paid * 10 <= par * 7 else 2 if paid <= par else 1
+def G_stars(paid, par, great=0, good=0):
+    """SwordLedger.Stars — ★ 통과, ★★ 기준의 good% 이하, ★★★ 기준의 great% 이하(띠마다 StageInfoData 의 문턱).
+    문턱이 없는 데이터면 예전 규칙(70%·100%). 정수 셈 그대로."""
+    if great <= 0 or good <= 0:
+        great, good = 70, 100
+    return 0 if par <= 0 else 3 if paid * 100 <= par * great else 2 if paid * 100 <= par * good else 1
 
 
 # ---------------------------------------------------------------- 선택의 무게 (판단 하나만 바꿔 다시 돌린다)
@@ -1121,7 +1157,8 @@ def summarize(r, table, ref):
     return dict(
         table=table, seed=P.seed, ref=ref, label=P.label(),
         potion=P.potion, side=P.side, vault=P.vault, altar=P.altar, skill=P.skill, treasure=P.treasure,
-        ok=r.stuck is None, stuck=r.stuck, deaths=list(r.deaths), rescues=r.rescues, retreats=r.retreats, level=r.level,
+        ok=r.stuck is None, stuck=r.stuck, deaths=list(r.deaths), rescues=r.rescues, retreats=r.retreats,
+        grinds=r.grinds, level=r.level,
         paid=r.paid, par=r.par, altar_paid=r.altar_paid, altar_n=r.altar_n, foretold=r.foretold,
         score=r.score(), stars=list(r.stars), bands=list(r.bands), low=low, low_at=low_at, fights=fights, pots=pots,
         extras=list(r.extras))
@@ -1150,6 +1187,9 @@ def _job(args):
 # ---------------------------------------------------------------- 집계와 찍기
 
 V1_BOT = dict(paid=27654, foretold=28309, par=46693, stars="22223322333333333333")   # 재미검증 보고서 7절
+# 시뮬의 봇이 같은 데이터(기준 합 46,693)에서 치른 값 25,449 — 실제/시뮬 = 1.087. 데이터를 다시 뽑으면 실제 봇과
+# 견줄 판이 없으니 이 비를 그대로 쓴다(봇 녹화를 새로 뜨면 V1_BOT 와 함께 갈 것).
+CAL = 27654 / 25449
 
 
 def q(xs, p):
@@ -1205,11 +1245,11 @@ def _by_skill(runs):
             ("스킬 씀", [r for r in runs if r["skill"] != SKILL_NONE]))
 
 
-def report(results, seconds, mob_loss=None):
+def report(results, seconds, mob_loss=None, stages=None):
     say = print
-    whatif = [r for r in results if r.get("scope") == "floor"]
+    whatif = [r for r in results if r.get("scope") == "battle"]
     late = [r for r in results if r["table"] == "whatif"]
-    results = [r for r in results if r.get("scope") != "floor" and r["table"] != "whatif"]
+    results = [r for r in results if r.get("scope") != "battle" and r["table"] != "whatif"]
     refs = [r for r in results if r["ref"]]
     pop = {t: [r for r in results if not r["ref"] and r["table"] == t] for t in TABLES}
     say("")
@@ -1220,15 +1260,18 @@ def report(results, seconds, mob_loss=None):
 
     # ---- 0. 기준점: 봇
     say("\n[0] 기준점 — 봇을 흉내 낸 판 vs v1 의 실제 봇 완주")
-    cal = 1.0
+    cal = CAL
     for r in refs:
         if r["table"] == "normal" and r["ref"] == "봇":
-            cal = V1_BOT["paid"] / r["paid"]
             say(f"    시뮬 봇  치름 {r['paid']:,} · 예언 {r['foretold']:,} · 기준 {r['par']:,} · 점수 {r['score']} · "
                 f"별 {''.join(map(str, r['stars']))}")
             say(f"    실제 봇  치름 {V1_BOT['paid']:,} · 예언 {V1_BOT['foretold']:,} · 기준 {V1_BOT['par']:,} · 점수 "
                 f"{round(1000 * V1_BOT['paid'] / V1_BOT['par'])} · 별 {V1_BOT['stars']}")
-            say(f"    -> 시뮬이 실제보다 {100 * (1 - 1 / cal):.0f}% 싸게 싸운다(예언 합도 같은 만큼). 문턱 추천은 x{cal:.2f} 로 보정한다.")
+            if r["par"] == V1_BOT["par"]:
+                say(f"    -> 시뮬이 실제보다 {100 * (1 - r['paid'] / V1_BOT['paid']):.0f}% 싸게 싸운다(예언 합도 같은 만큼).")
+            else:
+                say("    -> 기준 합이 다르다 — 데이터가 v1 뒤로 바뀌었다. 견줄 실제 판이 없다.")
+            say(f"    문턱은 v1 데이터에서 잰 비 x{cal:.3f} 로 보정한다(CAL).")
     say("    고정 판:")
     for r in refs:
         status = "완주" if r["ok"] else f"{r['stuck']}층 막힘"
@@ -1240,7 +1283,7 @@ def report(results, seconds, mob_loss=None):
             continue
         name = "일반" if t == "normal" else "탑의 법"
         say(f"\n{'#' * 30} {name} 표 — {len(runs)}판 {'#' * 30}")
-        say("\n[1] 완주 (죽으면 층 입구에서 다시 — 다시 할 때는 물약을 보이는 대로, 두 번 죽으면 스킬을 꺼낸다)")
+        say("\n[1] 완주 (죽으면 층 입구에서 다시 — 물약을 보이는 대로 → 두고 온 물약 → 지나친 곁길을 잡으러 → 스킬)")
         for label, group in (("전체", runs),) + _by_skill(runs):
             n = len(group)
             if not n:
@@ -1250,7 +1293,8 @@ def report(results, seconds, mob_loss=None):
             rescued = sum(1 for r in group if r["rescues"])
             say(f"    {label:8} {n:3}판 · 안 죽고 완주 {pct(clean, n):3.0f}% · 다시 해서라도 완주 {pct(done, n):3.0f}% · "
                 f"판당 죽음 {sum(len(r['deaths']) for r in group) / n:.2f} · 내려가 두고 온 물약을 마신 판 "
-                f"{pct(sum(1 for r in group if r['retreats']), n):.0f}% · 스킬을 꺼내서야 넘은 판 {pct(rescued, n):.0f}%"
+                f"{pct(sum(1 for r in group if r['retreats']), n):.0f}% · 지나친 곁길을 잡으러 간 판 "
+                f"{pct(sum(1 for r in group if r['grinds']), n):.0f}% · 스킬을 꺼내서야 넘은 판 {pct(rescued, n):.0f}%"
                 f" (그 층 {sum(r['rescues'] for r in group)}개)")
         firsts = [r["deaths"][0] for r in runs if r["deaths"]]
         if firsts:
@@ -1284,18 +1328,23 @@ def report(results, seconds, mob_loss=None):
                     f" · 25% 아래 {pct(sum(1 for x in xs if x < 25), len(xs)):3.0f}% · 10% 아래 {pct(sum(1 for x in xs if x < 10), len(xs)):3.0f}%"
                     + (" · 50% 아래로 떨어진 층 " + ", ".join(f"{f}층 {at.count(f)}" for f in where) if where else ""))
 
-        say("\n[3] 띠마다 치름/기준 (p25 / p50 / p75) · 지금 규칙(0.70/1.00)의 ★★★/★★/★ 몫")
+        col = "Tower" if t == "tower" else ""
+        rows = [(stages or {}).get(5 * b + 4, {}) for b in range(20)]
+        limits = [(int(r.get("StarGreat" + col, 0)) or 70, int(r.get("StarGood" + col, 0)) or 100) for r in rows]
+        say(f"\n[3] 띠마다 치름/기준 (p25 / p50 / p75, 시뮬 그대로) · 데이터의 띠별 별 문턱으로 본 ★★★/★★/★ 몫"
+            f" (치름에 봇 보정 x{cal:.3f})")
         say("    띠  층        스킬 안 씀            ★★★ ★★  ★     스킬 씀               ★★★ ★★  ★")
         groups = [band_ratios(g) for _, g in _by_skill(runs)]
         for b in range(20):
             cells = []
+            g3, g2 = limits[b]
             for rr in groups:
                 v = rr[b]
                 if not v:
                     cells.append(" " * 38)
                     continue
-                s3 = pct(sum(1 for x in v if x <= 0.7), len(v))
-                s2 = pct(sum(1 for x in v if 0.7 < x <= 1.0), len(v))
+                s3 = pct(sum(1 for x in v if x * cal * 100 <= g3 + 1e-9), len(v))
+                s2 = pct(sum(1 for x in v if g3 + 1e-9 < x * cal * 100 <= g2 + 1e-9), len(v))
                 cells.append(f"{q(v, .25):.2f} {q(v, .5):.2f} {q(v, .75):.2f}     {s3:3.0f} {s2:3.0f} {100 - s3 - s2:3.0f}")
             say(f"    {b:2}  {b * 5 + 1:3}~{b * 5 + 5:<4} {cells[0]}    {cells[1]}")
         say("    판 점수(완주한 판, 낮을수록 좋다) p10 / p25 / p50 / p75 / p90")
@@ -1371,40 +1420,42 @@ def report(results, seconds, mob_loss=None):
                 say("      층마다 값이 걸린 판단 (2%/5% 넘음): " + " · ".join(line))
 
     # ---- 7. 문턱
-    say("\n[7] 별 문턱 — 스킬 안 쓰는 무작위 사람. ★★★ = 띠마다 상위 4분의 1(p25), ★★ = 가운데(p50)")
-    say(f"    시뮬의 치름에 봇 보정 x{cal:.2f} 를 곱해 실제 게임의 치름으로 읽는다. 기준(ParLoss)은 그대로 둔다.")
+    say("\n[7] 별 문턱 — 무작위 사람 전부(스킬은 층마다 한 번). ★★★ = 띠마다 상위 4분의 1(p25), ★★ = 가운데(p50)")
+    say(f"    시뮬의 치름에 봇 보정 x{cal:.3f} 를 곱해 실제 게임의 치름으로 읽는다. 기준(ParLoss)은 그대로 둔다.")
     for t, runs in pop.items():
-        rr = band_ratios([r for r in runs if r["skill"] == SKILL_NONE])
-        if not any(rr.values()):
+        real = {b: [x * cal for x in v] for b, v in band_ratios(runs).items()}
+        if not any(real.values()):
             continue
         name = "일반" if t == "normal" else "탑의 법"
-        real = {b: [x * cal for x in v] for b, v in rr.items()}
-        x3, x2 = thresholds(real)
-        a3, a2 = round(100 * x3), round(100 * x2)
-        s3 = [pct(sum(1 for x in v if x * 100 <= a3 + 1e-9), len(v)) for v in real.values() if v]
-        say(f"    {name} — 한 쌍이면 ★★★ ≤ {a3}% · ★★ ≤ {a2}% (20띠 가운데 값). 띠마다 ★★★ 몫: "
-            + " ".join(f"{s:.0f}" for s in s3))
         great = [round(100 * q(real[b], .25)) if real[b] else 0 for b in range(20)]
         good = [round(100 * q(real[b], .50)) if real[b] else 0 for b in range(20)]
-        c3 = [pct(sum(1 for x in real[b] if x * 100 <= great[b] + 1e-9), len(real[b])) for b in range(20) if real[b]]
-        say(f"    {name} — 띠마다 따로면 (기준 대비 %, 띠 0~19)  ★★★ {great}")
-        say(f"    {' ' * len(name)}                                    ★★  {good}")
-        say(f"    {' ' * len(name)}   → 띠마다 ★★★ {min(c3[1:]):.0f}~{max(c3[1:]):.0f}% (띠 0 은 5층 한 층이라 모두 같은 값 — {c3[0]:.0f}%)")
-        now = [pct(sum(1 for x in v if x <= 0.7), len(v)) for v in real.values() if v]
-        say(f"    {' ' * len(name)}   지금 규칙 0.70/1.00 은 띠마다 ★★★ {min(now):.0f}~{max(now):.0f}% (평균 {sum(now) / len(now):.0f}%)")
-    sk = [r for r in pop["normal"] if r["skill"] != SKILL_NONE]
-    if sk:
-        rs = band_ratios(sk)
-        s3 = [pct(sum(1 for x in v if x * cal <= 0.7), len(v)) for v in rs.values() if v]
-        say(f"    스킬 쓰는 사람(일반)은 지금 규칙으로 띠마다 ★★★ {min(s3):.0f}~{max(s3):.0f}% — 어떤 문턱도 스킬 한 번을 못 이긴다([8])")
+        say(f"    {name} — 이 판들로 뽑은 띠별 문턱 (기준 대비 %, 띠 0~19, generate_content 의 STAR_* 에 붙인다)")
+        say(f"      ★★★ {great}")
+        say(f"      ★★  {good}")
+        rows = {b: (stages or {}).get(5 * b + 4, {}) for b in range(20)}
+        col = "Tower" if t == "tower" else ""
+        have = [(int(rows[b].get("StarGreat" + col, 0)), int(rows[b].get("StarGood" + col, 0))) for b in range(20)]
+        rules = [("뽑은 표", list(zip(great, good)))]
+        if all(g > 0 and d > 0 for g, d in have):
+            rules.append(("데이터의 표", have))
+        rules.append(("예전 규칙 70/100", [(70, 100)] * 20))
+        for label, table in rules:
+            for skill_label, group in (("전체", runs),) + _by_skill(runs):
+                rr = {b: [x * cal for x in v] for b, v in band_ratios(group).items()}
+                s3 = [pct(sum(1 for x in rr[b] if x * 100 <= table[b][0] + 1e-9), len(rr[b])) for b in range(1, 20) if rr[b]]
+                s2 = [pct(sum(1 for x in rr[b] if table[b][0] < x * 100 <= table[b][1] + 1e-9), len(rr[b]))
+                      for b in range(1, 20) if rr[b]]
+                if s3:
+                    say(f"      {label:12} {skill_label:6} 띠 1~19 ★★★ {min(s3):3.0f}~{max(s3):3.0f}% (평균 {sum(s3) / len(s3):3.0f}) · "
+                        f"★★ 평균 {sum(s2) / len(s2):3.0f}%")
 
     if whatif:
-        say("\n[8] 가정 — 스킬이 전투마다가 아니라 층마다 한 번씩 찬다면 (같은 사람·같은 씨앗, 스킬 쓰는 판만)")
-        say("    때를 맞추는 사람은 그 층에서 가장 비싼 싸움(보스층은 보스)에 아끼고, 누르는 사람은 첫 싸움에 다 쓴다.")
+        say("\n[8] 예전 규칙과 견줌 — 스킬이 전투마다 다시 찼을 때 → 지금(층마다 한 번) (같은 사람·같은 씨앗, 스킬 쓰는 판만)")
+        say("    지금 규칙에서 때를 맞추는 사람은 그 층에서 가장 비싼 싸움(보스층은 보스)에 아끼고, 누르는 사람은 첫 싸움에 다 쓴다.")
         for t in TABLES:
             for sk in (SKILL_MASH, SKILL_TIMED, SKILL_BOT):
-                now = [r for r in pop[t] if r["skill"] == sk]
-                then = [r for r in whatif if r["table"] == t and r["skill"] == sk]
+                now = [r for r in whatif if r["table"] == t and r["skill"] == sk]      # 예전(전투마다)
+                then = [r for r in pop[t] if r["skill"] == sk]                         # 지금(층마다)
                 if not now or not then:
                     continue
                 a = statistics_median([q(x, .5) for x in band_ratios(now).values() if x])
@@ -1422,17 +1473,22 @@ def report(results, seconds, mob_loss=None):
                 f"{q([r['score'] for r in plain if r['ok']], .5):.0f})")
 
     if late:
+        now_loss = G.MOB_HP_LOSS if isinstance(G.MOB_HP_LOSS, (list, tuple)) else (G.MOB_HP_LOSS,) * 5
         say(f"\n[9] 가정 — 몹 손실을 챕터별 {'/'.join(f'{x:g}' for x in mob_loss)} 로 푼 표(지도·물약 그대로, 지금은 "
-            f"{G.MOB_HP_LOSS:g}) — 같은 사람(일반 표의 스킬 안 씀)을 한 번 더")
-        now = [r for r in pop["normal"] if r["skill"] == SKILL_NONE]
-        then = [r for r in late if not r["ref"]]
-        for label, group in (("지금", now), ("가정", then)):
-            ok = [r for r in group if r["ok"]]
-            cost = [statistics_median([r["fights"]["cost_med"][c] for r in ok]) for c in range(5)]
-            say(f"    {label}  안 죽고 완주 {pct(sum(1 for r in group if r['ok'] and not r['deaths']), len(group)):3.0f}% · "
-                f"스킬을 꺼내서야 넘은 판 {pct(sum(1 for r in group if r['rescues']), len(group)):3.0f}% · 챕터 최저 HP 가운데 "
-                + "/".join(f"{100 * q([r['low'][c] for r in ok], .5):.0f}" for c in range(5))
-                + " · 몹 한 판 가운데 " + "/".join(f"{100 * x:.1f}" for x in cost) + "%")
+            f"{'/'.join(f'{x:g}' for x in now_loss)}) — 일반 표의 같은 사람을 한 번 더")
+        for skill_label, keep in (("스킬 안 씀", lambda r: r["skill"] == SKILL_NONE), ("스킬 씀", lambda r: r["skill"] != SKILL_NONE)):
+            now = [r for r in pop["normal"] if keep(r)]
+            then = [r for r in late if not r["ref"] and keep(r)]
+            for label, group in (("지금", now), ("가정", then)):
+                ok = [r for r in group if r["ok"]]
+                if not ok:
+                    continue
+                cost = [statistics_median([r["fights"]["cost_med"][c] for r in ok]) for c in range(5)]
+                say(f"    {skill_label:6} {label}  안 죽고 완주 {pct(sum(1 for r in group if r['ok'] and not r['deaths']), len(group)):3.0f}% · "
+                    f"다시 해서라도 {pct(len(ok), len(group)):3.0f}% · 곁길 잡으러 {pct(sum(1 for r in group if r['grinds']), len(group)):3.0f}% · "
+                    f"스킬로 {pct(sum(1 for r in group if r['rescues']), len(group)):3.0f}% · 챕터 최저 HP 가운데 "
+                    + "/".join(f"{100 * q([r['low'][c] for r in ok], .5):.0f}" for c in range(5))
+                    + " · 몹 한 판 가운데 " + "/".join(f"{100 * x:.1f}" for x in cost) + "%")
         for r in sorted(late, key=lambda r: r["ref"] or ""):
             if r["ref"] in ("정답 경로", "덤 챙김", "봇"):
                 base = next((x for x in refs if x["ref"] == r["ref"] and x["table"] == "normal"), None)
@@ -1474,7 +1530,7 @@ def main(argv=None):
     W = World()
     n1, n2 = check_engine(W, sample=60)          # 매번 짧게 — 엔진이 어긋나면 아무것도 믿을 수 없다
     print(f"층 {len(W.specs)}개 읽음(생성기 계획과 대조 통과) · 전투 엔진 대조 {n1}+{n2}판 통과")
-    jobs = [(t, 1, ref, False, "battle") for t in TABLES for ref in REFERENCE]
+    jobs = [(t, 1, ref, False, "floor") for t in TABLES for ref in REFERENCE]
     tower_every = round(1 / args.tower_share) if args.tower_share > 0 else 0
     weighed = {True: 0, False: 0}           # 스킬 안 쓰는 사람 / 쓰는 사람 반씩 무게를 잰다
     for i in range(args.runs):
@@ -1482,13 +1538,13 @@ def main(argv=None):
         plain = sample_persona(args.seed + i).skill == SKILL_NONE
         w = t == "normal" and weighed[plain] < (args.weigh + plain) // 2
         weighed[plain] += w
-        jobs.append((t, args.seed + i, None, w, "battle"))
+        jobs.append((t, args.seed + i, None, w, "floor"))
         if not plain:
-            jobs.append((t, args.seed + i, None, False, "floor"))     # 가정: 스킬이 층마다 한 번이면 [8]
-        elif mob_loss and t == "normal":
-            jobs.append(("whatif", args.seed + i, None, False, "battle"))     # 가정: 몹 손실을 바꾸면 [9]
+            jobs.append((t, args.seed + i, None, False, "battle"))    # 예전 규칙: 스킬이 전투마다 찼다면 [8]
+        if mob_loss and t == "normal":
+            jobs.append(("whatif", args.seed + i, None, False, "floor"))      # 가정: 몹 손실을 바꾸면 [9]
     if mob_loss:
-        jobs += [("whatif", 1, ref, False, "battle") for ref in REFERENCE]
+        jobs += [("whatif", 1, ref, False, "floor") for ref in REFERENCE]
     # 무게를 재는 판이 가장 오래 걸린다 — 먼저 던진다.
     jobs.sort(key=lambda j: not j[3])
     results = []
@@ -1498,7 +1554,7 @@ def main(argv=None):
             if k % 50 == 0 or k == len(jobs):
                 print(f"  {k}/{len(jobs)} 판 ({time.time() - t0:.0f}초)", flush=True)
     results.sort(key=lambda r: (r["ref"] or "", r["table"], r["seed"]))
-    report(results, time.time() - t0, mob_loss)
+    report(results, time.time() - t0, mob_loss, W.stages)
     if args.json:
         import json
         with open(args.json, "w", encoding="utf-8") as f:

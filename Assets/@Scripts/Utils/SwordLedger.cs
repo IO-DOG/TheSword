@@ -80,8 +80,29 @@ public static class SwordLedger
         }
     }
 
-    /// <summary>★ 통과, ★★ 기준 이하, ★★★ 기준의 70% 이하. 기준이 없는 띠는 0 — 별을 보이지 않는다.</summary>
-    public static int Stars(int paid, int par) => par <= 0 ? 0 : paid * 10 <= par * 7 ? 3 : paid <= par ? 2 : 1;
+    /// <summary>★ 통과, ★★ 기준의 good% 이하, ★★★ 기준의 great% 이하(정수 셈). 기준이 없는 띠는 0 — 별을 보이지 않는다.</summary>
+    public static int Stars(int paid, int par, int great, int good) =>
+        par <= 0 ? 0 : paid * 100 <= par * great ? 3 : paid * 100 <= par * good ? 2 : 1;
+
+    /// <summary>
+    /// 그 띠(마지막 층 stageId)의 별 문턱, 기준 대비 % — StageInfoData 의 Star* 열(탑의 법이면 …Tower).
+    /// 띠마다 다르다: 그럴듯한 사람의 상위 4분의 1 이 ★★★, 가운데가 ★★ 다. 열이 없는 옛 데이터면 예전 규칙(70·100).
+    /// </summary>
+    public static void StarLimits(int stageId, out int great, out int good)
+    {
+        great = 70;
+        good = 100;
+        if (Managers.Data.StageInfoDic.TryGetValue(stageId, out Data.StageInfoData info) == false)
+            return;
+        bool tower = Managers.Game.PlayerData.Mode == GameMode.Tower;
+        int g = (int)(tower ? info.StarGreatTower : info.StarGreat);
+        int d = (int)(tower ? info.StarGoodTower : info.StarGood);
+        if (g > 0 && d >= g)
+        {
+            great = g;
+            good = d;
+        }
+    }
 
     /// <summary>판 점수 round(1000·Paid/Par), 낮을수록 좋다. 기준이 없으면 0(점수 없음).</summary>
     public static int Score(LedgerState l) => l != null && l.Par > 0 ? (int)Math.Round(1000.0 * l.Paid / l.Par) : 0;
@@ -142,7 +163,8 @@ public static class SwordLedger
         while (l.BandStars.Count < band)    // 장부 없이 저장된 옛 판 — 모르는 띠는 별 없음
             l.BandStars.Add(0);
 
-        int stars = Stars(l.BandPaid, l.BandPar);
+        StarLimits(stageId, out int great, out int good);
+        int stars = Stars(l.BandPaid, l.BandPar, great, good);
         l.BandStars.Add(stars);
         int foretold = l.BandForetold, paid = l.BandPaid, par = l.BandPar;
         l.BandForetold = l.BandPaid = l.BandPar = 0;

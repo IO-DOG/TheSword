@@ -1,4 +1,8 @@
-"""정답 경로가 하나뿐인지, 그리고 실수를 몇 번까지 봐주는지 잰다.
+"""[옛 길 — 참고용, 문이 아니다] 덤(여분 열쇠·금고·둘 중 하나의 룬)을 안 챙기는 옛 정답 경로로 잰다.
+완주 보장은 2026-11 부터 덤을 챙기는 길이다(generate_content [3/7] · 실수 허용은 [7/7] 의 waste_tolerance).
+챕터 3·4 몹 손실을 그 길에 맞춰 올렸으므로 이 옛 길은 후반에서 멈추는 것이 정상이다.
+
+정답 경로가 하나뿐인지, 그리고 실수를 몇 번까지 봐주는지 잰다.
 
 이 게임에서 "실수" 는 두 가지다.
 
@@ -67,7 +71,8 @@ def play(ptable, monsters, start, blunder_floors=(), skip_floors=(), waste_floor
         # 층 유형마다 예산이 다르다. 생성기와 같은 함수를 봐야 한다 —
         # 한쪽만 바뀌면 여기서 나오는 "완주" 는 거짓이 된다.
         heals = G.floor_potions(floor)
-        pots = [(heal, min(1 + i * 2, len(fights) - 1)) for i, heal in enumerate(heals)]
+        # 관문 셋(구역 0)을 넘어야 구역 1·2 의 물약에 닿는다 — simulate_run 과 같은 셈.
+        pots = [(heal, min(G.MIN_TOLLS, len(fights) - 1)) for heal in heals]
         if boss:
             pots.append((G.BOSS_FLOOR_POTIONS[0], len(fights) - 1))
         pots.append((G.EXIT_POTION, len(fights)))
@@ -157,11 +162,12 @@ def tolerance(ptable, monsters, start, limit=20):
 def main():
     ptable, monsters, start = _tables()
 
-    print(f"난이도  MOB_HP_LOSS = {G.MOB_HP_LOSS:.4f}")
+    print(f"난이도  MOB_HP_LOSS = {G.MOB_HP_LOSS}")
+    print("  [옛 길 — 참고용] 덤을 안 챙기는 옛 정답 경로다. 완주 보장이 아니다 — 보장은 generate_content [3/7](덤 챙김)")
     ok, err = play(ptable, monsters, start)
-    print(f"  정답 경로            : {'완주' if ok else '실패 — ' + err}")
+    print(f"  옛 정답 경로         : {'완주' if ok else '여기서 멈춘다 — ' + err + ' (덤 없이는 정상)'}")
     if not ok:
-        return 1
+        return 0        # 문이 아니다 — 뒤의 실수 셈은 옛 길이 끝까지 갈 때만 뜻이 있다
 
     ok_skip, err_skip = play(ptable, monsters, start,
                              skip_floors=range(G.HANDMADE_FLOORS + 1, G.TOTAL_FLOORS + 1))

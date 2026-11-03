@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 띠 결산 (기획 L2·L6). 띠(다섯 층)의 마지막 층 위 계단을 처음 오를 때 SwordLedger.CoCloseBand 가 띄우고, 계단은 이 창이
-/// 닫힐 때까지 기다린다. 그 띠의 별(★ 통과 · ★★ 기준 이하 · ★★★ 기준의 70% 이하, 기준이 없으면 별도 없다), 예언·치름·기준,
+/// 닫힐 때까지 기다린다. 그 띠의 별(★ 통과 · ★★/★★★ 는 띠마다 다른 문턱 — SwordLedger.StarLimits, 기준이 없으면 별도 없다), 예언·치름·기준,
 /// 다음 다섯 층에 서는 특성(처음 나오는 것은 금빛). 그 층에 제단이 있으면(StageInfoData.AltarPrice > 0) 최대 체력의 몇 %를
 /// 바치고 공격이나 방어를 하나 받는다 — 값과 거절은 SwordLedger.Altar 가 generate_content 와 같은 식으로 잰다.
 ///
@@ -131,7 +131,10 @@ public class UI_TallyPopup : UI_Popup
             totals.fontSharedMaterial = CodeUI.Outlined(number, 0.2f);
             totals.text = string.Format(Managers.GetString(TotalsText), foretold, paid, par);
             // 숫자가 든 줄은 숫자 글꼴로 — 이야기 글꼴(Silver)의 숫자는 한글의 반 높이라 1280x800 에서 "70%" 가 5~6 픽셀, "78%" 로 읽혔다.
-            Line(root, "Legend", number, 20f, Soft, ref y, 32f).text = Managers.GetString(StarsLegend);
+            // 이 띠의 문턱을 HP 로 — "치름 N 이하". 별과 같은 정수 셈이다(치름·100 ≤ 기준·문턱 ⟺ 치름 ≤ ⌊기준·문턱/100⌋).
+            SwordLedger.StarLimits(stageId, out int great, out int good);
+            Line(root, "Legend", number, 20f, Soft, ref y, 32f).text =
+                string.Format(Managers.GetString(StarsLegend), par * good / 100, par * great / 100);
         }
 
         string next = NextTraits(band);

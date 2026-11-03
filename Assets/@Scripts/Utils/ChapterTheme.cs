@@ -111,10 +111,12 @@ public static class ChapterTheme
         // 04 왕좌의 균열 — 스산한 저녁 / 짙은 보랏빛 안개
         new Theme
         {
-            Light = new Color(0.62f, 0.50f, 0.88f), Intensity = 0.70f,
-            SunAngle = new Vector3(14f, 70f, 0f),
-            Ambient = new Color(0.26f, 0.22f, 0.34f),
-            Fog = true, FogColor = new Color(0.28f, 0.22f, 0.38f), FogDensity = 0.042f,
+            // 해가 14°·옆(70°)이면 카메라를 보는 스프라이트 앞면에 빛이 거의 안 닿아 주인공·몬스터가 검은 실루엣이 됐다
+            // (2026-11-03 복셀 벽으로 바꾼 뒤 실측). 보랏빛 저녁은 남기고 해를 조금 들어 남쪽으로 돌린다.
+            Light = new Color(0.62f, 0.50f, 0.88f), Intensity = 0.92f,
+            SunAngle = new Vector3(32f, 30f, 0f),
+            Ambient = new Color(0.38f, 0.32f, 0.48f),
+            Fog = true, FogColor = new Color(0.28f, 0.22f, 0.38f), FogDensity = 0.034f,
             ColorFilter = new Color(0.82f, 0.72f, 1.00f),
             AirColor = new Color(0.72f, 0.48f, 1.00f), AirGravity = -0.10f,
             AirSize = 0.85f, AirSpeed = 0.70f, AirInterval = new Vector2(1.2f, 3.0f),

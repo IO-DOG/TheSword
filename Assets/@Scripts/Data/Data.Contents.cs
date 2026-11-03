@@ -273,6 +273,13 @@ namespace Data
         public float AltarPriceStep;
         public float AltarReserve;
         public float AltarReserveTower;
+        // 띠 결산의 별 문턱 (띠의 마지막 층에만, 없으면 0 — 예전 규칙 70%·100%). 기준(ParLoss 합) 대비 %:
+        // ★★★ = 치름 ≤ 기준·StarGreat/100, ★★ = 치름 ≤ 기준·StarGood/100. 탑의 법이면 …Tower.
+        // 그럴듯한 사람의 띠마다 상위 4분의 1 과 가운데다(generate_content.STAR_GREAT, Tools/fun_sim.py [7]).
+        public float StarGreat;
+        public float StarGood;
+        public float StarGreatTower;
+        public float StarGoodTower;
     }
 
     [Serializable]

@@ -11,9 +11,10 @@ TEXT = {
     # foretold (sum of the eye's numbers) / paid (HP actually lost) / par (the designed price). Also the run card.
     471: ("예언 {0}  치름 {1}  기준 {2}", "Foretold {0}  Paid {1}  Par {2}",
           "予言 {0}  支払い {1}  基準 {2}", "预言 {0}  付出 {1}  基准 {2}"),
-    # what the stars mean (only when the band has a par)
-    472: ("★ 통과  ★★ 기준 이하  ★★★ 기준의 70% 이하", "★ cleared  ★★ at or under par  ★★★ 70% of par or less",
-          "★ 突破  ★★ 基準以下  ★★★ 基準の70%以下", "★ 通过  ★★ 不超过基准  ★★★ 基准的70%以下"),
+    # what the stars mean (only when the band has a par): {0} = HP limit for two stars, {1} = for three
+    # (this band's StarGood / StarGreat of par - per band, from Tools/fun_sim.py [7])
+    472: ("★ 통과  ★★ 치름 {0} 이하  ★★★ 치름 {1} 이하", "★ cleared  ★★ paid {0} or less  ★★★ paid {1} or less",
+          "★ 突破  ★★ 支払い{0}以下  ★★★ 支払い{1}以下", "★ 通过  ★★ 付出不超过{0}  ★★★ 付出不超过{1}"),
     # {0} = trait names of the next five floors (joined in C#)
     473: ("다음 다섯 층: {0}", "Next five floors: {0}", "この先5階分: {0}", "接下来五层: {0}"),
     # altar at the stairs
@@ -64,7 +65,7 @@ if __name__ == "__main__":
         table = text.split("  m_CharacterTable:", 1)[1].split("\n  m_", 1)[0]
         return {int(u) for u in re.findall(r"m_Unicode: (\d+)", table)}
 
-    args = {470: 2, 471: 3, 472: 0, 473: 1, 474: 0, 475: 1, 476: 1, 477: 0, 478: 1, 479: 1, 480: 0, 481: 0,
+    args = {470: 2, 471: 3, 472: 2, 473: 1, 474: 0, 475: 1, 476: 1, 477: 0, 478: 1, 479: 1, 480: 0, 481: 0,
             490: 3, 491: 1, 492: 0, 500: 0, 501: 2, 502: 1, 503: 0, 504: 1}
     assert set(args) == set(TEXT), set(args) ^ set(TEXT)
     fonts = {name: glyphs(name) for name in ("Silver SDF", "DNFBitBitv2 SDF")}

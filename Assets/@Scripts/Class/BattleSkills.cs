@@ -6,8 +6,13 @@ using UnityEngine;
 /// 왜 이런 모양인가
 /// ----------------
 /// 이 게임의 전투는 자동이다. 게이지가 차면 때리고 막는다. 그래서 스킬은 "무엇을
-/// 누를까" 가 아니라 <b>언제 끼어들까</b> 여야 의미가 있다. 셋 다 전투당 한 번씩만
-/// 쓸 수 있고 자원도 쿨타임도 없다 — 아낄지 지금 쓸지, 그 판단 하나만 남긴다.
+/// 누를까" 가 아니라 <b>어디에 끼어들까</b> 여야 의미가 있다. 셋 다 <b>층마다 한 번씩</b>
+/// 쓸 수 있고 자원도 쿨타임도 없다 — 이 층의 어느 싸움에 쓸지, 그 판단 하나만 남긴다.
+///
+/// 예전에는 전투마다 다시 찼다. 그러면 아낄 까닭이 없어 시작하자마자 셋을 누르는 것이 정답이었고,
+/// 그렇게 하면 싸움값이 기준의 5% 로 떨어져 별·점수·긴장이 전부 "스킬을 눌렀나" 로 갈렸다
+/// (Tools/fun_sim.py, 재미검증 v2). 처음 오는 층에 들어설 때 다시 찬다(RefillForFloor) — 다녀온 층으로
+/// 내려가거나 워프해서는 안 찬다. 쓴 것은 CurPlayerData.SkillsUsed 라 체크포인트와 같이 저장된다.
 ///
 ///   1 강타   지금 즉시 공격력의 2.5배로 한 대. 오래 끌면 지는 상대를 끊는다.
 ///   2 철벽   즉시 방어 상태. 다음 한 대를 막는다. 큰 것이 들어오기 직전에 쓴다.
@@ -27,8 +32,6 @@ public static class BattleSkills
     const float SmashRatio = 2.5f;
     const float DrainRatio = 1.5f;
 
-    static readonly bool[] _used = new bool[Count];
-
     /// <summary>스킬을 쓸 수 있는 상태인가. 마검 계약 전에는 아무것도 못 쓴다.</summary>
     public static bool Unlocked
     {
@@ -39,16 +42,19 @@ public static class BattleSkills
         }
     }
 
+    /// <summary>이 층에서 이미 썼는가.</summary>
     public static bool IsUsed(int index)
     {
-        return index >= 0 && index < Count && _used[index];
+        GameManager.CurPlayerData p = Managers.Game != null ? Managers.Game.PlayerData : null;
+        return index >= 0 && index < Count && p != null && (p.SkillsUsed & (1 << index)) != 0;
     }
 
-    /// <summary>전투가 시작될 때마다 부른다. 셋 다 다시 쓸 수 있게 된다.</summary>
-    public static void ResetForBattle()
+    /// <summary>처음 오는 층에 들어설 때 부른다(PortalController — 체크포인트를 쓰기 전이라 그 층을 다시 시작해도 찬 채로 선다).
+    /// 셋 다 다시 쓸 수 있게 된다.</summary>
+    public static void RefillForFloor()
     {
-        for (int i = 0; i < Count; i++)
-            _used[i] = false;
+        if (Managers.Game != null && Managers.Game.PlayerData != null)
+            Managers.Game.PlayerData.SkillsUsed = 0;
     }
 
     public static string NameOf(int index)
@@ -65,7 +71,7 @@ public static class BattleSkills
     /// <summary>스킬을 쓴다. 실제로 발동했으면 true.</summary>
     public static bool Use(int index, UI_PlayerCard playerCard, UI_MonsterCard monsterCard)
     {
-        if (Unlocked == false || index < 0 || index >= Count || _used[index])
+        if (Unlocked == false || index < 0 || index >= Count || IsUsed(index))
             return false;
         if (Managers.Game.OnBattle == false || monsterCard == null || playerCard == null)
             return false;
@@ -105,7 +111,8 @@ public static class BattleSkills
                 break;
         }
 
-        _used[index] = true;
+        player.SkillsUsed |= 1 << index;
+        LastBattle.SkillsUsed = true;   // 이 싸움에서 썼다 — 업적(ACH_BOSS_BARE)이 읽는다. 전투를 열 때 지워진다(RecordStart)
         // 어드레서블에 실재하는 키여야 한다. 없는 키를 주면 ResourceManager 가 null 을
         // 돌려주고 SoundManager 가 그 null 의 .length 를 읽어 예외를 던진다 —
         // 스킬을 부른 쪽(봇의 코루틴)이 통째로 죽는다.

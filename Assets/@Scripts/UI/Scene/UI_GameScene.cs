@@ -75,6 +75,7 @@ public class UI_GameScene : UI_Scene
     bool _clickHintShown;
     TMP_Text _critText;             // 치명까지 N — 전투 사이에 이어지는 치명 횟수
     TMP_Text _guardText;            // 방패가 올라와 있다 — 다음 한 대를 막는다
+    TMP_Text _skillText;            // 이 층에 남은 스킬 — 셋 다 층마다 한 번(BattleSkills), 쓴 것은 흐리게
     // 마검의 배부름(기획 L3)과 탑의 법 표시 — 문구는 Tools/ui_text_parts/ledger.py
     public const int FullnessText = 490;    // Lv {0}  기준 {1} ({2})
     public const int ThroneText = 491;      // 왕좌에서 Lv {0}
@@ -626,6 +627,7 @@ public class UI_GameScene : UI_Scene
         _critText = CombatLabel(GetText((int)Texts.PlayerAttackText), "CritCountText");
         _guardText = CombatLabel(GetText((int)Texts.PlayerDefenseText), "GuardReadyText");
         _guardText.color = new Color32(140, 205, 255, 255);
+        _skillText = CombatLabel(GetText((int)Texts.PlayerHPText), "SkillsLeftText");
     }
 
     // 능력치 칸(왼쪽 아래 기준, 2배 그림) 바로 위, 칸 폭 안에 맞춘다 — 옆 칸 위의 글자와 겹치지 않게.
@@ -662,6 +664,18 @@ public class UI_GameScene : UI_Scene
         _guardText.gameObject.SetActive(guard);
         if (guard)
             _guardText.text = Managers.GetString(ForecastUI.GuardUp);
+
+        // 이 층에 남은 스킬. 전투창에서만 보이면 "이 층의 어느 싸움에 쓸까" 를 싸우기 전에 셀 수 없다.
+        bool skills = BattleSkills.Unlocked;
+        _skillText.gameObject.SetActive(skills);
+        if (skills)
+        {
+            var line = new System.Text.StringBuilder();
+            for (int i = 0; i < BattleSkills.Count; i++)
+                line.Append(i > 0 ? " " : "").Append(BattleSkills.IsUsed(i) ? "<color=#5A6070>" : "<color=#F0D28A>")
+                    .Append(Managers.GetString(UI_BattlePopup.SkillTextIds[i])).Append("</color>");
+            _skillText.text = line.ToString();
+        }
     }
 
     /// <summary>

@@ -334,7 +334,7 @@ def check_tower(players, monsters):
     start, err = G.simulate_handmade(ptable)
     if err:
         return None
-    ok, log, err = G.simulate_run(ptable, as_run(tower), start, verbose=False, greedy=True)
+    ok, log, err = G.simulate_run(ptable, as_run(tower), start, verbose=False, greedy=True, extras=False)
     if not ok:
         errors.append(f"탑의 법: 물약을 보이는 대로 마셔도 완주하지 못한다 — {err}")
         return None
@@ -383,16 +383,21 @@ def check_stage_extra(stages, players, monsters):
             errors.append(f"{s['DungeonID']}: 제단 {have} (기대 {want})")
         if floor > G.HANDMADE_FLOORS and not 0 < s.get("ParLevelIn", 0) <= s.get("ParLevelOut", 0):
             errors.append(f"{s['DungeonID']}: 기준 레벨 {s.get('ParLevelIn')}→{s.get('ParLevelOut')}")
+        stars = tuple(s.get(k, 0) for k in ("StarGreat", "StarGood", "StarGreatTower", "StarGoodTower"))
+        if stars != tuple(G.star_extra(floor).values()):
+            errors.append(f"{s['DungeonID']}: 별 문턱 {stars} (기대 {tuple(G.star_extra(floor).values())}) — "
+                          "generate_content.py --write")
 
     ptable = shipped_ptable(players)
     start, err = G.simulate_handmade(ptable)
     ok, log, _ = G.simulate_run(ptable, as_run(monsters), start, verbose=False) if not err else (False, None, None)
     if not ok:
         return                      # check_level_headroom 이 이미 알렸다
-    tables = [("AltarReserve", monsters)]
+    # 일반 표는 덤을 챙기는 경로로, 탑의 법은 덤 없이 보장한다(generate_content.check_tower).
+    tables = [("AltarReserve", monsters, True)]
     if os.path.exists(os.path.join(JSOND, G.TOWER_TABLE + ".json")):
-        tables.append(("AltarReserveTower", {m["id"]: m for m in load(G.TOWER_TABLE, "creatures")}))
-    for col, table in tables:
+        tables.append(("AltarReserveTower", {m["id"]: m for m in load(G.TOWER_TABLE, "creatures")}, False))
+    for col, table, extras in tables:
         run = as_run(table)
         for sid, s in sorted(stages.items()):
             floor, pct = sid + 1, s.get(col, 0)
@@ -404,7 +409,7 @@ def check_stage_extra(stages, players, monsters):
                 errors.append(f"{s['DungeonID']}: {col} 가 없다")
                 continue
             ok, _, err = G.simulate_run(ptable, run, G.altar_entry(ptable, log, floor, pct),
-                                        verbose=False, greedy=True, first=floor + 1)
+                                        verbose=False, greedy=True, first=floor + 1, extras=extras)
             if not ok:
                 errors.append(f"{s['DungeonID']}: 제단에서 {col} {pct:.0f}% 를 남기고 올라가면 {err}")
 

@@ -115,7 +115,13 @@ for _run in MOB_SPECIES_RUN:
 # 전투 길이는 16초 -> 12초(보스 45 -> 34)다. 몬스터 방어를 올리면(아래 MONSTER_DEF_RATIO)
 # 한 대가 가벼워져 같은 16초면 보는 시간이 171 -> 222분으로 는다. 12초면 1배속으로
 # 약 138분 — 방어를 올린 값(임계)은 받고 기다리는 시간은 예전(171분)보다 짧다.
-MOB_HP_LOSS = 0.060
+#
+# 챕터별이다(탑의 법처럼). 챕터 3·4 는 0.11 — 완주 보장을 덤 챙기는 경로(extras_at)로 옮기고 올렸다(재미 검증 v2 R3).
+# 0.06 이던 때 그럴듯한 사람(Tools/fun_sim.py, 스킬 층마다)은 챕터 3·4 최저 HP 가 가운데 74/73%, 몹 한 판이 최대 HP 의
+# 2.2/2.3% 였다 — 덤(크기 룬·제단)이 쌓여 후반이 평평했다. 0.11 이면 54/57% · 5.4/5.2% 로 챕터 0·1(47/40%)과 맞먹고
+# 다시 해서라도 완주는 99% 그대로다. 0.12 는 3% 가 막혔고, 0.13 이면 "공격 두 레벨 모자라도 완주" 문이 71층에서 깨진다.
+# 챕터 2 는 그대로 둔다 — 45층 제단에서 사는 사람이 46층에서 이미 가장 깊이 내려간다(올리면 그 바닥이 16% 로).
+MOB_HP_LOSS = (0.060, 0.060, 0.060, 0.110, 0.110)
 MOB_DURATION = 12.0
 BOSS_HP_LOSS = 0.35
 BOSS_DURATION = 34.0
@@ -130,10 +136,14 @@ BOSS_DURATION = 34.0
 #
 # 챕터마다 따로 둔다. 도입 챕터는 0.104 로는 최저 HP 가 55% 라 "30~40%" 밖이었다. 20층 보스
 # 앞에서 한 번에 무는 절벽이다 — 0.112 에서 40%, 0.113 에서 36%, 0.116 에서 29%, 0.118 에서
-# 22%(버틸 실수 12), 0.12 에서 16%(6), 0.13 이면 17층에서 죽는다. 그 가운데를 쓴다.
+# 22%(버틸 실수 12), 0.12 에서 16%(6), 0.13 이면 17층에서 죽는다. 그 가운데(0.113)를 썼다.
+# 스킬이 층마다 한 번이 되자(재미 검증 v2 R1) 0.113 은 곁길을 거르는 사람 4% 를 16~20층에 가뒀다 — 예전에는
+# 전투마다 차는 스킬이 꺼내 줬다. 0.110 으로 내려 절벽을 걷었다(보장 경로 챕터 0 최저 41%@5).
+# 위의 숫자는 물약을 두 번째 전투부터 세던 때의 것이다. 관문 셋 뒤에서 세면(simulate_run) 챕터 1~4 최저가
+# 17~28%, 버틸 실수가 문턱 그대로 10 이다 — 탑의 법의 여유는 그만큼 얇다.
 # 얇은 것은 물약 쪽이다 — 모든 물약을 x0.95 로 줄이면 최저 HP 가 8~29% 로, x0.9 면 20층에서
 # 죽는다. 물약·특성·전투 길이를 바꾸면 [7/7] 이 다시 잰다(check_tower 가 문이다).
-TOWER_MOB_HP_LOSS = (0.113, 0.104, 0.104, 0.104, 0.104)     # 챕터별
+TOWER_MOB_HP_LOSS = (0.110, 0.104, 0.104, 0.104, 0.104)     # 챕터별
 TOWER_MIN_WASTE = 10            # 보이는 대로 마시며 물약을 이만큼 버려도 완주해야 한다
 
 # 몬스터 방어력 = 설계 플레이어 공격력 x 0.6 x 특성 배수, 단 0.7 을 넘지 않는다.
@@ -392,7 +402,13 @@ RUNE_GAIN = {"I_09": ("atk", 1.0), "I_10": ("dfn", 1.0), "I_11": ("hp", 5.0)}
 # 비율만큼)을 더한다. 예전에는 "그 챕터의 보스까지" 만 셌다 — 챕터 끝에서 주운 공격·방어는
 # 한두 층 값만 쳐서(39층 방어 +1 이 3%) 체력이 거기서 이기는 것처럼 보였고, 20층·100층으로
 # 늘리면 공격 49% · 체력 10%, 공격 88% 로 무너졌다. 크기 룬이 놓이는 59개 층에서 셋 중 가장
-# 값진 것이 공격 25% · 방어 37% · 체력 37% 다(report_rune_tiers — 다른 셈법의 몫도 같이 찍는다).
+# 값진 것이 공격 25% · 방어 37% · 체력 37% 였다(report_rune_tiers — 다른 셈법의 몫도 같이 찍는다).
+# 재미 검증 v2 R3 뒤로 59% · 39% · 2% 가 됐다(체력이 죽은 선택). 챕터 3·4 몹 손실 0.11 로 공격·방어가 아끼는
+# HP 가 커졌고, 완주 보장 경로가 덤을 챙겨 물약을 덜 마신다(0.52 → 0.38 — 체력 몫이 준다). 그래서 체력 크기를
+# 60/50/65/80/60 → 86/75/100/130/86 으로 올려 49% · 25% · 25% 로 되돌렸다. 체력을 키우면 보장 경로가 물약을 더
+# 덜 마셔(0.33) 몫이 또 줄므로 같은 셈(report_rune_tiers)을 돌리며 맞췄다 — 88 이면 방어가 10% 로 무너진다.
+# <b>챕터 4 는 여전히 공격 13/13 이다.</b> 챕터 0·4 가 같은 체력 룬(I_16)을 쓰는데 챕터 4 에서 셋째 몫이 되려면
+# 125 쯤이어야 하고, 그러면 챕터 0 에서 체력이 8/8 이다. 행을 나누면 셀 코드가 밀려 MapData 가 바뀐다 — 그때 같이 고친다.
 # 셈법이 하나로 안 모이는 것은 체력이 다른 화폐라서다. 체력 룬은 싸움값을 한 푼도 안 깎는다(장부
 # 점수로는 0) — 대신 보이는 대로 마시는 사람의 다음 20층 최저 HP 를 3~9%p 올린다(방어 +1 은
 # 0.6~2.7%p, 공격은 0~1%p). 점수를 볼지 안전을 볼지에 따라 답이 갈리니 셋 다 고를 까닭이 있다.
@@ -402,11 +418,11 @@ RUNE_GAIN = {"I_09": ("atk", 1.0), "I_10": ("dfn", 1.0), "I_11": ("hp", 5.0)}
 # 넘는 +6 이어야 했다. 도입 챕터(방어 1점이 한 대의 4분의 1)와 치명타 챕터(불사·암살이 평타를 흘린다)는
 # +6 으로도 방어·체력을 못 이겨서 +3 으로 둔다 — 임계 칸을 덜 쓴다.
 RUNE_TIERS = [      # 챕터별 (공격, 방어, 체력)
-    (3, 1, 60),
-    (6, 1, 50),
-    (6, 1, 65),
-    (3, 1, 80),
-    (6, 1, 60),
+    (3, 1, 86),
+    (6, 1, 75),
+    (6, 1, 100),
+    (3, 1, 130),
+    (6, 1, 86),
 ]
 RUNE_HORIZON = 20   # 영구 능력치의 값을 셀 층 수 (stat_value)
 SIZED_RUNE_BASE = 12                       # ConsumableItemData 에서 크기 룬이 시작하는 id
@@ -415,6 +431,10 @@ SIZED_RUNE_NAME_BASE = 4100                # 그 이름("공격 룬 +3")의 Scri
 # 능력치 자리는 RUNE_CYCLE 순서(0 공격, 1 방어, 2 체력). ConsumableItem.NUM_OF_RUNES 가
 # 이 행 수까지 덮어야 한다 — validate_content 가 확인한다.
 SIZED_RUNES = sorted({(s, tier[s]) for tier in RUNE_TIERS for s in range(3)})
+# 셀 코드(I_12~)는 이 목록의 자리다. 크기를 바꿔도 자리가 같으면 MapData 가 그대로고, 밀리면 세이브·순위표가 깨진다.
+# 그래서 챕터마다 (공격, 방어, 체력)이 앉는 자리를 못박는다 — 체력은 챕터 1 < 0 = 4 < 2 < 3 순서를 지켜야 한다.
+assert [SIZED_RUNES.index((s, t[s])) for t in RUNE_TIERS for s in range(3)] == \
+    [0, 2, 4, 1, 2, 3, 1, 2, 5, 0, 2, 6, 1, 2, 4], "크기 룬 셀 코드가 밀린다 — MapData 가 바뀐다"
 
 
 def rune_tier(floor):
@@ -452,6 +472,23 @@ def sized_rune(floor, stat):
 #
 # 한 번에 파는 양은 그 챕터의 크기 룬과 같다(RUNE_TIERS) — 제단은 "피로 사는 룬" 이다.
 # 값 10 + n(n−1) % 가 얼마까지 제값을 하는지는 check_altar 가 구매마다 찍는다.
+# ---------------------------------------------------------------- 별 문턱 (띠 결산)
+#
+# 예전에는 한 쌍(★★★ 기준의 70% · ★★ 기준 이하)이었다. 기준(ParLoss)은 이어 받기도 덤도 없는 설계 플레이어라
+# 그럴듯한 사람의 가운데가 기준의 절반 남짓이었고, 스킬 안 쓰는 사람도 띠의 63% 에서 ★★★ 였다. 띠마다 어려운 정도도
+# 달라(챕터 끝·보스 띠가 비싸다) 한 쌍으로는 어느 띠는 아무도, 어느 띠는 절반이 ★★★ 였다.
+# 그래서 띠마다 따로 둔다 — 기준 대비 %: ★★★ = 그럴듯한 사람의 상위 4분의 1, ★★ = 가운데.
+# Tools/fun_sim.py [7] 이 이 콘텐츠에서 무작위 사람 500판(스킬은 층마다 한 번)을 돌려 찍는다(봇 녹화로 맞춘 보정 x1.087).
+# 몬스터·물약·덤·스킬을 다시 맞추면 [7] 을 다시 돌려 이 표를 간다. 띠의 마지막 층 StageInfoData 에 실린다(SwordLedger).
+# 기준과 판 점수는 그대로다 — 세이브·순위표가 안 바뀐다.
+STAR_GREAT = (70, 50, 39, 40, 27, 34, 37, 46, 22, 26, 28, 45, 40, 40, 43, 48, 53, 39, 43, 51)
+STAR_GOOD = (86, 59, 53, 59, 37, 48, 52, 60, 32, 38, 42, 55, 48, 54, 56, 63, 61, 45, 51, 59)
+STAR_GREAT_TOWER = (72, 62, 53, 51, 40, 46, 50, 58, 31, 38, 47, 53, 41, 38, 45, 45, 54, 39, 42, 50)
+STAR_GOOD_TOWER = (97, 70, 68, 69, 55, 58, 69, 68, 39, 47, 61, 62, 53, 60, 57, 63, 61, 45, 49, 59)
+for _table in (STAR_GREAT, STAR_GOOD, STAR_GREAT_TOWER, STAR_GOOD_TOWER):
+    assert len(_table) == TOTAL_FLOORS // 5
+assert all(0 < g <= d for g, d in zip(STAR_GREAT + STAR_GREAT_TOWER, STAR_GOOD + STAR_GOOD_TOWER))
+
 ALTAR_PRICE = 10.0              # a — 첫 구매, 최대 HP 의 %
 ALTAR_PRICE_STEP = 1.0          # b
 ALTAR_MARGIN = 5.0              # 다음 층을 넘길 최소 HP 위에 얹는 여유, 최대 HP 의 %p
@@ -547,6 +584,35 @@ def choice_pair(floor):
     if floor in BOSS_RUNE_FLOORS:
         return (sized_rune(floor, 0), sized_rune(floor, 1), "stairs")
     return None
+
+
+def sized_gain(code):
+    """크기 룬 셀코드 -> (능력치, 양)."""
+    stat, amount = SIZED_RUNES[int(code[2:]) - SIZED_RUNE_BASE]
+    return ("atk", "dfn", "hp")[stat], float(amount)
+
+
+# 완주 보장 경로가 챙기는 덤 — 지도에 이미 놓였고 값을 치르지 않는 것만(재미 검증 v2 R3).
+# 예전 보장 경로는 이것도 안 챙겨서 실제로 하는 사람 누구보다 약했다 — 그 사람으로 후반을 맞추니 그럴듯한 사람은
+# 챕터 3·4 에서 최저 HP 가 70% 대, 몹 한 판이 최대 HP 의 2% 였다(Tools/fun_sim.py).
+#   여분 열쇠    골방 파수꾼 뒤 — 파수꾼은 곁길 몬스터라 그 싸움을 치를 때만
+#   금고        그 색 여분 열쇠가 있으면 연다 — 안의 크기 룬
+#   둘 중 하나   룬 쪽. 보물 층은 그 층 룬과 같은 능력치, 40·60·80층 보스 뒤는 방어(어느 쪽이 값진지는 챕터마다
+#               갈린다 — report_rune_tiers. 한쪽으로 고정한다)
+# 제단(HP 를 낸다)과 스킬은 셈에 없다. 룬처럼 층 끝(계단 앞)에서 얻어 다음 층부터 듣는다.
+def extras_at(floor, keys, guard_fought=True):
+    """그 층에서 챙기는 덤 (능력치, 양) 목록. keys(여분 열쇠 [초록, 노랑, 빨강])를 고친다."""
+    plan = alcove_plan(floor)
+    gains = []
+    if plan and plan[0] == "key":
+        keys[plan[1]] += guard_fought
+    elif plan and keys[plan[1]] > 0:
+        keys[plan[1]] -= 1
+        gains.append(sized_gain(plan[2]))
+    pair = choice_pair(floor)
+    if pair:
+        gains.append(sized_gain(pair[1]))
+    return gains
 
 
 # ---------------------------------------------------------------- 층 유형 (매직타워 분석)
@@ -937,7 +1003,7 @@ def target_level(floor, start_level):
 def build_monsters(ptable, start_level, mob_loss=None):
     """층별 몬스터 1종 + 챕터별 보스 1종을 만든다 (5~100층).
 
-    mob_loss 를 주면 그 손실로 푼다(챕터별 목록도 된다) — 탑의 법(TOWER_MOB_HP_LOSS) 표가 같은
+    mob_loss 를 주면 그 손실로 푼다(챕터별 목록, 하나면 전 챕터) — 탑의 법(TOWER_MOB_HP_LOSS) 표가 같은
     길로 나온다. id·이름·그림·특성·경험치는 손실과 무관하므로 두 표가 같은 MapData 를 쓴다.
     """
     mob_loss = MOB_HP_LOSS if mob_loss is None else mob_loss
@@ -1035,7 +1101,7 @@ def creature_of(md):
 def simulate_run(ptable, monsters, start_state, verbose=True,
                  skip_optional=False, skip_runes=False, greedy=False,
                  skip_potions=False, behind=0, atk_behind=0, altar=None, waste_floors=(),
-                 reserve=None, first=HANDMADE_FLOORS + 1):
+                 reserve=None, first=HANDMADE_FLOORS + 1, extras=True):
     """5층부터 100층까지 실제 전투 공식으로 완주 시뮬레이션.
 
     1~4층(손수 만든 구간)은 simulate_handmade 가 이미 돌린 뒤라,
@@ -1064,6 +1130,9 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
       waste_floors   그 층들에서 가장 작은 물약 하나를 버린다(실수 한 번 — route_check 와 같다).
       first          이 층 입구에서 시작한다(start_state 는 그 입구의 상태). 설계 레벨로 들어선다고
                      보고 behind·atk_behind 의 기준도 거기서 센다 — 제단 문턱(altar_reserves)이 쓴다.
+                     그 앞 층들의 덤은 다시 세어 들고 시작한다.
+      extras         공짜 덤(extras_at — 여분 열쇠·금고·둘 중 하나의 룬)을 챙긴다. 일반 표의 완주 보장 경로다.
+                     탑의 법은 덤 없이 보장한다(False) — 더 빡빡한 문이다. skip_runes 면 덤의 룬도 안 줍는다.
 
     플레이어는 마검을 든 채로 싸운다(stats_with_runes). 전투 사이에 치명 횟수와
     방어 게이지를 넘겨 받지 않는 것만 게임과 다르다 — thesword_balance 머리말 참조.
@@ -1075,11 +1144,23 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
     bought = {"atk": 0.0, "dfn": 0.0}     # 제단에서 산 것 — 룬처럼 영구다
     purchases = 0
     base = start_state[0] - (first - HANDMADE_FLOORS - 1)     # 5층 입구의 설계 레벨
+    keys = [0, 0, 0]                      # 여분 열쇠
+    extra = {"atk": 0.0, "dfn": 0.0, "hp": 0.0}               # 덤으로 얻은 크기 룬
+
+    def take_extras(floor, guard_fought=True):
+        for stat, amount in extras_at(floor, keys, guard_fought):
+            if not skip_runes:
+                extra[stat] += amount
+
+    if extras:
+        for f in range(HANDMADE_FLOORS + 1, first):
+            take_extras(f)
 
     def stats_at(level, floor):
         s = stats_with_runes(ptable, level, floor, runes=not skip_runes)
-        s["atk"] += bought["atk"]
-        s["dfn"] += bought["dfn"]
+        s["atk"] += bought["atk"] + extra["atk"]
+        s["dfn"] += bought["dfn"] + extra["dfn"]
+        s["hp"] += extra["hp"]
         short = target_level(floor, base) - atk_behind
         if atk_behind and level > short:
             s["atk"] -= player_stats_at(ptable, level)["atk"] - player_stats_at(ptable, short)["atk"]
@@ -1113,7 +1194,11 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
         fights = list(mobs) + ([boss] if boss else [])
 
         # 구역별 포션. (회복비율, 쓸 수 있게 되는 전투 인덱스)
-        # 구역1 포션은 두 번째 전투부터, 구역2 포션은 네 번째 전투부터 닿는다.
+        # 층의 물약은 구역 1·2 에 있고, 그 앞 구역 0 에 관문 셋(MIN_TOLLS)이 선다 — 셋을 다 넘어야 첫 물약에 닿는다.
+        # 곁길은 거를 수 있으니 관문 뒤로는 구역 1·2 의 물약이 다 열린다. 예전에는 구역 1 물약을 두 번째 전투부터,
+        # 구역 2 를 네 번째부터 셌다 — 첫 구역을 물약 하나로 끊어 가는 셈이라 제단 문턱이 낮게 나왔고, 탑의 법
+        # 19곳 중 9곳(30·35·50·55·70·75·85·90·95층)에서 문턱 HP 로 사면 2~7층 뒤 첫 관문 셋에 갇혔다(재미 검증 v2 5.4).
+        # ponytail: MIN_TOLLS 로 센다 — 관문이 넷·다섯인 16개 층([5/7])은 아직 한 판 이르다. 정확히는 floor_choices 의 관문 수.
         #
         # <b>층 유형이 정한 예산을 그대로 써야 한다.</b> 예전에는 여기만 늘
         # 두 개로 셌는데, 실제로 놓이는 것은 「인색」 층이 하나뿐이고
@@ -1121,8 +1206,7 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
         # "완주 보장" 이라 부르고 있었다. emit_layouts·route_check 와 같은
         # floor_potions 를 본다.
         heals = floor_potions(floor)
-        potions = [] if skip_potions else [
-            (h, min(1 + k * 2, len(fights) - 1)) for k, h in enumerate(heals)]
+        potions = [] if skip_potions else [(h, min(MIN_TOLLS, len(fights) - 1)) for h in heals]
         # 보스층은 보스 직전에 쓸 큰 물약과, 올라가기 전에 채울 물약을 따로 둔다.
         # 큰 것 하나만 두면 보스를 잡고 빈사로 다음 층에 올라가 그대로 죽는다.
         # 이 둘은 구역3(계단 앞)이라 <b>반드시 밟는다</b> — skip_potions 로도 안 빠진다.
@@ -1193,6 +1277,10 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
                 exp -= ptable[level + 1]["need_exp"]
                 level += 1
                 cur_hp += ptable[level]["hp"]  # LevelUp() 은 CurHP 도 같이 올린다
+
+        # 덤(금고·둘 중 하나)은 마지막 구역에 있다 — 층의 싸움을 다 치르고 줍는다.
+        if extras:
+            take_extras(floor, not (skip_optional is True or (skip_optional and floor in skip_optional)))
 
         # 계단 앞 회복은 올라가기 직전에 든다. 이미 가득하면 그만큼 버린다.
         # 이 층의 룬도 계단 앞에 있으니 여기서 최대 체력이 올라간다.
@@ -1292,6 +1380,8 @@ BAD_ROUTES = [
     # 제단(ALTAR_*)은 완주 계산 밖이다. 안 사도(= 정답 경로, [3/7]) 다 사도 완주해야 한다.
     ("제단에서 살 수 있을 때마다 공격을 산다", dict(altar="atk"), False, ""),
     ("제단에서 살 수 있을 때마다 방어를 산다", dict(altar="dfn"), False, ""),
+    # 완주 보장이 덤(여분 열쇠·금고·둘 중 하나)을 센다(extras_at). 그걸 다 거르는 사람이 어디까지 가는지만 찍는다.
+    ("덤을 전부 지나친다 (물약은 보이는 대로)", dict(extras=False, greedy=True), None, ""),
 ]
 
 
@@ -1318,27 +1408,28 @@ def optional_slack(ptable, monsters, start_state):
     return lo
 
 
-def waste_tolerance(ptable, monsters, start_state, greedy=False, limit=20):
+def waste_tolerance(ptable, monsters, start_state, greedy=False, limit=20, extras=True):
     """물약을 몇 개까지 버려도 완주하는가 — 층에 고르게 흩어 가장 작은 것을 하나씩 버린다
     (route_check.tolerance 와 같은 셈이고, greedy 면 보이는 대로 마시는 사람이다)."""
     floors = list(range(HANDMADE_FLOORS + 1, TOTAL_FLOORS + 1))
     for n in range(1, limit + 1):
         picks = [floors[int(i * len(floors) / n)] for i in range(n)]
         if not simulate_run(ptable, monsters, start_state, verbose=False, greedy=greedy,
-                            waste_floors=picks)[0]:
+                            waste_floors=picks, extras=extras)[0]:
             return n - 1
     return limit
 
 
 def check_tower(ptable, tower, start_state):
     """탑의 법 표의 완주 보장. 기준은 정답 경로가 아니라 <b>보이는 대로 마시는</b> 경로다 —
-    그쪽이 지배 전략이고(나쁜 선택 주석), 탑의 법에서 정답 경로는 11층에서 죽는다."""
+    그쪽이 지배 전략이고(나쁜 선택 주석), 탑의 법에서 정답 경로는 11층에서 죽는다. 덤(extras_at)은 셈에 없다 —
+    일반 표보다 빡빡한 문이다."""
     loss = "/".join(f"{x:g}" for x in TOWER_MOB_HP_LOSS)
-    ok, log, err = simulate_run(ptable, tower, start_state, verbose=False, greedy=True)
+    ok, log, err = simulate_run(ptable, tower, start_state, verbose=False, greedy=True, extras=False)
     if not ok:
         print(f"  [실패] 탑의 법 (챕터별 몹 손실 {loss}): 보이는 대로 마셔도 {err}")
         return False
-    n = waste_tolerance(ptable, tower, start_state, greedy=True)
+    n = waste_tolerance(ptable, tower, start_state, greedy=True, extras=False)
     bud, _, spl, _ = potion_ledger(log)
     bosses = [p for r in log for boss, p in r["fights"] if boss]
     head = "[실패]" if n < TOWER_MIN_WASTE else "      "
@@ -1461,22 +1552,27 @@ def altar_entry(ptable, log, floor, pct):
     return r["exit_level"], r["exit_exp"], max_hp * pct / 100.0
 
 
-def altar_reserves(ptable, monsters, log):
+def altar_reserves(ptable, monsters, log, extras=True, behind=1):
     """제단 층마다 내고 나서 남겨야 할 HP (최대 HP 의 %). 그 HP 로 다음 층에 들어서도 — 설계 레벨,
     산 것 없이, 보이는 대로 마시며 — <b>100층까지</b> 가는 가장 작은 값에 ALTAR_MARGIN 을 얹는다.
     다음 층만 넘기면 되는 것이 아니다: 층 입구마다 체크포인트라 그 뒤 어느 층에서 막혀도 같은
     HP 로 되살아나 갇힌다. 탑의 법은 넘치는 물약이 거의 없어(6%) 모자란 HP 가 몇 층씩 이어지므로
     문턱이 높다 — 제단은 거기서 "남는 HP 로만 산다" 가 된다.
     물약은 min(최대, 현재 + 회복) 이라 HP 가 많아서 손해 보는 일이 없으니 이분 탐색한다.
-    100% 로도 못 가는 층은 None — [7/7] 이 실패로 알린다. log 는 [3/7] 정답 경로."""
+    100% 로도 못 가는 층은 None — [7/7] 이 실패로 알린다. log 는 [3/7] 정답 경로.
+
+    그리고 <b>다음 층의 관문 셋</b>(첫 구역, 그 앞에 물약이 없다)을 한 레벨 뒤처진 사람(덤·제단 없이)이 넘을 만큼도
+    남긴다(toll_reserve). 설계 레벨만 보면 곁길을 거른 사람이 제단에서 사고 들어서다 거기서 갇혔다 — 탑의 법
+    66~70층(암살 셋, 한 레벨 뒤면 최대 HP 의 40%)이 그랬다(재미 검증 v2 R4, Tools/fun_sim.py)."""
     out = {}
     for floor in range(HANDMADE_FLOORS + 1, TOTAL_FLOORS):
         if not altar_at(floor):
             continue
+        tolls = toll_reserve(ptable, monsters, log, floor, behind)
 
         def finishes(pct):
             return simulate_run(ptable, monsters, altar_entry(ptable, log, floor, pct), verbose=False,
-                                greedy=True, first=floor + 1)[0]
+                                greedy=True, first=floor + 1, extras=extras)[0]
         if not finishes(100):
             out[floor] = None
             continue
@@ -1484,25 +1580,38 @@ def altar_reserves(ptable, monsters, log):
         while hi - lo > 1:
             mid = (lo + hi) // 2
             lo, hi = (lo, mid) if finishes(mid) else (mid, hi)
-        out[floor] = hi + ALTAR_MARGIN
+        out[floor] = max(hi, tolls) + ALTAR_MARGIN
     return out
 
 
+def toll_reserve(ptable, monsters, log, floor, behind=1):
+    """floor 의 제단 다음 층 첫 관문 셋(MIN_TOLLS — 층의 첫 구역, 물약보다 앞)을 behind 레벨 뒤처진 설계 플레이어가
+    치르는 값, 그 층 최대 HP 대비 % (올림). behind 가 None 이면 0 (따지지 않는다)."""
+    if behind is None:
+        return 0
+    level = altar_entry(ptable, log, floor, 100)[0] - behind
+    tolls = sorted((m for m in monsters if m["_floor"] == floor + 1 and not m["_boss"]),
+                   key=lambda m: m["_order"])[:MIN_TOLLS]
+    max_hp = stats_with_runes(ptable, level, floor + 1)["hp"]
+    paid = sum(simulate_battle(player_with_runes(ptable, level, floor + 1), creature_of(m))[2] for m in tolls)
+    return -int(-100.0 * paid // max_hp)
+
+
 def check_altar(ptable, tables, start_state, log):
-    """제단 [7/7]. tables = [(이름, 몬스터 표, altar_reserves)], log 는 [3/7] 정답 경로.
+    """제단 [7/7]. tables = [(이름, 몬스터 표, altar_reserves, 덤을 셈하나)], log 는 [3/7] 정답 경로.
       문턱   제단 다음 층에 그 표의 문턱 HP 그대로 들어서서 100층까지 간다(보이는 대로 마신다).
       다 산다 살 수 있을 때마다 공격(또는 방어)을 사도 완주한다 — 두 표 모두, 보이는 대로 마신다.
     일반 표는 구매마다 값과 그 구매가 다음 RUNE_HORIZON 층 동안 아끼는 HP 를 나란히 찍는다 —
     값보다 적게 아끼는 구매가 나와야 "다 사는 것" 이 답이 아니다."""
     ok_all = True
-    for label, monsters, reserves in tables:
+    for label, monsters, reserves, extras in tables:
         edge = []
         for floor, pct in sorted(reserves.items()):
             if pct is None:
                 edge.append(f"{floor + 1}층은 가득 찬 HP 로 들어서도 못 간다")
                 continue
             ok, _, err = simulate_run(ptable, monsters, altar_entry(ptable, log, floor, pct),
-                                      verbose=False, greedy=True, first=floor + 1)
+                                      verbose=False, greedy=True, first=floor + 1, extras=extras)
             if not ok:
                 edge.append(f"{floor}층 제단에서 {pct:.0f}% 를 남기고 올라가면 {err.split(' (')[0]}")
         pcts = [p for p in reserves.values() if p is not None]
@@ -1517,7 +1626,7 @@ def check_altar(ptable, tables, start_state, log):
         price = designed_price(ptable, monsters, start_state[0]) if label == "일반" else None
         for stat, name in ((0, "atk"), (1, "dfn")):
             ok, run, err = simulate_run(ptable, monsters, start_state, verbose=False, altar=name,
-                                        greedy=True, reserve=reserves)
+                                        greedy=True, reserve=reserves, extras=extras)
             if not ok:
                 ok_all = False
                 print(f"  [실패] 제단 ({label}) 살 수 있을 때마다 {STAT_OBJ[stat]} 사면 {err.split(' (')[0]}")
@@ -1707,7 +1816,8 @@ def emit_monster_data(monsters, tower):
 
 
 STAGE_EXTRA = ("ParLevelIn", "ParLevelOut", "AltarAtk", "AltarDef",
-               "AltarPrice", "AltarPriceStep", "AltarReserve", "AltarReserveTower")
+               "AltarPrice", "AltarPriceStep", "AltarReserve", "AltarReserveTower",
+               "StarGreat", "StarGood", "StarGreatTower", "StarGoodTower")
 
 
 def stage_extra(floor, log_by_floor, reserves):
@@ -1718,6 +1828,7 @@ def stage_extra(floor, log_by_floor, reserves):
                       n 번째 구매 = AltarPrice + AltarPriceStep·n(n−1), 내고 나서
                       AltarReserve(탑의 법이면 AltarReserveTower)가 안 남으면 팔지 않는다
                       (altar_sells 와 같은 식). reserves = (일반, 탑의 법) 의 altar_reserves
+      Star*           띠의 마지막 층(5·10·…·100층)에만 — 그 띠의 별 문턱, 기준 대비 % (STAR_GREAT 주석)
     """
     r = log_by_floor.get(floor)
     gain = altar_at(floor)
@@ -1726,7 +1837,17 @@ def stage_extra(floor, log_by_floor, reserves):
                 AltarPrice=ALTAR_PRICE if gain else 0.0,
                 AltarPriceStep=ALTAR_PRICE_STEP if gain else 0.0,
                 AltarReserve=float(reserves[0][floor]) if gain else 0.0,
-                AltarReserveTower=float(reserves[1][floor]) if gain else 0.0)
+                AltarReserveTower=float(reserves[1][floor]) if gain else 0.0,
+                **star_extra(floor))
+
+
+def star_extra(floor):
+    """그 층이 띠의 마지막 층이면 그 띠의 별 문턱 (StageInfoData 의 Star* 열), 아니면 전부 0."""
+    band = (floor - 1) // BAND_FLOORS
+    on = floor % BAND_FLOORS == 0
+    return dict(StarGreat=float(STAR_GREAT[band]) if on else 0.0, StarGood=float(STAR_GOOD[band]) if on else 0.0,
+                StarGreatTower=float(STAR_GREAT_TOWER[band]) if on else 0.0,
+                StarGoodTower=float(STAR_GOOD_TOWER[band]) if on else 0.0)
 
 
 def emit_stage_info(log, reserves):
@@ -1770,7 +1891,8 @@ def emit_stage_info(log, reserves):
     header = ["ID", "Dungeon_ID", "Type", "Up_Stairs", "Down_Stairs", "Boss_Room",
               "ATK_보정 (n)", "DEF_보정 (n)", "EXP_보정 (%)", "BGM", "던전 이름_ID",
               "기준 레벨_입장", "기준 레벨_퇴장", "제단_공격", "제단_방어",
-              "제단_값 (%)", "제단_값 증가 (%)", "제단_남길 HP (%)", "제단_남길 HP 탑의 법 (%)"]
+              "제단_값 (%)", "제단_값 증가 (%)", "제단_남길 HP (%)", "제단_남길 HP 탑의 법 (%)",
+              "별_★★★ (기준 %)", "별_★★ (기준 %)", "별_★★★ 탑의 법 (기준 %)", "별_★★ 탑의 법 (기준 %)"]
     write_csv(os.path.join(EXCEL, "StageInfoData.csv"), header, rows)
     write_json(os.path.join(JSOND, "StageInfoData.json"), "stageInfos", items)
     return items
@@ -2177,12 +2299,12 @@ def build_all(dry_run=False):
 
     print("[7/7] 나쁜 선택 재현 — 잘못 고르면 죽는가")
     reserves = altar_reserves(ptable, monsters, log)
-    tower_reserves = altar_reserves(ptable, tower, log)
+    tower_reserves = altar_reserves(ptable, tower, log, extras=False)
     if not check_bad_routes(ptable, monsters, start_state, reserves):
         return False
     if not check_tower(ptable, tower, start_state):
         return False
-    if not check_altar(ptable, [("일반", monsters, reserves), ("탑의 법", tower, tower_reserves)],
+    if not check_altar(ptable, [("일반", monsters, reserves, True), ("탑의 법", tower, tower_reserves, False)],
                        start_state, log):
         return False
     report_breakpoints(ptable, monsters, start_level)

@@ -254,6 +254,9 @@ public class PortalController : MonoBehaviour
         Managers.Game.Player.transform.position = nextPos;
         Managers.Game.Player._cellPos = nextPos;
 
+        // 처음 오는 층이면 스킬 셋이 다시 찬다 — HUD 를 칠하기 전, 체크포인트(EnterFloor)를 쓰기 전.
+        if (firstVisit)
+            BattleSkills.RefillForFloor();
         Managers.Game.OnPortalAction.Invoke();
         Managers.Game.GameScene.Refresh();
         Managers.Game.OnInteract = false;

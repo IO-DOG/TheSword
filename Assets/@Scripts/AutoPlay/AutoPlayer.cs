@@ -333,8 +333,8 @@ public class AutoPlayer : MonoBehaviour
     /// <summary>
     /// 스킬을 쓸지 본다. 무작위가 아니라 아래 규칙 그대로다.
     ///
-    /// 어디서 쓰나
-    ///   보스 전투에서는 항상 쓴다. 오래 끄는 전투라 셋이 다 들어갈 자리가 있고,
+    /// 어디서 쓰나 — 스킬은 층마다 한 번씩이라(BattleSkills) 그 층에서 가장 비싼 싸움에 아낀다.
+    ///   보스 전투에서는 항상 쓴다. 보스층에서 가장 비싼 싸움이고 오래 끌어 셋이 다 들어갈 자리가 있다.
     ///   녹화에서 스킬을 보여 줄 자리도 여기다.
     ///   일반 층에서는 HP 가 SkillEmergencyHp 아래로 떨어졌을 때만 쓴다 — 지금까지
     ///   기록(record46)에서 509 전투 중 HP 를 30% 넘게 잃은 전투가 2 건이라
@@ -354,7 +354,7 @@ public class AutoPlayer : MonoBehaviour
     /// 은신이 안 풀린 동안은 피해가 통째로 0 이 된다(AssassinTrait.ExcuteOnHit).
     /// 은신이 풀렸는지는 밖에서 볼 수 없으니 아끼고 철벽만 쓴다.
     ///
-    /// 전투당 1회 제한과 마검 계약 해금은 BattleSkills 가 지킨다 — 여기서 다시 세지 않는다.
+    /// 층당 1회 제한과 마검 계약 해금은 BattleSkills 가 지킨다 — 이미 쓴 것은 UseSkill 이 IsUsed 로 거른다.
     /// </summary>
     void TickSkills()
     {

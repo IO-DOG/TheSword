@@ -44,6 +44,7 @@ public static class MeshyArtImport
     const int MaxTexture = 512;
     const float AnkleHeight = 0.08f;   // 걷는 칸 위 소품의 높이 한계 — 8 복셀 (Art_Music_Prompts §4.2.1)
     const float TallCap = 1.5f;        // 벽·큰 소품은 옛 벽 높이의 1.5 배까지 (굴뚝·가시·떠오른 조각)
+    const float EmitIntensity = 1.5f;  // 빛나는 칸의 밝기(선형). 블룸 문턱 1.1(GameSceneProfile)을 가장 밝은 칸만 조금 넘는다
     const int WallTris = 3000;
     const int PropTris = 2000;
 
@@ -317,12 +318,14 @@ public static class MeshyArtImport
     {
         var m = new Material(template) { name = Path.GetFileName(pathNoExt) };
         Color color = Color.white;
-        Texture tex = null;
+        Texture tex = null, glow = null;
         if (src != null)
         {
             color = src.HasProperty("_BaseColor") ? src.GetColor("_BaseColor")
                   : src.HasProperty("_Color") ? src.GetColor("_Color") : Color.white;
-            tex = Bake(BaseMap(src), pathNoExt + ".png");
+            Texture baseMap = BaseMap(src);
+            tex = Bake(baseMap, pathNoExt + ".png");
+            glow = Bake(EmitMap(baseMap), pathNoExt + "_Emit.png");
         }
         foreach (string p in new[] { "_BaseMap", "_MainTex" })
             if (m.HasProperty(p))
@@ -330,8 +333,30 @@ public static class MeshyArtImport
         foreach (string p in new[] { "_BaseColor", "_Color" })
             if (m.HasProperty(p))
                 m.SetColor(p, color);
+
+        // 빛나는 칸(불꽃·숯·등 유리·수정·빛 균열)은 챕터가 어두워도 제 색으로 보인다. 빛 그림이 없으면 옛 벽 재질 그대로다.
+        // SetColor 는 선형 공간 프로젝트에서 감마 값을 받아 선형으로 바꾼다 — 선형 밝기 EmitIntensity 가 되게 되돌려 넘긴다.
+        if (glow != null && m.HasProperty("_EmissionMap"))
+        {
+            float k = QualitySettings.activeColorSpace == ColorSpace.Linear
+                ? Mathf.LinearToGammaSpace(EmitIntensity) : EmitIntensity;
+            m.SetTexture("_EmissionMap", glow);
+            m.SetColor("_EmissionColor", new Color(k, k, k, 1f));
+            m.EnableKeyword("_EMISSION");
+            m.globalIlluminationFlags &= ~MaterialGlobalIlluminationFlags.EmissiveIsBlack;
+        }
         AssetDatabase.CreateAsset(m, pathNoExt + ".mat");
         return m;
+    }
+
+    /// <summary>바탕색 그림 옆의 {이름}_Emit.png — 같은 배치에서 빛나는 칸만 켜고 나머지는 검정인 그림
+    /// (복셀 키트가 팔레트와 같이 낸다). 그림 파일이 없으면(GLB 속 그림) null.</summary>
+    static Texture EmitMap(Texture baseMap)
+    {
+        string file = baseMap != null ? AssetDatabase.GetAssetPath(baseMap) : "";
+        if (file.EndsWith(".png", StringComparison.OrdinalIgnoreCase) == false)
+            return null;
+        return AssetDatabase.LoadAssetAtPath<Texture2D>(file.Substring(0, file.Length - 4) + "_Emit.png");
     }
 
     static Texture BaseMap(Material m)
@@ -585,6 +610,7 @@ public static class MeshyArtImport
             // 걷는 칸에 10 복셀(발목 8 복셀보다 크다) — 그때만 줄인다
             GameObject voxelTall = BoxModel("VoxelTall", new Vector3(-0.5f, 0f, -0.5f), new Vector3(0.5f, 1f, 0.5f), plain, dir, models);
             CheckVoxel(fails, voxelTall, "Prop", 2, "Floor", t, dir, notes, new Vector3(AnkleHeight, AnkleHeight, AnkleHeight));
+            CheckGlow(fails, t, dir);
             sb.AppendLine("  " + string.Join("\n  ", notes));
         }
         finally
@@ -620,6 +646,38 @@ public static class MeshyArtImport
         go.AddComponent<MeshRenderer>().sharedMaterial = material;
         go.AddComponent<BoxCollider>();   // 지워져야 한다
         return go;
+    }
+
+    /// <summary>팔레트 옆에 {이름}_Emit.png 가 있으면 재질이 빛나고(빛 그림·_EMISSION), 없으면 옛 벽 재질과 같은가.
+    /// 4x1 팔레트 둘을 CPU 로 써서 본다 — GPU 가 없어도 돈다.</summary>
+    static void CheckGlow(List<string> fails, Targets t, string dir)
+    {
+        var palette = new Texture2D(4, 1, TextureFormat.RGBA32, false);
+        var lit = new Color32[] { new Color32(80, 60, 40, 255), new Color32(255, 180, 60, 255),
+                                  new Color32(90, 90, 90, 255), new Color32(30, 30, 30, 255) };
+        palette.SetPixels32(lit);
+        byte[] colors = palette.EncodeToPNG();
+        lit[0] = lit[2] = lit[3] = new Color32(0, 0, 0, 255);   // 불꽃 칸(1)만 남긴다
+        palette.SetPixels32(lit);
+        File.WriteAllBytes(dir + "/Glow.png", colors);
+        File.WriteAllBytes(dir + "/Glow_Emit.png", palette.EncodeToPNG());
+        File.WriteAllBytes(dir + "/Plain.png", colors);
+        Object.DestroyImmediate(palette);
+        foreach (string file in new[] { "Glow.png", "Glow_Emit.png", "Plain.png" })
+            AssetDatabase.ImportAsset($"{dir}/{file}");
+
+        foreach (string name in new[] { "Glow", "Plain" })
+        {
+            var src = new Material(t.Template.shader) { mainTexture = AssetDatabase.LoadAssetAtPath<Texture2D>($"{dir}/{name}.png") };
+            Material m = MakeMaterial(src, t.Template, $"{dir}/{name}Mat");
+            Object.DestroyImmediate(src);
+
+            bool glows = m.IsKeywordEnabled("_EMISSION") && m.HasProperty("_EmissionMap") && m.GetTexture("_EmissionMap") != null;
+            if (name == "Glow" && glows == false)
+                fails.Add("빛 그림(_Emit)이 있는데 재질이 빛나지 않는다");
+            if (name == "Plain" && m.IsKeywordEnabled("_EMISSION") != t.Template.IsKeywordEnabled("_EMISSION"))
+                fails.Add("빛 그림이 없는데 재질의 빛 설정이 옛 벽 재질과 다르다");
+        }
     }
 
     /// <summary>복셀 그림 — 배율 0.1(넘치면 그만큼 줄여서) 들어가 크기가 want 이고 자리에 붙었는가.</summary>

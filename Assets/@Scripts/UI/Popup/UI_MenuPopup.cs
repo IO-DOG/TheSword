@@ -159,7 +159,14 @@ public class UI_MenuPopup : UI_Popup
 
         // 빌드 번호 — 게임 안에서만. 타이틀은 제 것을 이미 보인다.
         if (_inGame)
-            CodeUI.VersionLabel(transform, GetText((int)Texts.QuitGameButtonText).font);
+        {
+            // 오른쪽 아래는 HUD 의 가방·스킬 단추 자리라 겹친다 — 메뉴 단추 아래 가운데에 둔다.
+            TMPro.TextMeshProUGUI version = CodeUI.VersionLabel(transform, GetText((int)Texts.QuitGameButtonText).font);
+            RectTransform rt = version.rectTransform;
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0f);
+            rt.anchoredPosition = new Vector2(0f, 16f);
+            version.alignment = TMPro.TextAlignmentOptions.Bottom;
+        }
 
         return true;
     }
