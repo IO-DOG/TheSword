@@ -10,13 +10,13 @@
 ## 짧은 설명
 
 ```text
-A Magic Tower–style puzzle RPG with no luck in it. The Ego Sword's single eye shows exactly how much HP each fight will cost, so every door, key and potion is a priced choice. Plan a route through 100 floors, chase the stars and the leaderboards, and decide at the end who pays.
+A Magic Tower–style puzzle RPG with zero randomness. A talking demon sword's single eye shows exactly how much HP each fight will cost, so every door, key and potion is a priced choice. Plan a route through 100 floors, chase the stars and the leaderboards, and decide at the end who pays.
 ```
 
 ## 게임 정보 (About This Game)
 
 ```text
-[h2]A tower with no luck in it[/h2]
+[h2]A tower with no room for luck[/h2]
 Monsters aren't enemies here. They're price tags. HP isn't your life; it's your budget. Nothing in this tower is random: the number over a monster's head is exactly the HP that fight will cost. All you decide is what to pay for, and in what order.
 
 [h2]Story[/h2]
@@ -26,9 +26,9 @@ The sword's single eye shows the price of every fight. It hides only one: the pr
 [h2]Read the price, then pay it[/h2]
 [list]
 [*][b]An exact forecast above every monster[/b]: after the contract, every monster on the map shows the HP you'll lose if you fight it next. It's the real battle, run ahead of time, so unless you use a skill it's never off by a single point. A red X marks a fight you'd lose; a ★ marks a kill that levels you up.
-[*][b]Find the ATK that saves a hit[/b]: the Monster Manual lists every species on the floor with its stats, how many are left, the price of the next fight, the hits you'll take, and "ATK +k → one hit fewer". Hover over an ATK or DEF rune and its tooltip shows which monsters get cheaper, and from what to what, if you pick it up.
-[*][b]Eight monster traits[/b]: Beast, Magic, Guardian, Immortal, Swordsman, Titan, Assassin and Armor. Assassins dodge every plain hit until a critical hit reveals them, Armored foes hide behind a shell you have to break first, Titans roar back every fifth hit they take. Each chapter asks for a different answer.
-[*][b]Gauge combat you can read[/b]: fighters strike and guard as their gauges fill. Critical hits aren't a dice roll. They land every Nth hit, and the count carries over from one fight to the next, so who you cut first changes the price. The HUD counts down to your next crit. Smash, Bulwark and Drain refill once per floor: spend them on the right fight to beat the forecast.
+[*][b]Find the ATK that saves a hit[/b]: the Monster Manual lists every species on the floor with its stats, how many are left, the price of the next fight, the hits you'll take, and "ATK +k → one hit fewer". Hover over an ATK or DEF rune to see which monsters it would make cheaper, and by how much.
+[*][b]Eight monster traits[/b]: Beast, Magic, Guardian, Immortal, Swordsman, Titan, Assassin and Armor. Assassins dodge every plain hit until a critical hit reveals them; Armored foes hide behind a shell you must break first; Titans roar back every fifth hit they take. Each chapter asks for a different answer.
+[*][b]Gauge combat you can read[/b]: both sides attack and guard automatically as their gauges fill. Critical hits aren't a dice roll. They land every Nth hit, and the count carries over from one fight to the next, so who you cut first changes the price. The HUD counts down to your next crit. You get Smash, Bulwark and Drain once each per floor: spend them on the right fights to beat the forecast.
 [*][b]Less waiting[/b]: set battle speed to 1×, 2× or 4× in the options and hold Space for 8×. Press Tab to skip a fight and pay exactly its forecast price. Boss fights always play out.
 [/list]
 
@@ -43,12 +43,12 @@ The sword's single eye shows the price of every fight. It hides only one: the pr
 
 [h2]The Sword's Ledger[/h2]
 [list]
-[*][b]A tally every five floors[/b]: the sword sets what you paid against the par price those floors were built around, then awards ★ to ★★★: ★★ for beating what a typical climber pays on those floors, ★★★ for the top quarter. The tally shows the HP you needed for each. Par counts only the fights you actually took. What it foretold is listed alongside, and it names the traits of the next five floors.
+[*][b]A tally every five floors[/b]: the sword sets what you paid against the par price those floors were built around, then awards ★ to ★★★: ★★ for beating what a typical climber pays on those floors, ★★★ for the top quarter. The tally shows the HP cutoff for each star. Par counts only the fights you actually took. What it foretold is listed alongside, and it names the traits of the next five floors.
 [*][b]An altar at the stairs[/b]: pay HP (priced as a % of your max HP) for permanent ATK or DEF, one pick per visit. The price climbs with every purchase, and the altar won't sell if it would leave you too low.
 [*][b]A score that outlasts the ending[/b]: finish a run and the ledger turns it into one score (lower is better). Normal and Tower's Law each have a Steam leaderboard, and there are 20 Steam achievements.
-[*][b]Tower's Law[/b]: a rule you pick when you start a new game. Same map, but the monsters hit harder and every potion is part of your budget. If it's your first climb, start with Normal.
+[*][b]Tower's Law[/b]: a ruleset you choose when you start a new game. Same map, but the monsters hit harder and every potion counts. If it's your first climb, start with Normal.
 [/list]
-One price. No DLC, no in-game purchases. Play in Korean, English, Japanese or Simplified Chinese.
+Pay once. No DLC, no in-game purchases. Play in Korean, English, Japanese or Simplified Chinese.
 
 Silver font by Poppy Works (CC BY 4.0)
 ```
@@ -78,7 +78,7 @@ Stylized fantasy combat against monsters, in pixel art.
 ## AI 사용 공개
 
 ```text
-The story script, the names and descriptions of monsters, bosses and traits, and the guide, help and interface text were written with the help of AI tools, as were all translations of the game's text (English, Japanese and Simplified Chinese). The text of this store page and the trailer captions was written the same way.
+The story script, the names and descriptions of monsters, bosses and traits, and the guide, help and interface text were written with the help of AI tools, as were all translations of the game's text (English, Japanese and Simplified Chinese). The layouts and monster stats of floors 5–100, and the chapter walls and decorative props, were produced by generator code written with the help of AI tools. The text of this store page and the trailer captions were written the same way.
 ```
 
 사람 검수가 끝난 뒤에만 " The developers reviewed and edited them." 를 붙인다. 둘째 문장(스토어 글·트레일러 자막)과 그림·음악 규칙은 `ko.md` 와 같다.

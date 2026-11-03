@@ -20,7 +20,7 @@ S2 battle → "읽히는 게이지 전투", S4 ledger → "다섯 층마다 결�
 | 스킬 셋(강타·철벽·흡혈, 층마다 한 번씩, 계약 뒤) | `BattleSkills` |
 | 특성 8종과 암살·갑옷·거대의 설명 | `CreatureClass`(`AssassinTrait`·`ArmorTrait`·`TitanTrait`), ScriptData 30001~30018 |
 | 장부·결산·별(★ 통과 / ★★ 보통 사람보다 싸게 / ★★★ 상위 4분의 1 — 띠마다 문턱이 다르다(StageInfoData Star*). **치름과 기준**만 견준다, 예언은 나란히 보일 뿐, 기준은 실제로 싸운 몬스터만 센다)·제단(값은 최대 체력의 %, 내는 것은 지금 체력)·점수(낮을수록 좋다) | `SwordLedger`(`Stars`, `Score`, `Altar`, `BuyAltar`), `ledger.py` |
-| 보통 / 탑의 법("같은 지도에 더 아픈 몬스터. 물약 하나하나가 예산입니다.") | `mode.py` 530~537 |
+| 보통 / 탑의 법("더 아픈 몬스터. 곁길까지 다 잡고 물약을 아껴야 버팁니다.") | `mode.py` 530~537 |
 | 클릭 이동(두 번 누르면 빠르게), WASD | `PathMover`, `input.py` 590 |
 | 체크포인트 층마다, 최근 10개 | `SaveStore.HistoryLimit` |
 | 업적 20·순위표 2(보통·탑의 법) | `Steam/achievements.csv`, `Steam/leaderboards.md`, `SteamHooks` |
@@ -106,7 +106,7 @@ Puzzle, RPG, Dungeon Crawler, Strategy, Logic, Resource Management, Story Rich, 
 
 - 프로세서·메모리 행은 일부러 뺐다(위 머리말) — 측정 전이라 비워 둔다.
 - "게임패드 지원" 은 게임이 XInput 패드를 직접 읽고(`GameKeys` — Xbox 배열) Steam Input 의 **Gamepad 템플릿**이 Publish 돼 있을 때의 말이다(`deck.md`; 스팀 덱·PlayStation·Switch·일반 패드는 그 템플릿을 거쳐 XInput 으로 보인다).
-  `GameKeys` 는 2026-11-03 현재 작업 트리에만 있어서 **커밋되고 `deck.md` 의 "패드" 점검을 통과한 뒤에** 올린다. 그 전에는 이 칸을 "키보드와 마우스." 로만 둔다.
+  `GameKeys` 는 커밋돼 있다(6bc92e04, 패드 단추 안내 bb62ba78). 남은 문은 진짜 패드로 하는 `deck.md` 의 "패드" 점검이다 — **그것을 통과한 뒤에** 올리고, 그 전에는 이 칸을 "키보드와 마우스." 로만 둔다.
   **Steam Deck "Verified" 는 말하지 않는다** — Valve 의 실기 검토가 정한다(화면 안내는 2026-11-03 부터 패드면 패드 단추 이름이다, `deck.md`). 패드가 툴팁·장비 바꾸기까지 닿게 되면 뒷 문장을 뺀다.
 - 근거: 빌드는 64비트(StandaloneWindows64, `TheSword.exe` 는 PE32+ x86-64), 그래픽 API 는 Direct3D 11 하나뿐(`ProjectSettings.asset` `m_APIs: 02000000`, 자동 선택 끔).
 - 저장 공간: `Build/Windows` 가 **221,457,928 바이트(211 MiB)** 다(1.0.0, 2026-11-03 빌드, `du -sb`. 체험판 `Build/WindowsDemo` 는 221,458,568 바이트).
@@ -131,7 +131,7 @@ Puzzle, RPG, Dungeon Crawler, Strategy, Logic, Resource Management, Story Rich, 
 Content Survey 의 AI 항목(Pre-Generated)에 체크하고 아래를 적는다. 스토어 페이지에 그대로 보인다.
 
 ```text
-이야기 대본, 몬스터·보스·특성의 이름과 설명, 안내·도움말·인터페이스 문구, 그리고 그 모든 번역(영어·일본어·간체 중국어)은 AI 도구의 도움을 받아 썼다. 이 스토어 페이지의 글과 트레일러 자막도 같은 방식으로 썼다.
+이야기 대본, 몬스터·보스·특성의 이름과 설명, 안내·도움말·인터페이스 문구, 그리고 그 모든 번역(영어·일본어·간체 중국어)은 AI 도구의 도움을 받아 썼다. 5~100층의 지도·몬스터 수치와 챕터별 벽·장식 소품은 AI 도구의 도움을 받아 작성한 생성 코드로 만들었다. 이 스토어 페이지의 글과 트레일러 자막도 같은 방식으로 썼다.
 ```
 
 - 범위(README 7절): 대본, 몬스터·보스·특성 이름과 설명(`Tools/bestiary.py`), 안내·도움말·UI 문구(`Tools/ui_text.py`, `Tools/ui_text_parts/*.py`), 모든 번역.
