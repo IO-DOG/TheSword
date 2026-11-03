@@ -547,6 +547,9 @@ public class AutoPlayer : MonoBehaviour
             return false;
         }
         Progress($"ui:{typeof(T).Name}");
+        // 창을 하나 넘긴 것도 진행이다(잠금 감시 WatchLocks). 손수 만든 프롤로그 대화는 층·레벨·HP·위치를 바꾸지 않아서,
+        // 3층 대화 끝에 거의 다 찬 15초가 5.5초짜리 계약 연출 도중에 터졌다 — 봇이 계약 결과를 손으로 채우고 "연출이 끊겼다" 고 적었다.
+        _lastReal = Time.unscaledTime;
         return true;
     }
 
