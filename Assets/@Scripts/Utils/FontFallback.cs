@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.TextCore;
 using UnityEngine.TextCore.LowLevel;
 
 // 일본어·중국어가 두부(□)로 나오지 않게 TMP 전역 폴백을 채운다.
@@ -27,7 +29,13 @@ public static class FontFallback
         (Define.ScriptType.Cn, "Microsoft YaHei"),
     };
 
+    // HUD·숫자 글꼴(DNF)에는 한자가 없어 Silver 로 넘어가는데, 같은 크기에서 Silver 한자는 DNF 글자 키의 0.7 배라
+    // "距暴击 6次"·"基准" 의 한자만 쪼그라들었다(중·일 HUD, 2026-11-03 스크린샷). 중·일일 때만 DNF 의 제 폴백 표에
+    // 키운 Silver 를 건다 — 이야기 글꼴(Silver SDF)은 전역 폴백(제 크기) 그대로, 한·영은 아무것도 안 바뀐다.
+    const float NumberCjkScale = 1.3f;
+
     static TMP_FontAsset s_pixel;
+    static TMP_FontAsset s_pixelCjk;
     static readonly List<(Define.ScriptType lang, TMP_FontAsset font)> s_system = new List<(Define.ScriptType, TMP_FontAsset)>();
     static bool s_installed;
 
@@ -37,6 +45,7 @@ public static class FontFallback
     static void ResetStatics()
     {
         s_pixel = null;
+        s_pixelCjk = null;
         s_system.Clear();
         s_installed = false;
     }
@@ -58,6 +67,9 @@ public static class FontFallback
             GameSettings.Changed += Attach;
             Application.quitting -= Detach;
             Application.quitting += Detach;
+            // DNF 는 장면과 어드레서블 묶음에 따로 실려 메모리에 둘일 수 있다 — 새로 읽힌 것에도 건다(선로드 뒤는 Refresh).
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+            SceneManager.sceneLoaded += OnSceneLoaded;
 
             // 주소도 키라서 라벨 자리에 넣어도 된다. 등록이 안 돼 있으면 예외 없이 오류 문자열만 온다.
             Managers.Resource.LoadAllAsync<Font>(PixelFontKey, null, error =>
@@ -70,12 +82,21 @@ public static class FontFallback
                 }
                 // Silver SDF 와 같은 크기·여백으로 굽는다. 한 줄에 섞여 찍혀도 굵기가 같다.
                 s_pixel = TMP_FontAsset.CreateFontAsset(source, 47, 5, GlyphRenderMode.SDFAA, 1024, 1024);
+                s_pixelCjk = TMP_FontAsset.CreateFontAsset(source, 47, 5, GlyphRenderMode.SDFAA, 1024, 1024);
+                FaceInfo face = s_pixelCjk.faceInfo;
+                face.scale = NumberCjkScale;
+                s_pixelCjk.faceInfo = face;
                 if (Application.isPlaying)
                     Attach();
             });
         }
         Attach();
     }
+
+    /// <summary>어드레서블 선로드 뒤 한 번 — 프리팹이 물고 온 DNF 에도 건다.</summary>
+    public static void Refresh() => Attach();
+
+    static void OnSceneLoaded(Scene scene, LoadSceneMode mode) => Attach();
 
     // 픽셀 글꼴 → 고른 언어의 윈도 글꼴 → 나머지 윈도 글꼴.
     static void Attach()
@@ -91,11 +112,38 @@ public static class FontFallback
         foreach ((Define.ScriptType lang, TMP_FontAsset font) in s_system)
             if (lang != chosen)
                 global.Add(font);
+
+        if (s_pixelCjk != null && (chosen == Define.ScriptType.Cn || chosen == Define.ScriptType.Jp))
+            foreach (TMP_FontAsset font in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
+                if (font.name == CodeUI.NumberFontName)
+                {
+                    MatchLines(s_pixelCjk, font);
+                    font.fallbackFontAssetTable.Insert(0, s_pixelCjk);
+                }
+        // 이미 짠 글은 옛 폴백 글자를 들고 있다 — 다음 그리기에 다시 짠다. 꺼진 글은 켤 때 다시 짠다.
+        foreach (TMP_Text text in Object.FindObjectsByType<TMP_Text>(FindObjectsSortMode.None))
+            if (text.font != null && text.font.name == CodeUI.NumberFontName)
+                text.havePropertiesChanged = true;
+    }
+
+    // 줄의 윗선·아랫선은 DNF 와 같게. Silver 의 깊은 아랫선(0.47em)을 1.3 배로 키운 채 두면 한자 한 글자가 줄을 늘려,
+    // 높이에 맞춰 줄이는 글(전투 라벨)이 숫자까지 17pt 로 작아졌다. 글자 그림의 자리는 그대로다.
+    static void MatchLines(TMP_FontAsset fallback, TMP_FontAsset number)
+    {
+        FaceInfo face = fallback.faceInfo, to = number.faceInfo;
+        float k = face.pointSize / (to.pointSize * face.scale);   // DNF 단위 -> 이 글꼴 단위
+        face.ascentLine = to.ascentLine * k;
+        face.descentLine = to.descentLine * k;
+        face.lineHeight = to.lineHeight * k;
+        fallback.faceInfo = face;
     }
 
     static void Detach()
     {
         // 부서진 글꼴(유니티 null)도 같이 걷는다. 지난 플레이의 것이 전역 목록(TMP Settings 에셋)에 남아 플레이마다 늘었다.
         TMP_Settings.fallbackFontAssets.RemoveAll(f => f == null || f == s_pixel || s_system.Exists(s => s.font == f));
+        foreach (TMP_FontAsset font in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
+            if (font.name == CodeUI.NumberFontName)
+                font.fallbackFontAssetTable?.RemoveAll(f => f == null || f == s_pixelCjk);
     }
 }

@@ -197,6 +197,7 @@ public class UI_TitleScene : UI_Scene
             try
             {
                 Managers.Data.Init();
+                FontFallback.Refresh();     // 방금 읽힌 프리팹들의 DNF 글꼴에도 중·일 폴백을 건다
                 Managers.Game.Init();
                 Managers.Sound.Init();
                 Managers.Sound.Play(Define.Sound.Bgm, "MainTitle_BGM");
@@ -269,6 +270,8 @@ public class UI_TitleScene : UI_Scene
         {
             _language = Managers.Game.ScriptType;
             SetButtonColorAndButtonsText(buttonsIdx);
+            if (isPreload && _loadFailed == false)
+                GetText((int)Texts.PessAnyKeyText).text = Managers.GetString(Define.TITLE_PRESS_KEY);
         }
 
         // 방향키·Enter 는 메뉴가 서 있을 때만 받는다. 불러오기가 끝나고 칼이 부딪혀 "아무 키나" 가 뜨기까지(1초 남짓)는
