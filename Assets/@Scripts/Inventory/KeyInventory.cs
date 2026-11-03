@@ -110,6 +110,7 @@ public class KeyInventory
             return 0;
 
         int topVault = top + 1 < GeneratedStory.VaultDoors.Length ? GeneratedStory.VaultDoors[top + 1] : -1;
+        int topSpare = top + 1 < GeneratedStory.SpareKeys.Length ? GeneratedStory.SpareKeys[top + 1] : -1;
         int need = 0;
         foreach (ObjectData obj in map.Objects)
         {
@@ -117,6 +118,12 @@ public class KeyInventory
             if (obj.ObjectType == (int)Define.ObjectType.Door && obj.Count != topVault && (obj.Id - 3) % NUM_OF_KEYS == door._keyIndex
                 && Managers.Data.DoorActiveDic.TryGetValue(obj.Count, out bool closed) && closed)
                 need++;
+            // 그 층의 큰길 열쇠가 아직 바닥에 있으면 그 문 몫은 그것이 맡는다 — 색마다 열쇠는 제 색 문 앞의 방(다른 색 문 너머)에
+            // 있어서, 이 색을 금고에 써도 못 줍게 되지 않는다. 그것까지 세지 않으면 워프로 옛 금고에 가져온 진짜 여분도 막혔다.
+            // 골방의 여분 열쇠(파수꾼 뒤)와 둘 중 하나는 셈하지 않는다 — 꼭 얻는다고 볼 수 없다. 열쇠는 소비 아이템 0~2(색 순서).
+            else if (obj.ObjectType == (int)Define.ObjectType.CItem && obj.Id == door._keyIndex && obj.ChoiceGroup == 0
+                     && obj.Count != topSpare && Managers.Data.CItemActiveDic.TryGetValue(obj.Count, out bool lying) && lying)
+                need--;
         }
         return _keys[door._keyIndex] - 1 < need ? top + 1 : 0;
     }

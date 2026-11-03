@@ -404,6 +404,9 @@ public class UI_TitleScene : UI_Scene
     IEnumerator CoOnClickNewGameButton()
     {
         if (_lock || !isPreload) yield break;
+#if DEMO
+        if (HasFullGameSave()) yield break;     // 봇은 이것을 곧장 부른다(AutoPlayer.TitleStart) — 사람 길은 새 게임 단추에서 이미 알렸다
+#endif
         _lock = true;
 
         Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UIselect");
