@@ -102,7 +102,7 @@ public class UI_GuidePopup : UI_Popup
     {
         if (Managers.UI.TopPopup != this || Time.unscaledTime - _openedAt < KeyGuard)
             return;
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Space))
+        if (GameKeys.Down(KeyCode.Return) || GameKeys.Down(KeyCode.KeypadEnter) || GameKeys.Down(KeyCode.Space))
             YesClick();
     }
 

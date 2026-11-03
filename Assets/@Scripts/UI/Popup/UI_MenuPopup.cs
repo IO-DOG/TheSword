@@ -157,6 +157,10 @@ public class UI_MenuPopup : UI_Popup
         _rows = _main;
         Highlight(0);
 
+        // 빌드 번호 — 게임 안에서만. 타이틀은 제 것을 이미 보인다.
+        if (_inGame)
+            CodeUI.VersionLabel(transform, GetText((int)Texts.QuitGameButtonText).font);
+
         return true;
     }
 
@@ -262,11 +266,11 @@ public class UI_MenuPopup : UI_Popup
         if (_shifted && _list == null)
             ShiftBack();
 
-        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+        if (GameKeys.Nav(KeyCode.W) || GameKeys.Nav(KeyCode.UpArrow))
             Move(-1);
-        else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+        else if (GameKeys.Nav(KeyCode.S) || GameKeys.Nav(KeyCode.DownArrow))
             Move(1);
-        else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Space))
+        else if (GameKeys.Down(KeyCode.Return) || GameKeys.Down(KeyCode.KeypadEnter) || GameKeys.Down(KeyCode.Space))
             _rows[_cursor].Press();
     }
 

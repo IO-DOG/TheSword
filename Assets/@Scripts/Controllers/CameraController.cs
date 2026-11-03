@@ -113,7 +113,8 @@ public class CameraController : MonoBehaviour
         else if (Managers.Game.OnDirect == true) return;
         else if (Managers.UI.GetPopupCount() == 0 || (Managers.UI.StageNamePopup != null && Managers.UI.GetPopupCount() == 1))
         {
-            float scroll = Input.GetAxis("Mouse ScrollWheel") * _scrollSpeed * Time.deltaTime;
+            // 패드는 오른쪽 스틱 위아래가 휠 한 칸씩이다(쥐고 있으면 되풀이).
+            float scroll = Input.GetAxis("Mouse ScrollWheel") * _scrollSpeed * Time.deltaTime + GameKeys.Zoom;
 
             if (scroll > 0 && Managers.Game.ResolutionIdx < _resolutionX.Length - 1)
                 Managers.Game.ResolutionIdx++;

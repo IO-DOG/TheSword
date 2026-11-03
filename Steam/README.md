@@ -16,6 +16,7 @@
 | `store/*.md` | 스토어 문구 — 한국어·영어·간체·번체·일본어 |
 | `deck.md` | Steam Deck 조작표, 글자 크기·fps 점검, 알려진 틈 |
 | `check_steam.py` | 이 폴더가 게임 데이터·코드와 맞는지 본다: `python Steam/check_steam.py` |
+| `THIRD_PARTY_NOTICES.txt` | 제3자 라이선스 고지 — Silver 글꼴(CC BY 4.0 표기 의무)·MIT 라이브러리·OFL 글꼴 등. `GameBuild` 가 본편·체험판 실행 파일 옆에 복사하고, 크레딧(`Tools/ui_text_parts/credits.py`)이 이 파일을 가리킨다 |
 
 ## 0. 먼저 정할 것
 
@@ -59,7 +60,7 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
 - 두 번으로 나누는 까닭: `Prepare` 의 `AddressableSetup.RegisterRuntimePrefabs` 는 배치 모드에서 끝나면 에디터를 끈다. 같은 실행에 이어 적은 빌드는
   **오류 없이 안 돈다** — 로그에 "등록 6건", 종료 코드 0 이라 성공처럼 보인다(CLAUDE.md).
 - `Windows` 는 `Tools/validate_content.py` 가 통과해야 굽고, 출력 폴더를 비운 뒤 LZ4HC 로 굽고, `*_DoNotShip` 폴더를 `Build/Symbols/<버전>/` 으로 옮기고,
-  개발 빌드가 아니면 `steam_appid.txt` 를 지운다(2026-09-30 작업 트리의 `GameBuild`).
+  개발 빌드가 아니면 `steam_appid.txt` 를 지우고, `Steam/THIRD_PARTY_NOTICES.txt` 를 실행 파일 옆에 복사한다(없으면 예외로 멈춘다)(2026-09-30 작업 트리의 `GameBuild`).
 
 - [ ] `Build/Windows/TheSword_Data/StreamingAssets/aa` 가 있다. 없으면 실행 파일은 타이틀에서 한 발짝도 못 나간다.
 - [ ] 로컬 스모크: `Build\Windows` 에 `steam_appid.txt`(본편 AppID)를 **잠깐** 두고 `TheSword.exe` → 타이틀 → 새 게임 → 1층. 끝나면 지운다.
@@ -108,12 +109,13 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
   **찜 목록에 추가**(Steam 오버레이로 본편 스토어, Steam 이 없으면 브라우저, `GameAppId` 가 0 이면 단추 없음), **타이틀로**.
   21층 체크포인트를 이어 해도 같은 카드가 뜬다. Esc·메뉴·워프·도감은 막힌다. 봇(`IsAutoPlaying`)은 막지 않는다.
 - 업적·통계·순위표·Rich Presence 는 **하나도 올리지 않는다**(`SteamHooks.Active`). 데모 앱에는 그것들을 만들지 않는다.
-- **저장은 본편이 잇는다 — 지도가 같은 동안만.** 체험판도 `LocalLow\CozyByte\TheSword` 에 쓴다(회사·제품 이름이 같다). 계단으로 오면 끝 카드는
+- **저장은 본편이 잇는다 — 지도를 고쳐도.** 체험판도 `LocalLow\CozyByte\TheSword` 에 쓴다(회사·제품 이름이 같다). 계단으로 오면 끝 카드는
   `EnterFloor` 바로 앞의 HUD 갱신에서 뜨고, 21층 입구 체크포인트는 같은 호출 안에서 그 뒤에 적힌다.
-  같은 PC 에서 본편을 켜고 이어하기를 누르면 21층에서 계속된다 — **본편의 MapData 해시가 체험판과 같을 때만**이다. `ValidateCheckpoint` 는 해시가
-  다른 체크포인트를 거절한다(지우지는 않는다). 체험판을 낸 뒤 본편의 지도를 한 칸이라도 고치면 모든 체험판 저장이 막히므로 **K1(옛 MapData 를
-  해시별로 실어 맞는 것을 읽는다)이 체험판 출시를 막는 일이다** — 아니면 본편 지도를 체험판 것으로 얼린다. 그래서 끝 카드는 잇는다고 약속하지
-  않고 "저장은 21층 입구에 남아 있습니다" 라고만 한다(`Tools/ui_text_parts/steam2.py` 561, K1 이 들어오면 되돌린다). 이을 수 있으면 챕터 1 을 여는 이야기가 뜬다
+  같은 PC 에서 본편을 켜고 이어하기를 누르면 21층에서 계속된다. 본편의 지도가 그 사이에 바뀌었으면 **K1**(`SaveMigration`)이 옮긴다: 빌드마다
+  `GameBuild` 가 그 빌드의 MapData 를 해시 이름으로 `Assets/StreamingAssets/Data/MapDataArchive/` 에 남기고(**새 파일은 커밋한다, 지우지 않는다**),
+  `ValidateCheckpoint` 가 옛 해시의 체크포인트를 보면 그 지도를 찾아 오브젝트 상태를 지금 번호로 옮긴 뒤 다시 적는다(처음 것은 `.bak`).
+  보관함에 없는 지도의 저장만 예전처럼 거절한다(지우지 않는다). 그래서 끝 카드가 "본편에서 이 저장으로 21층부터 이어 갑니다" 라고 약속한다
+  (`Tools/ui_text_parts/steam2.py` 561). **체험판 빌드의 보관 파일이 본편 저장소에 커밋돼 있어야 한다.** 이을 수 있으면 챕터 1 을 여는 이야기가 뜬다
   (체험판은 그 장면을 틀기 전에 걷는다). 체험판에서 한 계약·잡은 보스(킹 슬라임·20층)·챕터 0 의 ★★★ 는 본편이 그 저장으로 층을 옮길 때 업적으로 풀린다.
   다른 PC 로는 본편 출시 뒤 클라우드를 이을 때부터 넘어간다(4절).
 - 같은 폴더를 쓰니 본편을 하던 사람이 체험판에서 **새 게임**을 누르면 본편 저장이 지워진다 — 새 게임 확인 창("지금 저장이 지워집니다")이 막는 전부다.
@@ -198,7 +200,8 @@ App Admin → Application → **Steam Cloud** [S9].
 ## 6. Steam Input 과 Deck
 
 `deck.md` 가 전부다. 요약:
-- [ ] 공식 키보드 설정(조작표)을 만들어 Workshop 파일 ID 로 올린다 → App Admin → Steam Input → *Custom Configuration* → Publish [S14].
+- [ ] 게임이 XInput 패드를 직접 읽는다(`GameKeys`). App Admin → Steam Input → 템플릿 **Gamepad**, PlayStation·Switch·일반 패드 사용 켜기 → Publish.
+      공식 키보드 설정(Workshop 파일 ID)은 만들지 않는다(`deck.md`).
 - [ ] Deck 에서 1~5층 막힘 없음. 그리고 우리 목표(MASTER_PLAN 종료 기준 7): 1280×800 에서 글자 9px 이상, 30fps 이상.
       이 둘은 Valve 의 **Verified** 항목이다 — 어겨도 대개 Playable 로 나오지만, 우리 기준이라 출시 전에 맞춘다 [S13].
 - [ ] 검토 신청: 빌드 검토를 통과한 뒤 앱 랜딩 페이지 → Technical Tools → *Steam Hardware Compatibility Review*. 목표는 **Playable**, Verified 는 출시 뒤.
@@ -245,7 +248,8 @@ App Admin → Application → **Steam Cloud** [S9].
       플레이어가 보는 콘텐츠 가운데 AI 도움을 받은 전부다 [S18]. 이 게임에서는 이야기 대본(`Tools/story/`), 몬스터·보스·특성 이름과 설명
       (`Tools/bestiary.py`, 대본의 `bestiary`), 안내·도움말·UI 문구(`Tools/ui_text.py`, `Tools/ui_text_parts/*.py`), 그리고 모든 번역 —
       이 파일들을 바꾼 커밋(`59080e52` `22835e4f` `7f7362d4` `267880e9` `48466782`)에 Claude 공동 저자 표시가 있다.
-      새 그림·음악이 오면 파일별 출처 기록을 보고 AI 로 만든 것을 더한다.
+      스토어 페이지 글과 트레일러 자막(`Build/Store/trailer_script.json`)도 AI 도움으로 썼으므로 문단 둘째 문장에 넣었다(`store/ko.md` 의 AI 절 — 빼도 되는지는 소유자가 정한다).
+      새 그림·음악이 오면 파일별 출처 기록을 보고 AI 로 만든 것을 더한다. Meshy(AI 3D 생성)로 만든 3D 그림을 쓰면 `store/*.md` 의 Meshy 줄을 문단 끝에 더한다.
       개발 도구의 효율 향상(코드 도우미)은 이 항목의 관심사가 아니다 [S18].
 - [ ] **독일**: 2024-11-15 부터 등급이 없는 게임은 독일에서 보이지 않는다. 설문을 채워야 Valve 가 등급을 준다 [S18].
 - [ ] **한국 등급(GRAC)**: Steam 은 한국 자체등급 사업자가 아니어서 직접 받아야 한다고 조사됐다(r04, 게임메카 2025 보도 — 직접 확인하지 않았다).
@@ -273,13 +277,16 @@ App Admin → Application → **Steam Cloud** [S9].
 ## 9. 출시 체크리스트
 
 - [ ] K0 `CozyByte` 커밋, `SteamManager.GameAppId`·`DemoAppId`, `steam_appid.txt` 에 본편 AppID
-- [ ] 세이브가 패치를 견딘다(K1 — 층 배치를 고친 패치가 옛 세이브를 거부하지 않는다). 안 되면 출시 뒤 첫 패치가 모든 진행을 막는다
-- [ ] 크레딧·고지: Silver 글꼴(Poppy Works, **CC BY 4.0 — 표기 의무**), DNF BitBit(표기 권장), MIT 고지(UIEffect, ParticleEffectForUGUI, **Steamworks.NET**)를
-      크레딧이나 게임 폴더의 고지 파일로 싣는다(r07 — 지금 크레딧은 6줄뿐이다)
-- [ ] 버전 번호가 타이틀이나 메뉴에 보인다(r07)
+- [ ] 세이브가 패치를 견딘다(K1 `SaveMigration` — 층 배치를 고친 패치가 옛 세이브를 옮겨 읽는다). 에디터에서 `SaveMigration.SelfTest()` 가 OK,
+      내보낸 빌드(체험판 포함)마다 `Assets/StreamingAssets/Data/MapDataArchive/` 의 새 파일이 커밋됐는지 본다 — 빠지면 출시 뒤 첫 패치가 그 빌드의 진행을 막는다
+- [x] 크레딧·고지: Silver 글꼴(Poppy Works, **CC BY 4.0 — 표기 의무**), DNF BitBit(표기 권장), MIT 고지(UIEffect, ParticleEffectForUGUI, **Steamworks.NET**)를
+      크레딧이나 게임 폴더의 고지 파일로 싣는다(r07). 크레딧은 마지막 인사 앞에 제3자 블록(`UI_StoryCreditsPopup.ThirdParty`, 문구 `Tools/ui_text_parts/credits.py` 630~638),
+      전문은 `Steam/THIRD_PARTY_NOTICES.txt`(`GameBuild` 가 두 빌드에 복사). 의존성·에셋을 바꾸면 이 파일도 고친다(마지막 점검 2026-11-03).
+      Silver 는 itch.io 설명에 제작비·수익이 $100,000 을 넘으면 hello@poppy.works 로 문의하라는 문구가 있다고 한다(검색 요약으로만 봤다 — 페이지를 직접 열어 확인한다).
+- [ ] 버전 번호가 타이틀이나 메뉴에 보인다(r07) — 타이틀·게임 메뉴 오른쪽 아래 `v1.0.0`(체험판은 `v1.0.0 Demo`, `CodeUI.VersionLabel`). 에디터에서 자리를 본 뒤 체크한다.
 - [ ] 통계 4 → 업적 20 → 순위표 2 → Rich Presence 5 → Publish, `check_steam.py` 통과, 봇 한 판 뒤 풀린 업적 0·순위표 기록 0
 - [ ] Steam Cloud 5줄, 두 PC 시험 1~4. 데모의 Shared cloud APP ID 는 0 — **출시일에** 본편 AppID 로 바꾸고 시험 5(4절)
-- [ ] Steam Input 공식 설정, Deck 점검(`deck.md`), 호환성 검토 신청(링크가 열려 있으면 — 6절)
+- [ ] Steam Input 템플릿(Gamepad), Deck 점검(`deck.md`), 호환성 검토 신청(링크가 열려 있으면 — 6절)
 - [ ] 스토어: 문구 4~5개 언어, 캡슐·라이브러리 그림, 스크린샷 5장 이상, 트레일러, 태그, 지원 언어, 시스템 요구 사항(측정값)
 - [ ] Content Survey(AI 공개 포함), GRAC
 - [ ] Coming Soon 2주 이상, 빌드를 default 에 켜고 빌드 검토 통과

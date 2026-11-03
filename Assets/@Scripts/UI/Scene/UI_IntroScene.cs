@@ -71,22 +71,22 @@ public class UI_IntroScene : UI_Scene
         if (_lock)
             return;
 
-        if (!GetText((int)Texts.SceneText).GetComponent<TextAnimator_TMP>().allLettersShown && (Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0)))
+        if (!GetText((int)Texts.SceneText).GetComponent<TextAnimator_TMP>().allLettersShown && (GameKeys.Down(KeyCode.Return) || Input.GetMouseButtonDown(0)))
         {
             GetText((int)Texts.SceneText).GetComponent<TextAnimator_TMP>().SetVisibilityEntireText(true);
         }
-        else if (GetText((int)Texts.SceneText).GetComponent<TextAnimator_TMP>().allLettersShown && (Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0)))
+        else if (GetText((int)Texts.SceneText).GetComponent<TextAnimator_TMP>().allLettersShown && (GameKeys.Down(KeyCode.Return) || Input.GetMouseButtonDown(0)))
         {
             NextScene();
         }
 
         //test
-        if (Input.GetKey(KeyCode.Escape))
+        if (GameKeys.Held(KeyCode.Escape))
         {
             isPressing = true;
         }
 
-        if (Input.GetKeyUp(KeyCode.Escape))
+        if (GameKeys.Up(KeyCode.Escape))
         {
             isPressing = false;
             GetImage((int)Images.EscapeGauge).fillAmount = 0;

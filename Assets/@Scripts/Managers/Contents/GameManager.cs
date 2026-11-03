@@ -875,14 +875,15 @@ public class GameManager
     void ValidateCheckpoint(SaveStore.Snapshot snapshot)
     {
         // Level+1 을 요구하면 표의 끝(Lv115)에서 저장한 체크포인트가 영영 안 읽힌다.
-        if (snapshot.ContentHash != CurrentContentHash())
-            throw new InvalidDataException("This checkpoint belongs to a different dungeon layout.");
         if (!Managers.Data.StageInfoDic.ContainsKey(snapshot.Player.CurStageid) ||
             !Managers.Data.PlayerDic.ContainsKey(snapshot.Player.Level))
             throw new InvalidDataException("Checkpoint stage or level is unavailable.");
         // 탑의 법 판을 보통 표로 돌리지 않는다. 표가 없으면(잘못 구운 빌드) 거절만 한다 — 지우지 않는다.
         if (!Managers.Data.HasMonsterTable(snapshot.Player.Mode))
             throw new InvalidDataException("This checkpoint needs the Tower's Law monster table, which is missing.");
+        // 지도를 고친 패치 앞에 적은 체크포인트 — 그 지도를 보관함에서 찾아 지금 지도로 옮긴다(K1). 없으면 거절한다(지우지 않는다).
+        if (snapshot.ContentHash != CurrentContentHash())
+            SaveMigration.Apply(snapshot, Managers.Data.MapDic);
     }
 
     /// <summary>체크포인트를 불러 지금 판에 입힌다. file 이 null 이면 Checkpoint.json(없으면 .bak),
@@ -925,6 +926,9 @@ public class GameManager
                 return false;
             }
         }
+        // 해시가 다르면 ValidateCheckpoint 가 옛 지도에서 옮겨 온 것이다(못 옮기면 거절했다). 아래에서 지금 지도로 다시 적는다.
+        bool migrated = snapshot.ContentHash != CurrentContentHash();
+        snapshot.ContentHash = CurrentContentHash();
         PlayerData = snapshot.Player;
         PlayerData.EnsureLists();       // 장부(Ledger)가 없던 옛 체크포인트
         // 몬스터 표는 불러온 판의 규칙을 따른다(Mode 가 없던 옛 체크포인트는 보통). 이어하기·다시 시작·체크포인트·죽음이
@@ -950,9 +954,10 @@ public class GameManager
         GameSpeed = 1;
         EquipUtility.Apply();
 
-        if (file != null)
+        if (file != null || migrated)
         {
             // 고른 사본이 이제 지금의 체크포인트다. 여기서 죽거나 이어하기를 눌러도 이 자리로 온다.
+            // 옮겨 온 것도 지금 지도로 적는다 — 처음 것은 .bak 으로 밀려 남는다(SaveStore.Write).
             snapshot.Progress = CaptureProgress();
             snapshot.PlayTime = PlayTime;
             try { SaveStore.Write(SaveStore.DirectoryPath, snapshot); }

@@ -1,67 +1,54 @@
 # Steam Deck
 
-목표는 **Playable**(MASTER_PLAN §7). 게임은 패드를 직접 읽지 않고 키보드·마우스만 받는다(`activeInputHandler: 0`, 레거시 Input).
-그래서 Steam Input 공식 설정이 패드 단추를 키로 바꿔 준다. **Verified** 는 네이티브 패드 입력과 단추 그림(글리프)이 있어야 해서
-출시 뒤로 미룬다. Valve 의 정의: Playable = "동작하지만 사용자가 손을 좀 써야 할 수 있다(예: 터치스크린으로 런처를 조작)".
+목표는 **Playable**(MASTER_PLAN §7). 게임이 **XInput 패드를 직접 읽는다**(`GameKeys` — 레거시 Input 의 joystick button 과 축,
+`activeInputHandler: 0` 그대로). 스팀 덱은 Steam Input 의 **Gamepad** 템플릿으로 XInput 패드를 내놓으니 키보드 흉내 설정이 필요 없다.
+**Verified** 는 단추 그림(글리프)이 있어야 해서 출시 뒤로 미룬다 — 화면 안내가 아직 키보드 글자다(아래 "알려진 틈").
+Valve 의 정의: Playable = "동작하지만 사용자가 손을 좀 써야 할 수 있다(예: 터치스크린으로 런처를 조작)".
 
-## 조작표 (공식 키보드 설정)
+## 조작표 (게임이 직접 읽는다 — `GameKeys`)
+
+키 열은 그 단추가 대신하는 키다. 코드는 키보드 키로 묻고(`GameKeys.Down(KeyCode.Return)` …) 패드의 같은 자리를 같이 본다 —
+그래서 키보드로 되는 것은 패드로도 된다. 화살표 키는 패드에 묶지 않았다(화살표를 묻는 곳은 다 W A S D 도 묻는다).
 
 | Deck | Xbox 패드 | 키 | 게임에서 |
 |---|---|---|---|
-| 왼쪽 스틱 · 방향 패드 | 왼쪽 스틱 · 방향 패드 | W A S D | 이동. 메뉴·도감·확인 창에서 위아래·좌우 고르기 |
+| 왼쪽 스틱 · 방향 패드 | 왼쪽 스틱 · 방향 패드 | W A S D | 이동 — 쥐고 있으면 키처럼 계속 걷는다. 메뉴·도감·확인 창·워프 칸·설정 줄·언어 고르기 — 쥐고 있으면 0.4초 뒤부터 0.12초마다 한 칸 |
 | A | A | Enter | 확인, 대사 넘기기, 안내 창 닫기, 타이틀 "아무 키나", 게임오버(2초 뒤)·로딩 그림 넘기기. 누르고 있으면 크레디트 ×5 |
 | B | B | Esc | 창 닫기·메뉴(안내 창도 닫힌다). 인트로는 3초 누르면 건너뛴다 |
 | ☰ (Menu) | ≡ (Menu) | Esc | 메뉴 — MASTER_PLAN 표에 없는 것을 더했다. 휴대기에서 멈춤 단추를 찾는 자리라서 |
 | X / Y / R1 | X / Y / RB | 1 / 2 / 3 | 전투 스킬 강타 / 철벽 / 흡혈 |
+| Y (맵에서) | Y (맵에서) | I | 인벤토리 열고 닫기(계약 뒤, HUD 가방 단추와 같다). 장비 바꾸기는 아직 클릭이다 |
 | L1 | LB | Tab | 맵: 워프 창(워프석 반지 뒤). 전투: 건너뛰기(보스 아님, 치명타 수업 뒤). 대사: 본 장면은 누르면, 처음 보는 장면은 0.6초 누르고 있으면 건너뛴다 |
 | ⧉ (View) | View | M | 몬스터 도감 |
 | L3 (왼쪽 스틱 누르기) | LS 누르기 | V | 맵 위 예측 숫자 켜고 끄기 |
-| R2 (누르고 있기) | RT (누르고 있기) | Space | 누르는 동안 전투 8배속 |
-| 오른쪽 트랙패드 | — | 마우스 | 가리키기(툴팁). **누르면 왼쪽 클릭** |
-| 오른쪽 스틱 | 오른쪽 스틱 | 마우스 휠 | 카메라 줌 |
-| 나머지 (L2, 왼쪽 트랙패드, L4·L5·R4·R5) | LT 등 | 비움 | |
+| R2 (누르고 있기) | RT (누르고 있기) | Space | 누르는 동안 전투 8배속. 대사·안내·확인 창에서는 Enter 처럼(누르는 순간만) |
+| 오른쪽 스틱 위아래 | 오른쪽 스틱 위아래 | 마우스 휠 | 카메라 줌 — 휠 한 칸씩, 쥐고 있으면 되풀이 |
+| 오른쪽 트랙패드 | — | 마우스 | 가리키기(툴팁). **누르면 왼쪽 클릭** (Gamepad 템플릿 기본) |
+| 나머지 (L2, R3, 왼쪽 트랙패드, L4·L5·R4·R5) | LT, RS 누르기 | 비움 | |
 
-- 이 표는 **2026-10-01 작업 트리**의 키를 옮긴 것이다(`PlayerController`, `UI_GameScene`, `UI_BattlePopup` — 가속 Space, 건너뛰기 Tab,
-  `StoryUI.SkipKey`, `UI_GuidePopup`, `WarpUI`, 각 창의 키 처리). 이번 웨이브(B1·O2·O3)가 넣은 키가 섞여 있으니 통합 뒤 한 번 더 맞춰 본다.
-- **Shift+Tab 은 Steam 오버레이 단축키다.** 그래서 전투 가속은 Shift 를 받지 않고 **Space 만** 받는다
-  (`UI_BattlePopup.Speed`) — R2 를 Space 로 매핑한다. Space 는 대사·안내·확인 창에서 Enter 처럼 동작하지만
-  누르는 순간만 치고, 누르고 있는 것은 치지 않는다.
+- 스틱·트리거는 0.5 이상 기울이면 눌렀다, 0.3 밑으로 돌아오면 뗐다. 한 번에 한 방향이다 — 대각선은 많이 기운 쪽, 방향 패드의
+  대각선은 쥐고 있던 쪽. 단추 번호와 축은 Windows 의 XInput 배치다: 단추 A0 B1 X2 Y3 LB4 RB5 View6 Menu7 LS8,
+  축은 왼쪽 스틱 = Input Manager 의 "Horizontal"·"Vertical" 조이스틱 줄, `PadDPadX`(6번째)·`PadDPadY`(7번째, 위 +1)·`PadRT`(10번째)·
+  `PadRStickY`(5번째, 반전 — 위 +1). 축 이름이 Input Manager 에 없으면 그 축만 빠지고 단추는 된다.
+- "Horizontal"·"Vertical" 은 키보드 줄과 이름이 같아서, 그 키(화살표·W A S D)를 쥐고 있는 동안은 스틱 값을 버린다 — 안 그러면 화살표로 걷는다.
+- 확인: `dotnet run --project Tools/gamekeys_check` — 축 값을 프레임마다 넣어 눌렀다·뗐다·되풀이·대각선·빠진 축을 본다(에디터는 패드 축을 손으로 못 넣는다).
+- **Shift+Tab 은 Steam 오버레이 단축키다.** 그래서 전투 가속은 Shift 를 받지 않고 **Space(RT)만** 받는다
+  (`UI_BattlePopup.Speed`). Space 는 대사·안내·확인 창에서 Enter 처럼 동작하지만 누르는 순간만 치고, 누르고 있는 것은 치지 않는다.
 
-## 공식 설정 만들기와 올리기
+## Steam Input 설정
 
-두 길이 있다. **지금은 1번을 쓴다** — 빌드를 건드리지 않고, 문서가 In-Game Actions 파일을 전제하지 않는 길이다(README [S14]).
+게임이 패드를 직접 읽으므로 공식 키보드 설정(Workshop 파일 ID·매니페스트)은 **만들지 않는다**.
+Steamworks → App Admin → Application → **Steam Input** 에서:
 
-**1. Workshop 파일 ID (빌드 수정 없음)**
-1. Steam 을 Big Picture 로 켠다 → 라이브러리 → TheSword → 컨트롤러 설정(Controller Layout).
-2. 템플릿 **Keyboard (WASD) and Mouse** 에서 시작해 위 표대로 바꾼다. Deck 에서 한 벌, Xbox 패드로 한 벌(설정은 컨트롤러 종류마다 따로다).
-3. 저장: (Y) 또는 *Save As* → 제목·설명(언어별) → **PUBLIC** → *PUBLISH*. 나오는 **파일 ID** 를 적는다.
-4. Steamworks → App Admin → Application → **Steam Input** → *Steam Input Template* 에서 **Custom Configuration** →
-   *Add Custom Configuration* → 파일 ID 를 넣는다(여럿이면 쉼표, 첫째가 새 사용자 기본값) → 저장 → **Publish**.
+1. *Steam Input Template* = **Gamepad**(Xbox 배치). 스팀 덱의 내장 조작은 늘 Steam Input 을 거치고, 이 템플릿이면 게임에는 XInput 패드로 보인다.
+   오른쪽 트랙패드는 템플릿 기본대로 마우스다(툴팁·클릭).
+2. 컨트롤러 종류별 사용 설정에서 **PlayStation·Switch·일반 패드는 켠다**. 게임은 XInput 의 단추 번호(A0 B1 X2 Y3 …)를 읽는데,
+   Steam Input 을 거치지 않은 DualShock 4 는 DirectInput 번호가 달라서(□0 ✕1 ○2 △3) ✕ 가 B(=Esc) 자리에 온다.
+   Steam Input 을 거치면 이들도 XInput 으로 보인다. Xbox 패드는 Steam Input 없이도 그대로 된다.
+3. 저장 → **Publish**.
 
-**2. 게임에 싣기 (Valve 가 새 게임에 권하는 길 — 이 게임에서는 확인 전)**
-Valve 문서의 순서는 In-Game Actions(IGA) 파일이 있는 게임을 전제로 한다. 이 게임은 IGA 없이 키보드 흉내만 쓰므로,
-아래 매니페스트가 그 설정을 싣는지 **Deck 실기에서 먼저 확인**하고 나서 1번에서 옮긴다(README [S14]).
-1. Big Picture → 설정 → 시스템 → 개발자 모드 → 개발자 → **Steam Input Layout Dev Mode** 켜기.
-2. 설정 화면의 톱니 → *Export layout*. `steam://dumpcontrollerconfig?appid=<AppID>` 가 문서 폴더에 VDF 를 쓴다. 컨트롤러 종류마다 한 벌씩.
-3. **Action Manifest** 파일을 만든다. 종류별로 내보낸 설정을 가리키는 목록이고, `path` 는 이 파일이 있는 폴더 기준이다.
-   종류 이름은 `controller_neptune`(Deck), `controller_xboxone`, `controller_xbox360`, `controller_ps4`, `controller_ps5`, `controller_generic` 등.
-   ```
-   "Action Manifest"
-   {
-       "configurations"
-       {
-           "controller_neptune"  { "0" { "path" "deck.vdf" } }
-           "controller_xboxone"  { "0" { "path" "xbox.vdf" } }
-       }
-       "actions" { }
-       "localization" { }
-   }
-   ```
-4. 매니페스트(예: `steam_input_manifest.vdf`)와 설정 파일들을 빌드 폴더에 넣고(`GameBuild.Windows` 가 복사하게 해야 한다 — CORE 레인 일)
-   *Steam Input Template* = **Custom Configuration (Bundled with game)** 에 **매니페스트**의 경로를 적는다 → Publish.
-
-같은 페이지에 컨트롤러 종류별(Xbox·PlayStation·일반 패드) Steam Input 사용 설정이 있으면 켠다. 게임이 패드를 직접 읽지 않으므로
-Steam Input 이 꺼진 PC 패드는 아무것도 못 한다. Deck 의 내장 조작은 늘 Steam Input 을 거친다.
+예전 계획(Keyboard (WASD) and Mouse 템플릿을 표대로 고쳐 Workshop 에 올리는 길)으로 이미 올린 설정이 있으면 Gamepad 로 바꾼다 —
+키보드 설정을 둔 채여도 게임은 돌지만(키로 들어온다) 패드 단추가 전부 키로 바뀌어 위 표의 되풀이·문턱이 키보드 동작이 된다.
 
 ## 점검 (1280×800)
 
@@ -77,6 +64,9 @@ Steam Input 이 꺼진 PC 패드는 아무것도 못 한다. Deck 의 내장 조
       한꺼번에 짓는다), 보스전, 81~100층(떠오르는 티끌), 횃불이 많은 층, 결말. 에디터 실측은 평균 약 47fps, 한 층을 그릴 때
       그리기 호출 1,460~1,570, 챕터 20개 층이 한꺼번에 켜져 있어 광원 165개(r08). 30 아래면 D4: 그림자 1024·캐스케이드 2, 그다음 안 보이는 층 끄기.
 - [ ] **모든 내용에 닿는가.** 위 표로 1층 → 5층까지. 트랙패드가 필요한 곳(아래)을 빼고 막히는 곳이 없어야 한다.
+- [ ] **패드.** Xbox 패드를 PC 에 꽂고(Steam 없이) 타이틀 "아무 키나"(A·스틱 둘 다) → 모드 고르기 → 1층 이동(스틱·방향 패드, 쥐고 걷기) →
+      대사(A, LB 길게) → 마검 계약(A) → 전투(X·Y·RB 스킬, RT 쥐고 8배속, LB 건너뛰기) → 메뉴(≡)·설정(줄 고르기·값 옮기기)·언어 → 도감(View) →
+      예측 표시(L3) → 인벤토리(Y) → 줌(오른쪽 스틱) → 워프(LB, 칸 고르기). 한 번 누른 A·B 가 창 둘을 넘기지 않는지(대사 끝 → 계약 창, 안내 창 → 게임오버).
 - [ ] **글꼴.** 일본어·중국어 화면에서 □ 가 없는지. `FontFallback` 은 없는 글자를 Windows 글꼴(맑은 고딕·Yu Gothic·Microsoft YaHei)로
       받는데 Proton 에는 그 글꼴이 없을 수 있다. 지금 대본의 글자는 원본 Silver.ttf 가 다 갖고 있다(`FontFallback.cs` 주석) — 그래도 한 번 훑는다.
 - [ ] **클라우드.** PC 에서 5층까지 하고 Deck 에서 이어하기(README 4절). Windows 경로가 Proton 안에서 맞게 옮겨지는지 여기서 확인된다.
@@ -88,8 +78,8 @@ Steam Input 이 꺼진 PC 패드는 아무것도 못 한다. Deck 의 내장 조
 
 | 무엇 | 지금 | Playable 에 괜찮은가 |
 |---|---|---|
-| 단추 그림 | 화면 안내가 키보드 글자다 — "WASD 이동 · M 도감 · V 예측 표시 · Tab 워프 · 1/2/3 스킬 · Esc 메뉴"(ScriptData 274), 스킬 단추의 1/2/3. 그림에 박힌 WASD 도 있다(`GuidePanel_WASD`, 1층 표지판, `LoadingIllust1`) | 괜찮다. Verified 는 안 된다 |
-| 마우스로만 되는 창 | 마검 계약 "예"(`UI_MagicalSwordCheckPopup`), 보스방 확인(`UI_BossRoomCheckPopup`), 언어 고르기, 설정(해상도는 일부러 마우스만), 워프 창에서 층 고르기, 인벤토리(HUD 단추로만 열린다). 안내 창은 O2 로 Enter·Space·Esc 가 된다 | 괜찮다 — 오른쪽 트랙패드로 누른다 |
+| 단추 그림 | 화면 안내가 키보드 글자다 — "WASD 이동 · M 도감 · V 예측 표시 · Tab 워프 · 1/2/3 스킬 · Esc 메뉴"(ScriptData 274, I 인벤토리는 아직 없다), 스킬 단추의 1/2/3, 대사의 "Tab 길게" 안내, 도감·모드 창의 조작 줄. 그림에 박힌 WASD 도 있다(`GuidePanel_WASD`, 1층 표지판, `LoadingIllust1`). **Verified 에 남은 것은 이것이다** — 마지막으로 누른 것이 패드면 패드 그림을 보이는 갈래가 필요하다 | 괜찮다. Verified 는 안 된다 |
+| 마우스로만 되는 것 | 설정의 해상도 줄(일부러 — 손을 뗄 때 바꾸고 메뉴를 닫는다), 인벤토리 안에서 장비 바꾸기(열고 닫기는 Y·I — 더 나은 장비는 주울 때 저절로 낀다), 툴팁. 마검 계약은 A, 보스방 확인은 A(예)·B(아니오)가 되고, 언어·설정·워프 칸은 방향키·스틱으로 고른다 | 괜찮다 — 오른쪽 트랙패드로 누른다 |
 | 툴팁 | 몬스터·아이템 정보는 마우스를 올려야 뜬다 | 트랙패드로 가리킨다. 같은 값을 도감(⧉ View)이 보여 준다 |
 | 터치스크린 | 지원하지 않는다. 시험하지 않았다. 터치가 마우스 클릭처럼 들어갈 수는 있지만 가리키기(툴팁)는 안 된다 | 괜찮다(필수가 아니다) |
 | 글자 입력 | 이름 입력 같은 것이 없다 | 해당 없음 |

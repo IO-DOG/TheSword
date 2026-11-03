@@ -167,11 +167,11 @@ public class UI_ModePopup : UI_Popup
                 Select(_hover, true);
         }
 
-        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+        if (GameKeys.Nav(KeyCode.W) || GameKeys.Nav(KeyCode.UpArrow))
             Select(_cursor - 1, true);
-        else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+        else if (GameKeys.Nav(KeyCode.S) || GameKeys.Nav(KeyCode.DownArrow))
             Select(_cursor + 1, true);
-        else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Space))
+        else if (GameKeys.Down(KeyCode.Return) || GameKeys.Down(KeyCode.KeypadEnter) || GameKeys.Down(KeyCode.Space))
             Pick(_cursor);
     }
 

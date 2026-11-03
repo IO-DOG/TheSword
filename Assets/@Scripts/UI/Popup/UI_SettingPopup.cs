@@ -94,9 +94,15 @@ public class UI_SettingPopup : UI_Popup
         GetImage((int)Images.FullWindowScreenCheckBox).gameObject.BindEvent(OnClickFullWindowScreenCheckBox);
 
         // 전체 음량은 AudioListener 가, 배경음·효과음은 각 소리가 맡는다 (GameSettings.ApplyVolume).
-        BindVolume(GameObjects.TotalSoundSlider, Texts.TotalSoundText, "CURSOUND", v => AudioListener.volume = v);
-        BindVolume(GameObjects.BGMSoundSlider, Texts.BGMSoundText, "CURBGMSOUND", Managers.Sound.SetBGMVolume);
-        BindVolume(GameObjects.EffectSoundSlider, Texts.EffectSoundText, "CUREFFECTSOUND", Managers.Sound.SetEffectVolume);
+        BindVolume(GameObjects.TotalSoundSlider, Texts.TotalSoundClassText, Texts.TotalSoundText, "CURSOUND", v => AudioListener.volume = v);
+        BindVolume(GameObjects.BGMSoundSlider, Texts.BGMSoundClassText, Texts.BGMSoundText, "CURBGMSOUND", Managers.Sound.SetBGMVolume);
+        BindVolume(GameObjects.EffectSoundSlider, Texts.EffectSoundClassText, Texts.EffectSoundText, "CUREFFECTSOUND", Managers.Sound.SetEffectVolume);
+
+        AddRow(GetText((int)Texts.FullScreenText), OnClickFullScreenCheckBox);
+        AddRow(GetText((int)Texts.WindowScreenText), OnClickWindowScreenCheckBox);
+        AddRow(GetText((int)Texts.FullWindowScreenText), OnClickFullWindowScreenCheckBox);
+        // 줄은 여기저기서 세웠다(AddRows·BindVolume) — 화면에서 위에서 아래 순서로 늘어놓는다.
+        _rows.Sort((a, b) => b.Label.transform.position.y.CompareTo(a.Label.transform.position.y));
 
         OnEnterExitImage();
 
@@ -120,10 +126,11 @@ public class UI_SettingPopup : UI_Popup
 
     // 값이 바뀔 때만 한 번. 예전에는 창이 떠 있는 동안 매 프레임 GetComponent 를 열여섯 번,
     // PlayerPrefs 를 세 번 불렀다.
-    void BindVolume(GameObjects slider, Texts percent, string key, Action<float> apply)
+    void BindVolume(GameObjects slider, Texts label, Texts percent, string key, Action<float> apply)
     {
         Slider s = GetObject((int)slider).GetComponent<Slider>();
         TMP_Text text = GetText((int)percent);
+        AddRow(GetText((int)label), null, s, 0.1f);
         // "100%" 는 칸(너비 15)을 꽉 채워 오른쪽 끝에 선 손잡이(너비 8)에 붙어 있었다. 조금 띄운다.
         ((RectTransform)text.transform).anchoredPosition += new Vector2(6f, 0f);
         s.SetValueWithoutNotify(PlayerPrefs.GetFloat(key, 1));
@@ -251,6 +258,65 @@ public class UI_SettingPopup : UI_Popup
         _resolutions = list.Distinct().OrderBy(s => s.x * s.y).ToList();
     }
 
+    #region 키보드·패드
+    // W/S(↑/↓)로 줄을 고르고 A/D(←/→)로 값을 옮기고 Enter·Space 로 누른다(켜고 끄기, 창 상태). 고른 줄은 이름이 금빛이다 —
+    // 마우스를 올린 칸의 테두리와 따로 간다. 아직 아무 줄도 안 골랐으면 처음 누른 W/S 가 맨 윗줄을 고른다(이 창을 연
+    // 메뉴의 Enter 가 같은 프레임에 여기서 먹혀도 아무것도 안 누른다). 해상도 줄은 빠진다(AddSlider).
+    // 슬라이더는 눌러도 uGUI 선택이 되지 않게 한다 — 선택되면 EventSystem 이 같은 방향키·스틱으로 한 번 더 움직인다.
+    // 대신 누른 슬라이더를 이 커서가 고른다: 눌러 놓고 ←/→ 로 다듬던 손버릇이 그대로 된다.
+    static readonly Color Pointed = new Color32(240, 210, 138, 255);
+
+    class Row
+    {
+        public TMP_Text Label;
+        public Color Idle;
+        public Action Press;
+        public Action<int> Nudge;
+    }
+
+    readonly List<Row> _rows = new List<Row>();
+    int _cursor = -1;
+
+    void AddRow(TMP_Text label, Action press, Slider slider = null, float step = 1f)
+    {
+        Row row = new Row { Label = label, Idle = label.color, Press = press };
+        if (slider != null)
+        {
+            row.Nudge = d => slider.value = Mathf.Round(slider.value / step + d) * step;
+            slider.navigation = new Navigation { mode = Navigation.Mode.None };
+            slider.gameObject.BindEvent(() => Point(_rows.IndexOf(row), false), null, Define.UIEvent.PointerDown);
+        }
+        _rows.Add(row);
+    }
+
+    void Update()
+    {
+        if (Managers.UI.TopPopup != this || Managers.UI.ClosedThisFrame || _rows.Count == 0)
+            return;
+        int move = GameKeys.Nav(KeyCode.S) || GameKeys.Nav(KeyCode.DownArrow) ? 1
+                 : GameKeys.Nav(KeyCode.W) || GameKeys.Nav(KeyCode.UpArrow) ? -1 : 0;
+        if (move != 0)
+            Point(_cursor < 0 ? 0 : Mathf.Clamp(_cursor + move, 0, _rows.Count - 1));
+        else if (_cursor < 0)
+            return;
+        else if (GameKeys.Nav(KeyCode.A) || GameKeys.Nav(KeyCode.LeftArrow))
+            _rows[_cursor].Nudge?.Invoke(-1);
+        else if (GameKeys.Nav(KeyCode.D) || GameKeys.Nav(KeyCode.RightArrow))
+            _rows[_cursor].Nudge?.Invoke(1);
+        else if (GameKeys.Down(KeyCode.Return) || GameKeys.Down(KeyCode.KeypadEnter) || GameKeys.Down(KeyCode.Space))
+            _rows[_cursor].Press?.Invoke();
+    }
+
+    void Point(int index, bool sound = true)
+    {
+        if (sound && index != _cursor)
+            Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_SFX");
+        _cursor = index;
+        for (int i = 0; i < _rows.Count; i++)
+            _rows[i].Label.color = i == index ? Pointed : _rows[i].Idle;
+    }
+    #endregion
+
     #region 새 줄
     // 해상도·수직 동기화·글자 속도·전투 속도·화면 흔들림·예상 피해. 모양은 프리팹의 체크박스·슬라이더를 복제해
     // 그대로 쓰고, 판을 아래로 늘려 담는다. 자리는 프리팹 단위이고 판의 가운데가 0 이다:
@@ -335,6 +401,9 @@ public class UI_SettingPopup : UI_Popup
             name.text = label((int)v);
             changed?.Invoke((int)v);
         });
+        // 바뀔 때 할 일이 없는 줄(해상도 — 손을 뗄 때 바꾼다)은 마우스로만 고른다.
+        if (changed != null)
+            AddRow(name, null, s, 1f);
         return s;
     }
 
@@ -344,15 +413,18 @@ public class UI_SettingPopup : UI_Popup
         PlaceY(box.transform, y);
         GameObject choice = Util.FindChild(box, nameof(Images.FullScreenChoice));
         GameObject pick = Util.FindChild(box, nameof(Images.FullScreenPick));
-        Util.FindChild<TMP_Text>(box, nameof(Texts.FullScreenText)).text = Managers.GetString(labelId);
+        TMP_Text label = Util.FindChild<TMP_Text>(box, nameof(Texts.FullScreenText));
+        label.text = Managers.GetString(labelId);
         choice.SetActive(false);
         pick.SetActive(get());
 
-        box.BindEvent(() =>
+        Action flip = () =>
         {
             set(!get());
             pick.SetActive(get());
-        });
+        };
+        box.BindEvent(flip);
+        AddRow(label, flip);
         box.BindEvent(() => choice.SetActive(true), null, Define.UIEvent.PointerEnter);
         box.BindEvent(() => choice.SetActive(false), null, Define.UIEvent.PointerExit);
     }

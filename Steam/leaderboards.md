@@ -9,10 +9,11 @@
 - 기준 값이 0 인 판(장부가 없던 옛 저장)은 점수가 없다. 최종 HP 로 줄 세우지 않는다(MASTER_PLAN §9).
 - 점수는 장부가 판을 닫을 때 난다(`SwordLedger.FinishRun` → `GameEvents.RunScored`, 결말 직전). **판마다 한 번** — 100층 입구 체크포인트에서
   다시 올라도 같은 판은 다시 내지 않는다(`LEDGER_SCORED_RUN`).
-- **열린 문제 (2026-10, 출시를 막는다):** `FinishRun` 은 지금 100층 **위 계단**(`PortalController`)에서만 불린다. 그런데 계약한 판은 100층
-  보스(904)가 쓰러지자마자 `StoryDirector.OnBossDefeated` → `CoEnding` 이 결말을 틀고 엔딩 씬으로 가서, 보스 뒤의 그 계단을 밟지 않는다.
-  그래서 실제 완주는 **점수를 내지 않는다** — 이 표도, `Records` 의 최고 점수도, 판 카드도 비고, 마지막 띠(96~100층)가 닫히지 않아
-  챕터 4 의 `ACH_CH_3STAR` 도 못 푼다. 결말 길에서 마지막 띠를 닫고 `FinishRun` 을 부르면(STORY/RUN 레인) 이 절의 나머지가 그대로 맞는다.
+- **결말 길에서도 점수가 난다** (이 자리에 "출시를 막는" 열린 문제로 적혀 있던 것은 고쳐졌다). 계약한 판은 100층 보스(904)가 쓰러지면 계단을
+  밟지 않고 `StoryDirector.CoEnding` 이 바로 돈다. 거기서 마지막 띠(96~100층)를 닫고(`SwordLedger.CoCloseBand`) `FinishRun` 을 부른다
+  (`StoryDirector.cs` 의 `CoEnding`, 디버그 장면이 아닐 때). 계단 쪽(`PortalController`)에도 같은 호출이 있지만 장부가 같은 띠·같은 판을 두 번
+  세지 않는다(`BandStars`, `LEDGER_SCORED_RUN`). 그래서 이 표도, `Records` 의 최고 점수도, 판 카드도, 챕터 4 의 `ACH_CH_3STAR` 도 결말 길로 채워진다.
+  QA(2026-10-05): 결말 → 띠 결산 → 점수 한 번 → 판 카드 → 타이틀 최고 점수가 통과했다(`Documents/TheSword_재미검증_보고서.md` 7절).
 - 올리는 곳은 `SteamHooks`(`Assets/@Scripts/Managers/Core/SteamHooks.cs`). 점수를 받으면 곧바로 PlayerPrefs `STEAM_PENDING_SCORE` 에
   적고(판 id·표·점수·자세한 값), Steam 이 받았다고 답해야 지운다. 결말을 기다리다 꺼지거나 Steam 없이 끝낸 판은 다음에 Steam 을 켠 채
   씬이 설 때(타이틀) 올라간다. 봇 판은 점수 자체가 없고, 체험판은 100층까지 가지 않는다(올리지도 않는다).
@@ -71,8 +72,7 @@
 
 ## 시험
 
-- Steam 을 켠 채 에디터·개발 빌드로 한 판을 끝낸다(아직 점수를 내지 않은 판의 100층 입구 체크포인트에서 이어 해도 된다 — 위의 열린
-  문제가 풀린 뒤라야 점수가 난다). 로그: `[Steam] 순위표 LB_NORMAL_V1 점수 874 (바뀜 True, 순위 1)`, 그 뒤 PlayerPrefs 의
+- Steam 을 켠 채 에디터·개발 빌드로 한 판을 끝낸다(아직 점수를 내지 않은 판의 100층 입구 체크포인트에서 이어 해도 된다). 로그: `[Steam] 순위표 LB_NORMAL_V1 점수 874 (바뀜 True, 순위 1)`, 그 뒤 PlayerPrefs 의
   `STEAM_PENDING_SCORE` 가 없다. 못 올리면 "찾지 못했다" / "올리지 못했다 — 다음 씬에서 다시" 가 찍히고 그 값이 남는다.
 - 꺼져도 남는지: 점수가 난 뒤 결말을 고르기 전에 게임을 끈다 → `STEAM_PENDING_SCORE` 가 남아 있다 → 다시 켜면 타이틀에서 올라가고
   (결말 칸 0) 값이 지워진다. Steam 을 끈 채 끝낸 판도 같다.

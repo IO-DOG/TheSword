@@ -198,11 +198,11 @@ public class UI_ConfirmPopup : UI_Popup
         if (_answered || Managers.UI.TopPopup != this)
             return;
 
-        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+        if (GameKeys.Nav(KeyCode.A) || GameKeys.Nav(KeyCode.LeftArrow))
             Select(true);
-        else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+        else if (GameKeys.Nav(KeyCode.D) || GameKeys.Nav(KeyCode.RightArrow))
             Select(false);
-        else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Space))
+        else if (GameKeys.Down(KeyCode.Return) || GameKeys.Down(KeyCode.KeypadEnter) || GameKeys.Down(KeyCode.Space))
             Answer(_yes);
     }
 

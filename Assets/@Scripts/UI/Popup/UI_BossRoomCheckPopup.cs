@@ -78,7 +78,7 @@ public class UI_BossRoomCheckPopup : UI_Popup
         if (_locked == false || Managers.UI.TopPopup != this || Managers.UI.ClosedThisFrame
             || GetButton((int)Buttons.YesBtn).gameObject.activeSelf == false)
             return;
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Space))
+        if (GameKeys.Down(KeyCode.Return) || GameKeys.Down(KeyCode.KeypadEnter) || GameKeys.Down(KeyCode.Space))
             YesClick();
     }
 

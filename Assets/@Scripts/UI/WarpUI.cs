@@ -11,8 +11,9 @@ using UnityEngine.UI;
 /// 이 창에는 프리팹이 없어 코드로 세운다. 글꼴과 틀은 CodeUI 가 다른 창에서 빌려 와 같은 그림을 쓴다.
 /// 팝업 스택 밖의 창이라 Esc 는 UI_GameScene 이 먼저 여기로 보낸다.
 ///
-/// 여는 키는 Tab (또는 HUD 의 워프 단추). 반지를 끼지 않았거나, 메뉴·다른 창이 떠 있거나, 흐름이 캐릭터를
+/// 여는 키는 Tab·패드 LB (또는 HUD 의 워프 단추). 반지를 끼지 않았거나, 메뉴·다른 창이 떠 있거나, 흐름이 캐릭터를
 /// 쥐고 있으면(전투·연출·대화·문·계단·레버·입력 잠금·전투 직전 관문 — UI_GameScene.CanOpenPanel) 열리지 않는다.
+/// 방향키(패드의 스틱·방향 패드)로 칸을 고르고 Enter·Space(A) 로 간다. 처음에는 지금 층 바로 밑의 다녀온 층에 서 있다.
 /// </summary>
 public class WarpUI : MonoBehaviour
 {
@@ -35,6 +36,10 @@ public class WarpUI : MonoBehaviour
     static WarpUI _instance;
     GameObject _panel;
     bool _lockedInput;      // 입력 잠금을 이 창이 켰다. 켠 쪽만 끈다
+    readonly List<Image> _cells = new List<Image>();
+    List<int> _stages;      // 칸마다 그 층
+    int _cursor;            // 고른 칸 — Enter 가 갈 곳
+    Color _idle;            // 고르지 않은 칸의 색 (칸은 다 같은 색이다)
 
     /// <summary>지금 살아 있는 워프 창. HUD 의 워프 버튼이 이걸 연다.</summary>
     public static WarpUI Instance { get { return _instance; } }
@@ -64,7 +69,9 @@ public class WarpUI : MonoBehaviour
         if (_lockedInput && _panel == null)
             _lockedInput = false;
 
-        if (Input.GetKeyDown(OpenKey) == false)
+        if (IsOpen)
+            Steer();
+        if (GameKeys.Down(OpenKey) == false)
             return;
         if (IsOpen)
             Close();
@@ -85,6 +92,39 @@ public class WarpUI : MonoBehaviour
         Managers.Game.OnInputLock = true;
         Build(stages);
         Play(OpenSound);
+    }
+
+    // 좌우는 한 칸(줄 끝에서는 옆 줄로), 위아래는 한 줄. 끝에서는 서 있다.
+    void Steer()
+    {
+        int step = GameKeys.Nav(KeyCode.D) || GameKeys.Nav(KeyCode.RightArrow) ? 1
+                 : GameKeys.Nav(KeyCode.A) || GameKeys.Nav(KeyCode.LeftArrow) ? -1
+                 : GameKeys.Nav(KeyCode.S) || GameKeys.Nav(KeyCode.DownArrow) ? Columns
+                 : GameKeys.Nav(KeyCode.W) || GameKeys.Nav(KeyCode.UpArrow) ? -Columns : 0;
+        if (step != 0)
+        {
+            if (_cursor + step >= 0 && _cursor + step < _cells.Count)
+                Select(_cursor + step, true);
+        }
+        else if (GameKeys.Down(KeyCode.Return) || GameKeys.Down(KeyCode.KeypadEnter) || GameKeys.Down(KeyCode.Space))
+            Warp(_stages[_cursor]);
+    }
+
+    // 고른 칸만 밝다. 마우스를 떼어도 그대로 두어 Enter 가 어디로 갈지 보이게 한다(확인 창과 같다).
+    void Select(int index, bool sound)
+    {
+        if (sound && index != _cursor)
+            Play(HoverSound);
+        _cursor = index;
+        for (int i = 0; i < _cells.Count; i++)
+            _cells[i].color = i == index ? Color.white : _idle;
+    }
+
+    void Warp(int stageId)
+    {
+        Close(false);
+        if (Managers.Game.WarpToStage(stageId))
+            Play(WarpSound);
     }
 
     public void Close() => Close(true);
@@ -153,26 +193,25 @@ public class WarpUI : MonoBehaviour
         layout.constraintCount = columns;
         layout.childAlignment = TextAnchor.UpperLeft;
 
+        _cells.Clear();
+        _stages = stages;
         foreach (int stage in stages)
             AddFloor(list, stage);
+        Select(Mathf.Max(0, stages.FindLastIndex(s => s < Managers.Game.PlayerData.CurStageid)), false);
         _panel.SetActive(true);
     }
 
-    // 한 칸 = 층 번호 + 그 층 이름 (+ 남은 금고). 마우스를 올리면 밝아진다.
+    // 한 칸 = 층 번호 + 그 층 이름 (+ 남은 금고). 마우스를 올리면 그 칸을 고른다(밝아진다).
     void AddFloor(Transform list, int stageId)
     {
         Sprite frame = Frame();
         Image cell = CodeUI.NewImage(list, $"Warp_{stageId}", frame, frame != null ? Idle : new Color(0.16f, 0.16f, 0.2f, 0.95f), true);
         cell.raycastTarget = true;
-        Color idle = cell.color;
-        cell.gameObject.BindEvent(() => { cell.color = Color.white; Play(HoverSound); }, type: Define.UIEvent.PointerEnter);
-        cell.gameObject.BindEvent(() => cell.color = idle, type: Define.UIEvent.PointerExit);
-        cell.gameObject.BindEvent(() =>
-        {
-            Close(false);
-            if (Managers.Game.WarpToStage(stageId))
-                Play(WarpSound);
-        });
+        _idle = cell.color;
+        int index = _cells.Count;
+        _cells.Add(cell);
+        cell.gameObject.BindEvent(() => Select(index, true), type: Define.UIEvent.PointerEnter);
+        cell.gameObject.BindEvent(() => Warp(stageId));
 
         TextMeshProUGUI number = CodeUI.NewText(cell.transform, "Floor", CodeUI.NumberFont, 24f, Color.white);
         CodeUI.Place(number.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(12f, -6f), new Vector2(Cell.x - 24f, 28f));

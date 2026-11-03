@@ -27,7 +27,7 @@ public static class StoryUI
     /// <summary>자동 플레이에서 한 줄을 다 보인 뒤 넘기기까지 (초).</summary>
     public const float AutoDelay = 0.35f;
 
-    /// <summary>건너뛰기 키. 컨트롤러는 Steam Input 이 LB 를 Tab 으로 준다 — 전투 건너뛰기와 같은 키다.</summary>
+    /// <summary>건너뛰기 키. 패드는 LB 다(GameKeys) — 전투 건너뛰기와 같은 키다.</summary>
     public const KeyCode SkipKey = KeyCode.Tab;
     /// <summary>이만큼(실시간 초) 누르고 있으면 지금 장면을 끝까지 넘긴다.</summary>
     public const float SkipHold = 0.6f;
@@ -43,8 +43,8 @@ public static class StoryUI
 
     /// <summary>넘기기 입력 — Enter·Space·왼쪽 클릭 (건너뛰는 중이면 늘).</summary>
     public static bool NextPressed() =>
-        Skipping || Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)
-        || Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0);
+        Skipping || GameKeys.Down(KeyCode.Return) || GameKeys.Down(KeyCode.KeypadEnter)
+        || GameKeys.Down(KeyCode.Space) || Input.GetMouseButtonDown(0);
 
     static CanvasGroup s_hint;
     static TMP_Text s_hintText;

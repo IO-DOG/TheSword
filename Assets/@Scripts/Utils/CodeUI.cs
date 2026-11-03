@@ -190,4 +190,25 @@ public static class CodeUI
         }
         return image;
     }
+
+    /// <summary>빌드 번호 "v1.0.0" (PlayerSettings.bundleVersion). 체험판이면 "v1.0.0 Demo". 제보에 적히는 글이라 어느 화면에서나 같다.</summary>
+    public static string VersionText =>
+#if DEMO
+        "v" + Application.version + " Demo";
+#else
+        "v" + Application.version;
+#endif
+
+    /// <summary>
+    /// 화면 오른쪽 아래 구석에 작게 서는 빌드 번호 (타이틀·게임 메뉴). 구석은 칼날 빛에서 멀어 어둡고,
+    /// 그래도 밝은 그림 위에서 읽히게 검은 테두리를 두른다. font 는 화면에 이미 있는 글자의 것을 빌린다.
+    /// </summary>
+    public static TextMeshProUGUI VersionLabel(Transform parent, TMP_FontAsset font)
+    {
+        TextMeshProUGUI label = NewText(parent, "Version", font, 24f, new Color(0.8f, 0.8f, 0.8f), TextAlignmentOptions.BottomRight);
+        label.fontSharedMaterial = Outlined(font, 0.3f);
+        Place(label.rectTransform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-24f, 16f), new Vector2(400f, 32f));
+        label.text = VersionText;
+        return label;
+    }
 }

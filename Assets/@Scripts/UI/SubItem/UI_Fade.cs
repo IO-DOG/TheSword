@@ -37,8 +37,23 @@ public class UI_Fade : UI_Base
         {
             Debug.LogWarning($"[Fade] {seconds:0.0}초가 지나도 페이드가 안 끝나 강제로 해제한다");
             Managers.Game.OnFade = false;
+            if (TakePendingScene())
+                yield break;
             Managers.Resource.Destroy(gameObject);
         }
+    }
+
+    Define.Scene _pendingScene = Define.Scene.Unknown;
+
+    /// <summary>걸린 씬 전환이 있으면 한 번만 건다. 걸었으면 true.</summary>
+    bool TakePendingScene()
+    {
+        if (_pendingScene == Define.Scene.Unknown)
+            return false;
+        Define.Scene scene = _pendingScene;
+        _pendingScene = Define.Scene.Unknown;
+        Managers.Scene.LoadScene(scene);
+        return true;
     }
     void Start()
     {
@@ -59,14 +74,17 @@ public class UI_Fade : UI_Base
             return;
         }
 
+        // CoReleaseFade 가 이 오브젝트를 먼저 부수면(프레임이 느릴 때 실시간 시계가 트윈보다 먼저 간다)
+        // 시퀀스가 부서진 RectTransform 을 계속 만졌다. 오브젝트와 함께 죽게 묶는다 — OnFade 는 OnDestroy 가 풀고,
+        // 씬 전환은 CoReleaseFade 가 대신 건다(_pendingScene).
+        _pendingScene = scene;
+        sequence.SetLink(gameObject);
         sequence.OnComplete(() =>
         {
-            if (scene != Define.Scene.Unknown)
-            {
-                Managers.Scene.LoadScene(scene);
-                //Managers.UI.ShowPopupUI<UI_StageNamePopup>();
+            if (this == null)
                 return;
-            }
+            if (TakePendingScene())
+                return;
             Managers.Game.OnFade = false;
             Managers.Resource.Destroy(this.gameObject);
         });

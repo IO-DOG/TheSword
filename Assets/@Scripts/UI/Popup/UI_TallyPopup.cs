@@ -297,20 +297,20 @@ public class UI_TallyPopup : UI_Popup
         if (Managers.UI.TopPopup != this || t < InputDelay)
             return;
 
-        bool enter = Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Space);
+        bool enter = GameKeys.Down(KeyCode.Return) || GameKeys.Down(KeyCode.KeypadEnter) || GameKeys.Down(KeyCode.Space);
         if (_choosing == false)
         {
-            if (enter || Input.GetKeyDown(KeyCode.Tab) || (Input.GetMouseButtonDown(0) && ClickReady) || Time.unscaledTime >= _closeAt)
+            if (enter || GameKeys.Down(KeyCode.Tab) || (Input.GetMouseButtonDown(0) && ClickReady) || Time.unscaledTime >= _closeAt)
                 Close();
             return;
         }
-        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+        if (GameKeys.Nav(KeyCode.A) || GameKeys.Nav(KeyCode.LeftArrow))
             Move(-1);
-        else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+        else if (GameKeys.Nav(KeyCode.D) || GameKeys.Nav(KeyCode.RightArrow))
             Move(1);
         else if (enter)
             Pick(_cursor);
-        else if (Input.GetKeyDown(KeyCode.Tab))
+        else if (GameKeys.Down(KeyCode.Tab))
             Close();
     }
 

@@ -30,6 +30,7 @@ TEXT = {
 #   380-409 story flow (instinct, skip, loading)   410-439 feel (price ticks, pickups, what-if)
 #   440-469 records/title/Steam   470-529 ledger/tally/altar/fullness/run card   530-559 mode (Tower's Law)
 #   560-589 Steam 2 (demo card)   590-609 input (click-to-move)   610-629 look (polish)
+#   630-659 credits (third-party block)
 def _load_parts():
     import importlib.util
     parts = sorted((Path(__file__).parent / "ui_text_parts").glob("*.py"))

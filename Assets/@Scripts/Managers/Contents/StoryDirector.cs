@@ -422,8 +422,8 @@ public class StoryDirector : MonoBehaviour
             return;
         }
         bool seen = _scene != null && _sceneSeenBefore;
-        _skipHeld = Input.GetKey(StoryUI.SkipKey) ? _skipHeld + Time.unscaledDeltaTime : 0f;
-        if (_skipHeld >= StoryUI.SkipHold || (seen && Input.GetKeyDown(StoryUI.SkipKey)))
+        _skipHeld = GameKeys.Held(StoryUI.SkipKey) ? _skipHeld + Time.unscaledDeltaTime : 0f;
+        if (_skipHeld >= StoryUI.SkipHold || (seen && GameKeys.Down(StoryUI.SkipKey)))
         {
             _skipHeld = 0f;
             StoryUI.BeginSkip();

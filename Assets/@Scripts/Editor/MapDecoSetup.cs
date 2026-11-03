@@ -18,6 +18,12 @@ using UnityEngine;
 ///
 /// 미술을 바꾸고 싶으면 그 프리팹만 열면 된다. 맵도 데이터도 건드릴 필요가 없다.
 ///
+/// 새 그림(Meshy — Documents/TheSword_Meshy_Prompts.md)은 MeshyArtImport 가 Prop_C{챕터}_{자리} 로
+/// 들여온다. 그 자리에 그림이 있으면 새 규칙으로 놓고, 없으면 옛 장식이 그대로 구워진다.
+/// 새 규칙이 따로인 이유: 옛 횃불(±0.03)·사슬은 벽 칸 한가운데에 놓여 벽(±0.15, 높이 0.2~0.5) 속에
+/// 들어가 있다. 새 것은 카메라가 보는 남쪽 벽면에 걸고(프리팹이 그 면으로 비켜 서 있다), 큰 것은 방 안쪽
+/// 벽 한 칸을 대신하고, 바닥 것은 아무것도 없는 바닥에만 둔다.
+///
 ///   Unity.exe -projectPath . -executeMethod MapDecoSetup.Build
 /// </summary>
 public static class MapDecoSetup
@@ -33,7 +39,21 @@ public static class MapDecoSetup
     /// 그래서 벽 프리팹(Tilemap_C00_W02)이 0.1 로 놓여 있다 — 같은 팩에서 나온
     /// 장식도 같은 값이어야 한 칸에 맞는다. 1 로 두면 사슬 하나가 여섯 칸을 덮는다.
     /// </summary>
-    const float TileScale = 0.1f;
+    internal const float TileScale = 0.1f;
+
+    /// <summary>새 소품의 자리 이름 — 파일 이름 Prop_C{챕터}_{자리} 의 끝. MeshyArtImport 는 이것만 받는다.</summary>
+    internal static readonly string[] PropSlots = { "Light", "Light2", "Wall", "Floor", "Extra", "Big" };
+
+    // 새 그림의 밀도. 큰 소품은 층에 둘(벽 한 칸씩), 바닥 소품은 벽에 붙은 빈 바닥 몇 칸마다 하나.
+    const int BigPerFloor = 2;
+    const int FloorEvery = 16;
+    const int ExtraEvery = 40;
+
+    // 새 불의 점광원 자리. 벽에 건 불은 남쪽 면(z -0.15) 바로 앞, 벽 높이의 가운데쯤 —
+    // 옛 횃불처럼 벽 속에 두면 불이 걸린 그 면은 빛의 뒤쪽이라 밝아지지 않는다.
+    static readonly Vector3 FaceGlow = new Vector3(0f, 0.32f, -0.22f);
+    static readonly Vector3 FloorGlow = new Vector3(0f, 0.15f, 0f);
+    static readonly Color EmberLight = new Color(1.00f, 0.60f, 0.30f);   // 마지막 불씨(Light2)
 
     // 손수 만든 도입부는 이미 미술이 들어가 있다. 건드리지 않는다.
     static readonly HashSet<string> HandAuthored = new HashSet<string>
@@ -77,9 +97,17 @@ public static class MapDecoSetup
                           Light = new Color(0.72f, 0.55f, 1.00f), LightRange = 2.2f },
     };
 
+    /// <summary>그 챕터의 불(Light)을 바닥에 놓는가 — 아니면 벽에 건다. MeshyArtImport 가 크기를 맞출 때 본다.</summary>
+    internal static bool LightOnFloor(int chapter)
+    {
+        return Chapters[Mathf.Clamp(chapter, 0, Chapters.Length - 1)].OnFloor;
+    }
+
     [MenuItem("TheSword/Build Map Decorations")]
     public static void Build()
     {
+        // 같은 세션에서 새 그림을 들여온 뒤 다시 구우면, 지난번의 "그 주소 없음" 을 믿으면 안 된다.
+        _cache.Clear();
         Directory.CreateDirectory(DecoDir);
 
         int made = 0;
@@ -138,6 +166,12 @@ public static class MapDecoSetup
         return c.Length > 0 && c != "0" && c.StartsWith("W") == false;
     }
 
+    /// <summary>아무것도 서 있지 않은 바닥("1"). 몬스터·아이템·문·계단 칸에는 새 장식을 겹치지 않는다.</summary>
+    static bool IsPlain(string[][] grid, int x, int y)
+    {
+        return y >= 0 && y < grid.Length && x >= 0 && x < grid[y].Length && grid[y][x].Trim() == "1";
+    }
+
     static GameObject BuildOne(string dungeonId, int chapter, string[][] grid)
     {
         ChapterDeco deco = Chapters[Mathf.Clamp(chapter, 0, Chapters.Length - 1)];
@@ -146,6 +180,11 @@ public static class MapDecoSetup
 
         var walls = new List<Vector3>();   // 길에 면한 벽 — 거는 것
         var edges = new List<Vector3>();   // 벽에 붙은 바닥 — 놓는 것
+
+        // 새 그림이 고르는 자리. 옛 장식은 위 둘만 쓴다.
+        var faces = new List<Vector3>();   // 남쪽(카메라 쪽)이 빈 바닥인 벽 — 그 면이 보인다
+        var backs = new List<Vector3>();   // 그중 나머지 세 쪽도 벽인 칸 — 큰 소품이 벽 하나를 대신한다
+        var floors = new List<Vector3>();  // 벽에 붙은 빈 바닥 — 몬스터·아이템·문·계단 칸은 뺀다
 
         for (int y = 0; y < grid.Length; y++)
         {
@@ -166,6 +205,33 @@ public static class MapDecoSetup
                     walls.Add(pos);          // 뒤쪽 벽에 걸면 보이지도 않는다
                 else if (open && touchesWall)
                     edges.Add(pos);
+
+                if (wall && IsPlain(grid, x, y + 1))
+                {
+                    faces.Add(pos);
+                    if (IsWall(grid, x, y - 1) && IsWall(grid, x - 1, y) && IsWall(grid, x + 1, y))
+                        backs.Add(pos);
+                }
+                else if (open && touchesWall && IsPlain(grid, x, y))
+                {
+                    floors.Add(pos);
+                }
+            }
+        }
+
+        GameObject light = Art(chapter, "Light"), light2 = Art(chapter, "Light2"), hang = Art(chapter, "Wall");
+        GameObject floor = Art(chapter, "Floor"), extra = Art(chapter, "Extra"), big = Art(chapter, "Big");
+        var taken = new HashSet<Vector3>();   // 새 그림이 차지한 칸
+
+        // 큰 소품(석관·물레바퀴 …)은 방 안쪽 벽 한 칸을 대신한다. 생성 층에는 "벽 옆 빈칸" 이 없다 —
+        // 바닥에 닿은 빈 칸은 layout_gen 이 전부 벽으로 채운다. 걷는 칸에 세우면 길을 막는 것처럼
+        // 보여 퍼즐이 거짓말을 한다. 그래서 벽(콜라이더)은 그대로 두고 MapBuilder 가 그 칸의 벽 그림만 끈다.
+        if (big != null)
+        {
+            foreach (Vector3 p in Spread(backs, BigPerFloor))
+            {
+                Attach(root.transform, big, p, 1f).name = MapBuilder.WALL_SWAP;
+                taken.Add(p);
             }
         }
 
@@ -178,22 +244,58 @@ public static class MapDecoSetup
         List<Vector3> fireCells = deco.OnFloor ? edges : walls;
         int fires = Mathf.Min(deco.FireCount, fireCells.Count);
         var used = new HashSet<int>();
-        for (int i = 0; i < fires; i++)
+        if (light == null)
         {
-            int at = (int)((i + 0.5f) * fireCells.Count / fires);   // 층 전체에 고르게 흩는다
-            used.Add(at);
-            Attach(root.transform, deco.Fire, fireCells[at], TileScale);
-            AddLight(root.transform, fireCells[at], deco);
+            for (int i = 0; i < fires; i++)
+            {
+                int at = (int)((i + 0.5f) * fireCells.Count / fires);   // 층 전체에 고르게 흩는다
+                used.Add(at);
+                Attach(root.transform, deco.Fire, fireCells[at], TileScale);
+                AddLight(root.transform, fireCells[at], deco);
+            }
+        }
+        else
+        {
+            // 새 불은 보이는 자리에만 놓고 점광원은 불마다 하나다 — 옛 횃불·화로 프리팹은
+            // 제 안에 점광원을 하나 더 갖고 있었다(범위 20·10). 챕터 3 은 셋 + 마지막 불씨 하나.
+            foreach (Vector3 p in Spread(Free(deco.OnFloor ? floors : faces, taken), deco.FireCount))
+            {
+                Attach(root.transform, light, p, 1f);
+                AddLight(root.transform, p + (deco.OnFloor ? FloorGlow : FaceGlow), deco.Light, deco.LightRange);
+                taken.Add(p);
+            }
         }
 
         // 나머지 소품은 광원이 없어 싸다. 벽을 훑으며 일정 간격으로 건다.
-        for (int i = 0; i < walls.Count; i++)
+        if (hang == null)
         {
-            if (i % deco.AmbientEvery != deco.AmbientEvery / 2)
-                continue;
-            if (deco.OnFloor == false && used.Contains(i))
-                continue;
-            Attach(root.transform, deco.Ambient, walls[i], TileScale);
+            for (int i = 0; i < walls.Count; i++)
+            {
+                if (i % deco.AmbientEvery != deco.AmbientEvery / 2)
+                    continue;
+                if (deco.OnFloor == false && used.Contains(i))
+                    continue;
+                Attach(root.transform, deco.Ambient, walls[i], TileScale);
+            }
+        }
+        else
+        {
+            Every(root.transform, hang, faces, taken, deco.AmbientEvery);
+        }
+
+        // 바닥 소품은 걷는 칸에 선다 — 그래서 발목 높이로 줄어 들어오고(MeshyArtImport) 콜라이더도 없다.
+        Every(root.transform, floor, floors, taken, FloorEvery);
+        Every(root.transform, extra, floors, taken, ExtraEvery);
+
+        // 마지막 불씨(챕터 3) — 층에 하나. 차가운 챕터의 단 하나 따뜻한 빛이다.
+        if (light2 != null)
+        {
+            foreach (Vector3 p in Spread(Free(floors, taken), 1))
+            {
+                Attach(root.transform, light2, p, 1f);
+                AddLight(root.transform, p + FloorGlow, EmberLight, deco.LightRange);
+                taken.Add(p);
+            }
         }
 
         // 위층 계단 위에 빛기둥. 어디로 가야 하는지가 멀리서도 보인다.
@@ -218,37 +320,81 @@ public static class MapDecoSetup
 
     static void Attach(Transform parent, string address, Vector3 pos, float scale)
     {
-        GameObject prefab = FindByAddress(address);
+        Attach(parent, FindByAddress(address), pos, scale);
+    }
+
+    static GameObject Attach(Transform parent, GameObject prefab, Vector3 pos, float scale)
+    {
         if (prefab == null)
-            return;
+            return null;
 
         GameObject go = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
         go.transform.localPosition = pos;
         go.transform.localScale = Vector3.one * scale;
+        return go;
+    }
+
+    /// <summary>새 그림 소품(Prop_C{챕터}_{자리}). 없으면 null — 그 자리는 옛 장식이 돈다.
+    /// 새 소품은 MeshyArtImport 가 칸 가운데를 피벗으로 크기·자리를 맞춰 두었으니 배율 1 로 놓는다.</summary>
+    static GameObject Art(int chapter, string slot)
+    {
+        return FindByAddress($"Prop_C{chapter}_{slot}", true);
+    }
+
+    static List<Vector3> Free(List<Vector3> cells, HashSet<Vector3> taken)
+    {
+        return cells.FindAll(c => taken.Contains(c) == false);
+    }
+
+    /// <summary>층 전체에 고르게 n 개 — 옛 불과 같은 식이다.</summary>
+    static IEnumerable<Vector3> Spread(List<Vector3> cells, int n)
+    {
+        n = Mathf.Min(n, cells.Count);
+        for (int i = 0; i < n; i++)
+            yield return cells[(int)((i + 0.5f) * cells.Count / n)];
+    }
+
+    /// <summary>비어 있는 칸을 훑으며 every 칸마다 하나 — 옛 소품과 같은 간격 규칙이다.</summary>
+    static void Every(Transform parent, GameObject prefab, List<Vector3> cells, HashSet<Vector3> taken, int every)
+    {
+        if (prefab == null)
+            return;
+        List<Vector3> free = Free(cells, taken);
+        for (int i = every / 2; i < free.Count; i += every)
+        {
+            Attach(parent, prefab, free[i], 1f);
+            taken.Add(free[i]);
+        }
     }
 
     static void AddLight(Transform parent, Vector3 pos, ChapterDeco deco)
+    {
+        // 불꽃이 있는 높이에 둔다. 벽은 0.2~0.5 를 차지하고, 횃불 불꽃은 그 아래쪽이다.
+        AddLight(parent, pos + new Vector3(0f, deco.OnFloor ? 0.15f : 0.28f, 0f), deco.Light, deco.LightRange);
+    }
+
+    static void AddLight(Transform parent, Vector3 at, Color color, float range)
     {
         GameObject prefab = FindByAddress("Deco_PointLight");
         if (prefab == null)
             return;
 
         GameObject go = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
-        // 불꽃이 있는 높이에 둔다. 벽은 0.2~0.5 를 차지하고, 횃불 불꽃은 그 아래쪽이다.
-        go.transform.localPosition = pos + new Vector3(0f, deco.OnFloor ? 0.15f : 0.28f, 0f);
+        go.transform.localPosition = at;
 
         Light light = go.GetComponentInChildren<Light>();
         if (light != null)
         {
-            light.color = deco.Light;
-            light.range = deco.LightRange;
+            light.color = color;
+            light.range = range;
         }
     }
 
     static readonly Dictionary<string, GameObject> _cache = new Dictionary<string, GameObject>();
 
-    /// <summary>어드레서블 주소로 프리팹을 찾는다. 주소는 파일 이름과 다를 수 있다.</summary>
-    static GameObject FindByAddress(string address)
+    /// <summary>어드레서블 주소로 프리팹을 찾는다. 주소는 파일 이름과 다를 수 있다.
+    /// quiet 면 없어도 경고하지 않는다 — 새 그림은 없는 것이 보통이다.</summary>
+    internal static GameObject FindByAddress(string address, bool quiet = false)
     {
         GameObject found;
         if (_cache.TryGetValue(address, out found))
@@ -272,13 +418,14 @@ public static class MapDecoSetup
             }
         }
 
-        Debug.LogWarning("[MapDeco] 주소를 못 찾았다: " + address);
+        if (quiet == false)
+            Debug.LogWarning("[MapDeco] 주소를 못 찾았다: " + address);
         _cache[address] = null;
         return null;
     }
 
     /// <summary>만든 장식 프리팹을 어드레서블에 등록한다. 안 하면 런타임에 못 찾는다.</summary>
-    static void Register(List<KeyValuePair<string, string>> items)
+    internal static void Register(List<KeyValuePair<string, string>> items)
     {
         var settings = AddressableAssetSettingsDefaultObject.Settings;
         if (settings == null)

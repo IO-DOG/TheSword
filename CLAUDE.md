@@ -9,7 +9,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 (진입: `TitleScene` → `IntroScene` → `GameScene` → `EndingScene`).
 
 `@` 접두사 폴더(`@Scripts`, `@Resources`, `@Scenes`)만 이 프로젝트의 자체 콘텐츠다.
-`Assets/` 하위의 나머지(BroAudio, Febucci Text Animator, DOTween, Retro Arsenal, UniGLTF 등)는 서드파티 에셋이므로 수정하지 않는다.
+`Assets/` 하위의 나머지(Febucci Text Animator, DOTween, Retro Arsenal, UniGLTF 등)는 서드파티 에셋이므로 수정하지 않는다.
+(BroAudio 는 2026-11-03 에 뺐다 — 코드·에셋 참조가 0 인데 데모 오디오 ~10MB 가 Resources 로 빌드에 실렸다. 원본은 `../_TheSword_removed/`.)
+
+**키 입력은 `GameKeys` 로 읽는다**(`Input.GetKey*` 직접 호출 금지) — 그래야 패드(XInput, Deck)가 같이 돈다. 목록 이동은 `GameKeys.Nav`.
+패드 축 이름(`PadDPadX/Y`, `PadLT/RT`, `PadRStickY`)은 Input Manager 에 있어야 하고, 없으면 버튼만 돈다.
 
 커밋 메시지는 한국어 + `[ADD]`/`[FIX]` 태그 컨벤션.
 
@@ -180,8 +184,8 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
   Steam 없이 끝낸 판도 다음에 붙을 때 올라간다. 콘텐츠 판(MapData)을 바꾸면 `_V` 를 올린다.
 - **체험판**은 `GameBuild.WindowsDemo`(→ `Build/WindowsDemo`)가 `DEMO` 정의를 그 빌드에만 얹어 굽는다(플레이어 설정은
   안 바뀐다). `DemoGate` 가 21층(20층 보스·반지 뒤)에서 끝 카드(`UI_DemoEndPopup`: 예언·치름·찜하기)를 띄운다.
-  **체험판 세이브가 본편으로 이어지려면 MapData 가 같아야 한다** — 그 사이에 레이아웃을 바꾸면 K1(옛 MapData 를 해시로
-  찾아 읽기)부터 넣는다. 그 전에는 끝 카드가 "이어진다" 고 약속하지 않는다(steam2.py 561).
+  체험판 세이브는 그 사이에 본편 레이아웃을 바꿔도 이어진다(K1, 아래 데이터 파이프라인의 "세이브") — **체험판 빌드가 남긴 지도
+  보관 파일이 커밋돼 있을 때만**이다. 끝 카드가 그것을 약속한다(steam2.py 561).
 
 ### 점수의 천장 — 마검의 장부·별·제단·탑의 법
 
@@ -714,6 +718,7 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
 - 테이블 원본: `Assets/@Resources/Data/Excel/*.csv` → 변환된 `Assets/@Resources/Data/JsonData/*.json`(Addressable TextAsset)을 `DataManager.Init()`이 Newtonsoft.Json + `ILoader<Key,Value>` 패턴으로 로드. 새 테이블 추가 시 `Data.Contents.cs`에 Data 클래스+Loader 정의 후 `DataManager`에 딕셔너리·로드 라인 추가.
 - 던전 맵: `Assets/StreamingAssets/Data/Excel/Dungeon_*.csv` 그리드를 `Tools/mapdata_gen.py` 가 런타임 `MapData.json` 으로 굽는다. `DataManager.ResetActiveDic()` 은 같은 CSV 에서 활성화 딕셔너리만 만든다(카운터 순서가 같아야 한다). 셀 코드: `I`=소비 아이템, `E`=장비, `M`=몬스터, `B`=보스, `W`=벽, 숫자 3~8=문, 11=스폰 지점, 12=레버, 13=기둥, 14~16=포탈. 끝의 `~` 는 "둘 중 하나" 보상(보물 층에 한 쌍, `ChoiceGroup`) — 하나를 주우면 짝이 사라진다.
 - 세이브: `SaveStore` 가 플레이어·오브젝트 활성화·진행 플래그를 **`Checkpoint.json` 하나**에 쓴다. `MapData` 해시를 같이 적어, 데이터를 다시 뽑은 뒤의 옛 세이브는 섞지 않고 거부한다 — **거부해도 지우지 않는다**(타이틀이 "원본은 보존됩니다" 를 띄운다). 예전 방식(`SaveData.json` + `*ActiveData.json`)은 이어하기 때 한 번 옮겨 적는다.
+- **지도를 고친 패치 뒤의 옛 세이브(K1, `SaveMigration`)**: 빌드마다 `GameBuild` 가 그 빌드의 MapData 를 해시 이름으로 `Assets/StreamingAssets/Data/MapDataArchive/MapData_<해시 앞 8바이트>.json.gz` 에 남긴다 — **새 파일은 커밋하고, 지우지 않는다**(지우면 그 빌드의 저장이 다시 거부된다). 옛 해시의 체크포인트는 그 지도를 찾아 오브젝트 상태를 지금 번호로 옮긴 뒤 다시 적는다(처음 것은 `.bak`). 번호는 층을 가로지르는 카운터라 층 안의 순서로 짝짓는다: 그대로인 층은 그대로, 바뀐 층은 가장 높이 올라온 층(`FirstEnterMapCheck`) 아래면 다 쓴 것(공짜 경험치도 막힌 길도 없다), 그 층과 위면 새 판처럼. 지금 층이 아니라 가장 높은 층으로 가르는 것은 워프 때문이다. 바뀐 층에 서 있었으면 같은 입구로 옮긴다. 장부·기록·이야기·능력치는 그대로. 고치면 `SaveMigration.SelfTest()`(에디터: `FastChecks.EditorBootData()` 먼저)가 OK 여야 한다.
 - ScriptData 는 **JSON 이 원본**이고 CSV 는 생성기가 JSON 에서 다시 쓴다. CSV 만 고치면 사라진다.
   줄바꿈은 **백슬래시와 n 두 글자**로 적는다(실제 줄바꿈 문자를 넣으면 CSV 가 여러 줄로 쪼개진다).
 

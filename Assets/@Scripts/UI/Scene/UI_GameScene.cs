@@ -476,7 +476,7 @@ public class UI_GameScene : UI_Scene
     /// </summary>
     void OnClickESC()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) == false)
+        if (GameKeys.Down(KeyCode.Escape) == false)
             return;
         // 죽는 연출이 도는 중이다. 게임오버 창을 걷으면 되살리는 코루틴이 같이 죽는다. 그 위에 뜬 전투 안내
         // (첫 전투에서 죽었다)만은 다른 때처럼 Esc 로 닫는다 — 게임오버 창은 같은 프레임의 키를 받지 않는다.
@@ -514,16 +514,20 @@ public class UI_GameScene : UI_Scene
     }
 
     // M 은 도감을 열고 닫는다(UI_MonsterManualPopup 이 계약·열 수 있는가를 본다). V 는 맵 위 숫자를 끄고 켠다.
+    // I 는 인벤토리를 열고 닫는다(HUD 가방 단추와 같다 — 단추는 계약 뒤에만 있다). 패드는 Y 라 전투에서는 스킬이다.
     // 계약 뒤 처음으로 손이 비면 두 키를 한 번 알려 준다 — 자동 플레이 중에는 알리지 않고 다음으로 미룬다.
     void OnForecastKeys()
     {
-        if (Input.GetKeyDown(KeyCode.M))
+        if (GameKeys.Down(KeyCode.M))
             UI_MonsterManualPopup.Toggle();
-        else if (Input.GetKeyDown(KeyCode.V) && Managers.Game.PlayerData.IsContractedSword && CanOpenPanel())
+        else if (GameKeys.Down(KeyCode.V) && Managers.Game.PlayerData.IsContractedSword && CanOpenPanel())
         {
             GameSettings.ShowForecast = !GameSettings.ShowForecast;
             ShowHint(Managers.GetString(GameSettings.ShowForecast ? ForecastUI.ForecastOn : ForecastUI.ForecastOff), 1.5f);
         }
+        else if (GameKeys.Down(KeyCode.I) && Managers.Game.PlayerData.IsContractedSword
+                 && (Managers.UI.FindPopup<UI_InvenPopup>() != null || CanOpenPanel()))
+            OnClickMainUIInventoryAImage();
 
         if (_keysHintShown == false && GameEvents.IsAutoPlaying == false
             && Managers.Game.PlayerData.IsContractedSword && CanOpenPanel() && Managers.UI.TopPopup == null)
@@ -891,7 +895,7 @@ public class UI_GameScene : UI_Scene
                 Managers.Sound.SetBGMVolume(SoundManager.ConfiguredBgmVolume - t);
                 Managers.Sound.SetEffectVolume(PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1) - t);
             }
-            else if (timer > 0f && Input.anyKeyDown)     // 계단을 밟은 그 프레임의 키는 치지 않는다
+            else if (timer > 0f && GameKeys.AnyDown)     // 계단을 밟은 그 프레임의 키는 치지 않는다
             {
                 break;
             }

@@ -12,9 +12,17 @@ using UnityEngine;
 /// </summary>
 public static class MapBuilder
 {
-    // 벽 아트는 챕터 00 세트만 존재한다. 챕터 분위기는 아래 틴트로 낸다.
+    // 옛 벽 아트는 챕터 00 세트뿐이다. 챕터 분위기는 아래 틴트로 낸다.
+    // 새 그림(Wall_C{챕터}_{변형}, MeshyArtImport)이 있으면 그쪽이 먼저다 — WallArt.
     const string WALL_PREFAB_FORMAT = "Tilemap_C00_W{0:00}";
     const string WALL_PREFAB_FALLBACK = "Tilemap_C00_W02";
+
+    /// <summary>새 벽 그림의 변형 이름. 0 이 기본형이다 (Documents/TheSword_Meshy_Prompts.md 의 표).</summary>
+    public static readonly string[] WallVariants = { "Base", "A", "B", "C" };
+
+    /// <summary>장식 프리팹 안에서 이 이름을 단 것은 벽 한 칸을 대신한다 — 그 칸의 벽은 그림만 끄고
+    /// 콜라이더는 남긴다. MapDecoSetup 이 큰 소품(석관 …)에 붙인다.</summary>
+    public const string WALL_SWAP = "WallSwap";
 
     static readonly Color[] ChapterTint =
     {
@@ -94,7 +102,8 @@ public static class MapBuilder
         Transform levers = NewContainer(root, "Levers");
 
         PlaceFloorField(root, mapData, tint);
-        PlaceDeco(root, dungeonId);
+        HashSet<Vector2Int> swapped = PlaceDeco(root, dungeonId);
+        GameObject[] wallArt = IsHandAuthored(dungeonId) ? null : WallArt(chapter);
 
         int doorCount = 0;
         var rewardGroups = new Dictionary<int, ConsumableItem>();
@@ -111,10 +120,18 @@ public static class MapBuilder
 
                 case Define.ObjectType.Wall:
                     {
-                        string key = string.Format(WALL_PREFAB_FORMAT, obj.Id);
-                        GameObject wall = Place(key, tiles, pos, tint);
+                        // 새 그림은 칸 자리로 변형을 고른다. 데이터의 벽 id(W01~W03)는 옛 그림 몫이다 —
+                        // 그 id 를 바꾸면 MapData 가 바뀌어 세이브 해시가 깨진다.
+                        // 새 그림에는 틴트를 곱하지 않는다. 챕터 색이 그림에 이미 들어 있다.
+                        Vector2Int cell = Cell(pos);
+                        GameObject art = wallArt != null ? wallArt[WallVariant(mapId, cell)] : null;
+                        GameObject wall = art != null
+                            ? Place(art, tiles, pos, Color.white)
+                            : Place(string.Format(WALL_PREFAB_FORMAT, obj.Id), tiles, pos, tint);
                         if (wall == null)
-                            Place(WALL_PREFAB_FALLBACK, tiles, pos, tint);
+                            wall = Place(WALL_PREFAB_FALLBACK, tiles, pos, tint);
+                        if (wall != null && swapped != null && swapped.Contains(cell))
+                            HideLook(wall);
                         break;
                     }
 
@@ -246,12 +263,14 @@ public static class MapBuilder
     /// 밸런스·경로 검증에까지 딸려 다니고, 미술을 손보려면 생성기를 다시 돌려야 한다.
     /// 층 이름과 짝지은 프리팹 하나만 열면 되게 둔다 —
     /// 손수 만든 1~4층이 이미 그 규칙(Deco_00_000)을 쓰고 있다.
-    /// 없으면 조용히 넘어간다. 장식이 없다고 층이 안 만들어질 이유는 없다.</summary>
-    static void PlaceDeco(GameObject root, string dungeonId)
+    /// 없으면 조용히 넘어간다. 장식이 없다고 층이 안 만들어질 이유는 없다.
+    ///
+    /// 큰 소품(WALL_SWAP)이 선 벽 칸을 돌려준다 — 그 칸의 벽은 그림만 끈다. 없으면 null.</summary>
+    static HashSet<Vector2Int> PlaceDeco(GameObject root, string dungeonId)
     {
         GameObject prefab = Managers.Resource.Load<GameObject>($"Deco_{dungeonId}");
         if (prefab == null)
-            return;
+            return null;
 
         // 바닥 필드가 이미 만든 "Decos" 를 같이 쓴다. 따로 만들면 같은 이름이 둘이 되고,
         // CameraController 가 Find("Decos/BG") 로 찾는 바닥을 놓친다.
@@ -262,6 +281,75 @@ public static class MapBuilder
         GameObject go = Object.Instantiate(prefab, decos);
         go.name = prefab.name;
         go.transform.localPosition = Vector3.zero;
+
+        HashSet<Vector2Int> swapped = null;
+        foreach (Transform child in go.transform)
+        {
+            if (child.name != WALL_SWAP)
+                continue;
+            if (swapped == null)
+                swapped = new HashSet<Vector2Int>();
+            swapped.Add(Cell(child.localPosition));
+        }
+        return swapped;
+    }
+
+    /// <summary>그 챕터의 새 벽 그림, WallVariants 순서로. 변형이 없으면 기본형, 기본형도 없으면
+    /// 그 자리는 null(옛 벽)이다. 하나도 없으면 null. 층마다 한 번만 찾는다.</summary>
+    static GameObject[] WallArt(int chapter)
+    {
+        GameObject basic = Managers.Resource.Load<GameObject>($"Wall_C{chapter}_{WallVariants[0]}");
+        GameObject[] art = new GameObject[WallVariants.Length];
+        bool any = false;
+        for (int i = 0; i < art.Length; i++)
+        {
+            art[i] = Managers.Resource.Load<GameObject>($"Wall_C{chapter}_{WallVariants[i]}");
+            if (art[i] == null)
+                art[i] = basic;
+            any |= art[i] != null;
+        }
+        return any ? art : null;
+    }
+
+    /// <summary>
+    /// 이 칸의 벽 변형(WallVariants 의 번호). 76% 가 기본형, 나머지 셋이 8% 씩이다 — 아래 이웃 규칙으로
+    /// 기본형이 조금 늘어 실제로는 80 / 7 / 7 / 7 이다(MeshyArtImport.SelfTest 가 잰다).
+    ///
+    /// 층과 칸 좌표로만 정한다 — 같은 층은 언제 지어도 같은 모양이고 데이터는 건드리지 않는다.
+    /// 같은 변형이 상하좌우로 붙으면 뒤의 것(오른쪽·아래)을 기본형으로 돌린다. 이웃의 변형도
+    /// 같은 식으로 다시 재면 되니 격자를 따로 들고 있을 필요가 없다.
+    /// </summary>
+    public static int WallVariant(int seed, Vector2Int cell)
+    {
+        int v = RawVariant(seed, cell.x, cell.y);
+        if (v != 0 && (v == RawVariant(seed, cell.x - 1, cell.y) || v == RawVariant(seed, cell.x, cell.y - 1)))
+            return 0;
+        return v;
+    }
+
+    static int RawVariant(int seed, int x, int y)
+    {
+        // 정수 해시. string.GetHashCode 는 실행마다 달라질 수 있다.
+        uint h = (uint)x * 73856093u ^ (uint)y * 19349663u ^ (uint)seed * 83492791u;
+        h ^= h >> 13;
+        h *= 0x5bd1e995u;
+        h ^= h >> 15;
+        int roll = (int)(h % 100u);
+        return roll < 76 ? 0 : 1 + (roll - 76) / 8;
+    }
+
+    /// <summary>맵 안 위치 → 칸(x 오른쪽, y 아래). CSV 의 열·행과 같다.</summary>
+    static Vector2Int Cell(Vector3 local)
+    {
+        return new Vector2Int(Mathf.RoundToInt(local.x / Define.TILE_SIZE),
+                              Mathf.RoundToInt(-local.z / Define.TILE_SIZE));
+    }
+
+    /// <summary>벽의 그림만 끈다. 콜라이더(벽 레이어)는 남으니 길·충돌·카메라 범위는 그대로다.</summary>
+    static void HideLook(GameObject wall)
+    {
+        foreach (Renderer r in wall.GetComponentsInChildren<Renderer>(true))
+            r.enabled = false;
     }
 
     static void BuildDoor(Data.ObjectData obj, Transform doors, Vector3 pos, Color tint, int index)
@@ -614,7 +702,11 @@ public static class MapBuilder
 
     static GameObject Place(string key, Transform parent, Vector3 localPos, Color tint)
     {
-        GameObject prefab = Managers.Resource.Load<GameObject>(key);
+        return Place(Managers.Resource.Load<GameObject>(key), parent, localPos, tint);
+    }
+
+    static GameObject Place(GameObject prefab, Transform parent, Vector3 localPos, Color tint)
+    {
         if (prefab == null)
             return null;
 

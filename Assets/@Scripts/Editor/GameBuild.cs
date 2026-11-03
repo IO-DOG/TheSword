@@ -28,6 +28,7 @@ using Debug = UnityEngine.Debug;
 ///
 /// Windows 는 콘텐츠 검증(validate_content.py)을 통과해야 굽고, 굽기 전에 출력 폴더를 비운다.
 /// 내보내면 안 되는 디버그 기호 폴더(*_DoNotShip)는 Build/Symbols/{버전}/ 으로 옮기고, 개발용 steam_appid.txt 는 지운다.
+/// 제3자 라이선스 고지(Steam/THIRD_PARTY_NOTICES.txt)는 실행 파일 옆에 복사한다.
 ///
 /// 체험판은 2단계만 WindowsDemo 로 바꾼다 — 같은 콘텐츠에 DEMO 정의만 얹어 Build/WindowsDemo 에 굽는다(MASTER_PLAN D1).
 /// </summary>
@@ -37,6 +38,8 @@ public static class GameBuild
     const string DemoOutDir = "Build/WindowsDemo";     // Steam/scripts/app_build_DEMO_APPID.vdf 의 ContentRoot 와 같아야 한다
     const string DemoDefine = "DEMO";
     const string ExeName = "TheSword.exe";
+    const string NoticesFile = "Steam/THIRD_PARTY_NOTICES.txt";     // 제3자 라이선스 고지 — 실행 파일 옆에 둔다(크레딧이 이 파일을 가리킨다)
+    const string MapDataJson = "Assets/@Resources/Data/JsonData/MapData.json";    // 어드레서블 "MapData" 의 원본
 
     /// <summary>1단계: 새 프리팹·데이터를 어드레서블에 등록하고 저장한다.
     ///
@@ -101,6 +104,15 @@ public static class GameBuild
             if (ContentIsValid() == false)
                 return 6;
 
+            // 이 빌드의 지도를 보관함(StreamingAssets)에 남긴다 — 다음 패치가 지도를 고쳐도 이 빌드의 저장을 옮겨 읽는다(K1).
+            // StreamingAssets 는 플레이어 빌드가 디스크에서 그대로 복사한다. 임포트는 .meta 를 만들 뿐이다.
+            string archived = SaveMigration.Archive(File.ReadAllText(MapDataJson), SaveMigration.ArchiveDirectory);
+            if (archived != null)
+            {
+                AssetDatabase.ImportAsset(FileUtil.GetProjectRelativePath(archived.Replace('\\', '/')));
+                Debug.LogWarning($"[GameBuild] 지도를 보관함에 넣었다 — 커밋한다, 지우지 않는다: {archived}");
+            }
+
             // 콘텐츠를 굽는다. 등록은 Prepare 가 먼저 끝내 둔다.
             Debug.Log("[GameBuild] 어드레서블 콘텐츠 빌드");
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
@@ -164,6 +176,8 @@ public static class GameBuild
             // steam_appid.txt 는 개발용이다 — 남으면 Steam 을 거치지 않고 켜진다(SteamManager.AppId). 개발 빌드가 아니면 지운다.
             if ((opt.options & BuildOptions.Development) == 0)
                 File.Delete(Path.Combine(dir, "steam_appid.txt"));
+            // 라이선스 고지는 반드시 실려야 한다(Silver 글꼴 CC BY 4.0 표기 의무). 원본이 없으면 여기서 예외로 멈춘다.
+            File.Copy(Path.GetFullPath(NoticesFile), Path.Combine(dir, Path.GetFileName(NoticesFile)), true);
             Debug.Log("[GameBuild] 완료: " + opt.locationPathName + (demo ? " (체험판, " + DemoDefine + ")" : ""));
             Debug.Log("[GameBuild] Steam 에 올리기(SteamPipe, beta 브랜치): powershell -ExecutionPolicy Bypass -File Steam/scripts/upload.ps1"
                       + (demo ? " -Demo" : ""));

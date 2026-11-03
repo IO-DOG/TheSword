@@ -596,11 +596,11 @@ public class UI_ConversationPopup : UI_Popup
         if (Managers.UI.TopPopup != this || Time.unscaledTime - _choiceOpenedAt < ChoiceGuard)
             return;
 
-        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+        if (GameKeys.Nav(KeyCode.W) || GameKeys.Nav(KeyCode.UpArrow) || GameKeys.Nav(KeyCode.A) || GameKeys.Nav(KeyCode.LeftArrow))
             Select(Mathf.Max(0, _choice - 1));
-        else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+        else if (GameKeys.Nav(KeyCode.S) || GameKeys.Nav(KeyCode.DownArrow) || GameKeys.Nav(KeyCode.D) || GameKeys.Nav(KeyCode.RightArrow))
             Select(Mathf.Min(_choiceBoxes.Length - 1, _choice + 1));
-        else if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Space)) && _choice >= 0)
+        else if ((GameKeys.Down(KeyCode.Return) || GameKeys.Down(KeyCode.KeypadEnter) || GameKeys.Down(KeyCode.Space)) && _choice >= 0)
             Choose(_choice);
     }
 

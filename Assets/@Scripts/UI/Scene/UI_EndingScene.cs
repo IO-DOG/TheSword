@@ -155,7 +155,7 @@ public class UI_EndingScene : UI_Scene
     {
         for (float t = 0f; t < seconds; t += Time.unscaledDeltaTime)
         {
-            if (t > 2f && (Input.anyKeyDown || StoryUI.Auto))
+            if (t > 2f && (GameKeys.AnyDown || StoryUI.Auto))
                 yield break;
             yield return null;
         }

@@ -454,9 +454,9 @@ public class UI_MonsterManualPopup : UI_Popup
         if (Managers.UI.TopPopup != this || Managers.UI.ClosedThisFrame)
             return;
 
-        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+        if (GameKeys.Nav(KeyCode.W) || GameKeys.Nav(KeyCode.UpArrow))
             Select(_cursor - 1, true);
-        else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+        else if (GameKeys.Nav(KeyCode.S) || GameKeys.Nav(KeyCode.DownArrow))
             Select(_cursor + 1, true);
     }
 

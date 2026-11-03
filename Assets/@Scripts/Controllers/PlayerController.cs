@@ -126,19 +126,19 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.W))
+        if (GameKeys.Down(KeyCode.W))
         {
             keyInputStack.Push((int)MoveDir.Up);
         }
-        if (Input.GetKeyDown(KeyCode.D))
+        if (GameKeys.Down(KeyCode.D))
         {
             keyInputStack.Push((int)MoveDir.Right);
         }
-        if (Input.GetKeyDown(KeyCode.S))
+        if (GameKeys.Down(KeyCode.S))
         {
             keyInputStack.Push((int)MoveDir.Down);
         }
-        if (Input.GetKeyDown(KeyCode.A))
+        if (GameKeys.Down(KeyCode.A))
         {
             keyInputStack.Push((int)MoveDir.Left);
         }
@@ -146,7 +146,7 @@ public class PlayerController : MonoBehaviour
         // 값을 임시로 저장할 스택 생성
         Stack<int> tempStack = new Stack<int>();
 
-        if (Input.GetKeyUp(KeyCode.W))
+        if (GameKeys.Up(KeyCode.W))
         {
             while (keyInputStack.Count > 0)
             {
@@ -159,7 +159,7 @@ public class PlayerController : MonoBehaviour
             while (tempStack.Count > 0)
                 keyInputStack.Push(tempStack.Pop());
         }
-        if (Input.GetKeyUp(KeyCode.D))
+        if (GameKeys.Up(KeyCode.D))
         {
             while (keyInputStack.Count > 0)
             {
@@ -172,7 +172,7 @@ public class PlayerController : MonoBehaviour
             while (tempStack.Count > 0)
                 keyInputStack.Push(tempStack.Pop());
         }
-        if (Input.GetKeyUp(KeyCode.S))
+        if (GameKeys.Up(KeyCode.S))
         {
             while (keyInputStack.Count > 0)
             {
@@ -185,7 +185,7 @@ public class PlayerController : MonoBehaviour
             while (tempStack.Count > 0)
                 keyInputStack.Push(tempStack.Pop());
         }
-        if (Input.GetKeyUp(KeyCode.A))
+        if (GameKeys.Up(KeyCode.A))
         {
             while (keyInputStack.Count > 0)
             {
@@ -206,25 +206,25 @@ public class PlayerController : MonoBehaviour
 
         int topKey = -1;
         keyInputStack.TryPeek(out topKey);
-        if (Input.GetKey(KeyCode.W) && topKey == (int)MoveDir.Up)
+        if (GameKeys.Held(KeyCode.W) && topKey == (int)MoveDir.Up)
         {
             _moveDir = MoveDir.Up;
         }
-        if (Input.GetKey(KeyCode.D) && topKey == (int)MoveDir.Right)
+        if (GameKeys.Held(KeyCode.D) && topKey == (int)MoveDir.Right)
         {
             _moveDir = MoveDir.Right;
         }
-        if (Input.GetKey(KeyCode.S) && topKey == (int)MoveDir.Down)
+        if (GameKeys.Held(KeyCode.S) && topKey == (int)MoveDir.Down)
         {
             _moveDir = MoveDir.Down;
         }
-        if (Input.GetKey(KeyCode.A) && topKey == (int)MoveDir.Left)
+        if (GameKeys.Held(KeyCode.A) && topKey == (int)MoveDir.Left)
         {
             _moveDir = MoveDir.Left;
         }
 
-        if (_moveDir != MoveDir.None && (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) ||
-            Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
+        if (_moveDir != MoveDir.None && (GameKeys.Held(KeyCode.W) || GameKeys.Held(KeyCode.S) ||
+            GameKeys.Held(KeyCode.A) || GameKeys.Held(KeyCode.D)))
         {
             Moving(_moveDir, false);
         }
@@ -758,7 +758,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // 키든 마우스 단추든 새로 누르면 걷던 것을 멈춘다. 맵을 누른 것이면 그리로 다시 간다.
-        if (Input.anyKeyDown)
+        if (GameKeys.AnyDown)
         {
             bool was = _walking;
             _walking = false;
@@ -775,8 +775,8 @@ public class PlayerController : MonoBehaviour
     static bool CanClickWalk()
     {
         return IsBusy() == false && IsHeld() == false && UI_GameScene.CanShowTooltip()
-               && Input.GetKey(KeyCode.W) == false && Input.GetKey(KeyCode.A) == false
-               && Input.GetKey(KeyCode.S) == false && Input.GetKey(KeyCode.D) == false;
+               && GameKeys.Held(KeyCode.W) == false && GameKeys.Held(KeyCode.A) == false
+               && GameKeys.Held(KeyCode.S) == false && GameKeys.Held(KeyCode.D) == false;
     }
 
     /// <param name="wasWalking">이 누름이 멈추기 전에 걷고 있었나.</param>

@@ -99,7 +99,7 @@ public class UI_GameOverPopup : UI_Popup
     void Update()
     {
         if (_respawned || Time.unscaledTime - _openedAt < SkipAfter || Managers.UI.TopPopup != this
-            || Managers.UI.ClosedThisFrame || Input.anyKeyDown == false)
+            || Managers.UI.ClosedThisFrame || GameKeys.AnyDown == false)
             return;
         // 곡이 3초에 걸쳐 꺼지는 중이다(DeadAni). 끝까지 기다렸을 때처럼 꺼 둔다 — 반쯤 꺼지던 곡은 되살린 층이 같은 곡을
         // 틀려 할 때 "이미 도는 중" 으로 보여 새로 틀리지 않고, 그 뒤에 마저 꺼져 층이 무음이 된다.

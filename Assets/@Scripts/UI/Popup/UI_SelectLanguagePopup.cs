@@ -87,6 +87,38 @@ public class UI_SelectLanguagePopup : UI_Popup
         return true;
     }
 
+    // 키보드·패드: A/D(←/→)로 고르고 Enter·Space 로 바꾼다. 고른 칸에는 마우스를 올린 것과 같은 테두리가 선다.
+    // 처음 누른 방향키는 지금 언어(표시가 붙은 칸)에서 한 칸 간다. 방향키를 누르기 전의 Enter 는 아무것도 안 고른다 —
+    // 이 창을 연 메뉴의 Enter 가 같은 프레임에 여기서 한 번 더 먹힐 수 있다.
+    static readonly Define.ScriptType[] Languages = { Define.ScriptType.Kr, Define.ScriptType.En, Define.ScriptType.Jp, Define.ScriptType.Cn };
+    static readonly Images[] Choices = { Images.KoreanChoice, Images.EnglishChoice, Images.JapanChoice, Images.ChinaChoice };
+    int _cursor = -1;
+
+    void Update()
+    {
+        if (Managers.UI.TopPopup != this || Managers.UI.ClosedThisFrame)
+            return;
+        int step = GameKeys.Nav(KeyCode.A) || GameKeys.Nav(KeyCode.LeftArrow) ? -1
+                 : GameKeys.Nav(KeyCode.D) || GameKeys.Nav(KeyCode.RightArrow) ? 1 : 0;
+        int from = _cursor >= 0 ? _cursor : Mathf.Max(0, System.Array.IndexOf(Languages, GameSettings.Language));
+        if (step != 0)
+            Point(Mathf.Clamp(from + step, 0, Languages.Length - 1));
+        else if (_cursor >= 0 && (GameKeys.Down(KeyCode.Return) || GameKeys.Down(KeyCode.KeypadEnter) || GameKeys.Down(KeyCode.Space)))
+        {
+            Select(Languages[_cursor]);
+            Point(_cursor);     // 바꾸면 표시를 다 걷는다(Refresh) — 고른 칸을 다시 세운다
+        }
+    }
+
+    void Point(int index)
+    {
+        if (index != _cursor)
+            Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_SFX");
+        _cursor = index;
+        for (int i = 0; i < Choices.Length; i++)
+            GetImage((int)Choices[i]).gameObject.SetActive(i == index);
+    }
+
     void Refresh()
     {
         GetImage((int)Images.KoreanChoice).gameObject.SetActive(false);

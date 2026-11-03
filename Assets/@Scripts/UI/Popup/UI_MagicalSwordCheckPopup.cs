@@ -56,7 +56,7 @@ public class UI_MagicalSwordCheckPopup : UI_Popup
     {
         if (_locked == false || Managers.UI.TopPopup != this || Managers.UI.ClosedThisFrame)
             return;
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Space))
+        if (GameKeys.Down(KeyCode.Return) || GameKeys.Down(KeyCode.KeypadEnter) || GameKeys.Down(KeyCode.Space))
             YesClick();
     }
 

@@ -76,7 +76,7 @@ public class UI_BattlePopup : UI_Popup
         {
             if (GameEvents.IsAutoPlaying)
                 return Mathf.Max(1, Managers.Game.GameSpeed);
-            if (Input.GetKey(KeyCode.Space))
+            if (GameKeys.Held(KeyCode.Space))
                 return HoldSpeed;
             return GameSettings.BattleSpeed;
         }
@@ -351,7 +351,7 @@ public class UI_BattlePopup : UI_Popup
         // 치명타 수업(StoryDirector)이 전투를 세워 두고 말하는 동안은 키도 받지 않는다 — 시계는 멈췄는데 스킬만 들어가면 안 된다.
         if (StoryDirector.HoldsBattle)
             return;
-        if (Input.GetKeyDown(KeyCode.Tab) && CanSkip)
+        if (GameKeys.Down(KeyCode.Tab) && CanSkip)
         {
             Skip();
             return;
@@ -359,11 +359,11 @@ public class UI_BattlePopup : UI_Popup
         if (BattleSkills.Unlocked == false || Managers.Game.OnBattle == false || Managers.UI.IsPaused)
             return;
 
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        if (GameKeys.Down(KeyCode.Alpha1))
             BattleSkills.Use((int)BattleSkills.Kind.Smash, playerCard, monsterCard);
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        else if (GameKeys.Down(KeyCode.Alpha2))
             BattleSkills.Use((int)BattleSkills.Kind.Guard, playerCard, monsterCard);
-        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        else if (GameKeys.Down(KeyCode.Alpha3))
             BattleSkills.Use((int)BattleSkills.Kind.Drain, playerCard, monsterCard);
     }
 

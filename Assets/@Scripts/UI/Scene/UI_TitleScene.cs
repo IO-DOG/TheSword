@@ -87,6 +87,9 @@ public class UI_TitleScene : UI_Scene
         GetImage((int)Images.BlackBGImage).gameObject.SetActive(false);
         PlacePrompt();
         StyleButtons();
+        // 빌드 번호. 새 게임이 눌려 까맣게 덮일 때 같이 덮이도록 검은 판(맨 위 자식) 바로 밑에 둔다.
+        CodeUI.VersionLabel(transform, GetText((int)Texts.NewGameText).font).transform
+            .SetSiblingIndex(GetImage((int)Images.BlackBGImage).transform.GetSiblingIndex());
 
         //GetObject((int)Objects.Slider).GetComponent<Slider>().value = 0;
         GetObject((int)Objects.Slider).GetComponent<Slider>().gameObject.SetActive(false);
@@ -242,8 +245,8 @@ public class UI_TitleScene : UI_Scene
                 _loading = false;
                 Loading();
             }
-            if (_loadFailed && Input.GetKeyDown(KeyCode.Return)) Loading();
-            if (_loadFailed && Input.GetKeyDown(KeyCode.Escape)) Application.Quit();
+            if (_loadFailed && GameKeys.Down(KeyCode.Return)) Loading();
+            if (_loadFailed && GameKeys.Down(KeyCode.Escape)) Application.Quit();
             return;
         }
         // 창이 떠 있는 동안 타이틀 메뉴 글자를 가린다. 설정 메뉴에는 어둡게 덮는 판이 없어서, 그 단추 사이로
@@ -257,7 +260,7 @@ public class UI_TitleScene : UI_Scene
         // Esc 는 맨 위 창에 넘긴다(메뉴·확인 창이 제 닫는 길로 닫힌다).
         if (Managers.UI.GetPopupCount() > 0 || Managers.UI.ClosedThisFrame)
         {
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (GameKeys.Down(KeyCode.Escape))
                 Managers.UI.EscapeTopPopup();
             return;
         }
@@ -273,14 +276,14 @@ public class UI_TitleScene : UI_Scene
         // 있으면 오프닝 위에 확인 창이 떴다.
         bool menu = GetImage((int)Images.Buttons).gameObject.activeSelf && !Waiting;
 
-        if (menu && (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)))
+        if (menu && (GameKeys.Nav(KeyCode.DownArrow) || GameKeys.Nav(KeyCode.S)))
         {
             if (buttonsIdx != (maxButtonCount - 1)) Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UImove");
             buttonsIdx++;
             buttonsIdx = Mathf.Min(buttonsIdx, maxButtonCount - 1);
             SetButtonColorAndButtonsText(buttonsIdx);
         }
-        if (menu && (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)))
+        if (menu && (GameKeys.Nav(KeyCode.UpArrow) || GameKeys.Nav(KeyCode.W)))
         {
             if (buttonsIdx != 0) Managers.Sound.Play(Define.Sound.Effect, "MainTitle_UImove");
             buttonsIdx--;
@@ -288,7 +291,7 @@ public class UI_TitleScene : UI_Scene
             SetButtonColorAndButtonsText(buttonsIdx);
         }
 
-        if (menu && Input.GetKeyDown(KeyCode.Return))
+        if (menu && GameKeys.Down(KeyCode.Return))
         {
             switch (buttonsIdx)
             {
@@ -317,7 +320,7 @@ public class UI_TitleScene : UI_Scene
             return;
         }
 
-        if (isPreload && Input.anyKeyDown && Waiting /*&& !Input.GetKeyDown(KeyCode.Return)*/ && !Input.GetKeyDown(KeyCode.UpArrow) && !Input.GetKeyDown(KeyCode.DownArrow))
+        if (isPreload && GameKeys.AnyDown && Waiting /*&& !Input.GetKeyDown(KeyCode.Return)*/ && !GameKeys.Down(KeyCode.UpArrow) && !GameKeys.Down(KeyCode.DownArrow))
         {
             GetText((int)Texts.PessAnyKeyText).gameObject.SetActive(false);
             if (_notice != null)
