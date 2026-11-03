@@ -27,7 +27,7 @@ TEXT = {
     # UI_TitleScene new game in the demo: the demo and the full game share the save folder (the full game picks up the
     # demo's save). A save past the demo's last floor came from the full game - the demo's new game must not delete it.
     566: ("본편에서 21층을 넘은 저장이 있습니다. 체험판은 이 저장을 지우지 않습니다. 본편에서 이어 하세요.",
-          "There is a save from the full game past floor 21. The demo will not delete it. Continue it in the full game.",
+          "Found a full-game save past floor 21. The demo will not delete it. Continue it in the full game.",
           "製品版で21階を越えたセーブがあります。体験版はこのセーブを消しません。製品版で続けてください。",
           "存在正式版中超过第21层的存档。试玩版不会删除它。请在正式版中继续。"),
 }

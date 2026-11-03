@@ -18,8 +18,8 @@ TEXT = {
     # KeyInventory.TryUseKey: a vault on a lower floor would eat a key the highest floor's main door still needs (that floor
     # could never be passed again and every checkpoint would keep the stuck state). {0} = that floor's number.
     152: ("이 열쇠를 쓰면 {0}층 문을 열 수 없습니다. 금고는 남는 열쇠로 여세요.",
-          "Using this key would leave a door on floor {0} locked for good. Open vaults with spare keys.",
-          "この鍵を使うと{0}階の扉が開けられなくなります。金庫は余った鍵で開けてください。",
+          "Floor {0} needs this key for a door. Open vaults with spare keys.",
+          "この鍵を使うと{0}階の扉を開けられません。金庫は余った鍵で開けてください。",
           "用掉这把钥匙就打不开第{0}层的门了。金库请用多余的钥匙开。"),
 }
 
