@@ -180,9 +180,9 @@ public class WarpUI : MonoBehaviour
         CodeUI.Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -18f), new Vector2(grid.x, 50f));
         title.text = Managers.GetString(ForecastUI.WarpTitle);
 
-        TextMeshProUGUI help = CodeUI.NewText(box.transform, "Help", CodeUI.ProseFont, 22f, Soft, TextAlignmentOptions.Center);
+        TextMeshProUGUI help = CodeUI.NewText(box.transform, "Help", CodeUI.ProseFont, 24f, Soft, TextAlignmentOptions.Center);
         CodeUI.Place(help.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 20f), new Vector2(grid.x, 30f));
-        CodeUI.Fit(help, 14f).text = Managers.GetString(ForecastUI.WarpHelp);
+        CodeUI.Fit(help, 24f).text = Managers.GetString(ForecastUI.WarpHelp);
 
         RectTransform list = CodeUI.NewRect(box.transform, "Floors");
         CodeUI.Place(list, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -80f), grid);
@@ -224,7 +224,8 @@ public class WarpUI : MonoBehaviour
         TextMeshProUGUI name = CodeUI.NewText(cell.transform, "Name", CodeUI.ProseFont, 28f, Soft);
         CodeUI.Place(name.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(12f, -36f), new Vector2(Cell.x - 24f, 34f));
         name.overflowMode = TextOverflowModes.Ellipsis;
-        CodeUI.Fit(name, 22f).text = Managers.Data.StageInfoDic.TryGetValue(stageId, out info)
+        // 24 아래로는 줄이지 않는다 — 22 는 Steam Deck(캔버스 0.74 배)에서 라틴 대문자 8.6px 라 9px 기준에 걸렸다.
+        CodeUI.Fit(name, 24f).text = Managers.Data.StageInfoDic.TryGetValue(stageId, out info)
             ? WithoutFloor(Managers.GetString(info.DungeonNameScriptID), floor) : "";
 
         if (HasClosedVault(stageId))

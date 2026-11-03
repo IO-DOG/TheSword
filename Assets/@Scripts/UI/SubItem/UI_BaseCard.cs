@@ -108,7 +108,7 @@ public class UI_BaseCard : UI_Base
     /// 위로 넘쳐 공격력·방어력 숫자를 덮었다 — 다섯 보스 전부 그랬다.
     /// 칸을 키우면 카드 그림이 밀리므로, 한 줄로 두고 폭에 맞춰 줄인다.
     /// </summary>
-    static void SetName(TMP_Text label, string name)
+    public static void SetName(TMP_Text label, string name)
     {
         if (label == null)
             return;

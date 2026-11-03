@@ -817,3 +817,7 @@ UI에 노출되는 문자열은 하드코딩하지 않고 `ScriptData` 테이블
 고른 언어 → 영어 → 한국어 → … 순으로 비지 않은 것을 준다. 일본어·중국어 글자는 두 픽셀 글꼴에
 대부분 없어서, 켤 때 `FontFallback` 이 `Silver.ttf` 동적 아틀라스와 Windows 글꼴(맑은 고딕·Yu Gothic·
 Microsoft YaHei)을 TMP 전역 대체 목록에 얹는다 — 에셋은 고치지 않고, 플레이가 끝나면 걷어 낸다.
+숫자 글꼴(DNF)은 한자가 하나도 없고 같은 크기의 Silver 한자는 DNF 글자 키의 0.7 배라, 중·일일 때만
+**DNF 의 제 폴백 표**에 1.3배 Silver 를 단다(줄 윗선·아랫선은 DNF 와 같게). 전역 목록에 넣으면 이야기 글꼴(Silver SDF)의
+빠진 글자까지 커지고, 줄 높이를 안 맞추면 높이에 맞춰 줄이는 HUD 라벨이 숫자까지 작아진다.
+Steam Deck(Proton)에는 Windows 글꼴이 없다 — 대본에 Silver 에 없는 글자를 쓰면 □ 다(`python Tools/glyph_check.py` 0 이어야 한다).

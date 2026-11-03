@@ -72,7 +72,7 @@ public class UI_CItemInfo : UI_Base
         var item = gameObject.transform.parent.GetComponent<ConsumableItem>();
         _owner = item;
         int id = item.id;
-        GetText((int)Texts.MonsterNameText).text = Managers.GetString(Managers.Data.ConsumableItemDic[id].ScriptNameId);
+        UI_BaseCard.SetName(GetText((int)Texts.MonsterNameText), Managers.GetString(Managers.Data.ConsumableItemDic[id].ScriptNameId));
         GetText((int)Texts.MonsterAttackText).text = Managers.Data.ConsumableItemDic[id].AttackUp.ToString();
         GetText((int)Texts.MonsterDefenseText).text = Managers.Data.ConsumableItemDic[id].DefenceUp.ToString();
         float heal = Managers.Data.ConsumableItemDic[id].Heal * Managers.Game.PlayerData.MaxHP / 100;

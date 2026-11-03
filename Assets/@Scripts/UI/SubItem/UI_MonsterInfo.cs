@@ -76,7 +76,8 @@ public class UI_MonsterInfo : UI_Base
         int stageId = Managers.Game.PlayerData.CurStageid;
 
         //Debug.Log(Managers.Data.MonsterDic[id].MonsterNameId);
-        GetText((int)Texts.MonsterNameText).text = Managers.GetString(Managers.Data.MonsterDic[id].MonsterNameId);
+        // 긴 이름("Moss Goblin Spearman")이 두 줄로 접혀 둘째 줄이 공방체 칸과 설명을 덮었다 — 전투 카드처럼 한 줄로 줄인다.
+        UI_BaseCard.SetName(GetText((int)Texts.MonsterNameText), Managers.GetString(Managers.Data.MonsterDic[id].MonsterNameId));
         //GetText((int)Texts.MonsterClassText).text = "특성 : " + Managers.Data.MonsterClassDic[Managers.Data.MonsterDic[id].Feature].ClassName;
         GetText((int)Texts.MonsterAttackText).text = (Managers.Data.StageInfoDic[stageId].ATK * Managers.Data.MonsterDic[id].Attack).ToString();
         GetText((int)Texts.MonsterDefenseText).text = (Managers.Data.StageInfoDic[stageId].DEF * Managers.Data.MonsterDic[id].Defence).ToString();
