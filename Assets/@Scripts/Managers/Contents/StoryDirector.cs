@@ -1160,9 +1160,13 @@ public class StoryDirector : MonoBehaviour
             s_lastEnding = ending;
             if (s_debug == false)
             {
-                PlayerPrefs.SetInt(ClearedKey, 1);
-                PlayerPrefs.SetString(ClearedEndingKey, ending.ToString().ToLowerInvariant());
-                PlayerPrefs.Save();
+                // 봇의 결말은 사람이 본 것이 아니다 — Records 가 처음 설 때 이 키를 본 결말로 옮겨 적는다.
+                if (GameEvents.IsAutoPlaying == false)
+                {
+                    PlayerPrefs.SetInt(ClearedKey, 1);
+                    PlayerPrefs.SetString(ClearedEndingKey, ending.ToString().ToLowerInvariant());
+                    PlayerPrefs.Save();
+                }
                 GameEvents.RaiseEndingReached(ending.ToString().ToLowerInvariant());
             }
 

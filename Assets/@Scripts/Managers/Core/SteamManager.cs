@@ -130,6 +130,7 @@ public static class SteamManager
     {
         if (Initialized == false)
             return;
+        SteamHooks.Flush(final: true);      // 1초 묶음에 걸려 아직 안 올린 마지막 해제·통계
         Initialized = false;
         SteamAPI.Shutdown();
     }

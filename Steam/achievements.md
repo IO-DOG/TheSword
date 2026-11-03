@@ -6,6 +6,9 @@
 - 20개 모두 **연결됨(wired=yes)** — `SteamHooks` 가 부른다. `wired=planned` 는 기능이 들어오기 전의 업적을 적는 칸이다:
   그런 업적은 Steamworks 에 만들지 않는다 — 못 따는 업적이 목록에 보이면 안 된다. `check_steam.py` 가 코드와 이 칸을 대조한다.
 - 봇 실행(`GameEvents.IsAutoPlaying`)과 데모(`DEMO`)에서는 아무것도 풀리지 않는다(MASTER_PLAN §7). 데모 앱에는 업적을 만들지 않는다.
+- Steam 이 없을 때·체험판에서 해낸 것은 `Records.json` 에 남는다 — 결말·우두머리는 그 칸에, 그 순간에만 셀 수 있는 것(한 끗·이어지는 숨·
+  맨손의 셈·한 방울도·기준보다 싸게·값을 아는 자·배불리, 싸게·탑의 법·법 위의 새벽)은 `Records.Feats` 에(`SteamHooks.Earn`).
+  Steam 이 붙으면 씬이 설 때·층을 옮길 때 `SyncRecords` 가 한꺼번에 푼다. 봇 판은 `Records` 가 적지 않는다.
 - 새 앱은 처음에 업적 100개까지다. 20개는 넉넉하다.
 
 ## 표
@@ -24,13 +27,13 @@
 | `ACH_END_DAWN` | 배부른 검 | "검을 놓지 않는다", 레벨이 `DawnLevel` 이상 | **숨김** | yes | `EndingReached("dawn")` |
 | `ACH_END_ALL` | 세 갈래 길 | 세 결말을 모두 봄 (판을 넘어 센다) | | yes | `Records.EndingsSeen == 3`. 진행 통계 `ENDINGS_SEEN` (0~3) |
 | `ACH_CRIT_CARRY` | 이어지는 숨 | 첫 타가 치명타인 싸움에서 이긴다 — HUD 가 노란 "치명까지 1타", 몬스터 정보가 "첫 타 치명" 일 때 | | yes | `BattleEnded` won 이고 `LastBattle.FirstHitCrit` |
-| `ACH_NO_SPILL` | 한 방울도 | 다섯 층 연속, 회복이 한 번도 넘치지 않음 | | yes | 처음 오는 바로 다음 층에 들어설 때 끝낸 층을 하나 센다. `ItemPicked` overflow > 0 이면 처음부터(되살아나면 그 층은 다시) |
+| `ACH_NO_SPILL` | 한 방울도 | 다섯 층 연속, 물약 회복이 한 번도 넘치지 않음 (흡혈은 최대 HP 에서 그냥 멈춰 세지 않는다) | | yes | 처음 오는 바로 다음 층에 들어설 때 끝낸 층을 하나 센다. `ItemPicked` overflow > 0 이면 처음부터(되살아나면 그 층은 다시) |
 | `ACH_SLIVER` | 한 끗 | 최대 체력의 1% 이하를 남기고 승리 | | yes | `BattleEnded` won, 이긴 순간의 HP(그 한 대의 레벨 업 몫을 뺀 값)가 0 초과 `LastBattle.MaxHp` 의 1% 이하 |
 | `ACH_BOSS_BARE` | 맨손의 셈 | 스킬 없이 챕터 보스(20·40·60·80·100층) 격파 | | yes | 위 보스 업적과 같은 때, `LastBattle.MonsterId` 가 그 보스이고 `SkillsUsed` 가 false. 킹 슬라임(4층)은 20의 배수가 아니어서 빠진다 |
-| `ACH_UNDER_PAR` | 예언보다 싸게 | 한 층을 기준(par)보다 적게 치르고 끝낸다 | | yes | `FloorTallied(stageId, paid, par)` — 장부가 새 층에 처음 들어서며 앞 층을 닫을 때. par > 0 이고 paid < par |
-| `ACH_CH_3STAR` | 값을 아는 자 | 한 챕터의 결산(다섯 층 띠)이 모두 ★★★ | | yes | `BandTallied(band, stars)` 와 장부의 `BandStars`(띠 번호 순, 0 = 기준 없는 띠는 건너뛴다). 챕터 0 은 띠 1~3(6~20층 — 띠 0 은 생성 층이 5층뿐), 챕터 c 는 띠 4c~4c+3. 층에 들어설 때마다 체크포인트의 장부로 다시 본다 — 체험판에서 끝낸 챕터 0 도 본편에서 풀린다 |
-| `ACH_DAWN_PAR` | 배불리, 싸게 | 판 전체를 기준(par) 이하로 치르고 새벽 결말 | **숨김** | yes | `EndingReached("dawn")` 이고 장부의 `Paid ≤ Par`, `Par > 0` |
-| `ACH_TOWER` | 탑의 법 | 탑의 법에서 100층 보스 격파(결말까지) | | yes | `EndingReached` 이고 `PlayerData.Mode == Tower`. 층에 들어설 때마다 `Records.ModeCleared(Tower)` 로도 — Steam 없이 끝낸 판 |
+| `ACH_UNDER_PAR` | 기준보다 싸게 | 한 층을 기준(par)보다 적게 치르고 끝낸다 | | yes | `FloorTallied(stageId, paid, par)` — 장부가 새 층에 처음 들어서며 앞 층을 닫을 때. par > 0 이고 paid < par |
+| `ACH_CH_3STAR` | 값을 아는 자 | 한 챕터의 결산(다섯 층 띠)이 모두 ★★★ | | yes | `BandTallied(band, stars)` 와 장부의 `BandStars`(띠 번호 순, 0 = 기준 없는 띠는 건너뛴다). 챕터 c 는 띠 4c~4c+3 — 챕터 0 도 1~5층 결산(띠 0, 생성 층은 5층뿐)까지 넷이다. 해낸 순간 `Records.Feats` 에 적는다 — 체험판에서 끝낸 챕터 0 도 본편에서 풀린다 |
+| `ACH_DAWN_PAR` | 배불리, 싸게 | 판 전체를 기준(par)의 절반 이하로 치르고 새벽 결말 | **숨김** | yes | `EndingReached("dawn")` 이고 장부의 `Paid × 2 ≤ Par`, `Par > 0` (판 점수 500 이하) |
+| `ACH_TOWER` | 탑의 법 | 탑의 법에서 100층 보스 격파 | | yes | `BossDefeated` 100층이고 `PlayerData.Mode == Tower` — 결말을 고르기 전에 꺼도 남는다. `Records.ModeCleared(Tower)` 로도 |
 | `ACH_TOWER_DAWN` | 법 위의 새벽 | 탑의 법에서 새벽 결말 | **숨김** | yes | `EndingReached("dawn")` 이고 `Mode == Tower` |
 
 ### MASTER_PLAN §7 과 다르게 적은 것
@@ -47,7 +50,9 @@
 | `ACH_CRIT_CARRY` | Held Breath | The Breath Carries Over | "held breath" 는 숨을 참는다는 뜻이 된다. 게임은 "The breaths I count carry over" (`mech_crit.04`) |
 | `ACH_DAWN_PAR` | 숨김 아님 | **숨김** | 설명이 새벽 결말을 말한다. `ACH_END_DAWN` 을 숨긴 것이 헛일이 된다 |
 | 결말 셋의 설명 | 봉인/함께 남는/새벽 결말을 본다 | 선택지 문구로 | 게임의 선택지는 "검을 왕좌에 꽂는다 / 검을 놓지 않는다" (`ending_choice`). hold 와 dawn 을 가르는 것은 레벨(검의 배부름)이라 "배고픈 / 배부른" 으로 적었다 |
-| `ACH_UNDER_PAR`·`ACH_DAWN_PAR` 설명 | 예언보다 적게 / 예언 이하의 값으로 | 기준보다 적게 / 판 전체를 기준 이하로 | 풀리는 조건은 기준(par, `ParLoss` 합)이다. 예언(foretold)은 스킬 없이 싸우면 치른 값과 같아서 조건이 되지 못한다. 결산 창의 말("예언 · 치름 · 기준", `ledger.py` 471)을 따랐다. 이름(예언보다 싸게)은 그대로 둔다 — 바꿀지는 소유자 결정 |
+| `ACH_UNDER_PAR`·`ACH_DAWN_PAR` 설명 | 예언보다 적게 / 예언 이하의 값으로 | 기준보다 적게 / 판 전체를 기준 이하로 | 풀리는 조건은 기준(par, `ParLoss` 합)이다. 예언(foretold)은 스킬 없이 싸우면 치른 값과 같아서 조건이 되지 못한다. 결산 창의 말("예언 · 치름 · 기준", `ledger.py` 471)을 따랐다. 이름도 "예언보다 싸게 / Cheaper Than Foretold" 에서 "기준보다 싸게 / Under Par" 로 바꿨다(2026-11-04, 조건과 같은 말) |
+| `ACH_DAWN_PAR` 조건 | 기준 이하 | 기준의 **절반** 이하 | 기준 이하는 새벽까지 간 판이면 거의 다 됐다 — fun_sim 500판에서 새벽 문턱(Lv 109)을 넘긴 일반 표 452판 중 451판. 절반이면 314판(69%), 스킬 안 쓰는 사람 44%·쓰는 사람 55~85%. 숨은 업적이 `ACH_END_DAWN` 의 사본이 되지 않게 (2026-11-04) |
+| `ACH_NO_SPILL` 설명 | 회복이 넘치지 않음 | 물약 회복이 넘치지 않음 | 세는 것은 물약의 넘침(`ItemPicked` overflow)뿐이다 — 흡혈은 최대 HP 에서 멈추고 넘침으로 치지 않는다 (2026-11-04) |
 | `ACH_CH_3STAR` 설명 | 한 챕터 전 층 ★★★ | 한 챕터의 결산을 모두 ★★★ | 별은 층이 아니라 다섯 층 결산(띠)마다 받는다(`ledger.py` 470·472). 층별 별은 MASTER_PLAN §9 에서 뺐다 |
 | `ACH_TOWER` 간체·번체 이름 | 塔之律 | 塔之法则 / 塔之法則 | 새 게임의 규칙 이름(ScriptData 533, `mode.py`)과 같게. 설명의 「…」 도 같은 이름. `check_steam.py` 가 대조한다 |
 
@@ -75,16 +80,16 @@
 - 장부·별·탑의 법 다섯:
   - `ACH_UNDER_PAR`: 한 층을 기준보다 적게 치르고 다음 층에 처음 들어서면 그 순간 풀린다(장부가 앞 층을 닫을 때). 사람 판에서는 스킬(흡혈·철벽)로
     아끼거나 설계보다 높은 레벨로 싸운다. 빠른 확인은 치트 F2(공격 +10000, 시험 계정만)로 층을 끝내고 계단을 오른다.
-  - `ACH_CH_3STAR`: 한 챕터의 네 결산(챕터 0 은 6~20층의 셋)을 ★★★ 로. 마지막 결산 창이 뜰 때 풀린다.
+  - `ACH_CH_3STAR`: 한 챕터의 네 결산(챕터 0 도 5·10·15·20층의 넷)을 ★★★ 로. 마지막 결산 창이 뜰 때 풀린다.
     ★★★ 는 띠마다 그럴듯한 사람의 상위 4분의 1 이다(`StageInfoData` 의 `Star*`, 재미 검증 v2 R2) — 예전 한 쌍(기준의 70%)일 때는
     스킬 안 쓰는 사람의 64% 가 받았고, 지금은 완주한 사람의 약 24% — 스킬 안 쓰는 사람 6%, 쓰는 사람 36%(fun_sim 500판,
     봇 보정 x1.087, 스킬은 층마다 한 번). 어려워졌으니 설명의 "모두 ★★★" 는 그대로 둔다.
     치트 F2(공격 +10000)로 싸우면 치름이 거의 0 이라 빨리 확인된다(시험 계정만). 챕터 4 의 마지막 결산(96~100층)은 100층 보스 뒤 결말 길에서
     닫힌다(`StoryDirector.CoEnding` 이 `SwordLedger.CoCloseBand` 와 `FinishRun` 을 부른다 — `leaderboards.md`). 빨리 보려면 챕터 0~3 으로 시험한다.
-  - `ACH_TOWER`·`ACH_TOWER_DAWN`: 새 게임에서 탑의 법을 골라 결말까지. 새벽은 레벨이 `DawnLevel` 이상일 때. Steam 을 끈 채 탑의 법 결말을 본 뒤
-    Steam 을 켜고 아무 판에서 층을 옮기면 `ACH_TOWER` 가 풀린다(`Records.ModeCleared`).
-  - `ACH_DAWN_PAR`: 새벽 결말을 판 전체 치름 ≤ 기준으로 — 결산 창의 합계나 엔딩 씬의 판 카드로 확인한다. 조건은 결말 순간의
+  - `ACH_TOWER`·`ACH_TOWER_DAWN`: 새 게임에서 탑의 법을 골라 100층 보스까지(탑의 법) · 결말까지(새벽, 레벨이 `DawnLevel` 이상일 때).
+    Steam 을 끈 채 해낸 뒤 Steam 을 켜고 게임을 켜면 타이틀이 설 때 풀린다(`Records.Feats`·`ModeCleared`).
+  - `ACH_DAWN_PAR`: 새벽 결말을 판 전체 치름 ≤ 기준의 절반(판 점수 500 이하)으로 — 결산 창의 합계나 엔딩 씬의 판 카드로 확인한다. 조건은 결말 순간의
     장부다 — 100층 보스의 값은 결말 전에 장부에 든다(BattleEnded 가 CoEnding 의 첫 대기보다 먼저다).
-- 체험판(DEMO 빌드)에서는 아무것도 풀리지 않는다. 체험판에서 쌓인 것(본 결말·잡은 보스·챕터 0 의 별)은 같은 PC 의 본편이 그 저장으로 층을 옮길 때 풀린다.
+- 체험판(DEMO 빌드)에서는 아무것도 풀리지 않는다. 체험판에서 쌓인 것(잡은 보스·해낸 순간 — `Records`)은 같은 PC 의 본편이 Steam 에 붙어 처음 씬이 설 때 풀린다.
 - 결말 셋: 100층 입구 체크포인트에서 이어하기 → 보스 → 선택. hold 와 dawn 은 레벨로 갈리므로(`StoryDirector.DawnLevel`)
   한 판에서 둘 다 보려면 레벨이 모자란 체크포인트가 필요하다. `ENDINGS_SEEN` 이 3 이 되는 순간 `ACH_END_ALL` 이 함께 풀린다.

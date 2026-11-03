@@ -31,6 +31,7 @@ public static class Records
         public bool NoSpillSpilled;
         public Dictionary<string, int> Best = new Dictionary<string, int>();   // 판 점수 최고(낮을수록 좋다), GameMode 이름별
         public HashSet<string> ClearedModes = new HashSet<string>();         // 결말까지 간 규칙 (GameMode 이름)
+        public HashSet<string> Feats = new HashSet<string>();                // 그 순간에만 풀리는 업적 id (SteamHooks.Earn)
     }
 
     static Data s_data;
@@ -79,6 +80,10 @@ public static class Records
     });
     // 그 규칙으로 결말까지 간 적이 있다(탑의 법 업적·타이틀 표시).
     public static bool ModeCleared(GameMode mode) => Current.ClearedModes != null && Current.ClearedModes.Contains(mode.ToString());
+    // 그 순간에만 풀리는 업적(한 끗·맨손의 셈·새벽 결말의 둘 …)을 해낸 적이 있다. 다시 셀 수 없는 것이라 해낸 순간 적어 둔다 —
+    // Steam 없이·체험판에서 해낸 것도 다음에 붙을 때 SteamHooks.SyncRecords 가 준다.
+    public static IReadOnlyCollection<string> Feats => Current.Feats;
+    public static void Earn(string achievementId) => Change(d => d.Feats.Add(achievementId));
 
     static GameMode CurrentMode => Managers.Game?.PlayerData?.Mode ?? GameMode.Normal;
 

@@ -3,7 +3,7 @@
 C# constants: UI_DemoEndPopup (TITLE, BODY, LEDGER, FORETOLD, PAID, WISHLIST). "Back to title" reuses 182 (ui.py),
 the third figure "Altar" reuses 474 (ledger.py).
 Same rules as mode.py: no newlines, commas or '^'; Korean and English stay inside the glyphs of both pixel fonts
-(DNFBitBitv2 SDF, Silver SDF) - no middle dot or em dash. "Foretold" follows the achievements (Cheaper Than Foretold);
+(DNFBitBitv2 SDF, Silver SDF) - no middle dot or em dash. "Foretold" follows the tally (ledger.py 471);
 the wishlist button uses each language's Steam store wording.
 """
 

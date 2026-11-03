@@ -14,6 +14,8 @@ using UnityEngine.SceneManagement;
 ///
 /// 사람이 한 일만 센다 — 봇이 돌 때(GameEvents.IsAutoPlaying), Steam 이 없을 때(SteamManager.Initialized),
 /// 체험판(DEMO)에서는 Steam 에 아무것도 하지 않는다(판 점수만 적어 뒀다가 다음에 붙으면 올린다 — 순위표 절).
+/// 그때도 업적거리는 Records 에 남는다 — 결말·우두머리는 Records 가 듣고, 그 순간에만 셀 수 있는 것은 Earn 이 적는다.
+/// Steam 이 붙으면(씬이 설 때·층을 옮길 때) SyncRecords 가 한꺼번에 준다.
 /// 통계는 Records 를 옮기되 올리기만 한다(Records 도 봇 판은 적지 않는다).
 /// 업적·통계 id 는 Steamworks 관리 페이지에 같은 이름으로 만들어 둬야 풀린다 — 없는 id 는 Steam 이 거절하고 끝이다.
 /// 순위표 이름·자세한 값의 순서는 Steam/leaderboards.md 와 같아야 한다.
@@ -90,8 +92,8 @@ public static class SteamHooks
         GameEvents.EndingReached += OnEndingReached;
         GameEvents.ItemPicked += (itemId, heal, overflow) => s_spillUnsaved |= overflow > 0;
         // ACH_UNDER_PAR — 기준 값이 있는 층(싸운 층)을 그보다 싸게 끝냈다.
-        GameEvents.FloorTallied += (stageId, paid, par) => { if (par > 0 && paid < par) Unlock("ACH_UNDER_PAR"); };
-        GameEvents.BandTallied += (band, stars) => { if (ChapterAllThree(band / BandsPerChapter, band, stars)) Unlock("ACH_CH_3STAR"); };
+        GameEvents.FloorTallied += (stageId, paid, par) => { if (par > 0 && paid < par) Earn("ACH_UNDER_PAR"); };
+        GameEvents.BandTallied += (band, stars) => { if (ChapterAllThree(band / BandsPerChapter, band, stars)) Earn("ACH_CH_3STAR"); };
         GameEvents.RunScored += OnRunScored;
         // SceneManager 의 이벤트는 플레이마다 비워지지 않는다(도메인 리로드를 끈 에디터) — 빼고 건다.
         SceneManager.sceneLoaded -= OnSceneLoaded;
@@ -108,21 +110,26 @@ public static class SteamHooks
             UploadPending();                // 지난 실행에서 못 올린 것도 여기서 (켜서 처음 서는 타이틀)
             s_ending = null;
         }
-        if (Active && scene.name != nameof(Define.Scene.GameScene))
+        if (Active == false)
+            return;
+        if (scene.name != nameof(Define.Scene.GameScene))
         {
             SteamFriends.ClearRichPresence();
             s_presenceFloor = -1;
         }
+        SyncRecords(Records.MaxFloor);      // 켜서 처음 서는 타이틀 — Steam 없이 해낸 것을 다시 오르지 않아도 준다
     }
 
     static void OnFloorEntered(int stageId, bool firstVisit)
     {
         RememberChapterStart(stageId, firstVisit);
+        if (GameEvents.IsAutoPlaying)
+            return;
+        CountNoSpill(stageId, firstVisit);
         if (Active == false)
             return;
         CheckContract();
         SetPresence(stageId);
-        CountNoSpill(stageId, firstVisit);
         SyncRecords(Mathf.Max(Records.MaxFloor, stageId + 1));     // Records 가 이 층을 아직 안 적었을 수 있다
     }
 
@@ -169,7 +176,7 @@ public static class SteamHooks
             last = stageId;
             spilled = false;
             if (run >= NoSpillFloors)
-                Unlock("ACH_NO_SPILL");
+                Earn("ACH_NO_SPILL");
         }
         Records.NoSpill = (run, last, spilled);
     }
@@ -182,42 +189,44 @@ public static class SteamHooks
         if (floor % FloorsPerChapter != 0)
             return;
         Unlock("ACH_BOSS" + floor);                                     // 20·40·60·80·100층 챕터 보스
+        // 탑의 법은 보스를 쓰러뜨린 순간이다 — 결말(ClearedModes)까지 기다리면 그 사이에 끈 판은 보스를 다시 잡아야 했다.
+        if (floor == LastFloor && Managers.Game?.PlayerData?.Mode == GameMode.Tower)
+            Earn("ACH_TOWER");
         // LastBattle 은 전투창이 이 알림 바로 앞에 채운다. 다른 전투의 것이면(채우지 못한 길) 믿지 않는다.
         if (LastBattle.MonsterId == monsterId && LastBattle.SkillsUsed == false)
-            Unlock("ACH_BOSS_BARE");
+            Earn("ACH_BOSS_BARE");
     }
 
     static void OnBattleEnded(int monsterId, bool won)
     {
         CheckContract();
-        if (Active == false || won == false || LastBattle.MonsterId != monsterId || LastBattle.Won == false)
+        if (GameEvents.IsAutoPlaying || won == false || LastBattle.MonsterId != monsterId || LastBattle.Won == false)
             return;
         // 그 한 대로 레벨이 오르면 늘어난 최대 HP 만큼이 HP 에 얹힌다(GameManager.LevelUp) — 이긴 순간의 HP 로 잰다.
         float hp = LastBattle.HpAfter - (Managers.Game.PlayerData.MaxHP - LastBattle.MaxHp);
         if (hp > 0f && hp <= LastBattle.MaxHp * 0.01f)
-            Unlock("ACH_SLIVER");               // HP 1% 이하로 이겼다
+            Earn("ACH_SLIVER");                 // HP 1% 이하로 이겼다
         if (LastBattle.FirstHitCrit)
-            Unlock("ACH_CRIT_CARRY");           // 첫 타가 치명타
+            Earn("ACH_CRIT_CARRY");             // 첫 타가 치명타
     }
 
-    // 결말. 탑의 법 둘과 "배불리, 싸게" 는 그 판의 규칙·장부를 본다 — 장부는 체크포인트째 이 판의 것이다.
+    // 결말. 탑의 법 새벽과 "배불리, 싸게" 는 그 판의 규칙·장부를 본다 — 장부는 체크포인트째 이 판의 것이다.
     static void OnEndingReached(string ending)
     {
         s_ending = ending;
         UploadPending();
-        if (Active == false)
+        if (GameEvents.IsAutoPlaying)
             return;
         var player = Managers.Game?.PlayerData;
-        bool tower = player?.Mode == GameMode.Tower;
         bool dawn = ending == "dawn";
-        if (tower)
-            Unlock("ACH_TOWER");                // Records.ModeCleared 도 같은 것을 남긴다 — Steam 이 없던 판은 SyncRecords 가 준다
-        if (tower && dawn)
-            Unlock("ACH_TOWER_DAWN");
+        if (dawn && player?.Mode == GameMode.Tower)
+            Earn("ACH_TOWER_DAWN");
+        // 기준의 절반 — 기준 이하로는 새벽까지 간 판이면 거의 다 된다(재미 검증 452판 중 451판).
         LedgerState ledger = player?.Ledger;
-        if (dawn && ledger != null && ledger.Par > 0 && ledger.Paid <= ledger.Par)
-            Unlock("ACH_DAWN_PAR");
-        SyncRecords(Records.MaxFloor, ending);
+        if (dawn && ledger != null && ledger.Par > 0 && ledger.Paid * 2 <= ledger.Par)
+            Earn("ACH_DAWN_PAR");
+        if (Active)
+            SyncRecords(Records.MaxFloor, ending);
     }
 
     // 계약(3층, DirectingManager.FinishContract)은 알리는 이벤트가 없다 — 뒤따르는 HUD·층·전투에서 본다.
@@ -229,15 +238,15 @@ public static class SteamHooks
     }
 
     /// <summary>
-    /// ACH_CH_3STAR — 한 챕터의 띠가 모두 ★★★ 인가. 별 0 은 기준 값이 없던 띠라 건너뛰고, 아직 없는 띠가 있으면 아니다.
-    /// 챕터 0 은 띠 1~3(6~20층)만 본다 — 띠 0 은 손수 만든 1~4층에 생성 층이 5층 하나뿐이다. 챕터 c≥1 은 띠 4c~4c+3.
+    /// ACH_CH_3STAR — 한 챕터의 띠(4c~4c+3)가 모두 ★★★ 인가. 별 0 은 기준 값이 없던 띠라 건너뛰고, 아직 없는 띠가 있으면 아니다.
+    /// 챕터 0 의 띠 0 도 센다 — 생성 층은 5층 하나뿐이지만 결산 창이 뜨고, 업적 글이 "모든 결산" 이다.
     /// band·stars 는 방금 닫은 띠(BandTallied) — 장부가 BandStars 에 적기 전에 알릴 수도 있어서 그 띠는 인자를 믿는다.
     /// </summary>
-    static bool ChapterAllThree(int chapter, int band = -1, int stars = 0)
+    static bool ChapterAllThree(int chapter, int band, int stars)
     {
         List<int> all = Managers.Game?.PlayerData?.Ledger?.BandStars;
         int full = 0;
-        for (int b = chapter == 0 ? 1 : chapter * BandsPerChapter; b < (chapter + 1) * BandsPerChapter; b++)
+        for (int b = chapter * BandsPerChapter; b < (chapter + 1) * BandsPerChapter; b++)
         {
             int s = b == band ? stars : all != null && b < all.Count ? all[b] : -1;
             if (s == 3)
@@ -248,8 +257,8 @@ public static class SteamHooks
         return full > 0;
     }
 
-    // Records(판을 넘어 남는 기록)를 Steam 에 옮긴다. Steam 없이·체험판에서 본 결말과 잡은 우두머리도 다음에 붙었을 때 여기서 풀린다.
-    // 별(★★★ 챕터)은 체크포인트의 장부에서 본다 — 체험판에서 끝낸 챕터 0 도 본편이 그 저장을 이어 층을 옮길 때 풀린다.
+    // Records(판을 넘어 남는 기록)를 Steam 에 옮긴다. Steam 없이·체험판에서 본 결말, 잡은 우두머리, 해낸 순간(Feats)도
+    // 다음에 붙었을 때 여기서 풀린다.
     // justReached: Records 도 같은 EndingReached 를 듣는데 누가 먼저 들을지 모른다 — 방금 본 결말은 직접 센다.
     static void SyncRecords(int maxFloor, string justReached = null)
     {
@@ -272,11 +281,8 @@ public static class SteamHooks
         }
         if (Records.ModeCleared(GameMode.Tower))
             Unlock("ACH_TOWER");
-        for (int chapter = 0; chapter < Chapters; chapter++)
-        {
-            if (ChapterAllThree(chapter))
-                Unlock("ACH_CH_3STAR");
-        }
+        foreach (string id in Records.Feats)
+            Unlock(id);
         RaiseStat("MAX_FLOOR", maxFloor);
         RaiseStat("ENDINGS_SEEN", seen);
         RaiseStat("FIGHTS_WON", Records.FightsWon);
@@ -293,10 +299,10 @@ public static class SteamHooks
 
     /// <summary>모아 둔 업적·통계를 올린다(Managers.Update → SteamManager.RunCallbacks). Valve 는 StoreStats 를 몇 분 단위로 막을 수
     /// 있다고 해서, 한 프레임에 몰린 해제(본편을 처음 켤 때의 SyncRecords)와 층마다의 통계를 1초에 한 번으로 묶는다. 알림은 올릴 때 뜬다.
-    /// 받지 않으면 10초 뒤 다시 올린다(끌 때 Steam 이 한 번 더 올린다).</summary>
-    public static void Flush()
+    /// 받지 않으면 10초 뒤 다시 올린다. 끌 때(final, SteamManager.Shutdown)는 기다리지 않고 남은 것을 올린다.</summary>
+    public static void Flush(bool final = false)
     {
-        if (s_storeDirty == false || Time.unscaledTime < s_nextStore || Active == false)
+        if (s_storeDirty == false || (final == false && Time.unscaledTime < s_nextStore) || Active == false)
             return;
         bool ok = SteamUserStats.StoreStats();
         s_storeDirty = ok == false;
@@ -320,6 +326,13 @@ public static class SteamHooks
         bool ok = SteamUserStats.SetAchievement(id);
         s_storeDirty |= ok;
         Debug.Log(ok ? $"[Steam] 업적 {id}" : $"[Steam] 업적 {id} — Steam 이 받지 않았다");
+    }
+
+    // 그 순간에만 셀 수 있는 업적 — Records 에 적고(봇 판은 Records 가 거른다) Steam 이 있으면 바로 푼다. 없으면 SyncRecords 가 나중에.
+    static void Earn(string id)
+    {
+        Records.Earn(id);
+        Unlock(id);
     }
 
     #region 순위표
