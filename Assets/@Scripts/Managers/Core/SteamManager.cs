@@ -96,6 +96,7 @@ public static class SteamManager
         Initialized = true;
         Application.quitting -= Shutdown;   // 에디터는 정적 이벤트가 플레이마다 쌓인다 — 빼고 건다
         Application.quitting += Shutdown;
+        s_overlay = Callback<GameOverlayActivated_t>.Create(OnOverlay);
         // 여기서 난 예외가 Managers.Init 을 빠져나가면 설정 맞추기(ApplySettings: 언어·글꼴·화면·소리)가 통째로 빠진다.
         try { DefaultLanguage(); }
         catch (System.Exception e) { Debug.LogException(e); }
@@ -117,12 +118,26 @@ public static class SteamManager
 #if !DISABLESTEAMWORKS
     static bool s_tried;
 
+    // 오버레이(Shift+Tab, 덱의 Steam 단추)는 창 포커스를 가져가지 않아서 그 뒤에서 전투가 그대로 돌았다 — 창을 잃을 때처럼
+    // 메뉴를 연다(UI_GameScene.OnApplicationFocus 와 같은 길, 전투도 멈춘다). 콜백은 붙잡아 둬야 GC 가 거두지 않는다.
+    static Callback<GameOverlayActivated_t> s_overlay;
+
+    static void OnOverlay(GameOverlayActivated_t overlay)
+    {
+        if (overlay.m_bActive == 0 || GameEvents.IsAutoPlaying || Managers.IsAlive == false)
+            return;
+        UI_GameScene scene = Managers.Game.GameScene;
+        if (scene != null)
+            scene.TryOpenMenu();
+    }
+
     // 에디터는 도메인 리로드 없이 플레이를 되풀이한다. 지난 플레이는 끄면서 닫았으니(Shutdown) 이번 플레이가 다시 켠다.
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void ResetStatics()
     {
         Initialized = false;
         s_tried = false;
+        s_overlay = null;       // 지난 플레이의 콜백은 SteamAPI.Shutdown 이 풀었다
     }
 
     // 끈 뒤에 오는 호출(OnDestroy 에서 난 GameEvents 등)은 Initialized 가 막는다.

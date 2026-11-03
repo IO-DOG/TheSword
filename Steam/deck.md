@@ -35,6 +35,8 @@ Valve 의 정의: Playable = "동작하지만 사용자가 손을 좀 써야 할
 - 확인: `dotnet run --project Tools/gamekeys_check` — 축 값을 프레임마다 넣어 눌렀다·뗐다·되풀이·대각선·빠진 축을 본다(에디터는 패드 축을 손으로 못 넣는다).
 - **Shift+Tab 은 Steam 오버레이 단축키다.** 그래서 전투 가속은 Shift 를 받지 않고 **Space(RT)만** 받는다
   (`UI_BattlePopup.Speed`). Space 는 대사·안내·확인 창에서 Enter 처럼 동작하지만 누르는 순간만 치고, 누르고 있는 것은 치지 않는다.
+- **오버레이를 열면(Shift+Tab, 덱의 Steam 단추) 게임 메뉴가 열려 멈춘다**(`SteamManager.OnOverlay` — 창을 잃을 때와 같은 길). 오버레이는
+  창 포커스를 가져가지 않아서 그 뒤에서 전투가 그대로 돌았다. 실기 확인 항목: 전투 중 Steam 단추 → 메뉴가 떠 있고 전투가 멈춰 있다.
 
 ## Steam Input 설정
 
