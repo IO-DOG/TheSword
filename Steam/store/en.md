@@ -67,7 +67,7 @@ Silver font by Poppy Works (CC BY 4.0)
 | Storage | 500 MB available space |
 | Additional Notes | Keyboard and mouse. Gamepad supported (Xbox layout). Tooltips and swapping equipment use the mouse. |
 
-근거와 측정(빌드 223 MiB)은 `ko.md` 의 같은 절. 프로세서·메모리 행은 일부러 뺐다. "Gamepad supported" 는 패드 직접 입력(`GameKeys`)이 커밋되고 `deck.md` 의 "패드" 점검을 통과한 뒤에 올린다 — 그 전에는 "Keyboard and mouse." 만 둔다. Steam Deck "Verified" 는 말하지 않는다.
+근거와 측정(빌드 211 MiB)은 `ko.md` 의 같은 절. 프로세서·메모리 행은 일부러 뺐다. "Gamepad supported" 는 패드 직접 입력(`GameKeys`)이 커밋되고 `deck.md` 의 "패드" 점검을 통과한 뒤에 올린다 — 그 전에는 "Keyboard and mouse." 만 둔다. Steam Deck "Verified" 는 말하지 않는다.
 
 ## 콘텐츠 설명 메모
 
