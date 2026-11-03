@@ -15,6 +15,8 @@ public class UI_BaseCard : UI_Base
     // (덱에서 8배속이면 한 프레임에 여러 대). 카드는 전투마다 새로 서니(SetBattleCard) 처음 찾은 것을 쥔다.
     // 한 대마다 내는 베기·맞음 이펙트(0.3초)를 지우지 않아서, 다 끝난 UIParticle 이 매 프레임 캔버스를 다시 굽게 했다 — 보스전 끝에는 백 개가 넘었다.
     protected const float FxLife = 1.5f;
+    // 게이지를 채우는 루프가 한 걸음마다 새로 만들던 대기 — 전투 한 대에 10~20개(쓰레기). 값이 고정이라 하나를 돌려 쓴다.
+    protected static readonly WaitForSeconds Wait10ms = new WaitForSeconds(0.01f), Wait5ms = new WaitForSeconds(0.005f);
     UI_BattlePopup _battle;
     UI_BaseCard _opponent;
     protected Transform BattleRoot

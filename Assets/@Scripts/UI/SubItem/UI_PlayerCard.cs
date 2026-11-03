@@ -163,7 +163,7 @@ public class UI_PlayerCard : UI_BaseCard
             image.color += new Color(0, 0, 0, -0.05f);
             swordImage.color += new Color(0, 0, 0, -0.05f);
             shieldImage.color += new Color(0, 0, 0, -0.05f);
-            yield return new WaitForSeconds(0.01f);
+            yield return Wait10ms;
         }
         yield return delay;
         Destroy(go);
@@ -199,7 +199,7 @@ public class UI_PlayerCard : UI_BaseCard
         {
             i += 1;
             image.color += new Color(0, 0, 0, -0.1f);
-            yield return new WaitForSeconds(0.005f);
+            yield return Wait5ms;
         }
         yield return delay;
 

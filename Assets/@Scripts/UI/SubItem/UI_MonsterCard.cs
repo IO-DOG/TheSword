@@ -196,7 +196,7 @@ public class UI_MonsterCard : UI_BaseCard
             //image.SetNativeSize();
             i += 1;
             image.color += new Color(0, 0, 0, -0.05f);
-            yield return new WaitForSeconds(0.01f);
+            yield return Wait10ms;
         }
         yield return delay;
         Destroy(go);
@@ -227,7 +227,7 @@ public class UI_MonsterCard : UI_BaseCard
             //image.SetNativeSize();
             i += 1;
             image.color += new Color(0, 0, 0, -0.1f);
-            yield return new WaitForSeconds(0.005f);
+            yield return Wait5ms;
         }
         yield return delay;
         Destroy(go);
