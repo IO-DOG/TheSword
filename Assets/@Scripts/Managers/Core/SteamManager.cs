@@ -13,7 +13,8 @@ using Steamworks;
 /// 앱이 꺼질 때(Application.quitting) 닫는다. 업적·통계·Rich Presence 는 SteamHooks 가 맡는다.
 ///
 /// Steam 이 없으면(꺼져 있다, 게임을 가지고 있지 않다, steam_appid.txt 도 없다) 한 번 적고 아무것도 하지 않는다.
-/// 에디터에서도 빌드에서도 Steam 없이 똑같이 돈다 — Steam 때문에 게임이 멈추면 안 된다.
+/// 에디터에서도 빌드에서도 Steam 없이 똑같이 돈다 — Steam 때문에 게임이 멈추면 안 된다. 단 AppId 를 넣은 릴리스 빌드를 Steam 밖에서
+/// 켜면 RestartAppIfNecessary 가 Steam 으로 다시 켜려고 곧바로 끈다 — Steam 없는 PC·전시용으로 줄 빌드는 exe 옆에 steam_appid.txt.
 /// 에디터는 프로젝트 루트의 steam_appid.txt(Steamworks.NET 이 480 = Spacewar 로 만든다)와 켜진 Steam 이 있으면 붙는다.
 /// </summary>
 public static class SteamManager
@@ -55,7 +56,8 @@ public static class SteamManager
             return;
         }
 #endif
-        Application.OpenURL("https://store.steampowered.com/app/" + GameAppId + "/");
+        // 오버레이를 끈 사람은 Steam 앱의 상점으로(브라우저는 대개 Steam 에 로그인돼 있지 않아 찜을 못 한다). Steam 이 없으면 웹.
+        Application.OpenURL(Initialized ? "steam://store/" + GameAppId : "https://store.steampowered.com/app/" + GameAppId + "/");
     }
 
     /// <summary>Steam 에 붙어 있다. 거짓이면 Steam 을 부르지 않는다.</summary>
@@ -105,7 +107,10 @@ public static class SteamManager
     {
 #if !DISABLESTEAMWORKS
         if (Initialized)
+        {
             SteamAPI.RunCallbacks();
+            SteamHooks.Flush();
+        }
 #endif
     }
 
@@ -129,19 +134,20 @@ public static class SteamManager
         SteamAPI.Shutdown();
     }
 
-    // 언어를 한 번도 고르지 않았으면(PlayerPrefs 에 GameSettings 의 SET_LANGUAGE 가 없다) Steam 의 게임 언어를 따른다.
-    // GameSettings.Language 에 넣으면 고른 것으로 남아 다음부터는 여기를 지나지 않는다. 목록에 없는 언어는 OS 언어 그대로다.
+    // 언어를 한 번도 고르지 않았으면 Steam 의 게임 언어를 따른다 — 이번 실행만(GameSettings.UseLanguageForSession). 남기면 고른 것으로
+    // 굳어서, Steamworks 에 지원 언어를 올리기 전의 첫 실행이 받은 "english" 가 영영 남고 Steam 에서 언어를 바꿔도 따라가지 않았다.
+    // 목록에 없는 언어는 OS 언어 그대로다.
     static void DefaultLanguage()
     {
-        if (PlayerPrefs.HasKey("SET_LANGUAGE"))
+        if (GameSettings.LanguageChosen)
             return;
         switch (SteamApps.GetCurrentGameLanguage())
         {
-            case "koreana": GameSettings.Language = Define.ScriptType.Kr; break;
-            case "english": GameSettings.Language = Define.ScriptType.En; break;
-            case "japanese": GameSettings.Language = Define.ScriptType.Jp; break;
+            case "koreana": GameSettings.UseLanguageForSession(Define.ScriptType.Kr); break;
+            case "english": GameSettings.UseLanguageForSession(Define.ScriptType.En); break;
+            case "japanese": GameSettings.UseLanguageForSession(Define.ScriptType.Jp); break;
             case "schinese":
-            case "tchinese": GameSettings.Language = Define.ScriptType.Cn; break;
+            case "tchinese": GameSettings.UseLanguageForSession(Define.ScriptType.Cn); break;
         }
     }
 #endif

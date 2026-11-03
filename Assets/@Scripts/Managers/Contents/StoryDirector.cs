@@ -267,15 +267,9 @@ public class StoryDirector : MonoBehaviour
             if (s_seen != null)
                 return s_seen;
             s_seen = new HashSet<string>();
-            try
-            {
-                if (File.Exists(SeenPath))
-                    s_seen.UnionWith(JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(SeenPath)) ?? new List<string>());
-            }
-            catch (Exception e) when (SaveStore.IsSaveError(e))
-            {
-                Debug.LogWarning($"[Story] {SeenFile} 를 읽지 못했다 — 처음부터 센다: {e.Message}");
-            }
+            List<string> seen = SaveStore.ReadText(SeenPath, JsonConvert.DeserializeObject<List<string>>);   // 깨졌으면 .bak
+            if (seen != null)
+                s_seen.UnionWith(seen);
             return s_seen;
         }
     }
@@ -293,13 +287,7 @@ public class StoryDirector : MonoBehaviour
         // 체크포인트와 같은 방식으로 바꿔 끼운다. 쓰다 꺼져도 옛 파일은 남는다.
         try
         {
-            Directory.CreateDirectory(SaveStore.DirectoryPath);
-            string temp = SeenPath + ".tmp";
-            File.WriteAllText(temp, JsonConvert.SerializeObject(new List<string>(s_seen)));
-            if (File.Exists(SeenPath))
-                File.Replace(temp, SeenPath, null);
-            else
-                File.Move(temp, SeenPath);
+            SaveStore.WriteText(SeenPath, JsonConvert.SerializeObject(new List<string>(s_seen)));
         }
         catch (Exception e) when (SaveStore.IsSaveError(e))
         {
@@ -313,7 +301,19 @@ public class StoryDirector : MonoBehaviour
     public static void ClearSeen()
     {
         s_seen = new HashSet<string>();
-        try { File.Delete(SeenPath); }
+        try
+        {
+            // .bak 도 지운다 — 남기면 다음에 읽을 때(ReadText) 지난 판의 본 장면이 되살아난다.
+            foreach (string suffix in new[] { "", ".bak", ".tmp", ".corrupt" })
+            {
+                string path = SeenPath + suffix;
+                if (File.Exists(path))
+                {
+                    File.SetAttributes(path, FileAttributes.Normal);
+                    File.Delete(path);
+                }
+            }
+        }
         catch (Exception e) when (SaveStore.IsSaveError(e)) { Debug.LogWarning($"[Story] {SeenFile} 를 지우지 못했다: {e.Message}"); }
     }
     #endregion

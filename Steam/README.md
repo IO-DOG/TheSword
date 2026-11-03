@@ -47,6 +47,13 @@
 - [ ] 빌드 계정 권한 *Edit App Metadata*, *Publish App Changes To Steam*. 출시된 앱에 빌드를 켜려면 그 계정에 휴대폰 번호나 Steam 모바일 인증기가
       있어야 하고, 보안 정보를 바꾸면 3일 동안 켜지 못한다 [S4].
 - [ ] App Admin 에서 바꾼 것은 **Publish** 탭에서 올려야 반영된다.
+- [ ] **처음 켜기 전에 Publish 할 것** (Steam 연동 코드 리뷰, 2026-11-04):
+      - 스토어의 **지원 언어**(한·영·일·간체). 그 전에 켜면 Steam 이 "english" 로 답한다 — 게임은 그 실행만 따르고 남기지 않는다.
+      - **통계 → 업적**(5절). 그 전의 실행에서 해제한 업적은 다음 실행에 다시 묻지만, 그 판의 순간을 지난 것(예: `ACH_SLIVER`)은 다시 오지 않는다.
+      - 체험판 앱에도 따로 **Installation → Launch Option**(`TheSword.exe`, Windows) → Publish.
+      - 찜하기 단추가 있는 체험판(`GameAppId` 를 넣은 빌드)을 내기 전에 본편 스토어 페이지가 **Coming Soon** 으로 보여야 한다 — 아니면 단추가 "찾을 수 없음" 페이지로 간다.
+- [ ] **Steam 밖에서 켜기**: AppId 를 넣은 릴리스 빌드는 Steam 밖에서 켜면 Steam 으로 다시 켜려고 곧바로 꺼진다(`RestartAppIfNecessary`). Steam 이 켜진 PC 에서 exe 를 두 번 눌러 Steam 을 거쳐 다시 뜨는지 본다
+      (`forceSingleInstance` 라 다시 뜬 쪽이 아직 안 꺼진 앞 프로세스를 보고 접을 수 있다 — 안 뜨면 알려 준다). Steam 이 없는 PC·전시용으로 줄 빌드는 exe 옆에 `steam_appid.txt`(본편 AppID).
 
 ## 2. 빌드와 업로드
 
@@ -180,7 +187,7 @@ App Admin → Application → **Steam Cloud** [S9].
 | `StorySeen.json` | 이번 판에 본 장면 | `StoryDirector` |
 | `Records.json` | 판을 넘어 남는 기록(본 결말·장면·통계). 새 게임이 지우지 않는다 | `Records` |
 
-- 올리지 **않는** 것: `Player.log`·`Player-prev.log`(같은 폴더에 있다 — 그래서 `*` 가 아니라 이름을 적는다), 쓰는 중에 잠깐 생기는 `*.tmp`,
+- 올리지 **않는** 것: `Player.log`·`Player-prev.log`(같은 폴더에 있다 — 그래서 `*` 가 아니라 이름을 적는다), 쓰는 중에 잠깐 생기는 `*.tmp`, 기록 파일의 로컬 안전망 `Records.json.bak`·`StorySeen.json.bak`·`*.corrupt`, 읽지 못해 비켜 둔 `Unreadable/`,
   레지스트리의 설정(해상도·소리·언어). Valve 도 기기마다 다른 설정은 올리지 말라고 한다 [S9].
 - **데모는 같은 폴더에 쓴다**: 같은 PC 에서는 클라우드 없이도 본편이 데모 세이브를 이어받는다(둘 다 `LocalLow\CozyByte\TheSword`,
   콘텐츠도 같다 — D1). 데모 빌드의 회사·제품 이름(`CozyByte` / `TheSword`)을 바꾸면 폴더가 달라져 세이브가 안 넘어간다.

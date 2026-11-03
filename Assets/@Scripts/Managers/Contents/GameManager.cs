@@ -735,7 +735,9 @@ public class GameManager
         if (OnDirect == false)
         {
             SaveGame();
-            if (LastSaveError == null)
+            if (LastSaveError != null)
+                TellSaveFailed();
+            else
             {
                 try { SaveStore.WriteHistory(SaveStore.DirectoryPath, PlayerData.CurStageid); }
                 catch (Exception ex) when (SaveStore.IsSaveError(ex))
@@ -863,6 +865,17 @@ public class GameManager
     }
 
     public string LastSaveError { get; private set; }
+
+    // 체크포인트를 못 쓰면 한 번 알린다(실행마다 한 번). 예전에는 로그에만 남아 — 디스크가 찬 41층부터 70층까지 올라 죽고서야
+    // 41층 입구로 돌아갔다. 봇은 묻지 않는다.
+    bool _saveFailTold;
+    void TellSaveFailed()
+    {
+        if (_saveFailTold || GameEvents.IsAutoPlaying)
+            return;
+        _saveFailTold = true;
+        UI_ConfirmPopup.Tell(Managers.GetString(Define.SAVE_FAILED_PLAY));
+    }
     public bool HasSave => SaveStore.Exists(SaveStore.DirectoryPath) ||
         File.Exists(Path.Combine(SaveStore.DirectoryPath, "SaveData.json"));
 
@@ -1039,7 +1052,10 @@ public class GameManager
 
     public void DeleteGameData()
     {
-        SaveStore.Delete(SaveStore.DirectoryPath);
+        // 이 빌드가 읽지 못하는 저장은 지우지 않고 비켜 둔다(SaveStore.Delete) — 타이틀이 "원본은 보존됩니다" 라고 했다.
+        string dir = SaveStore.DirectoryPath;
+        bool unreadable = SaveStore.Exists(dir) && SaveStore.TryRead(dir, out _, out _, ValidateCheckpoint) == false;
+        SaveStore.Delete(dir, keepAside: unreadable);
         File.Delete(Path.Combine(SaveStore.DirectoryPath, "SaveData.json"));
         StoryDirector.ClearSeen();      // 새 판은 이야기도 처음부터 (StorySeen.json)
         LastSaveError = null;

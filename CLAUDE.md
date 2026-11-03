@@ -174,8 +174,8 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
 
 | 파일 | 하는 일 |
 |---|---|
-| `SteamManager` | `Managers.Init` 이 켜고 매 프레임 콜백, 끌 때 닫는다. **Steam 이 없으면 한 줄 적고 아무것도 안 한다** — 에디터·빌드 모두. 언어를 고른 적이 없으면 Steam 의 게임 언어를 따른다 |
-| `SteamHooks` | `GameEvents` 만 듣고 업적·통계·Rich Presence 를 올린다. 봇(`IsAutoPlaying`)·`DEMO` 에서는 아무것도 안 한다 |
+| `SteamManager` | `Managers.Init` 이 켜고 매 프레임 콜백, 끌 때 닫는다. **Steam 이 없으면 한 줄 적고 아무것도 안 한다** — 에디터·빌드 모두. 단 AppId 를 넣은 릴리스 빌드는 Steam 밖에서 켜면 Steam 으로 다시 켜려고 꺼진다(전시용 빌드엔 `steam_appid.txt`). 언어를 고른 적이 없으면 Steam 의 게임 언어를 **그 실행만** 따른다(남기지 않는다) |
+| `SteamHooks` | `GameEvents` 만 듣고 업적·통계·Rich Presence 를 올린다. 봇(`IsAutoPlaying`)·`DEMO` 에서는 아무것도 안 한다. 올리기(`StoreStats`)는 `Flush` 가 1초에 한 번 묶는다 — Valve 가 몇 분 단위로 막을 수 있다. Steam 이 답하지 않은 업적은 다음에 다시 묻는다 |
 | `Records` | 판을 넘어 남는 기록 `Records.json`(본 결말·본 장면·잡은 우두머리·평생 통계). 새 게임이 지우지 않고, 봇 판은 적지 않는다. Steam 없이 얻은 것도 다음에 붙을 때 `SyncRecords` 가 풀어 준다 |
 | `LastBattle` | 방금 끝난 전투의 요약(예측·잃은 HP·첫 타 치명·스킬·건너뜀). `UI_BattlePopup` 이 `BattleEnded` 직전에 채운다 |
 
@@ -746,7 +746,7 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
   `generate_content --write` 가 되돌린다. 생성기와 ui_text 가 같은 id 를 쓰면 생성기가 멈춘다.
 - 테이블 원본: `Assets/@Resources/Data/Excel/*.csv` → 변환된 `Assets/@Resources/Data/JsonData/*.json`(Addressable TextAsset)을 `DataManager.Init()`이 Newtonsoft.Json + `ILoader<Key,Value>` 패턴으로 로드. 새 테이블 추가 시 `Data.Contents.cs`에 Data 클래스+Loader 정의 후 `DataManager`에 딕셔너리·로드 라인 추가.
 - 던전 맵: `Assets/StreamingAssets/Data/Excel/Dungeon_*.csv` 그리드를 `Tools/mapdata_gen.py` 가 런타임 `MapData.json` 으로 굽는다. `DataManager.ResetActiveDic()` 은 같은 CSV 에서 활성화 딕셔너리만 만든다(카운터 순서가 같아야 한다). 셀 코드: `I`=소비 아이템, `E`=장비, `M`=몬스터, `B`=보스, `W`=벽, 숫자 3~8=문, 11=스폰 지점, 12=레버, 13=기둥, 14~16=포탈. 끝의 `~` 는 "둘 중 하나" 보상(보물 층에 한 쌍, `ChoiceGroup`) — 하나를 주우면 짝이 사라진다.
-- 세이브: `SaveStore` 가 플레이어·오브젝트 활성화·진행 플래그를 **`Checkpoint.json` 하나**에 쓴다. `MapData` 해시를 같이 적어, 데이터를 다시 뽑은 뒤의 옛 세이브는 섞지 않고 거부한다 — **거부해도 지우지 않는다**(타이틀이 "원본은 보존됩니다" 를 띄운다). 예전 방식(`SaveData.json` + `*ActiveData.json`)은 이어하기 때 한 번 옮겨 적는다.
+- 세이브: `SaveStore` 가 플레이어·오브젝트 활성화·진행 플래그를 **`Checkpoint.json` 하나**에 쓴다(임시 파일 → 디스크까지 → 바꿔 끼우기, 앞의 것은 `.bak`). 판을 넘는 `Records.json`·`StorySeen.json` 도 같은 방식(`SaveStore.WriteText`/`ReadText` — 깨지면 `.corrupt` 로 비켜 두고 `.bak` 을 읽는다). 층 입구에서 저장이 실패하면 한 번 알린다(`GameManager.TellSaveFailed`). 이 빌드가 읽지 못하는 저장은 새 게임이 지우지 않고 `Unreadable/<시각>/` 으로 옮긴다. `MapData` 해시를 같이 적어, 데이터를 다시 뽑은 뒤의 옛 세이브는 섞지 않고 거부한다 — **거부해도 지우지 않는다**(타이틀이 "원본은 보존됩니다" 를 띄운다). 예전 방식(`SaveData.json` + `*ActiveData.json`)은 이어하기 때 한 번 옮겨 적는다.
 - **지도를 고친 패치 뒤의 옛 세이브(K1, `SaveMigration`)**: 빌드마다 `GameBuild` 가 그 빌드의 MapData 를 해시 이름으로 `Assets/StreamingAssets/Data/MapDataArchive/MapData_<해시 앞 8바이트>.json.gz` 에 남긴다 — **새 파일은 커밋하고, 지우지 않는다**(지우면 그 빌드의 저장이 다시 거부된다). 옛 해시의 체크포인트는 그 지도를 찾아 오브젝트 상태를 지금 번호로 옮긴 뒤 다시 적는다(처음 것은 `.bak`). 번호는 층을 가로지르는 카운터라 층 안의 순서로 짝짓는다: 그대로인 층은 그대로, 바뀐 층은 가장 높이 올라온 층(`FirstEnterMapCheck`) 아래면 다 쓴 것(공짜 경험치도 막힌 길도 없다), 그 층과 위면 새 판처럼. 지금 층이 아니라 가장 높은 층으로 가르는 것은 워프 때문이다. 바뀐 층에 서 있었으면 같은 입구로 옮긴다. 장부·기록·이야기·능력치는 그대로. 고치면 `SaveMigration.SelfTest()`(에디터: `FastChecks.EditorBootData()` 먼저)가 OK 여야 한다.
 - ScriptData 는 **JSON 이 원본**이고 CSV 는 생성기가 JSON 에서 다시 쓴다. CSV 만 고치면 사라진다.
   줄바꿈은 **백슬래시와 n 두 글자**로 적는다(실제 줄바꿈 문자를 넣으면 CSV 가 여러 줄로 쪼개진다).

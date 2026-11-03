@@ -104,22 +104,15 @@ public static class Records
         {
             if (s_data != null)
                 return s_data;
-            s_data = new Data();
-            try
+            // 깨졌으면 .bak 을 읽는다(SaveStore.ReadText) — 깨진 본 파일은 .corrupt 로 비켜 두어 빈 기록으로 덮지 않는다.
+            bool any = File.Exists(FilePath) || File.Exists(FilePath + ".bak");
+            s_data = SaveStore.ReadText(FilePath, JsonConvert.DeserializeObject<Data>) ?? new Data();
+            if (any == false)
             {
-                if (File.Exists(FilePath))
-                    s_data = JsonConvert.DeserializeObject<Data>(File.ReadAllText(FilePath)) ?? new Data();
-                else
-                {
-                    // 예전에는 마지막으로 본 결말 하나만 PlayerPrefs 에 남았다 — 처음 한 번 옮겨 적는다.
-                    string last = PlayerPrefs.GetString(StoryDirector.ClearedEndingKey, "");
-                    if (string.IsNullOrEmpty(last) == false)
-                        s_data.Endings.Add(last);
-                }
-            }
-            catch (Exception e) when (SaveStore.IsSaveError(e))
-            {
-                Debug.LogWarning($"[Records] {FileName} 를 읽지 못했다 — 빈 기록으로 센다: {e.Message}");
+                // 예전에는 마지막으로 본 결말 하나만 PlayerPrefs 에 남았다 — 처음 한 번 옮겨 적는다.
+                string last = PlayerPrefs.GetString(StoryDirector.ClearedEndingKey, "");
+                if (string.IsNullOrEmpty(last) == false)
+                    s_data.Endings.Add(last);
             }
             return s_data;
         }
@@ -132,13 +125,7 @@ public static class Records
             return;
         try
         {
-            Directory.CreateDirectory(SaveStore.DirectoryPath);
-            string temp = FilePath + ".tmp";
-            File.WriteAllText(temp, JsonConvert.SerializeObject(s_data));
-            if (File.Exists(FilePath))
-                File.Replace(temp, FilePath, null);
-            else
-                File.Move(temp, FilePath);
+            SaveStore.WriteText(FilePath, JsonConvert.SerializeObject(s_data));
         }
         catch (Exception e) when (SaveStore.IsSaveError(e))
         {

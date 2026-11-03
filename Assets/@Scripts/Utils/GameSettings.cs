@@ -48,6 +48,12 @@ public static class GameSettings
         set { s_language = value; PlayerPrefs.SetInt(KeyLanguage, (int)value); Commit(); }
     }
 
+    /// <summary>언어를 고른 적이 있다. 없으면 Steam 의 게임 언어를 따른다(SteamManager).</summary>
+    public static bool LanguageChosen => PlayerPrefs.HasKey(KeyLanguage);
+
+    /// <summary>이번 실행만의 언어 — 남기지 않는다(고른 것이 아니다). 켜자마자(설정을 맞추기 전에) 부른다.</summary>
+    public static void UseLanguageForSession(Define.ScriptType value) => s_language = value;
+
     // 화면 흔들림. 멀미하는 사람을 위해 끌 수 있다.
     public static bool ScreenShake
     {

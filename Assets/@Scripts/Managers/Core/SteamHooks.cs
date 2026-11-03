@@ -43,7 +43,9 @@ public static class SteamHooks
     static bool s_spillUnsaved;
     static int s_presenceFloor = -1;    // Rich Presence 에 마지막으로 적은 층 (stageId). -1 은 비웠다
 
-    static readonly HashSet<string> s_asked = new HashSet<string>();   // 이번 실행에 Steam 에 물어본 업적
+    static readonly HashSet<string> s_asked = new HashSet<string>();   // 이번 실행에 Steam 이 답한 업적
+    static bool s_storeDirty;           // 올릴 업적·통계가 있다 — Flush 가 1초에 한 번 StoreStats
+    static float s_nextStore;
 
     // 판 점수(RunScored)와 결말(EndingReached)은 어느 쪽이 먼저 올지 모른다 — 둘이 모이면 올린다. 결말 뒤 엔딩 씬까지는
     // 그 판이라 거기서 점수가 와도 결말을 붙인다. 결말이 오지 않은 채 게임 화면·타이틀이 서면(결말을 이미 본 판·선택 전에 끔)
@@ -69,6 +71,8 @@ public static class SteamHooks
         s_spillUnsaved = false;
         s_presenceFloor = -1;
         s_asked.Clear();
+        s_storeDirty = false;
+        s_nextStore = 0f;
         s_ending = null;
         s_uploading = false;
         s_find = null;          // 지난 플레이의 답 기다리기는 SteamAPI.Shutdown 이 이미 풀었다
@@ -277,28 +281,45 @@ public static class SteamHooks
         RaiseStat("ENDINGS_SEEN", seen);
         RaiseStat("FIGHTS_WON", Records.FightsWon);
         RaiseStat("DEATHS", Records.Deaths);
-        SteamUserStats.StoreStats();
     }
 
     // 올리기만 한다 — 다른 PC 나 클라우드가 붙기 전의 Records 는 비어 있어서, 그대로 옮기면 Steam 의 값을 깎는다.
     // 켠 직후라 값을 아직 못 받았거나 Steamworks 에 없는 통계면 GetStat 이 거짓이다 — 건너뛰고 다음 층에서 다시 온다.
     static void RaiseStat(string name, int value)
     {
-        if (SteamUserStats.GetStat(name, out int current) && current < value)
-            SteamUserStats.SetStat(name, value);
+        if (SteamUserStats.GetStat(name, out int current) && current < value && SteamUserStats.SetStat(name, value))
+            s_storeDirty = true;
     }
 
-    // 실행마다 id 하나에 한 번만 묻는다(HUD 가 그릴 때마다 계약을 다시 묻지 않게). 이미 풀린 것은 조용히 넘기고,
-    // 푼 것과 거절된 것은 한 줄 적는다 — 앱 등록 전(Spacewar 480)에는 전부 거절로 찍히니 그 줄로 어느 업적이 걸리는지 본다.
-    // 올려야(StoreStats) 풀리고 알림도 그때 뜬다.
+    /// <summary>모아 둔 업적·통계를 올린다(Managers.Update → SteamManager.RunCallbacks). Valve 는 StoreStats 를 몇 분 단위로 막을 수
+    /// 있다고 해서, 한 프레임에 몰린 해제(본편을 처음 켤 때의 SyncRecords)와 층마다의 통계를 1초에 한 번으로 묶는다. 알림은 올릴 때 뜬다.
+    /// 받지 않으면 10초 뒤 다시 올린다(끌 때 Steam 이 한 번 더 올린다).</summary>
+    public static void Flush()
+    {
+        if (s_storeDirty == false || Time.unscaledTime < s_nextStore || Active == false)
+            return;
+        bool ok = SteamUserStats.StoreStats();
+        s_storeDirty = ok == false;
+        s_nextStore = Time.unscaledTime + (ok ? 1f : 10f);
+        if (ok == false)
+            Debug.LogWarning("[Steam] StoreStats — Steam 이 받지 않았다(10초 뒤 다시)");
+    }
+
+    // Steam 이 답한 id 는 실행마다 한 번만 묻는다(HUD 가 그릴 때마다 계약을 다시 묻지 않게). 답하지 않은 것(Steamworks 에
+    // 아직 Publish 안 된 업적·통계를 못 받은 직후)은 다음에 다시 묻는다 — 예전에는 묻기 전에 적어서, 업적을 올리기 전에 켠
+    // 실행의 해제는 그 판 내내 사라졌다(ACH_SLIVER 처럼 Records 가 다시 주지 않는 것은 영영). 올려야(Flush) 풀리고 알림도 그때 뜬다.
     static void Unlock(string id)
     {
-        if (Active == false || s_asked.Add(id) == false)
+        if (Active == false || s_asked.Contains(id))
             return;
-        if (SteamUserStats.GetAchievement(id, out bool achieved) && achieved)
+        if (SteamUserStats.GetAchievement(id, out bool achieved) == false)
             return;
-        bool ok = SteamUserStats.SetAchievement(id) && SteamUserStats.StoreStats();
-        Debug.Log(ok ? $"[Steam] 업적 {id}" : $"[Steam] 업적 {id} — Steam 이 받지 않았다 (Steamworks 에 없는 id)");
+        s_asked.Add(id);
+        if (achieved)
+            return;
+        bool ok = SteamUserStats.SetAchievement(id);
+        s_storeDirty |= ok;
+        Debug.Log(ok ? $"[Steam] 업적 {id}" : $"[Steam] 업적 {id} — Steam 이 받지 않았다");
     }
 
     #region 순위표

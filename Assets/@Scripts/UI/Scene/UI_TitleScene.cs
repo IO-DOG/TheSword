@@ -398,7 +398,17 @@ public class UI_TitleScene : UI_Scene
         //test
         Managers.Game.PlayerData.Ability = (int)Define.Trait.None;
         Debug.Log("Cllck OnClickNewGameButton");
-        Managers.Game.DeleteGameData();
+        // 지우다 던지면(읽기 전용·다른 프로그램이 쥔 파일) 코루틴이 죽어 검은 화면에 잠긴 채 멈췄다 — 알리고 타이틀로 돌아간다.
+        try { Managers.Game.DeleteGameData(); }
+        catch (System.Exception ex) when (SaveStore.IsSaveError(ex))
+        {
+            Debug.LogError($"[Title] 새 게임 — 지난 저장을 지우지 못했다: {ex.Message}");
+            GetImage((int)Images.BlackBGImage).gameObject.SetActive(false);
+            _lock = false;
+            GetImage((int)Images.Buttons).gameObject.SetActive(false);
+            ShowNotice(Managers.GetString(Define.SAVE_DELETE_FAILED));
+            yield break;
+        }
         Managers.Game.SetMode(GameEvents.IsAutoPlaying ? AutoPlayer.StartMode : _mode);   // 판을 새로 세운 뒤(Clear 가 보통으로 되돌린 뒤)에 적는다 — 몬스터 표도 같이 바뀐다
         SetPlayerInitSetting();
         Managers.Scene.LoadScene(Define.Scene.IntroScene);

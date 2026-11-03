@@ -148,32 +148,34 @@ public static class SaveStore
         ? Directory.GetFiles(directory, HistoryPrefix + "*.json").OrderByDescending(f => File.GetLastWriteTimeUtc(f))
         : Enumerable.Empty<string>();
 
-    /// <summary>지금의 Checkpoint.json 을 그 층의 사본으로 복사하고, 오래된 것은 지운다.</summary>
+    /// <summary>지금의 Checkpoint.json 을 그 층의 사본으로 복사하고, 오래된 것은 지운다. 방금 쓴 것은 지우지 않는다 — 시계가 뒤로
+    /// 가면(CMOS·덱의 틀린 시각) 그것이 가장 옛것으로 보여 바로 지워졌다.</summary>
     public static void WriteHistory(string directory, int stage)
     {
-        File.Copy(Path.Combine(directory, FileName),
-            Path.Combine(directory, $"{HistoryPrefix}{stage:000}.json"), true);
-        foreach (string old in HistoryFiles(directory).Skip(HistoryLimit).ToList())
+        string copy = Path.Combine(directory, $"{HistoryPrefix}{stage:000}.json");
+        File.Copy(Path.Combine(directory, FileName), copy, true);
+        foreach (string old in HistoryFiles(directory)
+                     .Where(f => string.Equals(Path.GetFullPath(f), Path.GetFullPath(copy), StringComparison.OrdinalIgnoreCase) == false)
+                     .Skip(HistoryLimit - 1).ToList())
             File.Delete(old);
     }
 
-    /// <summary>층별 사본, 최근 것부터 HistoryLimit 개. 읽히지 않는 것은 뺀다.</summary>
+    /// <summary>층별 사본, 최근 것부터 HistoryLimit 개. 읽히지 않는 것은 뺀다. 순서는 플레이 시간(줄지 않는다)이다 — 파일 시각은
+    /// 시계가 뒤로 가거나 Steam 클라우드에서 내려받으면 어긋난다.</summary>
     public static List<CheckpointInfo> History(string directory)
     {
-        var found = new List<CheckpointInfo>();
+        var found = new List<(float time, CheckpointInfo info)>();
         foreach (string path in HistoryFiles(directory))
         {
-            if (found.Count == HistoryLimit)
-                break;
             if (!TryReadFile(path, out Snapshot s, out _))
                 continue;
-            found.Add(new CheckpointInfo {
+            found.Add((s.PlayTime, new CheckpointInfo {
                 File = path, Stage = s.Player.CurStageid, Level = s.Player.Level,
                 Hp = Mathf.CeilToInt(s.Player.CurHP), MaxHp = Mathf.CeilToInt(s.Player.MaxHP),
                 SavedAt = File.GetLastWriteTime(path)
-            });
+            }));
         }
-        return found;
+        return found.OrderByDescending(f => f.time).Take(HistoryLimit).Select(f => f.info).ToList();
     }
 
     public static void Write(string directory, Snapshot value)
@@ -200,12 +202,79 @@ public static class SaveStore
         else File.Move(temp, path);
     }
 
-    public static void Delete(string directory)
+    /// <summary>새 게임. 이 빌드가 읽지 못하는 저장(keepAside)은 지우지 않고 Unreadable/<시각>/ 으로 옮긴다 — 타이틀이 "원본은
+    /// 보존됩니다" 라고 약속했고, 지도 보관 파일이 빠진 패치(K1) 뒤라면 다음 패치가 그것을 살릴 수 있다. Steam 클라우드는 맨 위
+    /// 폴더의 이름 적힌 파일만 올린다. 읽기 전용 파일도 지운다(지우다 던지면 새 게임이 검은 화면에서 멈췄다).</summary>
+    public static void Delete(string directory, bool keepAside = false)
     {
+        var files = new List<string>();
         foreach (var suffix in new[] { "", ".bak", ".tmp" })
-            File.Delete(Path.Combine(directory, FileName + suffix));
+            files.Add(Path.Combine(directory, FileName + suffix));
         // 새 게임에 지난 판의 층별 사본이 남아 있으면 "되돌아가기" 가 옛 판으로 간다.
-        foreach (string old in HistoryFiles(directory).ToList())
-            File.Delete(old);
+        files.AddRange(HistoryFiles(directory));
+        string aside = keepAside ? Path.Combine(directory, "Unreadable", DateTime.Now.ToString("yyyyMMdd-HHmmss")) : null;
+        foreach (string file in files)
+        {
+            if (File.Exists(file) == false)
+                continue;
+            File.SetAttributes(file, FileAttributes.Normal);
+            if (aside == null)
+            {
+                File.Delete(file);
+                continue;
+            }
+            Directory.CreateDirectory(aside);
+            File.Move(file, Path.Combine(aside, Path.GetFileName(file)));
+        }
+    }
+
+    /// <summary>작은 기록 파일(Records.json·StorySeen.json)을 체크포인트처럼 쓴다: 임시 파일을 디스크까지 내린 뒤 바꿔 끼우고 앞의 것은
+    /// .bak. File.WriteAllText 는 디스크까지 내리지 않아서, 싸움 직후 전원이 나가면 NUL 로 찬 파일이 남고 다음 판에 빈 기록으로 덮였다.</summary>
+    public static void WriteText(string path, string text)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(path));
+        string temp = path + ".tmp";
+        using (var stream = new FileStream(temp, FileMode.Create, FileAccess.Write, FileShare.None))
+        using (var writer = new StreamWriter(stream, new UTF8Encoding(false)))
+        {
+            writer.Write(text);
+            writer.Flush();
+            stream.Flush(true);
+        }
+        if (File.Exists(path))
+            File.Replace(temp, path, path + ".bak");
+        else
+            File.Move(temp, path);
+    }
+
+    /// <summary>WriteText 로 쓴 파일을 읽는다. 본 파일이 깨졌으면 .corrupt 로 비켜 두고 .bak 을 읽는다 — 깨진 것을 .bak 으로 밀어
+    /// 좋은 사본을 덮거나, 그 위에 빈 기록을 쓰지 않는다. 없거나 둘 다 못 읽으면 null.</summary>
+    public static T ReadText<T>(string path, Func<string, T> parse) where T : class
+    {
+        if (TryParse(path, parse, out T value))
+            return value;
+        if (File.Exists(path))
+        {
+            try
+            {
+                File.Copy(path, path + ".corrupt", true);
+                File.Delete(path);
+            }
+            catch (Exception ex) when (IsSaveError(ex))
+            {
+                Debug.LogWarning($"[Save] {Path.GetFileName(path)} 를 비켜 두지 못했다: {ex.Message}");
+            }
+        }
+        return TryParse(path + ".bak", parse, out value) ? value : null;
+    }
+
+    static bool TryParse<T>(string path, Func<string, T> parse, out T value) where T : class
+    {
+        value = null;
+        if (File.Exists(path) == false)
+            return false;
+        try { value = parse(File.ReadAllText(path)); }
+        catch (Exception ex) when (IsSaveError(ex)) { Debug.LogWarning($"[Save] {Path.GetFileName(path)} 를 읽지 못했다: {ex.Message}"); }
+        return value != null;
     }
 }

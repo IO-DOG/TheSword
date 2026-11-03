@@ -6,6 +6,7 @@ public class Define
 {
     public const int TITLE_START = 140, TITLE_NEW = 141, TITLE_CONTINUE = 142;
     public const int TITLE_PRESS_KEY = 143, TITLE_LOAD_FAILED = 144, TITLE_SAVE_FAILED = 145;
+    public const int SAVE_FAILED_PLAY = 150, SAVE_DELETE_FAILED = 151;   // Tools/ui_text_parts/save.py
     public const int REWARD_CHOICE = 146;
 
     public static Vector3 DEFALUT_CAMERA_OFFSET = new Vector3(0f, 10f, -5f);
