@@ -52,8 +52,10 @@ public class BossDoor : PortalController
         Managers.Game.OnDirect = false; 
         Managers.Game.DirectionalLight.color = originLightColor;
 
-        // Sound
-        Managers.Sound.Play(Define.Sound.Bgm, "Boss_Entry_BGM");
+        // Sound — 킹 슬라임이 이미 쓰러졌으면(워프로 돌아와 다시 들어간다) 보스곡을 틀지 않는다. 같은 챕터 계단은 곡을 되돌리지 않아
+        // 그 곡이 20층까지 돌았다. 이 문은 손수 만든 2층에만 있다(보스 포탈 셀 16 을 쓰는 층이 그 하나다).
+        if (Managers.Data.MonsterActiveDic.TryGetValue(GameManager.KingSlimeActiveIndex, out bool kingAlive) == false || kingAlive)
+            Managers.Sound.Play(Define.Sound.Bgm, "Boss_Entry_BGM");
 
         yield return new WaitForSeconds(5f);
 

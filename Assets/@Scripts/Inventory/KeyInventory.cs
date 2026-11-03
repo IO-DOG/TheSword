@@ -79,11 +79,46 @@ public class KeyInventory
         int idx = d._keyIndex;
         if (idx < 0 || idx >= _keys.Count || _keys[idx] == 0)
             return false;
+        int stranded = StrandedFloor(d);
+        if (stranded > 0)
+        {
+            UI_ConfirmPopup.Tell(string.Format(Managers.GetString(Define.VAULT_KEY_NEEDED), stranded));
+            return false;
+        }
 
         Managers.Data.DoorActiveDic[d._doorIndex_forActive] = false;
         _keys[idx]--;
         ShowKeySlot(Managers.Game.Player._keyInventory);
         return true;
+    }
+
+    /// <summary>
+    /// 아래층 금고(네 번째 문)에 이 열쇠를 쓰면 가장 높이 올라온 층의 큰길 문을 열 열쇠가 모자라는가 — 그 층 번호(1 부터), 아니면 0.
+    /// 큰길 열쇠는 층마다 문 수만큼만 있다. 위층 첫 구역의 초록 열쇠는 내려가는 계단 옆이고 아래층 금고는 올라오는 계단 옆이라,
+    /// 내려가 금고를 열고 오면 그 층을 영영 못 넘었고 오르내릴 때마다 체크포인트도 그 상태로 덮였다.
+    /// 같은 층의 금고는 마지막 구역에 있어(layout_gen.check_vault_safe) 그 앞에서는 큰길 문이 다 열려 있다 — 늘 0 이다.
+    /// ponytail: 아직 안 주운 여분 열쇠는 세지 않는다 — 줍고 오면 열린다.
+    /// </summary>
+    int StrandedFloor(Door door)
+    {
+        GameManager.CurPlayerData p = Managers.Game.PlayerData;
+        int floor = p.CurStageid + 1;
+        if (floor >= GeneratedStory.VaultDoors.Length || GeneratedStory.VaultDoors[floor] != door._doorIndex_forActive)
+            return 0;
+        int top = p.FirstEnterMapCheck != null ? p.FirstEnterMapCheck.LastIndexOf(true) : -1;
+        if (top <= p.CurStageid || Managers.Data.MapDic.TryGetValue(top, out MapData map) == false || map.Objects == null)
+            return 0;
+
+        int topVault = top + 1 < GeneratedStory.VaultDoors.Length ? GeneratedStory.VaultDoors[top + 1] : -1;
+        int need = 0;
+        foreach (ObjectData obj in map.Objects)
+        {
+            // 색은 MapBuilder.BuildDoor 와 같은 셈 — 셀 코드 3·6 초록, 4·7 노랑, 5·8 빨강.
+            if (obj.ObjectType == (int)Define.ObjectType.Door && obj.Count != topVault && (obj.Id - 3) % NUM_OF_KEYS == door._keyIndex
+                && Managers.Data.DoorActiveDic.TryGetValue(obj.Count, out bool closed) && closed)
+                need++;
+        }
+        return _keys[door._keyIndex] - 1 < need ? top + 1 : 0;
     }
 
     public void ShowKeySlot(GameObject keyInventory)

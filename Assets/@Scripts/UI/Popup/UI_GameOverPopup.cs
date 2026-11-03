@@ -129,12 +129,10 @@ public class UI_GameOverPopup : UI_Popup
     static void Restart()
     {
         GameEvents.RespawnPending = true;
+        // 치명 횟수(AttackCount)는 LoadGame 이 체크포인트 값으로 되돌린다 — "이 층 다시 시작" 과 같다. 예전에는 여기서 0 으로 지워
+        // 죽은 뒤에만 HUD 의 "치명까지 N타" 와 맵 위 예측이 체크포인트와 달랐다.
         if (Managers.Game.RestartFromCheckpoint())
-        {
-            // 죽을때 타격횟수 초기화
-            Managers.Game.AttackCount = 0;
             return;
-        }
 
         GameEvents.RespawnPending = false;
         Debug.LogError($"[GameOver] 체크포인트를 읽지 못해 타이틀로 간다: {Managers.Game.LastSaveError}");

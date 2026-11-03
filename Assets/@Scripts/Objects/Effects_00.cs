@@ -66,6 +66,18 @@ public class Effects_00 : MonoBehaviour
         StartCoroutine(FallingLeaves());
     }
 
+    // OnPortalAction 은 씬을 넘어 사는 GameManager 의 것이다. 위의 -= 는 이 객체의 것만 뺀다 — 죽을 때·다시 할 때·챕터를 지을 때마다
+    // 부서진 앞 객체의 넷이 남아 쌓였고, 계단·워프마다 전부 돌았다. 끄는 중(매니저가 먼저 부서졌다)에는 매니저를 새로 만들지 않는다.
+    void OnDestroy()
+    {
+        if (Managers.IsAlive == false || Managers.Game == null)
+            return;
+        Managers.Game.OnPortalAction -= SetFogPosition;
+        Managers.Game.OnPortalAction -= SetLight;
+        Managers.Game.OnPortalAction -= SetDustPosition;
+        Managers.Game.OnPortalAction -= ApplyAir;
+    }
+
     GameObject GetPooledObejct()
     {
         foreach (var obj in fallingLeaves)

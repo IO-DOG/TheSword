@@ -187,7 +187,12 @@ public class UI_GameScene : UI_Scene
             else
                 TryOpenMenu();
         });
-        GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(OnClickMainUIInventoryAImage);
+        // I 키와 같은 문 — 죽는 연출 동안(게임오버 배경이 아직 꺼져 있다) 눌리면 인벤토리가 맨 위에 서서 되살아나기 키를 막았다.
+        GetImage((int)Images.MainUIInventoryAImage).gameObject.BindEvent(() =>
+        {
+            if (Managers.UI.FindPopup<UI_InvenPopup>() != null || CanOpenPanel())
+                OnClickMainUIInventoryAImage();
+        });
 
         // HUD 에 워프 버튼과 그림은 진작 있었는데 아무 데도 연결돼 있지 않았다.
         GetImage((int)Images.MainUIWarpAImage).gameObject.BindEvent(() =>

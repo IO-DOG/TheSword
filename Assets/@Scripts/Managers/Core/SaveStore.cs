@@ -126,10 +126,10 @@ public static class SaveStore
     }
 
     // ---------------------------------------------------------------- 층별 사본
-    // 층에 들어설 때마다 방금 쓴 체크포인트를 그 층 이름으로 한 벌 더 둔다. 같은 층에
-    // 다시 오면 덮어쓴다 — 오르내리기만 해도 목록이 같은 두 층으로 차 버리면 쓸모가 없다.
-    // 체크포인트 하나로는 "피가 바닥인 채 저장된 층" 에 갇힐 수 있어서, 몇 층 앞으로
-    // 되돌아갈 길을 남긴다.
+    // 층에 처음 들어설 때 방금 쓴 체크포인트를 그 층 이름으로 한 벌 더 둔다. 층마다 한 벌이다 —
+    // 오르내리기만 해도 목록이 같은 두 층으로 차 버리면 쓸모가 없다. 다시 와도 덮지 않는다(GameManager.EnterFloor):
+    // 체크포인트 하나로는 "피가 바닥인 채 저장된 층" 에 갇힐 수 있어서 몇 층 앞으로 되돌아갈 길을 남기는 것인데,
+    // 갇힌 채 오르내릴 때마다 덮으면 그 길까지 갇힌 상태가 됐다.
 
     public struct CheckpointInfo
     {
@@ -149,10 +149,12 @@ public static class SaveStore
         : Enumerable.Empty<string>();
 
     /// <summary>지금의 Checkpoint.json 을 그 층의 사본으로 복사하고, 오래된 것은 지운다. 방금 쓴 것은 지우지 않는다 — 시계가 뒤로
-    /// 가면(CMOS·덱의 틀린 시각) 그것이 가장 옛것으로 보여 바로 지워졌다.</summary>
-    public static void WriteHistory(string directory, int stage)
+    /// 가면(CMOS·덱의 틀린 시각) 그것이 가장 옛것으로 보여 바로 지워졌다. replace 가 false 면 그 층의 사본이 이미 있을 때 두고 간다.</summary>
+    public static void WriteHistory(string directory, int stage, bool replace = true)
     {
         string copy = Path.Combine(directory, $"{HistoryPrefix}{stage:000}.json");
+        if (replace == false && File.Exists(copy))
+            return;
         File.Copy(Path.Combine(directory, FileName), copy, true);
         foreach (string old in HistoryFiles(directory)
                      .Where(f => string.Equals(Path.GetFullPath(f), Path.GetFullPath(copy), StringComparison.OrdinalIgnoreCase) == false)

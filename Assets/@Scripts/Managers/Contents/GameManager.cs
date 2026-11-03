@@ -1,5 +1,6 @@
 using Cinemachine;
 using Data;
+using DG.Tweening;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
@@ -428,7 +429,7 @@ public class GameManager
     }
 
     /// <summary>킹 슬라임만 쓰는 활성 번호. 맵 데이터의 카운터(수백 번대)와 마검 열쇠(9000)를 피한다.</summary>
-    const int KingSlimeActiveIndex = 9001;
+    public const int KingSlimeActiveIndex = 9001;
 
     /// <summary>분열 슬라임 셋(몬스터 9002~9004)과 노랑이 품은 물약(아이템 9001)의 활성 번호.
     /// 킹 슬라임이 죽을 때 연출이 새로 세우는 것이라(DirectingManager.SpawnSplitSlime/SpawnSplitPotion) 맵 데이터 번호가 없다.
@@ -668,7 +669,7 @@ public class GameManager
             return false;
         if (CanWarpTo(stageId) == false)
             return false;
-        if (OnBattle || OnFade || OnDirect || OnInteract)
+        if (OnBattle || OnFade || OnDirect || OnInteract || OnLever)     // 레버 몸짓의 끝(OnComplete)이 OnLever 를 푼다 — 아래 DOKill 이 끊으면 안 된다
             return false;
 
         // 층 번호부터 옮긴다. 카메라 경계·몬스터 배율·계단의 층 계산이 전부 CurStageid 를 읽는다.
@@ -685,6 +686,10 @@ public class GameManager
 
         Transform arrival = ArrivalPoint(stageId);
         Vector3 pos = arrival != null ? arrival.position : Player.transform.position;
+        // 한 걸음 도중에 워프하면 그 걸음(PlayerController.Moving 의 DOMove)이 끝까지 돌아 몸을 옛 층의 칸으로 되돌렸다 — 끊고 세운다.
+        // 부딪히는 몸짓(InteractAnim)은 OnInteract 를 쥐어 위에서 막혔다.
+        Player.transform.DOKill();
+        Player.SetIdleState(Player._moveDir);
         Player.transform.position = pos;
         Player._cellPos = pos;
 
@@ -744,7 +749,9 @@ public class GameManager
                 TellSaveFailed();
             else
             {
-                try { SaveStore.WriteHistory(SaveStore.DirectoryPath, PlayerData.CurStageid); }
+                // 층 사본은 처음 들어설 때의 것을 지킨다 — 다시 올 때마다 덮으면, 갇힌 채 오르내린 층의 사본이 전부 갇힌 상태가 됐다
+                // (아래층 금고에 큰길 열쇠를 쓴 판, 피가 바닥인 채 물약을 찾아 내려간 판). 지금 상태는 Checkpoint.json 이 쥔다(죽음·이 층 다시).
+                try { SaveStore.WriteHistory(SaveStore.DirectoryPath, PlayerData.CurStageid, replace: firstVisit); }
                 catch (Exception ex) when (SaveStore.IsSaveError(ex))
                 {
                     Debug.LogWarning($"[Save] Floor copy was not written: {ex.Message}");
