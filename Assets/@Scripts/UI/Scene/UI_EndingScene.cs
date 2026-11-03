@@ -153,9 +153,11 @@ public class UI_EndingScene : UI_Scene
     }
 
     // 기다린다. 2초가 지나면 아무 키로나 넘길 수 있다.
+    // 창을 내려 둔 동안(runInBackground 라 돈다)은 세지 않는다 — 크레딧 동안 Alt+Tab 하면 새벽 그림·판 카드가 보지도 못한 채
+    // 지나갔고, 판 카드는 다시 볼 길이 없다. 봇(StoryUI.Auto)은 늘 센다 — 에디터는 포커스 밖에서 돈다.
     static IEnumerator CoHold(float seconds)
     {
-        for (float t = 0f; t < seconds; t += Time.unscaledDeltaTime)
+        for (float t = 0f; t < seconds; t += Application.isFocused || StoryUI.Auto ? Time.unscaledDeltaTime : 0f)
         {
             if (t > 2f && (GameKeys.AnyDown || StoryUI.Auto))
                 yield break;
