@@ -182,7 +182,7 @@ public class WarpUI : MonoBehaviour
 
         TextMeshProUGUI help = CodeUI.NewText(box.transform, "Help", CodeUI.ProseFont, 24f, Soft, TextAlignmentOptions.Center);
         CodeUI.Place(help.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 20f), new Vector2(grid.x, 30f));
-        CodeUI.Fit(help, 24f).text = Managers.GetString(ForecastUI.WarpHelp);
+        PromptText.Set(CodeUI.Fit(help, 24f), ForecastUI.WarpHelp);
 
         RectTransform list = CodeUI.NewRect(box.transform, "Floors");
         CodeUI.Place(list, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -80f), grid);

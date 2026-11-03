@@ -223,7 +223,8 @@ public class UI_BattlePopup : UI_Popup
             label.fontSharedMaterial = outline;
             CodeUI.Stretch(label.rectTransform).offsetMin = new Vector2(20f, 0f);
             label.rectTransform.offsetMax = new Vector2(-20f, 0f);
-            CodeUI.Fit(label, 14f).text = $"<color=#F0D28A>{i + 1}</color>  {Managers.GetString(SkillTextIds[i])}";
+            int skill = i;
+            PromptText.Set(CodeUI.Fit(label, 14f), () => $"<color=#F0D28A>{PromptText.SkillKey(skill)}</color>  {Managers.GetString(SkillTextIds[skill])}");
 
             _skillSlots[i] = slot.gameObject.AddComponent<CanvasGroup>();
             _skillPainted[i] = !BattleSkills.IsUsed(i);     // 처음 한 번은 반드시 칠한다
@@ -270,7 +271,7 @@ public class UI_BattlePopup : UI_Popup
         hold.fontSharedMaterial = outline;
         CodeUI.Place(hold.rectTransform, new Vector2(0.5f, 0f), new Vector2(bar ? 1f : 0.5f, 0f),
             new Vector2(bar ? -(SkillBarWidth / 2f + SkillGap) : 0f, SkillBottom), new Vector2(HintWidth, SkillHeight));
-        CodeUI.Fit(hold, 12f).text = Managers.GetString(HoldHintText);
+        PromptText.Set(CodeUI.Fit(hold, 12f), HoldHintText);
 
         if (_skipAllowed == false)
             return;
@@ -284,7 +285,7 @@ public class UI_BattlePopup : UI_Popup
         label.fontSharedMaterial = outline;
         CodeUI.Stretch(label.rectTransform).offsetMin = new Vector2(20f, 0f);
         label.rectTransform.offsetMax = new Vector2(-20f, 0f);
-        CodeUI.Fit(label, 14f).text = Managers.GetString(SkipText);
+        PromptText.Set(CodeUI.Fit(label, 14f), SkipText);
         button.gameObject.BindEvent(Skip);
         _skipButton = button.gameObject;
         _skipButton.SetActive(false);
@@ -300,7 +301,7 @@ public class UI_BattlePopup : UI_Popup
         TextMeshProUGUI told = CodeUI.NewText(band.transform, "Text", font, 26f, Gold, TextAlignmentOptions.Center);
         told.fontSharedMaterial = outline;
         CodeUI.Stretch(told.rectTransform);
-        CodeUI.Fit(told, 14f).text = Managers.GetString(SkipToldText);
+        PromptText.Set(CodeUI.Fit(told, 14f), SkipToldText);
         // OnStart 는 지연(4초)이 끝난 뒤에 불린다. 그 전에 창이 닫히면 SetLink 가 트윈을 죽여 다음 싸움에서 다시 띄운다.
         band.gameObject.AddComponent<CanvasGroup>().DOFade(0f, 1f).SetDelay(4f).SetLink(band.gameObject)
             .OnStart(() => PlayerPrefs.SetInt(SkipToldPref, 1));

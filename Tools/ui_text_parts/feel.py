@@ -17,7 +17,7 @@ TEXT = {
     414: ("{0}이면 {1}→{2}", "With {0}: {1}→{2}", "{0} なら {1}→{2}", "{0} 时 {1}→{2}"),
     # Potion floating text when healing spills over max HP: "40 (80 wasted)". {0} = HP wasted. Same words as the
     # potion tooltip's 284 so the float and the tooltip read alike.
-    415: ("(넘침 {0})", "({0} wasted)", "({0} 無駄)", "(溢出 {0})"),
+    415: ("(넘침 {0})", "({0} wasted)", "(溢れ {0})", "(溢出 {0})"),
 }
 
 

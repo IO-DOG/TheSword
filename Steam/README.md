@@ -125,6 +125,26 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
 
 ## 3. 일정
 
+길은 둘이다. 어느 쪽이든 Steamworks 가입·크레딧 결제(오너)가 첫 칸이고, **결제한 날부터 21일**이 지나야 출시 단추가 열린다 [S1].
+
+**가장 빠른 길 — 2026-12-03(목) 출시** (11-04 에 결제한다고 치면. 2026-11-03 Steamworks 문서로 다시 확인)
+
+| 언제 | 할 일 | 근거 |
+|---|---|---|
+| 11-04 | 가입·$100 결제·세금/은행 → 본편·체험판 앱 만들기 → AppID·DepotID 네 개를 Claude 에 알린다 | 세금 확인은 최대 30일 걸릴 수 있다 [S1] |
+| 11-04~05 | Claude: 번호 채우고 다시 빌드. 오너: `upload.ps1`(Steam 로그인·Steam Guard) → beta | |
+| 11-05 | 스토어 페이지를 채우고 **Mark As Ready For Review** (원하면 Claude 가 크롬으로 채운다 — 로그인·서명은 오너) | 검토 3~5 영업일, Coming Soon 7일 전에 낸다 [S5] |
+| ~11-12 | 통과하면 **Coming Soon** 공개 — 찜이 쌓이기 시작한다 | 출시 2주 전까지 떠 있어야 한다 [S6] |
+| ~11-16 | 빌드를 default 에 켜고 빌드 검토 제출 | 3~5 영업일 [S5] |
+| 11-25 | 결제 21일 | [S1] |
+| 11-26 | Coming Soon 2주 | [S6] |
+| **12-03(목)** | 출시(단추는 손으로 누른다) — 미국 추수감사절 주(11-26)를 피했다 | [S7] |
+
+- Winter Sale(12-17 ~ 1-04)에는 할인으로 못 들어간다 — 행사 시작 30일 전에 나온 게임만 된다(11-17 까지 출시). 출시 할인은 따로 걸 수 있다.
+- 이 길은 찜이 2~3주밖에 안 쌓인다. 처음 내는 소규모 게임은 찜 수가 첫 주 노출을 가른다 — 그래서 아래 Next Fest 길을 권한다(오너 결정).
+
+**Next Fest 길 — 2027-03-01 이후 출시** (아래 표. MASTER_PLAN W6 은 5월. Spring Sale 3-18 ~ 3-25 주는 피한다)
+
 | 언제 | 할 일 |
 |---|---|
 | 지금 (W0) | 가입·크레딧(21일 시계가 돈다), K0 커밋, 이름·부제 |
@@ -204,7 +224,7 @@ App Admin → Application → **Steam Cloud** [S9].
       공식 키보드 설정(Workshop 파일 ID)은 만들지 않는다(`deck.md`).
 - [ ] Deck 에서 1~5층 막힘 없음. 그리고 우리 목표(MASTER_PLAN 종료 기준 7): 1280×800 에서 글자 9px 이상, 30fps 이상.
       이 둘은 Valve 의 **Verified** 항목이다 — 어겨도 대개 Playable 로 나오지만, 우리 기준이라 출시 전에 맞춘다 [S13].
-- [ ] 검토 신청: 빌드 검토를 통과한 뒤 앱 랜딩 페이지 → Technical Tools → *Steam Hardware Compatibility Review*. 목표는 **Playable**, Verified 는 출시 뒤.
+- [ ] 검토 신청: 빌드 검토를 통과한 뒤 앱 랜딩 페이지 → Technical Tools → *Steam Hardware Compatibility Review*. Verified 의 글리프·글자 9px 항목은 맞췄다(2026-11-03, `deck.md`) — 신청해서 실기 결과를 본다. 못 받아도 Playable 이면 출시에 문제없다.
       **이 링크는 모든 파트너에게 열려 있지 않다.** 없으면 Valve 가 검토 대기열에 올리기를 기다린다(Valve 가 고르거나, 출시 뒤 자동 기준에 걸릴 때) [S13].
 
 ## 7. 스토어 페이지

@@ -13,6 +13,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 (BroAudio 는 2026-11-03 에 뺐다 — 코드·에셋 참조가 0 인데 데모 오디오 ~10MB 가 Resources 로 빌드에 실렸다. 원본은 `../_TheSword_removed/`.)
 
 **키 입력은 `GameKeys` 로 읽는다**(`Input.GetKey*` 직접 호출 금지) — 그래야 패드(XInput, Deck)가 같이 돈다. 목록 이동은 `GameKeys.Nav`.
+**키 이름이 든 안내는 `PromptText.Set(text, id)`(한 번 띄우고 마는 글은 `PromptText.Get`)로 띄운다** — 마지막에 쓴 장치가 패드면 짝 문구(`Tools/ui_text_parts/pad.py` 의 `TWIN`)로
+바꾸고 장치가 바뀌면 다시 칠한다(Steam Deck Verified: 쓰지 않는 장치의 글리프 금지). 새 키 안내에 짝이 없으면 `validate_content` 가 멈춘다(프리팹에 박힌 글은 못 본다 — 인트로의 "ESC" 가 그랬다). 패드인 동안 커서·마우스 툴팁은 숨는다.
+장치 판정은 `GameKeys.UsingPad` — 패드 단추·축이면 패드, 키·마우스 단추·휠·"Mouse X/Y" 축으로 잰 실제 움직임이면 키보드(커서 좌표로 재면 창 크기만 바꿔도 넘어갔다).
+확인: `dotnet run --project Tools/gamekeys_check`.
 패드 축 이름(`PadDPadX/Y`, `PadLT/RT`, `PadRStickY`)은 Input Manager 에 있어야 하고, 없으면 버튼만 돈다.
 
 커밋 메시지는 한국어 + `[ADD]`/`[FIX]` 태그 컨벤션.

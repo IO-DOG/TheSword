@@ -771,10 +771,10 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>클릭으로 걸어도 되는가. 흐름이 캐릭터를 쥐었거나(전투·대화·연출·문·계단·레버·입력 잠금), 창이 맵을
-    /// 덮었거나(층·보스 이름과 인벤토리는 괜찮다 — UI_GameScene.CanShowTooltip), 키보드로 걷는 중이면 아니다.</summary>
+    /// 덮었거나(층·보스 이름과 인벤토리는 괜찮다 — UI_GameScene.MapFree), 키보드로 걷는 중이면 아니다.</summary>
     static bool CanClickWalk()
     {
-        return IsBusy() == false && IsHeld() == false && UI_GameScene.CanShowTooltip()
+        return IsBusy() == false && IsHeld() == false && UI_GameScene.MapFree()
                && GameKeys.Held(KeyCode.W) == false && GameKeys.Held(KeyCode.A) == false
                && GameKeys.Held(KeyCode.S) == false && GameKeys.Held(KeyCode.D) == false;
     }

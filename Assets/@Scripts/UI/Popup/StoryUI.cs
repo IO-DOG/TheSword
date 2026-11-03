@@ -77,7 +77,7 @@ public static class StoryUI
         }
         if (s_hint == null)
             BuildSkipHint();
-        int id = seen ? SkipSeenHint : SkipHoldHint;
+        int id = PromptText.Id(seen ? SkipSeenHint : SkipHoldHint);     // 패드면 "LB 길게"
         if (id != s_hintId || s_hintLang != GameSettings.Language)     // 매 프레임 찾지 않는다
         {
             s_hintId = id;
@@ -101,6 +101,7 @@ public static class StoryUI
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.matchWidthOrHeight = 0.5f;
+        WideScreenCanvas.Attach(go);
         s_hint = go.AddComponent<CanvasGroup>();
         s_hint.interactable = false;
         s_hint.blocksRaycasts = false;

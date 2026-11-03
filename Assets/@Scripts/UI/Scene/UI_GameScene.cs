@@ -85,6 +85,7 @@ public class UI_GameScene : UI_Scene
     CanvasGroup _hint;
     TMP_Text _hintText;
     float _hintUntil;
+    int _hintDevice;
 
     public override bool Init()
     {
@@ -424,8 +425,13 @@ public class UI_GameScene : UI_Scene
     /// 자리인데 맵 위 숫자는 창 밑에서 숨으니, 그때 예측을 보는 곳은 툴팁뿐이다.
     /// ponytail: 판 위에서도 그 밑의 몬스터를 짚는다(커서도 돋보기가 된다) — 예전과 같다. 툴팁 캔버스(0)가 판(10~)
     /// 밑이라 판의 클릭은 막지 않는다. 거슬리면 판(Inventory_Frame) 안의 마우스를 뺀다.
+    /// 패드를 쓰는 동안은 아니다(GameKeys.UsingPad) — 커서가 숨어 있고, 걷는 동안 그 밑을 지나는 몬스터마다 툴팁이 뜬다.
     /// </summary>
-    public static bool CanShowTooltip() =>
+    public static bool CanShowTooltip() => GameKeys.UsingPad == false && MapFree();
+
+    /// <summary>맵 위 숫자가 보이고 워프 창이 맵을 덮지 않았다 — 툴팁의 조건에서 장치만 뺀 것. 클릭 걷기(PlayerController)가 쓴다:
+    /// 덱의 트랙패드로 누른 걸음이 오른쪽 스틱 줌(패드) 한 번에 끊기면 안 된다.</summary>
+    public static bool MapFree() =>
         ForecastOverlay.MapInView(besideInventory: true) && (WarpUI.Instance == null || WarpUI.Instance.IsOpen == false);
 
     void ShowInfo()
@@ -535,9 +541,9 @@ public class UI_GameScene : UI_Scene
         {
             _keysHintShown = true;
             PlayerPrefs.SetInt(KeysHintPref, 1);
-            ShowHint(Managers.GetString(ForecastUI.HintKeys), 6f);
+            ShowHint(PromptText.Get(ForecastUI.HintKeys), 6f);
         }
-        else if (_clickHintShown == false && _keysHintShown && GameEvents.IsAutoPlaying == false
+        else if (_clickHintShown == false && _keysHintShown && GameEvents.IsAutoPlaying == false && GameKeys.UsingPad == false
             && Managers.Game.PlayerData.CurStageid >= 4 && CanOpenPanel() && Managers.UI.TopPopup == null
             && (_hint == null || _hint.gameObject.activeSelf == false))
         {
@@ -547,8 +553,11 @@ public class UI_GameScene : UI_Scene
         }
 
         // 알림은 막지 않고 떠 있다가 스스로 옅어진다. 멈춘 시간(메뉴)에도 흐르게 실시간으로 잰다.
+        // 띄운 뒤에 장치가 바뀌면 걷는다 — "M: 도감" 이나 "바닥을 누르면" 이 패드를 잡은 사람 앞에 6초 남았다.
         if (_hint != null && _hint.gameObject.activeSelf)
         {
+            if (_hintDevice != GameKeys.DeviceVersion)
+                _hintUntil = 0f;
             float left = _hintUntil - Time.unscaledTime;
             _hint.alpha = Mathf.Clamp01(left / HintFade);
             if (left <= 0f)
@@ -756,6 +765,7 @@ public class UI_GameScene : UI_Scene
         _hint.gameObject.SetActive(true);
         _hint.transform.SetAsLastSibling();
         _hintUntil = Time.unscaledTime + seconds;
+        _hintDevice = GameKeys.DeviceVersion;
     }
 
     public void OnClickMainUIInventoryAImage()
@@ -896,7 +906,8 @@ public class UI_GameScene : UI_Scene
         Image illust = GetImage((int)Images.LoadingIllustImage);
         illust.raycastTarget = true;        // 넘기려고 누른 클릭이 밑의 HUD 단추(인벤토리 등)에 닿지 않게. 끝나면 되돌린다
         illust.color = new Color(0, 0, 0, 1);
-        illust.sprite = Managers.Resource.Load<Sprite>($"LoadingIllust{UnityEngine.Random.Range(1, 7)}");
+        // 1번 그림에는 W A D 화살표가 그려져 있다 — 패드로 하는 사람에게는 2~6번만(쓰지 않는 장치의 글리프).
+        illust.sprite = Managers.Resource.Load<Sprite>($"LoadingIllust{UnityEngine.Random.Range(GameKeys.UsingPad ? 2 : 1, 7)}");
         // 정수 Range(1, 2) 는 늘 1 이었다. 1~2초 사이로.
         float fadeIn = chapter ? 2f : 0.4f, hold = chapter ? UnityEngine.Random.Range(1f, 2f) : 0.4f, fadeOut = chapter ? 1f : 0.4f;
 

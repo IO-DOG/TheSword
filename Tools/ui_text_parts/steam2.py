@@ -13,7 +13,7 @@ TEXT = {
     # in StreamingAssets/Data/MapDataArchive by its hash) - so 561 promises the carry-over. Never delete that archive file.
     560: ("체험판은 여기까지", "The demo ends here", "体験版はここまで", "试玩版到此为止"),
     561: ("탑은 100층까지 이어집니다. 본편에서 이 저장으로 21층부터 이어 갑니다.",
-          "The tower goes on to floor 100. The full game picks up this save at floor 21.",
+          "The Tower goes on to floor 100. The full game picks up this save at floor 21.",
           "塔は100階まで続きます。製品版ではこのセーブで21階から続けられます。",
           "塔一直延伸到第100层。正式版可以用这个存档从第21层继续。"),
     # the run's ledger (LedgerState): a caption, then numbers under these labels - foretold, paid in fights

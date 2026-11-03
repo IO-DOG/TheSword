@@ -137,7 +137,7 @@ public class UI_ModePopup : UI_Popup
 
         TextMeshProUGUI footer = CodeUI.NewText(root, "Controls", prose, 24f, Soft, TextAlignmentOptions.Center);
         CodeUI.Place(footer.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, Pad - 6f), new Vector2(width, FooterHeight));
-        CodeUI.Fit(footer, 14f).text = Managers.GetString(UI_TitleScene.MODE_CONTROLS);
+        PromptText.Set(CodeUI.Fit(footer, 14f), UI_TitleScene.MODE_CONTROLS);
     }
 
     // 줄: 메뉴 단추 그림(240x48). 양 끝의 뾰족한 모서리만 남기고 가운데를 늘린다 (몬스터 도감과 같다).

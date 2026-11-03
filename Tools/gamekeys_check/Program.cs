@@ -135,6 +135,37 @@ static class Program
         Fresh();
         Check(!GameKeys.AnyHeld && !GameKeys.Held(KeyCode.W), "no axes at all");
 
+        // 7. 마지막에 쓴 장치(UsingPad) — 화면 안내·커서·툴팁이 따른다(PromptText). 덱은 패드가 늘 꽂혀 있다.
+        string[] withMouse = { "Horizontal", "Vertical", "PadDPadX", "PadDPadY", "PadRT", "PadRStickY", "Mouse X", "Mouse Y" };
+        Input.JoystickNames = new[] { "" };
+        Fresh(withMouse);
+        Check(!GameKeys.UsingPad && Cursor.visible, "no pad plugged in: keyboard");
+        int v0 = GameKeys.DeviceVersion;
+        Step(() => { Input.Keys.Add(KeyCode.JoystickButton0); });
+        Check(GameKeys.UsingPad && !Cursor.visible && GameKeys.DeviceVersion == v0 + 1, "pad button switches to pad, hides cursor");
+        Step(() => { Input.Keys.Clear(); });
+        for (int i = 0; i < 10; i++)
+        {
+            Step(() => { Input.Axes["Mouse X"] = 0.05f; });
+            Check(GameKeys.AnyHeld == false, "drift is not a key");    // InputManager 가 매 프레임 이렇게 묻는다 — 그래야 움직임이 쌓인다
+        }
+        Check(GameKeys.UsingPad, "a little mouse drift stays on pad");
+        Step(() => { Input.Axes["Mouse X"] = 0.6f; });
+        Check(!GameKeys.UsingPad && Cursor.visible, "real mouse motion switches back");
+        Step(() => { Input.Axes["Mouse X"] = 0f; Input.Axes["PadDPadY"] = 1f; });
+        Check(GameKeys.UsingPad, "dpad switches to pad");
+        Step(() => { Input.Axes["PadDPadY"] = 0f; Input.Keys.Add(KeyCode.UpArrow); Input.Axes["Vertical"] = 1f; });
+        Check(!GameKeys.UsingPad, "arrow key switches to keyboard, not pad");
+        Step(() => { Input.Keys.Clear(); Input.Axes["Vertical"] = 0f; Input.Axes["PadRStickY"] = 0.9f; });
+        Check(GameKeys.UsingPad, "right stick zoom is pad");
+        int v1 = GameKeys.DeviceVersion;
+        Step(() => { Input.Axes["PadRStickY"] = 0f; Input.Keys.Add(KeyCode.JoystickButton1); });
+        Check(GameKeys.UsingPad && GameKeys.DeviceVersion == v1, "pad to pad keeps the version");
+        Input.JoystickNames = new[] { "Controller (XBOX 360 For Windows)" };
+        Fresh(withMouse);
+        Check(GameKeys.UsingPad && !Cursor.visible, "pad plugged in at start (Deck): pad");
+        Input.JoystickNames = new string[0];
+
         Console.WriteLine(_failed == 0 ? "gamekeys_check: ok" : $"gamekeys_check: {_failed} failed");
         return _failed == 0 ? 0 : 1;
     }

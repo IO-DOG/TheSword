@@ -10,6 +10,8 @@ namespace UnityEngine
         UpArrow, DownArrow, LeftArrow, RightArrow,
         JoystickButton0, JoystickButton1, JoystickButton2, JoystickButton3, JoystickButton4,
         JoystickButton5, JoystickButton6, JoystickButton7, JoystickButton8, JoystickButton9,
+        JoystickButton10, JoystickButton11, JoystickButton12, JoystickButton13, JoystickButton14,
+        JoystickButton15, JoystickButton16, JoystickButton17, JoystickButton18, JoystickButton19,
     }
 
     public enum RuntimeInitializeLoadType { SubsystemRegistration }
@@ -26,6 +28,17 @@ namespace UnityEngine
         public static float Max(float a, float b) => Math.Max(a, b);
     }
 
+    public struct Vector2
+    {
+        public float x, y;
+        public Vector2(float x, float y) { this.x = x; this.y = y; }
+    }
+
+    public static class Cursor
+    {
+        public static bool visible = true;
+    }
+
     public static class Time
     {
         public static int frameCount;
@@ -37,6 +50,9 @@ namespace UnityEngine
         public static readonly HashSet<KeyCode> Keys = new HashSet<KeyCode>(), Before = new HashSet<KeyCode>();
         // 여기 있는 이름만 Input Manager 에 있는 축이다. 없는 이름은 진짜처럼 ArgumentException.
         public static readonly Dictionary<string, float> Axes = new Dictionary<string, float>();
+        public static string[] JoystickNames = new string[0];
+        public static Vector2 mouseScrollDelta;
+        public static string[] GetJoystickNames() => JoystickNames;
 
         public static bool GetKey(KeyCode k) => Keys.Contains(k);
         public static bool GetKeyDown(KeyCode k) => Keys.Contains(k) && !Before.Contains(k);

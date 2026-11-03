@@ -151,7 +151,7 @@ public class UI_TallyPopup : UI_Popup
 
         y -= 10f;
         _footer = Line(root, "Keys", prose, 26f, Soft, ref y, 34f, TextAlignmentOptions.Center);   // 22 는 1280x800 에서 9 픽셀
-        _footer.text = Managers.GetString(_choosing ? ChooseKeys : ContinueKey);
+        PromptText.Set(_footer, _choosing ? ChooseKeys : ContinueKey);
         y -= Pad;
 
         CodeUI.Place(root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(Width, -y));
@@ -369,7 +369,7 @@ public class UI_TallyPopup : UI_Popup
         }
         _altarDesc.text = string.Format(Managers.GetString(BoughtText), _gains[index]);
         _altarDesc.color = Gold;
-        _footer.text = Managers.GetString(ContinueKey);
+        PromptText.Set(_footer, ContinueKey);
         _closeAt = Time.unscaledTime + AutoClose;
         Paint();
     }

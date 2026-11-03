@@ -548,7 +548,7 @@ public class UI_ConversationPopup : UI_Popup
         hint.rectTransform.sizeDelta = new Vector2(1200f, 50f);
         hint.rectTransform.anchoredPosition = new Vector2(-60f, 26f);
         hint.color = new Color(0.8f, 0.8f, 0.8f, 1f);
-        hint.text = Managers.GetString(StoryUI.ChoiceHint);
+        PromptText.Set(hint, StoryUI.ChoiceHint);
 
         _choiceBoxes = new RectTransform[count];
         _choiceTexts = new TMP_Text[count];

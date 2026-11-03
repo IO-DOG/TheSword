@@ -215,7 +215,7 @@ public class UI_TitleScene : UI_Scene
                 isPreload = true;
                 _language = Managers.Game.ScriptType;
                 // 켜는 것은 오프닝의 칼 부딪히는 순간(PlayOneShot)이다. 여기서 켜면 그 전에 넘길 수 있다.
-                GetText((int)Texts.PessAnyKeyText).text = Managers.GetString(Define.TITLE_PRESS_KEY);
+                PromptText.Set(GetText((int)Texts.PessAnyKeyText), Define.TITLE_PRESS_KEY);   // 패드면 "아무 버튼이나"
             }
             catch (System.Exception ex) { LoadingFailed(ex.ToString()); }
         });
@@ -227,7 +227,7 @@ public class UI_TitleScene : UI_Scene
         _loadFailed = true;
         GetObject((int)Objects.Slider).SetActive(false);
         var prompt = GetText((int)Texts.PessAnyKeyText);
-        prompt.text = Managers.GetString(Define.TITLE_LOAD_FAILED);
+        PromptText.Set(prompt, Define.TITLE_LOAD_FAILED);
         prompt.gameObject.SetActive(true);
     }
 
@@ -271,7 +271,7 @@ public class UI_TitleScene : UI_Scene
             _language = Managers.Game.ScriptType;
             SetButtonColorAndButtonsText(buttonsIdx);
             if (isPreload && _loadFailed == false)
-                GetText((int)Texts.PessAnyKeyText).text = Managers.GetString(Define.TITLE_PRESS_KEY);
+                PromptText.Set(GetText((int)Texts.PessAnyKeyText), Define.TITLE_PRESS_KEY);   // 패드면 "아무 버튼이나"
         }
 
         // 방향키·Enter 는 메뉴가 서 있을 때만 받는다. 불러오기가 끝나고 칼이 부딪혀 "아무 키나" 가 뜨기까지(1초 남짓)는
@@ -428,7 +428,7 @@ public class UI_TitleScene : UI_Scene
                 // 알리고 타이틀에 머문다. 아무 키나 누르면 버튼으로 돌아간다.
                 Debug.LogWarning($"[Title] 이어하기 실패 — 저장은 그대로 둔다: {Managers.Game.LastSaveError}");
                 GetImage((int)Images.Buttons).gameObject.SetActive(false);
-                ShowNotice(Managers.GetString(Define.TITLE_SAVE_FAILED));
+                ShowNotice(PromptText.Get(Define.TITLE_SAVE_FAILED));
                 return;
             }
 

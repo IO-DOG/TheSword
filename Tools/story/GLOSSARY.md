@@ -92,7 +92,7 @@
 |---|---|---|---|---|
 | 20 | 묘소의 늑대 / 해 질 녘을 기다리는 것 | Wolf of the Catacombs / The One Who Waits for Dusk | 墓所の狼 / 日暮れを待つもの | 墓穴之狼 / 等待黄昏之物 |
 | 40 | 수로의 방패병 / 내리지 않는 방패 | Shieldbearer of the Aqueduct / The Shield Never Lowered | 水路の盾兵 / 下ろされぬ盾 | 水道之盾兵 / 从不放下的盾 |
-| 60 | 재의 파수꾼 / 타다 남은 목소리 | Sentinel of Ash / The Voice That Did Not Burn | 灰の番兵 / 燃え残りの声 | 灰之哨兵 / 燃剩的声音 |
+| 60 | 재의 파수꾼 / 타다 남은 목소리 | Sentinel of Ash / The Voice That Did Not Burn | 灰の番兵 / 燃え残りの声 | 灰之哨兵 / 未燃尽的声音 |
 | 80 | 얼어붙은 기사 / 마지막 문의 파수 | The Frozen Knight / Warden of the Last Door | 凍てついた騎士 / 最後の扉の番 | 冰封骑士 / 最后之门的守卫 |
 | 100 | 검은 태양 / 끝없는 허기 | The Black Sun / Endless Hunger | 黒い太陽 / 果てなき飢え | 黑太阳 / 无尽的饥饿 |
 | 4 | 킹 슬라임 (분열: 메이스·대거·방패) | King Slime (mace, dagger, shield) | キングスライム (メイス・ダガー・盾) | 史莱姆王 (钉锤·匕首·盾) |
@@ -129,7 +129,7 @@
 | 크다 / 컸다 | 레벨업 | grow | 大きくなる | 长大 |
 | 먹다 / 먹이다 | 마검이 마물의 마력을 먹는 것(경험치) | eat / feed | 食う / 食わせる | 吃 / 喂 |
 | 배고프다 / 배부르다 | 참 결말 조건(레벨)의 말 | hungry / full | 腹が減る / 満腹 | 饿 / 饱 |
-| 문턱 | 그 층에 처음 들어선 자리. 되살아나는 곳. 탑 안이다(`ending_seal.09` 의 "탑 밖까지" 와 구별) | threshold | 敷居 | 门槛 |
+| 문턱 | 그 층에 처음 들어선 자리. 되살아나는 곳. 탑 안이다(`ending_seal.09` 의 "탑 밖까지" 와 구별) | threshold | 敷居 | 入口 |
 | 탑의 글자 | 룬(마검의 말) | the Tower's glyph | 塔の文字 | 塔之文字 |
 | 룬 | 공격·방어·체력 룬 | Rune ☆ | ルーン ☆ | 符文 ☆ |
 | 강타 · 철벽 · 흡혈 | 스킬 셋. UI 와 같게 (코드 이름 Smash·Guard·Drain) | Smash · Bulwark · Drain (방패 4042 "Iron Wall" 과 겹치지 않게) | 強打 · 鉄壁 · 吸血 | 强击 · 铁壁 · 吸血 |
@@ -177,7 +177,7 @@
 | 내레이션 | 과거형, 담백함 | plain past tense | 簡潔な過去形 | 简洁的叙述 |
 
 **의성어·감탄사**: 크하핫! Kahaha! クハハッ！ 咔哈哈！ · …음냐 *mumble* むにゃ… 呼噜… · 킁, 킁 sniff, sniff クンクン 嗅嗅 ·
-우물우물 munch munch もぐもぐ 吧唧吧唧 · 퉤, 퉤! Ptoo! ペッ、ペッ！ 呸、呸！ · 찌익 rrrip ビリッ 嘶啦
+우물우물 munch munch もぐもぐ 吧嗒吧嗒 · 퉤, 퉤! Ptoo! ペッ、ペッ！ 呸、呸！ · 찌익 rrrip ビリッ 嘶啦
 
 ## 8. 메아리 대사 (같은 번역을 되풀이할 것)
 

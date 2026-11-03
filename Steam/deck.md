@@ -1,8 +1,9 @@
 # Steam Deck
 
-목표는 **Playable**(MASTER_PLAN §7). 게임이 **XInput 패드를 직접 읽는다**(`GameKeys` — 레거시 Input 의 joystick button 과 축,
+목표는 **Playable**(MASTER_PLAN §7), 할 수 있으면 Verified. 게임이 **XInput 패드를 직접 읽는다**(`GameKeys` — 레거시 Input 의 joystick button 과 축,
 `activeInputHandler: 0` 그대로). 스팀 덱은 Steam Input 의 **Gamepad** 템플릿으로 XInput 패드를 내놓으니 키보드 흉내 설정이 필요 없다.
-**Verified** 는 단추 그림(글리프)이 있어야 해서 출시 뒤로 미룬다 — 화면 안내가 아직 키보드 글자다(아래 "알려진 틈").
+화면 안내는 **마지막에 쓴 장치를 따른다**(`GameKeys.UsingPad`, 2026-11-03) — 패드면 Xbox 단추 이름(A B X Y LB RB RT LS View Menu)이고
+커서와 마우스 툴팁이 숨는다. Valve 는 Xbox 글리프를 받는다("쓰고 있지 않은 장치의 글리프를 보이지 않는다" 가 Verified 항목). Verified 는 실기 검토가 정한다.
 Valve 의 정의: Playable = "동작하지만 사용자가 손을 좀 써야 할 수 있다(예: 터치스크린으로 런처를 조작)".
 
 ## 조작표 (게임이 직접 읽는다 — `GameKeys`)
@@ -78,7 +79,7 @@ Steamworks → App Admin → Application → **Steam Input** 에서:
 
 | 무엇 | 지금 | Playable 에 괜찮은가 |
 |---|---|---|
-| 단추 그림 | 화면 안내가 키보드 글자다 — "WASD 이동 · M 도감 · V 예측 표시 · Tab 워프 · 1/2/3 스킬 · Esc 메뉴"(ScriptData 274, I 인벤토리는 아직 없다), 스킬 단추의 1/2/3, 대사의 "Tab 길게" 안내, 도감·모드 창의 조작 줄. 그림에 박힌 WASD 도 있다(`GuidePanel_WASD`, 1층 표지판, `LoadingIllust1`). **Verified 에 남은 것은 이것이다** — 마지막으로 누른 것이 패드면 패드 그림을 보이는 갈래가 필요하다 | 괜찮다. Verified 는 안 된다 |
+| 단추 그림 | 마지막에 쓴 장치를 따른다 — 패드면 `PromptText` 가 짝 문구(`Tools/ui_text_parts/pad.py`, 660~674: 아무 버튼·A 계속·LB 건너뛰기·RT 8배속·X/Y/RB 스킬…)로 갈아 끼우고, 장치가 바뀌면 떠 있는 안내도 다시 칠한다. 키 이름이 든 안내에 짝이 없으면 `validate_content` 가 막는다. 1층 표지판 "MOVE WASD" 는 패드면 십자 방향 칸 그림(`KeyGuideSign`), 로딩 그림 1번(W A D 화살표)은 패드면 안 고른다, "바닥을 누르면 걸어갑니다" 는 패드면 안 띄운다. 덱 이름(L1 R1 R2)이 아니라 Xbox 이름이다. 덱의 오른쪽 트랙패드를 만지면 마우스로 바뀐다 | 괜찮다. Verified 의 글리프 항목도 맞췄다 — 실기에서 본다 |
 | 마우스로만 되는 것 | 설정의 해상도 줄(일부러 — 손을 뗄 때 바꾸고 메뉴를 닫는다), 인벤토리 안에서 장비 바꾸기(열고 닫기는 Y·I — 더 나은 장비는 주울 때 저절로 낀다), 툴팁. 마검 계약은 A, 보스방 확인은 A(예)·B(아니오)가 되고, 언어·설정·워프 칸은 방향키·스틱으로 고른다 | 괜찮다 — 오른쪽 트랙패드로 누른다 |
 | 툴팁 | 몬스터·아이템 정보는 마우스를 올려야 뜬다 | 트랙패드로 가리킨다. 같은 값을 도감(⧉ View)이 보여 준다 |
 | 터치스크린 | 지원하지 않는다. 시험하지 않았다. 터치가 마우스 클릭처럼 들어갈 수는 있지만 가리키기(툴팁)는 안 된다 | 괜찮다(필수가 아니다) |

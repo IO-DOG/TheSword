@@ -135,7 +135,7 @@ public class UI_EndingScene : UI_Scene
 
         TextMeshProUGUI hint = CodeUI.NewText(box, "AnyKey", prose, 26f, soft, TextAlignmentOptions.Center);
         CodeUI.Place(hint.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 48f), new Vector2(1600f, 40f));
-        hint.text = Managers.GetString(AnyKey);
+        PromptText.Set(hint, AnyKey);
 
         yield return card.DOFade(1f, 1f).SetLink(box.gameObject).WaitForCompletion();
         yield return CoHold(20f);

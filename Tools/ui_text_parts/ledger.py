@@ -16,7 +16,7 @@ TEXT = {
     472: ("★ 통과  ★★ 치름 {0} 이하  ★★★ 치름 {1} 이하", "★ cleared  ★★ paid {0} or less  ★★★ paid {1} or less",
           "★ 突破  ★★ 支払い{0}以下  ★★★ 支払い{1}以下", "★ 通过  ★★ 付出不超过{0}  ★★★ 付出不超过{1}"),
     # {0} = trait names of the next five floors (joined in C#)
-    473: ("다음 다섯 층: {0}", "Next five floors: {0}", "この先5階分: {0}", "接下来五层: {0}"),
+    473: ("다음 다섯 층: {0}", "Next five floors: {0}", "この先5階分: {0}", "接下来五层：{0}"),
     # altar at the stairs
     474: ("제단", "Altar", "祭壇", "祭坛"),
     # {0} = price in % of max HP (10 + n(n-1))
@@ -27,9 +27,9 @@ TEXT = {
     477: ("지나간다", "Pass", "通り過ぎる", "离开"),
     # refused: {0} = HP that must remain after paying (AltarReserve / AltarReserveTower)
     478: ("체력이 모자라다: 바친 뒤에도 {0} 이상 남아야 한다", "Not enough HP: at least {0} must remain after the offering",
-          "体力が足りない: 捧げた後も{0}以上残す必要がある", "生命不足: 献上后须剩余{0}以上"),
+          "体力が足りない: 捧げた後も{0}以上残す必要がある", "生命不足：献上后须剩余{0}以上"),
     # after buying: {0} = "공격 +3" (feel.py 410/411)
-    479: ("받았다: {0}", "Received: {0}", "受け取った: {0}", "获得: {0}"),
+    479: ("받았다: {0}", "Received: {0}", "受け取った: {0}", "获得：{0}"),
     480: ("←→ 고르기  Enter 받기  Esc 지나간다", "←→ choose  Enter receive  Esc pass",
           "←→ 選ぶ  Enter 受け取る  Esc 通り過ぎる", "←→ 选择  Enter 领取  Esc 离开"),
     481: ("Enter 계속", "Enter continue", "Enter 続ける", "Enter 继续"),
@@ -37,7 +37,7 @@ TEXT = {
     # UI_GameScene fullness gauge: {0} level now, {1} this floor's par level (ParLevelIn), {2} difference (+2 / -1)
     490: ("Lv {0}  기준 {1} ({2})", "Lv {0}  Par {1} ({2})", "Lv {0}  基準 {1} ({2})", "Lv {0}  基准 {1} ({2})"),
     # from floor 90: the level the sword wants at the throne (StoryDirector.DawnLevel, the dawn ending's gate)
-    491: ("왕좌에서 Lv {0}", "At the throne: Lv {0}", "玉座で Lv {0}", "抵达王座时 Lv {0}"),
+    491: ("왕좌에서 Lv {0}", "At the Throne: Lv {0}", "玉座で Lv {0}", "抵达王座时 Lv {0}"),
     # badge next to the floor name / on the run card. Same words as mode.py 533 (the New Game picker).
     492: ("탑의 법", "Tower's Law", "塔の掟", "塔之法则"),
 

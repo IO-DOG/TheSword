@@ -91,9 +91,11 @@ public static class GameSettings
         set { PlayerPrefs.SetInt(KeyVSync, value ? 1 : 0); ApplyDisplay(); Commit(); }
     }
 
+    // 끄면 화면 주사율(최소 60)에서 묶는다 — 묶지 않으면 메뉴에서도 GPU 가 수백 프레임을 돌린다(팬 소음·덱 배터리).
     public static void ApplyDisplay()
     {
         QualitySettings.vSyncCount = VSync ? 1 : 0;
+        Application.targetFrameRate = VSync ? -1 : Mathf.Max(60, Mathf.RoundToInt((float)Screen.currentResolution.refreshRateRatio.value));
     }
 
     // 전체 음량은 AudioListener 한 곳에서 건다. 그래야 음량을 스스로 곱하지 않는 소리

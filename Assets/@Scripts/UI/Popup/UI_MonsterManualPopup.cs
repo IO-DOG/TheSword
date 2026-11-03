@@ -206,7 +206,7 @@ public class UI_MonsterManualPopup : UI_Popup
 
         TextMeshProUGUI footer = CodeUI.NewText(root, "Controls", _prose, Small, Soft, TextAlignmentOptions.Center);
         CodeUI.Place(footer.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, Pad - 6f), new Vector2(PanelWidth - Pad * 2f, FooterHeight));
-        CodeUI.Fit(footer, Small).text = Managers.GetString(ForecastUI.Controls);
+        PromptText.Set(CodeUI.Fit(footer, Small), ForecastUI.Controls);
     }
 
     void BuildHeader(Transform root, float top)

@@ -60,6 +60,7 @@ public class UIManager
         {
             cs.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             cs.referenceResolution = new Vector2(1080, 1920);
+            WideScreenCanvas.Attach(go);    // 21:9 에서 세로가 1080 보다 짧아지지 않게
         }
 
         go.GetOrAddComponent<GraphicRaycaster>();

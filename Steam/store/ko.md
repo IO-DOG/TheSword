@@ -107,7 +107,7 @@ Puzzle, RPG, Dungeon Crawler, Strategy, Logic, Resource Management, Story Rich, 
 - 프로세서·메모리 행은 일부러 뺐다(위 머리말) — 측정 전이라 비워 둔다.
 - "게임패드 지원" 은 게임이 XInput 패드를 직접 읽고(`GameKeys` — Xbox 배열) Steam Input 의 **Gamepad 템플릿**이 Publish 돼 있을 때의 말이다(`deck.md`; 스팀 덱·PlayStation·Switch·일반 패드는 그 템플릿을 거쳐 XInput 으로 보인다).
   `GameKeys` 는 2026-11-03 현재 작업 트리에만 있어서 **커밋되고 `deck.md` 의 "패드" 점검을 통과한 뒤에** 올린다. 그 전에는 이 칸을 "키보드와 마우스." 로만 둔다.
-  **Steam Deck "Verified" 는 말하지 않는다**(화면 안내가 아직 키보드 글자다). 패드가 툴팁·장비 바꾸기까지 닿게 되면 뒷 문장을 뺀다.
+  **Steam Deck "Verified" 는 말하지 않는다** — Valve 의 실기 검토가 정한다(화면 안내는 2026-11-03 부터 패드면 패드 단추 이름이다, `deck.md`). 패드가 툴팁·장비 바꾸기까지 닿게 되면 뒷 문장을 뺀다.
 - 근거: 빌드는 64비트(StandaloneWindows64, `TheSword.exe` 는 PE32+ x86-64), 그래픽 API 는 Direct3D 11 하나뿐(`ProjectSettings.asset` `m_APIs: 02000000`, 자동 선택 끔).
 - 저장 공간: `Build/Windows` 가 **221,457,928 바이트(211 MiB)** 다(1.0.0, 2026-11-03 빌드, `du -sb`. 체험판 `Build/WindowsDemo` 는 221,458,568 바이트).
   2026-10-05 의 234,129,397 바이트(223 MiB)에서 쓰지 않던 BroAudio 를 빼 12 MB 줄었다(챕터 복셀 그림은 들어간 뒤다). Steamworks(`steam_api64.dll`)는 이미 들어 있다. 새 그림·음악·3D 가 들어오면 는다 — 211 MiB 의 두 배 남짓이라

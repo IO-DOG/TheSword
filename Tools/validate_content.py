@@ -156,6 +156,13 @@ def check_ui_text(scripts):
     if stale:
         errors.append(f"ScriptData 가 Tools/ui_text_parts 보다 옛것이다 {len(stale)}건 "
                       f"(예: {', '.join(map(str, stale[:8]))}) — generate_content.py --write")
+    # 패드로 하는 동안은 키보드 글자를 보이지 않는다(Steam Deck Verified) — 키 이름이 든 안내는 패드 짝이 있어야
+    # GameKeys.PromptId 가 갈아 끼운다(Tools/ui_text_parts/pad.py 의 TWIN). 마우스 안내(590)는 C# 이 패드일 때 안 띄운다.
+    keyish = re.compile(r"\b(Enter|Esc|ESC|Tab|Space|WASD|W/S|Shift)\b|any key|arrow keys|아무 키|방향키|何かキー|方向キー|任意键|方向键")
+    lonely = sorted(sid for sid, values in ui_text.TEXT.items()
+                    if any(keyish.search(v) for v in values) and sid not in ui_text.TWIN)
+    if lonely:
+        errors.append(f"키 이름이 든 안내에 패드 짝이 없다: {lonely} — Tools/ui_text_parts/pad.py 의 TWIN")
     with tempfile.TemporaryDirectory() as tmp:
         os.makedirs(os.path.join(tmp, "Assets", "@Scripts", "Data"))
         ui_text.emit_bootstrap(tmp)

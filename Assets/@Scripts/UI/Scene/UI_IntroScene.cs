@@ -47,6 +47,11 @@ public class UI_IntroScene : UI_Scene
         GetImage((int)Images.SceneImage).gameObject.SetActive(false);
         //GetImage((int)Images.SceneFrameImage).gameObject.SetActive(false);
 
+        // 건너뛰기 게이지에 박힌 "ESC" — 패드면 B 다(GameKeys 가 B·Menu 도 Esc 로 받는다).
+        TMPro.TMP_Text escLabel = GetImage((int)Images.EscapeGauge).GetComponentInChildren<TMPro.TMP_Text>(true);
+        if (escLabel != null)
+            PromptText.Set(escLabel, () => GameKeys.UsingPad ? "B" : "ESC");
+
         _scripts = Managers.Data.LoadScriptData(Define.INTRO_STORY);
         totalCount = 7;
 

@@ -36,6 +36,13 @@ public static class GameKeys
     /// <summary>오른쪽 스틱 위아래 — 위 +1(마우스 휠을 위로 한 칸), 아래 -1, 아니면 0. 기울인 순간 한 번, 쥐고 있으면 되풀이.</summary>
     public static int Zoom => Pulse(Pad.ZoomIn) ? 1 : Pulse(Pad.ZoomOut) ? -1 : 0;
 
+    /// <summary>마지막에 쓴 것이 패드다(단추·스틱·트리거). 키·마우스 단추·휠·마우스 움직임이면 키보드로 돌아간다.
+    /// 패드이면 화면 안내가 패드 단추 이름이고(PromptText), 커서와 마우스 툴팁이 숨는다 — Steam Deck Verified 는 "쓰고 있지 않은
+    /// 장치의 글리프를 보이지 않는다" 를 본다. 처음 값은 패드가 꽂혀 있는가다(덱은 늘 꽂혀 있다). 덱의 오른쪽 트랙패드는 마우스다.</summary>
+    public static bool UsingPad { get { Poll(); return _usingPad; } }
+    /// <summary>UsingPad 가 바뀔 때마다 는다 — 떠 있는 안내(PromptText)가 다시 칠할 때를 안다.</summary>
+    public static int DeviceVersion { get { Poll(); return _deviceVersion; } }
+
     const int Holding = 0, Pressed = 1, Released = 2;
     const float Press = 0.5f;           // 이만큼 기울이면 눌렀다
     const float Release = 0.3f;         // 쥐고 있던 것은 이 밑으로 돌아와야 뗐다 — 문턱 언저리에서 떨지 않게
@@ -52,7 +59,11 @@ public static class GameKeys
     static readonly bool[] _armed = new bool[(int)Pad.Count];     // 누른 프레임에 Nav·Zoom 이 물었다 — 되풀이해도 된다
     static readonly float[] _repeatAt = new float[(int)Pad.Count];
     static int _frame = -1;
-    static bool _probed, _hasStick, _hasDPad, _hasRT, _hasZoom;
+    static bool _probed, _hasStick, _hasDPad, _hasRT, _hasZoom, _hasMouse;
+    static bool _usingPad;
+    static int _deviceVersion;
+    static float _mouseTravel;          // 패드를 쓴 뒤로 마우스가 실제로 움직인 양(Mouse X·Y 축 — 감도 0.1 이라 1 이 약 10px)
+    const float MouseSlop = 1f;         // 이만큼 움직여야 마우스로 돌아간다. 커서 좌표의 변화로 재면 창 크기만 바꿔도(설정의 화면 모드) 넘어갔다
 
     // 에디터는 도메인 리로드 없이 플레이를 되풀이한다 — 지난 플레이의 쥔 방향을 넘기지 않고, 그새 더한 축을 다시 묻는다.
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -60,6 +71,8 @@ public static class GameKeys
     {
         _frame = -1;
         _probed = false;
+        _deviceVersion = 0;     // 다음 Poll 이 꽂힌 패드를 다시 묻고 커서를 다시 정한다
+        _mouseTravel = 0f;
         System.Array.Clear(_held, 0, _held.Length);
         System.Array.Clear(_was, 0, _was.Length);
         System.Array.Clear(_pulse, 0, _pulse.Length);
@@ -147,6 +160,8 @@ public static class GameKeys
             _hasDPad = Has("PadDPadX") && Has("PadDPadY");
             _hasRT = Has("PadRT");
             _hasZoom = Has("PadRStickY");
+            _hasMouse = Has("Mouse X") && Has("Mouse Y");
+            SetDevice(System.Array.Exists(Input.GetJoystickNames(), name => string.IsNullOrEmpty(name) == false));
         }
 
         float x = 0f, y = 0f;
@@ -172,6 +187,7 @@ public static class GameKeys
 
         // 메뉴가 떠 있으면 시간이 멈춘다(UIManager.RefreshTimeScale) — 되풀이는 실시간으로 잰다.
         float now = Time.unscaledTime;
+        bool usedPad = false;
         for (int i = 0; i < _held.Length; i++)
         {
             _pulse[i] = _held[i] && (_was[i] == false || now >= _repeatAt[i]);
@@ -179,7 +195,34 @@ public static class GameKeys
                 _repeatAt[i] = now + (_was[i] ? RepeatRate : RepeatDelay);
             if (_held[i] == false)
                 _armed[i] = false;
+            usedPad |= _held[i] && _was[i] == false;    // 축은 패드에서만 온다 — Stick 이 키보드 몫을 버린다
         }
+
+        // 마지막에 쓴 장치. Input.anyKeyDown 은 패드 단추도 세니 패드를 먼저 본다.
+        for (KeyCode button = KeyCode.JoystickButton0; button <= KeyCode.JoystickButton19 && usedPad == false; button++)
+            usedPad = Input.GetKeyDown(button);
+        if (usedPad)
+        {
+            SetDevice(true);
+            _mouseTravel = 0f;
+            return;
+        }
+        if (_usingPad && _hasMouse)
+            _mouseTravel += Mathf.Abs(Input.GetAxisRaw("Mouse X")) + Mathf.Abs(Input.GetAxisRaw("Mouse Y"));
+        if (Input.anyKeyDown || _mouseTravel > MouseSlop || Input.mouseScrollDelta.y != 0f)
+        {
+            SetDevice(false);
+            _mouseTravel = 0f;
+        }
+    }
+
+    static void SetDevice(bool pad)
+    {
+        if (pad == _usingPad && _deviceVersion > 0)
+            return;
+        _usingPad = pad;
+        _deviceVersion++;
+        Cursor.visible = pad == false;
     }
 
     static float Threshold(Pad pad) => _was[(int)pad] ? Release : Press;

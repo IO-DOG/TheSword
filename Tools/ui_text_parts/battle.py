@@ -17,7 +17,7 @@ TEXT = {
     355: ("예측 -{0}", "Forecast -{0}", "予測 -{0}", "预测 -{0}"),
     # once, the first fight that can be skipped
     356: ("이제 Tab 으로 전투를 건너뛸 수 있습니다. 결과는 예측 그대로입니다.",
-          "You can now skip fights with Tab. The result is exactly the forecast.",
+          "You can now skip fights with Tab. The result is exactly as forecast.",
           "Tabで戦闘をスキップできます。結果は予測どおりです。",
           "现在可以按 Tab 跳过战斗。结果与预测完全一致。"),
 }

@@ -20,7 +20,7 @@ TEXT = {
     534: ("더 아픈 몬스터. 곁길까지 다 잡고 물약을 아껴야 버팁니다.",
           "Monsters hurt more. Clear the side paths and spend every potion with care.",
           "敵の一撃がより重い。脇道の敵も倒しポーションを大切に。",
-          "怪物下手更狠。支路怪物也要清掉。药水一瓶也别浪费。"),
+          "怪物下手更狠。岔路怪物也要清掉。药水一瓶也别浪费。"),
     535: ("W/S 고르기   Enter 시작   Esc 뒤로", "W/S Choose   Enter Start   Esc Back",
           "W/S 選択   Enter 開始   Esc 戻る", "W/S 选择   Enter 开始   Esc 返回"),
     # UI_TitleScene, under "Endings n/3": {0} = mode name (531 / 533), {1} = best run score (lower is better)

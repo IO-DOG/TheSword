@@ -16,7 +16,7 @@ TEXT = {
           "読み込めませんでした。Enter：再試行 / Esc：終了", "加载失败。Enter：重试 / Esc：退出"),
     145: ("저장을 복구하지 못했습니다. 원본은 보존됩니다. 아무 키나 눌러 돌아가세요.",
           "Could not restore your save. The original is preserved. Press any key to return.",
-          "セーブを復元できませんでした。元のデータは保持されます。何かキーを押して戻ります。",
+          "セーブを復元できませんでした。元のデータは保持されます。何かキーを押すと戻ります。",
           "无法恢复存档。原始存档已保留。请按任意键返回。"),
     146: ("둘 중 하나를 얻으면 다른 보상은 사라집니다.", "Taking one reward removes the other.",
           "片方を取ると、もう片方の報酬は消えます。", "领取一个奖励后，另一个奖励将消失。"),
@@ -30,7 +30,10 @@ TEXT = {
 #   380-409 story flow (instinct, skip, loading)   410-439 feel (price ticks, pickups, what-if)
 #   440-469 records/title/Steam   470-529 ledger/tally/altar/fullness/run card   530-559 mode (Tower's Law)
 #   560-589 Steam 2 (demo card)   590-609 input (click-to-move)   610-629 look (polish)
-#   630-659 credits (third-party block)
+#   630-659 credits (third-party block)   660-689 pad twins of the key legends (TWIN, GameKeys.PromptId)
+TWIN = {}   # keyboard legend id -> its pad twin (ui_text_parts/pad.py), baked into GeneratedUiText.PadTwin
+
+
 def _load_parts():
     import importlib.util
     parts = sorted((Path(__file__).parent / "ui_text_parts").glob("*.py"))
@@ -48,6 +51,10 @@ def _load_parts():
             if any(h != holes[0] for h in holes):
                 raise ValueError(f"UI text id {sid} in {part.name} uses different {{n}} placeholders per language: {holes}")
             TEXT[sid] = tuple(values)
+        TWIN.update(getattr(mod, "TWIN", {}))
+    for key, pad in TWIN.items():
+        if key not in TEXT or pad not in TEXT:
+            raise ValueError(f"pad twin {key} -> {pad}: both ids need UI text")
 
 
 _load_parts()
@@ -71,5 +78,9 @@ def emit_bootstrap(root):
     for sid, (kr, en, jp, cn) in TEXT.items():
         values = ", ".join(json.dumps(v, ensure_ascii=False) for v in (en, kr, en, jp, cn))
         lines.append(f"            case {sid}: return new[] {{ {values} }}[language >= 0 && language <= 4 ? language : 0];")
-    lines += ["            default: return null;", "        }", "    }", "}"]
+    lines += ["            default: return null;", "        }", "    }", "",
+              "    /// <summary>The pad twin of a key legend (Tools/ui_text_parts/pad.py), or 0.</summary>",
+              "    public static int PadTwin(int id)", "    {", "        switch (id)", "        {"]
+    lines += [f"            case {key}: return {pad};" for key, pad in TWIN.items()]
+    lines += ["            default: return 0;", "        }", "    }", "}"]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")

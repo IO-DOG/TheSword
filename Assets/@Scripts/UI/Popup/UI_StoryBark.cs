@@ -53,6 +53,7 @@ public class UI_StoryBark : MonoBehaviour
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.matchWidthOrHeight = 0.5f;
+        WideScreenCanvas.Attach(gameObject);
         _group = gameObject.AddComponent<CanvasGroup>();
         _group.alpha = 0f;
         _group.interactable = false;
