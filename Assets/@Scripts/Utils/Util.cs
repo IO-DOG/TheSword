@@ -209,7 +209,8 @@ public static class Util
     {
         yield return new WaitForEndOfFrame();
         Texture2D texture = ScreenCapture.CaptureScreenshotAsTexture();
-        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+        // FullRect — 기본(Tight)은 화면 전체의 윤곽을 따서 메시를 만든다. 전투가 열릴 때마다 5~30ms 였다.
+        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect);
         onFinished?.Invoke(sprite);
     }
 

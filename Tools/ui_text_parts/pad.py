@@ -11,7 +11,7 @@ fonts - so no up/down arrows (the stick picks rows) and no menu/view symbols.
 # keyboard id -> pad id. ui_text bakes this into GeneratedUiText.PadTwin.
 TWIN = {
     143: 660, 144: 661, 145: 662, 274: 663, 275: 664, 288: 665, 300: 666, 352: 667,
-    353: 668, 356: 669, 381: 670, 382: 671, 480: 672, 481: 673, 535: 674,
+    353: 668, 356: 669, 381: 670, 382: 671, 480: 672, 481: 673, 535: 674, 204: 675,
 }
 
 TEXT = {
@@ -22,12 +22,11 @@ TEXT = {
           "Could not restore your save. The original is preserved. Press any button to return.",
           "セーブを復元できませんでした。元のデータは保持されます。何かボタンを押すと戻ります。",
           "无法恢复存档。原始存档已保留。请按任意按钮返回。"),
-    # 274 without "Hover Info" - tooltips are a mouse thing. Y opens the bag on the map but is skill 2 in a fight,
-    # and the keyboard line has no bag key either.
-    663: ("스틱 이동   View 도감   LS 예측 표시   LB 워프   X/Y/RB 스킬   Menu 메뉴",
-          "Stick Move   View Manual   LS Forecast   LB Warp   X/Y/RB Skills   Menu Pause",
-          "スティック 移動   View 図鑑   LS 予測表示   LB ワープ   X/Y/RB スキル   Menu メニュー",
-          "摇杆 移动   View 图鉴   LS 预测显示   LB 传送   X/Y/RB 技能   Menu 菜单"),
+    # 274 without "Hover Info" (on a pad the tooltip follows the faced tile). Y opens the bag on the map and is skill 2 in a fight.
+    663: ("스틱 이동   View 도감   LS 예측 표시   Y 가방   LB 워프   X/Y/RB 스킬   Menu 메뉴",
+          "Stick Move   View Manual   LS Forecast   Y Bag   LB Warp   X/Y/RB Skills   Menu Pause",
+          "スティック 移動   View 図鑑   LS 予測表示   Y 持ち物   LB ワープ   X/Y/RB スキル   Menu メニュー",
+          "摇杆 移动   View 图鉴   LS 预测显示   Y 背包   LB 传送   X/Y/RB 技能   Menu 菜单"),
     664: ("View: 몬스터 도감   LS: 예측 표시", "View: Monster Manual   LS: Forecast",
           "View: モンスター図鑑   LS: 予測表示", "View: 怪物图鉴   LS: 预测显示"),
     665: ("스틱으로 층 고르기   A 이동   LB / B 닫기", "Stick Choose a floor   A Go   LB / B Close",
@@ -46,6 +45,8 @@ TEXT = {
     673: ("A 계속", "A continue", "A 続ける", "A 继续"),
     674: ("스틱 고르기   A 시작   B 뒤로", "Stick Choose   A Start   B Back",
           "スティック 選択   A 開始   B 戻る", "摇杆 选择   A 开始   B 返回"),
+    675: ("RB 칸 바꾸기   X 다음 장비   Y / B 닫기", "RB Next slot   X Next item   Y / B Close",
+          "RB 欄を切替   X 次の装備   Y / B 閉じる", "RB 切换栏位   X 下一件装备   Y / B 关闭"),
 }
 
 

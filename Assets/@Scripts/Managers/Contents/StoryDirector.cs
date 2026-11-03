@@ -287,7 +287,7 @@ public class StoryDirector : MonoBehaviour
         // 체크포인트와 같은 방식으로 바꿔 끼운다. 쓰다 꺼져도 옛 파일은 남는다.
         try
         {
-            SaveStore.WriteText(SeenPath, JsonConvert.SerializeObject(new List<string>(s_seen)));
+            SaveStore.WriteText(SeenPath, JsonConvert.SerializeObject(new List<string>(s_seen)), durable: false);
         }
         catch (Exception e) when (SaveStore.IsSaveError(e))
         {

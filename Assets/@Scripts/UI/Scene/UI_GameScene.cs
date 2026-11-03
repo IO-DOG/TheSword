@@ -425,9 +425,41 @@ public class UI_GameScene : UI_Scene
     /// 자리인데 맵 위 숫자는 창 밑에서 숨으니, 그때 예측을 보는 곳은 툴팁뿐이다.
     /// ponytail: 판 위에서도 그 밑의 몬스터를 짚는다(커서도 돋보기가 된다) — 예전과 같다. 툴팁 캔버스(0)가 판(10~)
     /// 밑이라 판의 클릭은 막지 않는다. 거슬리면 판(Inventory_Frame) 안의 마우스를 뺀다.
-    /// 패드를 쓰는 동안은 아니다(GameKeys.UsingPad) — 커서가 숨어 있고, 걷는 동안 그 밑을 지나는 몬스터마다 툴팁이 뜬다.
+    /// 패드로 하면 커서 밑이 아니라 주인공이 바라보는 옆 칸을 가리킨다(Pointed) — 패드로는 물약 회복량·넘침·룬 값을 볼 길이 없었다.
     /// </summary>
-    public static bool CanShowTooltip() => GameKeys.UsingPad == false && MapFree();
+    public static bool CanShowTooltip() => MapFree();
+
+    static readonly Collider[] s_pointed = new Collider[8];
+    const int PadPointMask = (1 << (int)Define.Layer.Monster) | (1 << (int)Define.Layer.CItem);
+
+    /// <summary>툴팁이 가리키는 것. 마우스면 커서 밑(광선, mask), 패드면 주인공이 바라보는 옆 칸에 선 몬스터·아이템(칸을 겹쳐 본다 —
+    /// 카메라 광선은 가운데 선 주인공·키 큰 몬스터 콜라이더에 가린다). screen 은 툴팁을 붙일 화면 자리.</summary>
+    public static bool Pointed(int mask, out Collider collider, out Vector3 screen)
+    {
+        collider = null;
+        screen = Input.mousePosition;
+        Camera cam = Camera.main;
+        if (cam == null)
+            return false;
+        if (GameKeys.UsingPad == false)
+        {
+            if (Physics.Raycast(cam.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 1000.0f, mask) == false)
+                return false;
+            collider = hit.collider;
+            return true;
+        }
+        PlayerController player = Managers.Game.Player;
+        Vector3? cell = player != null ? player.FacingCell() : null;
+        if (cell == null)
+            return false;
+        int count = Physics.OverlapBoxNonAlloc(cell.Value + Vector3.up * 0.5f, new Vector3(0.1f, 0.5f, 0.1f), s_pointed,
+            Quaternion.identity, PadPointMask);
+        for (int i = 0; i < count && collider == null; i++)
+            if (s_pointed[i] != null && s_pointed[i].gameObject.activeInHierarchy)
+                collider = s_pointed[i];
+        screen = cam.WorldToScreenPoint(cell.Value);
+        return collider != null;
+    }
 
     /// <summary>맵 위 숫자가 보이고 워프 창이 맵을 덮지 않았다 — 툴팁의 조건에서 장치만 뺀 것. 클릭 걷기(PlayerController)가 쓴다:
     /// 덱의 트랙패드로 누른 걸음이 오른쪽 스틱 줌(패드) 한 번에 끊기면 안 된다.</summary>
@@ -439,17 +471,15 @@ public class UI_GameScene : UI_Scene
         if (isOpenInfoPopup || CanShowTooltip() == false)
             return;
 
-        RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        bool raycastHit = Physics.Raycast(ray, out hit, 100.0f, _mask);
-
-        if (raycastHit)
+        if (Pointed(_mask, out Collider pointed, out Vector3 at))
         {
-            if (hit.collider.gameObject.layer == (int)Define.Layer.Monster && Managers.Cursor._cursor == CursorType.Search)
+            // 마우스는 커서가 돋보기일 때만(CursorManager 가 같은 광선으로 정한다). 패드는 바라보는 칸이면 된다.
+            bool aimed = GameKeys.UsingPad || Managers.Cursor._cursor == CursorType.Search;
+            if (pointed.gameObject.layer == (int)Define.Layer.Monster && aimed)
             {
                 // 콜라이더가 붙은 오브젝트에 컴포넌트가 없을 수 있다(생성된 층의
                 // 몬스터가 그렇다). 문에서 겪은 것과 같은 문제라 같은 방식으로 찾는다.
-                MonsterController monster = Util.Find<MonsterController>(hit.collider.gameObject);
+                MonsterController monster = Util.Find<MonsterController>(pointed.gameObject);
                 if (monster == null)
                     return;
 
@@ -459,18 +489,18 @@ public class UI_GameScene : UI_Scene
                 Vector3 monsterInfoPos = monsterInfo.gameObject.transform.position;
 
                 isOpenInfoPopup = true;
-                monsterInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
+                monsterInfo.Position = Util.ScreenToWorldCood(at);
 
             }
-            else if (hit.collider.gameObject.layer == (int)Define.Layer.CItem && Managers.Cursor._cursor == CursorType.Search)
+            else if (pointed.gameObject.layer == (int)Define.Layer.CItem && aimed)
             {
-                ConsumableItem cItem = Util.Find<ConsumableItem>(hit.collider.gameObject);
+                ConsumableItem cItem = Util.Find<ConsumableItem>(pointed.gameObject);
                 if (cItem == null)
                     return;
 
                 UI_CItemInfo cItemInfo = Managers.UI.MakeSubItem<UI_CItemInfo>(cItem.transform);
                 isOpenInfoPopup = true;
-                cItemInfo.Position = Util.ScreenToWorldCood(Input.mousePosition);
+                cItemInfo.Position = Util.ScreenToWorldCood(at);
 
             }
         }

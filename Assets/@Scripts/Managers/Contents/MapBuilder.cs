@@ -609,7 +609,9 @@ public static class MapBuilder
             AnimatorCullingMode cull = anim.cullingMode;
             anim.cullingMode = AnimatorCullingMode.AlwaysAnimate;
             anim.Update(0f);
-            anim.cullingMode = cull;
+            // 아이템 프리팹은 늘 재생(AlwaysAnimate)이라 한 챕터 20개 층의 물약·룬 170개 남짓이 화면 밖에서도 매 프레임 돌았다 —
+            // 그림을 넣은 뒤에는 안 보이면 멈춘다. 몬스터(CullUpdateTransforms)는 그대로 둔다.
+            anim.cullingMode = cull == AnimatorCullingMode.AlwaysAnimate ? AnimatorCullingMode.CullCompletely : cull;
         }
 
         SpriteRenderer sr = go.GetComponentInChildren<SpriteRenderer>();

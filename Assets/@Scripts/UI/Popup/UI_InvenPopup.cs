@@ -221,7 +221,74 @@ public class UI_InvenPopup : UI_Popup
         SortInven();
         Refresh();
 
+        // 칸·장비를 고르는 키 — 장치에 맞는 이름으로(PromptText). 틀이 화면 아래 끝까지 닿아 그 밑은 화면 밖이다 — 틀 왼쪽 아래,
+        // HUD 능력치 줄 위의 맵 자리에 외곽선 글씨로 둔다.
+        RectTransform frame = Util.FindChild<RectTransform>(gameObject, "Inventory_Frame", true);
+        if (frame != null)
+        {
+            TMPro.TextMeshProUGUI legend = CodeUI.NewText(frame, "Keys", CodeUI.ProseFont, 26f, new Color32(240, 225, 190, 255),
+                TMPro.TextAlignmentOptions.Right);
+            legend.fontSharedMaterial = CodeUI.Outlined(legend.font, 0.25f);
+            CodeUI.Place(legend.rectTransform, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(-16f, 96f), new Vector2(900f, 36f));
+            PromptText.Set(CodeUI.Fit(legend, 24f), KeysText);
+        }
+
         return true;
+    }
+
+    const int KeysText = 204;   // Tools/ui_text_parts/ui.py (패드 짝 675)
+
+    // 패드(와 키보드)로도 칸을 넘기고 장비를 고른다 — 예전에는 클릭뿐이라 패드로는 장비 이름·설명·검 그림을 볼 수 없었다.
+    // 스틱은 쓰지 않는다: 가방을 연 채로 걸을 수 있다(PlayerController). RB(3) 다음 칸, X(1) 그 칸의 다음 장비(끼운다).
+    // 맵에서는 1·3 이 비어 있다 — 스킬은 전투창이 받는다.
+    static readonly Define.Types[] Slots = { Define.Types.None, Define.Types.Sword, Define.Types.Shield, Define.Types.Necklace,
+        Define.Types.Ring, Define.Types.Shoes, Define.Types.Book };
+    int _slot;
+
+    void Update()
+    {
+        if (Managers.UI.TopPopup != this)
+            return;
+        if (GameKeys.Down(KeyCode.Alpha3))
+        {
+            _slot = (_slot + 1) % Slots.Length;
+            ShowSlot(Slots[_slot]);
+        }
+        else if (GameKeys.Down(KeyCode.Alpha1) && Slots[_slot] != Define.Types.None)
+        {
+            System.Collections.Generic.List<int> owned = OwnedOf(_listType);
+            if (owned.Count > 1)
+                OnClickEquipList((owned.IndexOf(EquippedId(_listType)) + 1) % owned.Count + 1);   // 목록 칸은 1 부터
+        }
+    }
+
+    void ShowSlot(Define.Types type)
+    {
+        switch (type)
+        {
+            case Define.Types.None: if (_isInventory_MyInfo_On == false) OnClickInventory_MyInfo_On(); break;
+            case Define.Types.Sword: OnClickSword(); break;
+            case Define.Types.Shield: OnClickShield(); break;
+            case Define.Types.Necklace: OnClickNecklace(); break;
+            case Define.Types.Ring: OnClickRing(); break;
+            case Define.Types.Shoes: OnClickShoes(); break;
+            case Define.Types.Book: OnClickBook(); break;
+        }
+    }
+
+    static int EquippedId(Define.Types type)
+    {
+        GameManager.CurPlayerData p = Managers.Game.PlayerData;
+        switch (type)
+        {
+            case Define.Types.Sword: return p.CurSword;
+            case Define.Types.Shield: return p.CurShield;
+            case Define.Types.Necklace: return p.CurNecklace;
+            case Define.Types.Ring: return p.CurRing;
+            case Define.Types.Shoes: return p.CurShoes;
+            case Define.Types.Book: return p.CurBook;
+            default: return -1;
+        }
     }
 
     // Esc 는 게임 화면(UI_GameScene)이 맨 위 창에게만 넘긴다. 예전에는 여기서도 따로 받아서,

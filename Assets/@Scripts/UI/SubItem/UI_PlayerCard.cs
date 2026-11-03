@@ -52,13 +52,13 @@ public class UI_PlayerCard : UI_BaseCard
     {
         base.PresentAttack(attacker, target, damage, critical, guarded);
 
-        Vector3 pos = GameObject.Find("UI_MonsterCard").GetComponent<UI_MonsterCard>().GetImage((int)Images.CreatureImage).gameObject.transform.position;
+        Vector3 pos = Opponent<UI_MonsterCard>().GetImage((int)Images.CreatureImage).gameObject.transform.position;
         // 맞는 쪽 이미지 기준으로 살짝 아래. 몬스터가 때릴 때(UI_MonsterCard)와 같은 값이다.
         // 예전에는 +200 이라 몬스터 그림 한참 위에 떠서 어디를 때렸는지 안 보였다.
         // 캔버스 100 칸(화면 픽셀 = 캔버스 배율 x 100)이다 — 숫자가 날아가는 거리(DamageFont)와 같이 화면 크기를 따른다.
         pos = new Vector3(pos.x, pos.y - 100f * transform.parent.lossyScale.y, pos.z);
 
-        GameObject go = GameObject.Find("UI_BattlePopup");
+        GameObject go = BattleRoot != null ? BattleRoot.gameObject : null;
         if (go != null)
         {
             Managers.Object.ShowDamageFont(pos, _hitDamage, 0, go.transform, critical, guarded);
@@ -243,6 +243,7 @@ public class UI_PlayerCard : UI_BaseCard
         var uiParticle = go.GetOrAddComponent<UIParticle>();
         uiParticle.scale = 270;
         uiParticle.Play();
+        Managers.Resource.Destroy(go, FxLife);
 
         //Destroy(uiParticle, 0.3f);
     }
@@ -251,7 +252,7 @@ public class UI_PlayerCard : UI_BaseCard
     {
         int swordId = Managers.Game.PlayerData.CurSword;
         string hitFX = Managers.Data.EquipDic[swordId].HitFX;
-        GameObject monster = GameObject.Find("UI_MonsterCard");
+        GameObject monster = Opponent<UI_MonsterCard>() != null ? Opponent<UI_MonsterCard>().gameObject : null;
         if (monster == null)
             return;
 
@@ -263,6 +264,7 @@ public class UI_PlayerCard : UI_BaseCard
 
         uiParticle.scale = 50;
         uiParticle.Play();
+        Managers.Resource.Destroy(go, FxLife);
     }
 
     public override void Dead()

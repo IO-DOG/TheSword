@@ -124,10 +124,10 @@ public class UI_MonsterCard : UI_BaseCard
     {
         base.PresentAttack(attacker, target, damage, critical, guarded);
 
-        Vector3 pos = GameObject.Find("UI_PlayerCard").GetComponent<UI_PlayerCard>().GetImage((int)Images.CreatureImage).gameObject.transform.position;
+        Vector3 pos = Opponent<UI_PlayerCard>().GetImage((int)Images.CreatureImage).gameObject.transform.position;
         pos = new Vector3(pos.x, pos.y - 100f * transform.parent.lossyScale.y, pos.z);   // 캔버스 100 칸 (UI_PlayerCard 와 같다)
 
-        GameObject go = GameObject.Find("UI_BattlePopup");
+        GameObject go = BattleRoot != null ? BattleRoot.gameObject : null;
         if (go != null)
         {
             Managers.Object.ShowDamageFont(pos, _hitDamage, 0, go.transform, critical, guarded);
@@ -275,11 +275,12 @@ public class UI_MonsterCard : UI_BaseCard
         var uiParticle = go.GetOrAddComponent<UIParticle>();
         uiParticle.scale = SlashScale;
         uiParticle.Play();
+        Managers.Resource.Destroy(go, FxLife);
     }
 
     void CreatePlayerHitParticle()
     {
-        GameObject player = GameObject.Find("UI_PlayerCard");
+        GameObject player = Opponent<UI_PlayerCard>() != null ? Opponent<UI_PlayerCard>().gameObject : null;
         if (player == null)
             return;
         // 이펙트가 없어도(데이터의 "-") 전투는 굴러가야 한다 — 여기서 터지면 전투 시계의 그 걸음이 도중에 끊긴다.
@@ -291,6 +292,7 @@ public class UI_MonsterCard : UI_BaseCard
 
         uiParticle.scale = HitScaleOf();
         uiParticle.Play();
+        Managers.Resource.Destroy(go, FxLife);
     }
 
     // 맞는 이펙트의 크기가 서열이다 — 모양과 색은 특성(generate_content.TRAIT_FX)이 정하고, 정예·우두머리는 같은 것을

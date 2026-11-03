@@ -228,9 +228,10 @@ public static class SaveStore
         }
     }
 
-    /// <summary>작은 기록 파일(Records.json·StorySeen.json)을 체크포인트처럼 쓴다: 임시 파일을 디스크까지 내린 뒤 바꿔 끼우고 앞의 것은
-    /// .bak. File.WriteAllText 는 디스크까지 내리지 않아서, 싸움 직후 전원이 나가면 NUL 로 찬 파일이 남고 다음 판에 빈 기록으로 덮였다.</summary>
-    public static void WriteText(string path, string text)
+    /// <summary>작은 기록 파일(Records.json·StorySeen.json)을 체크포인트처럼 쓴다: 임시 파일에 써서 바꿔 끼우고 앞의 것은 .bak.
+    /// 예전에는 .bak 없이 덮어써서, 싸움 직후 전원이 나가 NUL 로 찬 파일이 다음 판에 빈 기록으로 덮였다. durable 이면 디스크까지
+    /// 기다린다(fsync) — 싸움마다 쓰는 기록에는 끈다: 덱의 microSD 에서 수십 ms 가 걸리고, 깨져도 .bak(오래전에 디스크에 내려간 앞 판)이 남는다.</summary>
+    public static void WriteText(string path, string text, bool durable = true)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path));
         string temp = path + ".tmp";
@@ -239,7 +240,7 @@ public static class SaveStore
         {
             writer.Write(text);
             writer.Flush();
-            stream.Flush(true);
+            stream.Flush(durable);
         }
         if (File.Exists(path))
             File.Replace(temp, path, path + ".bak");

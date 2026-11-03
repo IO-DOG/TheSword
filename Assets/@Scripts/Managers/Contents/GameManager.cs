@@ -676,7 +676,12 @@ public class GameManager
         // 몸은 챕터 첫 층에 서고 게임은 고른 층이라고 여겼다 — 그 차이가 계단마다 이어졌다.
         PlayerData.CurStageid = stageId;
         OnStaticResolution = stageId == 2;
-        GenerateMap(stageId);
+        // 같은 챕터 안이면 다시 짓지 않는다 — 계단처럼(PortalController 는 챕터 경계에서만 짓는다). 예전에는 늘 20개 층을 한 프레임에
+        // 다시 지어 덱에서 0.5~1.5초 멈췄다(가릴 그림도 없이). 떨군 보상은 짓기 전처럼 먼저 주워 둔다.
+        if (Maps.ContainsKey(stageId))
+            CollectDrops();
+        else
+            GenerateMap(stageId);
 
         Transform arrival = ArrivalPoint(stageId);
         Vector3 pos = arrival != null ? arrival.position : Player.transform.position;

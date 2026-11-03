@@ -11,6 +11,28 @@ using static GameManager;
 
 public class UI_BaseCard : UI_Base
 {
+    // 한 대마다 GameObject.Find 로 찾던 전투창·상대 카드. 한 챕터의 20개 층이 다 켜져 있어 장면에 3만 개 가까이 있고, 한 번에 수 ms 였다
+    // (덱에서 8배속이면 한 프레임에 여러 대). 카드는 전투마다 새로 서니(SetBattleCard) 처음 찾은 것을 쥔다.
+    // 한 대마다 내는 베기·맞음 이펙트(0.3초)를 지우지 않아서, 다 끝난 UIParticle 이 매 프레임 캔버스를 다시 굽게 했다 — 보스전 끝에는 백 개가 넘었다.
+    protected const float FxLife = 1.5f;
+    UI_BattlePopup _battle;
+    UI_BaseCard _opponent;
+    protected Transform BattleRoot
+    {
+        get
+        {
+            if (_battle == null)
+                _battle = GetComponentInParent<UI_BattlePopup>(true);
+            return _battle != null ? _battle.transform : null;
+        }
+    }
+    protected T Opponent<T>() where T : UI_BaseCard
+    {
+        if (_opponent == null && BattleRoot != null)
+            _opponent = BattleRoot.GetComponentInChildren<T>(true);
+        return _opponent as T;
+    }
+
     protected enum Images
     {
         CreatureImage,

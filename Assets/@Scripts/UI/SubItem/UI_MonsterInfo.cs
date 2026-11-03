@@ -209,9 +209,8 @@ public class UI_MonsterInfo : UI_Base
     {
         if (_init == false)
             return;
-        RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (UI_GameScene.CanShowTooltip() && Physics.Raycast(ray, out hit, 1000.0f, _mask) && IsOwner(hit.collider))
+        // 마우스면 커서 밑, 패드면 바라보는 칸(UI_GameScene.Pointed)이 아직 이것인가.
+        if (UI_GameScene.CanShowTooltip() && UI_GameScene.Pointed(_mask, out Collider pointed, out _) && IsOwner(pointed))
             return;
 
         Release();

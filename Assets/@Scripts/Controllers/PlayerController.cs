@@ -117,6 +117,7 @@ public class PlayerController : MonoBehaviour
     }
 
     Stack<int> keyInputStack = new Stack<int>();
+    readonly Stack<int> _tempStack = new Stack<int>();
 
     void OnKeyboard()
     {
@@ -143,8 +144,8 @@ public class PlayerController : MonoBehaviour
             keyInputStack.Push((int)MoveDir.Left);
         }
 
-        // 값을 임시로 저장할 스택 생성
-        Stack<int> tempStack = new Stack<int>();
+        // 값을 임시로 저장할 스택 — 매 프레임 새로 만들지 않는다(쓰고 나면 늘 비어 있다)
+        Stack<int> tempStack = _tempStack;
 
         if (GameKeys.Up(KeyCode.W))
         {
@@ -483,7 +484,8 @@ public class PlayerController : MonoBehaviour
 
         // 밀었는데 아무 일도 안 일어나는 경우가 있다. 그때 광선이 무엇을 맞혔는지
         // 남긴다 — 이 한 줄이 없으면 상대가 왜 반응하지 않는지 알 수가 없다.
-        if (Time.time - _lastHitLog > 2f)
+        // 개발 빌드·에디터만 — 릴리스의 Debug.Log 는 걷는 동안 2초마다 스택 추적까지 Player.log 에 적었다.
+        if (Debug.isDebugBuild && Time.time - _lastHitLog > 2f)
         {
             _lastHitLog = Time.time;
             if (hit.collider == null)
@@ -768,6 +770,22 @@ public class PlayerController : MonoBehaviour
 
         if (_walking)
             WalkStep();
+    }
+
+    /// <summary>바라보는 옆 칸의 가운데(월드) — 서 있으면 Idle 방향, 걷는 중이면 걷는 방향. 패드 툴팁이 가리키는 곳이다
+    /// (UI_GameScene.Pointed). 연출·레버 같은 다른 상태면 null.</summary>
+    public Vector3? FacingCell()
+    {
+        Vector3 dir;
+        switch (_state)
+        {
+            case PlayerState.Up: case PlayerState.IdleBack: dir = Vector3.forward; break;
+            case PlayerState.Down: case PlayerState.IdleFront: dir = Vector3.back; break;
+            case PlayerState.Left: case PlayerState.IdleLeft: dir = Vector3.left; break;
+            case PlayerState.Right: case PlayerState.IdleRight: dir = Vector3.right; break;
+            default: return null;
+        }
+        return _cellPos + dir * _offset;
     }
 
     /// <summary>클릭으로 걸어도 되는가. 흐름이 캐릭터를 쥐었거나(전투·대화·연출·문·계단·레버·입력 잠금), 창이 맵을

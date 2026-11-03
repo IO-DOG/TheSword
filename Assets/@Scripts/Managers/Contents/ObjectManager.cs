@@ -28,10 +28,10 @@ public class ObjectManager
         else
             prefabName = "DamageFont";
 
-        GameObject ui_BattlePopup = GameObject.Find("UI_BattlePopup");
-        if (ui_BattlePopup != null)
+        UI_BattlePopup battle = Managers.UI.FindPopup<UI_BattlePopup>();    // GameObject.Find 는 장면 전체(3만 개 가까이)를 훑었다 — 한 대마다
+        if (battle != null)
         {
-            GameObject go = Managers.Resource.Instantiate(prefabName, ui_BattlePopup.transform);
+            GameObject go = Managers.Resource.Instantiate(prefabName, battle.transform);
             DamageFont damageText = go.GetOrAddComponent<DamageFont>();
             damageText.SetInfo(pos, damage, healAmount, parent, isCritical, isDefence);
         }

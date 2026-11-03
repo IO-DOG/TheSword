@@ -125,7 +125,7 @@ public static class Records
             return;
         try
         {
-            SaveStore.WriteText(FilePath, JsonConvert.SerializeObject(s_data));
+            SaveStore.WriteText(FilePath, JsonConvert.SerializeObject(s_data), durable: false);   // 싸움마다 쓴다
         }
         catch (Exception e) when (SaveStore.IsSaveError(e))
         {

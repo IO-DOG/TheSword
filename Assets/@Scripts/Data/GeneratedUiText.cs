@@ -51,7 +51,7 @@ public static class GeneratedUiText
             case 271: return new[] { "First hit crits", "첫 타 치명", "First hit crits", "初撃が会心", "首击暴击" }[language >= 0 && language <= 4 ? language : 0];
             case 272: return new[] { "EXP {0}", "경험치 {0}", "EXP {0}", "経験値 {0}", "经验 {0}" }[language >= 0 && language <= 4 ? language : 0];
             case 273: return new[] { "No monsters left on this floor.", "이 층에는 남은 몬스터가 없다.", "No monsters left on this floor.", "この階にモンスターは残っていない。", "本层没有剩下的怪物。" }[language >= 0 && language <= 4 ? language : 0];
-            case 274: return new[] { "WASD Move   Hover Info   M Manual   V Forecast   Tab Warp   1/2/3 Skills   Esc Menu", "WASD 이동   마우스 올리기 정보   M 도감   V 예측 표시   Tab 워프   1/2/3 스킬   Esc 메뉴", "WASD Move   Hover Info   M Manual   V Forecast   Tab Warp   1/2/3 Skills   Esc Menu", "WASD 移動   マウスオーバー 情報   M 図鑑   V 予測表示   Tab ワープ   1/2/3 スキル   Esc メニュー", "WASD 移动   鼠标悬停 信息   M 图鉴   V 预测显示   Tab 传送   1/2/3 技能   Esc 菜单" }[language >= 0 && language <= 4 ? language : 0];
+            case 274: return new[] { "WASD Move   Hover Info   M Manual   V Forecast   I Bag   Tab Warp   1/2/3 Skills   Esc Menu", "WASD 이동   마우스 올리기 정보   M 도감   V 예측 표시   I 가방   Tab 워프   1/2/3 스킬   Esc 메뉴", "WASD Move   Hover Info   M Manual   V Forecast   I Bag   Tab Warp   1/2/3 Skills   Esc Menu", "WASD 移動   マウスオーバー 情報   M 図鑑   V 予測表示   I 持ち物   Tab ワープ   1/2/3 スキル   Esc メニュー", "WASD 移动   鼠标悬停 信息   M 图鉴   V 预测显示   I 背包   Tab 传送   1/2/3 技能   Esc 菜单" }[language >= 0 && language <= 4 ? language : 0];
             case 275: return new[] { "M: Monster Manual   V: Forecast", "M: 몬스터 도감   V: 예측 표시", "M: Monster Manual   V: Forecast", "M: モンスター図鑑   V: 予測表示", "M: 怪物图鉴   V: 预测显示" }[language >= 0 && language <= 4 ? language : 0];
             case 276: return new[] { "Battle forecast on", "전투 예측 표시 켬", "Battle forecast on", "戦闘予測 表示オン", "已显示战斗预测" }[language >= 0 && language <= 4 ? language : 0];
             case 277: return new[] { "Battle forecast off", "전투 예측 표시 끔", "Battle forecast off", "戦闘予測 表示オフ", "已隐藏战斗预测" }[language >= 0 && language <= 4 ? language : 0];
@@ -225,7 +225,7 @@ public static class GeneratedUiText
             case 660: return new[] { "Press any button", "아무 버튼이나 누르세요", "Press any button", "何かボタンを押してください", "请按任意按钮" }[language >= 0 && language <= 4 ? language : 0];
             case 661: return new[] { "Loading failed. A: retry / B: quit", "불러오지 못했습니다. A: 재시도 / B: 종료", "Loading failed. A: retry / B: quit", "読み込めませんでした。A：再試行 / B：終了", "加载失败。A：重试 / B：退出" }[language >= 0 && language <= 4 ? language : 0];
             case 662: return new[] { "Could not restore your save. The original is preserved. Press any button to return.", "저장을 복구하지 못했습니다. 원본은 보존됩니다. 아무 버튼이나 눌러 돌아가세요.", "Could not restore your save. The original is preserved. Press any button to return.", "セーブを復元できませんでした。元のデータは保持されます。何かボタンを押すと戻ります。", "无法恢复存档。原始存档已保留。请按任意按钮返回。" }[language >= 0 && language <= 4 ? language : 0];
-            case 663: return new[] { "Stick Move   View Manual   LS Forecast   LB Warp   X/Y/RB Skills   Menu Pause", "스틱 이동   View 도감   LS 예측 표시   LB 워프   X/Y/RB 스킬   Menu 메뉴", "Stick Move   View Manual   LS Forecast   LB Warp   X/Y/RB Skills   Menu Pause", "スティック 移動   View 図鑑   LS 予測表示   LB ワープ   X/Y/RB スキル   Menu メニュー", "摇杆 移动   View 图鉴   LS 预测显示   LB 传送   X/Y/RB 技能   Menu 菜单" }[language >= 0 && language <= 4 ? language : 0];
+            case 663: return new[] { "Stick Move   View Manual   LS Forecast   Y Bag   LB Warp   X/Y/RB Skills   Menu Pause", "스틱 이동   View 도감   LS 예측 표시   Y 가방   LB 워프   X/Y/RB 스킬   Menu 메뉴", "Stick Move   View Manual   LS Forecast   Y Bag   LB Warp   X/Y/RB Skills   Menu Pause", "スティック 移動   View 図鑑   LS 予測表示   Y 持ち物   LB ワープ   X/Y/RB スキル   Menu メニュー", "摇杆 移动   View 图鉴   LS 预测显示   Y 背包   LB 传送   X/Y/RB 技能   Menu 菜单" }[language >= 0 && language <= 4 ? language : 0];
             case 664: return new[] { "View: Monster Manual   LS: Forecast", "View: 몬스터 도감   LS: 예측 표시", "View: Monster Manual   LS: Forecast", "View: モンスター図鑑   LS: 予測表示", "View: 怪物图鉴   LS: 预测显示" }[language >= 0 && language <= 4 ? language : 0];
             case 665: return new[] { "Stick Choose a floor   A Go   LB / B Close", "스틱으로 층 고르기   A 이동   LB / B 닫기", "Stick Choose a floor   A Go   LB / B Close", "スティック 階を選ぶ   A 移動   LB / B 閉じる", "摇杆 选择楼层   A 前往   LB / B 关闭" }[language >= 0 && language <= 4 ? language : 0];
             case 666: return new[] { "Pick with the stick then press A", "스틱으로 고른 뒤 A", "Pick with the stick then press A", "スティックで選んでからA", "用摇杆选择后按A" }[language >= 0 && language <= 4 ? language : 0];
@@ -237,6 +237,7 @@ public static class GeneratedUiText
             case 672: return new[] { "←→ choose  A receive  B pass", "←→ 고르기  A 받기  B 지나간다", "←→ choose  A receive  B pass", "←→ 選ぶ  A 受け取る  B 通り過ぎる", "←→ 选择  A 领取  B 离开" }[language >= 0 && language <= 4 ? language : 0];
             case 673: return new[] { "A continue", "A 계속", "A continue", "A 続ける", "A 继续" }[language >= 0 && language <= 4 ? language : 0];
             case 674: return new[] { "Stick Choose   A Start   B Back", "스틱 고르기   A 시작   B 뒤로", "Stick Choose   A Start   B Back", "スティック 選択   A 開始   B 戻る", "摇杆 选择   A 开始   B 返回" }[language >= 0 && language <= 4 ? language : 0];
+            case 675: return new[] { "RB Next slot   X Next item   Y / B Close", "RB 칸 바꾸기   X 다음 장비   Y / B 닫기", "RB Next slot   X Next item   Y / B Close", "RB 欄を切替   X 次の装備   Y / B 閉じる", "RB 切换栏位   X 下一件装备   Y / B 关闭" }[language >= 0 && language <= 4 ? language : 0];
             case 440: return new[] { "Endings {0}/{1}", "결말 {0}/{1}", "Endings {0}/{1}", "エンディング {0}/{1}", "结局 {0}/{1}" }[language >= 0 && language <= 4 ? language : 0];
             case 150: return new[] { "Could not save. Check your free disk space and the save folder. Quitting now loses progress since the last save.", "저장하지 못했습니다. 디스크 공간과 저장 폴더를 확인해 주세요. 지금 끄면 마지막 저장 뒤의 진행이 사라집니다.", "Could not save. Check your free disk space and the save folder. Quitting now loses progress since the last save.", "セーブできませんでした。ディスクの空き容量とセーブフォルダを確認してください。今終了すると最後のセーブ以降の進行が失われます。", "无法保存。请检查磁盘剩余空间和存档文件夹。现在退出将丢失上次保存之后的进度。" }[language >= 0 && language <= 4 ? language : 0];
             case 151: return new[] { "Could not clear the old save. The files may be read-only or in use by another program.", "지난 저장을 지우지 못했습니다. 파일이 읽기 전용이거나 다른 프로그램이 쓰고 있습니다.", "Could not clear the old save. The files may be read-only or in use by another program.", "前のセーブを削除できませんでした。ファイルが読み取り専用か別のプログラムが使用中です。", "无法删除旧存档。文件可能为只读或正被其他程序占用。" }[language >= 0 && language <= 4 ? language : 0];
@@ -283,6 +284,7 @@ public static class GeneratedUiText
             case 201: return new[] { "DEF SPEED", "방어 속도", "DEF SPEED", "防御 速度", "防御 速度" }[language >= 0 && language <= 4 ? language : 0];
             case 202: return new[] { "MOVE SPEED", "이동 속도", "MOVE SPEED", "移動 速度", "移动 速度" }[language >= 0 && language <= 4 ? language : 0];
             case 203: return new[] { "Back", "돌아가기", "Back", "戻る", "返回" }[language >= 0 && language <= 4 ? language : 0];
+            case 204: return new[] { "3 Next slot   1 Next item   I / Esc Close", "3 칸 바꾸기   1 다음 장비   I / Esc 닫기", "3 Next slot   1 Next item   I / Esc Close", "3 欄を切替   1 次の装備   I / Esc 閉じる", "3 切换栏位   1 下一件装备   I / Esc 关闭" }[language >= 0 && language <= 4 ? language : 0];
             default: return null;
         }
     }
@@ -307,6 +309,7 @@ public static class GeneratedUiText
             case 480: return 672;
             case 481: return 673;
             case 535: return 674;
+            case 204: return 675;
             default: return 0;
         }
     }

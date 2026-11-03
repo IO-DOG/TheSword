@@ -59,4 +59,7 @@ TEXT = {
     202: ("이동 속도", "MOVE SPEED", "移動 速度", "移动 速度"),
     # UI_MenuPopup first row when opened from the title: it only closes the menu ("Continue" read as "load save")
     203: ("돌아가기", "Back", "戻る", "返回"),
+    # UI_InvenPopup key legend under the frame (pad twin 675 in pad.py)
+    204: ("3 칸 바꾸기   1 다음 장비   I / Esc 닫기", "3 Next slot   1 Next item   I / Esc Close",
+          "3 欄を切替   1 次の装備   I / Esc 閉じる", "3 切换栏位   1 下一件装备   I / Esc 关闭"),
 }

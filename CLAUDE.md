@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **키 입력은 `GameKeys` 로 읽는다**(`Input.GetKey*` 직접 호출 금지) — 그래야 패드(XInput, Deck)가 같이 돈다. 목록 이동은 `GameKeys.Nav`.
 **키 이름이 든 안내는 `PromptText.Set(text, id)`(한 번 띄우고 마는 글은 `PromptText.Get`)로 띄운다** — 마지막에 쓴 장치가 패드면 짝 문구(`Tools/ui_text_parts/pad.py` 의 `TWIN`)로
-바꾸고 장치가 바뀌면 다시 칠한다(Steam Deck Verified: 쓰지 않는 장치의 글리프 금지). 새 키 안내에 짝이 없으면 `validate_content` 가 멈춘다(프리팹에 박힌 글은 못 본다 — 인트로의 "ESC" 가 그랬다). 패드인 동안 커서·마우스 툴팁은 숨는다.
+바꾸고 장치가 바뀌면 다시 칠한다(Steam Deck Verified: 쓰지 않는 장치의 글리프 금지). 맵 툴팁은 패드면 주인공이 바라보는 옆 칸을 가리킨다(`UI_GameScene.Pointed`). 새 키 안내에 짝이 없으면 `validate_content` 가 멈춘다(프리팹에 박힌 글은 못 본다 — 인트로의 "ESC" 가 그랬다). 패드인 동안 커서·마우스 툴팁은 숨는다.
 장치 판정은 `GameKeys.UsingPad` — 패드 단추·축이면 패드, 키·마우스 단추·휠·"Mouse X/Y" 축으로 잰 실제 움직임이면 키보드(커서 좌표로 재면 창 크기만 바꿔도 넘어갔다).
 확인: `dotnet run --project Tools/gamekeys_check`.
 패드 축 이름(`PadDPadX/Y`, `PadLT/RT`, `PadRStickY`)은 Input Manager 에 있어야 하고, 없으면 버튼만 돈다.
@@ -781,6 +781,7 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
 - 보스가 떨군 장비는 저장·맵 재구성 직전에 주워진다(`GameManager.CollectDrops`) — 처치는 저장되는데 떨군 것은
   안 저장돼서, 안 줍고 워프하거나 죽으면 반지가 영영 사라졌다.
 - 챕터 첫 층(21·41·61·81)에서 **내려가는** 계단도 앞 챕터의 맵을 다시 짓는다. 올라가는 쪽만 짓고 있었다.
+- **워프는 같은 챕터 안이면 다시 짓지 않는다**(계단처럼) — 예전에는 늘 20개 층을 한 프레임에 다시 지어 덱에서 0.5~1.5초 멈췄다. 챕터를 넘을 때만 `GenerateMap`.
 - 킹 슬라임(9001)·분열 슬라임과 그 물약도 제 활성 인덱스를 쓴다 — 0 을 빌려 쓰다 1층 몬스터 0번이 죽은 것으로 저장됐다.
 - **4층 계단도 보스 문처럼 잠근다**(`RefreshBossGates` 가 손수 만든 층 중 4층만 본다). 킹 슬라임과 분열 셋(9002~9004)이
   다 쓰러져야 열린다 — 예전에는 슬라임을 왼쪽으로 돌아 5층에 Lv12 로 올라갈 수 있었고 완주 계산(5층 Lv16)이 거짓이 됐다.

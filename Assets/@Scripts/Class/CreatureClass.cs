@@ -131,7 +131,6 @@ public class CreatureClass : MonoBehaviour
 
         public GuardianTrait(UI_BaseCard uI_BaseCard)
         {
-            Debug.Log(uI_BaseCard);
             //OnGuardianAction -= uI_BaseCard.FillDefenceGague;
             //OnGuardianAction += uI_BaseCard.FillDefenceGague;
             //Managers.Event.Unsubscribe(Define.GameEvent.FillDefenceGague, uI_BaseCard.FillDefenceGague);
@@ -139,10 +138,6 @@ public class CreatureClass : MonoBehaviour
             if (uI_BaseCard != null) uI_BaseCard.FillDefenceGague();
         }
 
-        ~GuardianTrait()
-        {
-            //Managers.Event.DeleteEvent(Define.GameEvent.FillDefenceGague);
-        }
 
         public void ExcuteOnDead(CreatureData creature)
         {
