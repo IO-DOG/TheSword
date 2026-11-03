@@ -102,6 +102,8 @@ public class UI_BattlePopup : UI_Popup
         #endregion
 
         GetImage((int)Images.BGImage).sprite = Managers.Game._screenShot2;
+        if (Managers.Game._screenShot2 != null)
+            HideWorld();
 
         Managers.Sound.Play(Define.Sound.Effect, "BattleStart_SFX");
 
@@ -434,8 +436,32 @@ public class UI_BattlePopup : UI_Popup
         ShowSummary();
     }
 
+    // 전투창은 화면을 불투명한 스크린샷 배경(BGImage)으로 덮는다 — 그동안 월드를 그리지 않는다(cullingMask 0). 한 판의 3분의 1 이
+    // 전투라 덱의 GPU·배터리 몫이 크다. 배경이 없으면(스크린샷 실패) 그대로 그린다. 창이 어느 길로 사라지든 되돌린다.
+    Camera _hiddenCamera;
+    int _hiddenMask;
+
+    void HideWorld()
+    {
+        _hiddenCamera = Camera.main;
+        if (_hiddenCamera == null)
+            return;
+        _hiddenMask = _hiddenCamera.cullingMask;
+        _hiddenCamera.cullingMask = 0;
+    }
+
+    void ShowWorld()
+    {
+        if (_hiddenCamera != null)
+            _hiddenCamera.cullingMask = _hiddenMask;
+        _hiddenCamera = null;
+    }
+
+    void OnDisable() => ShowWorld();
+
     void OnDestroy()
     {
+        ShowWorld();
         _battle?.Dispose();
         // 메뉴에서 다시 시작하거나 타이틀로 나가면 전투가 끝나지 않은 채 파괴된다 — 남은 구독이 다음 전투를 닫으면 안 된다.
         if (Managers.IsAlive && Managers.Game.OnBattleAction != null)
