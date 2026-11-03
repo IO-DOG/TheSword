@@ -254,7 +254,8 @@ public class UI_CItemInfo : UI_Base
 
         while (true)
         {
-            GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().verticalNormalizedPosition -= 10f * Time.deltaTime / GetObject((int)Objects.Content).GetComponent<RectTransform>().sizeDelta.y;
+            // 끝에 닿으면 방향을 바꾼다(mScrollSpeed 의 부호). 예전에는 늘 10 을 빼서 바닥에 붙은 채 안 돌아왔다 — 맨 위의 특성 줄이 사라졌다.
+            GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().verticalNormalizedPosition -= mScrollSpeed * Time.deltaTime / GetObject((int)Objects.Content).GetComponent<RectTransform>().sizeDelta.y;
 
             //스크롤의 끝 영역에 도달했다면 방향을 반전
             if (GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition <= 0f || GetObject((int)Objects.ScrollView).GetComponent<ScrollRect>().horizontalNormalizedPosition >= 1f)

@@ -38,6 +38,7 @@ public static class FontFallback
     static TMP_FontAsset s_pixelCjk;
     static readonly List<(Define.ScriptType lang, TMP_FontAsset font)> s_system = new List<(Define.ScriptType, TMP_FontAsset)>();
     static bool s_installed;
+    static Define.ScriptType? s_attachedFor;    // 마지막으로 건 언어 (OnSettingsChanged)
 
     // 에디터는 도메인 리로드를 끄고 돈다(Enter Play Mode 옵션). 만든 글꼴은 플레이가 끝날 때 부서지는데 이 값들은
     // 남아서, 두 번째 플레이부터 죽은 글꼴을 다시 걸어 ◀▶·일본어·중국어가 □ 로 나왔다. 플레이마다 새로 만든다.
@@ -48,6 +49,7 @@ public static class FontFallback
         s_pixelCjk = null;
         s_system.Clear();
         s_installed = false;
+        s_attachedFor = null;
     }
 
     // 켜자마자 한 번 (Managers).
@@ -63,8 +65,8 @@ public static class FontFallback
                     s_system.Add((lang, font));
             }
             // 정적 이벤트도 플레이를 넘어 남는다 — 빼고 건다.
-            GameSettings.Changed -= Attach;
-            GameSettings.Changed += Attach;
+            GameSettings.Changed -= OnSettingsChanged;
+            GameSettings.Changed += OnSettingsChanged;
             Application.quitting -= Detach;
             Application.quitting += Detach;
             // DNF 는 장면과 어드레서블 묶음에 따로 실려 메모리에 둘일 수 있다 — 새로 읽힌 것에도 건다(선로드 뒤는 Refresh).
@@ -98,6 +100,14 @@ public static class FontFallback
 
     static void OnSceneLoaded(Scene scene, LoadSceneMode mode) => Attach();
 
+    // 설정은 소리 막대 한 칸·V(맵 숫자)·흔들림마다 Changed 를 쏜다. 글꼴은 언어만 따르는데 그때마다 모든 글꼴·글을 훑어 덱에서
+    // 한 번씩 끊겼다 — 언어가 바뀐 때만 다시 건다.
+    static void OnSettingsChanged()
+    {
+        if (s_attachedFor != GameSettings.Language)
+            Attach();
+    }
+
     // 픽셀 글꼴 → 고른 언어의 윈도 글꼴 → 나머지 윈도 글꼴.
     static void Attach()
     {
@@ -106,6 +116,7 @@ public static class FontFallback
         if (s_pixel != null)
             global.Add(s_pixel);
         Define.ScriptType chosen = GameSettings.Language;
+        s_attachedFor = chosen;
         foreach ((Define.ScriptType lang, TMP_FontAsset font) in s_system)
             if (lang == chosen)
                 global.Add(font);

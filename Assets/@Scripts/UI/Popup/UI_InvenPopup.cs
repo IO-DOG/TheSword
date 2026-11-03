@@ -249,6 +249,8 @@ public class UI_InvenPopup : UI_Popup
     {
         if (Managers.UI.TopPopup != this)
             return;
+        // 마우스로 고른 칸에서 잇는다 — 칸 번호를 따로 들고 있으면 RB 가 옛 칸에서 뛰고, 내 정보가 떠 있는데 X 가 장비를 바꿨다.
+        _slot = _isInventory_MyInfo_On ? 0 : Mathf.Max(0, System.Array.IndexOf(Slots, _listType));
         if (GameKeys.Down(KeyCode.Alpha3))
         {
             _slot = (_slot + 1) % Slots.Length;
@@ -711,6 +713,10 @@ public class UI_InvenPopup : UI_Popup
 
     void OnClickEquipList(int idx)
     {
+        // 가방을 연 채 걷다 부딪히면 전투창 밑에서도 목록이 눌린다(배경은 화면 사진이라 클릭을 막지 않는다). 싸우는 중에 검을
+        // 바꾸면 공격력만 바뀌고 공격 주기는 그대로라 어느 예측과도 안 맞는다 — 이길 싸움에서 죽었다.
+        if (Managers.Game.OnBattle)
+            return;
         GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
 
         UnityEngine.UI.Image[] onMark =

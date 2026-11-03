@@ -41,6 +41,8 @@ public class UI_ConfirmPopup : UI_Popup
     public static void Tell(string message, Action onClose = null)
         => Open(message, onClose, onClose, null, null, true, true);
 
+    const float ClickDelay = 0.4f;
+    float _openedAt;
     Action _onYes;
     Action _onNo;
     bool _yes;          // 지금 골라 둔 쪽 — Enter 가 누를 것
@@ -140,8 +142,11 @@ public class UI_ConfirmPopup : UI_Popup
 
         yes.gameObject.BindEvent(() => Select(true), type: Define.UIEvent.PointerEnter);
         no.gameObject.BindEvent(() => Select(false), type: Define.UIEvent.PointerEnter);
-        yes.gameObject.BindEvent(() => Answer(true));
-        no.gameObject.BindEvent(() => Answer(false));
+        // 마우스는 창이 뜨고 ClickDelay 뒤부터 받는다(UI_TallyPopup 과 같다) — 지는 싸움 옆 칸을 두 번 누르면 첫 클릭이 부딪혀
+        // "그래도 싸울까" 를 띄우고 두 번째(0.35초 안)가 그 창의 단추에 떨어졌다.
+        _openedAt = Time.unscaledTime;
+        yes.gameObject.BindEvent(() => { if (Time.unscaledTime - _openedAt >= ClickDelay) Answer(true); });
+        no.gameObject.BindEvent(() => { if (Time.unscaledTime - _openedAt >= ClickDelay) Answer(false); });
 
         AddLabel(yes, yesLabel, text);
         AddLabel(no, noLabel, text);
