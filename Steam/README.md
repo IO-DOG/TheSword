@@ -25,7 +25,7 @@
       Coming Soon 전에 정한다. 캡슐에는 게임 이름과 공식 부제 말고는 글을 넣을 수 없다 [S15].
       언어별 이름(한국어 "더 소드" 등)은 Steamworks 에서 따로 넣을 수 있고, 그 언어 사용자의 검색 제안에 쓰인다 [S19].
 - [ ] **D3** 번체 중국어를 데모에 넣을지(번역가에 달렸다). 번체는 아직 게임에 없다 — `store/zh-TW.md` 머리말.
-- [ ] **K0** `ProjectSettings.asset` 의 `companyName: CozyByte` 를 커밋한다(지금 작업 트리에만 있다). 저장 폴더·클라우드 경로가 이 이름에 달렸다 —
+- [x] **K0** `ProjectSettings.asset` 의 `companyName: CozyByte` — 커밋돼 있다(2026-11-04 확인). 저장 폴더·클라우드 경로가 이 이름에 달렸다 —
       공개 빌드가 나간 뒤에 바꾸면 모든 세이브가 고아가 된다(CLAUDE.md).
 
 ## 1. 계정과 앱
@@ -147,7 +147,7 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
 
 | 언제 | 할 일 |
 |---|---|
-| 지금 (W0) | 가입·크레딧(21일 시계가 돈다), K0 커밋, 이름·부제 |
+| 지금 (W0) | 가입·크레딧(21일 시계가 돈다), 이름·부제 |
 | Coming Soon 올리기 7 영업일 전 | 스토어 페이지 **Mark As Ready For Review**. 검토는 보통 3~5 영업일 [S5]. 통과하면 *Post as Coming Soon* [S6] |
 | 출시 **2주 전까지** | Coming Soon 이 떠 있어야 한다 [S6]. 그때부터 찜(위시리스트)이 쌓인다 |
 | 2027-01-10 23:59 PST | **Next Fest 2월 등록 마감** [S8] |
@@ -203,7 +203,7 @@ App Admin → Application → **Steam Cloud** [S9].
 ## 5. 업적·통계·Rich Presence
 
 - [ ] **통계 먼저**(업적의 진행 통계가 통계를 가리킨다): `stats.md` 의 표대로 넷 → Publish.
-- [ ] **업적**: `achievements.md` 순서대로 20개. 아이콘 256×256 × 2장씩(아직 없다 — 임시 아이콘으로 먼저 넣어도 된다) → Publish.
+- [ ] **업적**: `achievements.md` 순서대로 20개. 아이콘 256×256 × 2장씩(`art/icons/` 의 40장 — 풀린 것·잠긴 것) → Publish.
 - [ ] **순위표**: `leaderboards.md` 대로 둘(오름차순·숫자, Trusted 끔, Community Name) → Publish.
 - [ ] **Rich Presence**: App Admin → Community → Rich Presence 에서 `rich_presence/` 의 다섯 파일을 하나씩 올린다 → Publish.
       언어별 파일(`"lang" { "Language" … "Tokens" { … } }`)도, 여러 언어를 한 파일에 넣어 한 번에 올리는 것도 문서에 있다 — 올린 파일에 든 언어만
