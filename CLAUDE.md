@@ -11,6 +11,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 `@` 접두사 폴더(`@Scripts`, `@Resources`, `@Scenes`)만 이 프로젝트의 자체 콘텐츠다.
 `Assets/` 하위의 나머지(Febucci Text Animator, DOTween, Retro Arsenal, UniGLTF 등)는 서드파티 에셋이므로 수정하지 않는다.
 (BroAudio 는 2026-11-03 에 뺐다 — 코드·에셋 참조가 0 인데 데모 오디오 ~10MB 가 Resources 로 빌드에 실렸다. 원본은 `../_TheSword_removed/`.)
+DOTween Pro 도 2026-11-05 에 뺐다 — Pro 컴포넌트(`DOTweenAnimation`·`DOTweenPath`)·TMP 확장을 쓰는 곳이 0 이었고(TMP 의 `DOFade` 는 무료 `DOTweenModuleUI` 의
+`Graphic` 판이 받는다), 유료 좌석 에셋이 빌드에 실릴 까닭이 없었다. 원본은 `../_TheSword_removed/DOTweenPro_20261105/`. 무료 DOTween 은 그대로다.
 
 **키 입력은 `GameKeys` 로 읽는다**(`Input.GetKey*` 직접 호출 금지) — 그래야 패드(XInput, Deck)가 같이 돈다. 목록 이동은 `GameKeys.Nav`.
 **키 이름이 든 안내는 `PromptText.Set(text, id)`(한 번 띄우고 마는 글은 `PromptText.Get`)로 띄운다** — 마지막에 쓴 장치가 패드면 짝 문구(`Tools/ui_text_parts/pad.py` 의 `TWIN`)로

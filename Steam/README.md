@@ -73,7 +73,8 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
 - [ ] 로컬 스모크: `Build\Windows` 에 `steam_appid.txt`(본편 AppID)를 **잠깐** 두고 `TheSword.exe` → 타이틀 → 새 게임 → 1층. 끝나면 지운다.
       (없으면 AppID 가 박힌 릴리스 빌드는 Steam 으로 다시 켜진다 — 정상이다.)
 - [ ] 처음 한 번: `scripts/README.md` 대로 AppID·DepotID 를 채운다.
-- [ ] steamcmd 를 받아(https://developer.valvesoftware.com/wiki/SteamCMD 또는 Steamworks SDK 의 `tools\ContentBuilder\builder`) `Steam\steamcmd\steamcmd.exe` 에 둔다.
+- [x] steamcmd 를 받아(https://developer.valvesoftware.com/wiki/SteamCMD 또는 Steamworks SDK 의 `tools\ContentBuilder\builder`) `Steam\steamcmd\steamcmd.exe` 에 둔다.
+      (2026-11-05 Claude — 오너 허락. Valve 공식 `steamcdn-a.akamaihd.net/client/installer/steamcmd.zip`, 서명 Valve 확인, 첫 업데이트까지. 폴더는 git 밖이다)
       이 폴더는 .gitignore 다 — 로그인 토큰이 여기에 남는다.
 - [ ] 미리보기: `powershell -ExecutionPolicy Bypass -File Steam\scripts\upload.ps1 -Preview` → `Steam\output` 의 파일 목록에 `.pdb`·`steam_appid.txt` 가 없다.
 - [ ] 올리기: `powershell -ExecutionPolicy Bypass -File Steam\scripts\upload.ps1` (계정은 `$env:STEAM_USER` 또는 입력. 처음엔 비밀번호와 Steam Guard 코드를 묻는다).
@@ -277,7 +278,8 @@ App Admin → Application → **Steam Cloud** [S9].
       플레이어가 보는 콘텐츠 가운데 AI 도움을 받은 전부다 [S18]. 이 게임에서는 이야기 대본(`Tools/story/`), 몬스터·보스·특성 이름과 설명
       (`Tools/bestiary.py`, 대본의 `bestiary`), 안내·도움말·UI 문구(`Tools/ui_text.py`, `Tools/ui_text_parts/*.py`), 그리고 모든 번역 —
       이 파일들을 바꾼 커밋(`59080e52` `22835e4f` `7f7362d4` `267880e9` `48466782`)에 Claude 공동 저자 표시가 있다.
-      스토어 페이지 글과 트레일러 자막(`Build/Store/trailer_script.json`)도 AI 도움으로 썼으므로 문단 셋째 문장에 넣었다(`store/ko.md` 의 AI 절 — 빼도 되는지는 소유자가 정한다).
+      지도·몬스터 수치·벽 소품을 만든 생성 코드와 스토어 글·트레일러 자막은 11-05 소유자 결정으로 문단에서 뺐다(`store/ko.md` 의 AI 절 —
+      Pre-Generated 는 게임과 함께 나가 플레이어가 소비하는 콘텐츠이고 개발 도구의 효율 향상은 관심사가 아니다 [S18]).
       새 그림·음악이 오면 파일별 출처 기록을 보고 AI 로 만든 것을 더한다. Meshy(AI 3D 생성)로 만든 3D 그림을 쓰면 `store/*.md` 의 Meshy 줄을 문단 끝에 더한다.
       개발 도구의 효율 향상(코드 도우미)은 이 항목의 관심사가 아니다 [S18].
 - [ ] **독일**: 2024-11-15 부터 등급이 없는 게임은 독일에서 보이지 않는다. 설문을 채워야 Valve 가 등급을 준다 [S18].
