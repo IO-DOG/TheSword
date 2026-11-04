@@ -233,8 +233,25 @@ public class UI_InvenPopup : UI_Popup
             PromptText.Set(CodeUI.Fit(legend, 24f), KeysText);
         }
 
+        GameEvents.HudRefreshed += Redraw;
         return true;
     }
+
+    // 가방을 연 채 걸을 수 있다(PlayerController 가 막지 않는다) — 장비·룬·물약을 줍거나 싸우고 나면 그 칸을 다시 누를 때까지
+    // 옛 그림·옛 능력치였다. HUD 가 다시 칠할 때(GameScene.Refresh — 줍기·갈아입기·전투 끝·층 이동·제단) 같이 칠한다.
+    void Redraw()
+    {
+        SortInven();
+        if (_isInventory_MyInfo_On)
+        {
+            Refresh();
+            SetPlayerStatusInfo();
+        }
+        else
+            ShowSlot(_listType);
+    }
+
+    void OnDestroy() => GameEvents.HudRefreshed -= Redraw;
 
     const int KeysText = 204;   // Tools/ui_text_parts/ui.py (패드 짝 675)
 

@@ -114,8 +114,8 @@ public static class GameSettings
         PlayerPrefs.SetFloat("SAVESOUND", 1);
     }
 
-    // 전투 카드와 커서 크기가 이것을 본다(UI_BattlePopup, CursorManager). 예전에는 버튼으로 고른 값만
-    // 들고 있어서 다시 켜면 None 으로 돌아갔다 — 창 상태에서 바로 읽는다. 예전 세 버튼과 같은 뜻이다:
+    // 커서 크기가 이것을 본다(CursorManager — 매 프레임 창 상태에서 바로 읽는다). 예전에는 버튼으로 고른 값만
+    // 들고 있어서 다시 켜면 None 으로, Alt+Enter 뒤에는 옛 값으로 남았다. 예전 세 버튼과 같은 뜻이다:
     // 작은 창(960x540) = Window, 모니터만 한 창 = FullWindow, 전체 화면 = Full.
     public static Define.ScreenType ScreenTypeOf(FullScreenMode mode, int height)
     {

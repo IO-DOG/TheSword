@@ -105,7 +105,6 @@ public class Managers : MonoBehaviour
     static void ApplySettings()
     {
         Game.ScriptType = GameSettings.Language;   // 예전 코드(UI_TitleScene)가 읽는 사본
-        Game.ScreenType = GameSettings.ScreenTypeOf(Screen.fullScreenMode, Screen.height);
         // 에디터는 도메인 리로드를 끄고 돌아서 정적 이벤트가 플레이마다 쌓인다 — 빼고 건다.
         GameSettings.Changed -= SyncLanguage;
         GameSettings.Changed += SyncLanguage;

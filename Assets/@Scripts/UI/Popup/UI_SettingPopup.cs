@@ -237,8 +237,6 @@ public class UI_SettingPopup : UI_Popup
                 size = fit;
         }
         Screen.SetResolution(size.x, size.y, mode);
-        // 커서·전투 카드 크기가 본다. 창 상태는 프레임 끝에야 바뀌니 고른 값으로 정한다.
-        Managers.Game.ScreenType = GameSettings.ScreenTypeOf(mode, size.y);
         // 메뉴를 닫는다 (세 칸은 예전부터 그랬다). 메뉴는 비켜 둔 버튼의 제자리를 화면 픽셀로 재 두어서,
         // 창 크기가 바뀐 채 설정 창만 닫으면 버튼이 엉뚱한 곳으로 돌아간다.
         menuPopup.OnClickContinueGameButton();
@@ -261,7 +259,7 @@ public class UI_SettingPopup : UI_Popup
     #region 키보드·패드
     // W/S(↑/↓)로 줄을 고르고 A/D(←/→)로 값을 옮기고 Enter·Space 로 누른다(켜고 끄기, 창 상태). 고른 줄은 이름이 금빛이다 —
     // 마우스를 올린 칸의 테두리와 따로 간다. 아직 아무 줄도 안 골랐으면 처음 누른 W/S 가 맨 윗줄을 고른다(이 창을 연
-    // 메뉴의 Enter 가 같은 프레임에 여기서 먹혀도 아무것도 안 누른다). 해상도 줄은 빠진다(AddSlider).
+    // 메뉴의 Enter 가 같은 프레임에 여기서 먹혀도 아무것도 안 누른다). 해상도 줄은 A/D 로 고르고 Enter 로 바꾼다.
     // 슬라이더는 눌러도 uGUI 선택이 되지 않게 한다 — 선택되면 EventSystem 이 같은 방향키·스틱으로 한 번 더 움직인다.
     // 대신 누른 슬라이더를 이 커서가 고른다: 눌러 놓고 ←/→ 로 다듬던 손버릇이 그대로 된다.
     static readonly Color Pointed = new Color32(240, 210, 138, 255);
@@ -276,6 +274,7 @@ public class UI_SettingPopup : UI_Popup
 
     readonly List<Row> _rows = new List<Row>();
     int _cursor = -1;
+    Row _resolutionRow;
 
     void AddRow(TMP_Text label, Action press, Slider slider = null, float step = 1f)
     {
@@ -311,6 +310,13 @@ public class UI_SettingPopup : UI_Popup
     {
         if (sound && index != _cursor)
             Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_SFX");
+        // Enter 없이 떠난 해상도 줄은 지금 크기로 되돌린다 — 이름만 바뀐 채 남으면 바뀐 줄 알고, 창 상태 줄이 그 크기를 집어 갔다(SetScreenMode).
+        if (_cursor >= 0 && index != _cursor && _rows[_cursor] == _resolutionRow)
+        {
+            int now = _resolutions.IndexOf(new Vector2Int(Screen.width, Screen.height));
+            if (now >= 0)
+                _resolution.value = now;
+        }
         _cursor = index;
         for (int i = 0; i < _rows.Count; i++)
             _rows[i].Label.color = i == index ? Pointed : _rows[i].Idle;
@@ -340,9 +346,9 @@ public class UI_SettingPopup : UI_Popup
             i => $"{Managers.GetString(RESOLUTION)}  {_resolutions[i].x} x {_resolutions[i].y}", null);
         // 손을 뗄 때 한 번만 바꾼다. 끄는 동안 창 크기가 바뀌면 손잡이가 커서 밑에서 달아난다.
         _resolution.gameObject.BindEvent(OnReleaseResolution, null, Define.UIEvent.PointerUp);
-        // 그래서 마우스로만 고른다 — 키보드(A/D·←/→)로 움직이면 이름만 바뀌고 창은 그대로였다. None 이면
-        // 눌러도 선택되지 않고(Selectable.OnPointerDown) 옆 줄에서 방향키로 건너오지도 못한다(FindSelectable).
-        _resolution.navigation = new Navigation { mode = Navigation.Mode.None };
+        // 키보드·패드는 A/D(←/→)로 크기를 고르고 Enter(A)로 바꾼다. 예전에는 마우스만 받았다 — 옮기면 이름만 바뀌고 창은 그대로라서.
+        AddRow(Util.FindChild<TMP_Text>(_resolution.gameObject, nameof(Texts.TotalSoundClassText)), OnReleaseResolution, _resolution);
+        _resolutionRow = _rows[_rows.Count - 1];
         AddToggle(check, screen, -5f, VSYNC, () => GameSettings.VSync, on => GameSettings.VSync = on);
 
         Shift(sound, -40f);
@@ -401,7 +407,7 @@ public class UI_SettingPopup : UI_Popup
             name.text = label((int)v);
             changed?.Invoke((int)v);
         });
-        // 바뀔 때 할 일이 없는 줄(해상도 — 손을 뗄 때 바꾼다)은 마우스로만 고른다.
+        // 바뀔 때 할 일이 없는 줄(해상도 — 손을 떼거나 Enter 로 바꾼다)은 부른 쪽이 줄을 세운다.
         if (changed != null)
             AddRow(name, null, s, 1f);
         return s;

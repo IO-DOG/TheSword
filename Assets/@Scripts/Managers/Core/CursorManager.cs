@@ -182,7 +182,8 @@ public class CursorManager : MonoBehaviour
             }
         }
 
-        if (Managers.Game.ScreenType == Define.ScreenType.Window)
+        // 창 상태에서 바로 읽는다 — 값을 들고 있었더니 Alt+Enter(설정 창을 거치지 않는다) 뒤에는 다음 실행까지 옛 크기였다.
+        if (GameSettings.ScreenTypeOf(Screen.fullScreenMode, Screen.height) == Define.ScreenType.Window)
         {
             switch (_cursor)
             {

@@ -571,8 +571,11 @@ public class UI_GameScene : UI_Scene
                  && (Managers.UI.FindPopup<UI_InvenPopup>() != null || CanOpenPanel()))
             OnClickMainUIInventoryAImage();
 
+        // 숫자 수업(계약 직후에 이어 붙는다)을 본 뒤에 — 그 대사 도중에 끄고 이어 하면 수업이 다시 뜨는데(StoryDirector.OnSceneLoaded),
+        // 이 안내가 먼저 뜨면 수업이 HUD 를 가린 사이 6초가 지나가 버렸다.
         if (_keysHintShown == false && GameEvents.IsAutoPlaying == false
-            && Managers.Game.PlayerData.IsContractedSword && CanOpenPanel() && Managers.UI.TopPopup == null)
+            && Managers.Game.PlayerData.IsContractedSword && StoryDirector.MechanicSeen(StoryMechanic.Forecast)
+            && CanOpenPanel() && Managers.UI.TopPopup == null)
         {
             _keysHintShown = true;
             PlayerPrefs.SetInt(KeysHintPref, 1);

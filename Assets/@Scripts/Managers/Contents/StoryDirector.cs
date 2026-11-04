@@ -209,7 +209,11 @@ public class StoryDirector : MonoBehaviour
     {
         AbortAll();
         s_bossObject = null;
-        if (scene.name == nameof(Define.Scene.GameScene) && Contracted && CurFloor >= VillageFloor)
+        if (scene.name != nameof(Define.Scene.GameScene) || Contracted == false)
+            return;
+        // 계약 뒤 대사(6줄) 도중에 끄면 거기 이어 붙던 예측 수업(CoPrologue)을 다시 틀 길이 없었다 — 3층 계약 연출은 다시 돌지 않는다.
+        EnqueueScenes(Unseen(StoryMechanic.Forecast), true, 0.5f);
+        if (CurFloor >= VillageFloor)
             EnqueueScenes(FloorChain(CurFloor), false, 0.5f);
     }
 
