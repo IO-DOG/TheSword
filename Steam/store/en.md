@@ -81,7 +81,7 @@ Stylized fantasy combat against monsters, in pixel art.
 The story script, the names and descriptions of monsters, bosses and traits, and the guide, help and interface text were written with the help of AI tools, as were all translations of the game's text (English, Japanese and Simplified Chinese). The layouts and monster stats of floors 5–100, and the chapter walls and decorative props, were produced by generator code written with the help of AI tools. The text of this store page and the trailer captions were written the same way.
 ```
 
-사람 검수가 끝난 뒤에만 " The developers reviewed and edited them." 를 붙인다. 둘째 문장(스토어 글·트레일러 자막)과 그림·음악 규칙은 `ko.md` 와 같다.
+사람 검수가 끝난 뒤에만 " The developers reviewed and edited them." 를 붙인다. 셋째 문장(스토어 글·트레일러 자막)과 그림·음악 규칙은 `ko.md` 와 같다.
 Meshy(AI 3D 생성)로 만든 3D 그림을 **쓰게 되면** 문단 끝에 한 문장을 더한다. 괄호는 실제로 빌드에 든 것에 맞춘다(`ko.md` 의 Meshy 항목):
 
 ```text

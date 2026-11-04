@@ -137,7 +137,7 @@ Content Survey 의 AI 항목(Pre-Generated)에 체크하고 아래를 적는다.
 - 범위(README 7절): 대본, 몬스터·보스·특성 이름과 설명(`Tools/bestiary.py`), 안내·도움말·UI 문구(`Tools/ui_text.py`, `Tools/ui_text_parts/*.py`), 모든 번역.
   "게임 안의 모든 글" 이라고 쓰지 않은 것은 원래 있던 손글(`hand_text.py` 의 메뉴·능력치·아이템·1~4층·도입부 몬스터 한국어)이 사람 글이라서다.
   올리기 전에 소유자가 이 구분이 맞는지 확인한다 — 모자라게 적는 것보다 넓게 적는 쪽이 안전하다.
-- 둘째 문장(스토어 글·트레일러 자막): Valve 문서([S18])의 Pre-Generated 는 "게임과 함께 나가 플레이어가 소비하는 콘텐츠"(그림·소리·서사·현지화)라서 스토어 매체를 직접 말하지는 않는다.
+- 셋째 문장(스토어 글·트레일러 자막): Valve 문서([S18])의 Pre-Generated 는 "게임과 함께 나가 플레이어가 소비하는 콘텐츠"(그림·소리·서사·현지화)라서 스토어 매체를 직접 말하지는 않는다.
   그래도 이 페이지 글과 트레일러 자막(`trailer_script.json`)은 AI 도움으로 썼으므로 넓게 적는 쪽을 골랐다. 빼도 되는지는 소유자가 정한다.
 - **Meshy**: AI 3D 생성(Meshy)으로 만든 그림을 게임이나 스토어 그림에 **쓰게 되면** 위 문단 끝에 한 문장을 더한다(`Documents/TheSword_Meshy_Prompts.md` 도 같은 약속이다).
   `MeshyArtImport` 가 들이는 것은 챕터별 벽 `Wall_C{n}_*` 과 소품 `Prop_C{n}_*` 이다(2026-11-03 현재 `Assets/@Resources/Art/Meshy` 는 비어 있다).
