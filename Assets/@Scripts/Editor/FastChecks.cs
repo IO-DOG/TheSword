@@ -811,7 +811,9 @@ public static class FastChecks
     static readonly System.Type[] TextIdOwners =
     {
         typeof(ForecastUI), typeof(StoryUI), typeof(UI_MenuPopup), typeof(UI_TitleScene), typeof(UI_ConfirmPopup),
-        typeof(UI_SettingPopup), typeof(UI_BattlePopup), typeof(UI_InvenPopup),
+        typeof(UI_SettingPopup), typeof(UI_BattlePopup), typeof(UI_InvenPopup), typeof(UI_DemoEndPopup),
+        // 정수 상수가 모두 문구 id 인 타입만 — UI_TallyPopup(Pass)·UI_EndingScene(BandsPerChapter)·UI_GameScene(PadPointMask)은
+        // 문구 아닌 수가 섞여 빈칸으로 잡힌다.
     };
 
     static void CheckUiText(StringBuilder sb)

@@ -33,7 +33,9 @@ public class UI_BattlePopup : UI_Popup
     // 따로 곱해서 4:3·16:10 에서는 그림이 찌그러졌다. 배율은 하나다 (1080p 전체 화면에서 보던 크기).
     const float CardScale = 4.5f;
 
-    const int HoldSpeed = 8;                    // Space 를 누르고 있는 동안의 배속. Shift 는 안 쓴다 — Shift+Tab(건너뛰기)이 Steam 오버레이다
+    // Space 를 누르고 있는 동안의 배속. Shift 는 안 쓴다 — Shift+Tab(건너뛰기)이 Steam 오버레이다.
+    // const 가 아닌 것은 FastChecks.MissingUiText 가 이 타입의 정수 상수를 문구 id 로 보기 때문이다(8 을 빈 문구로 잡았다).
+    static readonly int HoldSpeed = 8;
     // 건너뛰기가 끝나지 않는 싸움(둘 다 상대를 못 깎는다)을 붙잡고 영영 돌지 않게 하는 마개. 예측(BattleForecast)과 같은 600초.
     const float MaxSkipSeconds = 600f;
     const float SummarySeconds = 0.5f;          // 건너뛴 싸움의 값을 보여 주고 창이 닫히기까지
