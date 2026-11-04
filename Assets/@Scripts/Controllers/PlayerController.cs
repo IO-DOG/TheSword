@@ -629,7 +629,7 @@ public class PlayerController : MonoBehaviour
                 float dotProduct = Vector3.Dot(Vector3.back, playerDir);
                 if (dotProduct > 0.7f)
                 {
-                    Managers.UI.ShowPopupUI<UI_BossRoomCheckPopup>();
+                    UI_BossRoomCheckPopup.Ask();
                 }
             }
             else if (hit.collider.gameObject.layer == (int)Define.Layer.InteractObjects)

@@ -968,7 +968,10 @@ public class GameManager
             int saved = snapshot.Progress.TryGetValue(key, out int value) ? value : 0;
             // 죽은 횟수·걸음 수는 기록이다. 체크포인트로 돌아가도 줄지 않는다 — 예전에는 죽어서
             // 불러올 때마다 저장 시점 값으로 돌아가 죽은 횟수가 늘지 않았다.
-            bool tally = key == "DEATHCOUNT" || key == "MOVECOUNT";
+            // 처음 한 번만 뜨는 안내(첫 전투·열쇠·레버·회복)도 — 0 은 아직, 1 은 봤다. 체크포인트 값으로 되돌리면 첫 싸움을 이기고
+            // 1층에서 죽은 사람에게 전투·열쇠 안내가 다시 떴다. 새 게임(DeleteGameData)은 이 키들을 지운다.
+            bool tally = key == "DEATHCOUNT" || key == "MOVECOUNT"
+                || key == "ISFIRSTBATTLE" || key == "ISFIRSTKEY" || key == "ISFIRSTLEVER" || key == "ISFIRSTRECOVERY";
             PlayerPrefs.SetInt(key, tally ? Mathf.Max(saved, PlayerPrefs.GetInt(key, 0)) : saved);
         }
         PlayTime = Mathf.Max(snapshot.PlayTime, PlayerPrefs.GetFloat("PLAYTIME", 0));

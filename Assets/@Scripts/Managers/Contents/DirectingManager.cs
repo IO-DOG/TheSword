@@ -534,9 +534,12 @@ public class Events : MonoBehaviour
 
             if (actionBack != null)
                 actionBack.SetActive(false);
+            // 걷는 것은 안개뿐이다(보스 앞 시야). 예전에는 Effects_00 을 통째로 꺼서, 챕터 0 이 한 번 지어진 채 이어지는 5~20층 내내
+            // 안개·먼지·잎이 없었다(죽거나 이어하기 전까지). 안개는 다음 계단에서 Effects_00.SetFogPosition 이 다시 켠다.
             GameObject effects = GameObject.Find("Effects_00");
-            if (effects != null)
-                effects.SetActive(false);
+            Transform fog = effects != null ? effects.transform.Find("Fog") : null;
+            if (fog != null)
+                fog.gameObject.SetActive(false);
 
             handedOff = true;
             CoroutineManager.StartCoroutine(AfterMeetKingSlime());
@@ -715,7 +718,11 @@ public class Events : MonoBehaviour
         Managers.Game.RefreshBossGates();
         // "노랑부터 베니까 산 거다." — 마지막 분열 슬라임의 전투창이 닫혀 한가해지면 뜬다.
         StoryDirector.QueuePrologue(StoryPrologue.KingslimeClear);
+        UI_GameScene scene = Managers.Game.GameScene;
         yield return new WaitForSeconds(10f);
+        // 그 사이 다시 시작·체크포인트·죽음으로 씬이 다시 섰으면(이 코루틴은 씬을 넘어 산다) 킹이 다시 살아 있는 방이다 — 빛줄기를 긋지 않는다.
+        if (Managers.Game.GameScene != scene)
+            yield break;
         // 보스를 잡은 뒤 계단까지 이어지는 빛줄기. 관문 자체는 위의 RefreshBossGates
         // 가 이미 열었으니, 층을 못 찾거나 이펙트가 없으면 조용히 건너뛴다.
         GameObject parent = GameObject.Find("Dungeon_00_003");
@@ -735,8 +742,12 @@ public class Events : MonoBehaviour
     #region KingSlimeDead
     public void CoStartKingSlimeDead()
     {
-        if(!Managers.Game.IsPlayerDead)
-            CoroutineManager.StartCoroutine(StartKingSlimeDead());
+        if (Managers.Game.IsPlayerDead)
+            return;
+        // 연출이 서기 전 0.4초에도 흐름을 쥔다 — 그 틈에 메뉴(Esc·B·창 전환)가 열려 "이 층 다시 시작" 을 고르면, 씬을 넘어 사는
+        // CoroutineManager 의 이 코루틴이 다시 올린 방(킹이 살아 있다)에서 분열 연출을 틀었다.
+        Managers.Game.OnDirect = true;
+        CoroutineManager.StartCoroutine(StartKingSlimeDead());
     }
 
     IEnumerator StartKingSlimeDead()

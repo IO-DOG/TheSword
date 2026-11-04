@@ -40,17 +40,19 @@ public class BossDoor : PortalController
 
         yield return new WaitForSeconds(0.2f);
 
-        Managers.Game.Player.transform.DOMoveY(0.8f, 0.2f).SetEase(Ease.Linear);
         Managers.Game.Player.gameObject.SetActive(false);
+        // 옮기기 전에 이 문의 연출을 다 거둔다. 로딩 그림을 첫 프레임에 넘기면 옮기기(LoadingAndWarp → EnterFloor)가 0.2초 안에
+        // 끝나서 — OnDirect 가 켜진 채라 4층 체크포인트를 건너뛰었고, 뒤늦은 조명 되돌리기가 킹 방 조명을 덮었고, 위로 뜨던
+        // 걸음(DOMoveY — 몸을 끄는 이 프레임에 이미 보이지 않는다)이 도착한 몸을 0.8 띄웠다. 입력은 UsePortal 이 곧장 OnInteract 로 막는다.
+        Managers.Game.Player.transform.DOKill();
+        Managers.Game.DirectionalLight.color = originLightColor;
+        Managers.Game.OnDirect = false;
         UsePortal();
-
 
         yield return new WaitForSeconds(0.2f);
         Managers.Game.Player.transform.localScale = originScale;
         Managers.Game.Player.SetIdleState(Define.MoveDir.Up);
         Managers.Game.Player.gameObject.SetActive(true);
-        Managers.Game.OnDirect = false; 
-        Managers.Game.DirectionalLight.color = originLightColor;
 
         // Sound — 킹 슬라임이 이미 쓰러졌으면(워프로 돌아와 다시 들어간다) 보스곡을 틀지 않는다. 같은 챕터 계단은 곡을 되돌리지 않아
         // 그 곡이 20층까지 돌았다. 이 문은 손수 만든 2층에만 있다(보스 포탈 셀 16 을 쓰는 층이 그 하나다).

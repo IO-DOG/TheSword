@@ -28,6 +28,7 @@ public class UI_IntroScene : UI_Scene
     #endregion
 
     int idx = 0;
+    Coroutine _inverted, _invertedFade;     // 4번 그림의 뒤집기(CoInvertedImage)와 그 안의 흐려지기 — 넘기면 멈춘다
     int totalCount;
     bool isPressing = false;
     float requiredHoldTime = 3f;
@@ -156,6 +157,16 @@ public class UI_IntroScene : UI_Scene
             return;
         }
 
+        // 4번 그림이 뒤집히는 중(2초)에 넘기면 그 코루틴이 다음 그림을 4번으로 덮고 투명도를 마저 바꿨다 — 멈추고 되돌린다.
+        if (_inverted != null)
+        {
+            StopCoroutine(_inverted);
+            if (_invertedFade != null)
+                StopCoroutine(_invertedFade);
+            _inverted = _invertedFade = null;
+            GetImage((int)Images.SceneImage).color = Color.white;
+        }
+
         GetImage((int)Images.SceneImage).sprite = ImageList[idx - 1];
         if (idx != totalCount - 1)
             GetText((int)Texts.SceneText).text = Managers.GetString(_scripts[idx].id);
@@ -167,7 +178,7 @@ public class UI_IntroScene : UI_Scene
         }
         if (idx == totalCount - 3)
         {
-            StartCoroutine(CoInvertedImage());
+            _inverted = StartCoroutine(CoInvertedImage());
         }
         if (idx == totalCount - 1)
         {
@@ -188,7 +199,7 @@ public class UI_IntroScene : UI_Scene
     {
         WaitForSeconds delay = new WaitForSeconds(1f);
         GetImage((int)Images.SceneImage).sprite = Managers.Resource.Load<Sprite>("Intro03");
-        StartCoroutine(CoFadeOutImage(GetImage((int)Images.SceneImage)));
+        _invertedFade = StartCoroutine(CoFadeOutImage(GetImage((int)Images.SceneImage)));
         yield return delay;
         GetImage((int)Images.SceneImage).sprite = Managers.Resource.Load<Sprite>("Intro04");
         float tick = 0;

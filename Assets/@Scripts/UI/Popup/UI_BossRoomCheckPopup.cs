@@ -124,9 +124,17 @@ public class UI_BossRoomCheckPopup : UI_Popup
 
     void YesClick()
     {
+        // 한 번 연 문은 연출 끝에 꺼진다(BossDoor.PlayEffect). 같은 챕터 안 워프로 돌아와 그 칸에 부딪히면 문이 없어 여기서 터졌고,
+        // 창이 닫히지 않은 채 남았다 — 문이 없으면 "아니오" 로 닫는다.
+        BossDoor door = Managers.Game.ParentMap != null ? Managers.Game.ParentMap.GetComponentInChildren<BossDoor>() : null;
+        if (door == null)
+        {
+            NoClick();
+            return;
+        }
         Managers.Sound.Play(Define.Sound.Effect, "ButtonUI_Ok_SFX");
 
-        Managers.Game.ParentMap.GetComponentInChildren<BossDoor>().CoStartPlayEffect();
+        door.CoStartPlayEffect();
         Managers.Game.OnConversation = false;
         _locked = false;
         ClosePopupUI();
@@ -138,7 +146,27 @@ public class UI_BossRoomCheckPopup : UI_Popup
 
         Managers.Game.OnConversation = false;
         _locked = false;
+        s_declinedUntil = Time.unscaledTime + DeclineHold;
         ClosePopupUI();
+    }
+
+    // "아니오" 로 닫은 뒤 걷던 키(스틱·W)를 쥐고 있으면 다음 프레임에 문에 또 부딪혀 창이 곧장 다시 떴다(단추는 3초 뒤에야 받는다).
+    // 부딪히기를 DeclineHold 동안 쉬어야 다시 묻는다 — FatalFightGuard 와 같다.
+    const float DeclineHold = 0.5f;
+    static float s_declinedUntil;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() => s_declinedUntil = 0f;
+
+    /// <summary>보스방 문에 부딪혔다(PlayerController). 방금 "아니오" 로 닫았으면 묻지 않는다.</summary>
+    public static void Ask()
+    {
+        if (Time.unscaledTime < s_declinedUntil)
+        {
+            s_declinedUntil = Time.unscaledTime + DeclineHold;
+            return;
+        }
+        Managers.UI.ShowPopupUI<UI_BossRoomCheckPopup>();
     }
 
     void YesPointerExit()
