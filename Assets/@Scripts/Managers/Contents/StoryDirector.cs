@@ -635,7 +635,8 @@ public class StoryDirector : MonoBehaviour
     void WatchCrit()
     {
         GameManager g = Managers.Game;
-        if (g == null || g.OnBattle == false || g.PlayerData == null || Contracted == false || _running > 0)
+        // 메뉴가 떠 있으면 기다린다 — Esc·창 내림이 한 대와 같은 프레임에 메뉴를 열면 수업이 메뉴 위로 올라왔다.
+        if (g == null || g.OnBattle == false || g.PlayerData == null || Contracted == false || _running > 0 || Managers.UI.IsPaused)
             return;
         int period = (int)g.PlayerData.Critical;
         if (period <= 0 || g.AttackCount + 1 < period)

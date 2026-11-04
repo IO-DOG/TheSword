@@ -633,16 +633,6 @@ public class UI_GameScene : UI_Scene
         return true;
     }
 
-    // 창을 내리면(알트탭) 메뉴를 열어 멈춘다. runInBackground 라 그냥 두면 전투가 혼자 흘러갔다.
-    // 에디터에서는 인스펙터를 누를 때마다 멈추면 일을 못 하고, 자동 플레이는 멈추면 안 된다.
-    void OnApplicationFocus(bool focus)
-    {
-        // 앱을 끄는 중에도 포커스를 잃는다 — 매니저가 먼저 부서졌으면 건드리지 않는다.
-        if (focus || Application.isEditor || GameEvents.IsAutoPlaying || Managers.IsAlive == false)
-            return;
-        TryOpenMenu();
-    }
-
     /// <summary>
     /// �������� �÷��̾� ������ �����ϴ� �Լ�
     /// �÷��̾� ������ �߰��Ǹ� ���Լ� ���� �߰��Ǿ����.

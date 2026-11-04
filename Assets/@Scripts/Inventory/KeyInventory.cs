@@ -14,6 +14,9 @@ public class KeyInventory
     const int NUM_OF_KEYS = ConsumableItem.NUM_OF_KEYS;
     List<ConsumableItem> _items = new List<ConsumableItem>();
     public List<int> _keys = new List<int>(NUM_OF_KEYS);
+    const float TellHold = 0.5f;
+    Door _toldDoor;         // 금고 알림(152)을 막 닫은 문과 그 기한 — TryUseKey
+    float _toldUntil;
     public void InitKeyInventory()
     {
         // 새 게임에서는 이 함수가 LoadGame 끝에서만 불려서 아예 안 돌 때가 있다.
@@ -82,7 +85,18 @@ public class KeyInventory
         int stranded = StrandedFloor(d);
         if (stranded > 0)
         {
-            UI_ConfirmPopup.Tell(string.Format(Managers.GetString(Define.VAULT_KEY_NEEDED), stranded));
+            // 알림을 닫고 0.5초 안에 같은 문에 또 부딪히면 조용히 넘긴다 — 방향을 쥔 채 닫으면 다음 걸음이 곧장 다시 부딪혀
+            // 창이 끝없이 다시 떴다(FatalFightGuard·보스방 확인과 같은 몫).
+            if (ReferenceEquals(d, _toldDoor) && Time.unscaledTime < _toldUntil)
+            {
+                _toldUntil = Time.unscaledTime + TellHold;
+                return false;
+            }
+            UI_ConfirmPopup.Tell(string.Format(Managers.GetString(Define.VAULT_KEY_NEEDED), stranded), () =>
+            {
+                _toldDoor = d;
+                _toldUntil = Time.unscaledTime + TellHold;
+            });
             return false;
         }
 

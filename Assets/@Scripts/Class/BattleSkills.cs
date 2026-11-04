@@ -75,6 +75,10 @@ public static class BattleSkills
             return false;
         if (Managers.Game.OnBattle == false || monsterCard == null || playerCard == null)
             return false;
+        // 카드가 Init 을 마치기 전(전투창이 선 첫 프레임)에는 쓰지 않는다 — 죽음 알림(OnDeadAction → Dead)이 Init 에서 걸려서,
+        // 그 프레임에 끝낸 싸움은 경험치도 끝도 없이 OnBattle 이 켜진 채 남을 수 있었다. 건너뛰기(CanSkip)도 같은 것을 본다.
+        if (playerCard.Ready == false || monsterCard.Ready == false)
+            return false;
         // 치명 수업이 전투 시계를 세워 두고 말하는 동안은 쓰지 않는다. 사람 키는 전투창이 막지만 봇은 여기로 바로 온다.
         if (StoryDirector.HoldsBattle)
             return false;
@@ -90,6 +94,9 @@ public static class BattleSkills
             return false;
         GameManager.CurMonsterData monster = Managers.Game.MonsterData[0];
         if (player.CurHP <= 0 || monster.CurHP <= 0)
+            return false;
+        // 방패가 이미 서 있으면(이어받은 "방패 준비", 게이지가 찬 때) 철벽은 아무것도 바꾸지 않는다 — 쓴 것으로 치면 그 층의 철벽만 사라졌다.
+        if ((Kind)index == Kind.Guard && player.IsDefence)
             return false;
 
         switch ((Kind)index)

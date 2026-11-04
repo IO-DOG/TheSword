@@ -21,6 +21,7 @@ public class Managers : MonoBehaviour
         s_instance = null;
         Cursor = null;                  // 지난 플레이의 파괴된 CursorManager 를 가리키고 있다 — 타이틀이 다시 채운다
         s_quitting = false;
+        s_awayMenu = false;
         Application.quitting -= MarkQuitting;
         Application.quitting += MarkQuitting;
     }
@@ -162,7 +163,30 @@ public class Managers : MonoBehaviour
     {
         //Debug.Log("Managers");
         SteamManager.RunCallbacks();
+        PauseWhileAway();
         _input.OnUpdate();
+    }
+
+    // 창을 내린 동안(알트탭) 메뉴를 열어 멈춘다 — runInBackground 라 그냥 두면 전투가 혼자 흘러갔다. 그 순간에 못 열면(가방·연출·
+    // 보스 등장 꼬리·전투창이 서기 전 한 프레임 — TryOpenMenu 가 거절한다) 열 수 있을 때까지 매 프레임 다시 본다(오버레이와 같다,
+    // SteamManager.PauseForOverlay). 예전에는 UI_GameScene.OnApplicationFocus 가 한 번만 물었고, 연출 중 HUD 가 꺼져 있으면 그것마저
+    // 오지 않아 이야기 뒤의 싸움이 혼자 끝났다. 한 번 열면 돌아올 때까지 다시 열지 않는다. 에디터(인스펙터를 누를 때마다 멈추면
+    // 일을 못 한다)·자동 플레이는 멈추지 않는다.
+    static bool s_awayMenu;
+
+    static void PauseWhileAway()
+    {
+        if (Application.isFocused || Application.isEditor || GameEvents.IsAutoPlaying)
+        {
+            s_awayMenu = false;
+            return;
+        }
+        UI_GameScene scene = Game.GameScene;
+        if (s_awayMenu == false && scene != null && scene.TryOpenMenu())
+        {
+            s_awayMenu = true;
+            Debug.Log("[Focus] 창을 내린 사이 메뉴를 열었다");    // 창을 내릴 때 한 번 — 빌드에서 확인하는 자리(Player.log)
+        }
     }
 
     public static void Clear()

@@ -775,6 +775,9 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
   못한 채 사라지고 플레이어가 영영 멈췄다. 잠금을 쥔 팝업은 ESC 를 삼키고, `OnDestroy` 에서도
   자기가 쥔 잠금만 푼다. 팝업마다 따로 ESC 를 받지 않는다 — 한 번 누른 ESC 가 두 창을 닫았다.
 - 메뉴가 떠 있으면 `Time.timeScale = 0` 이다(`UIManager.RefreshTimeScale`) — 전투도 멈춘다.
+  창을 내리면(알트탭) `Managers.PauseWhileAway` 가 메뉴를 연다 — 그 순간 못 열면(연출·가방·전투창이 서기 전 프레임, `TryOpenMenu` 가
+  거절한다) 열릴 때까지 매 프레임 다시 본다. 예전에는 `UI_GameScene.OnApplicationFocus` 가 한 번만 물었고, 연출 중엔 HUD 가 꺼져 그 알림도
+  오지 않아 이야기 뒤의 싸움이 혼자 끝났다(runInBackground). 에디터·봇은 멈추지 않는다.
   예/아니오는 `UI_ConfirmPopup.Ask`/`AskDestructive`(되돌릴 수 없는 질문은 "아니오" 가 먼저)를 쓴다.
   자동 플레이 중(`GameEvents.IsAutoPlaying`)에는 묻지 않고 "예" 로 간다.
 

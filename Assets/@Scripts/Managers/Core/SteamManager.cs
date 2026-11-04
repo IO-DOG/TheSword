@@ -124,7 +124,7 @@ public static class SteamManager
     static bool s_tried;
 
     // 오버레이(Shift+Tab, 덱의 Steam 단추)는 창 포커스를 가져가지 않아서 그 뒤에서 전투가 그대로 돌았다 — 창을 잃을 때처럼
-    // 메뉴를 연다(UI_GameScene.OnApplicationFocus 와 같은 길, 전투도 멈춘다). 콜백은 붙잡아 둬야 GC 가 거두지 않는다.
+    // 메뉴를 연다(창을 내릴 때의 Managers.PauseWhileAway 와 같은 길, 전투도 멈춘다). 콜백은 붙잡아 둬야 GC 가 거두지 않는다.
     // 열리는 순간에 못 열면(연출·보스 등장·전투창이 서기 전 한 프레임 — TryOpenMenu 가 거절한다) 오버레이가 떠 있는 동안 다시 본다.
     static Callback<GameOverlayActivated_t> s_overlay;
     static bool s_overlayUp;
