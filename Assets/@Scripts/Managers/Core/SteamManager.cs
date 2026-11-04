@@ -63,6 +63,9 @@ public static class SteamManager
     /// <summary>Steam 에 붙어 있다. 거짓이면 Steam 을 부르지 않는다.</summary>
     public static bool Initialized { get; private set; }
 
+    /// <summary>Steam 오버레이가 떠 있다. 창 포커스를 가져가지 않으니 기다리는 화면(UI_EndingScene)은 이것도 본다.</summary>
+    public static bool OverlayActive { get; private set; }
+
     /// <summary>Managers.Init 이 설정을 맞추기 전에 부른다(Steam 의 게임 언어가 기본 언어가 된다). 두 번째부터는 아무 일도 없다.</summary>
     public static void Init()
     {
@@ -126,7 +129,7 @@ public static class SteamManager
     static Callback<GameOverlayActivated_t> s_overlay;
     static bool s_overlayUp;
 
-    static void OnOverlay(GameOverlayActivated_t overlay) => s_overlayUp = overlay.m_bActive != 0;
+    static void OnOverlay(GameOverlayActivated_t overlay) => s_overlayUp = OverlayActive = overlay.m_bActive != 0;
 
     static void PauseForOverlay()
     {
@@ -145,6 +148,7 @@ public static class SteamManager
         s_tried = false;
         s_overlay = null;       // 지난 플레이의 콜백은 SteamAPI.Shutdown 이 풀었다
         s_overlayUp = false;
+        OverlayActive = false;
     }
 
     // 끈 뒤에 오는 호출(OnDestroy 에서 난 GameEvents 등)은 Initialized 가 막는다.

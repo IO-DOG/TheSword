@@ -181,7 +181,7 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
 
 | 파일 | 하는 일 |
 |---|---|
-| `SteamManager` | `Managers.Init` 이 켜고 매 프레임 콜백, 끌 때 닫는다. **Steam 이 없으면 한 줄 적고 아무것도 안 한다** — 에디터·빌드 모두. 단 AppId 를 넣은 릴리스 빌드는 Steam 밖에서 켜면 Steam 으로 다시 켜려고 꺼진다(전시용 빌드엔 `steam_appid.txt`). 언어를 고른 적이 없으면 Steam 의 게임 언어를 **그 실행만** 따른다(남기지 않는다). 오버레이(Shift+Tab·덱 Steam 단추)가 열리면 창을 잃을 때처럼 메뉴를 연다(`OnOverlay` — 오버레이는 포커스를 가져가지 않아 전투가 그대로 돌았다) |
+| `SteamManager` | `Managers.Init` 이 켜고 매 프레임 콜백, 끌 때 닫는다. **Steam 이 없으면 한 줄 적고 아무것도 안 한다** — 에디터·빌드 모두. 단 AppId 를 넣은 릴리스 빌드는 Steam 밖에서 켜면 Steam 으로 다시 켜려고 꺼진다(전시용 빌드엔 `steam_appid.txt`). 언어를 고른 적이 없으면 Steam 의 게임 언어를 **그 실행만** 따른다(남기지 않는다). 오버레이(Shift+Tab·덱 Steam 단추)가 열리면 창을 잃을 때처럼 메뉴를 연다(`OnOverlay` — 오버레이는 포커스를 가져가지 않아 전투가 그대로 돌았다). 메뉴가 없는 기다리는 화면(엔딩)은 `OverlayActive` 를 본다 |
 | `SteamHooks` | `GameEvents` 만 듣고 업적·통계·Rich Presence 를 올린다. 봇(`IsAutoPlaying`)·`DEMO` 에서는 아무것도 안 한다. 올리기(`StoreStats`)는 `Flush` 가 1초에 한 번 묶는다 — Valve 가 몇 분 단위로 막을 수 있다. Steam 이 답하지 않은 업적은 다음에 다시 묻는다 |
 | `Records` | 판을 넘어 남는 기록 `Records.json`(본 결말·본 장면·잡은 우두머리·평생 통계, 그 순간에만 셀 수 있는 업적 `Feats`). 새 게임이 지우지 않고, 봇 판은 적지 않는다. Steam 없이·체험판에서 얻은 것도 다음에 붙을 때(씬이 설 때·층을 옮길 때) `SyncRecords` 가 풀어 준다 — 그래서 Records 의 다른 칸으로 되살릴 수 없는 업적은 `SteamHooks.Earn` 으로 준다(`Unlock` 만 부르면 Steam 이 없던 순간의 것이 사라진다) |
 | `LastBattle` | 방금 끝난 전투의 요약(예측·잃은 HP·첫 타 치명·스킬·건너뜀). `UI_BattlePopup` 이 `BattleEnded` 직전에 채운다 |

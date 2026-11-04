@@ -152,15 +152,23 @@ public class UI_EndingScene : UI_Scene
         return CodeUI.Fit(text, size * 0.5f);
     }
 
-    // 기다린다. 2초가 지나면 아무 키로나 넘길 수 있다.
-    // 창을 내려 둔 동안(runInBackground 라 돈다)은 세지 않는다 — 크레딧 동안 Alt+Tab 하면 새벽 그림·판 카드가 보지도 못한 채
-    // 지나갔고, 판 카드는 다시 볼 길이 없다. 봇(StoryUI.Auto)은 늘 센다 — 에디터는 포커스 밖에서 돈다.
+    // 기다린다. 2초가 지나면 아무 키로나 넘길 수 있다(실제 시간 — 앞 화면에서 누르던 키가 곧장 넘기지 않게).
+    // 창을 내려 둔 동안(runInBackground 라 돈다)과 Steam 오버레이가 떠 있는 동안(포커스를 안 가져간다 — 덱의 Steam 단추)은
+    // 기다린 시간으로 세지도, 키를 받지도 않는다 — 크레딧 동안 Alt+Tab 하면 새벽 그림·판 카드가 보지도 못한 채 지나갔고, 판 카드는
+    // 다시 볼 길이 없다. 돌아온 뒤 0.3초 동안도 받지 않는다(창을 되찾은 그 클릭). 봇(StoryUI.Auto)은 늘 센다 — 에디터는 포커스 밖에서 돈다.
     static IEnumerator CoHold(float seconds)
     {
-        for (float t = 0f; t < seconds; t += Application.isFocused || StoryUI.Auto ? Time.unscaledDeltaTime : 0f)
+        float shown = 0f, back = 0f;
+        for (float t = 0f; t < seconds; )
         {
-            if (t > 2f && (GameKeys.AnyDown || StoryUI.Auto))
+            float dt = Time.unscaledDeltaTime;
+            bool here = StoryUI.Auto || (Application.isFocused && SteamManager.OverlayActive == false);
+            shown += dt;
+            back = here ? back + dt : 0f;
+            if (shown > 2f && (StoryUI.Auto || (back > 0.3f && GameKeys.AnyDown)))
                 yield break;
+            if (here)
+                t += dt;
             yield return null;
         }
     }
