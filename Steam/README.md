@@ -153,6 +153,10 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
 
 - Winter Sale(12-17 ~ 1-04)에는 할인으로 못 들어간다 — 행사 시작 30일 전에 나온 게임만 된다(11-17 까지 출시). 출시 할인은 따로 걸 수 있다.
 - 이 길은 찜이 2~3주밖에 안 쌓인다. 처음 내는 소규모 게임은 찜 수가 첫 주 노출을 가른다 — 그래서 아래 Next Fest 길을 권한다(오너 결정).
+- **2026-11-03 Valve 공지(대시보드)**: 검토가 밀려 빌드 검토가 지금 **최대 12 영업일**이다. 출시 체크리스트에 새로 든 것 — Steam 의 Play 단추로 **5분 이상** 실행한 기록(7일 안, 또는 마지막 빌드 뒤),
+  재배포 패키지(DirectX·VC++ 등) 필요 여부, 업적 설정 완성(이름·아이콘), Steam Cloud 를 지원한다고 적으면 **파트너 그룹 누군가가 클라우드에 한 번 저장**하고 개발자 모드를 끈다,
+  스크린샷 **5장을 gameplay 로 분류**. 위 표의 빌드 검토 칸은 이 길이를 넣고 다시 잰다.
+- **세금 정보를 넣어야 앱 크레딧을 쓸 수 있다**(2026-11-06 *Create new app* 이 "You must enter your tax information before you can redeem an App Credit" 로 멈췄다). 순서는 가입 → $100 → 은행·세금 → 앱 만들기.
 
 **Next Fest 길 — 2027-03-01 이후 출시** (아래 표. MASTER_PLAN W6 은 5월. Spring Sale 3-18 ~ 3-25 주는 피한다)
 
