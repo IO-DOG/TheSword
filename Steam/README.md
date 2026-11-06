@@ -30,8 +30,9 @@
 
 ## 1. 계정과 앱
 
-- [ ] Steamworks 가입(https://partner.steamgames.com). 법적 이름은 별명이 아니라 실명·법인명이고, 은행 예금주와 같아야 한다.
-      세금 정보 확인에 10~15 영업일, 추가 서류를 요구할 수 있다 [S1].
+- [ ] Steamworks 가입(https://partner.steamgames.com → 대시보드 *I'm a developer or publisher* → Sign Up). 법적 이름은 별명이 아니라 실명·법인명이고, 은행 예금주와 같아야 한다.
+      사업자 등록된 법인이 아니면 회사 형태 **Sole Proprietorship**, 회사 이름 칸에 본인 실명 — 상호(DBA)는 넣지 말라고 한다. `CozyByte` 는 스토어의 개발사·배급사 칸에 쓴다.
+      세금 정보는 제3자 확인에 최대 30일, 추가 서류를 요구할 수 있다 [S1]. (2026-11-05 확인 — 로그인만 하고 가입 전이면 계정이 "Unaffiliated" 로 뜬다.)
 - [ ] **앱 크레딧 $100**(앱 하나마다). 조정 총수익 $1,000 을 넘으면 돌려받는다 [S2]. **낸 날부터 21일이 지나야 출시할 수 있다** [S1] — 일찍 낸다.
 - [ ] 본편 앱: *Create new app* → **AppID** 를 적어 둔다.
 - [ ] 데모 앱: 본편 앱 랜딩 페이지 → *All associated packages, DLC, demos and tools* → **Add Demo** [S3]. AppID 가 따로 나온다.
