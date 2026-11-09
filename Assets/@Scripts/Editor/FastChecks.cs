@@ -902,7 +902,11 @@ public static class FastChecks
         Managers.Init();
         foreach (KeyValuePair<string, string> kv in Preload)
         {
-            Object asset = AssetDatabase.LoadAssetAtPath<Object>(kv.Value);
+            // ".sprite" 키는 스프라이트를 싣는다. 텍스처(본 에셋)를 실으면 ResourceManager 가 그 키를 Sprite 로 꺼낼 때
+            // null 이 되고, 도메인 리로드 없이 플레이에 들어가면 타이틀 선로드가 "Missing resources" 로 멈췄다.
+            Object asset = kv.Key.EndsWith(".sprite", System.StringComparison.Ordinal)
+                ? AssetDatabase.LoadAssetAtPath<Sprite>(kv.Value)
+                : AssetDatabase.LoadAssetAtPath<Object>(kv.Value);
             if (asset != null)
                 Managers.Resource.EditorPreload(kv.Key, asset);
         }

@@ -22,8 +22,8 @@
 
 | API Name | 규칙 | Sort Method | Display Type | Writes | Reads | Community Name |
 |---|---|---|---|---|---|---|
-| `LB_NORMAL_V1` | 보통 (`GameMode.Normal`) | **Ascending** | **Numeric** | Trusted 끔 | Friends 끔 | 보통 — 점수 (낮을수록 좋다) / Normal — Score (lower is better) |
-| `LB_TOWER_V1` | 탑의 법 (`GameMode.Tower`) | **Ascending** | **Numeric** | Trusted 끔 | Friends 끔 | 탑의 법 — 점수 / Tower's Law — Score |
+| `LB_NORMAL_V2` | 보통 (`GameMode.Normal`) | **Ascending** | **Numeric** | Trusted 끔 | Friends 끔 | 보통 — 점수 (낮을수록 좋다) / Normal — Score (lower is better) |
+| `LB_TOWER_V2` | 탑의 법 (`GameMode.Tower`) | **Ascending** | **Numeric** | Trusted 끔 | Friends 끔 | 탑의 법 — 점수 / Tower's Law — Score |
 
 - **Ascending**: 낮은 점수가 1위다(Steam: "For positional based leaderboards, use Ascending").
 - 올리기는 **KeepBest** — Steam 이 그 사람의 가장 좋은(낮은) 점수만 남긴다. 더 나쁜 판을 끝내도 기록이 나빠지지 않는다.
@@ -72,7 +72,7 @@
 
 ## 시험
 
-- Steam 을 켠 채 에디터·개발 빌드로 한 판을 끝낸다(아직 점수를 내지 않은 판의 100층 입구 체크포인트에서 이어 해도 된다). 로그: `[Steam] 순위표 LB_NORMAL_V1 점수 874 (바뀜 True, 순위 1)`, 그 뒤 PlayerPrefs 의
+- Steam 을 켠 채 에디터·개발 빌드로 한 판을 끝낸다(아직 점수를 내지 않은 판의 100층 입구 체크포인트에서 이어 해도 된다). 로그: `[Steam] 순위표 LB_NORMAL_V2 점수 874 (바뀜 True, 순위 1)`, 그 뒤 PlayerPrefs 의
   `STEAM_PENDING_SCORE` 가 없다. 못 올리면 "찾지 못했다" / "올리지 못했다 — 다음 씬에서 다시" 가 찍히고 그 값이 남는다.
 - 꺼져도 남는지: 점수가 난 뒤 결말을 고르기 전에 게임을 끈다 → `STEAM_PENDING_SCORE` 가 남아 있다 → 다시 켜면 타이틀에서 올라가고
   (결말 칸 0) 값이 지워진다. Steam 을 끈 채 끝낸 판도 같다.

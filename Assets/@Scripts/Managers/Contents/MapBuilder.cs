@@ -104,6 +104,9 @@ public static class MapBuilder
         PlaceFloorField(root, mapData, tint);
         HashSet<Vector2Int> swapped = PlaceDeco(root, dungeonId);
         GameObject[] wallArt = IsHandAuthored(dungeonId) ? null : WallArt(chapter);
+        // 생성 층은 빈 땅을 전부 바위로 채운다(2026-11-09). 바위 윗면이 화면을 덮으면 걸을 수 있는 바닥이
+        // 오히려 도랑처럼 보였다(용광로) — 바닥에 닿지 않은 깊은 바위를 어둡게 해 노는 자리를 도드라지게 한다.
+        HashSet<Vector2Int> open = wallArt != null ? OpenCells(mapData) : null;
 
         int doorCount = 0;
         var rewardGroups = new Dictionary<int, ConsumableItem>();
@@ -132,6 +135,12 @@ public static class MapBuilder
                             wall = Place(WALL_PREFAB_FALLBACK, tiles, pos, tint);
                         if (wall != null && swapped != null && swapped.Contains(cell))
                             HideLook(wall);
+                        else if (art != null && open != null)
+                        {
+                            int depth = RockDepth(cell, open);
+                            if (depth > 1)
+                                Deepen(wall, DeepShade(chapter, depth));
+                        }
                         break;
                     }
 
@@ -343,6 +352,92 @@ public static class MapBuilder
     {
         return new Vector2Int(Mathf.RoundToInt(local.x / Define.TILE_SIZE),
                               Mathf.RoundToInt(-local.z / Define.TILE_SIZE));
+    }
+
+    /// <summary>벽이 아닌 칸 — 바닥과 그 위에 선 것(몬스터·아이템·문·계단…) 전부.</summary>
+    static HashSet<Vector2Int> OpenCells(Data.MapData mapData)
+    {
+        var open = new HashSet<Vector2Int>();
+        foreach (Data.ObjectData obj in mapData.Objects)
+        {
+            if ((Define.ObjectType)obj.ObjectType != Define.ObjectType.Wall)
+                open.Add(Cell(new Vector3(obj.Position.X, obj.Position.Y, obj.Position.Z)));
+        }
+        return open;
+    }
+
+    /// <summary>바위가 바닥에서 얼마나 깊은가 — 둘레 1칸에 바닥이 있으면 1(테두리, 밝은 그대로),
+    /// 2칸 안이면 2, 그보다 멀면 3. 한 번에 시커멓게 하면 바닥이 어두운 챕터(용광로)에서 바닥과 바위가 같은 색이 됐다.</summary>
+    static int RockDepth(Vector2Int cell, HashSet<Vector2Int> open)
+    {
+        for (int r = 1; r <= 2; r++)
+            for (int dy = -r; dy <= r; dy++)
+                for (int dx = -r; dx <= r; dx++)
+                    if (open.Contains(new Vector2Int(cell.x + dx, cell.y + dy)))
+                        return r;
+        return 3;
+    }
+
+    // 깊이 2·3 의 밝기(챕터별). 바닥에서 멀어질수록 어두워져 빛이 노는 자리에서 번져 나가는 것처럼 보인다.
+    // 02 용광로는 바닥이 바위보다 어둡다 — 세게 칠하면 깊은 바위가 바닥과 같은 색이 돼 길이 안 읽혔다(스크린샷으로 확인).
+    static readonly float[,] DeepRockShade =
+    {
+        { 0.55f, 0.30f },   // 00 묘소
+        { 0.55f, 0.30f },   // 01 수로
+        { 0.85f, 0.72f },   // 02 용광로
+        { 0.55f, 0.30f },   // 03 심층
+        { 0.55f, 0.30f },   // 04 균열
+    };
+    static readonly Dictionary<(Material, float), Material> _deepMaterials = new Dictionary<(Material, float), Material>();
+
+    static float DeepShade(int chapter, int depth)
+    {
+        return DeepRockShade[Mathf.Clamp(chapter, 0, DeepRockShade.GetLength(0) - 1), Mathf.Clamp(depth - 2, 0, 1)];
+    }
+    static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
+
+    // 에디터는 도메인을 다시 읽지 않는다 — 지난 플레이의 사본(플레이가 끝나면 부서진다)을 들고 오지 않게 비운다.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() => _deepMaterials.Clear();
+
+    /// <summary>깊은 바위 — 재질을 어둡게 한 사본으로 바꾼다. 틴트(MaterialPropertyBlock)는 SRP 배칭을 깨서
+    /// 칸마다 그리기 호출이 따로 나가므로, 원본 재질마다 사본 하나를 만들어 같이 쓴다.</summary>
+    static void Deepen(GameObject wall, float shade)
+    {
+        wall.GetComponentsInChildren(true, _renderers);
+        for (int i = 0; i < _renderers.Count; i++)
+        {
+            Renderer r = _renderers[i];
+            if (r is SpriteRenderer)
+                continue;
+            Material[] mats = r.sharedMaterials;
+            for (int m = 0; m < mats.Length; m++)
+                mats[m] = DeepMaterial(mats[m], shade);
+            r.sharedMaterials = mats;
+        }
+    }
+
+    static Material DeepMaterial(Material src, float shade)
+    {
+        if (src == null)
+            return null;
+        if (_deepMaterials.TryGetValue((src, shade), out Material deep) && deep != null)
+            return deep;
+
+        deep = new Material(src) { name = src.name + " (Deep " + shade.ToString("0.00") + ")" };
+        Shade(deep, BaseColorId, shade);
+        Shade(deep, ColorId, shade);
+        Shade(deep, EmissionColorId, shade);    // 빛나는 칸(_Emit)도 같이 — 어둠 속에 불티만 떠 보이지 않게
+        _deepMaterials[(src, shade)] = deep;
+        return deep;
+    }
+
+    static void Shade(Material m, int id, float k)
+    {
+        if (m.HasProperty(id) == false)
+            return;
+        Color c = m.GetColor(id);
+        m.SetColor(id, new Color(c.r * k, c.g * k, c.b * k, c.a));
     }
 
     /// <summary>벽의 그림만 끈다. 콜라이더(벽 레이어)는 남으니 길·충돌·카메라 범위는 그대로다.</summary>

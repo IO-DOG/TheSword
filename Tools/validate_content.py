@@ -16,7 +16,8 @@ import tempfile
 import bestiary
 import generate_content as G
 import ui_text
-from layout_gen import check_behind_boss, STAIRS_UP
+from layout_gen import (check_behind_boss, check_structure, check_variety, STAIRS_UP,
+                        SAME_FLOOR_MAX, SAME_FLOOR_MEAN)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
@@ -474,6 +475,7 @@ def main():
         errors.append("5층에서 4층으로 내려가는 연결이 끊겼다")
 
     # ---- 층 데이터
+    layouts = {}
     for sid, s in sorted(stages.items()):
         did = s["DungeonID"]
         m = maps.get(sid)
@@ -488,6 +490,10 @@ def main():
         with open(os.path.join(G.STREAM, f"Dungeon_{did}.csv"), encoding="utf-8-sig") as f:
             grid = [[c.strip() for c in line.split(",")] for line in f.read().splitlines()]
         check_deco(did, grid, godray)
+        layouts[did] = grid
+        # 눈에 이상한 구조 — 통로 한가운데 선 문, 아무것도 없는 막다른 칸, 닿지 않는 바닥.
+        for why, x, y in check_structure(grid):
+            errors.append(f"{did}: ({x}, {y}) {why}")
 
         # 완주 계산은 층의 몹과 큰 물약을 보스 <b>앞에서</b> 쓴다. 보스 뒤에 있으면 체크포인트
         # (층 입구)에서 빈사로 보스 앞에 선 사람은 영영 못 넘는다.
@@ -555,6 +561,16 @@ def main():
         # 전체 비율은 큰길 1:1 에 희석돼 늘 90%대로 보인다 — 볼 것은 이쪽이다.
         tower["vaults"] = [a + max(0, b - 1) for a, b in zip(tower["vaults"], doors)]
         tower["spares"] = [a + max(0, b - 1) for a, b in zip(tower["spares"], keys)]
+
+    # ---- 층끼리 닮음 — 같은 지도가 되풀이되면 96층이 한 층처럼 보인다(옛 생성기: 거울상까지 같은 층 한 쌍)
+    if layouts:
+        mean, pairs = check_variety(layouts)
+        for sim, a, b in pairs:
+            if sim <= SAME_FLOOR_MAX:
+                break
+            errors.append(f"{a} 와 {b} 의 바닥이 {sim:.0%} 같다 (문턱 {SAME_FLOOR_MAX:.0%}, 거울 포함)")
+        if mean > SAME_FLOOR_MEAN:
+            errors.append(f"층끼리 닮음 평균 {mean:.2f} 이 문턱 {SAME_FLOOR_MEAN} 을 넘는다")
 
     # ---- 공통 프리팹
     # 문은 색x방향 여섯 종이 다 있어야 한다 — 하나라도 없으면 BuildDoor 가

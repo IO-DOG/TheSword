@@ -39,7 +39,12 @@ from thesword_balance import (
 )
 from layout_gen import (build_floor_layout, validate_layout, check_doors,
                         check_sealed_by_portal, check_vault_safe, check_behind_boss,
-                        floor_choices, key_economy, KEY_ITEM, MIN_TOLLS)
+                        check_structure, check_variety, floor_similarity,
+                        floor_choices, key_economy, KEY_ITEM, MIN_TOLLS,
+                        SAME_FLOOR_MAX, SAME_FLOOR_MEAN)
+
+# 층마다 씨앗을 다시 뽑는 횟수. 앞 층을 닮은 지도를 버리므로 위층일수록 더 뽑는다.
+LAYOUT_ATTEMPTS = 300
 
 # 층마다 반드시 치러야 하는 전투의 수. layout_gen 이 배치로 보장하는 값이고,
 # 여기서는 "곁길을 전부 건너뛴다" 는 나쁜 선택을 재현할 때 쓴다 — 관문 셋만
@@ -481,10 +486,10 @@ def sized_rune(floor, stat):
 # Tools/fun_sim.py [7] 이 이 콘텐츠에서 무작위 사람 500판(스킬은 층마다 한 번)을 돌려 찍는다(봇 녹화로 맞춘 보정 x1.087).
 # 몬스터·물약·덤·스킬을 다시 맞추면 [7] 을 다시 돌려 이 표를 간다. 띠의 마지막 층 StageInfoData 에 실린다(SwordLedger).
 # 기준과 판 점수는 그대로다 — 세이브·순위표가 안 바뀐다.
-STAR_GREAT = (70, 50, 39, 40, 27, 34, 37, 46, 22, 26, 28, 45, 40, 40, 43, 48, 53, 39, 43, 51)
-STAR_GOOD = (86, 59, 53, 59, 37, 48, 52, 60, 32, 38, 42, 55, 48, 54, 56, 63, 61, 45, 51, 59)
-STAR_GREAT_TOWER = (72, 62, 53, 51, 40, 46, 50, 58, 31, 38, 47, 53, 41, 38, 45, 45, 54, 39, 42, 50)
-STAR_GOOD_TOWER = (97, 70, 68, 69, 55, 58, 69, 68, 39, 47, 61, 62, 53, 60, 57, 63, 61, 45, 49, 59)
+STAR_GREAT = (70, 50, 39, 39, 27, 35, 37, 47, 23, 24, 28, 45, 39, 40, 43, 47, 55, 39, 44, 51)
+STAR_GOOD = (86, 59, 54, 61, 40, 52, 50, 59, 31, 36, 46, 55, 49, 54, 57, 61, 64, 46, 52, 60)
+STAR_GREAT_TOWER = (72, 62, 53, 51, 40, 47, 51, 56, 31, 37, 45, 53, 42, 37, 43, 45, 54, 38, 42, 52)
+STAR_GOOD_TOWER = (97, 73, 67, 71, 56, 61, 69, 68, 38, 45, 58, 61, 51, 57, 57, 61, 63, 44, 50, 60)
 for _table in (STAR_GREAT, STAR_GOOD, STAR_GREAT_TOWER, STAR_GOOD_TOWER):
     assert len(_table) == TOTAL_FLOORS // 5
 assert all(0 < g <= d for g, d in zip(STAR_GREAT + STAR_GREAT_TOWER, STAR_GOOD + STAR_GOOD_TOWER))
@@ -1198,7 +1203,7 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
         # 곁길은 거를 수 있으니 관문 뒤로는 구역 1·2 의 물약이 다 열린다. 예전에는 구역 1 물약을 두 번째 전투부터,
         # 구역 2 를 네 번째부터 셌다 — 첫 구역을 물약 하나로 끊어 가는 셈이라 제단 문턱이 낮게 나왔고, 탑의 법
         # 19곳 중 9곳(30·35·50·55·70·75·85·90·95층)에서 문턱 HP 로 사면 2~7층 뒤 첫 관문 셋에 갇혔다(재미 검증 v2 5.4).
-        # ponytail: MIN_TOLLS 로 센다 — 관문이 넷·다섯인 16개 층([5/7])은 아직 한 판 이르다. 정확히는 floor_choices 의 관문 수.
+        # ponytail: MIN_TOLLS 로 센다 — 관문이 넷·다섯인 11개 층([5/7], 11-09 새 지도)은 아직 한 판 이르다. 정확히는 floor_choices 의 관문 수.
         #
         # <b>층 유형이 정한 예산을 그대로 써야 한다.</b> 예전에는 여기만 늘
         # 두 개로 셌는데, 실제로 놓이는 것은 「인색」 층이 하나뿐이고
@@ -1989,7 +1994,7 @@ def emit_layouts(monsters, write=True):
         by_floor.setdefault(m["_floor"], []).append(m)
 
     written, failures, bad_doors, sealed_off, unsafe_vaults, behind_boss = 0, [], [], [], [], []
-    choices, econ = {}, {}
+    choices, econ, made = {}, {}, {}
     for floor in range(HANDMADE_FLOORS + 1, TOTAL_FLOORS + 1):
         did, ch, _ = dungeon_id(floor)
         mobs = sorted((m for m in by_floor[floor] if not m["_boss"]),
@@ -2009,7 +2014,7 @@ def emit_layouts(monsters, write=True):
         pots = [[], region1, region2, region3]
 
         grid = None
-        for attempt in range(50):
+        for attempt in range(LAYOUT_ATTEMPTS):
             g, origins, doors = build_floor_layout(
                 [m["id"] for m in mobs], boss["id"] if boss else None, walls,
                 seed=floor * 1000 + attempt, mobs_in_floor=MOBS_PER_FLOOR,
@@ -2019,7 +2024,10 @@ def emit_layouts(monsters, write=True):
             if g is None:
                 continue
             ok, err = validate_layout(g, origins, doors)
-            if ok:
+            # 눈에 이상한 구조(통로 한가운데 문 등)와 앞 층을 닮은 지도는 버리고 다시 뽑는다.
+            # 거울상까지 같은 층이 둘 있었다(11층과 67층) — 오너가 직접 찾았다.
+            if ok and not check_structure(g) and not any(
+                    floor_similarity(g, other) > SAME_FLOOR_MAX for other in made.values()):
                 grid = g
                 break
         if grid is None:
@@ -2050,6 +2058,7 @@ def emit_layouts(monsters, write=True):
                                (f"{cell} — 보스를 잡아야 닿는다" if cell else "— 층에 없다"))
 
         econ[floor] = key_economy(grid, doors)
+        made[floor] = grid
 
         # 강제/선택은 배치 <b>의도</b>가 아니라 완성된 격자에서 다시 잰다.
         # 우회로가 하나라도 생기면 관문이 조용히 곁길이 되기 때문이다 —
@@ -2062,7 +2071,7 @@ def emit_layouts(monsters, write=True):
                 for row in grid:
                     f.write(",".join(row) + "\n")
         written += 1
-    return written, failures, bad_doors, choices, sealed_off, unsafe_vaults, behind_boss, econ
+    return written, failures, bad_doors, choices, sealed_off, unsafe_vaults, behind_boss, econ, made
 
 
 def report_choices(choices):
@@ -2250,7 +2259,7 @@ def build_all(dry_run=False):
 
     print("[4/7] 층 레이아웃 생성 + 도달 가능성 검사")
     (written, failures, bad_doors, choices, sealed_off,
-     unsafe_vaults, behind_boss, econ) = emit_layouts(monsters, write=False)
+     unsafe_vaults, behind_boss, econ, made) = emit_layouts(monsters, write=False)
     print(f"      {written}/{TOTAL_FLOORS - HANDMADE_FLOORS} 층 생성 "
           f"(1~{HANDMADE_FLOORS}층은 원본 유지)")
     if failures:
@@ -2280,6 +2289,16 @@ def build_all(dry_run=False):
         print(f"      보스 뒤에 앉은 몬스터·큰 물약 {len(behind_boss)}건")
         return False
     print("      보스 뒤에 앉은 몬스터·큰 물약 0건 (완주 계산은 둘 다 보스 앞에서 쓴다)")
+    odd = [(f, why) for f, g in made.items() for why, _x, _y in check_structure(g)]
+    mean, pairs = check_variety(made)
+    print(f"      눈에 이상한 구조(통로 한가운데 문·빈 막다른 칸·닿지 않는 바닥) {len(odd)}건")
+    print(f"      층끼리 닮음(바닥 Jaccard, 거울 포함) 평균 {mean:.3f} · 최대 {pairs[0][0]:.3f}"
+          f" ({pairs[0][1]}층-{pairs[0][2]}층) — 문턱 평균 {SAME_FLOOR_MEAN} · 최대 {SAME_FLOOR_MAX}")
+    if odd or mean > SAME_FLOOR_MEAN or pairs[0][0] > SAME_FLOOR_MAX:
+        for f, why in odd[:10]:
+            print(f"  [실패] {f}층 {why}")
+        print("  [실패] 지도 구조 또는 층끼리 닮음 문턱을 넘었다")
+        return False
 
     print("[5/7] 강제와 선택 세기")
     broken = report_choices(choices)

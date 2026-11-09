@@ -32,8 +32,8 @@ public static class SteamHooks
     static readonly string[] Endings = { "seal", "hold", "dawn" };     // StoryEnding 소문자 — Records 가 적는 이름
 
     // 순위표. 점수는 콘텐츠(지도·몬스터 표)에 달려 있다 — 콘텐츠를 바꾸면 _V 를 올려 새 표에서 센다(leaderboards.md).
-    const string BoardNormal = "LB_NORMAL_V1";
-    const string BoardTower = "LB_TOWER_V1";
+    const string BoardNormal = "LB_NORMAL_V2";
+    const string BoardTower = "LB_TOWER_V2";
 
 #if DEMO
     static bool Active => false;        // 체험판은 주지 않는다. 본편이 같은 기록(Records)을 보고 준다(SyncRecords)

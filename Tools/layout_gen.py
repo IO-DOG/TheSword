@@ -70,144 +70,265 @@ RUNE_ATK, RUNE_DEF, RUNE_HP = "I_09", "I_10", "I_11"
 
 NEIGHBORS = ((1, 0), (-1, 0), (0, 1), (0, -1))
 
-# 방 격자 3x3. 방 하나는 최대 7x5 이고, <b>크기는 층마다 다르다.</b>
-ROOMS_X, ROOMS_Y = 3, 3
-ROOM_W, ROOM_H = 7, 5                       # 가장 큰 방 = 방 사이 간격의 기준
-GAP_X = (GRID_W - 2 - ROOMS_X * ROOM_W) // (ROOMS_X - 1)
-GAP_Y = (GRID_H - 2 - ROOMS_Y * ROOM_H) // (ROOMS_Y - 1)
-STRIDE_X, STRIDE_Y = ROOM_W + GAP_X, ROOM_H + GAP_Y
-
-# 방 반지름 후보. 방 크기는 (2*hw+1) x (2*hh+1) — 5x3 / 5x5 / 7x3 / 7x5 넷이다.
+# ---------------------------------------------------------------------------
+# 방 배치 — 층마다 틀이 다르다
 #
-# 왜 방 크기가 층마다 달라야 하는가
-# ------------------------------
-# 방 아홉 개가 고정 좌표에 7x5 로 파이면 격자 621칸 중 515칸이 <b>모든 층에서
-# 같은 값</b>이 된다(82.9%). 그래서 두 층의 벽/바닥이 평균 97.7% 같았고, 문은
-# 통로 밖 구간의 한가운데에만 앉아 96개 층이 단 12칸을 나눠 썼다.
-# 방 크기를 흔들면 그 515칸이 통째로 흔들린다.
+# 예전에는 3x3 고정 격자에 방 아홉을 놓고 방 중심끼리 곧게 이었다. 그래서 96개 층이
+# 한 틀이었다 — 바닥 칸 Jaccard 평균 0.64, 0.8 을 넘는 층 쌍이 269개였고, 거울상까지
+# 똑같은 쌍도 있었다(11층과 67층). 문은 통로의 <b>아무 칸</b>에 앉아서, 방에서 떨어진
+# 긴 통로 한가운데 문짝만 덩그러니 섰다.
 #
-# <b>줄이는 쪽으로만</b> 흔든다. 방을 키우면 마지막 통로의 방 밖 구간이 짧아져
-# last_neck 이 보스에게 한 칸 주고 나면 바닥나고, 룬이 폴백 가지로 떨어져 여덟
-# 개 층에서 <b>그냥 지나칠 수 있는 룬</b>이 됐다 — 완주 보장이 거짓이 된다.
-# 반대로 hw=1(3칸 방)까지 줄이면 방이 방으로 안 보이고 밟을 칸이 36% 줄어든다.
-# 단조로움은 hw 2~3 만으로도 97.6% -> 85.3% 로 떨어진다(hw 1~3 은 83.0%).
-HALF_W, HALF_H = (2, 3), (1, 2)
+# 지금은 층마다
+#   * 틀(열 2~4 x 행 2~3)과 띠 폭을 굴리고,
+#   * 띠 안에서 방의 크기·자리를 굴리고, 일부 방은 모양을 바꾼다(기둥·ㄱ자·칸막이),
+#   * 이웃한 두 방을 곧은 통로나 한 번 꺾인 통로로 잇는다.
+# 통로는 두 방 사이 틈에만 판다. 다른 통로·방에 맞닿으면 그 씨앗은 버린다 —
+# 맞닿는 순간 문을 돌아가는 길이 생겨 "문 셋이 순서를 강제한다" 가 깨진다.
+# 문은 <b>문턱</b>(통로가 방에 닿는 첫 칸)에만 세운다. 그래야 방의 벽 줄에 붙어 보인다.
+# 남는 빈 땅은 전부 바위(벽)로 채운다 — 비워 두면 그 자리에 바닥 그림(BG)이 깔려
+# 걸을 수 있는 맨땅처럼 보였다.
 
-# 이 층의 방 반지름. build_floor_layout 이 씨앗으로 굴려 채운다.
-# 방 기하 함수 넷이 층수도 씨앗도 받지 않는 순수 함수라 여기 둔다 — 단조로움의
-# 뿌리가 바로 그것이었다. 한 층을 뽑고 나면 그 층의 값이 남으므로, 밖에서
-# room_cells 를 부르려면 그 층을 뽑은 <b>직후</b>여야 한다.
-_SHAPE = {}
+INNER_X, INNER_Y = (1, GRID_W - 2), (1, GRID_H - 2)   # 바깥 한 줄은 테두리 벽
 
+# 층 유형(generate_content.FLOOR_TYPES 의 번호) -> 틀 후보 (열, 행)
+#   0 기본 · 4 보물 : 큰길 방 아홉
+#   1 인색          : 큰길 방 여섯
+#   2 관문          : 작은 방 아홉 — 통로가 길어진다
+#   3 넉넉          : 큰길 방 여섯 + 곁방 셋
+FRAMES = {
+    0: ((3, 3), (4, 3)),
+    1: ((2, 3), (3, 2), (4, 2), (3, 3), (4, 3)),
+    2: ((3, 3), (4, 3)),
+    3: ((3, 3), (4, 3)),
+    4: ((3, 3), (4, 3)),
+}
+PATH_ROOMS = {0: 9, 1: 6, 2: 9, 3: 6, 4: 9}
+BRANCH_ROOMS = {3: 3}
 
-def room_half(rx, ry):
-    return _SHAPE.get((rx, ry), (ROOM_W // 2, ROOM_H // 2))
-
-
-def room_center(rx, ry):
-    """방 중심은 <b>격자에 고정</b>이다 — 흔들면 통로가 상대 방에 안 닿는다."""
-    return 1 + rx * STRIDE_X + ROOM_W // 2, 1 + ry * STRIDE_Y + ROOM_H // 2
-
-
-def room_origin(rx, ry):
-    cx, cy = room_center(rx, ry)
-    hw, hh = room_half(rx, ry)
-    return cx - hw, cy - hh
-
-
-def room_cells(rx, ry):
-    ox, oy = room_origin(rx, ry)
-    hw, hh = room_half(rx, ry)
-    return [(x, y) for y in range(oy, oy + 2 * hh + 1)
-            for x in range(ox, ox + 2 * hw + 1)]
-
-
-def _carve_rooms(grid, rooms=None):
-    for rx, ry in (rooms if rooms is not None else
-                   [(x, y) for y in range(ROOMS_Y) for x in range(ROOMS_X)]):
-        for x, y in room_cells(rx, ry):
-            grid[y][x] = FLOOR
+# 방 한 변의 범위. 띠가 좁으면 띠에 맞춘다. 3칸보다 좁으면 방으로 안 보인다.
+ROOM_W_RANGE, ROOM_H_RANGE = (4, 9), (3, 7)
+GAUNTLET_W_RANGE, GAUNTLET_H_RANGE = (3, 5), (3, 3)
+BAND_MIN = 5                 # 띠 폭의 하한 — 양쪽을 한 칸씩 비운 안쪽 띠에도 3칸 방이 들어간다
+STRAIGHT_LINK = 0.4          # 곧게 이을 수 있을 때 곧게 잇는 몫 — 나머지는 한 번 꺾는다
+RESHAPE = 0.55               # 모양을 바꿀 수 있는 방 가운데 실제로 바꾸는 몫
 
 
-def _corridor(grid, a, b):
-    """두 방 중심을 잇는 곧은 통로. 판 칸 목록을 돌려준다."""
-    (ax, ay), (bx, by) = a, b
-    cells = []
-    if ay == by:
-        for x in range(min(ax, bx), max(ax, bx) + 1):
-            cells.append((x, ay))
+class _Room:
+    __slots__ = ("rect", "cells", "anchor")
+
+    def __init__(self, rect):
+        self.rect = rect
+        x0, y0, x1, y1 = rect
+        self.cells = [(x, y) for y in range(y0, y1 + 1) for x in range(x0, x1 + 1)]
+        self.anchor = ((x0 + x1) // 2, (y0 + y1) // 2)
+
+
+# 이 층의 방과 통로 입구. build_floor_layout 이 씨앗으로 굴려 채운다. 한 층을 뽑고
+# 나면 그 층의 값이 남으므로, 밖에서 room_cells 를 부르려면 그 층을 뽑은 <b>직후</b>여야 한다.
+_ROOMS = {}
+_MOUTHS = set()      # 통로가 방에 닿는 방 칸. 포탈·골방·모양 바꾸기가 그 둘레를 피한다.
+
+
+def room_cells(room):
+    return list(_ROOMS[room].cells)
+
+
+def room_center(room):
+    return _ROOMS[room].anchor
+
+
+def _near_mouths():
+    return {(mx + dx, my + dy) for mx, my in _MOUTHS for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
+
+
+def _split(lo, hi, n, rng):
+    """lo..hi 칸을 띠 n 개로 나눈다. 띠마다 BAND_MIN 칸 이상, 남는 칸은 무작위로 흩는다."""
+    sizes = [BAND_MIN] * n
+    spare = (hi - lo + 1) - BAND_MIN * n
+    if spare < 0:
+        return None
+    for _ in range(spare):
+        sizes[rng.randrange(n)] += 1
+    bands, s = [], lo
+    for w in sizes:
+        bands.append((s, s + w - 1))
+        s += w
+    return bands
+
+
+def _span(band, limits, size_range, rng):
+    """띠 안에서 방 한 변의 (시작, 끝).
+
+    다른 띠와 맞댄 쪽은 한 칸 비운다 — 이웃 방과 사이에 두 칸 이상의 틈이 남고, 그 틈이
+    통로가 된다. 맵 가장자리 쪽은 테두리 벽이 있으니 비우지 않는다."""
+    b0, b1 = band
+    m0 = 0 if b0 == limits[0] else 1
+    m1 = 0 if b1 == limits[1] else 1
+    room_max = (b1 - m1) - (b0 + m0) + 1
+    lo, hi = size_range
+    hi = min(hi, room_max)
+    lo = min(lo, hi)
+    if lo < 3:
+        return None
+    size = rng.randint(lo, hi)
+    start = rng.randint(b0 + m0, b1 - m1 - size + 1)
+    return start, start + size - 1
+
+
+def _lattice_path(cols, rows, n, rng):
+    """틀의 칸 n 개를 이웃끼리 한 번씩 훑는 길(무작위 깊이 우선 + 되짚기)."""
+    cells = [(x, y) for y in range(rows) for x in range(cols)]
+    for _ in range(60):
+        path = [rng.choice(cells)]
+        seen = set(path)
+
+        def grow():
+            if len(path) == n:
+                return True
+            x, y = path[-1]
+            nbrs = [(x + dx, y + dy) for dx, dy in NEIGHBORS
+                    if 0 <= x + dx < cols and 0 <= y + dy < rows and (x + dx, y + dy) not in seen]
+            rng.shuffle(nbrs)
+            for c in nbrs:
+                path.append(c)
+                seen.add(c)
+                if grow():
+                    return True
+                path.pop()
+                seen.discard(c)
+            return False
+
+        if grow():
+            return path
+    return None
+
+
+def _link(a, b, rng):
+    """이웃한 두 방 a -> b 를 잇는 통로. (칸 목록 a 쪽부터, a 입구, b 입구) 또는 None.
+
+    통로는 두 방 사이 틈에만 판다. 꺾을 때는 틈 <b>안에서</b> 한 번 꺾고 양 끝을 한 칸
+    이상 곧게 둔다 — 그 끝 칸이 문턱이고, 문턱은 양옆이 벽이어야 문이 선다.
+    방의 모서리 줄로는 잇지 않는다. 입구 양옆이 방이어야 문턱의 문이 방 벽 줄에 붙는다.
+    """
+    ra, rb = a.rect, b.rect
+    flip = not (ra[2] < rb[0] or rb[2] < ra[0])        # 위아래 이웃이면 축을 바꿔 같은 식으로
+    if flip:
+        ra = (ra[1], ra[0], ra[3], ra[2])
+        rb = (rb[1], rb[0], rb[3], rb[2])
+    rev = ra[0] > rb[0]
+    if rev:
+        ra, rb = rb, ra
+    ga, gb = ra[2] + 1, rb[0] - 1                       # 틈의 양 끝 = 두 문턱
+    rows_a = list(range(ra[1] + 1, ra[3]))
+    rows_b = list(range(rb[1] + 1, rb[3]))
+    if gb <= ga or not rows_a or not rows_b:
+        return None
+    common = [y for y in rows_a if y in rows_b]
+    can_bend = gb - ga >= 2
+    if common and (not can_bend or rng.random() < STRAIGHT_LINK):
+        ya = yb = rng.choice(common)
+    elif can_bend:
+        ya, yb = rng.choice(rows_a), rng.choice(rows_b)
     else:
-        for y in range(min(ay, by), max(ay, by) + 1):
-            cells.append((ax, y))
-    for (x, y) in cells:
-        grid[y][x] = FLOOR
-    return cells
+        return None
+    if ya == yb:
+        cells = [(x, ya) for x in range(ga, gb + 1)]
+    else:
+        gx = rng.randint(ga + 1, gb - 1)
+        step = 1 if yb > ya else -1
+        cells = [(x, ya) for x in range(ga, gx + 1)]
+        cells += [(gx, y) for y in range(ya + step, yb + step, step)]
+        cells += [(x, yb) for x in range(gx + 1, gb + 1)]
+    mouth_a, mouth_b = (ra[2], ya), (rb[0], yb)
+    if rev:
+        cells.reverse()
+        mouth_a, mouth_b = mouth_b, mouth_a
+    if flip:
+        cells = [(y, x) for x, y in cells]
+        mouth_a, mouth_b = (mouth_a[1], mouth_a[0]), (mouth_b[1], mouth_b[0])
+    return cells, mouth_a, mouth_b
 
 
-def _outside_room(cell):
-    """방 크기를 <b>그 방에서</b> 읽는다. 고정값으로 재면 통로의 방 밖 구간이
-    잘못 잡혀 문이 방 안에 앉고, check_doors 가 전량 위반으로 뜬다."""
-    for ry in range(ROOMS_Y):
-        for rx in range(ROOMS_X):
-            ox, oy = room_origin(rx, ry)
-            hw, hh = room_half(rx, ry)
-            if ox <= cell[0] <= ox + 2 * hw and oy <= cell[1] <= oy + 2 * hh:
+def _free_for(grid, cells, ends):
+    """새 통로가 빈 땅에만 놓이고, 두 입구 말고는 어떤 바닥에도 맞닿지 않는가."""
+    own = set(cells) | set(ends)
+    for x, y in cells:
+        if grid[y][x] != VOID:
+            return False
+        for dx, dy in NEIGHBORS:
+            n = (x + dx, y + dy)
+            if n not in own and _inside(n) and grid[n[1]][n[0]] != VOID:
                 return False
     return True
 
 
-def _add_walls(grid, wall_tiles, rng):
-    """바닥과 맞닿은 빈 칸을 벽으로 채운다."""
+def _connected(cells):
+    cells = set(cells)
+    if not cells:
+        return False
+    start = next(iter(cells))
+    seen, stack = {start}, [start]
+    while stack:
+        x, y = stack.pop()
+        for dx, dy in NEIGHBORS:
+            n = (x + dx, y + dy)
+            if n in cells and n not in seen:
+                seen.add(n)
+                stack.append(n)
+    return len(seen) == len(cells)
+
+
+def _reshape(grid, room, rng):
+    """방 모양을 바꾼다 — 기둥 / ㄱ자 / 칸막이. 통로 입구 둘레와 중심은 남긴다.
+
+    네모 방만 이어 붙이면 틀이 달라도 같은 그림으로 보인다. 깎아 낸 칸은 바위가 된다.
+    깎은 뒤 방이 둘로 갈리거나 막다른 칸이 생기면 되돌린다.
+    """
+    x0, y0, x1, y1 = room.rect
+    w, h = x1 - x0 + 1, y1 - y0 + 1
+    options = []
+    if w >= 5 and h >= 5:
+        options.append("pillars")
+    if w >= 6 and h >= 4:
+        options.append("notch")
+    if w >= 7 and h >= 5 or w >= 5 and h >= 7:
+        options.append("divider")
+    if not options or rng.random() >= RESHAPE:
+        return
+    kind = rng.choice(options)
+    if kind == "pillars":
+        cut = {(x, y) for y in range(y0 + 1, y1, 2) for x in range(x0 + 1, x1, 2)}
+    elif kind == "notch":
+        cw, ch = rng.randint(2, w - 4), rng.randint(1, h - 3)
+        corner = rng.randrange(4)
+        xs = range(x0, x0 + cw) if corner in (0, 2) else range(x1 - cw + 1, x1 + 1)
+        ys = range(y0, y0 + ch) if corner in (0, 1) else range(y1 - ch + 1, y1 + 1)
+        cut = {(x, y) for x in xs for y in ys}
+    elif w >= h:
+        cut = {(x, (y0 + y1) // 2) for x in range(x0 + 2, x1 - 1)}
+    else:
+        cut = {((x0 + x1) // 2, y) for y in range(y0 + 2, y1 - 1)}
+    cut -= _near_mouths() | {room.anchor}
+    if not cut:
+        return
+    rest = [c for c in room.cells if c not in cut]
+    keep = set(rest)
+    if not _connected(rest):
+        return
+    for x, y in rest:
+        if sum((x + dx, y + dy) in keep for dx, dy in NEIGHBORS) < 2:
+            return
+    room.cells = rest
+    for x, y in cut:
+        grid[y][x] = VOID
+
+
+def _fill_rock(grid, wall_tiles, rng):
+    """빈 땅을 전부 바위로 채운다. 예전에는 바닥에 닿은 칸만 벽으로 세웠다."""
     for y in range(GRID_H):
         for x in range(GRID_W):
-            if grid[y][x] != VOID:
-                continue
-            touching = False
-            for dy in (-1, 0, 1):
-                for dx in (-1, 0, 1):
-                    nx, ny = x + dx, y + dy
-                    if 0 <= nx < GRID_W and 0 <= ny < GRID_H and grid[ny][nx] != VOID:
-                        touching = True
-                        break
-                if touching:
-                    break
-            if touching:
+            if grid[y][x] == VOID:
                 grid[y][x] = rng.choice(wall_tiles)
-
-
-def _room_order(rng):
-    """방 아홉 개를 인접하게 훑는 한붓그리기 순서."""
-    all_rooms = [(x, y) for y in range(ROOMS_Y) for x in range(ROOMS_X)]
-    for _ in range(400):
-        order = [rng.choice(all_rooms)]
-        seen = set(order)
-        while len(order) < len(all_rooms):
-            cx, cy = order[-1]
-            nbrs = [(cx + dx, cy + dy) for dx, dy in NEIGHBORS
-                    if 0 <= cx + dx < ROOMS_X and 0 <= cy + dy < ROOMS_Y
-                    and (cx + dx, cy + dy) not in seen]
-            if not nbrs:
-                break
-            nxt = rng.choice(nbrs)
-            order.append(nxt)
-            seen.add(nxt)
-        if len(order) == len(all_rooms):
-            return order
-    return all_rooms
-
-
-
-def _off_corridor_cells(room):
-    """방 안에서 통로가 지나지 않는 칸.
-
-    통로는 방 중심끼리 곧게 잇는다. 그래서 방의 가운데 가로줄/세로줄이
-    그대로 통로다. 포탈처럼 지나갈 수 없는 것을 그 줄에 놓으면 마개가 되어
-    방 뒤쪽이 통째로 막힌다(아래 계단이 실제로 그랬다).
-    아이템이나 몬스터는 주우거나 부딪혀 지나갈 수 있으니 상관없다.
-    """
-    cx, cy = room_center(*room)
-    return [c for c in room_cells(*room) if c[0] != cx and c[1] != cy]
-
 
 
 def _passable(grid, cell):
@@ -241,7 +362,6 @@ def _cuts_path(grid, start, goal, cell):
     return goal not in seen
 
 
-
 def _inside(cell):
     return 0 <= cell[0] < GRID_W and 0 <= cell[1] < GRID_H
 
@@ -257,39 +377,58 @@ def _touches_floor(grid, cell, allow):
     return False
 
 
+def _portal_cells(grid, room, used):
+    """포탈(계단)을 놓아도 되는 칸.
+
+    포탈은 <b>지나갈 수 없다.</b> 그 칸을 막아도 바닥이 둘로 갈리지 않아야 하고, 통로
+    입구 둘레(한 칸)는 비운다 — 입구를 막으면 방 뒤가 통째로 막힌다(예전 아래 계단).
+    """
+    near = _near_mouths()
+    floor = [(x, y) for y in range(GRID_H) for x in range(GRID_W) if grid[y][x] != VOID]
+    out = []
+    for c in _ROOMS[room].cells:
+        if c in used or c in near:
+            continue
+        rest = [f for f in floor if f != c]
+        if _connected(rest):
+            out.append(c)
+    return out
+
+
 def _carve_alcove(grid, rooms, rng, avoid=()):
     """방 가장자리에서 밖으로 두 칸을 파 <b>막다른 골방</b>을 만든다.
 
     avoid 의 방에는 파지 않는다. 후보 목록에서 빼지 않고 <b>건너뛰기만</b> 한다 —
-    목록 길이가 같아야 섞는 데 쓰는 씨앗 수가 같고, 그래야 다른 층이 안 바뀐다.
+    목록 길이가 같아야 섞는 데 쓰는 씨앗 수가 같다.
 
     왜 필요한가
     -----------
-    "지키는 몬스터 뒤에 덤을 둔다" 를 배치만으로 해 봤다가 실패했다. 우리 방은
-    7x5 열린 홀이라 어떤 칸도 보물로 가는 길을 끊지 못한다 — 항상 돌아서 접근할
-    수 있어서, 파수꾼을 아무리 잘 놓아도 "잡아야 얻는다" 가 성립하지 않았다
-    (150개 층 중 10% 만 실제로 지켜졌다).
+    "지키는 몬스터 뒤에 덤을 둔다" 를 배치만으로 해 봤다가 실패했다. 열린 방에서는
+    어떤 칸도 보물로 가는 길을 끊지 못한다 — 항상 돌아서 접근할 수 있어서, 파수꾼을
+    아무리 잘 놓아도 "잡아야 얻는다" 가 성립하지 않았다(150개 층 중 10% 만 지켜졌다).
+    골방은 그 판단을 <b>구조로</b> 만든다. 입구가 한 칸뿐이라 그 칸을 막으면 안쪽에
+    갈 수 없다. 그래서 입구에 선 몬스터는 진짜 파수꾼이 된다.
 
-    골방은 그 판단을 <b>구조로</b> 만든다. 입구가 한 칸뿐이라 그 칸을 막으면
-    안쪽에 갈 수 없다. 그래서 입구에 선 몬스터는 처음으로 진짜 파수꾼이 되고,
-    "이놈을 잡고 덤을 가질까, 그냥 지나갈까" 가 생긴다.
-
-    <b>세로로만 판다.</b> 방 크기가 층마다 달라 간격이 2~6칸으로 오락가락하는데,
-    가로로 파면 좁은 층에서 안쪽 칸이 옆방과 맞닿아 입구가 둘이 된다. 세로는
-    가장 큰 방(7x5)에서도 3칸이 남아 어느 층에서나 두 칸을 팔 수 있다.
+    방의 모서리 칸과 통로 입구 둘레에서는 파지 않는다. 골방 입구(금고 문 자리)의
+    양옆이 방이어야 문이 방 벽 줄에 붙는다(check_structure).
+    네 방향 어디로든 파되, 입구는 방과 안쪽에만, 안쪽은 입구에만 맞닿아야 한다 —
+    아니면 뒷문이 생긴다.
 
     (입구, 안쪽, 붙은 방 칸) 또는 (None, None, None).
     """
+    near = _near_mouths()
     cands = []
     for room in rooms:
-        ox, oy = room_origin(*room)
-        hw, hh = room_half(*room)
-        cx, _ = room_center(*room)
-        for x in range(ox, ox + 2 * hw + 1):
-            if x == cx:
-                continue                       # 통로가 지나는 줄은 피한다
-            cands.append(((x, oy), (0, -1), room))                 # 위로
-            cands.append(((x, oy + 2 * hh), (0, 1), room))         # 아래로
+        cells = set(_ROOMS[room].cells)
+        for bx, by in _ROOMS[room].cells:
+            if (bx, by) in near:
+                continue
+            for dx, dy in NEIGHBORS:
+                if (bx + dx, by + dy) in cells:
+                    continue                       # 밖으로만 판다
+                if (bx + dy, by + dx) not in cells or (bx - dy, by - dx) not in cells:
+                    continue                       # 모서리 칸
+                cands.append(((bx, by), (dx, dy), room))
     rng.shuffle(cands)
 
     for (bx, by), (dx, dy), room in cands:
@@ -302,7 +441,6 @@ def _carve_alcove(grid, rooms, rng, avoid=()):
             continue
         if grid[gate[1]][gate[0]] != VOID or grid[prize[1]][prize[0]] != VOID:
             continue
-        # 입구는 방과 안쪽에만, 안쪽은 입구에만 맞닿아야 한다. 아니면 뒷문이 생긴다.
         if _touches_floor(grid, gate, {(bx, by), prize}):
             continue
         if _touches_floor(grid, prize, {gate}):
@@ -324,6 +462,7 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     alcove  : 골방의 쓰임새 (종류, 색, 놓을 셀코드). None 이면 파수꾼 + 물약.
               "key"   파수꾼 뒤에 <b>여분 열쇠</b>를 둔다 — 잡아야 얻는다.
               "vault" 골방 입구가 <b>네 번째 문</b>이 되고 안에 보상이 있다.
+    layout_kind : 층 유형(FRAMES). 틀·방 수·방 크기가 갈린다.
     choice  : "둘 중 하나" 보상 (셀코드, 셀코드, 놓는 곳). 하나를 주우면 짝이 사라진다.
               "region" 마지막 구역의 곁길 칸 — 보물 층
               "stairs" 계단 방 — 보스를 잡아야 닿는다(40·60·80층, 예전 목걸이 자리)
@@ -333,12 +472,7 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     금고 문은 진행을 강제하지 않으므로 도달 가능성 검사에 넣지 않는다.
     """
     rng = random.Random(seed)
-
-    # 이 층의 방 크기. 중심은 고정이므로 통로는 그대로 곧게 남는다.
-    _SHAPE.clear()
-    for ry in range(ROOMS_Y):
-        for rx in range(ROOMS_X):
-            _SHAPE[(rx, ry)] = (rng.choice(HALF_W), rng.choice(HALF_H))
+    kind = layout_kind if layout_kind in FRAMES else 0
 
     if isinstance(mob_ids, int):
         mob_ids = [mob_ids] * mobs_in_floor
@@ -346,97 +480,110 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     while len(mob_ids) < mobs_in_floor:
         mob_ids.append(mob_ids[-1])
 
+    # 틀과 띠. 열·행 수와 띠 폭이 층마다 다르다.
+    cols, rows = rng.choice(FRAMES[kind])
+    xbands = _split(INNER_X[0], INNER_X[1], cols, rng)
+    ybands = _split(INNER_Y[0], INNER_Y[1], rows, rng)
+    order = _lattice_path(cols, rows, PATH_ROOMS[kind], rng)
+    if xbands is None or ybands is None or order is None:
+        return None, None, None
+
+    _ROOMS.clear()
+    _MOUTHS.clear()
+    wr, hr = (GAUNTLET_W_RANGE, GAUNTLET_H_RANGE) if kind == 2 else (ROOM_W_RANGE, ROOM_H_RANGE)
+
     grid = [[VOID] * GRID_W for _ in range(GRID_H)]
-    full_order = _room_order(rng)
-    # Compact floors use six rooms; exploration floors add three same-region branches.
-    order = full_order[:6] if layout_kind in (1, 3) else full_order
+
+    def make_room(key):
+        sx = _span(xbands[key[0]], INNER_X, wr, rng)
+        sy = _span(ybands[key[1]], INNER_Y, hr, rng)
+        if sx is None or sy is None:
+            return False
+        _ROOMS[key] = _Room((sx[0], sy[0], sx[1], sy[1]))
+        for x, y in _ROOMS[key].cells:
+            grid[y][x] = FLOOR
+        return True
+
+    def connect(a, b):
+        link = _link(_ROOMS[a], _ROOMS[b], rng)
+        if link is None:
+            return None
+        cells, ma, mb = link
+        if not _free_for(grid, cells, (ma, mb)):
+            return None
+        for x, y in cells:
+            grid[y][x] = FLOOR
+        _MOUTHS.update((ma, mb))
+        return cells
+
+    for key in order:
+        if not make_room(key):
+            return None, None, None
+
+    # 큰 줄기. necks[i] 는 i 번째 통로의 칸 전부 — 곁길이 없으니 전부 절단점이다.
+    # 마지막 통로(계단 방 입구)를 보스와 룬 자리로 쓴다.
+    necks = []
+    thresholds = []
+    for i in range(len(order) - 1):
+        cells = connect(order[i], order[i + 1])
+        if cells is None:
+            return None, None, None
+        necks.append(cells)
+        # 문은 통로의 두 끝(문턱) 가운데 하나에만. 한가운데 세우면 방에서 떨어진 통로에
+        # 문짝만 덩그러니 선다 — "문이 혼자 떨어져 있다".
+        thresholds.append(rng.choice((cells[0], cells[-1])))
+
     cuts = (2, 3, 4) if len(order) == 6 else (3, 5, 7)
     regions = [list(order[:cuts[0]]), list(order[cuts[0]:cuts[1]]),
                list(order[cuts[1]:cuts[2]]), list(order[cuts[2]:])]
-    if layout_kind == 2:  # Narrow gauntlet rooms, with enough corridor for boss and rune.
-        for room in order:
-            _SHAPE[room] = (2, 1)
-    _carve_rooms(grid, order)
-    centers = [room_center(*r) for r in order]
 
-    # 큰 줄기. 통로마다 방 밖 구간의 한가운데가 관문 자리다.
-    # necks[i] 는 그 통로에서 방 밖으로 난 구간 전체 — 곁길이 없다면 이 칸들은
-    # 전부 절단점이다. 마지막 통로(계단 방 입구)를 보스와 룬 자리로 쓴다.
-    gates = []
-    necks = []
-    for i in range(len(order) - 1):
-        cells = _corridor(grid, centers[i], centers[i + 1])
-        outside = [c for c in cells if _outside_room(c)]
-        necks.append(outside)
-        # 한가운데가 아니라 <b>아무 데나</b>. 한가운데로 고정하면 96개 층의 문이
-        # 통로마다 한 칸씩, 다 합쳐 12칸만 쓴다 — 그리고 몬스터의 62%가 그
-        # 12칸 위에 선다. 통로 안이면 어디든 좌우(또는 위아래)가 벽이라 문 규칙은
-        # 그대로 지켜진다.
-        gates.append(rng.choice(outside) if outside else None)
+    # 곁방(넉넉 층). 틀에 남은 칸을 큰길 방 하나에만 잇는다 — 막다른 방이라 문을
+    # 돌아가는 길이 생기지 않는다. 계단 방에는 잇지 않는다(보스 뒤가 된다).
+    want = BRANCH_ROOMS.get(kind, 0)
+    if want:
+        spare = [(x, y) for y in range(rows) for x in range(cols) if (x, y) not in _ROOMS]
+        rng.shuffle(spare)
+        attached = 0
+        for room in spare:
+            if attached == want:
+                break
+            parents = [(i, parent) for i, region in enumerate(regions) for parent in region
+                       if parent != order[-1] and
+                       abs(parent[0] - room[0]) + abs(parent[1] - room[1]) == 1]
+            if not parents:
+                continue
+            i, parent = rng.choice(parents)
+            if not make_room(room) or connect(parent, room) is None:
+                return None, None, None
+            regions[i].append(room)
+            attached += 1
+        if attached < want:
+            return None, None, None
 
-    # <b>곁길 통로는 내지 않는다.</b> 문법을 깨고 있었다.
-    #
-    # 곁길은 순서상 세 칸 이상 떨어진 방 쌍에만 팠는데, 구역이 3/2/2/2 로 끊겨
-    # 있어서 그 조건을 만족하는 쌍은 <b>반드시 구역 경계를 넘는다</b>. 그래서
-    # 곁길이 뚫릴 때마다 문을 우회하는 길이 같이 생겼다 — 재 보니 96개 층 중
-    # 67개가 문을 하나도 안 열고 뒤 구역 방에 닿았고, 48개 층은 열쇠를 둘 이상,
-    # 9개 층은 셋 다 가질 수 있었다. "각 방에 열쇠를 둬서 잡는 순서를 강제한다"
-    # 가 절반의 층에서 거짓이었던 것이다. 곁길을 0으로 두면 누수도 0이 된다.
-    #
-    # 지우고 잃는 것은 거의 없다. 곁길 몬스터는 191 -> 187 마리(층당 0.04마리)뿐
-    # 줄었다 — 곁길 몬스터 수를 정하는 것은 통로가 아니라 forced = min(MIN_TOLLS,
-    # mobs) = 3 이기 때문이다(다섯 중 셋이 관문, 둘은 곁길). 곁길 통로는 고를
-    # 것을 못 늘리면서 문법만 깨고 생성 재시도만 늘리고 있었다(시도 107 -> 96).
-    # 골방 파수꾼과 방 안의 남는 한 마리가 "피해 갈 수 있는 상대" 자리를 잇는다.
+    # 방 모양. 통로를 다 판 뒤라야 입구 둘레를 지킬 수 있다.
+    for key in sorted(_ROOMS):
+        _reshape(grid, _ROOMS[key], rng)
 
     # 막다른 골방. 입구 한 칸에 파수꾼을 세우고 안쪽에 덤을 둔다.
-    # 통로를 다 판 뒤라야 뒷문이 생기지 않는다.
     #
-    # 금고 층은 <b>마지막 구역에서만</b> 판다(order[7:]). 골방 입구가 네 번째
-    # 문이 되는데, 그 문이 앞 구역에 있으면 <b>이 층의 열쇠로 열린다</b> —
-    # 그러면 큰길 문을 열 열쇠가 사라져 층이 통째로 막힌다. 세 문을 다 연
-    # 뒤라야 손에 남은 것이 진짜 여분이고, 잘못 써서 갇히는 수가 없어진다.
-    # check_vault_safe 가 완성된 격자에서 그걸 다시 잰다.
-    if layout_kind == 3:
-        pending = set(full_order) - set(order)
-        while pending:
-            attached = False
-            for room in sorted(pending):
-                parents = [(i, parent) for i, region in enumerate(regions) for parent in region
-                           if parent != order[-1] and
-                           abs(parent[0] - room[0]) + abs(parent[1] - room[1]) == 1]
-                if not parents:
-                    continue
-                region, parent = rng.choice(parents)
-                _carve_rooms(grid, [room])
-                _corridor(grid, room_center(*room), room_center(*parent))
-                regions[region].append(room)
-                pending.remove(room)
-                attached = True
-                break
-            if not attached:
-                return None, None, None
-
+    # 금고 층은 <b>마지막 구역에서만</b> 판다. 골방 입구가 네 번째 문이 되는데,
+    # 그 문이 앞 구역에 있으면 <b>이 층의 열쇠로 열린다</b> — 그러면 큰길 문을 열
+    # 열쇠가 사라져 층이 통째로 막힌다. check_vault_safe 가 완성된 격자에서 다시 잰다.
     vault_color = alcove[1] if alcove and alcove[0] == "vault" else None
     # 보스층은 계단 방에 골방을 파지 않는다. 보스가 그 방 입구를 막고 서므로 파수꾼이
-    # 보스 <b>뒤</b>가 되는데, 완주 계산은 층의 몹 다섯을 보스 앞에서 잡는다 —
-    # 40층 파수꾼이 그랬다(check_behind_boss).
+    # 보스 <b>뒤</b>가 되는데, 완주 계산은 층의 몹 다섯을 보스 앞에서 잡는다(check_behind_boss).
     alcove_gate, alcove_prize, alcove_base = _carve_alcove(
         grid, regions[3] if vault_color is not None else [r for region in regions for r in region], rng,
         avoid=(order[-1],) if boss_id is not None else ())
-    if vault_color is not None and alcove_gate is None:
+    # 골방을 못 판 층은 버린다 — 금고 층만이 아니다. 여분 열쇠 층에서 못 파면 열쇠 없이 통과돼
+    # 완주 계산(extras_at)이 세는 여분 열쇠가 사라졌다(코드 리뷰가 찾았다, 출고 층에는 없었다).
+    if alcove_gate is None:
         return None, None, None
 
-    # 구역: 방 아홉 개를 3/2/2/2 로 끊고 경계에 문을 세운다.
-    doors = []
-    for c in cuts:
-        g = gates[c - 1]
-        if g is None:
-            return None, None, None
-        doors.append(g)
+    # 구역 경계에 문을 세운다 — 구역 k 의 마지막 방과 구역 k+1 의 첫 방을 잇는 통로의 문턱.
+    doors = [thresholds[c - 1] for c in cuts]
     if len(set(doors)) != 3:
         return None, None, None
-
 
     place = {}
     used = set()
@@ -452,27 +599,26 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     def free_in(rooms):
         pool = []
         for r in rooms:
-            pool += [c for c in room_cells(*r)
+            pool += [c for c in room_cells(r)
                      if c not in used and grid[c[1]][c[0]] == FLOOR]
         rng.shuffle(pool)
         return pool
 
-    spawn = room_center(*order[0])
+    spawn = room_center(order[0])
     place[spawn] = SPAWN
     used.add(spawn)
 
     if with_down_stairs:
-        # 통로가 지나는 중앙선은 피한다 — 포탈은 지나갈 수 없어서 마개가 된다.
-        pool = [c for c in _off_corridor_cells(order[0]) if c not in used]
+        pool = _portal_cells(grid, order[0], used)
         rng.shuffle(pool)
         if not pool:
             return None, None, None
         place[pool[0]] = STAIRS_DOWN
         used.add(pool[0])
 
-    # 위 계단도 같은 이유로 중앙선을 피한다. 보스층에서는 보스가 그 뒤에 서므로
+    # 위 계단도 같은 이유로 길을 끊지 않는 칸에. 보스층에서는 보스가 그 앞에 서므로
     # 계단이 마개가 되면 보스에게 갈 수가 없다.
-    up_pool = [c for c in _off_corridor_cells(order[-1]) if c not in used]
+    up_pool = _portal_cells(grid, order[-1], used)
     rng.shuffle(up_pool)
     if not up_pool:
         return None, None, None
@@ -488,9 +634,8 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     last_neck.sort(key=lambda c: abs(c[0] - up[0]) + abs(c[1] - up[1]))
 
     # 챕터 보스는 계단 방 입구에 세운다.
-    # 예전에는 "계단에서 가장 가까운 빈 칸" 이었는데, 방이 7x5 열린 홀이라 어떤
-    # 칸도 길을 끊지 못했다 — 재 보니 챕터 보스 다섯이 전부 그냥 지나칠 수 있는
-    # 상대였다(관문인 보스 0/5). 보스를 안 잡고 다음 챕터로 올라갈 수 있었다.
+    # 예전에는 "계단에서 가장 가까운 빈 칸" 이었는데, 열린 방에서는 어떤 칸도 길을
+    # 끊지 못했다 — 챕터 보스 다섯이 전부 그냥 지나칠 수 있는 상대였다(관문인 보스 0/5).
     before_boss = None
     if boss_id is not None:
         if not last_neck:
@@ -503,10 +648,8 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
             grid, spawn, {cell} | {c for c, v in place.items() if v in PORTAL_CELLS})
 
     # 룬도 같은 자리에. 룬은 얻을지 말지가 흔들리면 완주 보장을 계산할 수 없다
-    # (기획서 65·81쪽, CLAUDE.md "계단 앞 구역에 둔다").
-    # 예전에는 마지막 구역의 아무 빈 칸이었고, 재 보니 96개 층 중 94개에서 그냥
-    # 지나칠 수 있었다 — 그런데 완주 시뮬레이션은 룬을 늘 주운 것으로 셈하고
-    # 있었으니 "완주 보장" 이 그만큼 거짓이었다.
+    # (기획서 65·81쪽, CLAUDE.md "계단 앞 구역에 둔다"). 예전에는 마지막 구역의 아무
+    # 빈 칸이어서 96개 층 중 94개에서 그냥 지나칠 수 있었다.
     rune_cell = last_neck.pop(0) if last_neck else None
     if rune is not None and rune_cell is not None:
         place[rune_cell] = rune
@@ -526,32 +669,13 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
     #   곁길 : 골방 입구와 방 안에 선다. 지나가는 데는 필요 없다 —
     #          잡으면 골방의 덤을 갖고, 안 잡으면 경험치를 버린다.
     #
-    # 예전에는 다섯 마리를 전부 "통로 목" 에 세웠다. 그런데 재 보니 그중 78% 는
-    # 그냥 돌아갈 수 있었다 — 관문이라 부르면서 실은 관문이 아니었고, 어느 것이
-    # 강제인지는 아무도 몰랐다. 눈대중으로는 이 둘을 가를 수 없다.
-    # 그래서 자리마다 "막으면 계단까지 못 가는가" 를 직접 계산해서 가른다.
-    # 통로 둘이 한 칸을 공유하면 그 칸이 목록에 두 번 들어온다. 그대로 두면
-    # 몬스터 둘이 같은 칸에 놓이고 뒤엣것이 앞엣것을 덮어써서, 그 층은 몹이
-    # 넷뿐인 층이 된다 — "층의 몹을 다 잡으면 1레벨" 이 그만큼 어긋난다.
-    # 96개 층 중 20개가 그랬다.
-    def _unique(cells):
-        out = []
-        for c in cells:
-            if c not in out:
-                out.append(c)
-        return out
-
-    free_gates = _unique([g for neck in necks for g in neck
-                          if g and g not in used and g not in doors])
-
+    # 자리마다 "막으면 계단까지 못 가는가" 를 직접 계산해서 가른다. 눈대중으로 세운
+    # "통로 목" 의 78% 는 그냥 돌아갈 수 있었다.
+    free_gates = [g for neck in necks for g in neck if g not in used and g not in doors]
     toll_spots = [g for g in free_gates if _cuts_path(grid, spawn, up, g)]
 
-    # 관문 자리가 모자라면 층 전체에서 찾는다.
-    #
-    # 통로 목이라고 다 통행료는 아니다. 재 보니 31/200 개 층은 강제 전투가
-    # 하나도 없어서, 한 마리도 안 잡고 계단까지 갈 수 있었다. 그러면
-    # "층의 몹을 다 잡으면 1레벨" 이라는 성장 곡선이 무너지고, 봇은 전부 잡으니
-    # 검증에서도 안 걸린다 — 사람만 조용히 약해진 채 위층에서 죽는다.
+    # 관문 자리가 모자라면 층 전체에서 찾는다. 강제 전투가 하나도 없으면 "층의 몹을
+    # 다 잡으면 1레벨" 이라는 성장 곡선이 무너지고, 봇은 전부 잡으니 검증에서도 안 걸린다.
     if len(toll_spots) < MIN_TOLLS:
         for r in range(len(regions)):
             for cell in free_in(regions[r]):
@@ -563,13 +687,8 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
                     toll_spots.append(cell)
     open_spots = [g for g in free_gates if g not in toll_spots]
 
-    # 그래도 관문을 못 만들면 이 층은 버린다.
-    #
-    # 곁길 통로가 있던 시절에는 <b>어떤 칸을 막아도 우회로가 있는</b> 층이 있었다.
-    # 그런 층은 한 마리도 안 잡고 계단까지 갈 수 있어 통행료라는 구조 자체가 없다.
-    # 곁길을 없앤 지금은 96개 층이 전부 첫 시도에 통과해 이 가지가 돌지 않는다.
-    # 그래도 남겨 둔다 — 배치 규칙을 손대면 다시 걸릴 수 있고, 억지로 배치하느니
-    # 다른 씨앗으로 다시 뽑는 편이 낫다 (호출부가 50번까지 다시 시도한다).
+    # 그래도 관문을 못 만들면 이 층은 버린다 — 억지로 배치하느니 다른 씨앗으로
+    # 다시 뽑는 편이 낫다(호출부가 다시 시도한다).
     if len(toll_spots) < MIN_TOLLS:
         return None, None, None
 
@@ -588,14 +707,13 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
         idx += 1
 
     # 골방 파수꾼도 곁길이다 — 지나가는 데는 필요 없고, 덤을 가지려면 잡아야 한다.
-    # 층의 몹 수는 그대로 둔다 (다섯 마리를 다 잡아야 1레벨이라는 설계).
     if alcove_gate is not None and alcove_gate not in used:
         if vault_color is None:
             open_spots.insert(0, alcove_gate)
         else:
             used.add(alcove_gate)        # 여기엔 파수꾼이 아니라 문이 선다
 
-    # 곁길 — 피해 갈 수 있는 상대. 질러가려면 값을 치르고, 아니면 돌아간다.
+    # 곁길 — 피해 갈 수 있는 상대.
     while idx < mobs_in_floor and open_spots:
         cell = open_spots.pop(0)
         if cell in used:
@@ -619,10 +737,7 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
         for k, pot in enumerate(pots or []):
             pool = free_in(regions[r])
             # 보스층 구역3 의 물약은 [보스 앞, 보스 뒤] 순서다 — 큰 물약은 보스 직전에,
-            # 계단 앞 물약은 잡고 나서 마신다(simulate_run 이 그렇게 센다). 구역3 은 계단
-            # 방까지 품어서 아무 칸이나 고르면 큰 물약이 보스 뒤에 앉는다: 40·60·80·100층이
-            # 그랬고, 그 자리대로 셈하면 100층 보스에서 죽는다. 섞은 뒤에 가리기만 하므로
-            # 씨앗이 굴리는 수는 그대로다 — 벽은 한 칸도 안 바뀐다.
+            # 계단 앞 물약은 잡고 나서 마신다(simulate_run 이 그렇게 센다).
             if r == 3 and before_boss is not None:
                 pool = [c for c in pool if (c in before_boss) == (k == 0)]
                 if not pool:
@@ -633,17 +748,15 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
             used.add(pool[0])
 
     if rune is not None and rune_cell is None:
-        # 계단 방 입구를 못 잡은 층의 폴백. 마지막 구역 안에는 두되, 이 층의 룬은
-        # 강제가 아니다 — floor_choices 가 "지나칠 수 있는 아이템" 으로 센다.
+        # 계단 방 입구를 못 잡은 층의 폴백. 이 층의 룬은 강제가 아니다 —
+        # floor_choices 가 "지나칠 수 있는 아이템" 으로 센다.
         pool = free_in(regions[3])
         if pool:
             place[pool[0]] = rune
             used.add(pool[0])
 
     # 골방 안쪽의 덤. 완주 계산에는 넣지 않는다 — 안 잡고 지나갈 수 있으니
-    # 이걸 셈에 넣으면 보장이 거짓말이 된다. 계산은 그대로 두고 덤만 얹는다.
-    # 열쇠 경제도 전부 여기 얹힌다(여분 열쇠 / 금고 속 룬) — 그래서 완주
-    # 보장은 이 변경 전과 <b>한 칸도</b> 달라지지 않는다.
+    # 이걸 셈에 넣으면 보장이 거짓말이 된다. 열쇠 경제도 전부 여기 얹힌다.
     if alcove_prize is not None and alcove_prize not in used:
         place[alcove_prize] = alcove[2] if alcove else POTION_20
         used.add(alcove_prize)
@@ -681,14 +794,13 @@ def build_floor_layout(mob_ids, boss_id, wall_tiles, seed, mobs_in_floor=5,
         horizontal_corridor = (grid[y][x - 1] != VOID and grid[y][x + 1] != VOID)
         grid[y][x] = (DOOR_V if horizontal_corridor else DOOR_H)[i]
 
-    # 네 번째 문 — 금고. 골방은 세로로만 파므로 입구의 좌우가 곧 벽이 된다.
-    # 방향 판정은 큰길 문과 <b>같은 줄</b>을 쓴다. 규칙이 두 벌이 되면 어긋난다.
+    # 네 번째 문 — 금고. 방향 판정은 큰길 문과 <b>같은 줄</b>을 쓴다. 규칙이 두 벌이 되면 어긋난다.
     if vault_color is not None:
         x, y = alcove_gate
         horizontal_corridor = (grid[y][x - 1] != VOID and grid[y][x + 1] != VOID)
         grid[y][x] = (DOOR_V if horizontal_corridor else DOOR_H)[vault_color]
 
-    _add_walls(grid, wall_tiles, rng)
+    _fill_rock(grid, wall_tiles, rng)
     return grid, regions, doors
 
 
@@ -1090,6 +1202,98 @@ def floor_choices(grid, doors):
     return out
 
 
+# ---------------------------------------------------------------------------
+# 눈에 이상한 구조를 <b>센다</b>
+#
+# 문 규칙(check_doors)과 도달 가능성(validate_layout)은 다 통과하는데 화면이 이상한 층이
+# 있었다 — 방에서 떨어진 통로 한가운데 문짝만 서 있고, 96개 층이 한 틀이었다.
+# 오너가 직접 보고 찾은 것이다. 이제 생성기([4/7])와 validate_content 가 같이 잰다.
+
+
+def _open(grid, cell):
+    return _inside(cell) and _passable(grid, cell)
+
+
+def check_structure(grid):
+    """눈에 이상한 구조. (사유, x, y) 목록 — 빈 목록이면 정상.
+
+      * 문이 통로 한가운데 — 문을 지나가는 방향의 두 이웃 가운데 어느 쪽도 방 칸(양옆이
+        열린 칸)이 아니다. 문은 방 입구(문턱)에 서야 벽 줄에 붙어 보인다.
+      * 빈 막다른 칸 — 이웃이 하나뿐인데 아무것도 없다. 어디로도 안 가는 꼬리다.
+      * 닿지 않는 바닥 — 문을 다 열고 몬스터를 지나가도(포탈은 못 지나간다) 스폰에서 못 간다.
+    """
+    issues = []
+    spawn = None
+    for y in range(len(grid)):
+        for x in range(len(grid[y])):
+            cell = grid[y][x].strip()
+            if cell == SPAWN:
+                spawn = (x, y)
+            if cell in DOOR_CELLS:
+                if int(cell) >= 6:                  # 세로문: 좌우로 지나간다
+                    ends = [((x - 1, y), ((x - 1, y - 1), (x - 1, y + 1))),
+                            ((x + 1, y), ((x + 1, y - 1), (x + 1, y + 1)))]
+                else:
+                    ends = [((x, y - 1), ((x - 1, y - 1), (x + 1, y - 1))),
+                            ((x, y + 1), ((x - 1, y + 1), (x + 1, y + 1)))]
+                if not any(_open(grid, e) and all(_open(grid, c) for c in sides)
+                           for e, sides in ends):
+                    issues.append(("문이 통로 한가운데 서 있다 — 방 입구가 아니다", x, y))
+            elif cell == FLOOR:
+                if sum(_open(grid, (x + dx, y + dy)) for dx, dy in NEIGHBORS) == 1:
+                    issues.append(("아무것도 없는 막다른 칸", x, y))
+    if spawn is not None:
+        seen, stack = {spawn}, [spawn]
+        while stack:
+            c = stack.pop()
+            if grid[c[1]][c[0]].strip() in PORTAL_CELLS:
+                continue                            # 포탈은 밟을 수는 있어도 넘어갈 수 없다
+            for dx, dy in NEIGHBORS:
+                n = (c[0] + dx, c[1] + dy)
+                if n not in seen and _open(grid, n):
+                    seen.add(n)
+                    stack.append(n)
+        for y in range(len(grid)):
+            for x in range(len(grid[y])):
+                if _open(grid, (x, y)) and (x, y) not in seen:
+                    issues.append(("스폰에서 닿지 않는 바닥", x, y))
+    return issues
+
+
+def _floor_set(grid):
+    return frozenset((x, y) for y, row in enumerate(grid) for x, c in enumerate(row)
+                     if _open(grid, (x, y)))
+
+
+def floor_similarity(a, b):
+    """두 층의 바닥 칸 Jaccard. 좌우·상하 거울까지 맞춰 본 가장 큰 값.
+    격자가 정사각형이 아니라 돌려 보지는 않는다."""
+    fa, fb = _floor_set(a), _floor_set(b)
+    best = 0.0
+    for k in range(4):
+        t = frozenset(((GRID_W - 1 - x) if k & 1 else x, (GRID_H - 1 - y) if k & 2 else y)
+                      for x, y in fb)
+        best = max(best, len(fa & t) / max(1, len(fa | t)))
+    return best
+
+
+# 층끼리 이만큼 닮으면 같은 지도로 보인다. 옛 생성기는 평균 0.64, 최대 1.0(거울상)이었다.
+SAME_FLOOR_MAX = 0.6
+SAME_FLOOR_MEAN = 0.35
+
+
+def check_variety(grids):
+    """{이름: 격자} 가 서로 충분히 다른가. (평균, [(유사도, 이름, 이름)…] 높은 순)."""
+    names = sorted(grids)
+    pairs = []
+    for i, a in enumerate(names):
+        for b in names[i + 1:]:
+            pairs.append((floor_similarity(grids[a], grids[b]), a, b))
+    pairs.sort(reverse=True)
+    mean = sum(p[0] for p in pairs) / max(1, len(pairs))
+    return mean, pairs
+
+
 def check_all_floors(verbose=True):
     """StreamingAssets 의 던전 CSV 를 전부 훑어 문 규칙을 검사한다.
 
@@ -1113,6 +1317,7 @@ def check_all_floors(verbose=True):
 
     gen_doors = gen_bad = hand_doors = hand_bad = 0
     floors = 0
+    generated = {}
     for fn in sorted(os.listdir(excel)):
         if not fn.startswith("Dungeon_") or not fn.endswith(".csv"):
             continue
@@ -1131,46 +1336,66 @@ def check_all_floors(verbose=True):
         if bad and verbose:
             for cell, x, y, why in bad:
                 print("  [위반] %s 셀 %s (행%d, 열%d) — %s" % (did, cell, y, x, why))
+        odd = check_structure(grid)
+        gen_bad += len(odd)
+        if odd and verbose:
+            for why, x, y in odd[:5]:
+                print("  [구조] %s (행%d, 열%d) — %s" % (did, y, x, why))
+        generated[did] = grid
 
+    mean, pairs = check_variety(generated)
+    same = [p for p in pairs if p[0] > SAME_FLOOR_MAX]
+    gen_bad += len(same) + (1 if mean > SAME_FLOOR_MEAN else 0)
     if verbose:
         print("  생성 층 %d개 / 문 %d개 — 위반 %d건" % (floors, gen_doors, gen_bad))
+        if pairs:
+            print("  층끼리 닮음(바닥 Jaccard, 거울 포함) 평균 %.3f (문턱 %.2f) · 최대 %.3f %s-%s · %.2f 넘는 쌍 %d"
+                  % (mean, SAME_FLOOR_MEAN, pairs[0][0], pairs[0][1], pairs[0][2],
+                     SAME_FLOOR_MAX, len(same)))
         print("  (참고) 손수 만든 층 문 %d개 — 위반 %d건" % (hand_doors, hand_bad))
     return gen_bad
 
 
-def _shape_self_check(seeds=40):
-    """방 크기를 흔들어도 규칙이 지켜지는지 씨앗 몇 개로 <b>지금</b> 확인한다.
+def _shape_self_check(seeds=60):
+    """새 생성기가 규칙을 지키는지 씨앗 몇 개로 <b>지금</b> 확인한다.
 
     check_all_floors 는 디스크의 CSV 를 읽는다 — 생성기를 고쳐도 --write 를
-    돌리기 전에는 아무것도 안 보인다. 특히 _outside_room 이 방 크기를 고정값으로
-    재면 통로의 방 밖 구간이 잘못 잡혀 <b>문이 방 안에 앉는다.</b>
-    돌려주는 값은 씨앗들이 만든 서로 다른 방 모양 조합의 수다.
+    돌리기 전에는 아무것도 안 보인다. 층 유형 다섯(FRAMES)과 골방의 세 쓰임새,
+    보스 유무를 돌려 가며 뽑고, generate_content 가 재는 것을 똑같이 잰다.
+    돌려주는 값은 (서로 다른 방 배치 수, 닮음 평균, 닮음 최대).
     """
     art = door_prefab_facts()
-    shapes = set()
+    layouts, grids = set(), {}
     for seed in range(seeds):
-        # 씨앗을 셋으로 갈라 골방의 세 쓰임새를 다 돌린다. 금고 층은 골방을
-        # 마지막 구역에서만 파므로 <b>생성이 더 자주 실패한다</b> — 그 실패율을
-        # 여기서 먼저 보게 해 둔다(호출부는 씨앗을 50번까지 다시 뽑는다).
+        # 금고 층은 골방을 마지막 구역에서만 파므로 <b>생성이 더 자주 실패한다</b> —
+        # 그 실패율을 여기서 먼저 보게 해 둔다(호출부는 씨앗을 다시 뽑는다).
         alcove = [None, ("key", 2, KEY_ITEM[2]), ("vault", 1, RUNE_DEF)][seed % 3]
+        kind = seed % 5
+        boss = 9 if seed % 4 == 0 else None
+        pots = [[], [POTION_20], [POTION_30], [POTION_50, POTION_20] if boss else [POTION_30]]
         grid = None
-        for retry in range(50):
+        for retry in range(100):
             grid, regions, doors = build_floor_layout(
-                [1, 2, 3, 4, 5], 9, ["W_01", "W_02"], seed=seed * 100 + retry,
-                rune=RUNE_ATK, alcove=alcove)
-            if grid is not None:
+                [1, 2, 3, 4, 5], boss, ["W_01", "W_02"], seed=seed * 100 + retry,
+                rune=RUNE_ATK, alcove=alcove, layout_kind=kind, potions=pots)
+            # generate_content 처럼 앞서 뽑은 층을 닮으면 다시 뽑는다.
+            if grid is not None and not any(floor_similarity(grid, g) > SAME_FLOOR_MAX
+                                            for g in grids.values()):
                 break
-        assert grid is not None, f"씨앗 {seed} 층 생성 실패"
+            grid = None
+        assert grid is not None, f"씨앗 {seed} 층 생성 실패 (유형 {kind})"
         ok, why = validate_layout(grid, regions, doors)
         assert ok, f"씨앗 {seed} {why}"
         bad = check_doors(grid, art)
         assert not bad, f"씨앗 {seed} 문 위반 {bad}"
+        odd = check_structure(grid)
+        assert not odd, f"씨앗 {seed} 구조 {odd[:3]}"
         assert not check_sealed_by_portal(grid), f"씨앗 {seed} 포탈이 막았다"
         unsafe = check_vault_safe(grid, doors)
         assert not unsafe, f"씨앗 {seed} 금고가 앞 구역에 있다 {unsafe}"
-        # 기본 물약표에서 구역3 의 첫 물약은 POTION_30 — 보스 앞이어야 한다.
-        behind = check_behind_boss(grid, (POTION_30,))
-        assert not behind, f"씨앗 {seed} 보스 뒤 {behind}"
+        if boss:
+            behind = check_behind_boss(grid, (POTION_50,))
+            assert not behind, f"씨앗 {seed} 보스 뒤 {behind}"
         keys, main, vault, guarded = key_economy(grid, doors)
         assert main == [1, 1, 1], f"씨앗 {seed} 큰길 문 {main}"
         if alcove is None:
@@ -1180,18 +1405,26 @@ def _shape_self_check(seeds=40):
             assert guarded == 1, f"씨앗 {seed} 여분 열쇠가 파수꾼 뒤가 아니다"
         else:
             assert vault == [0, 1, 0], f"씨앗 {seed} 금고 문이 없다 {vault}"
-            c = floor_choices(grid, doors)
+        c = floor_choices(grid, doors)
+        if alcove and alcove[0] == "vault":
             assert c["vault_items"] == 1 and c["runes"] == 1, f"씨앗 {seed} {c}"
-        shapes.add(tuple(sorted(_SHAPE.items())))
-    assert len(shapes) > seeds // 2, f"방 모양이 {len(shapes)}가지뿐이다"
-    return len(shapes)
+        assert c["forced_mobs"] >= MIN_TOLLS, f"씨앗 {seed} 관문 {c['forced_mobs']}"
+        assert c["forced_runes"] == c["runes"], f"씨앗 {seed} 룬을 지나칠 수 있다"
+        if boss:
+            assert c["boss_forced"], f"씨앗 {seed} 보스를 지나칠 수 있다"
+        layouts.add(tuple(sorted((k, r.rect) for k, r in _ROOMS.items())))
+        grids[seed] = grid
+    assert len(layouts) == seeds, f"방 배치가 {len(layouts)}가지뿐이다"
+    mean, pairs = check_variety(grids)
+    assert pairs[0][0] <= SAME_FLOOR_MAX, f"너무 닮은 층 {pairs[:3]}"
+    return len(layouts), mean, pairs[0][0]
 
 
 if __name__ == "__main__":
     # 번역표 자기검사. 이게 깨지면 화면의 문이 90° 돌아간다.
     assert [door_art(c) for c in "345678"] == \
         ["Tilemap_3", "Tilemap_5", "Tilemap_7", "Tilemap_4", "Tilemap_6", "Tilemap_8"]
-    print("===== 문 배치 검사 =====")
-    print("  갓 뽑은 층 40개 — 방 모양 %d가지, 문 위반 0건"
+    print("===== 문 배치·구조 검사 =====")
+    print("  갓 뽑은 층 60개 — 방 배치 %d가지, 닮음 평균 %.3f · 최대 %.3f, 문·구조 위반 0건"
           % _shape_self_check())
     sys.exit(1 if check_all_floors() else 0)
