@@ -402,6 +402,14 @@ python Tools/layout_gen.py    # 100층 CSV 를 전부 훑는다. 위반 0 이어
 `generate_content.py` 의 `[4/5]` 단계도 같은 검사를 돌린다. 여기서 걸리면 씨앗을
 다시 뽑아도 소용없다 — 규칙이 아니라 번역표가 어긋난 것이다.
 
+**문과 열쇠에는 색마다 모양 표지가 붙는다**(`KeyMark` — 초록 ●, 노랑 ▲, 빨강 ◆). 다섯 챕터가 같은 판자문이라 색으로만 갈렸는데,
+색약이면 초록·빨강 문이 같고, 아니어도 용광로의 주황 조명 아래에서는 노랑 문이 빨강처럼 보였다(2026-11-10). 표지는 조명을 받지
+않는 기본 스프라이트 재질로 코드가 점을 찍어 그린다. 문짝(`Door` 오브젝트)·열쇠 아이템 아래에 달아 문이 열리거나 열쇠를 주우면
+같이 꺼지고, HUD 열쇠 칸 모서리에도 같은 것이 있다.
+**코드로 세운 스프라이트는 바닥 위에서 번진다** — 카메라 후처리에 가우스 피사계 심도가 있고, 기본 스프라이트 재질도 바닥(BG)도 깊이를
+안 써서 "아주 먼 것" 으로 잡힌다. 그래서 표지 밑에 같은 그림을 아이템 재질(`Item_Shadow_000`, 알파 컷·깊이 기록, 그림자 끔)로 한 장 더 깐다.
+맵에 새 스프라이트를 세울 때도 같다.
+
 ### 챕터 테마 (기획서 12·118~123쪽)
 
 "현재 시스템을 유지 ▶ 환경을 변화". 20층마다 시간대(해의 각도·세기·색)와 안개가 바뀐다
@@ -429,6 +437,8 @@ Unity.exe -projectPath . -executeMethod MapDecoSetup.Build
 
 **레이아웃을 다시 뽑으면 장식도 다시 굽는다**(`MapDecoSetup.Build`, 한 층만이면 `BuildOne` 을 리플렉션으로).
 `validate_content` 가 장식이 옛 격자로 구워진 층을 경고한다.
+바닥에 세우는 것(화로·바닥 소품)은 **방 칸에만** 놓는다 — 2x2 로 트인 덩어리에 드는 칸이어야 하고(폭 한 칸 통로·꺾인 모퉁이·기둥 옆 틈은 아니다),
+문·계단 바로 옆은 뺀다(`IsRoomEdge`). 콜라이더는 없지만 통로에 서면 길을 막은 것처럼 보였다(11-10). `validate_content` 가 같은 규칙을 잰다.
 
 높이도 같이 맞는다. 벽은 y 0.2~0.5 를 차지하고, 이 팩의 장식은 y 2.0 부터
 그려져 있어서 0.1 을 곱하면 벽면 아래쪽에 정확히 걸린다. 0.3 으로 두면 벽 위로 뜬다.
@@ -721,9 +731,9 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
 (`Items/CItem13`, `SpawnKingSlime`, `YellowSlimePos` …), 레이아웃을 새로 생성하면
 인트로가 NullReference 로 통째로 깨진다. 생성기는 5층부터만 만든다.
 
-목록이 세 곳에 있고 **전부 같아야 한다**:
-`Tools/generate_content.py` 의 `HANDMADE_FLOORS`, `MapBuilder.IsHandAuthored`,
-`Tools/validate_content.py` 의 `HAND_AUTHORED`.
+목록이 다섯 곳에 있고 **전부 같아야 한다**:
+`Tools/generate_content.py`·`mapdata_gen.py` 의 `HANDMADE_FLOORS`, `MapBuilder.IsHandAuthored`,
+`Tools/validate_content.py`·`layout_gen.py` 의 `HAND_AUTHORED` — `rules_check` 가 대조한다. C# 의 다른 곳(장식 굽기 등)은 `MapBuilder.IsHandAuthored` 를 부른다.
 
 5층의 목표 레벨은 고정값이 아니라 1~4층을 원본 데이터로 실제 전투 시뮬레이션해서 얻는다
 (`simulate_handmade`). 현재 4층 종료 시 Lv16(다음 레벨까지 138/244) → 5층 목표 Lv16 → 100층 Lv112.
@@ -837,7 +847,13 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
 python Tools/cscheck.py          # Assets/@Scripts 의 C# 을 디스크 그대로 빌드 (런타임 + 에디터)
 python Tools/cscheck.py --warn   # 우리 스크립트의 경고까지
 python Tools/cscheck.py --define=DEMO --tag demo   # 체험판 정의로도(#if DEMO 코드는 평소 검사에 안 잡힌다)
+python Tools/rules_check.py      # 이 문서의 규칙 가운데 코드에서 셀 수 있는 것 — 위반 0 이어야 한다
 ```
+
+`rules_check` 는 키를 `GameKeys` 로 읽는지(치트 키는 `#if UNITY_EDITOR || DEVELOPMENT_BUILD` 안), 런타임 코드의 `UnityEditor` 가드,
+`Managers.Resource` 에 글자 그대로 준 키와 `ShowPopupUI<T>` 의 창이 PreLoad 어드레서블에 있는지, 데이터에서 온 키로 만든 것을 null 확인 없이
+쓰는지, 정적 값을 필드마다 `SubsystemRegistration` 에서 비우는지(남아도 되는 것은 `STATIC_KEEP` 에 까닭과 함께), 손수 만든 층 목록
+다섯 곳이 같은지를 본다. 글자로 재는 검사라 흐름은 못 본다 — 예외는 그 파일에 까닭과 함께 적는다.
 
 Unity 는 에디터가 새로고침할 때만 csproj 를 다시 쓰므로, 밖에서 추가한 스크립트는 `dotnet build` 에
 빠진다. `cscheck` 는 csproj 를 복사해 디스크의 파일 목록으로 바꾸고, 패키지는 `Library/ScriptAssemblies`

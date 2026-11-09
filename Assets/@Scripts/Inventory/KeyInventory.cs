@@ -152,6 +152,7 @@ public class KeyInventory
         int slots = Mathf.Min(NUM_OF_KEYS, keyInventory.transform.childCount);
         for (int i = 0; i < slots && i < _keys.Count; i++)
         {
+            KeyMark.Badge(keyInventory.transform.GetChild(i), i);   // 문 위의 것과 같은 모양 — 색 없이도 짝짓는다
             TMP_Text text = keyInventory.transform.GetChild(i).GetComponentInChildren<TMP_Text>();
             if (text != null)
                 text.text = _keys[i].ToString();

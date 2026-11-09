@@ -55,12 +55,6 @@ public static class MapDecoSetup
     static readonly Vector3 FloorGlow = new Vector3(0f, 0.15f, 0f);
     static readonly Color EmberLight = new Color(1.00f, 0.60f, 0.30f);   // 마지막 불씨(Light2)
 
-    // 손수 만든 도입부는 이미 미술이 들어가 있다. 건드리지 않는다.
-    static readonly HashSet<string> HandAuthored = new HashSet<string>
-    {
-        "00_000", "00_001", "00_002", "00_003",
-    };
-
     /// <summary>챕터마다 다른 것을 건다. 스무 층이 지나면 눈에 띄게 달라야 한다.</summary>
     struct ChapterDeco
     {
@@ -116,7 +110,7 @@ public static class MapDecoSetup
         foreach (string csv in Directory.GetFiles(StreamDir, "Dungeon_*.csv"))
         {
             string dungeonId = Path.GetFileNameWithoutExtension(csv).Substring("Dungeon_".Length);
-            if (HandAuthored.Contains(dungeonId))
+            if (MapBuilder.IsHandAuthored(dungeonId))   // 손수 만든 도입부는 이미 미술이 들어가 있다
                 continue;
 
             int chapter;
@@ -172,6 +166,31 @@ public static class MapDecoSetup
         return y >= 0 && y < grid.Length && x >= 0 && x < grid[y].Length && grid[y][x].Trim() == "1";
     }
 
+    /// <summary>바닥에 세우는 것(화로·바닥 소품)을 놓아도 되는 방 칸인가 — 폭 한 칸 길(통로·꺾인 모퉁이·기둥 옆 틈)도,
+    /// 문·계단 바로 옆도 아니다. 콜라이더는 없지만 통로 한가운데나 문 앞에 서면 길을 막은 것처럼 보였다
+    /// (2026-11-10, 43층 초록 문 바로 북쪽 통로 칸의 화로). 11-09 의 새 지도는 방 사이가 전부 이런 통로다.
+    /// 처음엔 "마주 보는 두 쪽이 벽" 으로 쟀는데 꺾인 모퉁이 칸이 빠졌다(47층 화로) — 2x2 로 트인 덩어리에 드는 칸만 방이다.</summary>
+    static bool IsRoomEdge(string[][] grid, int x, int y)
+    {
+        bool inRoom = false;
+        for (int dx = -1; dx <= 0 && inRoom == false; dx++)
+            for (int dy = -1; dy <= 0 && inRoom == false; dy++)
+                inRoom = IsOpen(grid, x + dx, y + dy) && IsOpen(grid, x + dx + 1, y + dy)
+                      && IsOpen(grid, x + dx, y + dy + 1) && IsOpen(grid, x + dx + 1, y + dy + 1);
+        return inRoom
+            && IsGate(grid, x - 1, y) == false && IsGate(grid, x + 1, y) == false
+            && IsGate(grid, x, y - 1) == false && IsGate(grid, x, y + 1) == false;
+    }
+
+    /// <summary>문(3~8)·계단(14~16) 칸.</summary>
+    static bool IsGate(string[][] grid, int x, int y)
+    {
+        if (y < 0 || y >= grid.Length || x < 0 || x >= grid[y].Length)
+            return false;
+        int code;
+        return int.TryParse(grid[y][x].Trim(), out code) && ((code >= 3 && code <= 8) || (code >= 14 && code <= 16));
+    }
+
     static GameObject BuildOne(string dungeonId, int chapter, string[][] grid)
     {
         ChapterDeco deco = Chapters[Mathf.Clamp(chapter, 0, Chapters.Length - 1)];
@@ -203,7 +222,7 @@ public static class MapDecoSetup
                 Vector3 pos = new Vector3(x * TileSize, 0f, -y * TileSize);
                 if (wall && touchesFloor)
                     walls.Add(pos);          // 뒤쪽 벽에 걸면 보이지도 않는다
-                else if (open && touchesWall)
+                else if (open && touchesWall && IsRoomEdge(grid, x, y))
                     edges.Add(pos);
 
                 if (wall && IsPlain(grid, x, y + 1))
@@ -212,7 +231,7 @@ public static class MapDecoSetup
                     if (IsWall(grid, x, y - 1) && IsWall(grid, x - 1, y) && IsWall(grid, x + 1, y))
                         backs.Add(pos);
                 }
-                else if (open && touchesWall && IsPlain(grid, x, y))
+                else if (open && touchesWall && IsPlain(grid, x, y) && IsRoomEdge(grid, x, y))
                 {
                     floors.Add(pos);
                 }

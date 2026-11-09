@@ -32,6 +32,8 @@ public class ObjectManager
         if (battle != null)
         {
             GameObject go = Managers.Resource.Instantiate(prefabName, battle.transform);
+            if (go == null)     // 숫자가 없어도 전투 한 걸음은 끝까지 가야 한다
+                return;
             DamageFont damageText = go.GetOrAddComponent<DamageFont>();
             damageText.SetInfo(pos, damage, healAmount, parent, isCritical, isDefence);
         }

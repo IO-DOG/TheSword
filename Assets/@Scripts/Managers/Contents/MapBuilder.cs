@@ -643,7 +643,7 @@ public static class MapBuilder
     /// 60도면 2.00 인데 <b>이 게임의 카메라는 50도</b>라 1.56 이다 — 2.0 을 박아 두었더니
     /// 물약이 29% 길쭉했다 (화면에서 잰 세로/가로 1.17~1.29, 제 비율이면 1.00).
     /// </summary>
-    static float BillboardStretch()
+    internal static float BillboardStretch()
     {
         Camera cam = Managers.Game != null ? Managers.Game.MainCamera : null;
         if (cam == null)

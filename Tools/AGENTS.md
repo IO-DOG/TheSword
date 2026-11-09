@@ -13,6 +13,7 @@ cd Tools
 python generate_content.py            # dry-run: 밸런스 + 도달 가능성만 검사
 python generate_content.py --write    # 실제 데이터/레이아웃 출력
 python validate_content.py            # 산출물 검증
+python rules_check.py                 # CLAUDE.md 규칙 가운데 코드에서 셀 수 있는 것 (위반 0)
 python route_check.py                 # 정답 경로 유일성 + 허용 실수 횟수
 python tune_difficulty.py --strict    # 난이도 손잡이 자동 조정
 ```
@@ -27,6 +28,7 @@ python tune_difficulty.py --strict    # 난이도 손잡이 자동 조정
 | `route_check.py` | 정답 경로가 하나뿐인지, 물약 실수를 몇 번까지 봐주는지 측정 |
 | `tune_difficulty.py` | 층당 몹 손실(`MOB_HP_LOSS`) 하나만 움직여 난이도를 맞춘다 |
 | `validate_content.py` | 계단 쌍·문/열쇠 수·ID 유효성·프리팹 존재 검사 (`Editor/ContentValidator.cs`의 파이썬 판) |
+| `rules_check.py` | 키는 `GameKeys` 로·런타임의 `UnityEditor` 가드·리소스 키가 PreLoad 에 있는가·데이터 키로 만든 것의 null 확인·정적 값 비우기·손수 만든 층 목록 다섯 곳 |
 
 ## 산출물 (덮어쓰는 파일)
 | 경로 | 내용 |
@@ -40,10 +42,10 @@ python tune_difficulty.py --strict    # 난이도 손잡이 자동 조정
 ### Working In This Directory
 - **밸런스를 건드릴 때는 특성을 켠 채로 역산한다.** 암살은 치명타가 아닌 공격을 전부 회피하고
   불사는 80%를 흘린다 — 특성을 끄고 뽑은 수치는 실제와 몇 배씩 어긋난다
-- 특성 배분은 `generate_content.py`의 `CHAPTER_TRAITS` **한 곳에서만** 정한다
+- 특성 배분은 `generate_content.py`의 `BAND_TRAITS` **한 곳에서만** 정한다(다섯 층마다 한 줄 — 예전 `CHAPTER_TRAITS` 는 없어졌다)
 - **1~4층은 생성하지 않는다.** 손수 만든 도입부라 `DirectingManager`가 오브젝트를 이름으로 직접 찾는다.
-  목록이 세 곳에 있고 전부 같아야 한다: `generate_content.py`의 `HANDMADE_FLOORS`,
-  `MapBuilder.IsHandAuthored`, `validate_content.py`의 `HAND_AUTHORED`
+  목록이 여러 곳에 있고 전부 같아야 한다: `generate_content.py`·`mapdata_gen.py`의 `HANDMADE_FLOORS`,
+  `MapBuilder.IsHandAuthored`, `validate_content.py`·`layout_gen.py`의 `HAND_AUTHORED` — `rules_check.py` 가 대조한다
 - 5층 목표 레벨은 고정값이 아니라 1~4층을 원본 데이터로 시뮬레이션해 얻는다(`simulate_handmade`)
 - C# 전투 코드를 고치면 `thesword_balance.py`도 같이 고쳐야 한다 — 두 곳이 어긋나면 검증이 거짓말을 한다
 

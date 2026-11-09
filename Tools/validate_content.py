@@ -183,13 +183,15 @@ def address_guid(address):
     return m.group(1) if m else None
 
 
-def check_deco(did, grid, godray):
+def check_deco(did, grid, godray, point_light):
     """장식 프리팹이 <b>지금</b> 격자로 구워졌는가. MapDecoSetup.Build 는 에디터에서만 돈다.
 
     생성기가 격자를 다시 뽑아도 장식은 옛 격자대로 남는다 — 40층 빛기둥(위층 계단 표시)이
     옛 계단 자리에 서 있었다. BuildOne 이 고르는 자리와 대조한다: 빛기둥은 위층 계단(14)
     위, 나머지(불·소품·광원)는 길에 면한 벽이나 벽에 붙은 바닥. 그림만 틀리고 길은 안
     막으므로(콜라이더 없음) 경고다.
+    바닥에 선 것(화로·바닥 소품)은 방 칸에만 — 폭 한 칸 길(통로·꺾인 모퉁이·기둥 옆 틈)과 문·계단 바로 옆은 아니다
+    (MapDecoSetup.IsRoomEdge). 점광원은 벽 횃불 앞 칸으로 비켜 서므로 이 규칙에서 뺀다.
     """
     path = os.path.join(DECO_DIR, f"Deco_{did}.prefab")
     if not os.path.exists(path):
@@ -205,7 +207,17 @@ def check_deco(did, grid, godray):
         x, y = c
         return any(kind(n) == k for n in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)))
 
-    rays, astray = set(), 0
+    def gate(c):                    # 문 3~8 · 계단 14~16
+        v = cells.get(c, "")
+        return v.isdigit() and (3 <= int(v) <= 8 or 14 <= int(v) <= 16)
+
+    def room_edge(c):               # MapDecoSetup.IsRoomEdge — 2x2 로 트인 덩어리에 드는 칸, 문·계단 옆 아님
+        x, y = c
+        in_room = any(all(kind((x + dx + i, y + dy + j)) == "open" for i in (0, 1) for j in (0, 1))
+                      for dx in (-1, 0) for dy in (-1, 0))
+        return in_room and not any(gate(n) for n in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)))
+
+    rays, astray, in_way = set(), 0, 0
     with open(path, encoding="utf-8") as f:
         blocks = f.read().split("--- !u!")
     for b in blocks:
@@ -218,10 +230,12 @@ def check_deco(did, grid, godray):
             rays.add(c)
         elif not (kind(c) == "wall" and touches(c, "open") or kind(c) == "open" and touches(c, "wall")):
             astray += 1
+        elif kind(c) == "open" and src != point_light and not room_edge(c):
+            in_way += 1
     stairs = {c for c, v in cells.items() if v == STAIRS_UP}
-    if rays != stairs or astray:
+    if rays != stairs or astray or in_way:
         warnings.append(f"{did}: 장식이 옛 격자로 구워졌다 (빛기둥 {sorted(rays)}, 위층 계단 {sorted(stairs)}, "
-                        f"자리 밖 장식 {astray}개) — 에디터를 닫고 MapDecoSetup.Build")
+                        f"자리 밖 장식 {astray}개, 통로·문 앞에 선 장식 {in_way}개) — 에디터를 닫고 MapDecoSetup.Build")
 
 
 def check_traits(classes, monsters):
@@ -442,6 +456,7 @@ def main():
     scripts = {s["id"]: s for s in load("ScriptData", "scripts")}
     prefabs = prefab_names()
     godray = address_guid("Deco_GodRay")
+    point_light = address_guid("Deco_PointLight")
     if godray is None:
         warnings.append("어드레서블 주소 'Deco_GodRay' 가 없다 — 장식을 다시 구워도 계단 빛기둥이 빠진다")
     tower = dict(doors=[0] * NUM_OF_KEYS, keys=[0] * NUM_OF_KEYS,
@@ -489,7 +504,7 @@ def main():
 
         with open(os.path.join(G.STREAM, f"Dungeon_{did}.csv"), encoding="utf-8-sig") as f:
             grid = [[c.strip() for c in line.split(",")] for line in f.read().splitlines()]
-        check_deco(did, grid, godray)
+        check_deco(did, grid, godray, point_light)
         layouts[did] = grid
         # 눈에 이상한 구조 — 통로 한가운데 선 문, 아무것도 없는 막다른 칸, 닿지 않는 바닥.
         for why, x, y in check_structure(grid):

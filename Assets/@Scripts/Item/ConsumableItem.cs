@@ -31,6 +31,10 @@ public class ConsumableItem : MonoBehaviour
         }
         int art = ArtId(id);
         GetComponent<Animator>().Play($"ConsumableItem_{art}");
+        // 문과 같은 표지를 열쇠 왼쪽 위(그림의 빈 귀퉁이)에. 발치에 두면 방 남쪽 끝의 열쇠는 앞(남쪽) 바위에 가려 안 보였다 —
+        // 바위 윗면이 0.5 라 이 칸 앞쪽(z -0.05)에서는 0.31 위라야 카메라에 보인다.
+        if (id < NUM_OF_KEYS)
+            KeyMark.Stand(transform, id, transform.position + new Vector3(-0.1f, 0.34f, -0.05f));
         GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>(Managers.Data.ConsumableItemDic[id].Shadow);
         // 크기 룬은 기본 룬 그림을 빌려 써서 맵에서 계단 룬(+1)과 똑같아 보였다 — 금고를 열어야
         // 할지 겉보기로 알 수 없다. 제 능력치 색으로 더 진하게 칠한다(몬스터처럼 "진하면 세다").

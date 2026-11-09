@@ -28,6 +28,7 @@ public class Door : MonoBehaviour
         _camera = Camera.main.GetComponentInChildren<CameraController>();
         _rotateAngle = new Vector3(0f, transform.rotation.eulerAngles.y + 90f, 0f);
         _doorLockPos = transform.parent.GetChild(1);
+        _mark = KeyMark.OnDoor(this);   // 문이 열리면(이 오브젝트가 꺼지면) 같이 사라진다
 
         //#region Fade Setting
         //GetComponent<MeshRenderer>().material.SetFloat("_Mode", 2);
@@ -44,11 +45,15 @@ public class Door : MonoBehaviour
     #region Open Door Effect
     Vector3 _rotateAngle;
     Transform _doorLockPos;
+    GameObject _mark;
 
     Coroutine _openDoorCoroutine;
     public void CoOpenDoor(float time)
     {
         gameObject.GetComponent<Collider>().enabled = false;
+        if (_mark != null)
+            _mark.SetActive(false);     // 열쇠를 쓴 순간 걷는다 — 문짝이 돌며 사라지는 동안 남아 있지 않게
+
         Managers.Sound.Play(Define.Sound.Effect, "DoorUnlock_SFX");
         _openDoorCoroutine = StartCoroutine(OpenDoor(time));
         GameEvents.RaiseDoorOpened(_keyIndex);
@@ -77,11 +82,31 @@ public class Door : MonoBehaviour
         _doorLockOpenAnimCoroutine = StartCoroutine(DoorLockOpenAnim());
     }
 
-    IEnumerator DoorLockOpenAnim()
+    // 자물쇠 그림이 없어도 문은 열리고 잠금은 풀려야 한다 — 여기서 예외가 나면 OnInteract 가 영영 남아 플레이어가 멈춘다.
+    const float LockOpenTime = 0.68f;   // DoorLockOpen.anim 길이
+    const float LockShakeTime = 0.42f;  // DoorLockIsLocked.anim 길이
+
+    GameObject SpawnLock(string state, out float time)
     {
         GameObject go = Managers.Resource.Instantiate("DoorLock", _doorLockPos);
-        go.transform.localScale = new Vector3(go.transform.localScale.x, go.transform.localScale.y * _camera._scaleMultiplier, go.transform.localScale.z * _camera._scaleMultiplier);
-        float time = go.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length;
+        time = state == null ? LockOpenTime : LockShakeTime;
+        if (go == null)
+            return null;
+        Animator animator = go.GetComponent<Animator>();
+        if (animator != null)
+        {
+            if (state != null)
+                animator.Play(state);
+            time = animator.GetCurrentAnimatorStateInfo(0).length;
+        }
+        if (_camera != null)
+            go.transform.localScale = new Vector3(go.transform.localScale.x, go.transform.localScale.y * _camera._scaleMultiplier, go.transform.localScale.z * _camera._scaleMultiplier);
+        return go;
+    }
+
+    IEnumerator DoorLockOpenAnim()
+    {
+        GameObject go = SpawnLock(null, out float time);
         yield return new WaitForSeconds(time);
         Managers.Resource.Destroy(go);
         Managers.Game.OnInteract = false;
@@ -101,13 +126,8 @@ public class Door : MonoBehaviour
     {
         Managers.Sound.Play(Define.Sound.Effect, "DoorLock_SFX");
 
-        GameObject go = Managers.Resource.Instantiate("DoorLock", _doorLockPos);
-        go.GetComponent<Animator>().Play("DoorLockIsLocked");
-        go.transform.localScale = new Vector3(go.transform.localScale.x, go.transform.localScale.y * _camera._scaleMultiplier, go.transform.localScale.z * _camera._scaleMultiplier);
-
+        GameObject go = SpawnLock("DoorLockIsLocked", out float time);
         GameObject cross = Managers.Resource.Instantiate("FX_Cross", _doorLockPos);
-
-        float time = go.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length;
         yield return new WaitForSeconds(time);
         Managers.Resource.Destroy(go);
         Managers.Resource.Destroy(cross);
