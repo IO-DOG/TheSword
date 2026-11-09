@@ -277,7 +277,13 @@ public class UI_InvenPopup : UI_Popup
         {
             System.Collections.Generic.List<int> owned = OwnedOf(_listType);
             if (owned.Count > 1)
-                OnClickEquipList((owned.IndexOf(EquippedId(_listType)) + 1) % owned.Count + 1);   // 목록 칸은 1 부터
+                OnClickEquipList((owned.IndexOf(EquippedId(_listType)) + 1) % owned.Count + 1, true);   // 목록 칸은 1 부터
+        }
+        else if (_picked >= 0 && (GameKeys.Down(KeyCode.Return) || GameKeys.Down(KeyCode.KeypadEnter)))
+        {
+            int at = OwnedOf(_listType).IndexOf(_picked);
+            if (at >= 0)
+                OnClickEquipList(at + 1, true);
         }
     }
 
@@ -342,6 +348,7 @@ public class UI_InvenPopup : UI_Popup
 
     void Refresh()
     {
+        _picked = -1;
         GetImage((int)Images.Inventory_accessory_necklace_Get).gameObject.SetActive(false);
         GetImage((int)Images.Inventory_accessory_necklace_On).gameObject.SetActive(false);
         GetImage((int)Images.Inventory_accessory_ring_Get).gameObject.SetActive(false);
@@ -728,7 +735,10 @@ public class UI_InvenPopup : UI_Popup
         return inv[i];
     }
 
-    void OnClickEquipList(int idx)
+    // 한 번 누른 목록 칸의 장비 — 아직 안 꼈다. 칸을 바꾸거나 다시 그리면(Refresh) 잊는다.
+    int _picked = -1;
+
+    void OnClickEquipList(int idx, bool equipNow = false)
     {
         // 가방을 연 채 걷다 부딪히면 전투창 밑에서도 목록이 눌린다(배경은 화면 사진이라 클릭을 막지 않는다). 싸우는 중에 검을
         // 바꾸면 공격력만 바뀌고 공격 주기는 그대로라 어느 예측과도 안 맞는다 — 이길 싸움에서 죽었다.
@@ -755,6 +765,15 @@ public class UI_InvenPopup : UI_Popup
         int equipId = owned[slot];
         onMark[slot].gameObject.SetActive(true);
         PrintEquipAbilityAndDesc(equipId);
+
+        // 한 번 누르면 보여 주기만 한다 — 설명을 읽으려고 누른 것까지 바로 끼워서, 모르는 새 검을 든 채 예측이 바뀌었다
+        // (출시 보고서 6절 B1). 같은 칸을 한 번 더 누르거나 Enter 로 낀다. 1(패드 X, 다음 장비)은 끼우는 키라 바로 낀다.
+        if (equipNow == false && equipId != _picked && equipId != EquippedId(_listType))
+        {
+            _picked = equipId;
+            return;
+        }
+        _picked = -1;
 
         // 스탯 더하고 빼기와 슬롯 기록을 한 곳에서 한다. 예전에는 여기서 따로
         // 계산하고 CurSword 를 직접 대입해서, 부위마다 규칙이 갈라져 있었다.

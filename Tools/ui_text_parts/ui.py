@@ -60,6 +60,9 @@ TEXT = {
     # UI_MenuPopup first row when opened from the title: it only closes the menu ("Continue" read as "load save")
     203: ("돌아가기", "Back", "戻る", "返回"),
     # UI_InvenPopup key legend under the frame (pad twin 675 in pad.py)
-    204: ("3 칸 바꾸기   1 다음 장비   I / Esc 닫기", "3 Next slot   1 Next item   I / Esc Close",
-          "3 欄を切替   1 次の装備   I / Esc 閉じる", "3 切换栏位   1 下一件装备   I / Esc 关闭"),
+    # 목록은 한 번 누르면 설명만, 두 번(또는 Enter) 눌러야 낀다 — 1 은 바로 낀다(UI_InvenPopup.OnClickEquipList)
+    204: ("3 칸 바꾸기   1 다음 장비   두 번 클릭 끼우기   I / Esc 닫기",
+          "3 Next slot   1 Next item   Double-click Equip   I / Esc Close",
+          "3 欄を切替   1 次の装備   ダブルクリック 装備   I / Esc 閉じる",
+          "3 切换栏位   1 下一件装备   双击 装备   I / Esc 关闭"),
 }
