@@ -83,7 +83,7 @@ public class UI_EndingScene : UI_Scene
 
     // 판 카드 문구 (Tools/ui_text_parts/ledger.py)
     const int CardTitle = 500;      // 마검의 장부
-    const int CardExtra = 501;      // 제단 {0}  넘친 회복 {1}
+    const int CardExtra = 501;      // 치름 중 제단 {0}  넘친 회복 {1}
     const int CardScore = 502;      // 점수 {0}
     const int CardLower = 503;      // 낮을수록 좋다
     const int CardChapter = 504;    // {0}장

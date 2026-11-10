@@ -172,9 +172,8 @@ public class WarpUI : MonoBehaviour
         Image box = CodeUI.NewImage(_panel.transform, "Frame", frame, frame != null ? Color.white : new Color(0.07f, 0.08f, 0.12f, 0.97f), true);
         box.raycastTarget = true;
         CodeUI.Place(box.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, size);
-        // 좁은 화면(4:3)에서는 창째로 줄인다. 캔버스 높이는 늘 1080 이다.
-        float width = 1080f * Screen.width / Mathf.Max(1, Screen.height);
-        box.rectTransform.localScale = Vector3.one * Mathf.Min(1f, (width - 40f) / size.x, 1040f / size.y);
+        // 좁은 화면(4:3)에서는 창째로 줄이고, 작은 화면(Deck)에서는 남는 자리만큼 키운다. 캔버스 높이는 늘 1080 이다.
+        box.rectTransform.localScale = Vector3.one * CodeUI.PanelScale(size);
 
         TextMeshProUGUI title = CodeUI.NewText(box.transform, "Title", CodeUI.ProseFont, 40f, Gold, TextAlignmentOptions.Center);
         CodeUI.Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -18f), new Vector2(grid.x, 50f));

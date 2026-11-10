@@ -176,6 +176,18 @@ public static class CodeUI
         return text;
     }
 
+    /// <summary>
+    /// 높이를 1080 에 맞춘 캔버스에 세운 창의 배율. 화면을 넘으면 창째로 줄이고, 작은 화면(Steam Deck 800p·720p)에서는
+    /// 남는 자리만큼 키운다 — 거기서는 캔버스가 0.74 배라 24pt 글자가 9px 남짓이었고 창 둘레는 비어 있었다.
+    /// 1080p 부터는 키우지 않는다(도트가 정수 배로 남는다). 키워도 화면의 글자는 1080p 때의 크기를 넘지 않는다.
+    /// </summary>
+    public static float PanelScale(Vector2 size)
+    {
+        float canvasWidth = 1080f * Screen.width / Mathf.Max(1, Screen.height);
+        float fit = Mathf.Min((canvasWidth - 40f) / size.x, 1040f / size.y);
+        return Mathf.Min(fit, Mathf.Max(1f, 1080f / Mathf.Max(1, Screen.height)));
+    }
+
     /// <summary>그림 한 장. sliced 면 9분할 테두리를 2배 픽셀로 그린다 — HUD 가 같은 그림을 2배로 쓴다.</summary>
     public static Image NewImage(Transform parent, string name, Sprite sprite, Color color, bool sliced = false)
     {

@@ -22,11 +22,14 @@ public class UI_MonsterManualPopup : UI_Popup
     const float RowHeight = 96f;
     const float RowGap = 8f;
     const float MinDetailHeight = 150f;  // 설명 세 줄. 더 긴 설명이 있는 층은 _detailHeight 가 늘린다
-    const float FooterHeight = 36f;
+    const float FooterHeight = 40f;
     const float ScreenHeight = 1080f;   // 캔버스는 높이를 1080 에 맞춘다(Init)
     // 가장 작은 글자. Steam Deck(1280x800)에서 캔버스가 0.74 배라 Silver 22 의 라틴 대문자가 8.6px 로 "9px 아래 글자 없음" 에
     // 걸렸다(범례·조작·"다음에 싸우면"·설명). 24 면 9.4px. 자동 축소도 여기서 멈춘다 — 14 까지 줄이면 5px 였다.
     const float Small = 24f;
+    // 자리가 되면 이 크기로 쓴다(넘치면 Small 까지만 줄인다). 창도 작은 화면에서는 남는 자리만큼 커져서(CodeUI.PanelScale)
+    // Deck 에서 이 글자들이 권장 크기(12px) 가까이 온다.
+    const float Read = 28f;
     const int AttackSearch = 30;        // 임계를 찾는 끝. 한 층에 오르는 공격력(레벨 2~5, 룬 1)의 몇 배다
 
     static readonly Color Gold = new Color32(240, 210, 138, 255);
@@ -168,7 +171,9 @@ public class UI_MonsterManualPopup : UI_Popup
         dim.gameObject.BindEvent(Close);     // 창 밖을 누르면 닫는다
 
         int n = _entries.Count;
-        _detailHeight = DetailHeightFor(_entries);
+        // 설명은 Read 로 다 들어가는 높이를 주되, 줄(96)을 누르지 않는 만큼만. 모자라면 글자가 Small 까지 줄어 들어간다.
+        float spare = ScreenHeight - 40f - (Pad * 2f + HeaderHeight + FooterHeight + 28f) - (n * RowHeight + (n - 1) * RowGap);
+        _detailHeight = Mathf.Max(DetailHeightFor(_entries, Small), Mathf.Min(DetailHeightFor(_entries, Read), spare));
         float fixedPart = Pad * 2f + HeaderHeight + FooterHeight + (n > 0 ? _detailHeight + 28f : 0f);
         // 줄이 많아 화면을 넘으면 줄을 낮춘다. 지금 데이터의 한 층은 많아야 다섯 종이다.
         float rowHeight = n > 0 ? Mathf.Min(RowHeight, (ScreenHeight - 40f - fixedPart - (n - 1) * RowGap) / n) : 0f;
@@ -178,9 +183,8 @@ public class UI_MonsterManualPopup : UI_Popup
         Image panel = CodeUI.NewImage(transform, "Panel", Frame(), Frame() != null ? Color.white : new Color(0.07f, 0.08f, 0.12f, 0.97f), true);
         panel.raycastTarget = true;          // 창 안을 눌러도 닫히지 않게 가린다
         CodeUI.Place(panel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(PanelWidth, height));
-        // 좁은 화면(4:3)에서는 창째로 줄인다. 캔버스 높이는 늘 1080 이다.
-        float canvasWidth = ScreenHeight * Screen.width / Mathf.Max(1, Screen.height);
-        panel.rectTransform.localScale = Vector3.one * Mathf.Min(1f, (canvasWidth - 40f) / PanelWidth);
+        // 좁은 화면(4:3)에서는 창째로 줄이고, 작은 화면(Deck)에서는 남는 자리만큼 키운다. 캔버스 높이는 늘 1080 이다.
+        panel.rectTransform.localScale = Vector3.one * CodeUI.PanelScale(new Vector2(PanelWidth, height));
         Transform root = panel.transform;
 
         float y = -Pad;
@@ -204,7 +208,7 @@ public class UI_MonsterManualPopup : UI_Popup
             y -= _detailHeight + 12f;
         }
 
-        TextMeshProUGUI footer = CodeUI.NewText(root, "Controls", _prose, Small, Soft, TextAlignmentOptions.Center);
+        TextMeshProUGUI footer = CodeUI.NewText(root, "Controls", _prose, Read, Soft, TextAlignmentOptions.Center);
         CodeUI.Place(footer.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, Pad - 6f), new Vector2(PanelWidth - Pad * 2f, FooterHeight));
         PromptText.Set(CodeUI.Fit(footer, Small), ForecastUI.Controls);
     }
@@ -220,8 +224,8 @@ public class UI_MonsterManualPopup : UI_Popup
         CodeUI.Place(title.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(Pad + 100f, top), new Vector2(520f, 52f));
         CodeUI.Fit(title, 24f).text = Managers.GetString(ForecastUI.ManualTitle);
 
-        TextMeshProUGUI legend = CodeUI.NewText(root, "Legend", _prose, Small, Soft);
-        CodeUI.Place(legend.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(Pad + 100f, top - 56f), new Vector2(800f, 30f));
+        TextMeshProUGUI legend = CodeUI.NewText(root, "Legend", _prose, Read, Soft);
+        CodeUI.Place(legend.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(Pad + 100f, top - 54f), new Vector2(800f, 36f));
         CodeUI.Fit(legend, Small).text = Managers.GetString(ForecastUI.ManualLegend);
 
         GameManager g = Managers.Game;
@@ -270,7 +274,7 @@ public class UI_MonsterManualPopup : UI_Popup
         Animate(look, e.Data.IdleAnimStr);
         FitDrawn(look.rectTransform, look.sprite, new Vector2(92f, 0f), 80f);
 
-        string count = e.Alive > 1 ? $" <size=70%><color=#9AA4B8>{string.Format(Managers.GetString(ForecastUI.Count), e.Alive)}</color></size>" : "";
+        string count = e.Alive > 1 ? $" <size=80%><color=#9AA4B8>{string.Format(Managers.GetString(ForecastUI.Count), e.Alive)}</color></size>" : "";
         TextMeshProUGUI name = CodeUI.NewText(row, "Name", _prose, 30f, Ink);
         CodeUI.Place(name.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(144f, 18f), new Vector2(306f, 38f));
         CodeUI.Fit(name, 16f).text = Managers.GetString(e.Data.MonsterNameId) + count;
@@ -280,8 +284,8 @@ public class UI_MonsterManualPopup : UI_Popup
         Image traitIcon = CodeUI.NewImage(row, "TraitIcon", trait != null ? Managers.Resource.Load<Sprite>(trait.AbilityImage) : null, Color.white);
         traitIcon.enabled = traitIcon.sprite != null;
         CodeUI.Place(traitIcon.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(144f, -20f), new Vector2(34f, 34f));
-        TextMeshProUGUI traitName = CodeUI.NewText(row, "Trait", _prose, 24f, TraitGold);
-        CodeUI.Place(traitName.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(186f, -20f), new Vector2(264f, 32f));
+        TextMeshProUGUI traitName = CodeUI.NewText(row, "Trait", _prose, Read, TraitGold);
+        CodeUI.Place(traitName.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(186f, -20f), new Vector2(264f, 36f));
         CodeUI.Fit(traitName, 14f).text = trait != null ? Managers.GetString(trait.ClassName) : "";
 
         // 능력치: HUD 와 같은 칸에 같은 값 (공격·방어는 층 배수를 곱한 것 — UI_MonsterInfo 와 같다).
@@ -290,14 +294,14 @@ public class UI_MonsterManualPopup : UI_Popup
         StatBox(row, "MainUI_Status_DEF", 606f, stage.DEF * e.Data.Defence);
         StatBox(row, "MainUI_Status_HP", 750f, e.Data.MaxHP);
 
-        TextMeshProUGUI exp = CodeUI.NewText(row, "Exp", _prose, 24f, Soft);
-        CodeUI.Place(exp.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(462f, -22f), new Vector2(424f, 32f));
+        TextMeshProUGUI exp = CodeUI.NewText(row, "Exp", _prose, Read, Soft);
+        CodeUI.Place(exp.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(462f, -22f), new Vector2(424f, 36f));
         CodeUI.Fit(exp, 14f).text = string.Format(Managers.GetString(ForecastUI.Exp), e.Now.Exp)
             + (e.Now.LevelUp ? "  " + ForecastUI.LevelUpMark : "");
 
         // 다음에 싸우면: 잃을 체력(색은 지금 체력에 대한 몫)과 맞는 횟수.
-        TextMeshProUGUI next = CodeUI.NewText(row, "NextLabel", _prose, Small, Soft);
-        CodeUI.Place(next.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(904f, 24f), new Vector2(220f, 28f));
+        TextMeshProUGUI next = CodeUI.NewText(row, "NextLabel", _prose, Read, Soft);
+        CodeUI.Place(next.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(904f, 26f), new Vector2(220f, 34f));
         CodeUI.Fit(next, Small).text = Managers.GetString(ForecastUI.NextFight);
 
         TextMeshProUGUI cost = CodeUI.NewText(row, "Cost", _number, 40f, ForecastUI.Tone(e.Now, Managers.Game.PlayerData.CurHP));
@@ -306,7 +310,7 @@ public class UI_MonsterManualPopup : UI_Popup
         CodeUI.Fit(cost, 18f).text = CostText(e.Now);
 
         // 임계: 공격을 몇 올리면 한 대 덜 맞는가, 방어 +1 은 얼마인가.
-        TextMeshProUGUI step = CodeUI.NewText(row, "Breakpoint", _prose, 24f, Ink);
+        TextMeshProUGUI step = CodeUI.NewText(row, "Breakpoint", _prose, Read, Ink);
         CodeUI.Place(step.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(1136f, 0f), new Vector2(width - 1190f, height - 16f));
         step.alignment = TextAlignmentOptions.Left;
         string attack = AttackHint(e), defence = DefenceHint(e);
@@ -329,13 +333,14 @@ public class UI_MonsterManualPopup : UI_Popup
     float _detailHeight = MinDetailHeight;
 
     /// <summary>
-    /// 설명 칸 높이 = 이 층에서 가장 긴 설명(특성·몬스터)이 Small 로 다 들어가는 높이. 글자는 줄이지 않는다 — 줄이던 때는
-    /// 도입부 몬스터·킹 슬라임의 네댓 줄 설명(영어는 일곱 줄)이 14pt 까지 줄어 Steam Deck 에서 5px 였다.
+    /// 설명 칸 높이 = 이 층에서 가장 긴 설명(특성·몬스터)이 그 글자 크기로 다 들어가는 높이. Small 아래로는 줄이지 않는다 — 줄이던
+    /// 때는 도입부 몬스터·킹 슬라임의 네댓 줄 설명(영어는 일곱 줄)이 14pt 까지 줄어 Steam Deck 에서 5px 였다.
+    /// 칸은 줄을 옮겨도 그대로다(고른 설명에 맞춰 줄였다 늘였다 하면 창이 출렁인다) — 짧은 설명 아래는 비어 있다.
     /// </summary>
-    float DetailHeightFor(List<Entry> entries)
+    float DetailHeightFor(List<Entry> entries, float size)
     {
         float half = (PanelWidth - Pad * 2f) / 2f;
-        TextMeshProUGUI measure = CodeUI.NewText(transform, "Measure", _prose, Small, Soft);
+        TextMeshProUGUI measure = CodeUI.NewText(transform, "Measure", _prose, size, Soft);
         measure.textWrappingMode = TextWrappingModes.Normal;
         float need = 0f;
         foreach (Entry e in entries)
@@ -371,7 +376,7 @@ public class UI_MonsterManualPopup : UI_Popup
 
     TextMeshProUGUI Paragraph(Transform parent, string name, Vector2 pos, float width)
     {
-        TextMeshProUGUI text = CodeUI.NewText(parent, name, _prose, Small, Soft);
+        TextMeshProUGUI text = CodeUI.NewText(parent, name, _prose, Read, Soft);
         CodeUI.Place(text.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), pos, new Vector2(width, _detailHeight - 66f));
         text.textWrappingMode = TextWrappingModes.Normal;
         text.alignment = TextAlignmentOptions.TopLeft;

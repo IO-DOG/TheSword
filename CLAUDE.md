@@ -799,6 +799,9 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
 - 자식 위젯은 클래스 내 `enum`(Buttons, Texts, GameObjects…)으로 선언하고 `Init()`에서 `BindButton(typeof(Buttons))` 등으로 바인딩 — **enum 이름이 하이어라키의 자식 GameObject 이름과 정확히 일치해야 한다**
 - 접근은 `GetButton((int)Buttons.Xxx)`, 이벤트는 `BindEvent(go, action, type)`
 - 텍스트는 TextMeshPro (`TMP_Text`)
+- **코드로 세운 창의 배율은 `CodeUI.PanelScale(size)` 로 준다**(도감·워프). 화면을 넘으면 창째로 줄이고, 작은 화면(Steam Deck 800p·720p)에서는
+  남는 자리만큼 키운다 — 캔버스가 0.74 배라 24pt 글자가 9px 남짓인데 창 둘레는 비어 있었다(11-11). 1080p 부터는 키우지 않는다(도트가 정수 배로 남는다).
+  작은 글자는 넉넉한 크기(도감 `Read` 28)로 쓰고 `CodeUI.Fit(text, 최소)` 로 넘칠 때만 줄인다 — 최소는 Deck 9px 선(24) 아래로 두지 않는다.
 - **ESC 는 한 곳에서만 받는다.** `UI_GameScene`(타이틀은 `UI_TitleScene`)이 맨 위 팝업의
   `UI_Popup.OnEscape()` 를 묻고, 팝업이 처리했으면(스스로의 닫기 경로로) 끝이다. 예전에는 ESC 가
   맨 위 팝업을 **그냥 뽑아** 버려서, 잠금을 쥔 팝업(안내·보스방·대화·계약·게임오버)이 잠금을 풀지

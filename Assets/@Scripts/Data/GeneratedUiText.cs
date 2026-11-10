@@ -41,7 +41,7 @@ public static class GeneratedUiText
             case 261: return new[] { "Number = HP lost if you fight it next (no skills)   X = you lose   ★ = level up", "숫자 = 다음에 싸우면 잃는 체력 (스킬 제외)   X = 진다   ★ = 레벨 업", "Number = HP lost if you fight it next (no skills)   X = you lose   ★ = level up", "数字 = 次に戦うと失う体力 (スキル抜き)   X = 負ける   ★ = レベルアップ", "数字 = 下一战损失的生命 (不计技能)   X = 会输   ★ = 升级" }[language >= 0 && language <= 4 ? language : 0];
             case 262: return new[] { "x{0}", "{0}마리", "x{0}", "{0}体", "{0}只" }[language >= 0 && language <= 4 ? language : 0];
             case 263: return new[] { "If fought next", "다음에 싸우면", "If fought next", "次に戦うと", "下一战" }[language >= 0 && language <= 4 ? language : 0];
-            case 264: return new[] { "{0} hits taken", "{0}대 맞음", "{0} hits taken", "被弾 {0}回", "挨打 {0}次" }[language >= 0 && language <= 4 ? language : 0];
+            case 264: return new[] { "hits taken: {0}", "{0}대 맞음", "hits taken: {0}", "被弾 {0}回", "挨打 {0}次" }[language >= 0 && language <= 4 ? language : 0];
             case 265: return new[] { "ATK +{0} → one hit fewer", "공격 +{0} → 한 대 덜 맞음", "ATK +{0} → one hit fewer", "攻撃 +{0} → 被弾 1回減", "攻击 +{0} → 少挨一次" }[language >= 0 && language <= 4 ? language : 0];
             case 266: return new[] { "ATK +{0} → -{1}", "공격 +{0} → -{1}", "ATK +{0} → -{1}", "攻撃 +{0} → -{1}", "攻击 +{0} → -{1}" }[language >= 0 && language <= 4 ? language : 0];
             case 267: return new[] { "ATK +{0} → you win", "공격 +{0} → 이긴다", "ATK +{0} → you win", "攻撃 +{0} → 勝てる", "攻击 +{0} → 能赢" }[language >= 0 && language <= 4 ? language : 0];
@@ -210,7 +210,7 @@ public static class GeneratedUiText
             case 491: return new[] { "At the Throne: Lv {0}", "왕좌에서 Lv {0}", "At the Throne: Lv {0}", "玉座で Lv {0}", "抵达王座时 Lv {0}" }[language >= 0 && language <= 4 ? language : 0];
             case 492: return new[] { "Tower's Law", "탑의 법", "Tower's Law", "塔の掟", "塔之法则" }[language >= 0 && language <= 4 ? language : 0];
             case 500: return new[] { "The Sword's Ledger", "마검의 장부", "The Sword's Ledger", "魔剣の帳簿", "魔剑的账簿" }[language >= 0 && language <= 4 ? language : 0];
-            case 501: return new[] { "Altar {0}  Healing spilled {1}", "제단 {0}  넘친 회복 {1}", "Altar {0}  Healing spilled {1}", "祭壇 {0}  溢れた回復 {1}", "祭坛 {0}  溢出治疗 {1}" }[language >= 0 && language <= 4 ? language : 0];
+            case 501: return new[] { "Altar {0} of Paid  Healing spilled {1}", "치름 중 제단 {0}  넘친 회복 {1}", "Altar {0} of Paid  Healing spilled {1}", "支払いのうち祭壇 {0}  溢れた回復 {1}", "付出中祭坛 {0}  溢出治疗 {1}" }[language >= 0 && language <= 4 ? language : 0];
             case 502: return new[] { "Score {0}", "점수 {0}", "Score {0}", "スコア {0}", "分数 {0}" }[language >= 0 && language <= 4 ? language : 0];
             case 503: return new[] { "lower is better", "낮을수록 좋다", "lower is better", "低いほど良い", "越低越好" }[language >= 0 && language <= 4 ? language : 0];
             case 504: return new[] { "Ch. {0}", "{0}장", "Ch. {0}", "第{0}章", "第{0}章" }[language >= 0 && language <= 4 ? language : 0];

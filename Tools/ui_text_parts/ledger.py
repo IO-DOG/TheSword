@@ -44,7 +44,9 @@ TEXT = {
     # UI_EndingScene run card
     500: ("마검의 장부", "The Sword's Ledger", "魔剣の帳簿", "魔剑的账簿"),
     # {0} HP offered at altars (inside Paid) / {1} healing spilled over max HP (not in the score)
-    501: ("제단 {0}  넘친 회복 {1}", "Altar {0}  Healing spilled {1}", "祭壇 {0}  溢れた回復 {1}", "祭坛 {0}  溢出治疗 {1}"),
+    # "치름" 은 점수와 같은 셈이라 제단 몫이 들어 있다 — 따로 낸 값처럼 읽히지 않게 그 안의 몫이라고 적는다.
+    501: ("치름 중 제단 {0}  넘친 회복 {1}", "Altar {0} of Paid  Healing spilled {1}",
+          "支払いのうち祭壇 {0}  溢れた回復 {1}", "付出中祭坛 {0}  溢出治疗 {1}"),
     # {0} = round(1000 * paid / par)
     502: ("점수 {0}", "Score {0}", "スコア {0}", "分数 {0}"),
     503: ("낮을수록 좋다", "lower is better", "低いほど良い", "越低越好"),
