@@ -23,6 +23,11 @@ public class PortalController : MonoBehaviour
     public Type _portalType = Type.None;
     public int _mapId;
 
+    void Start()
+    {
+        KeyMark.OnStairs(this);
+    }
+
     public void UsePortal()
     {
         StartCoroutine(CoUsePortal());

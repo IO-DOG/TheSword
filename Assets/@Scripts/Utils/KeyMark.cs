@@ -9,9 +9,12 @@ using UnityEngine.UI;
 /// 용광로의 주황 조명 아래에서는 노랑 문이 빨강 문처럼, 열쇠는 다 갈색으로 보였다(2026-11-10 43층 화면).
 /// 그래서 조명을 받지 않는 기본 스프라이트 재질로 그리고, 그림은 생성 모델 없이 여기서 점을 찍는다
 /// (11x11, 한 점 = 아트 한 픽셀 — 픽셀 퍼펙트 카메라에서 다른 그림과 같은 굵기다).
+/// 계단 화살표(⇧ 위층, ⇩ 아래층)도 같은 도구로 그린다 — 위·아래 계단이 같은 초록 고리라 갈리지 않았다(2026-11-10).
 /// </summary>
 public static class KeyMark
 {
+    public const int StairsUp = 3, StairsDown = 4;
+
     // X 테두리, O 채움. 첫 줄이 맨 위다.
     static readonly string[][] Shapes =
     {
@@ -21,9 +24,19 @@ public static class KeyMark
                 "..XOOOOOX..", ".XOOOOOOOX.", ".XOOOOOOOX.", "XOOOOOOOOOX", "XXXXXXXXXXX" },
         new[] { ".....X.....", "....XOX....", "...XOOOX...", "..XOOOOOX..", ".XOOOOOOOX.", "XOOOOOOOOOX",
                 ".XOOOOOOOX.", "..XOOOOOX..", "...XOOOX...", "....XOX....", ".....X....." },
+        // 계단은 자루가 있다 — 노랑 열쇠의 ▲ 와 헷갈리지 않게.
+        new[] { ".....X.....", "....XOX....", "...XOOOX...", "..XOOOOOX..", ".XOOOOOOOX.", "XOOOOOOOOOX", "XXXXOOOXXXX",
+                "...XOOOX...", "...XOOOX...", "...XOOOX...", "...XOOOX...", "...XOOOX...", "...XXXXX..." },
+        new[] { "...XXXXX...", "...XOOOX...", "...XOOOX...", "...XOOOX...", "...XOOOX...", "...XOOOX...", "XXXXOOOXXXX",
+                "XOOOOOOOOOX", ".XOOOOOOOX.", "..XOOOOOX..", "...XOOOX...", "....XOX....", ".....X....." },
     };
-    static readonly Color32[] Fill = { new Color32(96, 224, 104, 255), new Color32(248, 208, 72, 255), new Color32(240, 88, 88, 255) };
+    static readonly Color32[] Fill =
+    {
+        new Color32(96, 224, 104, 255), new Color32(248, 208, 72, 255), new Color32(240, 88, 88, 255),
+        new Color32(244, 240, 228, 255), new Color32(120, 168, 240, 255),
+    };
     static readonly Color32 Line = new Color32(24, 18, 26, 255);
+    static readonly Color DownRing = new Color(0.40f, 0.62f, 1f);
 
     static Sprite[] s_sprites;
 
@@ -94,6 +107,23 @@ public static class KeyMark
         Bounds b = look.bounds;
         return Stand(door.transform, door._keyIndex,
             new Vector3(b.center.x, b.max.y + 0.02f, b.center.z - Mathf.Min(b.extents.z, 0.05f) - 0.01f));
+    }
+
+    /// <summary>계단 고리 위에 화살표를 세우고, 아래층 고리는 파랗게 칠한다. 보스방 입구는 제 그림이 있어 건너뛴다.</summary>
+    public static GameObject OnStairs(PortalController portal)
+    {
+        bool up = portal._portalType == PortalController.Type.UpStairs;
+        Transform root = portal.transform.parent;   // 계단 프리팹 루트 — 보스 층의 위층 계단은 이것째 꺼진다(RefreshBossGates)
+        if (root == null || (up == false && portal._portalType != PortalController.Type.DownStairs))
+            return null;
+        if (up == false)
+            foreach (ParticleSystem ps in root.GetComponentsInChildren<ParticleSystem>(true))
+                if (ps.name.StartsWith("FX_MapPortal"))
+                {
+                    ParticleSystem.MainModule main = ps.main;
+                    main.startColor = DownRing;
+                }
+        return Stand(root, up ? StairsUp : StairsDown, root.position + new Vector3(0f, 0.34f, 0f));
     }
 
     /// <summary>HUD 열쇠 칸 오른쪽 위 모서리에 단다. 이미 있으면 그대로 둔다.</summary>

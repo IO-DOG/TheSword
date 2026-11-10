@@ -10,11 +10,9 @@ public class UIManager
 {
     const int PopupBaseOrder = 10;
     int _order = PopupBaseOrder;
-    int _toastOrder = 500;
 
     // 떠 있는 팝업. 마지막이 맨 위다. (스택이던 것을 목록으로 바꿨다 — 맨 위가 아닌 창도 닫아야 한다)
     readonly List<UI_Popup> _popups = new List<UI_Popup>();
-    Stack<UI_Toast> _toastStack = new Stack<UI_Toast>();
     UI_Scene _sceneUI = null;
     public UI_Scene SceneUI { get { return _sceneUI; } }
 
@@ -43,7 +41,7 @@ public class UIManager
         }
     }
 
-    public void SetCanvas(GameObject go, bool sort = true, int sortOrder = 0, bool isToast = false)
+    public void SetCanvas(GameObject go, bool sort = true, int sortOrder = 0)
     {
         Canvas canvas = Util.GetOrAddComponent<Canvas>(go);
         // 코드로 만든 팝업(이야기 카드·크레딧·몬스터 도감)은 캔버스를 새로 붙이는데, AddComponent 의
@@ -74,13 +72,6 @@ public class UIManager
         {
             canvas.sortingOrder = sortOrder;
         }
-
-        if (isToast)
-        {
-            _toastOrder++;
-            canvas.sortingOrder = _toastOrder;
-        }
-
     }
 
     public T MakeWorldSpaceUI<T>(Transform parent = null, string name = null) where T : UI_Base
@@ -294,35 +285,6 @@ public class UIManager
     {
         UI_GameScene.gameObject.SetActive(true);
         ShowPlayerHpBar();
-    }
-
-    public UI_Toast ShowToast(string msg)
-    {
-        string name = typeof(UI_Toast).Name;
-        GameObject go = Managers.Resource.Instantiate($"{name}", pooling: true);
-        UI_Toast popup = Util.GetOrAddComponent<UI_Toast>(go);
-        popup.SetInfo(msg);
-        _toastStack.Push(popup);
-        go.transform.SetParent(Root.transform);
-        //CoroutineManager.StartCoroutine(CoCloseToastUI());
-        return popup;
-    }
-
-    IEnumerator CoCloseToastUI()
-    {
-        yield return new WaitForSeconds(1f);
-        CloseToastUI();
-    }
-
-    public void CloseToastUI()
-    {
-        if (_toastStack.Count == 0)
-            return;
-
-        UI_Toast toast = _toastStack.Pop();
-        Managers.Resource.Destroy(toast.gameObject);
-        toast = null;
-        _toastOrder--;
     }
 
     public int GetPopupCount()

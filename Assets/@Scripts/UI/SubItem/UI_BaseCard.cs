@@ -102,7 +102,14 @@ public class UI_BaseCard : UI_Base
 
     protected void SetUI()
     {
-        SetName(GetText((int)Texts.CreatureName), _creature.Name);
+        TMP_Text nameLabel = GetText((int)Texts.CreatureName);
+        SetName(nameLabel, _creature.Name);
+        // 이름은 전투를 열 때 한 번 푼 글이라, 싸우는 중에 언어를 바꾸면(메뉴 → 설정) 다음 싸움까지 옛 언어로 남았다.
+        // 키 안내처럼 언어가 바뀌면 다시 칠한다.
+        int nameId = _creature is CurMonsterData monster ? monster.MonsterNameId
+                   : _creature is CurPlayerData ? Define.USER_NAME_INDEX : 0;
+        if (nameLabel != null && nameId != 0)
+            PromptText.Set(nameLabel, () => Managers.GetString(nameId));
         GetText((int)Texts.HPBarText).text = Mathf.CeilToInt(_creature.CurHP).ToString();   // 야수의 회복 등으로 소수가 남으면 "231.6" 이 찍혔다
         GetText((int)Texts.AttackStatusText).text = _creature.Attack.ToString();
         GetText((int)Texts.DefenceStatusText).text = _creature.Defence.ToString();

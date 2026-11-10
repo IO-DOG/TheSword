@@ -20,7 +20,6 @@ enum 기반 자동 바인딩(`UI_Base.Bind`)을 쓰는 UI 계층. `UI_Popup`은 
 | `Popup/` | `UI_Popup` 파생 팝업들 (인벤토리, 메뉴, 설정, 대화, 게임오버, 보스명, 레터박스 등) |
 | `Scene/` | `UI_Scene` 파생 씬 UI (`UI_TitleScene`이 PreLoad+`Data.Init()` 담당, `legacy_`·`SHJTest`는 비사용) |
 | `SubItem/` | 재사용 위젯: 카드(`UI_BaseCard`←Monster/Player), 정보 패널, `UI_Fade` |
-| `Toast/` | `UI_Toast` 알림 |
 
 ## For AI Agents
 
