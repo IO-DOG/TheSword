@@ -159,6 +159,7 @@
 | 하사품 / 하사품 공고 | 왕국이 내리는 상 / 게시판에 남은 그 공고(`epilogue_hold.04` `epilogue_dawn.07`) | royal reward / reward notice | 下賜品 / 下賜品の告示 | 赏赐 / 赏赐告示 |
 | 의뢰 / 의뢰서 | 길드의 낡은 의뢰. 의뢰서는 데미안이 떼어 품었다(900005). 하사품 공고와 다르다 | request / request slip | 依頼 / 依頼書 | 委托 / 委托书 |
 | 왕국 조사관 | 브람의 직함 | Royal Investigator | 王国調査官 | 王国调查官 |
+| 길잡이 / 셈 | 브람이 제 기록(`f24_report` `f37_report`)에서 마검을 가리키는 말 / 마검이 내는 값. 기록은 검이라고 적지 않는다 | guide / sums | 案内役 / 勘定 | 向导 / 账 |
 | 가브 풍습 | 전사의 무덤에 그가 쓰던 칼을 꽂는다 | the Gabu custom | ガブの習わし | 加布的习俗 |
 | 뱉다 / 뱉어 내다 | 탑이 돌아오지 않는 자의 칼(과 반지)을 밑동 무덤 사이로 내놓는 것(`village_chief.04` `epilogue_hold.02`) | spit out | 吐き出す | 吐出 |
 
@@ -186,14 +187,14 @@
 | 숫자부터 봐라 | 개작 100031 | `pro_kingslime_clear.01`~`02` `bark_gate_1.01` |
 | 해 지기 전에 | `village_chief.07` | `f16_nap.01` `boss0_defeat.01` `boss0_defeat.08` `mech_warp.02`, 도감 `warp_ring` |
 | 이몸을 만난 건 행운이다 | 개작 100026 | `boss3_intro.08` |
-| 배부르면? / 그런 날은 안 온다 | `pro_contract_after.05`~`06` | `ending_dawn.05` |
+| 배부르면? / 그런 날은 안 온다 | `pro_contract_after.05`~`06` | `walk_97.01`~`02` ("그런 날은 온 적이 없다") `ending_dawn.05` |
 | 네 목숨은 이몸 거다 / 이몸 허락 없이는 못 죽는다 | `pro_contract_after.04` | `mech_death.02` `boss3_defeat.15` |
 | 다음 한 대는 진심으로 벤다 | `mech_crit.01` | `boss3_defeat.01` ("진심이었군") |
 | 세던 숨은 이어진다 | `mech_crit.04` | `f90_rule.01` `f100_lesson.05` |
 | 누구부터 베느냐가 값 | `mech_crit.04` | `trait_assassin.02` `f100_lesson.04`, 도감 `traits[7]` |
 | 비싼 놈은 나중에 | `mech_levelup.02` | `f90_rule.01` (`bark_basic_3.01`) |
 | 아직 멀었다 → 충분하다 | `mech_levelup.04` `f31_trust.06` `f50_leftovers.10` | `f72_enough.02`~`03` `boss3_defeat.08` |
-| 배고픈 놈은 먹히고, 배부른 놈이 먹는다 | `f11_motto.02` | `ending_hold.04` `ending_dawn.09` |
+| 배고픈 놈은 먹히고, 배부른 놈이 먹는다 | `f11_motto.02` | `walk_69.01` (앞 절만) `ending_hold.04` `ending_dawn.09` |
 | 눈 뜨고 잔다 | `f16_nap.04` | `boss3_defeat.12` ("눈 한 번 못 감고") `ending_seal.04` |
 | 넌 해 지기 전에 돌아갈 데 있나? / 없어. / …이몸도 없다. | `boss0_defeat.08`~`10` | `f76_nohome.01` `boss3_intro.16` `ending_hold.07`~`08` |
 | …세드릭… 문 열어… | `f27_sleeptalk.02` | `boss3_intro.02`~`03` ("두 번째다") |
@@ -214,6 +215,9 @@
 | 값은 머리 위에 떠 있다 | `mech_forecast.05` | `boss0_intro.06` ("머리 위에 떠 있잖나") |
 | 얼마? | `mech_forecast.04` | `boss0_intro.05` `f31_trust.01` `boss2_intro.05` `boss3_defeat.07` `f95_price.08` `boss4_intro.07` `ending_dawn.14` `epilogue_dawn.08` |
 | 무덤이야. 먹지 마. | `village_chief.06` | `pro_contract_after.02` "내 칼은 먹지 마." 와 짝 |
+| 등은 보이지 않는다 / 방패는 내리지 않는다 / 보고 | `f24_report.03` `f37_report.03` (브람의 기록) | `boss1_intro.02` `boss1_intro.07` `boss1_defeat.01`~`02` |
+| …너 요즘 숫자 안 보더라. / 네가 보잖아. | `f31_trust.02`~`03` | `walk_93.01`~`02` ("이몸보다 먼저 읽더라" / "네가 보여 줬잖아") |
+| 숫자는 이몸이 센다. 순서는 네가 정해라. | `bark_death_2.01` | `walk_87.01` ("숫자는 네가 세. 순서는 내가 정할게.") |
 | 껍질이 먼저 다 받는다 / (흡혈은) 껍질 깬 다음이다 | `trait_armor.01` `trait_armor.03` (26층, 마검) | `ch4_start.05` (81층, 데미안이 마검의 말투로 되읊는다) |
 
 ## 9. 말장난과 함정

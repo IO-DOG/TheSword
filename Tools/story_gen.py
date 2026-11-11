@@ -107,6 +107,8 @@ IMAGE_ADDRESS = dict(
 #   Fx X         데미안 자리에 이펙트    Boom  보스 폭발·흰 빛    Soul  보라 영혼
 #   Hands / VortexIn / VortexStop / Walk   결말의 왕좌의 입
 #   Backdrop     바로 앞 카드 그림을 깔아 둔 채 대화 (장면 전체)
+#   Letterbox    그 장면 동안 레터박스를 내린다 (장면 전체 — 보스·프롤로그 장면은 StoryDirector 가 이미 내린다)
+#   BgmLow       곡 소리를 3할로 낮춘다. 장면 무리가 끝나면 되돌아온다 (말이 없는 박자에 쓴다)
 CUES = {
     "pro_contract_after": [(0, "Flash"), (2, "Emote", "SweatDrop")],      # "01 직전" 번쩍 — 대화창보다 먼저
     "mech_forecast": [(5, "Emote", "Question")],          # 3층에는 몬스터가 없다 — 카메라는 데미안에게 (R11)
@@ -120,32 +122,41 @@ CUES = {
     "ch0_start": [(1, "Emote", "Question"), (1, "CamUp")],
     "f11_motto": [(6, "Emote", "SweatDrop")],
     "f16_nap": [(1, "Emote", "Sleepy"), (4, "Emote", "Surprise")],
+    "trait_beast": [(1, "Emote", "Question")],            # 냄새를 맡는다 (staging 01)
+    "boss0_intro": [(2, "Emote", "Question"), ("end", "Pose", "DrawSword")],
     "boss0_defeat": [(0, "BgmStop"), (0, "Boom"), (2, "CamBoss"), (3, "Fx", "FX_PowerWave"), ("end", "BgmFloor")],
     "ch1_start": [(0, "CamUp"), (2, "Emote", "SweatDrop"), (4, "Emote", "Question")],
     "f27_sleeptalk": [(1, "Emote", "Sleepy"), (3, "Emote", "Question"), (4, "Emote", "Surprise"),
                       (6, "Emote", "Angry")],
     "f31_trust": [(0, "CamMonster"), (1, "CamPlayer"), (5, "Emote", "Grinning")],
+    "f24_report_talk": [(1, "Emote", "Question"), (2, "Emote", "Sleepy")],
+    "trait_armor": [(3, "Emote", "Grinning")],
     "f35_suspect": [(3, "Emote", "Question"), (4, "Emote", "SweatDrop")],
+    "trait_magic": [(1, "Emote", "Angry")],
     "boss1_intro": [(8, "Emote", "Angry"), ("end", "Pose", "DrawSword")],    # 03 은 놀라지 않는다 (R11)
     "boss1_defeat": [(3, "Boom"), (3, "BgmFloor")],
     "ch2_start": [(0, "CamUp")],
     "f45_forge": [(2, "Emote", "Question"), (5, "Emote", "SweatDrop")],
-    "f50_leftovers": [(1, "Emote", "Sleepy"), (3, "Emote", "Grinning"), (10, "Emote", "Grinning")],
-    "f55_look": [(1, "CamClose"), (2, "Emote", "SweatDrop"), ("end", "CamPlayer")],
-    "boss2_intro": [(3, "Emote", "Question")],
+    "f50_leftovers": [(0, "Letterbox"), (1, "Emote", "Sleepy"), (3, "Emote", "Grinning"), (10, "Emote", "Grinning")],
+    "f55_look": [(0, "BgmLow"), (1, "CamClose"), (2, "Emote", "SweatDrop"), ("end", "CamPlayer")],
+    "boss2_intro": [(3, "Emote", "Question"), ("end", "Pose", "DrawSword")],
     "boss2_defeat": [(0, "BgmStop"), (3, "Boom"), (3, "White"), (6, "Clear"), ("end", "BgmFloor")],
+    "ch3_start": [(0, "CamUp")],                          # 다른 챕터처럼 내리는 것(눈)을 먼저 본다
     "f66_awake": [(4, "Emote", "Sleepy")],
-    "f72_enough": [(0, "CamClose"), (3, "CamPlayer")],
+    # 72층: 곡을 낮추고 눈만 내린다 (staging) — 머리 위를 보는 박자가 조용해야 "충분하다" 가 들린다.
+    "f72_enough": [(0, "Letterbox"), (0, "BgmLow"), (0, "CamClose"), (3, "CamPlayer")],
+    "f76_nohome": [(0, "BgmLow"), (3, "Emote", "NoAnswer")],
     # 09 "네 머리 위에도 숫자가 있다" 에 데미안 머리 위로, 기사가 다시 말하는 12 에 기사에게 돌아온다.
     "boss3_intro": [(5, "Shake"), (9, "CamClose"), (12, "CamBoss"), ("end", "Pose", "DrawSword")],
     "boss3_defeat": [(0, "BgmStop"), (4, "Soul"), (6, "CamPlayer"), ("end", "BgmFloor")],
     "ch4_card": [(0, "BgmStop")],
     "ch4_start": [(1, "CamUp"), (1, "BgmFloor")],
     "f85_honest": [(2, "Emote", "NoAnswer")],
-    "f95_price": [(7, "CamClose"), ("end", "CamPlayer")],
-    "f99_eve": [(2, "Emote", "Sleepy")],
+    "f95_price": [(0, "Letterbox"), (7, "CamClose"), ("end", "CamPlayer")],
+    # 99층: "자라. 깨울게." 에 화면이 저문다. 100층 첫 줄이 "일어나. 다 왔어." 다.
+    "f99_eve": [(0, "Letterbox"), (0, "BgmLow"), (2, "Emote", "Sleepy"), (4, "Dark"), ("end", "Clear")],
     "f100_lesson": [(0, "Emote", "Sleepy")],
-    "boss4_intro": [(1, "Shake"), (2, "Shake"), (5, "Shake")],
+    "boss4_intro": [(1, "Shake"), (2, "Shake"), (5, "Shake"), ("end", "Pose", "DrawSword")],
     "ending_seal": [(0, "Pose", "ContractSword"), (0, "Fx", "FX_ContractSwordEffect"), (0, "VortexStop"),
                     (0, "Flash"), (3, "Pose", "Idle"), (10, "Emote", "Sleepy"), (10, "White"), (11, "Dark")],
     "ending_hold": [(0, "Bgm", "EgoSword_Encounter_Event"), (0, "Hands"), (0, "Pose", "ContractSword"),
@@ -156,7 +167,7 @@ CUES = {
 }
 CUE_KINDS = ("Emote", "Shake", "Flash", "White", "Dark", "Clear", "CamUp", "CamClose", "CamPlayer",
              "CamMonster", "CamBoss", "Pose", "Bgm", "BgmStop", "BgmFloor", "Fx", "Boom", "Soul",
-             "Hands", "VortexIn", "VortexStop", "Walk", "Backdrop")
+             "Hands", "VortexIn", "VortexStop", "Walk", "Backdrop", "Letterbox", "BgmLow")
 CUE_NEEDS_ARG = {"Emote", "Pose", "Bgm", "Fx"}
 POSES = ("DrawSword", "ContractSword", "Idle")
 CUE_END = 999                     # "end" — 장면이 끝난 뒤
@@ -164,6 +175,7 @@ CUE_END = 999                     # "end" — 장면이 끝난 뒤
 # ---------------------------------------------------------------- 층 바크 (바이블 R13·R15)
 SWORD_QUIET = (81, 89)            # 이 층들의 마검은 값만 말한다 — 층·죽음 바크는 데미안 것만 (R13)
 BARK_EVERY = 3                    # 바크가 설 수 있는 층 셋에 하나꼴 (예전 BarkChance 0.35 와 비슷하다)
+WALK_LINES = 2                    # 걸으며 한마디(floor_bark)는 주고받는 두 줄까지 — 바크 창이 차례로 띄운다
 
 
 # ---------------------------------------------------------------- 읽기
@@ -336,7 +348,9 @@ def bark_schedule(scenes, speaker_rows, facts):
     for i, s in enumerate(scenes):
         if s["trigger"] == "FloorType":
             pools.setdefault(s["arg"], []).append(i)
-    taken = entry_floors(scenes) | {20 * (c + 1) for c in range(CHAPTERS)}
+    # 걸으며 한마디(floor_bark)가 걸린 층도 비운다 — 그 층은 그 한마디가 층 유형 바크 자리에 뜬다.
+    taken = (entry_floors(scenes) | {20 * (c + 1) for c in range(CHAPTERS)}
+             | {s["arg"] for s in scenes if s["trigger"] == "FloorBark"})
     free = [f for f in range(gc.HANDMADE_FLOORS + 1, gc.TOTAL_FLOORS + 1)
             if facts[f]["type"] in pools and f not in taken]
     def fits(i, floor):
@@ -381,6 +395,8 @@ def parse_trigger(text, choice_ids):
                 "boss_defeat": "BossDefeat"}[head], int(arg)
     if head == "floor_first" and arg.isdigit() and gc.HANDMADE_FLOORS < int(arg) <= gc.TOTAL_FLOORS:
         return "FloorFirst", int(arg)
+    if head == "floor_bark" and arg.isdigit() and gc.HANDMADE_FLOORS < int(arg) <= gc.TOTAL_FLOORS:
+        return "FloorBark", int(arg)
     if head == "trait_first" and arg in TRAITS:
         return "TraitFirst", TRAITS[arg]
     if head == "floor_type" and arg in FLOOR_TYPES:
@@ -510,8 +526,8 @@ def build(story, translations, current, facts, checks):
             errors.append(f"{sid}: 줄이 없다")
         if len(lines) > LINES_PER_SCENE:
             errors.append(f"{sid}: 줄이 {len(lines)}개 — 장면 하나는 {LINES_PER_SCENE}줄까지")
-        if kind == "Bark" and len(lines) != 1:
-            errors.append(f"{sid}: 바크는 한 줄이어야 한다")
+        if kind == "Bark" and len(lines) > (WALK_LINES if trig == "FloorBark" else 1):
+            errors.append(f"{sid}: 바크는 한 줄이어야 한다 (걸으며 한마디 floor_bark 는 {WALK_LINES}줄까지)")
         out_lines = []
         for li, line in enumerate(lines[:LINES_PER_SCENE]):
             key = line.get("key", "")
@@ -633,12 +649,31 @@ def check(scenes, speaker_rows, facts, fact_problems, checks, plan):
             errors.append(f"{s['id']}: 여분 열쇠가 있는 층이 없다")
         if t == "Mechanic" and MECHANICS[a] == "choice" and not any(f["choice"] for f in facts.values()):
             errors.append(f"{s['id']}: 둘 중 하나 보상이 있는 층이 없다")
-        if s["kind"] == "Bark" and t not in ("FloorType", "Death", "Mechanic"):
-            errors.append(f"{s['id']}: 바크는 floor_type·death·mechanic_first 에서만 뜬다")
-        if t in ("FloorType", "Death") and s["kind"] != "Bark":
-            errors.append(f"{s['id']}: floor_type·death 는 바크 전용이다")
+        if s["kind"] == "Bark" and t not in ("FloorType", "Death", "Mechanic", "FloorBark"):
+            errors.append(f"{s['id']}: 바크는 floor_type·floor_bark·death·mechanic_first 에서만 뜬다")
+        if t in ("FloorType", "Death", "FloorBark") and s["kind"] != "Bark":
+            errors.append(f"{s['id']}: floor_type·floor_bark·death 는 바크 전용이다")
+        if t == "FloorBark":
+            # 들어설 때 장면이 걸린 층·보스 층에서는 뜰 자리가 없다(StoryDirector.OnFloorEntered — 장면이 먼저다).
+            if a in entry_floors(scenes) or a % 20 == 0:
+                errors.append(f"{s['id']}: {a}층은 이야기 장면·보스 층이라 걸으며 한마디가 뜨지 않는다")
+            if len(by[(t, a)]) > 1:
+                errors.append(f"{s['id']}: {a}층에 걸으며 한마디가 둘이다 — 한 장면에 두 줄까지 쓴다")
+            if SWORD_QUIET[0] <= a <= SWORD_QUIET[1] and any(speaker_rows[line[0]][0] == "sword" for line in s["lines"]):
+                errors.append(f"{s['id']}: {SWORD_QUIET[0]}~{SWORD_QUIET[1]}층의 마검은 값만 말한다 — 데미안 것만 (R13)")
         if s["kind"] == "Bark" and t == "Mechanic" and MECHANICS[s["arg"]] not in ("spare_key", "nokey"):
             warnings.append(f"{s['id']}: 이 mechanic 은 대화로 트는 자리다 — 바크로 두면 막지 않고 지나간다")
+    # 장면 전체 레터박스·곡 낮추기는 층 입구 장면(floor_first)에만 — 그 무리(CoFloorChain)는 끝에서 Restore 가 되돌린다.
+    # 프롤로그·결말·치명타 수업에는 Restore 가 없고, 보스·프롤로그는 제 레터박스가 있다. 곡 낮추기는 곡을 바꾸는 신호와
+    # 같은 층 입구 무리에 섞지 않는다(소리 크기 하나를 두 트윈이 다투고, DOKill 이 곡 바꾸기를 끊는다).
+    for s in scenes:
+        kinds = {ck for _, ck, _ in s["cues"]}
+        if kinds & {"Letterbox", "BgmLow"} and s["trigger"] != "FloorFirst":
+            errors.append(f"연출 신호 {s['id']}: Letterbox·BgmLow 는 floor_first 장면에만 쓴다")
+        if "BgmLow" in kinds:
+            chain = {ck for other in by[(s["trigger"], s["arg"])] for _, ck, _ in other["cues"]}
+            if chain & {"Bgm", "BgmStop", "BgmFloor"}:
+                errors.append(f"연출 신호 {s['id']}: BgmLow 를 곡을 바꾸는 신호(Bgm·BgmStop·BgmFloor)와 같은 층 입구에 섞었다")
     # 같은 트리거에 장면이 여럿이면 파일 순서대로 잇는다(R1). 바크가 아닌 것이 섞이면 안 된다.
     for (t, a), group in by.items():
         kinds = {s["kind"] for s in group}
@@ -858,6 +893,7 @@ def _self_check():
     """손으로 잡은 규칙 몇 개가 그대로인지 (python Tools/story_gen.py --selftest)."""
     assert sheet("a, b\nc") == "a^ b\\nc"
     assert parse_trigger("floor_first:31", []) == ("FloorFirst", 31)
+    assert parse_trigger("floor_bark:13", []) == ("FloorBark", 13)
     assert parse_trigger("trait_first:armor", []) == ("TraitFirst", 8)
     assert parse_trigger("ending:seal", ["seal", "hold"]) == ("Ending", 1)
     assert parse_trigger("mechanic_first:spare_key", []) == ("Mechanic", 4)

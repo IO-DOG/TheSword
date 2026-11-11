@@ -9,12 +9,12 @@ using UnityEngine.SceneManagement;
 
 #region 대본 자료형 — GeneratedStory(Tools/story_gen.py)가 채운다
 public enum StoryKind { Dialogue, Card, Bark, Choice, Credits }
-public enum StoryTrigger { Prologue, Village, ChapterStart, FloorFirst, TraitFirst, FloorType, Mechanic, Death, BossIntro, BossDefeat, Ending, Epilogue, Credits }
+public enum StoryTrigger { Prologue, Village, ChapterStart, FloorFirst, TraitFirst, FloorType, Mechanic, Death, BossIntro, BossDefeat, Ending, Epilogue, Credits, FloorBark }
 public enum StoryPrologue { ContractAfter, KingslimeReveal, KingslimeClear }
 public enum StoryMechanic { Forecast, Fatal, Overflow, Vault, SpareKey, Choice, Rune, NoKey, Warp, Death, Crit, LevelUp }
 public enum StoryEnding { Choice, Seal, Hold, Dawn }
 public enum StoryPortrait { None, Damian, Sword, Boss }
-public enum StoryCueKind { Emote, Shake, Flash, White, Dark, Clear, CamUp, CamClose, CamPlayer, CamMonster, CamBoss, Pose, Bgm, BgmStop, BgmFloor, Fx, Boom, Soul, Hands, VortexIn, VortexStop, Walk, Backdrop }
+public enum StoryCueKind { Emote, Shake, Flash, White, Dark, Clear, CamUp, CamClose, CamPlayer, CamMonster, CamBoss, Pose, Bgm, BgmStop, BgmFloor, Fx, Boom, Soul, Hands, VortexIn, VortexStop, Walk, Backdrop, Letterbox, BgmLow }
 
 public sealed class StorySpeaker
 {
@@ -131,6 +131,7 @@ public class StoryDirector : MonoBehaviour
     bool _endingRunning;
     float _nextWatch;
     bool _offsetMoved, _exposureMoved;
+    bool _bgmLowered;                       // 곡 소리를 이 도구가 낮췄다 (BgmLow) — Restore 가 되돌린다
     GameObject _mark;                       // 보스가 사라진 자리를 카메라가 볼 때
     GameObject _portal, _vortex;            // 결말의 왕좌의 입
     StoryScene _scene;                      // 지금 창이 떠 있는 장면 (CoScene). 건너뛰기가 본다
@@ -204,7 +205,8 @@ public class StoryDirector : MonoBehaviour
     // 씬이 바뀌면(죽어서 다시 올림·타이틀·엔딩) 도는 장면·기다리던 장면·늦게 뜰 바크를 버린다 — 체크포인트가 그 일을
     // 되돌렸다. 예전에는 줄만 비워서 기다리던 바크가 타이틀 화면에 떴다.
     // 체크포인트는 이 층을 이미 다녀간 것으로 적었으니 FloorEntered(처음)는 다시 오지 않는다. 지난번에 층 입구 장면
-    // 도중에 꺼졌으면(창을 닫았다·녹화 조각이 끊겼다) 남은 것을 여기서 잇는다. 바크는 없다.
+    // 도중에 꺼졌으면(창을 닫았다·녹화 조각이 끊겼다) 남은 것을 여기서 잇는다. 층 유형 바크는 없다 — 걸으며 한마디만,
+    // 뜨기 전에 걷혔으면(들어서자마자 싸워 죽었다·메뉴) 여기서 다시 건다. 손으로 쓴 줄이라 한 번은 보여야 한다.
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         AbortAll();
@@ -214,7 +216,13 @@ public class StoryDirector : MonoBehaviour
         // 계약 뒤 대사(6줄) 도중에 끄면 거기 이어 붙던 예측 수업(CoPrologue)을 다시 틀 길이 없었다 — 3층 계약 연출은 다시 돌지 않는다.
         EnqueueScenes(Unseen(StoryMechanic.Forecast), true, 0.5f);
         if (CurFloor >= VillageFloor)
-            EnqueueScenes(FloorChain(CurFloor), false, 0.5f);
+        {
+            List<StoryScene> chain = FloorChain(CurFloor);
+            if (chain.Count > 0)
+                EnqueueScenes(chain, false, 0.5f);
+            else
+                WalkBark(CurFloor);
+        }
     }
 
     /// <summary>
@@ -509,7 +517,32 @@ public class StoryDirector : MonoBehaviour
             s_instance.StartNow(s_instance.CoFloorChain(chain));
             return;
         }
-        s_instance.FloorBark(stageId + 1);
+        if (s_instance.WalkBark(stageId + 1) == false)
+            s_instance.FloorBark(stageId + 1);
+    }
+
+    // 걸으며 한마디(floor_bark:<층>). 그 층에 처음 들어설 때 한 번, 걸음을 막지 않고 뜬다 — 이야기 장면 사이의 빈 층을
+    // 한두 줄로 잇는다(냄새·더위 같은 그 챕터의 단서, 둘 사이의 온도). 층이 정해져 있어 그 층의 말투를 따르고,
+    // 그 층의 층 유형 바크 자리를 쓴다(story_gen.bark_schedule 이 비워 둔다). 본 것으로 적는 것은 첫 줄이 실제로 뜬 순간이다 —
+    // 뜨기 전에 걷히면(2초 안에 싸워 죽었다·메뉴에서 이 층 다시) 씬이 다시 설 때 OnSceneLoaded 가 다시 건다.
+    bool WalkBark(int floor)
+    {
+        List<StoryScene> scenes = Unseen(StoryTrigger.FloorBark, floor);
+        if (scenes.Count == 0)
+            return false;
+        StartCoroutine(CoWalkBark(scenes));
+        return true;
+    }
+
+    static IEnumerator CoWalkBark(List<StoryScene> scenes)
+    {
+        yield return new WaitForSeconds(2f);
+        foreach (StoryScene scene in scenes)
+        {
+            StoryScene mine = scene;
+            for (int i = 0; i < scene.Lines.Length; i++)    // 한 번에 줄 세운다 — 다른 바크가 두 줄 사이에 끼지 않게
+                UI_StoryBark.Show(scene.Lines[i], i == 0 ? () => MarkSeen(mine) : (Action)null);
+        }
     }
 
     // 층 유형 바크. 어느 층에서 무엇이 뜰지는 story_gen 이 정해 굽는다(GeneratedStory.FloorBarks) — 유형마다 변주를
@@ -1035,6 +1068,11 @@ public class StoryDirector : MonoBehaviour
     {
         bool seenBefore = Records.SceneSeenEver(scene.Id);     // MarkSeen 이 곧 적는다 — 그 전에 잰다
         MarkSeen(scene);
+        // 장면 전체 레터박스(Letterbox 신호). 보스·프롤로그 무리가 이미 내렸으면 그대로 둔다 — 제가 내린 것만 걷는다.
+        // 도중에 끊기면 Restore·Abort 가 걷는다.
+        bool bars = _letterbox == false && HasCue(scene, StoryCueKind.Letterbox);
+        if (bars)
+            Letterbox(true);
         yield return CoCues(scene, 0);
         bool done = false;
         _scene = scene;
@@ -1068,6 +1106,8 @@ public class StoryDirector : MonoBehaviour
             yield return null;
         _scene = null;
         yield return CoCues(scene, StoryCue.End);
+        if (bars)
+            Letterbox(false);
     }
 
     void CloseBackdrop()
@@ -1103,6 +1143,18 @@ public class StoryDirector : MonoBehaviour
         if (_exposureMoved && Managers.Game.MainCamera != null)
             StartCoroutine(Safe(CameraController.CoExposure(0.3f, CameraController.Exposure.Default)));
         _exposureMoved = false;
+        Letterbox(false);       // 장면 신호(Letterbox)가 내린 채 끊겼을 때. 제가 내린 것이 없으면 아무 일도 없다
+        if (_bgmLowered)
+        {
+            AudioSource bgm = Managers.Sound.GetAudioSource(Define.Sound.Bgm);
+            if (bgm != null)
+            {
+                // 실시간으로 — 메뉴(timeScale 0)에서 걷힐 때도 바로 돌아온다. 씬을 넘기는 쪽이 소리를 다시 잡기 전에 끝난다.
+                bgm.DOKill();
+                bgm.DOFade(SoundManager.ConfiguredBgmVolume, 0.5f).SetUpdate(true);
+            }
+        }
+        _bgmLowered = false;
         if (_mark != null)
             Destroy(_mark);
         if (Managers.UI.UI_GameScene != null)
@@ -1363,7 +1415,18 @@ public class StoryDirector : MonoBehaviour
                 if (player != null)
                     player.Moving(Define.MoveDir.Up, true);
                 return 0f;
-            default:    // Backdrop: 장면을 잇는 쪽(CoChain)이 본다
+            case StoryCueKind.BgmLow:
+                // 말이 없는 박자를 위해 곡을 낮춘다. 층 입구 장면(floor_first)에만 쓰고 곡을 바꾸는 신호와 섞지 않는다 —
+                // story_gen 이 막는다(DOKill 이 곡 바꾸기의 페이드를 끊고, Restore 가 없는 무리에서는 낮춘 채 남는다).
+                AudioSource bgm = Managers.Sound.GetAudioSource(Define.Sound.Bgm);
+                if (bgm != null && bgm.isPlaying)
+                {
+                    bgm.DOKill();
+                    bgm.DOFade(SoundManager.ConfiguredBgmVolume * 0.3f, 1f).SetUpdate(true);
+                    _bgmLowered = true;
+                }
+                return 0f;
+            default:    // Backdrop·Letterbox: 장면을 잇는 쪽(CoChain·CoScene)이 본다
                 return 0f;
         }
     }
@@ -1534,7 +1597,8 @@ public class StoryDirector : MonoBehaviour
         StoryScene scene = GeneratedStory.Scenes[at];
         if (scene.Kind == StoryKind.Bark)
         {
-            UI_StoryBark.Show(scene.Lines[0]);
+            foreach (StoryLine line in scene.Lines)     // 걸으며 한마디는 두 줄까지다
+                UI_StoryBark.Show(line);
             return;
         }
         List<StoryScene> chain = new List<StoryScene> { scene };

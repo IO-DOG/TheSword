@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -16,14 +17,15 @@ public class UI_StoryBark : MonoBehaviour
     const float FadeTime = 0.25f;
 
     static UI_StoryBark s_instance;
-    readonly Queue<StoryLine> _queue = new Queue<StoryLine>();
+    readonly Queue<(StoryLine line, Action shown)> _queue = new Queue<(StoryLine, Action)>();
     CanvasGroup _group;
     Image _portrait;
     TMP_Text _name;
     TMP_Text _text;
     float _shownFor = -1f;          // 음수면 지금 띄운 것이 없다
 
-    public static void Show(StoryLine line)
+    /// <param name="onShown">그 줄이 실제로 화면에 뜨는 순간 한 번. 줄 선 채 걷히면(죽음·메뉴) 불리지 않는다.</param>
+    public static void Show(StoryLine line, Action onShown = null)
     {
         if (line == null)
             return;
@@ -33,7 +35,7 @@ public class UI_StoryBark : MonoBehaviour
             s_instance = go.AddComponent<UI_StoryBark>();
             s_instance.Build();
         }
-        s_instance._queue.Enqueue(line);
+        s_instance._queue.Enqueue((line, onShown));
     }
 
     /// <summary>떠 있는 것과 줄 선 것을 걷는다 (StoryDirector.AbortAll — 메뉴의 "이 층 다시"·"타이틀로" 앞).</summary>
@@ -99,7 +101,10 @@ public class UI_StoryBark : MonoBehaviour
         {
             if (hidden || _queue.Count == 0)
                 return;
-            Present(_queue.Dequeue());
+            (StoryLine line, Action shown) = _queue.Dequeue();
+            Present(line);
+            try { shown?.Invoke(); }
+            catch (Exception e) { Debug.LogException(e); }
         }
 
         if (hidden == false)

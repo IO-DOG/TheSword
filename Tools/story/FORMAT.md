@@ -55,6 +55,7 @@
   `TowerGraves`(탑 밑동의 무덤과 꽂힌 검) `Parchment`(양피지, 글만 보일 때) `ForestLine` `ForestColor`
   `Loading1`~`Loading6`(치비 삽화) `GameOver1` `Ending`(숲의 빛 속 검을 든 데미안)
 - `bark`: 대화창을 열지 않고 화면 위쪽에 잠깐 뜨는 한 줄. **움직임을 막지 않는다.**
+  `floor_bark:<n>`(걸으며 한마디)만 주고받는 **두 줄까지** 쓴다 — 바크 창이 차례로 띄운다. 줄 안에 줄바꿈은 없다.
   같은 트리거에 여러 장면을 두면 변주가 된다. 층 유형 바크는 `story_gen` 이 층마다 변주를 돌려 미리 정하고(`GeneratedStory.FloorBarks`),
   죽음 바크는 그중 하나가 무작위로 나온다.
 - `choice`: `lines` 로 상황을 말한 뒤 선택지를 띄운다.
@@ -72,6 +73,7 @@
 | `village` | 4층 계단을 올라 5층에 처음 들어가기 직전. 카드 셋뿐이다(탑 · 떨어진 밤 · 칼 꽂힌 무덤). 촌장과 두 번째 무덤 카드는 6층 `floor_first:6` |
 | `chapter_start:<c>` | 챕터 c(0~4)의 첫 생성 층(5·21·41·61·81)에 처음 들어섰을 때 |
 | `floor_first:<n>` | n층에 처음 들어섰을 때 (5~100, 챕터 첫 층은 위 트리거를 쓴다) |
+| `floor_bark:<n>` | n층에 처음 들어서고 2초 뒤, 걸음을 막지 않고 (bark 전용, 한 층에 한 장면, 한두 줄). 이야기 장면 사이의 빈 층을 잇는 "걸으며 한마디" 다. 그 층의 층 유형 바크 자리에 뜬다. 들어설 때 장면이 걸린 층(`floor_first`·챕터 첫 층)과 보스 층에는 못 쓴다. 81~89층은 데미안 줄만(R13) |
 | `trait_first:<t>` | 특성 t 몬스터에게 **처음 부딪혔을 때**, 싸움 직전(보스 등장 뒤, 첫 ✖ 수업 앞). 들어설 때가 아니다. 첫 층은 `generate_content.BAND_TRAITS` 가 정한다(바이블 부록 A.3). t = beast magic guardian immortal knight titan assassin armor |
 | `floor_type:<t>` | 그 유형의 층에 들어설 때 가끔 (bark 전용). t = basic stingy gate plenty treasure |
 | `mechanic_first:<m>` | m 을 처음 겪을 때. m = forecast(첫 예측 표시) fatal(처음으로 ✖ 상대에게 부딪힘) overflow(물약이 넘침) vault(금고 문 앞) spare_key(여분 열쇠 획득) choice(둘 중 하나 보상 앞) rune(첫 룬) nokey(열쇠 없이 문에 부딪힘) warp(워프석 반지 획득) death(처음 죽고 되살아났을 때) crit(치명타 한 대 전) levelup(첫 레벨업, 5층 이후) |

@@ -244,7 +244,7 @@ public static class GeneratedStory
                 new StoryLine(1, "Illust_MagicalSword_Smile", 301842, null),
             },
             null,
-            null),
+            new[] { new StoryCue(1, StoryCueKind.Emote, "Question") }),
         new StoryScene("boss0_intro", StoryKind.Dialogue, StoryTrigger.BossIntro, 0,
             new[]
             {
@@ -256,7 +256,7 @@ public static class GeneratedStory
                 new StoryLine(1, "Illust_MagicalSword_Smile", 301885, null),
             },
             null,
-            null),
+            new[] { new StoryCue(2, StoryCueKind.Emote, "Question"), new StoryCue(999, StoryCueKind.Pose, "DrawSword") }),
         new StoryScene("boss0_defeat", StoryKind.Dialogue, StoryTrigger.BossDefeat, 0,
             new[]
             {
@@ -386,7 +386,7 @@ public static class GeneratedStory
                 new StoryLine(0, "Illust_Adventurer_Thinking", 302321, null),
             },
             null,
-            null),
+            new[] { new StoryCue(1, StoryCueKind.Emote, "Angry") }),
         new StoryScene("trait_titan", StoryKind.Dialogue, StoryTrigger.TraitFirst, 6,
             new[]
             {
@@ -421,7 +421,7 @@ public static class GeneratedStory
                 new StoryLine(1, "Illust_MagicalSword_Smile", 302449, null),
             },
             null,
-            new[] { new StoryCue(1, StoryCueKind.Emote, "Sleepy"), new StoryCue(3, StoryCueKind.Emote, "Grinning"), new StoryCue(10, StoryCueKind.Emote, "Grinning") }),
+            new[] { new StoryCue(0, StoryCueKind.Letterbox, null), new StoryCue(1, StoryCueKind.Emote, "Sleepy"), new StoryCue(3, StoryCueKind.Emote, "Grinning"), new StoryCue(10, StoryCueKind.Emote, "Grinning") }),
         new StoryScene("f55_look", StoryKind.Dialogue, StoryTrigger.FloorFirst, 55,
             new[]
             {
@@ -432,7 +432,7 @@ public static class GeneratedStory
                 new StoryLine(1, "Illust_MagicalSword_Nerve", 302484, null),
             },
             null,
-            new[] { new StoryCue(1, StoryCueKind.CamClose, null), new StoryCue(2, StoryCueKind.Emote, "SweatDrop"), new StoryCue(999, StoryCueKind.CamPlayer, null) }),
+            new[] { new StoryCue(0, StoryCueKind.BgmLow, null), new StoryCue(1, StoryCueKind.CamClose, null), new StoryCue(2, StoryCueKind.Emote, "SweatDrop"), new StoryCue(999, StoryCueKind.CamPlayer, null) }),
         new StoryScene("boss2_intro", StoryKind.Dialogue, StoryTrigger.BossIntro, 2,
             new[]
             {
@@ -444,7 +444,7 @@ public static class GeneratedStory
                 new StoryLine(1, null, 302525, null),
             },
             null,
-            new[] { new StoryCue(3, StoryCueKind.Emote, "Question") }),
+            new[] { new StoryCue(3, StoryCueKind.Emote, "Question"), new StoryCue(999, StoryCueKind.Pose, "DrawSword") }),
         new StoryScene("boss2_defeat", StoryKind.Dialogue, StoryTrigger.BossDefeat, 2,
             new[]
             {
@@ -472,7 +472,7 @@ public static class GeneratedStory
                 new StoryLine(1, "Illust_MagicalSword_Silense", 302603, null),
             },
             null,
-            null),
+            new[] { new StoryCue(0, StoryCueKind.CamUp, null) }),
         new StoryScene("trait_immortal", StoryKind.Dialogue, StoryTrigger.TraitFirst, 4,
             new[]
             {
@@ -510,7 +510,7 @@ public static class GeneratedStory
                 new StoryLine(1, "Illust_MagicalSword_Silense", 302763, null),
             },
             null,
-            new[] { new StoryCue(0, StoryCueKind.CamClose, null), new StoryCue(3, StoryCueKind.CamPlayer, null) }),
+            new[] { new StoryCue(0, StoryCueKind.Letterbox, null), new StoryCue(0, StoryCueKind.BgmLow, null), new StoryCue(0, StoryCueKind.CamClose, null), new StoryCue(3, StoryCueKind.CamPlayer, null) }),
         new StoryScene("f76_nohome", StoryKind.Dialogue, StoryTrigger.FloorFirst, 76,
             new[]
             {
@@ -521,7 +521,7 @@ public static class GeneratedStory
                 new StoryLine(1, "Illust_MagicalSword_Silense", 302804, null),
             },
             null,
-            null),
+            new[] { new StoryCue(0, StoryCueKind.BgmLow, null), new StoryCue(3, StoryCueKind.Emote, "NoAnswer") }),
         new StoryScene("boss3_intro", StoryKind.Dialogue, StoryTrigger.BossIntro, 3,
             new[]
             {
@@ -602,7 +602,7 @@ public static class GeneratedStory
                 new StoryLine(1, "Illust_MagicalSword_Smile", 303002, null),
             },
             null,
-            null),
+            new[] { new StoryCue(3, StoryCueKind.Emote, "Grinning") }),
         new StoryScene("f85_honest", StoryKind.Dialogue, StoryTrigger.FloorFirst, 85,
             new[]
             {
@@ -644,7 +644,7 @@ public static class GeneratedStory
                 new StoryLine(0, "Illust_Adventurer_Silence", 303128, null),
             },
             null,
-            new[] { new StoryCue(7, StoryCueKind.CamClose, null), new StoryCue(999, StoryCueKind.CamPlayer, null) }),
+            new[] { new StoryCue(0, StoryCueKind.Letterbox, null), new StoryCue(7, StoryCueKind.CamClose, null), new StoryCue(999, StoryCueKind.CamPlayer, null) }),
         new StoryScene("f99_eve", StoryKind.Dialogue, StoryTrigger.FloorFirst, 99,
             new[]
             {
@@ -654,7 +654,7 @@ public static class GeneratedStory
                 new StoryLine(0, null, 303163, null),
             },
             null,
-            new[] { new StoryCue(2, StoryCueKind.Emote, "Sleepy") }),
+            new[] { new StoryCue(0, StoryCueKind.Letterbox, null), new StoryCue(0, StoryCueKind.BgmLow, null), new StoryCue(2, StoryCueKind.Emote, "Sleepy"), new StoryCue(4, StoryCueKind.Dark, null), new StoryCue(999, StoryCueKind.Clear, null) }),
         new StoryScene("f100_lesson", StoryKind.Dialogue, StoryTrigger.FloorFirst, 100,
             new[]
             {
@@ -681,7 +681,7 @@ public static class GeneratedStory
                 new StoryLine(1, "Illust_MagicalSword_Smile", 303247, null),
             },
             null,
-            new[] { new StoryCue(1, StoryCueKind.Shake, null), new StoryCue(2, StoryCueKind.Shake, null), new StoryCue(5, StoryCueKind.Shake, null) }),
+            new[] { new StoryCue(1, StoryCueKind.Shake, null), new StoryCue(2, StoryCueKind.Shake, null), new StoryCue(5, StoryCueKind.Shake, null), new StoryCue(999, StoryCueKind.Pose, "DrawSword") }),
         new StoryScene("ending_choice", StoryKind.Choice, StoryTrigger.Ending, 0,
             new[]
             {
@@ -954,6 +954,133 @@ public static class GeneratedStory
             },
             null,
             null),
+        new StoryScene("walk_08", StoryKind.Bark, StoryTrigger.FloorBark, 8,
+            new[]
+            {
+                new StoryLine(1, "Illust_MagicalSword_Sleep", 304400, null),
+                new StoryLine(0, null, 304401, null),
+            },
+            null,
+            null),
+        new StoryScene("walk_13", StoryKind.Bark, StoryTrigger.FloorBark, 13,
+            new[]
+            {
+                new StoryLine(0, "Illust_Adventurer_Thinking", 304440, null),
+                new StoryLine(1, "Illust_MagicalSword_Smile", 304441, null),
+            },
+            null,
+            null),
+        new StoryScene("walk_18", StoryKind.Bark, StoryTrigger.FloorBark, 18,
+            new[]
+            {
+                new StoryLine(1, "Illust_MagicalSword_Nerve", 304480, null),
+                new StoryLine(0, null, 304481, null),
+            },
+            null,
+            null),
+        new StoryScene("f24_report", StoryKind.Card, StoryTrigger.FloorFirst, 24,
+            new[]
+            {
+                new StoryLine(2, null, 304520, "00_배경"),
+                new StoryLine(2, null, 304521, null),
+                new StoryLine(2, null, 304522, null),
+            },
+            null,
+            null),
+        new StoryScene("f24_report_talk", StoryKind.Dialogue, StoryTrigger.FloorFirst, 24,
+            new[]
+            {
+                new StoryLine(0, "Illust_Adventurer_Thinking", 304560, null),
+                new StoryLine(1, "Illust_MagicalSword_Sleep", 304561, null),
+            },
+            null,
+            new[] { new StoryCue(1, StoryCueKind.Emote, "Question"), new StoryCue(2, StoryCueKind.Emote, "Sleepy") }),
+        new StoryScene("walk_29", StoryKind.Bark, StoryTrigger.FloorBark, 29,
+            new[]
+            {
+                new StoryLine(0, "Illust_Adventurer_Thinking", 304600, null),
+                new StoryLine(1, null, 304601, null),
+            },
+            null,
+            null),
+        new StoryScene("walk_33", StoryKind.Bark, StoryTrigger.FloorBark, 33,
+            new[]
+            {
+                new StoryLine(1, "Illust_MagicalSword_Smile", 304640, null),
+                new StoryLine(0, null, 304641, null),
+            },
+            null,
+            null),
+        new StoryScene("f37_report", StoryKind.Card, StoryTrigger.FloorFirst, 37,
+            new[]
+            {
+                new StoryLine(2, null, 304680, "00_배경"),
+                new StoryLine(2, null, 304681, null),
+                new StoryLine(2, null, 304682, null),
+            },
+            null,
+            null),
+        new StoryScene("walk_43", StoryKind.Bark, StoryTrigger.FloorBark, 43,
+            new[]
+            {
+                new StoryLine(0, null, 304720, null),
+                new StoryLine(1, "Illust_MagicalSword_Silense", 304721, null),
+            },
+            null,
+            null),
+        new StoryScene("walk_53", StoryKind.Bark, StoryTrigger.FloorBark, 53,
+            new[]
+            {
+                new StoryLine(0, "Illust_Adventurer_Thinking", 304760, null),
+                new StoryLine(1, "Illust_MagicalSword_Silense", 304761, null),
+            },
+            null,
+            null),
+        new StoryScene("walk_64", StoryKind.Bark, StoryTrigger.FloorBark, 64,
+            new[]
+            {
+                new StoryLine(0, null, 304800, null),
+            },
+            null,
+            null),
+        new StoryScene("walk_69", StoryKind.Bark, StoryTrigger.FloorBark, 69,
+            new[]
+            {
+                new StoryLine(0, null, 304840, null),
+                new StoryLine(1, "Illust_MagicalSword_Silense", 304841, null),
+            },
+            null,
+            null),
+        new StoryScene("walk_83", StoryKind.Bark, StoryTrigger.FloorBark, 83,
+            new[]
+            {
+                new StoryLine(0, "Illust_Adventurer_Thinking", 304880, null),
+            },
+            null,
+            null),
+        new StoryScene("walk_87", StoryKind.Bark, StoryTrigger.FloorBark, 87,
+            new[]
+            {
+                new StoryLine(0, null, 304920, null),
+            },
+            null,
+            null),
+        new StoryScene("walk_93", StoryKind.Bark, StoryTrigger.FloorBark, 93,
+            new[]
+            {
+                new StoryLine(1, null, 304960, null),
+                new StoryLine(0, null, 304961, null),
+            },
+            null,
+            null),
+        new StoryScene("walk_97", StoryKind.Bark, StoryTrigger.FloorBark, 97,
+            new[]
+            {
+                new StoryLine(0, "Illust_Adventurer_Question", 305000, null),
+                new StoryLine(1, "Illust_MagicalSword_Silense", 305001, null),
+            },
+            null,
+            null),
     };
 
     // 층별 사실 — 인덱스는 층 번호(1~100). 0 번과 손수 만든 1~4층은 비어 있다.
@@ -1000,11 +1127,11 @@ public static class GeneratedStory
     // 들어설 때 뜨는 층 유형 바크(Scenes 의 번호), 없으면 -1 — story_gen.bark_schedule (바이블 R13·R15)
     public static readonly int[] FloorBarks =
     {
-        -1, -1, -1, -1, -1, -1, -1, 71, -1, -1, 65, -1, -1, -1, 77, -1, -1, -1, 74, -1,
-        -1, -1, -1, 75, -1, -1, 68, -1, -1, -1, 66, -1, -1, -1, 78, -1, -1, -1, 76, -1,
-        -1, -1, -1, 74, -1, -1, -1, 72, -1, -1, -1, 69, -1, -1, 79, -1, -1, -1, 75, -1,
-        -1, -1, -1, 76, -1, -1, -1, 73, -1, -1, 67, -1, -1, -1, 77, -1, -1, -1, 74, -1,
-        -1, -1, -1, 75, -1, -1, -1, 72, -1, -1, -1, 70, -1, -1, 78, -1, -1, -1, 76, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, 79, 65, -1, -1, -1, -1, 66, -1, -1, -1, -1,
+        -1, -1, 71, 76, -1, -1, 68, -1, -1, -1, -1, -1, 72, -1, -1, -1, 70, -1, 74, -1,
+        -1, -1, -1, -1, 77, -1, -1, -1, 75, -1, -1, -1, 73, -1, -1, -1, -1, 71, -1, -1,
+        -1, -1, 72, -1, -1, -1, -1, 73, -1, -1, -1, 69, -1, -1, -1, 67, -1, -1, -1, 78,
+        -1, -1, -1, -1, -1, -1, 69, -1, -1, -1, -1, 68, -1, -1, -1, -1, 69, -1, -1, -1,
         -1,
     };
     // 마검이 값만 말하는 층 — 죽음 바크는 데미안 것만 (바이블 R13)

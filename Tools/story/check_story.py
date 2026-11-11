@@ -29,6 +29,7 @@ TRIGGERS = [                                      # (패턴, 인자 검사) — 
     (r"village", None),
     (r"chapter_start:([0-4])", None),
     (r"floor_first:([1-9][0-9]*)", lambda n: 5 <= int(n) <= 100),
+    (r"floor_bark:([1-9][0-9]*)", lambda n: 5 <= int(n) <= 100),
     (r"trait_first:" + _ONE("beast magic guardian immortal knight titan assassin armor"), None),
     (r"floor_type:" + _ONE("basic stingy gate plenty treasure"), None),
     (r"mechanic_first:" + _ONE("forecast fatal overflow vault spare_key choice rune nokey warp death crit levelup"), None),
@@ -39,7 +40,8 @@ TRIGGERS = [                                      # (패턴, 인자 검사) — 
     (r"epilogue:(" + ID + ")", None),
     (r"credits", None),
 ]
-BARK_ONLY = ("floor_type:", "death")               # FORMAT: bark 전용
+BARK_ONLY = ("floor_type:", "floor_bark:", "death")   # FORMAT: bark 전용
+WALK_LINES = 2                                    # 걸으며 한마디(floor_bark)는 주고받는 두 줄까지
 CHAPTER_FIRST = {5, 21, 41, 61, 81}               # 이 층은 chapter_start 를 쓴다
 MAX_LINES, SOFT_WIDTH = 3, 26
 TYPOS = ("외뢰서", "버텨기", "있을꺼야", "받친다")    # BRIEF 4절
@@ -179,8 +181,8 @@ def check(doc, old_prologue):
         if not isinstance(lines, list) or not lines:
             err.append(f"{where}: lines 가 비었다")
             continue
-        if kind == "bark" and len(lines) != 1:
-            err.append(f"{where}: bark 는 한 줄이다 (지금 {len(lines)})")
+        if kind == "bark" and len(lines) > (WALK_LINES if trigger.startswith("floor_bark:") else 1):
+            err.append(f"{where}: bark 는 한 줄이다, floor_bark 만 {WALK_LINES}줄까지 (지금 {len(lines)})")
         for i, l in enumerate(lines, 1):
             key = l.get("key")
             at = f"{where} {key or '#' + str(i)}"
