@@ -35,6 +35,7 @@ public class ForecastOverlay : MonoBehaviour
         public TextMeshProUGUI Text;
         public MonsterController Monster;
         public Vector3 Head;        // 몬스터 위치에서 그림의 보이는 윗변 가운데까지
+        public float Side;          // 그림 가운데에서 그려진 좌우 끝 중 먼 쪽까지 (월드)
         public Vector2 Size;        // 글자가 차지하는 너비·높이 (캔버스 단위). 글자를 바꿀 때 잰다
         public Vector3 Want;        // 이번 프레임에 서고 싶은 자리 (화면)
         public Vector3 Last;        // 지금 선 자리 (화면)
@@ -224,6 +225,7 @@ public class ForecastOverlay : MonoBehaviour
 
         label.Monster = mc;
         label.Head = HeadOf(mc) - mc.transform.position;
+        label.Side = SideOf(mc);
         label.Last = new Vector3(float.NaN, 0f, 0f);    // 다음 Follow 에서 반드시 옮긴다
 
         label.Result = r;
@@ -351,6 +353,37 @@ public class ForecastOverlay : MonoBehaviour
         return new Vector3(center.x, sr.transform.TransformPoint(new Vector3(0f, top, 0f)).y, center.z);
     }
 
+    /// <summary>그림 가운데에서 그려진 좌우 끝 중 먼 쪽까지(월드) — 그림이 뒤집혀도 숫자가 몸에 얹히지 않는다.
+    /// HeadOf 처럼 촘촘한 메시의 꼭짓점으로 잰다.</summary>
+    static float SideOf(MonsterController mc)
+    {
+        SpriteRenderer sr = mc.GetComponentInChildren<SpriteRenderer>();
+        Sprite sprite = sr != null ? sr.sprite : null;
+        if (sprite == null)
+            return Define.TILE_SIZE * 0.5f;
+
+        float center = sprite.bounds.center.x, side = 0f;
+        foreach (Vector2 v in sprite.vertices)
+            side = Mathf.Max(side, Mathf.Abs(v.x - center));
+        return side > 0f ? side * Mathf.Abs(sr.transform.lossyScale.x) : Define.TILE_SIZE * 0.5f;
+    }
+
+    /// <summary>바로 북쪽 칸에 살아 있는 다른 몬스터가 서 있는가. 몬스터는 걷지 않으니 칸 가운데끼리 잰다.</summary>
+    bool UnderAnother(MonsterController mc)
+    {
+        Vector3 at = mc.transform.position;
+        for (int i = 0; i < _used; i++)
+        {
+            MonsterController other = _labels[i].Monster;
+            if (other == null || other == mc || other.gameObject.activeInHierarchy == false)
+                continue;
+            Vector3 d = other.transform.position - at;
+            if (Mathf.Abs(d.x) < Define.TILE_SIZE * 0.5f && Mathf.Abs(d.z - Define.TILE_SIZE) < Define.TILE_SIZE * 0.5f)
+                return true;
+        }
+        return false;
+    }
+
     Label NewLabel()
     {
         TextMeshProUGUI text = CodeUI.NewText(transform, "Forecast", _font, FontSize, Color.white, TextAlignmentOptions.Bottom);
@@ -401,7 +434,20 @@ public class ForecastOverlay : MonoBehaviour
                 started = true;
             }
 
-            label.Want.y += Lift * scale;
+            // 바로 북쪽 칸에 다른 몬스터가 서 있으면 머리 위 숫자가 그놈 몸통에 얹혀 누구 값인지 읽히지 않았다
+            // (세로 통로에 줄 선 43·87층 — 그림이 한 칸 반 넘게 서 있어서다). 그때는 제 머리 오른쪽 옆에 세운다.
+            if (UnderAnother(mc))
+            {
+                // 화면 오른쪽 끝의 세로 통로면 밖으로 나간다 — 화면 안에 붙든다(제 몸에 조금 얹힌다).
+                label.Want.x = Mathf.Min(cam.WorldToScreenPoint(mc.transform.position + label.Head + Vector3.right * label.Side).x
+                                         + (label.Size.x * 0.5f + Gap) * scale,
+                                         Screen.width - (label.Size.x * 0.5f + Gap) * scale);
+                label.Want.y -= label.Size.y * scale;
+            }
+            else
+            {
+                label.Want.y += Lift * scale;
+            }
             label.Want.z = 0f;
             _placing.Add(label);
         }

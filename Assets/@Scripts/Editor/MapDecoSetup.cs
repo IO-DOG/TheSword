@@ -20,7 +20,7 @@ using UnityEngine;
 ///
 /// 새 그림(Meshy — Documents/TheSword_Meshy_Prompts.md)은 MeshyArtImport 가 Prop_C{챕터}_{자리} 로
 /// 들여온다. 그 자리에 그림이 있으면 새 규칙으로 놓고, 없으면 옛 장식이 그대로 구워진다.
-/// 새 규칙이 따로인 이유: 옛 횃불(±0.03)·사슬은 벽 칸 한가운데에 놓여 벽(±0.15, 높이 0.2~0.5) 속에
+/// 새 규칙이 따로인 이유: 옛 횃불(±0.03)·사슬은 벽 칸 한가운데에 놓여 벽(±0.15) 속에
 /// 들어가 있다. 새 것은 카메라가 보는 남쪽 벽면에 걸고(프리팹이 그 면으로 비켜 서 있다), 큰 것은 방 안쪽
 /// 벽 한 칸을 대신하고, 바닥 것은 아무것도 없는 바닥에만 둔다.
 ///
@@ -49,9 +49,13 @@ public static class MapDecoSetup
     const int FloorEvery = 16;
     const int ExtraEvery = 40;
 
-    // 새 불의 점광원 자리. 벽에 건 불은 남쪽 면(z -0.15) 바로 앞, 벽 높이의 가운데쯤 —
-    // 옛 횃불처럼 벽 속에 두면 불이 걸린 그 면은 빛의 뒤쪽이라 밝아지지 않는다.
-    static readonly Vector3 FaceGlow = new Vector3(0f, 0.32f, -0.22f);
+    /// <summary>벽에 거는 것·벽을 대신하는 것을 놓는 높이. 소품 프리팹(옛 횃불·사슬도, MeshyArtImport 의 새 것도)은
+    /// 벽 프리팹처럼 y 0.2 를 벽의 바닥으로 삼아 만들어져 있다 — 벽이 내려앉는 만큼 같이 내린다.</summary>
+    static readonly Vector3 OnWall = new Vector3(0f, MapBuilder.WallDrop, 0f);
+
+    // 새 불의 점광원 자리. 벽에 건 불은 남쪽 면(z -0.15) 바로 앞, 벽 윗면(그림 0.32, 콜라이더 0.3) 바로 아래 —
+    // 옛 횃불처럼 벽 속에 두면 불이 걸린 그 면은 빛의 뒤쪽이라 밝아지지 않고, 윗면보다 높으면 벽 윗면이 하얗게 뜬다.
+    static readonly Vector3 FaceGlow = new Vector3(0f, 0.28f, -0.22f);
     static readonly Vector3 FloorGlow = new Vector3(0f, 0.15f, 0f);
     static readonly Color EmberLight = new Color(1.00f, 0.60f, 0.30f);   // 마지막 불씨(Light2)
 
@@ -249,7 +253,7 @@ public static class MapDecoSetup
         {
             foreach (Vector3 p in Spread(backs, BigPerFloor))
             {
-                Attach(root.transform, big, p, 1f).name = MapBuilder.WALL_SWAP;
+                Attach(root.transform, big, p + OnWall, 1f).name = MapBuilder.WALL_SWAP;
                 taken.Add(p);
             }
         }
@@ -269,7 +273,7 @@ public static class MapDecoSetup
             {
                 int at = (int)((i + 0.5f) * fireCells.Count / fires);   // 층 전체에 고르게 흩는다
                 used.Add(at);
-                Attach(root.transform, deco.Fire, fireCells[at], TileScale);
+                Attach(root.transform, deco.Fire, fireCells[at] + (deco.OnFloor ? Vector3.zero : OnWall), TileScale);
                 AddLight(root.transform, fireCells[at], deco);
             }
         }
@@ -279,7 +283,7 @@ public static class MapDecoSetup
             // 제 안에 점광원을 하나 더 갖고 있었다(범위 20·10). 챕터 3 은 셋 + 마지막 불씨 하나.
             foreach (Vector3 p in Spread(Free(deco.OnFloor ? floors : faces, taken), deco.FireCount))
             {
-                Attach(root.transform, light, p, 1f);
+                Attach(root.transform, light, p + (deco.OnFloor ? Vector3.zero : OnWall), 1f);
                 AddLight(root.transform, p + (deco.OnFloor ? FloorGlow : FaceGlow), deco.Light, deco.LightRange);
                 taken.Add(p);
             }
@@ -294,12 +298,12 @@ public static class MapDecoSetup
                     continue;
                 if (deco.OnFloor == false && used.Contains(i))
                     continue;
-                Attach(root.transform, deco.Ambient, walls[i], TileScale);
+                Attach(root.transform, deco.Ambient, walls[i] + OnWall, TileScale);
             }
         }
         else
         {
-            Every(root.transform, hang, faces, taken, deco.AmbientEvery);
+            Every(root.transform, hang, faces, taken, deco.AmbientEvery, OnWall);
         }
 
         // 바닥 소품은 걷는 칸에 선다 — 그래서 발목 높이로 줄어 들어오고(MeshyArtImport) 콜라이더도 없다.
@@ -374,22 +378,23 @@ public static class MapDecoSetup
     }
 
     /// <summary>비어 있는 칸을 훑으며 every 칸마다 하나 — 옛 소품과 같은 간격 규칙이다.</summary>
-    static void Every(Transform parent, GameObject prefab, List<Vector3> cells, HashSet<Vector3> taken, int every)
+    static void Every(Transform parent, GameObject prefab, List<Vector3> cells, HashSet<Vector3> taken, int every,
+                      Vector3 lift = default)
     {
         if (prefab == null)
             return;
         List<Vector3> free = Free(cells, taken);
         for (int i = every / 2; i < free.Count; i += every)
         {
-            Attach(parent, prefab, free[i], 1f);
+            Attach(parent, prefab, free[i] + lift, 1f);
             taken.Add(free[i]);
         }
     }
 
     static void AddLight(Transform parent, Vector3 pos, ChapterDeco deco)
     {
-        // 불꽃이 있는 높이에 둔다. 벽은 0.2~0.5 를 차지하고, 횃불 불꽃은 그 아래쪽이다.
-        AddLight(parent, pos + new Vector3(0f, deco.OnFloor ? 0.15f : 0.28f, 0f), deco.Light, deco.LightRange);
+        // 불꽃이 있는 높이에 둔다. 벽은 그림 0~0.32·콜라이더 0~0.3 을 차지하고(MapBuilder.WallDrop), 횃불 불꽃은 그 아래쪽이다.
+        AddLight(parent, pos + new Vector3(0f, deco.OnFloor ? 0.15f : 0.28f + MapBuilder.WallDrop, 0f), deco.Light, deco.LightRange);
     }
 
     static void AddLight(Transform parent, Vector3 at, Color color, float range)

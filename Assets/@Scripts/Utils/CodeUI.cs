@@ -130,17 +130,19 @@ public static class CodeUI
     /// 마우스까지의 거리(픽셀), gap 은 마우스와 창 사이(캔버스 단위). frame 은 가운데 앵커·가운데 피벗이어야 한다.
     /// 몬스터·아이템 정보 창이 쓴다 — 예전에는 픽셀을 캔버스 단위로 그대로 써서 1080p 에서 창이 가리키는 몬스터를
     /// 덮었고(960x540 에서는 반대로 멀리 떨어졌다), 위아래로는 마우스 높이 그대로라 윗줄 몬스터의 창은 이름째 잘렸다.
+    /// 아래로는 HUD 의 능력치 줄(레벨·공방체와 그 위 "치명까지" 줄, 캔버스 64) 위에서 멈춘다 — 화면 아래쪽 몬스터를 짚으면
+    /// 창의 마지막 줄("공격 +k 이면 …")이 HUD 글자에 덮였다(2026-11-11).
     /// </summary>
     public static void PlaceBeside(RectTransform frame, Vector2 fromCenter, float gap)
     {
-        const float Margin = 8f;
+        const float Margin = 8f, HudStrip = 64f;
         float scale = frame.GetComponentInParent<Canvas>().rootCanvas.scaleFactor;
         Vector2 half = new Vector2(Screen.width, Screen.height) / (2f * scale);
         Vector2 box = Vector2.Scale(frame.rect.size, frame.localScale) / 2f;
         Vector2 at = fromCenter / scale;
         at.x += at.x >= 0f ? -(gap + box.x) : gap + box.x;
         at.x = Mathf.Clamp(at.x, -half.x + box.x + Margin, half.x - box.x - Margin);
-        at.y = Mathf.Clamp(at.y, -half.y + box.y + Margin, half.y - box.y - Margin);
+        at.y = Mathf.Clamp(at.y, -half.y + box.y + Margin + HudStrip, half.y - box.y - Margin);
         frame.anchoredPosition = at;
     }
 

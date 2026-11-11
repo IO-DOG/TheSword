@@ -124,17 +124,37 @@ public static class FontFallback
             if (lang != chosen)
                 global.Add(font);
 
-        if (s_pixelCjk != null && (chosen == Define.ScriptType.Cn || chosen == Define.ScriptType.Jp))
-            foreach (TMP_FontAsset font in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
-                if (font.name == CodeUI.NumberFontName)
-                {
-                    MatchLines(s_pixelCjk, font);
-                    font.fallbackFontAssetTable.Insert(0, s_pixelCjk);
-                }
+        bool cjk = s_pixelCjk != null && (chosen == Define.ScriptType.Cn || chosen == Define.ScriptType.Jp);
+        foreach (TMP_FontAsset font in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
+        {
+            bool number = font.name == CodeUI.NumberFontName;
+            if (number == false && font.name != CodeUI.ProseFontName)
+                continue;
+            ForgetFallbacks(font);
+            if (number && cjk)
+            {
+                MatchLines(s_pixelCjk, font);
+                font.fallbackFontAssetTable.Insert(0, s_pixelCjk);
+            }
+        }
         // 이미 짠 글은 옛 폴백 글자를 들고 있다 — 다음 그리기에 다시 짠다. 꺼진 글은 켤 때 다시 짠다.
         foreach (TMP_Text text in Object.FindObjectsByType<TMP_Text>(FindObjectsSortMode.None))
-            if (text.font != null && text.font.name == CodeUI.NumberFontName)
-                text.havePropertiesChanged = true;
+            text.havePropertiesChanged = true;
+    }
+
+    // TMP 는 폴백에서 찾은 글자를 그 글을 쓴 글꼴의 조회표에 적어 두고 다시 찾지 않는다(TMP_Text.GetTextElement — 먼저 찾은 것이
+    // 이긴다). Silver.ttf 가 도착하기 전에 짜인 글의 가나·한자는 윈도 글꼴로 적혀, 픽셀 글꼴을 건 뒤에도 그 실행 내내 그 글자만
+    // 윈도 글꼴로 나왔다 — 크기도 달라 히라가나만 커지고 도감 설명이 칸을 넘쳤다(2026-11-11 일본어). 폴백을 다시 걸 때마다
+    // 남의 글꼴에서 빌려 적어 둔 글자를 지운다. 제 글자(textAsset 이 자신)는 그대로다.
+    static void ForgetFallbacks(TMP_FontAsset font)
+    {
+        Dictionary<uint, TMP_Character> table = font.characterLookupTable;
+        var borrowed = new List<uint>();    // 폴백을 다시 걸 때(언어 바꿈·씬)만 돈다
+        foreach (KeyValuePair<uint, TMP_Character> kv in table)
+            if (kv.Value.textAsset != font)
+                borrowed.Add(kv.Key);
+        foreach (uint key in borrowed)
+            table.Remove(key);
     }
 
     // 줄의 윗선·아랫선은 DNF 와 같게. Silver 의 깊은 아랫선(0.47em)을 1.3 배로 키운 채 두면 한자 한 글자가 줄을 늘려,

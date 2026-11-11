@@ -24,6 +24,13 @@ public static class MapBuilder
     /// 콜라이더는 남긴다. MapDecoSetup 이 큰 소품(석관 …)에 붙인다.</summary>
     public const string WALL_SWAP = "WallSwap";
 
+    /// <summary>벽을 놓는 높이. 벽 프리팹은 그림도 콜라이더도 루트보다 0.2 위(y 0.2~0.5)에 있어, 손수 만든 1~4층은
+    /// 벽을 그만큼 내려(월드 y −0.2 — Walls −0.04 아래 −0.16) 바닥에 앉혔다. 여기서는 0 에 놓아 생성 층의 벽이 전부 0.2 떠 있었다(2026-11-11) — 화면에서는
+    /// 벽이 제 칸보다 3분의 1칸 위에 그려져, 벽 북쪽 칸에 선 것(주인공·몬스터·아이템)의 발치 36px 이 남쪽 벽 윗면에
+    /// 가렸고 벽 남쪽 면 아래로는 벽 칸의 바닥이 걸을 수 있는 땅처럼 비쳤다. 키높이 광선이 벽 밑으로 지나간 것도 같은 뿌리다
+    /// (PlayerController.WallAt). 벽에 건 장식·벽을 대신하는 큰 소품은 MapDecoSetup 이 같은 값으로 내려 굽는다.</summary>
+    public const float WallDrop = -0.2f;
+
     static readonly Color[] ChapterTint =
     {
         new Color(1.00f, 1.00f, 1.00f), // 00 이끼 낀 지하 묘소 - 원본
@@ -127,12 +134,13 @@ public static class MapBuilder
                         // 그 id 를 바꾸면 MapData 가 바뀌어 세이브 해시가 깨진다.
                         // 새 그림에는 틴트를 곱하지 않는다. 챕터 색이 그림에 이미 들어 있다.
                         Vector2Int cell = Cell(pos);
+                        Vector3 at = pos + new Vector3(0f, WallDrop, 0f);
                         GameObject art = wallArt != null ? wallArt[WallVariant(mapId, cell)] : null;
                         GameObject wall = art != null
-                            ? Place(art, tiles, pos, Color.white)
-                            : Place(string.Format(WALL_PREFAB_FORMAT, obj.Id), tiles, pos, tint);
+                            ? Place(art, tiles, at, Color.white)
+                            : Place(string.Format(WALL_PREFAB_FORMAT, obj.Id), tiles, at, tint);
                         if (wall == null)
-                            wall = Place(WALL_PREFAB_FALLBACK, tiles, pos, tint);
+                            wall = Place(WALL_PREFAB_FALLBACK, tiles, at, tint);
                         if (wall != null && swapped != null && swapped.Contains(cell))
                             HideLook(wall);
                         else if (art != null && open != null)
