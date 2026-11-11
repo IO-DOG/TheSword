@@ -13,8 +13,9 @@ using Object = UnityEngine.Object;
 ///
 ///   1. 표의 이름 그대로 넣는다 — Wall_C1_Base.glb, Prop_C3_Light.glb …
 ///        Assets/@Resources/Art/Meshy/       소유자가 Meshy 로 뽑은 그림
+///        Assets/@Resources/Art/Tripo/       소유자가 Tripo 로 뽑은 그림 (Documents/TheSword_Tripo_Prompts.md)
 ///        Assets/@Resources/Art/ChapterKit/  임시 복셀 그림(MagicaVoxel OBJ + 256x1 팔레트)
-///      같은 이름이 둘 다 있으면 Meshy 가 이긴다 — 진짜 그림이다.
+///      같은 이름이 여럿이면 Tripo > Meshy > 복셀 키트 — 생성 그림이 진짜 그림이다.
 ///   2. 메뉴 TheSword/Import Meshy Art → Assets/@Resources/Art/Built/{이름}.prefab
 ///   3. 소품(Prop_*)이 새로 들어왔으면 메뉴 TheSword/Build Map Decorations. 벽은 MapBuilder 가 런타임에 고른다.
 ///
@@ -22,7 +23,8 @@ using Object = UnityEngine.Object;
 ///   벽·큰 소품  옛 벽 셋(W01~W03)이 차지하던 칸을 채우고 그 바닥면(y 0.2)에 앉는다
 ///   벽에 거는 것  카메라가 보는 남쪽 벽면에 등을 붙인다 — 횃불·사슬 크기 안으로
 ///   바닥에 서는 것  (바닥 불 포함) 화로 발자국 안, 발목 높이(0.08) 안, 바닥(y 0) — 걷는 칸에 서기 때문이다
-/// 고르게 키우거나 줄이기만 한다. 찌그러뜨리지 않는다. 복셀 그림은 이미 옛 그림의 단위(한 칸 = 3.2)로
+/// 소품은 고르게 키우거나 줄이기만 한다(찌그러뜨리지 않는다). 생성 벽(Meshy·Tripo)만은 옛 벽과 같은 크기여야 해서
+/// 축마다 따로 맞춘다 — 폭·깊이는 나무 벽(0.32)을 꽉, 몸통 윗면은 돌 벽 높이(0.30), 위로 솟은 장식은 그 위(FitWall). 복셀 그림은 이미 옛 그림의 단위(한 칸 = 3.2)로
 /// 그렸으니 배율을 옛 장식과 같은 0.1 로 두고 자리만 붙인다 — 칸보다 클 때만 줄인다(복셀 크기가 달라져 알린다).
 ///
 /// 새 벽은 Tilemap_C00_W02 의 콜라이더·레이어를 그대로 받는다 — 길찾기·충돌·카메라 범위가 그것을 잰다.
@@ -37,6 +39,7 @@ using Object = UnityEngine.Object;
 public static class MeshyArtImport
 {
     const string MeshyDir = "Assets/@Resources/Art/Meshy";
+    const string TripoDir = "Assets/@Resources/Art/Tripo";   // Tripo 로 뽑은 그림 (Documents/TheSword_Tripo_Prompts.md)
     const string KitDir = "Assets/@Resources/Art/ChapterKit";
     const string OutDir = "Assets/@Resources/Art/Built";
     const string WallKey = "Tilemap_C00_W02";   // 새 벽이 콜라이더·재질을 물려받는 옛 기본형
@@ -70,14 +73,16 @@ public static class MeshyArtImport
     public static void Import()
     {
         Directory.CreateDirectory(MeshyDir);
+        Directory.CreateDirectory(TripoDir);
         Directory.CreateDirectory(KitDir);
         Directory.CreateDirectory(OutDir);
         AssetDatabase.Refresh();
 
-        // 이름 → 모델 파일. 복셀 키트를 먼저 담고 Meshy 로 덮는다 — 같은 이름이면 진짜 그림이 이긴다.
+        // 이름 → 모델 파일. 복셀 키트를 먼저 담고 Meshy, 그다음 Tripo 로 덮는다 — 같은 이름이면 진짜 그림이 이기고,
+        // 둘 다 있으면 Tripo 가 이긴다(나중에 들인 생성기). 콘솔이 무엇 대신 무엇을 쓰는지 알린다.
         var notes = new List<string>();
         var picked = new Dictionary<string, string>();
-        foreach (string dir in new[] { KitDir, MeshyDir })
+        foreach (string dir in new[] { KitDir, MeshyDir, TripoDir })
         {
             foreach (string found in Directory.GetFiles(dir))
             {
@@ -100,7 +105,7 @@ public static class MeshyArtImport
         }
         if (picked.Count == 0)
         {
-            Debug.LogWarning($"[MeshyArt] 넣을 모델이 없다 — {MeshyDir}/ 에 Wall_C1_Base.glb 처럼 표의 이름으로 넣는다");
+            Debug.LogWarning($"[MeshyArt] 넣을 모델이 없다 — {TripoDir}/ 나 {MeshyDir}/ 에 Wall_C1_Base.glb 처럼 표의 이름으로 넣는다");
             return;
         }
 
@@ -214,6 +219,105 @@ public static class MeshyArtImport
         offset = at - pivot * scale;
     }
 
+    const float BodyShare = 0.8f;   // 단면이 전체 폭·깊이의 이만큼이면 아직 몸통이다
+    const float BodyBand = 0.02f;   // 같은 높이로 보는 띠(전체 높이 대비)
+
+    /// <summary>
+    /// 생성 모델(Meshy·Tripo) 벽을 옛 벽 크기에 맞춘다 — 폭·깊이는 옛 벽 상자(나무 벽 0.32)를 꽉 채우고,
+    /// 몸통 윗면은 옛 벽 높이(돌 벽 0.30)에 닿는다. 몸통 위로 솟은 것(굴뚝·가시·떠오른 조각)은 같은 배율로
+    /// 그 위에 남되, 전체가 옛 벽 높이의 TallCap 배를 넘으면 그만큼 낮춘다(몸통도 같이 낮아진다 — 알린다).
+    /// 축마다 배율이 달라 모양이 조금 늘거나 준다. 많이 달라지면 알린다 — 다시 뽑을 일이다.
+    /// 원점에 놓인 그림에 scale3 을 곱한 뒤 offset 만큼 옮기면 된다.
+    /// </summary>
+    static void FitWall(GameObject art, Bounds src, Targets t, string name, List<string> notes,
+                        out Vector3 scale3, out Vector3 offset)
+    {
+        float top = BodyTop(art, src);
+        float body = top - src.min.y;
+        if (body < src.size.y * 0.4f)
+        {
+            notes.Add($"{name}: 몸통 윗면을 못 찾아(전체의 {body / src.size.y:P0}) 전체 높이로 맞췄다");
+            body = src.size.y;
+        }
+
+        scale3 = new Vector3(t.Wall.size.x / src.size.x, t.Wall.size.y / body, t.Wall.size.z / src.size.z);
+        float cap = t.Wall.size.y * TallCap;
+        if (src.size.y * scale3.y > cap + 1e-6f)
+        {
+            scale3.y = cap / src.size.y;
+            notes.Add($"{name}: 위로 솟은 것이 옛 벽 높이의 {TallCap:0.#}배를 넘어 몸통을 " +
+                      $"{body * scale3.y / t.Wall.size.y:P0} 높이로 낮췄다");
+        }
+
+        float most = Mathf.Max(scale3.x, Mathf.Max(scale3.y, scale3.z));
+        float least = Mathf.Min(scale3.x, Mathf.Min(scale3.y, scale3.z));
+        if (most / least > 1.3f)
+            notes.Add($"{name}: 옛 벽 크기에 맞추느라 모양이 {most / least - 1f:P0} 늘거나 줄었다 " +
+                      "(폭·깊이·몸통 높이가 고르지 않은 그림) — 어색하면 다시 뽑는다");
+        notes.Add($"{name}: 몸통 {t.Wall.size.x:0.000} x {body * scale3.y:0.000} x {t.Wall.size.z:0.000}, " +
+                  $"전체 높이 {src.size.y * scale3.y:0.000}");
+
+        Vector3 pivot = new Vector3(src.center.x, src.min.y, src.center.z);
+        Vector3 at = new Vector3(t.Wall.center.x, t.Wall.min.y, t.Wall.center.z);
+        offset = at - Vector3.Scale(pivot, scale3);
+    }
+
+    /// <summary>몸통 윗면의 높이(뿌리 기준) — 그 높이 둘레 정점들이 전체 폭과 깊이의 BodyShare 이상을 덮는
+    /// 가장 높은 곳. 상자 벽이면 꼭대기, 굴뚝·가시·떠오른 조각이 있으면 그 아래 몸통의 윗면이다.</summary>
+    static float BodyTop(GameObject art, Bounds src)
+    {
+        float band = Mathf.Max(src.size.y * BodyBand, 1e-5f);
+        int n = Mathf.CeilToInt(src.size.y / band) + 1;
+        var lo = new Vector2[n];
+        var hi = new Vector2[n];
+        var topY = new float[n];
+        var has = new bool[n];
+
+        foreach (Renderer r in art.GetComponentsInChildren<Renderer>(true))
+        {
+            Mesh mesh = null;
+            if (r is SkinnedMeshRenderer skin) mesh = skin.sharedMesh;
+            else if (r is MeshRenderer && r.TryGetComponent(out MeshFilter mf)) mesh = mf.sharedMesh;
+            if (mesh == null)
+                continue;
+            Matrix4x4 m = r.transform.localToWorldMatrix;
+            foreach (Vector3 v in mesh.vertices)
+            {
+                Vector3 p = m.MultiplyPoint3x4(v);
+                int i = Mathf.Clamp(Mathf.FloorToInt((p.y - src.min.y) / band), 0, n - 1);
+                var xz = new Vector2(p.x, p.z);
+                if (has[i] == false)
+                {
+                    lo[i] = hi[i] = xz;
+                    topY[i] = p.y;
+                    has[i] = true;
+                    continue;
+                }
+                lo[i] = Vector2.Min(lo[i], xz);
+                hi[i] = Vector2.Max(hi[i], xz);
+                topY[i] = Mathf.Max(topY[i], p.y);
+            }
+        }
+
+        // 띠 하나와 그 위아래 띠를 합쳐 본다 — 정점이 경계에 걸쳐 나뉘어도 같은 높이로 잡힌다
+        for (int i = n - 1; i >= 0; i--)
+        {
+            if (has[i] == false)
+                continue;
+            Vector2 a = lo[i], c = hi[i];
+            for (int j = Mathf.Max(0, i - 1); j <= Mathf.Min(n - 1, i + 1); j++)
+            {
+                if (has[j] == false)
+                    continue;
+                a = Vector2.Min(a, lo[j]);
+                c = Vector2.Max(c, hi[j]);
+            }
+            if (c.x - a.x >= src.size.x * BodyShare && c.y - a.y >= src.size.z * BodyShare)
+                return topY[i];
+        }
+        return src.max.y;
+    }
+
     /// <summary>모델 하나로 프리팹을 만든다. 경로를 돌려주고, 못 만들면 null.
     /// voxel 이면 옛 그림 단위로 그린 복셀 그림이다 — 배율은 0.1 그대로, 자리만 붙인다.
     ///
@@ -279,10 +383,29 @@ public static class MeshyArtImport
             else Object.DestroyImmediate(root);
             return null;
         }
-        float scale;
+        float scale = 1f;
         Vector3 offset;
-        Fit(b, max, back, at, voxel ? MapDecoSetup.TileScale : float.MaxValue, out scale, out offset);
-        art.transform.localScale *= scale;
+        if (kind == "Wall" && voxel == false)
+        {
+            // Meshy·Tripo 벽은 옛 벽과 같은 크기여야 한다 — 축마다 따로 맞춘다(FitWall).
+            // 축마다 다른 배율은 뿌리 축을 따라야 하니, 그림이 돌아 있으면 돌지 않은 그릇에 담는다.
+            if (Quaternion.Angle(art.transform.localRotation, Quaternion.identity) > 0.01f)
+            {
+                var holder = new GameObject("Art");
+                holder.transform.SetParent(root.transform, false);
+                art.name = "Model";
+                art.transform.SetParent(holder.transform, true);
+                art = holder;
+            }
+            Vector3 scale3;
+            FitWall(art, b, t, name, notes, out scale3, out offset);
+            art.transform.localScale = Vector3.Scale(art.transform.localScale, scale3);
+        }
+        else
+        {
+            Fit(b, max, back, at, voxel ? MapDecoSetup.TileScale : float.MaxValue, out scale, out offset);
+            art.transform.localScale *= scale;
+        }
         art.transform.localPosition = offset;
         if (voxel && scale < MapDecoSetup.TileScale * 0.999f)
             notes.Add($"{name}: 복셀 그림이 자리보다 커서 {scale / MapDecoSetup.TileScale:P0} 로 줄였다 — 복셀 크기가 옛 그림과 달라진다");
@@ -565,6 +688,14 @@ public static class MeshyArtImport
     /// 콜라이더·레이어를 잰다. 다시 들일 때 프리팹 뿌리가 그대로인지, 벽 변형의 비율과 이웃 규칙도 본다.
     /// 임시 폴더에 만들고 지운다. GPU 는 쓰지 않는다(그림 없는 재질).
     /// </summary>
+    [MenuItem("TheSword/Import Meshy Art - Self Test")]
+    static void SelfTestMenu()
+    {
+        string report = SelfTest();
+        if (report.Contains("실패")) Debug.LogError(report);
+        else Debug.Log(report);
+    }
+
     public static string SelfTest()
     {
         var fails = new List<string>();
@@ -590,6 +721,14 @@ public static class MeshyArtImport
 
             var notes = new List<string>();
             Check(fails, model, "Wall", 1, "Base", t, dir, notes);
+            // 굴뚝 벽 — 4x4x4 몸통 위에 1x1.6x1 굴뚝(몸통의 0.4 배 더). 몸통은 옛 벽, 굴뚝은 그 위로
+            GameObject chimney = BoxesModel("Chimney", new[] { new Vector3(0f, 0f, 0f), new Vector3(1.5f, 4f, 1.5f) },
+                                            new[] { new Vector3(4f, 4f, 4f), new Vector3(2.5f, 5.6f, 2.5f) }, plain, dir, models);
+            Check(fails, chimney, "Wall", 2, "B", t, dir, notes, t.Wall.size.y * 1.4f);
+            // 너무 높은 가시 — 몸통의 2 배. 전체가 TallCap 에 눌린다
+            GameObject spike = BoxesModel("Spike", new[] { new Vector3(0f, 0f, 0f), new Vector3(1.8f, 4f, 1.8f) },
+                                          new[] { new Vector3(4f, 4f, 4f), new Vector3(2.2f, 8f, 2.2f) }, plain, dir, models);
+            Check(fails, spike, "Wall", 4, "B", t, dir, notes, t.Wall.size.y * TallCap);
             Check(fails, model, "Prop", 0, "Light", t, dir, notes);   // 챕터 0 — 벽에 건다
             Check(fails, model, "Prop", 2, "Light", t, dir, notes);   // 챕터 2 — 바닥 화로
             Check(fails, model, "Prop", 3, "Light2", t, dir, notes);
@@ -630,13 +769,27 @@ public static class MeshyArtImport
     /// <summary>lo~hi 상자 하나짜리 가짜 모델. 메시는 에셋으로 남긴다(프리팹이 가리킬 수 있게).</summary>
     static GameObject BoxModel(string name, Vector3 lo, Vector3 hi, Material material, string dir, List<GameObject> made)
     {
+        return BoxesModel(name, new[] { lo }, new[] { hi }, material, dir, made);
+    }
+
+    /// <summary>상자 여럿(lo[k]~hi[k])을 한 메시로 묶은 가짜 모델.</summary>
+    static GameObject BoxesModel(string name, Vector3[] lo, Vector3[] hi, Material material, string dir, List<GameObject> made)
+    {
+        int[] box = { 0, 2, 1, 1, 2, 3, 4, 5, 6, 5, 7, 6, 0, 1, 4, 1, 5, 4,
+                      2, 6, 3, 3, 6, 7, 0, 4, 2, 2, 4, 6, 1, 3, 5, 3, 7, 5 };
         var mesh = new Mesh { name = name };
-        var v = new Vector3[8];
-        for (int i = 0; i < 8; i++)
-            v[i] = new Vector3((i & 1) != 0 ? hi.x : lo.x, (i & 2) != 0 ? hi.y : lo.y, (i & 4) != 0 ? hi.z : lo.z);
+        var v = new Vector3[8 * lo.Length];
+        var tris = new int[box.Length * lo.Length];
+        for (int k = 0; k < lo.Length; k++)
+        {
+            for (int i = 0; i < 8; i++)
+                v[8 * k + i] = new Vector3((i & 1) != 0 ? hi[k].x : lo[k].x, (i & 2) != 0 ? hi[k].y : lo[k].y,
+                                           (i & 4) != 0 ? hi[k].z : lo[k].z);
+            for (int i = 0; i < box.Length; i++)
+                tris[box.Length * k + i] = box[i] + 8 * k;
+        }
         mesh.vertices = v;
-        mesh.triangles = new[] { 0, 2, 1, 1, 2, 3, 4, 5, 6, 5, 7, 6, 0, 1, 4, 1, 5, 4,
-                                 2, 6, 3, 3, 6, 7, 0, 4, 2, 2, 4, 6, 1, 3, 5, 3, 7, 5 };
+        mesh.triangles = tris;
         mesh.RecalculateBounds();
         AssetDatabase.CreateAsset(mesh, $"{dir}/{name}.asset");
 
@@ -711,7 +864,7 @@ public static class MeshyArtImport
     }
 
     static void Check(List<string> fails, GameObject model, string kind, int chapter, string slot,
-                      Targets t, string dir, List<string> notes)
+                      Targets t, string dir, List<string> notes, float wantHeight = 0f)
     {
         string name = $"{kind}_C{chapter}_{slot}";
         string path = BuildPrefab(model, name, kind, chapter, slot, false, t, dir, notes);
@@ -731,19 +884,29 @@ public static class MeshyArtImport
             Bounds b;
             Box(go, false, out b);
 
-            bool touches = false;
-            for (int a = 0; a < 3; a++)
+            if (kind == "Wall")
             {
-                if (max[a] <= 0f)
-                    continue;
-                if (b.size[a] > max[a] + eps)
-                    fails.Add($"{name}: 축 {a} 크기 {b.size[a]:0.0000} 가 한계 {max[a]:0.0000} 를 넘는다");
-                touches |= Mathf.Abs(b.size[a] - max[a]) < eps;
+                // 생성 벽은 옛 벽 크기 그대로다 — 몸통이 칸을 채우고 몸통 윗면이 옛 벽 높이(위로 솟은 것은 wantHeight 까지)
+                Vector3 want = new Vector3(t.Wall.size.x, wantHeight > 0f ? wantHeight : t.Wall.size.y, t.Wall.size.z);
+                if ((b.size - want).magnitude > eps)
+                    fails.Add($"{name}: 크기 {b.size:F4} 가 옛 벽 {want:F4} 가 아니다");
             }
-            if (touches == false)
-                fails.Add($"{name}: 어느 축도 한계에 닿지 않는다 — 덜 키웠다");
-            if (Mathf.Abs(b.size.y / b.size.x - 1.5f) > 1e-3f || Mathf.Abs(b.size.z / b.size.x - 0.5f) > 1e-3f)
-                fails.Add($"{name}: 비율이 4:6:2 에서 어긋났다 — 찌그러졌다");
+            else
+            {
+                bool touches = false;
+                for (int a = 0; a < 3; a++)
+                {
+                    if (max[a] <= 0f)
+                        continue;
+                    if (b.size[a] > max[a] + eps)
+                        fails.Add($"{name}: 축 {a} 크기 {b.size[a]:0.0000} 가 한계 {max[a]:0.0000} 를 넘는다");
+                    touches |= Mathf.Abs(b.size[a] - max[a]) < eps;
+                }
+                if (touches == false)
+                    fails.Add($"{name}: 어느 축도 한계에 닿지 않는다 — 덜 키웠다");
+                if (Mathf.Abs(b.size.y / b.size.x - 1.5f) > 1e-3f || Mathf.Abs(b.size.z / b.size.x - 0.5f) > 1e-3f)
+                    fails.Add($"{name}: 비율이 4:6:2 에서 어긋났다 — 찌그러졌다");
+            }
 
             Vector3 pivot = back ? new Vector3(b.center.x, b.center.y, b.max.z)
                                  : new Vector3(b.center.x, b.min.y, b.center.z);
