@@ -223,7 +223,7 @@ public static class MeshyArtImport
     const float BodyBand = 0.02f;   // 같은 높이로 보는 띠(전체 높이 대비)
 
     /// <summary>
-    /// 생성 모델(Meshy·Tripo) 벽을 옛 벽 크기에 맞춘다 — 폭·깊이는 옛 벽 상자(나무 벽 0.32)를 꽉 채우고,
+    /// 생성 모델(Meshy·Tripo) 벽을 옛 벽 크기에 맞춘다 — 폭·깊이는 옆면(BodySides)이 옛 벽 상자(나무 벽 0.32)에 닿고,
     /// 몸통 윗면은 옛 벽 높이(돌 벽 0.30)에 닿는다. 몸통 위로 솟은 것(굴뚝·가시·떠오른 조각)은 같은 배율로
     /// 그 위에 남되, 전체가 옛 벽 높이의 TallCap 배를 넘으면 그만큼 낮춘다(몸통도 같이 낮아진다 — 알린다).
     /// 축마다 배율이 달라 모양이 조금 늘거나 준다. 많이 달라지면 알린다 — 다시 뽑을 일이다.
@@ -240,7 +240,10 @@ public static class MeshyArtImport
             body = src.size.y;
         }
 
-        scale3 = new Vector3(t.Wall.size.x / src.size.x, t.Wall.size.y / body, t.Wall.size.z / src.size.z);
+        // 폭·깊이는 경계 상자가 아니라 옆면이 대부분 서 있는 자리로 맞춘다(BodySides) — 상자로 맞추면 이웃과 틈이 난다.
+        Vector2 lo, hi;
+        BodySides(art, src, top, out lo, out hi);
+        scale3 = new Vector3(t.Wall.size.x / (hi.x - lo.x), t.Wall.size.y / body, t.Wall.size.z / (hi.y - lo.y));
         float cap = t.Wall.size.y * TallCap;
         if (src.size.y * scale3.y > cap + 1e-6f)
         {
@@ -257,9 +260,85 @@ public static class MeshyArtImport
         notes.Add($"{name}: 몸통 {t.Wall.size.x:0.000} x {body * scale3.y:0.000} x {t.Wall.size.z:0.000}, " +
                   $"전체 높이 {src.size.y * scale3.y:0.000}");
 
-        Vector3 pivot = new Vector3(src.center.x, src.min.y, src.center.z);
+        Vector3 pivot = new Vector3((lo.x + hi.x) * 0.5f, src.min.y, (lo.y + hi.y) * 0.5f);
         Vector3 at = new Vector3(t.Wall.center.x, t.Wall.min.y, t.Wall.center.z);
         offset = at - Vector3.Scale(pivot, scale3);
+    }
+
+    const int SideBins = 16;        // 옆면을 따라 나누는 칸 수
+    const float SideRank = 0.25f;   // 칸마다 잰 가장 바깥 점 가운데, 안쪽에서 이만큼째를 옆면으로 본다
+    const float SideLeast = 0.9f;   // 옆면 사이는 경계 상자의 이만큼보다 좁게 보지 않는다(이웃과 겹치는 양의 한계)
+
+    /// <summary>
+    /// 이웃 벽과 맞닿을 옆면의 자리(뿌리 기준, lo·hi 의 x = 서·동, y = 남·북). 생성 모델의 옆면은 울퉁불퉁해서 경계 상자는
+    /// 가장 튀어나온 돌 몇 개에만 닿는다 — 상자를 칸에 맞추면 옆면 대부분이 칸보다 안쪽이라, 위에서 보면 벽 사이로 바닥이
+    /// 줄처럼 비쳤다(2026-11-11: 챕터 4·2 기본형 0.008~0.015 = 1080p 에서 2~4px, 나머지 1px 안팎).
+    /// 옆면을 따라 SideBins 칸으로 나눠 칸마다 가장 바깥 점(위에서 본 윤곽)을 재고, 그 가운데 안쪽에서 SideRank 째를
+    /// 옆면으로 삼는다 — 그보다 튀어나온 돌은 이웃 벽 속으로(남쪽 면에서는 바닥 쪽으로 조금) 들어간다.
+    /// 몸통 윗면보다 위로 솟은 것(굴뚝·가시)은 세지 않는다.
+    /// </summary>
+    static void BodySides(GameObject art, Bounds src, float top, out Vector2 lo, out Vector2 hi)
+    {
+        var west = new float[SideBins];
+        var east = new float[SideBins];
+        var south = new float[SideBins];
+        var north = new float[SideBins];
+        for (int i = 0; i < SideBins; i++)
+        {
+            west[i] = south[i] = float.MaxValue;
+            east[i] = north[i] = float.MinValue;
+        }
+
+        float limit = top - Mathf.Max(src.size.y * BodyBand, 1e-5f);
+        foreach (Renderer r in art.GetComponentsInChildren<Renderer>(true))
+        {
+            Mesh mesh = null;
+            if (r is SkinnedMeshRenderer skin) mesh = skin.sharedMesh;
+            else if (r is MeshRenderer && r.TryGetComponent(out MeshFilter mf)) mesh = mf.sharedMesh;
+            if (mesh == null)
+                continue;
+            Matrix4x4 m = r.transform.localToWorldMatrix;
+            foreach (Vector3 v in mesh.vertices)
+            {
+                Vector3 p = m.MultiplyPoint3x4(v);
+                if (p.y > limit)
+                    continue;
+                int alongZ = Mathf.Clamp(Mathf.FloorToInt((p.z - src.min.z) / src.size.z * SideBins), 0, SideBins - 1);
+                int alongX = Mathf.Clamp(Mathf.FloorToInt((p.x - src.min.x) / src.size.x * SideBins), 0, SideBins - 1);
+                west[alongZ] = Mathf.Min(west[alongZ], p.x);
+                east[alongZ] = Mathf.Max(east[alongZ], p.x);
+                south[alongX] = Mathf.Min(south[alongX], p.z);
+                north[alongX] = Mathf.Max(north[alongX], p.z);
+            }
+        }
+
+        lo = new Vector2(Side(west, false, src.min.x), Side(south, false, src.min.z));
+        hi = new Vector2(Side(east, true, src.max.x), Side(north, true, src.max.z));
+        // 옆면이 상자보다 너무 안쪽으로 잡히면(끝이 좁아지는 그림) 그만큼만 — 가운데는 그대로 두고 폭만 붙든다.
+        for (int a = 0; a < 2; a++)
+        {
+            float least = (a == 0 ? src.size.x : src.size.z) * SideLeast;
+            if (hi[a] - lo[a] >= least)
+                continue;
+            float mid = (lo[a] + hi[a]) * 0.5f;
+            lo[a] = mid - least * 0.5f;
+            hi[a] = mid + least * 0.5f;
+        }
+    }
+
+    /// <summary>칸마다 잰 바깥 점들 가운데 안쪽에서 SideRank 째. 빈 칸은 뺀다. 하나도 없으면 상자의 면.</summary>
+    static float Side(float[] outer, bool upper, float box)
+    {
+        var found = new List<float>();
+        foreach (float v in outer)
+            if (v != float.MaxValue && v != float.MinValue)
+                found.Add(v);
+        if (found.Count == 0)
+            return box;
+        found.Sort();
+        if (upper == false)
+            found.Reverse();    // 서·남쪽은 큰 값이 안쪽이다
+        return found[Mathf.FloorToInt((found.Count - 1) * SideRank)];
     }
 
     /// <summary>몸통 윗면의 높이(뿌리 기준) — 그 높이 둘레 정점들이 전체 폭과 깊이의 BodyShare 이상을 덮는
@@ -466,7 +545,10 @@ public static class MeshyArtImport
             m.SetTexture("_EmissionMap", glow);
             m.SetColor("_EmissionColor", new Color(k, k, k, 1f));
             m.EnableKeyword("_EMISSION");
-            m.globalIlluminationFlags &= ~MaterialGlobalIlluminationFlags.EmissiveIsBlack;
+            // URP 는 재질을 에셋으로 저장할 때 키워드를 다시 정한다 — 이 깃발에 Baked/Realtime 이 없으면 _EMISSION 을 끈다
+            // (BaseShaderGUI.SetMaterialKeywords, 6000.3 의 URP). EmissiveIsBlack 만 걷어 None 으로 두었더니 저장하는 순간
+            // 꺼져, 빛 그림을 단 소품이 하나도 빛나지 않았다(2026-11-11 자체 검사). Lit 인스펙터가 켤 때 쓰는 값을 준다.
+            m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.BakedEmissive;
         }
         AssetDatabase.CreateAsset(m, pathNoExt + ".mat");
         return m;

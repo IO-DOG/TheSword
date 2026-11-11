@@ -247,6 +247,9 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
   `PlayerController.isObstacled` 가 갈 칸을 `PathMover` 와 같은 탐침(`WallAt`)으로 다시 잰다. 손수 만든 1~4층은 뺀다(`OnBuiltFloor`). 걸음 판정을 고치면 벽 쪽으로 직접 걸어 본다 — 봇은 벽을 밀지 않는다.
 - **벽 프리팹은 0.2 내려 놓는다**(`MapBuilder.WallDrop`). 벽 프리팹(옛 `Tilemap_C00_W*` 도 새 `Wall_C{n}_*` 도)은 그림·콜라이더가 루트보다 0.2 위에 있고, 손수 만든 층은 그만큼 내려 놓았다.
   생성 층은 0 에 놓아 벽이 통째로 떠 있었다 — 화면에서는 벽이 제 칸보다 3분의 1칸 위에 그려져, 벽 북쪽 칸에 선 주인공·몬스터·아이템의 발치(36px)가 남쪽 벽 윗면에 가렸다(오너의 "벽 속을 걷는다" 의 나머지 절반).
+  생성 벽 그림(Tripo·Meshy)은 `MeshyArtImport.FitWall` 이 옛 벽 크기로 맞추는데, 폭·깊이는 경계 상자가 아니라 옆면이 대부분 서 있는 자리(`BodySides`)로 잰다 —
+  상자로 맞추면 울퉁불퉁한 옆면 사이로 바닥이 줄처럼 비친다(11-11 챕터 4·2 기본형 2~4px). 빛 그림(`_Emit`)을 단 재질은 `globalIlluminationFlags` 에 Baked 를 줘야
+  URP 가 저장할 때 `_EMISSION` 을 끄지 않는다(자체 검사가 잡는다).
   벽에 거는 장식·벽을 대신하는 큰 소품·벽 불빛은 `MapDecoSetup` 이 같은 값으로 내려 굽는다(`OnWall`·`FaceGlow` — 불빛이 벽 윗면 0.32 보다 높으면 윗면이 하얗게 뜬다).
 - "내가 눌렸다" 판정은 몸 스프라이트의 **그려진 픽셀**(`sprite.vertices`)로 한다. 128×128 틀 전체(키높이 2배 스케일)로 잡았더니
   주인공 둘레 4×5 칸이 "자기 자신" 이 되어 옆의 몬스터·계단을 눌러도 멈췄다.
