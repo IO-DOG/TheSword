@@ -21,6 +21,7 @@ public class UI_MonsterCard : UI_BaseCard
         // 프리팹에 박혀 있던 기본 스프라이트를 재게 되고, 보스는 계속 잘린다.
         anim.Update(0f);
         FitCreatureImage(GetImage((int)Images.CreatureImage));
+        StandOnFrame(GetImage((int)Images.CreatureImage));
         // 맵에서 본 그 색 그대로 전투창에도 올린다. 둘이 다르면 같은 몬스터로 안 보인다.
         GameManager.CurMonsterData mdata = _creature as GameManager.CurMonsterData;
         if (mdata != null)
@@ -294,6 +295,42 @@ public class UI_MonsterCard : UI_BaseCard
         uiParticle.Play();
         Managers.Resource.Destroy(go, FxLife);
     }
+
+    /// <summary>
+    /// 그림의 그려진 아래끝을 카드 틀 윗선(그림 배경의 아래끝)에 세운다 — 주인공 카드가 서 있는 그 선이다.
+    ///
+    /// FitCreatureImage 는 스프라이트 <b>틀</b>을 카드 한가운데에 맞춘다. 그림이 틀 가운데에 그려진 옛 시트는 그걸로
+    /// 맞았는데, 생성 층의 시트(Mob_C0_*)는 그림이 틀 아래쪽에 붙어 있어 발이 체력바 틀 뒤로 가라앉았다
+    /// (1080p 에서 81px — 2026-11-11 오너 "전투 시 몬스터 위치가 올바르지 않다"). 틀이 아니라 그려진 픽셀
+    /// (sprite.vertices)로 잰다. 이펙트는 그림 칸의 자식이라 몸과 같이 움직인다.
+    /// </summary>
+    void StandOnFrame(Image img)
+    {
+        if (img == null || img.sprite == null)
+            return;
+        RectTransform rt = img.rectTransform;
+        RectTransform box = rt.parent as RectTransform;
+        RectTransform stage = box != null ? box.Find("BattleUI_CharacterBG") as RectTransform : null;
+        if (stage == null)
+            return;
+
+        stage.GetWorldCorners(s_corners);
+        float floor = box.InverseTransformPoint(s_corners[0]).y;
+
+        Sprite sp = img.sprite;
+        float low = float.MaxValue;
+        foreach (Vector2 v in sp.vertices)
+            low = Mathf.Min(low, v.y);
+        if (low == float.MaxValue || sp.rect.height <= 0f)
+            return;
+        // 틀 아래끝에서 그려진 아래끝까지, 틀 높이의 몫(0 = 틀 바닥에 붙은 그림).
+        float pad = Mathf.Clamp01((low * sp.pixelsPerUnit + sp.pivot.y) / sp.rect.height);
+
+        float h = rt.rect.height;
+        rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, floor - pad * h + h * 0.5f - box.rect.center.y);
+    }
+
+    static readonly Vector3[] s_corners = new Vector3[4];
 
     // 맞는 이펙트의 크기가 서열이다 — 모양과 색은 특성(generate_content.TRAIT_FX)이 정하고, 정예·우두머리는 같은 것을
     // 크게 친다. 맵에서 몸집(MapBuilder.MonsterBulk)으로 가르듯 전투창에서도 가른다. 졸개 50 은 예전 그대로다.

@@ -475,6 +475,25 @@ public class PlayerController : MonoBehaviour
 
     float _lastHitLog;
 
+    /// <summary>그 칸(바닥 좌표)에 벽이 있는가. PathMover.Solid 와 같은 탐침이다.</summary>
+    static bool WallAt(Vector3 cell)
+    {
+        return Physics.CheckBox(cell + Vector3.up * (PathMover.Tile * 0.5f), PathMover.ProbeHalf, Quaternion.identity,
+                                PathMover.WallMask, QueryTriggerInteraction.Collide);
+    }
+
+    static bool OnBuiltFloor()
+    {
+        Data.StageInfoData info;
+        return Managers.Data.StageInfoDic.TryGetValue(Managers.Game.PlayerData.CurStageid, out info)
+            && MapBuilder.IsHandAuthored(info.DungeonID) == false;
+    }
+
+    static bool BehindWall(int layer)
+    {
+        return layer == (int)Define.Layer.CItem || layer == (int)Define.Layer.EItem || layer == (int)Define.Layer.Monster;
+    }
+
     bool isObstacled()
     {
         bool somethingExist = false;
@@ -495,6 +514,17 @@ public class PlayerController : MonoBehaviour
                 Debug.Log($"[충돌] {hit.collider.gameObject.name} L{hit.collider.gameObject.layer} " +
                           $"거리{hit.distance:0.00}");
         }
+
+        // 광선이 빈손이어도 갈 칸이 벽일 수 있다 — 벽은 칸으로 한 번 더 잰다.
+        // 생성 층(5~100층)의 벽 콜라이더는 바닥에서 0.2 떠 있어(y 0.2~0.5) 키높이 0.16 의 광선이 그 밑으로 지나갔고,
+        // 키보드·패드로는 벽을 그대로 뚫고 걸었다(2026-11-11 오너 — 맵 테두리 밖으로도 나갔다). 클릭 이동·봇은
+        // 칸을 재는 PathMover 를 써서 멀쩡했다. 같은 탐침(같은 높이·크기)으로 재니 세 길이 같은 벽을 본다.
+        // 광선이 벽 밑을 지나 그 너머 칸의 아이템·몬스터를 맞히기도 한다(콜라이더가 제 칸을 넘는 것들) — 벽 너머로
+        // 주워지고 그대로 벽에 들어갔다. 그 둘은 벽 칸에 서지 않으니 갈 칸이 벽이면 벽이다.
+        // 손수 만든 1~4층은 벽이 바닥에 앉아 있어 광선이 전부 본다 — 거기는 그대로 둔다(3층 제단 방의 나무 장식 하나가
+        // 옆 칸에 걸쳐 있어, 탐침으로 재면 걷던 칸 하나가 막힌다).
+        if (OnBuiltFloor() && WallAt(_cellPos + _nextCellPos) && (hit.collider == null || BehindWall(hit.collider.gameObject.layer)))
+            return true;
 
         if (hit.collider != null)
         {
