@@ -267,7 +267,7 @@ App Admin → Application → **Steam Cloud** [S9].
 | Shortcut icon | 256×256 또는 512×512, ICO·PNG | |
 | App icon | 184×184 JPG | |
 | Event cover / header | 800×450 / 1920×622 | 이벤트·공지 |
-| Trailer | 첫 5초: "−31" 표시 → 싸움 → 정확히 −31 → 레벨 업 → 모든 값이 줄어든다 (MASTER_PLAN §7) | |
+| Trailer | 첫 5초: "−31" 표시 → 싸움 → 정확히 −31 → 레벨 업 → 모든 값이 줄어든다 (MASTER_PLAN §7) | 오너의 게임 소개 영상: https://youtu.be/9tGbBxhbzCo ("TheSword 게임영상", 2026-11-12 오너가 알려 줌). Steam 은 링크가 아니라 **영상 파일**(MP4 등)을 Steamworks "트레일러" 에 올린다 — 원본 파일로 올린다 |
 
 - 캡슐에는 게임 이름과 공식 부제 말고 글을 넣지 않는다(평점·수상·"지금 할인" 금지) [S15].
 - 그림 속 글자는 언어마다 바꿔 올려야 한다 [S16]. 한국어·영어·간체·일본어 로고(MASTER_PLAN §8 "logos in 5 languages").

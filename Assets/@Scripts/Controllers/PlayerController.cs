@@ -547,7 +547,7 @@ public class PlayerController : MonoBehaviour
             else if (hit.collider.gameObject.layer == (int)Define.Layer.CItem)
             {
                 ConsumableItem citem = Util.Find<ConsumableItem>(hit.collider.gameObject);
-                if (citem != null)
+                if (citem != null && InNextCell(citem))
                     citem.PickUp();
             }
             // Checking Item
@@ -729,7 +729,7 @@ public class PlayerController : MonoBehaviour
                 }
 
                 ConsumableItem ci = Util.Find<ConsumableItem>(found[i].gameObject);
-                if (ci != null && ci.gameObject.activeInHierarchy)
+                if (ci != null && ci.gameObject.activeInHierarchy && InNextCell(ci))
                     ci.PickUp();
             }
         }
@@ -737,6 +737,16 @@ public class PlayerController : MonoBehaviour
         //Managers.Game.SaveGame();
 
         return somethingExist;
+    }
+
+    // 줍는 것은 갈 칸에 놓인 것뿐이다. 소비 아이템 콜라이더는 제 칸보다 북쪽으로 0.096 밀려 있어(ConsumableItem.prefab — 봇 경로 때문에
+    // 그대로 둔다), 남쪽으로 걸으면 광선(0.42)이 두 칸 앞 아이템에, 동·서로 걸으면 갈 칸 상자가 그 아래 대각선 칸 아이템에 닿아
+    // 옆 칸의 사과·물약이 먹혔다(2026-11-12 오너). 아이템은 칸 자리에 놓인다(손수 만든 층도 0.1 안) — 뿌리 위치로 칸을 잰다.
+    // 떨군 장비는 콜라이더가 칸 가운데 한 칸 폭(Equip.Start)이라 이 일이 없고, 연출로 움직인 몬스터(킹 슬라임)의 칸 밖 자리에 떨어질 수 있어 재지 않는다.
+    bool InNextCell(Component item)
+    {
+        Vector3 d = item.transform.position - (_cellPos + _nextCellPos);
+        return Mathf.Abs(d.x) < Define.TILE_SIZE * 0.5f && Mathf.Abs(d.z) < Define.TILE_SIZE * 0.5f;
     }
 
     /// <summary>
