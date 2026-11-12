@@ -132,10 +132,12 @@ public static class CodeUI
     /// 덮었고(960x540 에서는 반대로 멀리 떨어졌다), 위아래로는 마우스 높이 그대로라 윗줄 몬스터의 창은 이름째 잘렸다.
     /// 아래로는 HUD 의 능력치 줄(레벨·공방체와 그 위 "치명까지" 줄, 캔버스 64) 위에서 멈춘다 — 화면 아래쪽 몬스터를 짚으면
     /// 창의 마지막 줄("공격 +k 이면 …")이 HUD 글자에 덮였다(2026-11-11).
+    /// 작은 화면(덱 800p·720p)에서는 창을 도감처럼 키운다(PanelScale) — 설명·예측 글자가 8.9px 로 9px 선 아래였다(2026-11-12).
     /// </summary>
     public static void PlaceBeside(RectTransform frame, Vector2 fromCenter, float gap)
     {
-        const float Margin = 8f, HudStrip = 64f;
+        const float Margin = 8f, HudStrip = 64f, PrefabScale = 2f;    // 정보 창 프리팹의 BGImage 가 2배다
+        frame.localScale = Vector3.one * (PrefabScale * PanelScale(frame.rect.size * PrefabScale));
         float scale = frame.GetComponentInParent<Canvas>().rootCanvas.scaleFactor;
         Vector2 half = new Vector2(Screen.width, Screen.height) / (2f * scale);
         Vector2 box = Vector2.Scale(frame.rect.size, frame.localScale) / 2f;

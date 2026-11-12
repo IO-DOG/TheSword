@@ -102,6 +102,7 @@ public class UI_ModePopup : UI_Popup
         Image panel = CodeUI.NewImage(transform, "Panel", frame, frame != null ? Color.white : new Color(0.07f, 0.08f, 0.12f, 0.97f), true);
         panel.raycastTarget = true;          // 창 안을 눌러도 물러나지 않게 가린다
         CodeUI.Place(panel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(PanelWidth, height));
+        panel.rectTransform.localScale = Vector3.one * CodeUI.PanelScale(new Vector2(PanelWidth, height));   // 덱 800p 에서 설명 글자가 9px 남짓이었다(도감과 같다)
         Transform root = panel.transform;
 
         TextMeshProUGUI title = CodeUI.NewText(root, "Title", prose, 44f, Gold, TextAlignmentOptions.Center);

@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Cinemachine;
 using Data;
 using System;
@@ -87,7 +88,7 @@ public class PortalController : MonoBehaviour
                     {
                         // 다음 챕터 20층을 짓는 한 프레임(덱 1초 남짓)을 삽화가 화면을 다 덮은 동안에 치른다. 예전에는 삽화가 까맣게
                         // 저문 뒤에 지어서 검은 화면이 1초 굳었다. 짓기가 이 계단을 부수므로 나머지는 게임 화면의 코루틴이 잇는다.
-                        Managers.Game.GameScene.StartCoroutine(CoCrossChapter(nextStage, chapter));
+                        Managers.Game.GameScene.StartCoroutine(CoCrossChapter(nextStage, chapter, true));
                         yield break;
                     }
                     yield return StartCoroutine(Managers.Game.GameScene.CoShowLoadingIllust(chapter));
@@ -103,22 +104,11 @@ public class PortalController : MonoBehaviour
 
             if (chapterEdge)
             {
-                // 다음 챕터 맵은 새로 짓는데, 그 GenerateMap 이 이 계단까지 부순다.
-                // 예전에는 다녀온 챕터면 부순 뒤에 이 계단 위에서 WaitAndWarp 를 시작해서,
-                // 한 프레임 뒤 계단과 함께 코루틴이 사라지고 OnInteract 가 켜진 채 멈췄다.
-                // 기다릴 것(계단 칸으로 내딛는 한 발)은 부수기 전에 기다리고, 부순 뒤로는
-                // 한 번에 끝낸다.
-                //
-                // 여기서 CurStageid 를 올리면 안 된다. LoadingAndWarp 의 SetStageID() 가 올린다 —
-                // 두 번 올리면 챕터를 넘을 때마다 층 번호가 두 칸씩 뛴다.
-                if (firstVisit == false)
-                {
-                    Managers.Game.OnInteract = true;
-                    yield return new WaitForSeconds(0.2f);
-                }
-                Managers.Game.GenerateMap(nextStage);
-                Transform arrival = Managers.Game.ArrivalPoint(nextStage);
-                LoadingAndWarp(arrival != null ? arrival.position : Managers.Game.Player.transform.position, firstVisit);
+                // 다녀온 챕터로 오른다. 짓기(덱 1초 남짓)가 이 계단을 부수므로 짧은 삽화가 덮은 동안 GameScene 코루틴이 짓고 옮긴다 —
+                // 예전에는 옛 층 화면이 그대로 0.7초 굳은 뒤에야 닦였다.
+                // 여기서 CurStageid 를 올리면 안 된다. LoadingAndWarp 의 SetStageID() 가 올린다(두 번 올리면 두 칸 뛴다).
+                Managers.Game.OnInteract = true;
+                Managers.Game.GameScene.StartCoroutine(CoCrossChapter(nextStage, false, firstVisit));
                 yield break;
             }
 
@@ -142,14 +132,9 @@ public class PortalController : MonoBehaviour
                     || Managers.Game.Maps.ContainsKey(prevStage))                // 같은 챕터인데 없다: 데이터 고장
                     yield break;
 
+                // 위 계단의 다녀온 챕터 경계와 같다: 짧은 삽화가 덮은 동안 짓고 옮긴다. CurStageid 는 LoadingAndWarp 의 SetStageID() 가 내린다.
                 Managers.Game.OnInteract = true;
-                yield return new WaitForSeconds(0.2f);
-                // GenerateMap 이 이 계단까지 부순다(프레임 끝). 여기서부터는 yield 없이 끝낸다.
-                // CurStageid 는 LoadingAndWarp 의 SetStageID() 가 내린다 — 여기서 내리면 두 칸 내려간다.
-                Managers.Game.GenerateMap(prevStage);
-                PortalController up = SearchPortal(prevStage, Type.UpStairs);
-                Transform arrival = up != null ? up.transform : Managers.Game.ArrivalPoint(prevStage);
-                LoadingAndWarp(arrival != null ? arrival.position : Managers.Game.Player.transform.position, false);
+                Managers.Game.GameScene.StartCoroutine(CoCrossChapter(prevStage, false, false));
                 yield break;
             }
 
@@ -170,21 +155,23 @@ public class PortalController : MonoBehaviour
         Debug.Log($"Setting player position to: {nextPos}");
     }
 
-    /// <summary>처음 오르는 챕터 경계: 삽화가 덮은 동안 짓고, 삽화가 걷히면 옮긴다. 이 계단이 아니라 GameScene 에서 돈다 —
-    /// 짓기가 이 계단을 부순 뒤에도 끝까지 가야 한다. 계단에서 읽는 것은 SetStageID 의 _portalType(C# 필드)뿐이다.</summary>
-    IEnumerator CoCrossChapter(int nextStage, bool chapter)
+    /// <summary>챕터 경계(오르기·내려가기): 삽화가 덮은 동안 짓고, 삽화가 걷히면 옮긴다. 이 계단이 아니라 GameScene 에서 돈다 —
+    /// 짓기가 이 계단을 부순 뒤에도 끝까지 가야 한다. 계단에서 읽는 것은 _portalType 같은 C# 필드뿐이다.</summary>
+    IEnumerator CoCrossChapter(int stage, bool chapter, bool firstVisit)
     {
         Vector3 arrival = Managers.Game.Player.transform.position;
         yield return Managers.Game.GameScene.CoShowLoadingIllust(chapter, () =>
         {
-            Managers.Game.GenerateMap(nextStage);
-            Transform point = Managers.Game.ArrivalPoint(nextStage);
+            Managers.Game.GenerateMap(stage);
+            // 내려가면 아래층의 위 계단 앞에 선다.
+            PortalController up = _portalType == Type.DownStairs ? SearchPortal(stage, Type.UpStairs) : null;
+            Transform point = up != null ? up.transform : Managers.Game.ArrivalPoint(stage);
             if (point != null)
                 arrival = point.position;
         });
         if (chapter)
             Managers.Sound.FadeInBGM(1f);
-        LoadingAndWarp(arrival, true);
+        LoadingAndWarp(arrival, firstVisit);
     }
 
     PortalController SearchPortal(int targetmapId, Type targetType)
@@ -280,6 +267,8 @@ public class PortalController : MonoBehaviour
         Managers.Game.MainCamera.GetComponentInChildren<CameraController>().SetupCameraConfiner();
         Debug.Log($"Setting player position to2: {nextPos}");
 
+        // 계단 칸으로 내딛는 한 걸음(DOMove 0.2초)이 아직 돌 수 있다 — 삽화를 바로 넘기면. 끝까지 돌면 몸을 옛 층 칸으로 되돌린다(워프와 같다).
+        Managers.Game.Player.transform.DOKill();
         Managers.Game.Player.transform.position = nextPos;
         Managers.Game.Player._cellPos = nextPos;
 
