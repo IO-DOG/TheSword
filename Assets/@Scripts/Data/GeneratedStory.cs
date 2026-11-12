@@ -1081,6 +1081,30 @@ public static class GeneratedStory
             },
             null,
             null),
+        new StoryScene("walk_39", StoryKind.Bark, StoryTrigger.FloorBark, 39,
+            new[]
+            {
+                new StoryLine(0, "Illust_Adventurer_Thinking", 305040, null),
+                new StoryLine(1, "Illust_MagicalSword_Angry", 305041, null),
+            },
+            null,
+            null),
+        new StoryScene("walk_58", StoryKind.Bark, StoryTrigger.FloorBark, 58,
+            new[]
+            {
+                new StoryLine(0, null, 305080, null),
+                new StoryLine(1, "Illust_MagicalSword_Nerve", 305081, null),
+            },
+            null,
+            null),
+        new StoryScene("walk_78", StoryKind.Bark, StoryTrigger.FloorBark, 78,
+            new[]
+            {
+                new StoryLine(0, "Illust_Adventurer_Thinking", 305120, null),
+                new StoryLine(1, "Illust_MagicalSword_Silense", 305121, null),
+            },
+            null,
+            null),
     };
 
     // 층별 사실 — 인덱스는 층 번호(1~100). 0 번과 손수 만든 1~4층은 비어 있다.
@@ -1127,10 +1151,10 @@ public static class GeneratedStory
     // 들어설 때 뜨는 층 유형 바크(Scenes 의 번호), 없으면 -1 — story_gen.bark_schedule (바이블 R13·R15)
     public static readonly int[] FloorBarks =
     {
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, 79, 65, -1, -1, -1, -1, 66, -1, -1, -1, -1,
-        -1, -1, 71, 76, -1, -1, 68, -1, -1, -1, -1, -1, 72, -1, -1, -1, 70, -1, 74, -1,
-        -1, -1, -1, -1, 77, -1, -1, -1, 75, -1, -1, -1, 73, -1, -1, -1, -1, 71, -1, -1,
-        -1, -1, 72, -1, -1, -1, -1, 73, -1, -1, -1, 69, -1, -1, -1, 67, -1, -1, -1, 78,
+        -1, -1, -1, -1, -1, -1, -1, 73, -1, -1, 65, -1, -1, -1, -1, 66, -1, -1, -1, -1,
+        -1, -1, 71, 75, -1, -1, 68, -1, 76, -1, -1, -1, 72, -1, -1, -1, 70, -1, 74, -1,
+        -1, -1, -1, -1, -1, -1, 69, -1, -1, 77, -1, -1, -1, -1, 78, -1, -1, -1, -1, 79,
+        -1, -1, -1, -1, -1, 67, -1, -1, -1, -1, 65, -1, -1, -1, 77, -1, -1, -1, -1, 78,
         -1, -1, -1, -1, -1, -1, 69, -1, -1, -1, -1, 68, -1, -1, -1, -1, 69, -1, -1, -1,
         -1,
     };
