@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -39,6 +40,12 @@ public static class FontFallback
     static readonly List<(Define.ScriptType lang, TMP_FontAsset font)> s_system = new List<(Define.ScriptType, TMP_FontAsset)>();
     static bool s_installed;
     static Define.ScriptType? s_attachedFor;    // 마지막으로 건 언어 (OnSettingsChanged)
+    static int s_loadRun;                       // 지금 기다리는 Silver 읽기 — 다시 부른 뒤 늦게 온 앞 요청의 콜백은 버린다
+
+    // 타이틀 선로드와 같은 증상(UI_TitleScene.StuckSeconds): 도메인 리로드를 끈 에디터 플레이에서 첫 요청의 답이 영영 안 올 때가 있다.
+    // 그러면 그 플레이 내내 일본어·중국어가 윈도 글꼴로 그려진다. 답이 없으면 다시 부른다 — 빌드에서는 본 적이 없다.
+    const float StuckSeconds = 10f;
+    const int MaxLoadTries = 3;
 
     // 에디터는 도메인 리로드를 끄고 돈다(Enter Play Mode 옵션). 만든 글꼴은 플레이가 끝날 때 부서지는데 이 값들은
     // 남아서, 두 번째 플레이부터 죽은 글꼴을 다시 걸어 ◀▶·일본어·중국어가 □ 로 나왔다. 플레이마다 새로 만든다.
@@ -50,6 +57,7 @@ public static class FontFallback
         s_system.Clear();
         s_installed = false;
         s_attachedFor = null;
+        s_loadRun = 0;
     }
 
     // 켜자마자 한 번 (Managers).
@@ -73,26 +81,45 @@ public static class FontFallback
             SceneManager.sceneLoaded -= OnSceneLoaded;
             SceneManager.sceneLoaded += OnSceneLoaded;
 
-            // 주소도 키라서 라벨 자리에 넣어도 된다. 등록이 안 돼 있으면 예외 없이 오류 문자열만 온다.
-            Managers.Resource.LoadAllAsync<Font>(PixelFontKey, null, error =>
-            {
-                Font source = error == null ? Managers.Resource.Load<Font>(PixelFontKey) : null;
-                if (source == null)
-                {
-                    Debug.LogWarning($"[Font] 어드레서블에 '{PixelFontKey}' 가 없다 — 빠진 글자는 윈도 글꼴로 그린다");
-                    return;
-                }
-                // Silver SDF 와 같은 크기·여백으로 굽는다. 한 줄에 섞여 찍혀도 굵기가 같다.
-                s_pixel = TMP_FontAsset.CreateFontAsset(source, 47, 5, GlyphRenderMode.SDFAA, 1024, 1024);
-                s_pixelCjk = TMP_FontAsset.CreateFontAsset(source, 47, 5, GlyphRenderMode.SDFAA, 1024, 1024);
-                FaceInfo face = s_pixelCjk.faceInfo;
-                face.scale = NumberCjkScale;
-                s_pixelCjk.faceInfo = face;
-                if (Application.isPlaying)
-                    Attach();
-            });
+            LoadPixel(1);
         }
         Attach();
+    }
+
+    static void LoadPixel(int attempt)
+    {
+        int run = ++s_loadRun;
+        // 주소도 키라서 라벨 자리에 넣어도 된다. 등록이 안 돼 있으면 예외 없이 오류 문자열만 온다.
+        Managers.Resource.LoadAllAsync<Font>(PixelFontKey, null, error =>
+        {
+            // 어느 요청의 답이든 처음 온 것을 받는다 — 마지막 요청만 받으면 앞 요청이 늦게 오고 마지막이 영영 안 올 때 글꼴이 끝내 안 선다.
+            if (s_pixel != null)
+                return;
+            s_loadRun++;            // 답이 왔다 — 기다리던 다시 부르기를 걷는다
+            Font source = error == null ? Managers.Resource.Load<Font>(PixelFontKey) : null;
+            if (source == null)
+            {
+                Debug.LogWarning($"[Font] 어드레서블에 '{PixelFontKey}' 가 없다 — 빠진 글자는 윈도 글꼴로 그린다");
+                return;
+            }
+            // Silver SDF 와 같은 크기·여백으로 굽는다. 한 줄에 섞여 찍혀도 굵기가 같다.
+            s_pixel = TMP_FontAsset.CreateFontAsset(source, 47, 5, GlyphRenderMode.SDFAA, 1024, 1024);
+            s_pixelCjk = TMP_FontAsset.CreateFontAsset(source, 47, 5, GlyphRenderMode.SDFAA, 1024, 1024);
+            FaceInfo face = s_pixelCjk.faceInfo;
+            face.scale = NumberCjkScale;
+            s_pixelCjk.faceInfo = face;
+            if (Application.isPlaying)
+                Attach();
+        });
+        if (Application.isPlaying == false || attempt >= MaxLoadTries)
+            return;
+        DOVirtual.DelayedCall(StuckSeconds, () =>
+        {
+            if (run != s_loadRun || s_pixel != null)
+                return;
+            Debug.LogWarning($"[Font] '{PixelFontKey}' 읽기가 {StuckSeconds:0}초 동안 답이 없다 — 다시 부른다 ({attempt + 1}/{MaxLoadTries})");
+            LoadPixel(attempt + 1);
+        }, true);
     }
 
     /// <summary>어드레서블 선로드 뒤 한 번 — 프리팹이 물고 온 DNF 에도 건다.</summary>

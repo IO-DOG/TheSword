@@ -79,10 +79,12 @@ Stylized fantasy combat against monsters, in pixel art.
 
 ```text
 The story script, the names and descriptions of monsters, bosses and traits, and the guide, help and interface text were written with the help of AI tools, as were all translations of the game's text (English, Japanese and Simplified Chinese).
+The chapter walls in the environment art were made with an AI 3D generation tool (Tripo).
 ```
 
 사람 검수가 끝난 뒤에만 " The developers reviewed and edited them." 를 붙인다. 그림·음악 규칙은 `ko.md` 와 같다(생성 코드·스토어 글 문장은 11-05 에 뺐다 — `ko.md`).
-Meshy(AI 3D 생성)로 만든 3D 그림을 **쓰게 되면** 문단 끝에 한 문장을 더한다. 괄호는 실제로 빌드에 든 것에 맞춘다(`ko.md` 의 Meshy 항목):
+**Tripo 문장(둘째 줄)은 2026-11-11 부터 붙인다** — Tripo(AI 3D 생성)로 뽑은 챕터 벽 20종(`Assets/@Resources/Art/Tripo/Wall_C0~C4_*`, 커밋 b69e0f09·c7ad3dab)이 빌드에 든다. 벽을 다른 그림으로 바꾸면 그 줄을 뺀다.
+Meshy(AI 3D 생성)로 만든 3D 그림도 **쓰게 되면** 문단 끝에 한 문장을 더한다(벽이 Tripo 그대로면 괄호에서 벽을 빼고 소품만). 괄호는 실제로 빌드에 든 것에 맞춘다(`ko.md` 의 Meshy 항목):
 
 ```text
 Some of the environment art (chapter walls and decorative props) was made with an AI 3D generation tool (Meshy).

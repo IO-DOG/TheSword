@@ -926,7 +926,16 @@ public class UI_GameScene : UI_Scene
     /// 곡을 되올리는 것은 부른 쪽이다(PortalController 의 FadeInBGM).
     /// 도는 동안 입력 잠금(OnInputLock)을 쥔다. 층을 옮기는 표시(OnInteract)는 부른 쪽이 쥐고 있다 — 워프가 끼어들지 않게.
     /// </summary>
-    public IEnumerator CoShowLoadingIllust(bool chapter = false)
+    /// <param name="covered">삽화가 화면을 다 덮은 순간 한 번(챕터 경계의 맵 짓기 — 그 프레임의 멈춤이 가만히 선 그림 뒤로 숨는다).
+    /// 넘겨서 다 밝아지지 않았으면 걷히기 직전에 부른다.</param>
+    // 짓기가 터져도 삽화는 걷히고 입력 잠금은 풀려야 한다(코루틴이 예외로 끝나면 화면이 가려진 채 남는다).
+    static void RunCovered(Action covered)
+    {
+        try { covered(); }
+        catch (Exception e) { Debug.LogException(e); }
+    }
+
+    public IEnumerator CoShowLoadingIllust(bool chapter = false, Action covered = null)
     {
         yield return null;
         Managers.Game.OnInputLock = true;
@@ -952,8 +961,16 @@ public class UI_GameScene : UI_Scene
             {
                 break;
             }
+            if (covered != null && t >= 1f)
+            {
+                Action now = covered;
+                covered = null;
+                RunCovered(now);
+            }
             yield return null;
         }
+        if (covered != null)
+            RunCovered(covered);
 
         // 지금 밝기에서 까맣게. 누르면 남은 밝기만큼 짧아진다.
         float from = illust.color.r;

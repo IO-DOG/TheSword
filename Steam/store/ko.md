@@ -132,6 +132,7 @@ Content Survey 의 AI 항목(Pre-Generated)에 체크하고 아래를 적는다.
 
 ```text
 이야기 대본, 몬스터·보스·특성의 이름과 설명, 안내·도움말·인터페이스 문구, 그리고 그 모든 번역(영어·일본어·간체 중국어)은 AI 도구의 도움을 받아 썼다.
+환경 그림 가운데 챕터별 벽은 AI 3D 생성 도구(Tripo)로 만들었다.
 ```
 
 - 범위(README 7절): 대본, 몬스터·보스·특성 이름과 설명(`Tools/bestiary.py`), 안내·도움말·UI 문구(`Tools/ui_text.py`, `Tools/ui_text_parts/*.py`), 모든 번역.
@@ -141,6 +142,8 @@ Content Survey 의 AI 항목(Pre-Generated)에 체크하고 아래를 적는다.
   개발 도구로 효율을 높인 것은 관심사가 아니라고 한다. 그래서 플레이어가 읽는 글·번역(위 한 문장)만 남기고, 예전 둘째·셋째 문장
   (지도·몬스터 수치·벽 소품을 만든 생성 코드 — 생성 AI 가 만든 그림이 아니라 AI 도움으로 짠 코드가 그린 것, 스토어 글·트레일러 자막 — 게임과 함께 나가지 않는다)은 뺐다.
   AI 로 만든 그림·소리가 게임에 들어오면 다시 적는다(아래 Meshy).
+- **Tripo**(2026-11-11 부터 — 위 둘째 줄): 챕터 벽 20종 `Assets/@Resources/Art/Tripo/Wall_C0~C4_{Base,A,B,C}.glb` 를 오너가 Tripo 웹에서 뽑아 골랐고(b69e0f09),
+  `MeshyArtImport` 가 Tripo > Meshy > 복셀 키트 순으로 들인다(c7ad3dab). 벽을 사람이 만든 그림으로 바꾸면 그 줄을 뺀다. 소품이 Tripo 로 들어오면 괄호에 "장식 소품" 을 더한다.
 - **Meshy**: AI 3D 생성(Meshy)으로 만든 그림을 게임이나 스토어 그림에 **쓰게 되면** 위 문단 끝에 한 문장을 더한다(`Documents/TheSword_Meshy_Prompts.md` 도 같은 약속이다).
   `MeshyArtImport` 가 들이는 것은 챕터별 벽 `Wall_C{n}_*` 과 소품 `Prop_C{n}_*` 이다(2026-11-03 현재 `Assets/@Resources/Art/Meshy` 는 비어 있다).
   괄호는 **실제로 빌드에 든 것**에 맞춘다 — 벽만 들어왔으면 "챕터별 벽" 만, 소품이 빠졌으면 소품을 뺀다:

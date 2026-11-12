@@ -83,6 +83,13 @@ public class PortalController : MonoBehaviour
                 {
                     // 새 챕터(5·21·41·61·81층)만 제 길이로 곡을 낮췄다 올린다. 보통 층은 1.2초에 곡이 그대로 흐른다.
                     bool chapter = Array.IndexOf(GeneratedStory.ChapterFirstFloors, _mapId + 2) >= 0;
+                    if (chapterEdge)
+                    {
+                        // 다음 챕터 20층을 짓는 한 프레임(덱 1초 남짓)을 삽화가 화면을 다 덮은 동안에 치른다. 예전에는 삽화가 까맣게
+                        // 저문 뒤에 지어서 검은 화면이 1초 굳었다. 짓기가 이 계단을 부수므로 나머지는 게임 화면의 코루틴이 잇는다.
+                        Managers.Game.GameScene.StartCoroutine(CoCrossChapter(nextStage, chapter));
+                        yield break;
+                    }
                     yield return StartCoroutine(Managers.Game.GameScene.CoShowLoadingIllust(chapter));
                     if (chapter)
                         Managers.Sound.FadeInBGM(1f);
@@ -161,6 +168,23 @@ public class PortalController : MonoBehaviour
             LoadingAndWarp(nextPos, firstVisit);
         }
         Debug.Log($"Setting player position to: {nextPos}");
+    }
+
+    /// <summary>처음 오르는 챕터 경계: 삽화가 덮은 동안 짓고, 삽화가 걷히면 옮긴다. 이 계단이 아니라 GameScene 에서 돈다 —
+    /// 짓기가 이 계단을 부순 뒤에도 끝까지 가야 한다. 계단에서 읽는 것은 SetStageID 의 _portalType(C# 필드)뿐이다.</summary>
+    IEnumerator CoCrossChapter(int nextStage, bool chapter)
+    {
+        Vector3 arrival = Managers.Game.Player.transform.position;
+        yield return Managers.Game.GameScene.CoShowLoadingIllust(chapter, () =>
+        {
+            Managers.Game.GenerateMap(nextStage);
+            Transform point = Managers.Game.ArrivalPoint(nextStage);
+            if (point != null)
+                arrival = point.position;
+        });
+        if (chapter)
+            Managers.Sound.FadeInBGM(1f);
+        LoadingAndWarp(arrival, true);
     }
 
     PortalController SearchPortal(int targetmapId, Type targetType)

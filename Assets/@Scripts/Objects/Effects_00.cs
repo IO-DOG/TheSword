@@ -96,11 +96,14 @@ public class Effects_00 : MonoBehaviour
             float spawnInterval = Random.Range(airInterval.x, airInterval.y);
             yield return new WaitForSeconds(spawnInterval);
 
+            // 챕터를 넘을 때는 맵을 삽화 뒤에서 먼저 짓고 옮기기는 삽화가 걷힌 뒤라, 그 사이 카메라가 부서진 옛 층 바닥을 쥐고 있다.
+            // 그때 bounds 를 읽으면 예외로 이 코루틴이 죽어 그 챕터 내내 공기가 없었다 — 바닥이 설 때까지 거른다.
             GameObject obj = GetPooledObejct();
-            if(obj != null)
+            Vector3 pos;
+            if(obj != null && TryGetSpawnPosition(out pos))
             {
                 obj.SetActive(true);
-                obj.transform.position = GetSpawnPosition();
+                obj.transform.position = pos;
             }
         }
     }
@@ -288,14 +291,19 @@ public class Effects_00 : MonoBehaviour
         }
     }
 
-    Vector3 GetSpawnPosition()
+    bool TryGetSpawnPosition(out Vector3 pos)
     {
-        Bounds bounds = Managers.Game.MainCamera.GetComponentInChildren<CameraController>()._bg.bounds;
-        return new Vector3
+        pos = default;
+        CameraController cam = Managers.Game.MainCamera != null ? Managers.Game.MainCamera.GetComponentInChildren<CameraController>() : null;
+        if (cam == null || cam._bg == null)
+            return false;
+        Bounds bounds = cam._bg.bounds;
+        pos = new Vector3
             (
                 Random.Range(bounds.min.x, bounds.max.x),
                 0.5f,
                 Random.Range(bounds.min.z, bounds.max.z)
             );
+        return true;
     }
 }

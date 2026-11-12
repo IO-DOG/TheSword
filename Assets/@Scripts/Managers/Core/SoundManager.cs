@@ -380,12 +380,14 @@ public class SoundManager
     {
         yield return null;
         float timer = 0f;
+        // 곡은 지금 크기에서 올린다 — 챕터 경계는 삽화 뒤에서 새 곡이 이미 오르는 중이라(FadeAndPlayBGM) 0 부터면 한 번 뚝 끊겼다.
+        float from = Mathf.Min(_audioSources[(int)Define.Sound.Bgm].volume, ConfiguredBgmVolume);
         while (timer < time)
         {
             timer += Time.deltaTime;
             float t = Mathf.Clamp01(timer / time);
             //// 소리켜기
-            Managers.Sound.SetBGMVolume(Mathf.Min(t, ConfiguredBgmVolume));
+            Managers.Sound.SetBGMVolume(Mathf.Max(from, Mathf.Min(t, ConfiguredBgmVolume)));
             Managers.Sound.SetEffectVolume(Mathf.Min(t, PlayerPrefs.GetFloat("CUREFFECTSOUND", 1) * PlayerPrefs.GetFloat("SAVESOUND", 1)));
 
             yield return null;
