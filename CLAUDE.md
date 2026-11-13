@@ -472,7 +472,7 @@ Unity.exe -projectPath . -executeMethod MapDecoSetup.Build
 
 | 어디에 | 무엇을 | 파일 |
 |---|---|---|
-| 맵 위 몬스터 머리 위 | `-58` (현재 HP 대비 몫으로 초록·노랑·주황), 못 이기면 빨간 `X`, 잡으면 레벨업이면 표시. V 로 끄고 켠다 | `ForecastOverlay` |
+| 맵 위 몬스터 머리 위 | `-58` (현재 HP 대비 몫으로 초록·노랑·주황), 못 이기면 빨간 `X`, 잡으면 레벨업이면 표시. 지금 마시면 넘치는 물약 위에는 실제로 차는 몫 주황 `+N`. V 로 끄고 켠다 | `ForecastOverlay` |
 | 몬스터 도감 (M, HUD 검 단추) | 층의 종마다 공방체·경험치·남은 수·다음 싸움 값·맞는 횟수·"공격 +k → 한 대 덜" | `UI_MonsterManualPopup` |
 | 부딪히기 직전 | 못 이기는 싸움이면 "그래도 싸울까" (`FightGate` 순서 100). 스토리의 첫 ✖ 수업이 50 | `FatalFightGuard` |
 | HUD | 치명까지 N타, 방패 준비 | `UI_GameScene` |

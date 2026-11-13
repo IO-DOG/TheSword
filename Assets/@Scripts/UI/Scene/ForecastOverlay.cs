@@ -7,6 +7,9 @@ using UnityEngine;
 /// 계약(PlayerData.IsContractedSword) 뒤에만 보이고, V 로 끄고 켠다(GameSettings.ShowForecast).
 /// 지는 싸움은 빨간 X, 쓰러뜨리면 레벨이 오르면 ★(ForecastUI.LevelUpMark). 색은 지금 체력에 대한 몫이다(ForecastUI.Tone).
 ///
+/// 지금 마시면 넘치는 물약 위에는 실제로 차는 체력을 주황 "+N" 으로 띄운다(툴팁의 넘침과 같은 색). 원형 魔塔 의 유일한
+/// 판단거리가 "언제 마시나" 인데 맵에서는 아무 표시가 없어 툴팁을 하나씩 열어야 했다(매직타워 보고서 5-3). 넘치지 않으면 안 띄운다.
+///
 /// 숫자는 그림이 <b>보이는</b> 윗변 바로 위에 선다. 옆 칸 숫자와 겹치면 한 줄씩 엇갈려 올린다(Follow).
 ///
 /// 값은 BattleForecast 그대로다. 치명 횟수·방어 게이지가 전투 사이에 이어져서 한 번 싸울 때마다 나머지
@@ -34,6 +37,7 @@ public class ForecastOverlay : MonoBehaviour
         public RectTransform Rect;
         public TextMeshProUGUI Text;
         public MonsterController Monster;
+        public ConsumableItem Item;     // 넘치는 물약이면 이것, 몬스터면 null
         public Vector3 Head;        // 몬스터 위치에서 그림의 보이는 윗변 가운데까지
         public float Side;          // 그림 가운데에서 그려진 좌우 끝 중 먼 쪽까지 (월드)
         public Vector2 Size;        // 글자가 차지하는 너비·높이 (캔버스 단위). 글자를 바꿀 때 잰다
@@ -67,6 +71,9 @@ public class ForecastOverlay : MonoBehaviour
     readonly List<Label> _labels = new List<Label>();     // 풀. 앞의 _used 개만 쓴다
     readonly List<Label> _placing = new List<Label>();    // Follow 가 왼쪽부터 놓는 순서
     readonly List<MonsterController> _monsters = new List<MonsterController>();
+    readonly List<ConsumableItem> _items = new List<ConsumableItem>();
+    static readonly Price NoPrice = new Price();    // 물약은 세지 않는다 (Dir 0)
+    static readonly Color Spill = new Color32(255, 160, 64, 255);    // UI_CItemInfo 의 넘침 #FFA040
     // 왼쪽부터, 같은 세로줄이면 아래부터. 순서가 프레임마다 뒤집히면 엇갈림이 깜빡인다.
     readonly System.Comparison<Label> _leftFirst = (a, b) =>
     {
@@ -201,11 +208,19 @@ public class ForecastOverlay : MonoBehaviour
                 if (ForecastUI.IsStanding(mc))
                     Show(mc, Forecast(mc.id, stage), g.PlayerData.CurHP);
             }
+            map.GetComponentsInChildren(false, _items);
+            foreach (ConsumableItem item in _items)
+            {
+                int gain;
+                if (Spills(item, g.PlayerData, out gain))
+                    ShowPotion(item, gain);
+            }
         }
 
         for (int i = _used; i < _labels.Count; i++)
         {
             _labels[i].Monster = null;
+            _labels[i].Item = null;
             SetShown(_labels[i], false);
         }
     }
@@ -224,6 +239,7 @@ public class ForecastOverlay : MonoBehaviour
         _used++;
 
         label.Monster = mc;
+        label.Item = null;
         label.Head = HeadOf(mc) - mc.transform.position;
         label.Side = SideOf(mc);
         label.Last = new Vector3(float.NaN, 0f, 0f);    // 다음 Follow 에서 반드시 옮긴다
@@ -232,6 +248,42 @@ public class ForecastOverlay : MonoBehaviour
         label.Tone = ForecastUI.Tone(r, hp);
         label.Price = PriceOf(mc, r);
         Paint(label, Time.unscaledTime);
+    }
+
+    /// <summary>회복 물약이고 지금 마시면 넘치는가 — gain 은 실제로 차는 체력. 셈은 ConsumableItem.PickUp 과 같다.</summary>
+    static bool Spills(ConsumableItem item, GameManager.CurPlayerData p, out int gain)
+    {
+        gain = 0;
+        Data.ConsumableItemData d;
+        if (item.id < ConsumableItem.NUM_OF_KEYS || item.id >= ConsumableItem.NUM_OF_POTIONS
+            || Managers.Data.ConsumableItemDic.TryGetValue(item.id, out d) == false)
+            return false;
+        float heal = Mathf.Round(d.Heal * p.MaxHP / 100);
+        gain = Mathf.Max(0, Mathf.RoundToInt(Mathf.Min(p.CurHP + heal, p.MaxHP) - p.CurHP));
+        return gain < Mathf.RoundToInt(heal);
+    }
+
+    void ShowPotion(ConsumableItem item, int gain)
+    {
+        Label label = _used < _labels.Count ? _labels[_used] : NewLabel();
+        _used++;
+
+        label.Monster = null;
+        label.Item = item;
+        label.Head = HeadOf(item) - item.transform.position;
+        label.Side = SideOf(item);
+        label.Last = new Vector3(float.NaN, 0f, 0f);
+        label.Price = NoPrice;
+        label.Live = false;
+        string text = "+" + gain;
+        if (label.Text.text != text)
+        {
+            label.Text.text = text;
+            label.Size = label.Text.GetPreferredValues();
+        }
+        label.Text.color = Spill;
+        if (label.Mark != null)
+            label.Mark.gameObject.SetActive(false);
     }
 
     // 이 몬스터의 값 기억을 새 값으로 옮긴다. 처음 보는 몬스터면 세지 않는다.
@@ -333,7 +385,7 @@ public class ForecastOverlay : MonoBehaviour
     /// ponytail: 다시 잴 때 보이는 프레임 하나로 잰다. 대기 동작의 높이 차는 시트마다 0.02~0.03, Mob_002 만 0.11
     /// 이라 그 숫자만 전투 뒤마다 조금 오르내린다. 거슬리면 시트별 최대값 표를 둔다.
     /// </summary>
-    static Vector3 HeadOf(MonsterController mc)
+    static Vector3 HeadOf(Component mc)
     {
         SpriteRenderer sr = mc.GetComponentInChildren<SpriteRenderer>();
         Sprite sprite = sr != null ? sr.sprite : null;
@@ -355,7 +407,7 @@ public class ForecastOverlay : MonoBehaviour
 
     /// <summary>그림 가운데에서 그려진 좌우 끝 중 먼 쪽까지(월드) — 그림이 뒤집혀도 숫자가 몸에 얹히지 않는다.
     /// HeadOf 처럼 촘촘한 메시의 꼭짓점으로 잰다.</summary>
-    static float SideOf(MonsterController mc)
+    static float SideOf(Component mc)
     {
         SpriteRenderer sr = mc.GetComponentInChildren<SpriteRenderer>();
         Sprite sprite = sr != null ? sr.sprite : null;
@@ -413,13 +465,14 @@ public class ForecastOverlay : MonoBehaviour
         {
             Label label = _labels[i];
             MonsterController mc = label.Monster;
-            bool on = mc != null && mc.gameObject.activeInHierarchy;
+            Transform target = mc != null ? mc.transform : label.Item != null ? label.Item.transform : null;
+            bool on = target != null && target.gameObject.activeInHierarchy;
             if (on)
             {
-                label.Want = cam.WorldToScreenPoint(mc.transform.position + label.Head);
+                label.Want = cam.WorldToScreenPoint(target.position + label.Head);
                 // 몸의 가운데가 화면 밖이면 숨긴다. 화면 아래 가장자리에 머리만 걸친 몬스터는 몸이 안 보이는데 숫자만
                 // 떠서, HUD 의 "치명까지" 글자 사이로 비쳐 보였다.
-                Vector3 body = cam.WorldToScreenPoint(mc.transform.position + label.Head * 0.5f);
+                Vector3 body = cam.WorldToScreenPoint(target.position + label.Head * 0.5f);
                 on = label.Want.z > 0f && body.x >= 0f && body.x <= Screen.width && body.y >= 0f && body.y <= Screen.height;
             }
             SetShown(label, on);
@@ -436,7 +489,7 @@ public class ForecastOverlay : MonoBehaviour
 
             // 바로 북쪽 칸에 다른 몬스터가 서 있으면 머리 위 숫자가 그놈 몸통에 얹혀 누구 값인지 읽히지 않았다
             // (세로 통로에 줄 선 43·87층 — 그림이 한 칸 반 넘게 서 있어서다). 그때는 제 머리 오른쪽 옆에 세운다.
-            if (UnderAnother(mc))
+            if (mc != null && UnderAnother(mc))
             {
                 // 화면 오른쪽 끝의 세로 통로면 밖으로 나간다 — 화면 안에 붙든다(제 몸에 조금 얹힌다).
                 label.Want.x = Mathf.Min(cam.WorldToScreenPoint(mc.transform.position + label.Head + Vector3.right * label.Side).x
