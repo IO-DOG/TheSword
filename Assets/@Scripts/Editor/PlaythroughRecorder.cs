@@ -322,7 +322,9 @@ public static class PlaythroughRecorder
                           || g.OnInputLock || g.OnFade || g.OnLever;
             // 이야기 장면도 스스로 끝난다 — 결말은 자동 진행으로도 25~30초다. 도중에 풀면 장면이 반쯤 끊기고
             // 잡고 있던 레터박스·HUD 가 어긋난다 (AutoPlayer.WatchLocks 도 같은 까닭으로 건너뛴다).
-            if (g.OnBattle || StoryDirector.IsPlaying)
+            // 손수 만든 연출의 대화창(1~4층 — 3층 마검 대화 다섯 줄 + 계약 5.5초)도 스스로 끝난다. 창이 떠 있는 동안을 세면
+            // 3층 계약이 20초를 넘겨 연출 도중에 HUD 가 튀어나왔다(11-13 완주 녹화). 창 없이 멈춘 연출은 AutoPlayer.WatchLocks 도 본다.
+            if (g.OnBattle || StoryDirector.IsPlaying || Managers.UI.TopPopup is UI_ConversationPopup)
             {
                 _lockedTime = 0.0;
                 return;
