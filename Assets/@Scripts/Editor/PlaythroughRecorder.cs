@@ -36,13 +36,15 @@ public static class PlaythroughRecorder
     // 100층을 한 번에 담아야 하는데, 인코딩이 무거우면 그만큼 실제 시간이 늘어난다.
     // 1280x720 30fps 로는 30분에 70층 언저리에서 끊겼다. 화면이 도트 그림이라
     // 960x540 24fps 로 낮춰도 알아보는 데 지장이 없고, 처리량은 두 배 가까이 는다.
-    const int Width = 960;
-    const int Height = 540;
+    // 사람이 볼 영상이면 THESWORD_RECORD_HQ=1 — 1280x720 30fps 보통 화질(실행 시간이 두 배 남짓 는다).
+    static bool HQ => System.Environment.GetEnvironmentVariable("THESWORD_RECORD_HQ") == "1";
+    static int Width => HQ ? 1280 : 960;
+    static int Height => HQ ? 720 : 540;
     // 프레임 상한을 풀어 두었으므로(CapFrameRate=false) 인코딩 비용이 곧 실행 시간이다.
     // 20fps 로는 100층이 38분쯤 걸려 배경 실행 예산(약 29분)을 넘겨 77층에서 잘렸다.
     // 15 로 내리면 인코딩할 프레임이 4분의 1 줄어든다. 해상도는 그대로 둔다 —
     // 보스전 클립에서 카드의 이름과 숫자를 읽어야 하기 때문이다.
-    const float Fps = 15f;
+    static float Fps => HQ ? 30f : 15f;
 
     /// <summary>이 시간이 지나면 결과와 상관없이 녹화를 끊고 나온다.
     /// 봇이 어딘가에서 맴돌아도 mp4 는 정상적으로 마무리돼야 한다.</summary>
@@ -223,7 +225,7 @@ public static class PlaythroughRecorder
             Codec = CoreEncoderSettings.OutputCodec.MP4,
             // 인코딩이 병목이라 화질을 낮추면 그만큼 실제 시간이 줄어든다.
             // 100층을 한 번에 담는 것이 화질보다 중요하다.
-            EncodingQuality = CoreEncoderSettings.VideoEncodingQuality.Low,
+            EncodingQuality = HQ ? CoreEncoderSettings.VideoEncodingQuality.Medium : CoreEncoderSettings.VideoEncodingQuality.Low,
         };
         movie.ImageInputSettings = new GameViewInputSettings
         {
