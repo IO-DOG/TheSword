@@ -80,8 +80,10 @@ MOB_DESC_BASE = 21000
 BOSS_NAME_BASE = 10900
 BOSS_DESC_BASE = 20900
 SCRIPT_STAGE_NAME_BASE = 5100  # 기존 5000~5004 뒤
-SCRIPT_MON_NAME_BASE = 10100   # 기존 10000~10008 뒤
-SCRIPT_MON_DESC_BASE = 20100   # 기존 20000~20008 뒤
+# 옛 생성기의 몬스터 이름·설명 구간(10101~·20101~). 이름이 11000~/21000~ 로 옮겨 간 뒤로 아무도 안 부르는데
+# 영어 칸에 한국어가 든 210행이 남아 있었다 — GENERATED_SCRIPT_RANGES 에 넣어 --write 가 비운다.
+OLD_MON_NAME_RANGE = (10100, 10899)
+OLD_MON_DESC_RANGE = (20100, 20899)
 
 # 층당 전투 목표치 (플레이어 최대 HP 대비 손실 비율, 전투 지속 시간 초)
 # 몹 5마리 * 최대 9.5% = 약 47%, 여기에 포션 2개(각 30%)로 층당 순회복이 되게 잡는다.
@@ -1914,6 +1916,8 @@ GENERATED_SCRIPT_RANGES = [
     (MOB_NAME_BASE, MOB_NAME_BASE + TOTAL_FLOORS * 8 + 7),
     (MOB_DESC_BASE, MOB_DESC_BASE + TOTAL_FLOORS * 8 + 7),
     (SIZED_RUNE_NAME_BASE, SIZED_RUNE_NAME_BASE + 49),
+    OLD_MON_NAME_RANGE,
+    OLD_MON_DESC_RANGE,
 ]
 BOOK_EQUIP_ID = 31              # EquipData 의 몬스터 도감
 RING_EQUIP_ID = 32              # EquipData 의 워프석 반지 — 새긴 글("렌에게. 해 지기 전에.")이 이야기의 일부다
