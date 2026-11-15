@@ -176,6 +176,8 @@ public static class SwordLedger
         l.BandStars.Add(stars);
         int foretold = l.BandForetold, paid = l.BandPaid, par = l.BandPar;
         l.BandForetold = l.BandPaid = l.BandPar = 0;
+        // 봇 완주 기록에서 띠마다 치름/기준을 견준다(재미 검증 v2 4절 "기준점 8% 차이" — fun_sim [7] 과 층 단위로 맞춘다).
+        Debug.Log($"[Ledger] 띠 {band + 1}: 예언 {foretold} 치름 {paid} 기준 {par} 별 {stars}");
         if (stars > 0)                      // 알림은 별 1~3 만 (GameEvents 계약) — 기준이 없는 띠는 조용히 닫는다
             GameEvents.RaiseBandTallied(band, stars);
 
