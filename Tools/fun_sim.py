@@ -39,8 +39,8 @@ v1(재미검증 보고서 7절)은 봇의 단순 완주 한 판으로 별을 쟀
   - 1~4층은 simulate_handmade 의 결과(5층 입구 Lv16 · 78 EXP — 2층 프리팹 몬스터까지 맞춘 값, 11-16 봇 체크포인트와 같다)로 시작한다.
   - 지난 층으로 워프해 곁길을 쓰는 것은 넣지 않는다(장부가 기준을 안 쳐 주므로 점수에 득이 없다). 금고는 챕터 끝에
     워프해 남은 열쇠로 여는 습관만 넣는다(싸움이 없다).
-  - 기준점: 봇을 흉내 낸 판(REFERENCE["봇"])은 v1 의 실제 봇 완주보다 8% 덜 치른다(예언 합도 같은 만큼 — 전투 조건이
-    조금 다르다는 뜻이고 원인은 못 찾았다). 문턱 추천은 그 비(V1_BOT)로 보정해 찍는다.
+  - 기준점: 봇을 흉내 낸 판(REFERENCE["봇"])은 v1 의 실제 봇 완주보다 8% 덜 치렀다(V1_BOT). 문턱 추천은 아직 그 비(CAL)로 보정해 찍는다.
+    11-16 봇 완주(V2_BOT)와 층마다 견주니 실제가 시뮬보다 5% 싸다 — 차이는 챕터 4 의 싸움 순서다(CAL 옆 주석).
 """
 
 import bisect
@@ -531,6 +531,7 @@ class Persona:
         self.side, self.side_p, self.side_cap = "all", 1.0, 0.08
         self.vault, self.vault_stats, self.backfill = "open", ("atk", "dfn", "hp"), False
         self.treasure, self.treasure_t, self.bosspick = "rune", 0.5, "atk"
+        self.rune_floors = ()       # 보물 층 가운데 treasure 와 달리 룬을 집는 층 (봇이 지도 때문에 그런 층)
         self.altar, self.altar_t, self.altar_stat = "never", 0.6, "atk"
         self.skill = SKILL_NONE
         for k, v in kw.items():
@@ -587,8 +588,10 @@ REFERENCE = {
     # (PathMover.UseKeys), 스킬은 보스(와 HP 35% 아래)에서만, 제단은 늘 지나간다. 보물 층의 둘 중 하나는 물약이다 —
     # 층을 비우면 남은 물약을 룬보다 먼저 줍고(PriTopUp < PriRune), 그 물약이 짝인 룬을 지운다.
     # v1 의 봇 완주(치름 27,654 · 기준 46,693 · 별 22223322333333333333)와 견줄 기준이다.
-    "봇": dict(potion="topup", pot_t=.7, side="all", vault="open", treasure="potion",
-              bosspick="random", altar="never", skill=SKILL_BOT),
+    # 11-16 봇 완주와 층마다 견줘 맞췄다: 둘 중 하나는 29층만 룬이고(AutoPlayer 는 룬을 아무 때나, 물약은 70% 아래거나 층을 비운 뒤에
+    # 줍는다 — 29층은 층을 비우기 전에 룬에 닿는다), 보스 뒤 셋(40·60·80)은 셋 다 공격이었다(예전 random 은 40·80 을 방어로 골랐다).
+    "봇": dict(potion="topup", pot_t=.7, side="all", vault="open", treasure="potion", rune_floors=(29,),
+              bosspick="atk", altar="never", skill=SKILL_BOT),
     # 생성기의 정답 경로(simulate_run 기본): 다 잡고, 구역 물약은 죽을 때만 마시고 남으면 두고 간다(계단 쪽 물약은
     # 마신다). 덤(금고·둘 중 하나·제단)은 안 줍는다.
     "정답 경로": dict(potion="needed", pot_t=0.0, sweep=False, side="all", vault="never", treasure="none",
@@ -844,6 +847,8 @@ class Run:
             mx = self.stats()["hp"]
             default = {"rune": rune, "potion": pot, "hp": pot if self.hp < P.treasure_t * mx else rune,
                        "none": None}[P.treasure]
+            if floor in P.rune_floors:
+                default = rune
             opts = (rune, pot)
         else:
             atk, dfn = (a, b) if a[0] == "atk" else (b, a)
@@ -1189,6 +1194,10 @@ V1_BOT = dict(paid=27654, foretold=28309, par=46693, stars="22223322333333333333
 # 시뮬의 봇이 같은 데이터(기준 합 46,693)에서 치른 값 25,449 — 실제/시뮬 = 1.087. 데이터를 다시 뽑으면 실제 봇과
 # 견줄 판이 없으니 이 비를 그대로 쓴다(봇 녹화를 새로 뜨면 V1_BOT 와 함께 갈 것).
 CAL = 27654 / 25449
+# 11-16 봇 완주(PathMover.ItemRootIn·HANDMADE_PREFAB_SWAP 뒤, 기준 합 71,253). 같은 데이터에서 시뮬의 봇은 42,096 — 실제/시뮬 = 0.950.
+# 능력치·레벨은 100층 내내 같고, 남은 차이는 챕터 4(띠 17·20)의 싸움 순서다(81층: 시뮬은 정예 암살을 셋째 종보다 먼저 쳐서
+# 이어 받은 치명 횟수가 갈렸다 — 172 대 87). CAL 을 이 비로 바꾸면 [7] 의 별 문턱이 13% 남짓 빡빡해진다 — 오너와 정한 뒤에 간다.
+V2_BOT = dict(paid=39976, foretold=40522, par=71253, stars="11111111111211112212")
 
 
 def q(xs, p):
@@ -1266,10 +1275,13 @@ def report(results, seconds, mob_loss=None, stages=None):
                 f"별 {''.join(map(str, r['stars']))}")
             say(f"    실제 봇  치름 {V1_BOT['paid']:,} · 예언 {V1_BOT['foretold']:,} · 기준 {V1_BOT['par']:,} · 점수 "
                 f"{round(1000 * V1_BOT['paid'] / V1_BOT['par'])} · 별 {V1_BOT['stars']}")
+            if r["par"] == V2_BOT["par"]:
+                say(f"    11-16 봇 치름 {V2_BOT['paid']:,} · 예언 {V2_BOT['foretold']:,} · 별 {V2_BOT['stars']} -> 실제/시뮬 "
+                    f"{V2_BOT['paid'] / r['paid']:.3f} (CAL 은 아직 v1 비)")
             if r["par"] == V1_BOT["par"]:
                 say(f"    -> 시뮬이 실제보다 {100 * (1 - r['paid'] / V1_BOT['paid']):.0f}% 싸게 싸운다(예언 합도 같은 만큼).")
-            else:
-                say("    -> 기준 합이 다르다 — 데이터가 v1 뒤로 바뀌었다. 견줄 실제 판이 없다.")
+            elif r["par"] != V2_BOT["par"]:
+                say("    -> 기준 합이 다르다 — 데이터가 11-16 뒤로 바뀌었다. 견줄 실제 판이 없다(봇 완주를 새로 떠서 V2_BOT 을 갈 것).")
             say(f"    문턱은 v1 데이터에서 잰 비 x{cal:.3f} 로 보정한다(CAL).")
     say("    고정 판:")
     for r in refs:
