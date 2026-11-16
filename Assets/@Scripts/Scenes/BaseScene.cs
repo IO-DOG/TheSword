@@ -14,7 +14,7 @@ public abstract class BaseScene : MonoBehaviour
 
     protected virtual void Init()
     {
-        Object obj = GameObject.FindObjectOfType(typeof(EventSystem));
+        Object obj = Object.FindAnyObjectByType(typeof(EventSystem));
         if (obj == null)
         {
             // 예전에는 "UI/EventSystem" 을 어드레서블에서 불렀는데 <b>그런 프리팹이

@@ -147,7 +147,7 @@ public class UI_BaseCard : UI_Base
         float designed = label.fontSize;      // 자동 축소를 켜면 이 값이 바뀐다. 먼저 잡아 둔다.
 
         label.text = name;
-        label.enableWordWrapping = false;
+        label.textWrappingMode = TextWrappingModes.NoWrap;
         label.overflowMode = TextOverflowModes.Ellipsis;
         label.fontSizeMin = 6f;
         label.fontSizeMax = designed;
