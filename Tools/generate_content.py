@@ -150,7 +150,9 @@ BOSS_DURATION = 34.0
 # 17~28%, 버틸 실수가 문턱 그대로 10 이다 — 탑의 법의 여유는 그만큼 얇다.
 # 얇은 것은 물약 쪽이다 — 모든 물약을 x0.95 로 줄이면 최저 HP 가 8~29% 로, x0.9 면 20층에서
 # 죽는다. 물약·특성·전투 길이를 바꾸면 [7/7] 이 다시 잰다(check_tower 가 문이다).
-TOWER_MOB_HP_LOSS = (0.110, 0.104, 0.104, 0.104, 0.104)     # 챕터별
+# 11-16: 5층 입구 경험치를 실측(78)으로 바로잡자(HANDMADE_PREFAB_SWAP — 예전 셈은 60 이 많았다) 0.110 은 물약 7개에서
+# 막히고 15층 탑의 법 제단 문턱이 18층에 갇혔다. 0.108 로 내렸다(챕터 0 최저 21%@18, 실수 허용 10).
+TOWER_MOB_HP_LOSS = (0.108, 0.104, 0.104, 0.104, 0.104)     # 챕터별
 TOWER_MIN_WASTE = 10            # 보이는 대로 마시며 물약을 이만큼 버려도 완주해야 한다
 
 # 몬스터 방어력 = 설계 플레이어 공격력 x 0.6 x 특성 배수, 단 0.7 을 넘지 않는다.
@@ -713,7 +715,9 @@ SPLIT_POTION_ID = 7                      # 노랑 슬라임 자리에 함께 떨
 # 00_002(3층)는 마검 이벤트 방이라 몬스터가 없다. 킹 슬라임을 잡으면 분열 셋이
 # 나오고 셋을 다 잡아야 계단이 열린다 — 반드시 치르는 전투인데 예전에는 빠져
 # 있어서 경험치 420 을 덜 셌다. 넣으니 5층 진입 예측이 Lv14 -> Lv16 이 됐다.
-# 자동 플레이 실측은 Lv17 이다 — 남은 1레벨(106 EXP 이상)은 아직 원인을 모른다.
+# 2026-11-16 봇 실측은 Lv16 + 78 EXP 다(예전 Lv17 은 옛 데이터). 2층 프리팹은 CSV 와 한 칸이 달라 M_004 다섯 중
+# 하나가 M_001 이다 — 실물은 프리팹이고 CSV 는 세이브 번호용이라(MapData 해시) 못 고친다. 그 60 EXP 를 빼면 실측과 같다.
+HANDMADE_PREFAB_SWAP = {"00_001": (4, 1)}    # 층: (CSV 의 몬스터, 프리팹의 몬스터) 한 마리
 HANDMADE_RUN = [("00_000", None, ()), ("00_001", None, ()),
                 ("00_003", (HANDMADE_BOSS_ID,), ()),
                 ("00_003", SPLIT_SLIME_IDS, (SPLIT_POTION_ID,))]
@@ -832,6 +836,9 @@ def simulate_handmade(ptable):
         scale = exp_scale.get(did, 1.0)
         floor = int(did.split("_")[1]) + 1
         mob_ids = list(ids) if ids is not None else _cells(did, r"M_[0-9]+")
+        if ids is None and did in HANDMADE_PREFAB_SWAP:
+            csv_id, prefab_id = HANDMADE_PREFAB_SWAP[did]
+            mob_ids[mob_ids.index(csv_id)] = prefab_id
         # 순서가 곧 난이도. 약한 놈부터.
         mob_ids.sort(key=lambda i: monsters[i]["MaxHP"] * monsters[i]["Attack"])
 

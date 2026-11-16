@@ -36,6 +36,7 @@ public class PathMover
     public static readonly int WallMask = 1 << (int)Define.Layer.Wall;
     public static readonly int ItemMask = (1 << (int)Define.Layer.CItem)
                                         | (1 << (int)Define.Layer.EItem);
+    static readonly int CItemMask = 1 << (int)Define.Layer.CItem;
 
     /// <summary>탐색 상자의 반지름. 층이 23x27 이라 32 면 어디서 재도 전부 들어온다.</summary>
     const int FloodRadius = 32;
@@ -228,9 +229,14 @@ public class PathMover
         //  - 20층: 보스의 큰 콜라이더가 제 주변 칸을 다 막아 아무도 못 다가갔다.
         int mask = PassItems
             ? (BlockMask & ~ItemMask & ~(1 << (int)Define.Layer.Monster))
-            : BlockMask;
+            : BlockMask & ~CItemMask;
         bool blocked = Physics.CheckBox(world, half, Quaternion.identity, mask,
                                         QueryTriggerInteraction.Collide);
+        // 소비 아이템은 제 칸만 막는다. 콜라이더가 북쪽으로 0.096 밀려 있어(PlayerController.InNextCell) 바로 북쪽 칸까지 막힌 것으로 쟀고,
+        // 골방 안쪽 끝의 열쇠·물약이 그 입구 칸을 막아 봇·클릭 이동이 골방에 못 들어갔다 — 봇 완주가 여분 열쇠를 하나도 못 주워
+        // 금고를 한 번도 안 열었다(2026-11-16, 5층 여분 열쇠가 끝까지 바닥에 남았다). 걸어서는 주워진다. 칸은 뿌리 위치로 잰다.
+        if (blocked == false && PassItems == false)
+            blocked = ItemRootIn(cell, world, half);
 
         if (blocked == false && Physics.CheckBox(world, half, Quaternion.identity, DoorMask,
                                                  QueryTriggerInteraction.Collide))
@@ -240,6 +246,19 @@ public class PathMover
 
         _solid[cell] = blocked;
         return blocked;
+    }
+
+    bool ItemRootIn(Vector2Int cell, Vector3 world, Vector3 half)
+    {
+        int n = Physics.OverlapBoxNonAlloc(world, half, s_hits, Quaternion.identity, CItemMask,
+                                           QueryTriggerInteraction.Collide);
+        for (int i = 0; i < n; i++)
+        {
+            ConsumableItem item = Util.Find<ConsumableItem>(s_hits[i].gameObject);
+            if (Cell(_map, item != null ? item.transform.position : s_hits[i].transform.position) == cell)
+                return true;
+        }
+        return false;
     }
 
     static bool HasKeyFor(Vector3 world, Vector3 half)
