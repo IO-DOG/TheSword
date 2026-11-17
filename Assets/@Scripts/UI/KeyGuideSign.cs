@@ -7,7 +7,7 @@ using UnityEngine;
 /// </summary>
 public class KeyGuideSign : MonoBehaviour
 {
-    [SerializeField] Sprite _padSprite;
+    [SerializeField] Sprite _padSprite = null; // 프리팹(1층 GuidePanel)이 채운다
     Animator _animator;
     SpriteRenderer _renderer;
     int _device = -1;

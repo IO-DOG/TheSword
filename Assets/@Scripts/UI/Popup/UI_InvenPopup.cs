@@ -229,7 +229,17 @@ public class UI_InvenPopup : UI_Popup
             TMPro.TextMeshProUGUI legend = CodeUI.NewText(frame, "Keys", CodeUI.ProseFont, 26f, new Color32(240, 225, 190, 255),
                 TMPro.TextAlignmentOptions.Right);
             legend.fontSharedMaterial = CodeUI.Outlined(legend.font, 0.25f);
-            CodeUI.Place(legend.rectTransform, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(-16f, 96f), new Vector2(900f, 36f));
+            // 오른쪽 맞춤이라 왼쪽으로 자란다 — HUD 열쇠 칸(화면 왼쪽 아래 세로 줄) 앞에서 멈춘다. 폭 900 이던 때는 720p 에서
+            // 노란 열쇠 칸에 글자가 얹혔다(11-18, 일본어가 가장 길다). 남는 폭이 모자라면 Fit 이 24 까지 줄인다.
+            float width = 900f;
+            RectTransform keyCol = Managers.UI.SceneUI == null ? null : Util.FindChild<RectTransform>(Managers.UI.SceneUI.gameObject, "GreenKey", true);
+            if (keyCol != null)
+            {
+                Vector3[] c = new Vector3[4];
+                keyCol.GetWorldCorners(c);
+                width = Mathf.Clamp(frame.rect.xMin - 16f - frame.InverseTransformPoint(c[2]).x - 8f, 200f, 900f);
+            }
+            CodeUI.Place(legend.rectTransform, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(-16f, 96f), new Vector2(width, 36f));
             PromptText.Set(CodeUI.Fit(legend, 24f), KeysText);
         }
 
@@ -603,9 +613,8 @@ public class UI_InvenPopup : UI_Popup
 
         GetImage((int)Images.Inventory_EquipList).gameObject.SetActive(true);
 
-        // TODO 여섯 부위(검·방패·목걸이·반지·신발·책) 핸들러가 전부 _Get 을 무조건
-        // 켠다. 이것이 "보유 표시"인지 "선택된 탭 표시"인지 프리팹에서 확인한 뒤
-        // 여섯 곳을 함께 고쳐야 한다. 한 곳만 바꾸면 부위마다 규칙이 갈라진다.
+        // _Get(보통 틀)·_On(같은 크기의 밝은 틀)은 "고른 탭" 표시다 — 보유와 무관하다. Refresh 가 여섯 부위를
+        // 다 끄고 누른 탭만 둘 다 켠다(여섯 핸들러가 같다). 목록 칸의 _Get 만 "가진 칸" 이다(Set*ListImage).
     }
 
     void SetShieldListImage()
@@ -856,8 +865,9 @@ public class UI_InvenPopup : UI_Popup
                 statusInfo.Init();
                 statusInfo.Refresh(equipId, i);
                 // 이름은 UI_StatusInfo 가 영어로 박아 쓴다("ATK", "DEF \n SPEED") — 한국어로 해도 장비 칸만 영어였다.
-                // 왼쪽 능력치 칸과 같은 문구로 덮는다.
-                statusInfo._statNameText.text = Managers.GetString(StatLabelTextIds[EquipStatLabel[i]]).Replace(' ', '\n');
+                // 왼쪽 능력치 칸과 같은 문구로 덮되 줄은 바꾸지 않는다 — 이 칸은 폭 150 에 가장 긴 "MOVE SPEED" 가 47 이다.
+                // 두 줄로 쪼개면 "공격 10 / 공격 / 속도 0.5" 처럼 이름이 하나 더 있는 것으로 읽혔다(11-18).
+                statusInfo._statNameText.text = Managers.GetString(StatLabelTextIds[EquipStatLabel[i]]);
             }
         }
     }
