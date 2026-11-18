@@ -1442,6 +1442,26 @@
         { "key": "walk_52.01", "speaker": "sword", "emotion": "Normal", "kr": "아까 그 말 말이다. 남은 것끼리." },
         { "key": "walk_52.02", "speaker": "damian", "emotion": "Normal", "kr": "잊어. 더위 먹은 소리야." }
       ]
+    },
+    {
+      "id": "walk_25",
+      "kind": "bark",
+      "trigger": "floor_bark:25",
+      "staging": "걸으며 한마디. 25층에 처음 들어서고 2초 뒤, 걸음을 막지 않고 뜬다. 21층 ch1_start 의 \"녹슬면 네가 닦아라, 허접.\" 을 되받는다 — 데미안이 젖은 발을 투덜대자 마검은 제 날부터 챙긴다. 수로 챕터의 투덜대며 쌓이는 온도. 짧게.",
+      "lines": [
+        { "key": "walk_25.01", "speaker": "damian", "emotion": "Normal", "kr": "발이 다 젖었어." },
+        { "key": "walk_25.02", "speaker": "sword", "emotion": "Angry", "kr": "이몸은 날이 젖었다. 닦아라, 허접." }
+      ]
+    },
+    {
+      "id": "walk_70",
+      "kind": "bark",
+      "trigger": "floor_bark:70",
+      "staging": "걸으며 한마디. 70층에 처음 들어서고 2초 뒤, 걸음을 막지 않고 뜬다. 72층 f72_enough(마검이 데미안 머리 위를 한참 본다)의 앞 단계 — 마검은 눈밭을 핑계로 댄다(눈[雪]과 눈[目]). 80층 \"네 머리 위에도 숫자가 있다\" 를 아직 말하지 않는다. 웃음·허접 없이.",
+      "lines": [
+        { "key": "walk_70.01", "speaker": "damian", "emotion": "Thinking", "kr": "왜 자꾸 내 머리 위를 봐?" },
+        { "key": "walk_70.02", "speaker": "sword", "emotion": "Normal", "kr": "…눈밭이라 눈이 시리다." }
+      ]
     }
   ],
   "prologue_rewrites": {
