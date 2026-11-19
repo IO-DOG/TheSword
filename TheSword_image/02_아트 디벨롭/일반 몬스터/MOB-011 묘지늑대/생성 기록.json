@@ -1,0 +1,48 @@
+{
+  "tool": "OpenAI built-in imagegen",
+  "author": "Codex",
+  "date": "2026-11-18",
+  "ai_used": true,
+  "status": "실루엣·포즈 초안, 손 도트 대기",
+  "plan_and_terms": "계정 플랜·상업 이용 약관 확인 전",
+  "hand_edit_notes": "사람의 손질 전. 팔레트와 픽셀 규격만 자동 변환.",
+  "seed": "미제공",
+  "reviewer": "아트 승인 전",
+  "assets": [
+    {
+      "prompt_id": "MOB-011 KEY-IDLE",
+      "id": "exec-bd01820d-5e61-435b-bc73-2591cb7bd35e.png",
+      "reference_images": [
+        "자사 Mob_004_Idle.png"
+      ],
+      "prompt": "Ch0 ordinary grave wolf in a low hunting crouch with jaws shut. A single VERTICAL, near symmetric enemy character, aggressively front on, like a creature approaching along the z-axis toward the player. As in the reference sprite's central front-on camera, the hindquarters are occluded by the forequarters; no visible flank or tail reaching sideways. Eye placement almost symmetrical, body exactly facing the camera, both ears visible evenly, snout deflected left only a couple of pixels. Use very clear simple clustered pixel art built to read at 46x40 pixels: bristling silver scruff broken into three angular tufts, dark charcoal chest, pale muzzle, two bright ivory eyes, broad front paws spread to either side at bottom, short broken chain. Economical broad flat shapes, crisp hard edged 1px outlines. Subdued greys, lit from overhead. True alpha with empty surroundings. One wolf only, no shadow, no lettering, no animation sheet. One unadorned ordinary animal, unlike a boss."
+    },
+    {
+      "prompt_id": "MOB-011 KEY-IMPACT",
+      "id": "exec-fac4d74c-b3bd-4f7e-aafc-d3ce5377bfc0.png",
+      "reference_images": [
+        "자사 Mob_004_Idle.png",
+        "exec-bd01820d-5e61-435b-bc73-2591cb7bd35e.png"
+      ],
+      "prompt": "Ch0 ordinary grave wolf with jaws spread wide in a bite, dominant open mouth with two bone-colored fangs, its gaze directly at the viewer and both forelegs reaching forward toward camera, under the face. A single VERTICAL, near symmetric enemy character, aggressively front on, like a creature approaching along the z-axis toward the player. As in the reference sprite's central front-on camera, the hindquarters are occluded by the forequarters; no visible flank or tail reaching sideways. Eye placement almost symmetrical, body exactly facing the camera, both ears visible evenly, snout deflected left only a couple of pixels. Use very clear simple clustered pixel art built to read at 46x40 pixels: bristling silver scruff broken into three angular tufts, dark charcoal chest, pale muzzle, two bright ivory eyes, broad front paws spread to either side at bottom, short broken chain. Economical broad flat shapes, crisp hard edged 1px outlines. Subdued greys, lit from overhead. True alpha with empty surroundings. One wolf only, no shadow, no lettering, no animation sheet. One unadorned ordinary animal, unlike a boss."
+    }
+  ],
+  "이전안": [
+    {
+      "prompt_id": "MOB-011 KEY-IDLE",
+      "id": "exec-90608ab0-5e20-4ab4-889d-e4c76eb87e0b.png",
+      "reference_images": [
+        "자사 Mob_004_Idle.png"
+      ],
+      "prompt": "a lean grave wolf in a low hunting crouch, heavy forequarters, bristling scruff, old stitched scar across the muzzle, broken iron chain collar, full body, facing the viewer with the head turned slightly to the left, feet on one ground line, bold readable silhouette, muted grey-brown colours, flat colour areas in three value steps, single-colour dark outline, lit from straight above, 16-bit dungeon RPG enemy sprite\nPose thumbnail for a small Unity enemy. One still pose, a single isolated compact creature with broad angular shoulder tufts and a clear gap between the two planted forepaws. Reference supplies game camera direction and pixel economy only. A true transparent backdrop with no shadow or props. One animal; do not make a strip, a second view or text."
+    },
+    {
+      "prompt_id": "MOB-011 KEY-IMPACT",
+      "id": "exec-154fc1e7-da32-42e2-bd74-764b16db8034.png",
+      "reference_images": [
+        "exec-90608ab0-5e20-4ab4-889d-e4c76eb87e0b.png"
+      ],
+      "prompt": "the same grave wolf at the instant of the bite, lunging forward and down-left, jaws wide, forelegs stretched, scruff flared, full body, facing the viewer with the head turned slightly to the left, feet on one ground line, bold readable silhouette, muted grey-brown colours, flat colour areas in three value steps, single-colour dark outline, lit from straight above, 16-bit dungeon RPG enemy sprite\nSingle pose isolated, same grey wolf and proportions, muzzle scar and short iron collar. Shift the shoulders and jaws into a more FRONT-FACING direct charge at the viewer, head lowered, visibly open black jaws distinguish impact from crouch. Bronzed grey muted eyes. One wolf, no text, no ground, no rim glow. True transparent background."
+    }
+  ]
+}
