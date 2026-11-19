@@ -55,6 +55,13 @@ public class UI_MonsterInfo : UI_Base
         if (base.Init() == false)
             return false;
 
+        // HUD(UI_GameScene)도 오버레이 캔버스 순서 0 이라 둘 중 무엇이 위인지 정해져 있지 않았다 — 왼쪽 열쇠 칸이 툴팁 설명을 덮었다(11-19 84층).
+        // HUD 위, 팝업(10~) 아래.
+        Canvas canvas = GetComponent<Canvas>();
+        if (canvas != null)
+            canvas.sortingOrder = 5;
+
+
         #region Bind
         BindImage(typeof(Images));
         BindText(typeof(Texts));
