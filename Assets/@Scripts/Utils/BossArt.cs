@@ -27,7 +27,35 @@ public static class BossArt
         if (anim != null)
             anim.enabled = false;
         sr.sprite = s;
+        Breathe(id, sr, s);
         return true;
+    }
+
+    const float BreathSeconds = 0.6f;
+    static System.Collections.Generic.Dictionary<int, Sprite> s_raised;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() => s_raised = null;
+
+    /// <summary>맵의 대기 동작 — 같은 그림을 한 점 위에 그린 판과 번갈아 건다(몹 시트의 들썩임 자리).
+    /// 트랜스폼을 옮기지 않아 콜라이더·SitOnFloor·예측 숫자 자리가 그대로고, 한 점씩이라 도트가 번지지 않는다.
+    /// 아래끝은 바닥 그대로(올라갔다 돌아온다).</summary>
+    static void Breathe(int id, SpriteRenderer sr, Sprite s)
+    {
+        s_raised ??= new System.Collections.Generic.Dictionary<int, Sprite>();
+        if (s_raised.TryGetValue(id, out Sprite up) == false || up == null)
+        {
+            Rect r = s.rect;
+            Vector2 pivot = new Vector2(s.pivot.x / r.width, (s.pivot.y - 1f) / r.height);   // 피벗을 한 점 내리면 그림이 한 점 뜬다
+            up = Sprite.Create(s.texture, r, pivot, s.pixelsPerUnit, 0, SpriteMeshType.FullRect);
+            up.name = s.name + "_up";
+            s_raised[id] = up;
+        }
+        DOTween.Kill(sr);
+        DOTween.Sequence()
+            .AppendInterval(BreathSeconds).AppendCallback(() => { if (sr != null && sr.sprite == s) sr.sprite = up; })
+            .AppendInterval(BreathSeconds).AppendCallback(() => { if (sr != null && sr.sprite == up) sr.sprite = s; })
+            .SetLoops(-1).SetId(sr).SetLink(sr.gameObject);
     }
 
     /// <summary>UI 판. 이미지의 애니메이터를 끄고 그림을 건다.</summary>

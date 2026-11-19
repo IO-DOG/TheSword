@@ -1,7 +1,7 @@
 # Steam 그림 — 게임 그림으로 합성한 임시본
 
 Steam 스토어·라이브러리·업적에 올릴 그림 전부. **프로젝트에 이미 있는, 사람이 그린 그림만** 잘라 붙였다 —
-도트 스프라이트, 타이틀 도트, 인트로·로딩 삽화, 로고. 이미지 생성 모델은 한 번도 쓰지 않았다.
+도트 스프라이트, 타이틀 도트, 인트로·로딩 삽화, 로고. 이미지 생성 모델은 쓰지 않았다 — 예외는 보스 업적 다섯의 주제로, 게임에 들어간 챕터 보스 그림(오너의 AI 생성 시안)을 그대로 얹었다(아래 ¹).
 새로 그린 것은 그라데이션·둥근 사각형·디더링한 빛 같은 도형뿐이다.
 
 - **도트는 정수 배율 NEAREST 로만 키웠다.** 삽화와 로고는 **줄이기만** 했다(LANCZOS·BOX). 흐린 확대는 없다.
@@ -60,11 +60,11 @@ Steam 스토어·라이브러리·업적에 올릴 그림 전부. **프로젝트
 |---|---|---|---|---|
 | `ACH_CONTRACT` | 계약 팝업의 외눈 검 문장 | `UI/UI_Popup/PopupUI_MagicalSwordCheck.png` 위쪽 문장(팝업 판은 색으로 걷어냄) | ×2 | 숲 초록 |
 | `ACH_KINGSLIME` | 킹 슬라임 | `MonsterSprites/BossMonsterSprite/Idle/Boss_C0_I000.png` 첫 칸 | 2/3 축소(BOX) | 금색 |
-| `ACH_BOSS20` | 묘소의 늑대 | `MonsterSprites/Idle/Mob_004_Idle.png` (= `Mob_C0_I004`) + 챕터 0 색 | ×4 | 숲 초록 |
-| `ACH_BOSS40` | 수로의 방패병 | `MonsterSprites/Idle/Mob_007_Idle.png` (`Mob_C0_I007`) + 챕터 1 색 | ×6 | 물빛 |
-| `ACH_BOSS60` | 재의 파수꾼 | `MonsterSprites/Idle/Boss_C1_I000.png` (`Mob_C0_I008`) + 챕터 2 색 | ×4 | 잿불 |
-| `ACH_BOSS80` | 얼어붙은 기사 | `MonsterSprites/Idle/Mob_006_Idle.png` (`Mob_C0_I006`) + 챕터 3 색 | ×5 | 서리 |
-| `ACH_BOSS100` | 검은 태양 | `LegacySprites/Monster_Idle.png` (`Mob_C0_I009`) + 챕터 4 색 | ×2 | 보랏빛 |
+| `ACH_BOSS20` | 종뿔사슴 | `Boss/BossCh0.png` ¹ | ×1 | 숲 초록 |
+| `ACH_BOSS40` | 수문을 진 소라 | `Boss/BossCh1.png` ¹ | ×1 | 물빛 |
+| `ACH_BOSS60` | 잿불풀무나방 | `Boss/BossCh2.png` ¹ | ×1 | 잿불 |
+| `ACH_BOSS80` | 빙성고래 | `Boss/BossCh3.png` ¹ | ×1 | 서리 |
+| `ACH_BOSS100` | 검은 태양(왕관 일식체) | `Boss/BossCh4.png` ¹ | ×1 | 보랏빛 |
 | `ACH_END_SEAL` | 잠든 검이 꽂혀 있다 — 날이 틀 아래로 들어간다 | `TitleImages/MainTitle_Sword.png` | ×2 | 밤 파랑 |
 | `ACH_END_HOLD` | 검을 높이 든 주인공 | `Player/UnitHero_ContractSword_F.png` 첫 칸 | ×3 | 핏빛 |
 | `ACH_END_DAWN` | 에고소드 — 손잡이와 외눈은 안에, 날은 틀 밖으로 | `EquipIllust/Illust_Sword_01.png` | ×2 | 새벽 + 빛살 |
@@ -79,13 +79,17 @@ Steam 스토어·라이브러리·업적에 올릴 그림 전부. **프로젝트
 | `ACH_TOWER` | 보스 문의 검은 해 | `BossPortal/BossPortal_Idle.png` 첫 칸 | ×3 | 핏빛 |
 | `ACH_TOWER_DAWN` | 같은 검은 해, 금빛 테 | 〃 | ×3 | 새벽 + 빛살 |
 
+- ¹ **보스 다섯은 2026-11-20 에 게임의 챕터 보스 그림(오너가 AI 이미지 생성으로 뽑은 시안, 172칸)으로 바꿨다.** 예전 판(몹 시트 + 챕터 색)의 틀·무늬·빛은 그대로 두고 —
+  옛 주제의 외곽선 안을 지운 뒤, 무늬는 30칸 주기로 옮겨 오고 빛(정수 단계, 반경에 비례)은 옛 판에서 잰 기울기로 다시 디더했다 — 새 그림을 1배로 얹고 2 px 외곽선(6,8,12)을 둘렀다.
+  게임에서도 보스 그림은 몹 도트의 절반 크기라 1배가 같은 밀도다. 챕터 색은 입히지 않았다(그림이 이미 챕터 색). 잠긴 판은 옛 쌍에서 맞춘 식(밝기 ×0.58 + 7.6, 파랑 +5).
+  `achievements_contact.png` 도 그 자리만 같은 축소 필터로 갈아 끼웠다.
 - ★ 는 글꼴 Silver(Poppy Works, CC BY 4.0)의 글리프다 — `../THIRD_PARTY_NOTICES.txt` 1.1 에 이미 표기돼 있다.
 - 숨김 업적 셋(`ACH_END_DAWN`·`ACH_DAWN_PAR`·`ACH_TOWER_DAWN`)도 두 장씩 있다. 풀리기 전에는 Steam 이 자기 "숨김" 표시를 보인다.
-- 64 px 에서 가장 약한 것: `ACH_BOSS60`·`ACH_BOSS100`(거의 검은 그림이라 실루엣과 빛 테두리로 읽힌다), `ACH_END_ALL`(×1 도트라 가늘다).
+- 64 px 에서 가장 약한 것: `ACH_BOSS20`(사슴 다리가 가늘다)·`ACH_BOSS100`(검은 구가 빛 테두리로 읽힌다), `ACH_END_ALL`(×1 도트라 가늘다).
 
 ## AI 공개와의 관계
 
-그림 속 모든 픽셀은 사람이 그린 프로젝트 그림(과 도형)이지만, **무엇을 어디서 잘라 어떻게 놓을지는 Claude(AI)가 스크립트로 정했다.**
+그림 속 픽셀은 사람이 그린 프로젝트 그림(과 도형)이다 — **보스 업적 다섯(`ACH_BOSS20~100`)의 주제만 예외로 AI 이미지 생성 그림이다**(Steam 공개 문단의 보스 줄이 덮는다). 그리고 **무엇을 어디서 잘라 어떻게 놓을지는 Claude(AI)가 스크립트로 정했다.**
 Content Survey 의 AI 공개 칸에 적을지는 소유자가 정한다(`../README.md` §7). 의뢰 그림으로 바꾸면 이 문제는 사라진다.
 
 ## 다시 만들기
