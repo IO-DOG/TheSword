@@ -757,7 +757,8 @@ public static class MapBuilder
             return;
 
         Animator anim = go.GetComponentInChildren<Animator>();
-        if (anim != null)
+        // 챕터 보스는 한 장짜리 그림이다(BossArt) — 애니메이터를 끄고 건다. 없으면 예전 몹 시트.
+        if (BossArt.Apply(id, anim, go.GetComponentInChildren<SpriteRenderer>()) == false && anim != null)
             anim.Play(md.IdleAnimStr);
 
         // 그림은 열두 종뿐이라 100층을 채우면 계속 같은 놈이 나온다.
@@ -786,7 +787,7 @@ public static class MapBuilder
     static float MonsterBulk(int id)
     {
         if (id >= 900 && id < 1000)
-            return 2f;                     // 챕터 보스
+            return BossArt.Of(id) != null ? 1f : 2f;   // 챕터 보스 — 172칸 그림(BossArt)이면 1, 몹 시트로 대신하면 2
 
         if (IsElite(id))
             return 1.2f;

@@ -130,6 +130,13 @@ DOTween Pro 도 2026-11-05 에 뺐다 — Pro 컴포넌트(`DOTweenAnimation`·`
 그래서 우두머리는 그림이 아니라 **덩치**(`MapBuilder.MonsterBulk`: 정예 1.2, 보스 2 — 정수 배라 픽셀이 고르다)와
 색으로 구분한다.
 
+**챕터 보스 다섯(id 900~904)은 제 그림이 있다**(2026-11-19, `Sprites/Boss/BossCh{챕터}.png` — 종뿔사슴·수문을 진 소라·잿불풀무나방·빙성고래·왕관 일식체, 172칸 한 장).
+`BossArt.Apply` 가 맵(`MapBuilder.SetupLook`)·전투 카드(`UI_MonsterCard`)·대화 초상(`SetRightBoss`)·도감에서 애니메이터를 끄고 이 그림을 건다 — 데이터의
+`IdleAnimStr` 는 그대로 둔다(`FastChecks` 가 두 컨트롤러의 상태인지 본다). 공격 동작은 `BossArt.Lunge`(카드를 내민다). 그림은 이미 챕터 색이라 `MonsterTint` 를 안 곱하고,
+몸집은 1 이다(172칸 = 옛 86칸 x2). `MonsterController.Init` 이 애니메이터를 다시 틀지 않게 막는다 — 틀면 몹 시트가 덮는다. 들이기 설정은 `BossArtImport`(점 필터·발밑 피벗·100 PPU),
+어드레서블은 `AddressableSetup.Required`. 그림이 없으면(null) 예전 몹 시트로 돌아간다. **오너가 AI 이미지 생성으로 뽑은 시안이다** — Steam AI 공개 셋째 줄(`Steam/store/ko.md`).
+업적 아이콘 `ACH_BOSS20~80` 은 아직 옛 몹 그림이다(만든 도구가 저장소에 없다).
+
 같은 그림을 색으로 갈라 쓴다(`MonsterTint`): 색조=챕터, 진하기=층 안 서열,
 그리고 **다섯 층마다 색 갈래**가 바뀐다(한 챕터 20층이 같은 색이면 같은 놈으로 보인다).
 

@@ -51,6 +51,13 @@ public static class AddressableSetup
         { "Equip_Necklace_00.sprite", "Assets/@Resources/Sprites/Item/Equip_Necklace_00.png" },
         { "Equip_Ring_00.sprite", "Assets/@Resources/Sprites/Item/Equip_Ring_00.png" },
         { "Equip_Shield_00.sprite", "Assets/@Resources/Sprites/Item/Equip_Shield_00.png" },
+
+        // 챕터 보스 그림(BossArt — 20·40·60·80·100층). 들이는 설정은 BossArtImport.
+        { "BossCh0.sprite", "Assets/@Resources/Sprites/Boss/BossCh0.png" },
+        { "BossCh1.sprite", "Assets/@Resources/Sprites/Boss/BossCh1.png" },
+        { "BossCh2.sprite", "Assets/@Resources/Sprites/Boss/BossCh2.png" },
+        { "BossCh3.sprite", "Assets/@Resources/Sprites/Boss/BossCh3.png" },
+        { "BossCh4.sprite", "Assets/@Resources/Sprites/Boss/BossCh4.png" },
     };
 
     [MenuItem("TheSword/Register Runtime Prefabs (Addressables)")]

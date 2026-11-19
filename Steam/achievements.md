@@ -17,10 +17,10 @@
 |---|---|---|---|---|---|
 | `ACH_CONTRACT` | 계약 | 3층 잊혀진 숲에서 마검과 계약 | | yes | `PlayerData.IsContractedSword` — 계약 이벤트가 없어 `HudRefreshed`·`FloorEntered`·`BattleEnded` 때 본다 |
 | `ACH_KINGSLIME` | 왕은 이몸 하나다 | 4층 킹 슬라임 격파 | | yes | `BossDefeated`, monsterId = `Define.KingSlime` |
-| `ACH_BOSS20` | 해 지기 전에 | 20층 묘소의 늑대 | | yes | `BossDefeated`, 층(stageId+1)이 20의 배수 → `"ACH_BOSS" + 층` |
-| `ACH_BOSS40` | 내리지 않는 방패 | 40층 수로의 방패병 | | yes | 〃 40 |
-| `ACH_BOSS60` | 타다 남은 목소리 | 60층 재의 파수꾼 | | yes | 〃 60 |
-| `ACH_BOSS80` | 마지막 문 | 80층 얼어붙은 기사 | | yes | 〃 80 |
+| `ACH_BOSS20` | 해 지기 전에 | 20층 종뿔사슴 | | yes | `BossDefeated`, 층(stageId+1)이 20의 배수 → `"ACH_BOSS" + 층` |
+| `ACH_BOSS40` | 내리지 않는 방패 | 40층 수문을 진 소라 | | yes | 〃 40 |
+| `ACH_BOSS60` | 타다 남은 목소리 | 60층 잿불풀무나방 | | yes | 〃 60 |
+| `ACH_BOSS80` | 마지막 문 | 80층 빙성고래 | | yes | 〃 80 |
 | `ACH_BOSS100` | 검은 태양 | 100층 검은 태양 | | yes | 〃 100 |
 | `ACH_END_SEAL` | 잘 자, 잠꾸러기 | 마지막 선택 "검을 왕좌에 꽂는다" | | yes | `EndingReached("seal")`, 그리고 층에 들어설 때마다 `Records` 에 있는 결말 |
 | `ACH_END_HOLD` | 영원한 동반자 | "검을 놓지 않는다", 레벨이 `StoryDirector.DawnLevel` 미만 | | yes | `EndingReached("hold")` |

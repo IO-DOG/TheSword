@@ -133,6 +133,7 @@ Content Survey 의 AI 항목(Pre-Generated)에 체크하고 아래를 적는다.
 ```text
 이야기 대본, 몬스터·보스·특성의 이름과 설명, 안내·도움말·인터페이스 문구, 그리고 그 모든 번역(영어·일본어·간체 중국어)은 AI 도구의 도움을 받아 썼다.
 환경 그림 가운데 챕터별 벽은 AI 3D 생성 도구(Tripo)로 만들었다.
+챕터 보스 다섯의 그림은 AI 이미지 생성 도구로 만들었다.
 ```
 
 - 범위(README 7절): 대본, 몬스터·보스·특성 이름과 설명(`Tools/bestiary.py`), 안내·도움말·UI 문구(`Tools/ui_text.py`, `Tools/ui_text_parts/*.py`), 모든 번역.
@@ -144,6 +145,7 @@ Content Survey 의 AI 항목(Pre-Generated)에 체크하고 아래를 적는다.
   AI 로 만든 그림·소리가 게임에 들어오면 다시 적는다(아래 Meshy).
 - **Tripo**(2026-11-11 부터 — 위 둘째 줄): 챕터 벽 20종 `Assets/@Resources/Art/Tripo/Wall_C0~C4_{Base,A,B,C}.glb` 를 오너가 Tripo 웹에서 뽑아 골랐고(b69e0f09),
   `MeshyArtImport` 가 Tripo > Meshy > 복셀 키트 순으로 들인다(c7ad3dab). 벽을 사람이 만든 그림으로 바꾸면 그 줄을 뺀다. 소품이 Tripo 로 들어오면 괄호에 "장식 소품" 을 더한다.
+- **보스 그림**(2026-11-19 부터 — 위 셋째 줄): 챕터 보스 다섯 `Assets/@Resources/Sprites/Boss/BossCh0~4.png` 은 오너가 AI 이미지 생성(OpenAI 이미지 생성 — `TheSword_image/02_아트 디벨롭/내부 검토 전용/생성 기록.json`)으로 뽑은 시안을 오너 지시로 게임에 넣은 것이다(`BossArt`). 사람이 그린 보스(`보스 작가용/` 의 Aseprite)로 바꾸면 그 줄을 뺀다.
 - **Meshy**: AI 3D 생성(Meshy)으로 만든 그림을 게임이나 스토어 그림에 **쓰게 되면** 위 문단 끝에 한 문장을 더한다(`Documents/TheSword_Meshy_Prompts.md` 도 같은 약속이다).
   `MeshyArtImport` 가 들이는 것은 챕터별 벽 `Wall_C{n}_*` 과 소품 `Prop_C{n}_*` 이다(2026-11-03 현재 `Assets/@Resources/Art/Meshy` 는 비어 있다).
   괄호는 **실제로 빌드에 든 것**에 맞춘다 — 벽만 들어왔으면 "챕터별 벽" 만, 소품이 빠졌으면 소품을 뺀다:
@@ -154,7 +156,7 @@ Content Survey 의 AI 항목(Pre-Generated)에 체크하고 아래를 적는다.
 
 - 사람 검수(MASTER_PLAN L10 의 사람 손질, 중국어 편집자)가 끝나면 끝에 "제작진이 검수하고 다듬었다." 를 붙인다. **끝나기 전에는 붙이지 않는다.**
 - 그림·음악·효과음: 새 파일이 들어올 때 파일별 출처 기록(MASTER_PLAN §8 Delivery 의 "AI yes/no")을 보고, AI 로 만든 것이 있으면
-  무엇인지 여기에 한 줄 더한다. 캡슐·키 아트·로고·초상화·보스·목소리는 생성하지 않기로 했다(§8).
+  무엇인지 여기에 한 줄 더한다. 캡슐·키 아트·로고·초상화·목소리는 생성하지 않기로 했다(§8). 보스는 11-19 오너 지시로 생성 시안을 넣었다(위 셋째 줄).
 - 코드 작성 도구는 공개 대상이 아니다(Valve: 개발 도구의 효율 향상은 이 항목의 관심사가 아니다).
 
 ## 체험판 줄 (선택)

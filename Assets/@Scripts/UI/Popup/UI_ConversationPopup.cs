@@ -468,9 +468,13 @@ public class UI_ConversationPopup : UI_Popup
             _bossAnim = right.gameObject.GetOrAddComponent<Animator>();
             _bossAnim.runtimeAnimatorController = controller;
         }
-        _bossAnim.enabled = true;
-        _bossAnim.Play(data.IdleAnimStr);
-        _bossAnim.Update(0f);       // Play 만으로는 이 프레임에 그림이 바뀌지 않는다
+        // 챕터 보스는 한 장짜리 그림(BossArt)이다 — 있으면 애니메이터를 끄고 건다.
+        if (BossArt.Apply(id, right) == false)
+        {
+            _bossAnim.enabled = true;
+            _bossAnim.Play(data.IdleAnimStr);
+            _bossAnim.Update(0f);       // Play 만으로는 이 프레임에 그림이 바뀌지 않는다
+        }
         right.preserveAspect = true;
         // 색조는 색만 입히고 밝기는 빼지 않는다. ForBoss 가 0.8 을 곱해서 원래 검은 놈(잿빛 파수꾼)은 어두운 바닥에 묻혔고,
         // 데미안 차례에 반으로 더 어두워지면 거의 사라졌다. 곁에 설 때도 BossDimFloor 밑으로는 내리지 않는다.

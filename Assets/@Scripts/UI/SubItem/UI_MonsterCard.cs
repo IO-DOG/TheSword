@@ -10,16 +10,24 @@ using static GameManager;
 
 public class UI_MonsterCard : UI_BaseCard
 {
+    bool _staticArt;
+    int ArtId => _creature is GameManager.CurMonsterData m ? m.id : -1;
+
     public override bool Init()
     {
         if (base.Init() == false)
             return false;
 
         Animator anim = GetImage((int)Images.CreatureImage).gameObject.GetComponent<Animator>();
-        anim.Play($"{_creature.IdleAnimStr}");
-        // Play 만으로는 이 프레임에 스프라이트가 바뀌지 않는다. 그대로 크기를 재면
-        // 프리팹에 박혀 있던 기본 스프라이트를 재게 되고, 보스는 계속 잘린다.
-        anim.Update(0f);
+        // 챕터 보스는 한 장짜리 그림(BossArt) — 애니메이터를 끄고 건다. 공격은 PlayMonsterAttackAnim 이 몸을 내민다.
+        _staticArt = BossArt.Apply(ArtId, GetImage((int)Images.CreatureImage));
+        if (_staticArt == false)
+        {
+            anim.Play($"{_creature.IdleAnimStr}");
+            // Play 만으로는 이 프레임에 스프라이트가 바뀌지 않는다. 그대로 크기를 재면
+            // 프리팹에 박혀 있던 기본 스프라이트를 재게 되고, 보스는 계속 잘린다.
+            anim.Update(0f);
+        }
         FitCreatureImage(GetImage((int)Images.CreatureImage));
         StandOnFrame(GetImage((int)Images.CreatureImage));
         // 맵에서 본 그 색 그대로 전투창에도 올린다. 둘이 다르면 같은 몬스터로 안 보인다.
@@ -187,7 +195,10 @@ public class UI_MonsterCard : UI_BaseCard
         image.rectTransform.sizeDelta = GetImage((int)Images.CreatureImage).rectTransform.sizeDelta;
         Animator animator = go.GetOrAddComponent<Animator>();
         animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIMonsterAnimController");
-        animator.Play($"{_creature.IdleAnimStr}");
+        if (_staticArt)
+            animator.enabled = false;      // 보스 그림을 몹 시트로 덮지 않는다
+        else
+            animator.Play($"{_creature.IdleAnimStr}");
         image.sprite = GetImage((int)Images.CreatureImage).sprite;
         image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         image.color = Util.DefenceColor();
@@ -218,7 +229,10 @@ public class UI_MonsterCard : UI_BaseCard
         image.rectTransform.sizeDelta = GetImage((int)Images.CreatureImage).rectTransform.sizeDelta;
         Animator animator = go.GetOrAddComponent<Animator>();
         animator.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>("UIMonsterAnimController");
-        animator.Play($"{_creature.IdleAnimStr}");
+        if (_staticArt)
+            animator.enabled = false;      // 보스 그림을 몹 시트로 덮지 않는다
+        else
+            animator.Play($"{_creature.IdleAnimStr}");
         image.sprite = GetImage((int)Images.CreatureImage).sprite;
         image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         image.color = Util.DamagedColor();
@@ -355,6 +369,11 @@ public class UI_MonsterCard : UI_BaseCard
 
     void PlayMonsterAttackAnim()
     {
+        if (_staticArt)
+        {
+            BossArt.Lunge(GetImage((int)Images.CreatureImage).rectTransform);
+            return;
+        }
         string animStr = _creature.AttackAnimStr;
         GetImage((int)Images.CreatureImage).GetComponent<Animator>().Play(animStr);
     }

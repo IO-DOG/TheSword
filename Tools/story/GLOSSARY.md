@@ -91,10 +91,10 @@
 
 | 층 | 이름 / 칭호 | EN | JP | CN |
 |---|---|---|---|---|
-| 20 | 묘소의 늑대 / 해 질 녘을 기다리는 것 | Wolf of the Catacombs / The One Who Waits for Dusk | 墓所の狼 / 日暮れを待つもの | 墓穴之狼 / 等待黄昏之物 |
-| 40 | 수로의 방패병 / 내리지 않는 방패 | Shieldbearer of the Aqueduct / The Shield Never Lowered | 水路の盾兵 / 下ろされぬ盾 | 水道之盾兵 / 从不放下的盾 |
-| 60 | 재의 파수꾼 / 타다 남은 목소리 | Sentinel of Ash / The Voice That Did Not Burn | 灰の番兵 / 燃え残りの声 | 灰之哨兵 / 未燃尽的声音 |
-| 80 | 얼어붙은 기사 / 마지막 문의 파수 | The Frozen Knight / Warden of the Last Door | 凍てついた騎士 / 最後の扉の番 | 冰封骑士 / 最后之门的守卫 |
+| 20 | 종뿔사슴 / 해 질 녘을 기다리는 것 | Bell-Antlered Stag / The One Who Waits for Dusk | 鐘角の鹿 / 日暮れを待つもの | 钟角鹿 / 等待黄昏之物 |
+| 40 | 수문을 진 소라 / 내리지 않는 방패 | Sluicegate Conch / The Shield Never Lowered | 水門を負う巻貝 / 下ろされぬ盾 | 背负水门的海螺 / 从不放下的盾 |
+| 60 | 잿불풀무나방 / 타다 남은 목소리 | Emberbellows Moth / The Voice That Did Not Burn | 残り火のふいご蛾 / 燃え残りの声 | 余烬风箱蛾 / 未燃尽的声音 |
+| 80 | 빙성고래 / 마지막 문의 파수 | Ice-Keep Whale / Warden of the Last Door | 氷城の鯨 / 最後の扉の番 | 冰城海兽 / 最后之门的守卫 |
 | 100 | 검은 태양 / 끝없는 허기 | The Black Sun / Endless Hunger | 黒い太陽 / 果てなき飢え | 黑太阳 / 无尽的饥饿 |
 | 4 | 킹 슬라임 (분열: 메이스·대거·방패) | King Slime (mace, dagger, shield) | キングスライム (メイス・ダガー・盾) | 史莱姆王 (钉锤·匕首·盾) |
 

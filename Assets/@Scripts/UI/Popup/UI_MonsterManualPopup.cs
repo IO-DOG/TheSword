@@ -271,7 +271,8 @@ public class UI_MonsterManualPopup : UI_Popup
         Image look = CodeUI.NewImage(row, "Monster", null, MonsterTint.Of(e.Id));
         look.preserveAspect = true;
         CodeUI.Place(look.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(52f, 0f), new Vector2(80f, 80f));
-        Animate(look, e.Data.IdleAnimStr);
+        if (BossArt.Apply(e.Id, look) == false)     // 챕터 보스는 한 장짜리 그림
+            Animate(look, e.Data.IdleAnimStr);
         FitDrawn(look.rectTransform, look.sprite, new Vector2(92f, 0f), 80f);
 
         string count = e.Alive > 1 ? $" <size=80%><color=#9AA4B8>{string.Format(Managers.GetString(ForecastUI.Count), e.Alive)}</color></size>" : "";

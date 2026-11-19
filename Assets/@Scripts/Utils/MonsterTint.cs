@@ -87,7 +87,7 @@ public static class MonsterTint
 
         // 생성 몬스터 id = MOB_ID_BASE + 층*8 + 서열, 보스 = BOSS_ID_BASE + 챕터
         if (monsterId >= 900 && monsterId < 1000)
-            return ForBoss(md.Chapter);
+            return BossArt.Of(monsterId) != null ? Color.white : ForBoss(md.Chapter);   // 보스 그림은 이미 챕터 색이다
 
         // 생성 몬스터 id = 1000 + 층*8 + 서열. 층을 되짚어 색 갈래를 정한다.
         int order = SpeciesRank[Mathf.Clamp(monsterId % 8, 0, SpeciesRank.Length - 1)];
