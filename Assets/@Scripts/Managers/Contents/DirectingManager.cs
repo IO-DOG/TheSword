@@ -628,6 +628,7 @@ public class Events : MonoBehaviour
             Managers.Sound.FadeAndPlayBGM("Chapter0_Boss_BGM", 1f);
 
             yield return new WaitForSeconds(2f);
+            Managers.UI.CloseBossNamePopup();   // 대사창 말풍선이 이름 위에 겹치지 않게
 
             // "킹? 왕은 이몸 하나다!" — 레터박스를 내린 채, 카메라가 킹 슬라임을 잡고 있을 때 (바이블 10절)
             yield return StoryDirector.CoPrologue(StoryPrologue.KingslimeReveal);

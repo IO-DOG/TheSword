@@ -377,6 +377,17 @@ public class UIManager
             CoHideBossNamePopup = CoroutineManager.StartCoroutine(BossNamePopup.HideBossNamePopup(duration));
     }
 
+    /// <summary>이름표를 바로 걷는다. 등장 대사가 뜰 때 부른다 — 대사창의 초상 말풍선이 아직 떠 있는 이름 위에 겹쳤다(20·100층).</summary>
+    public void CloseBossNamePopup()
+    {
+        if (CoHideBossNamePopup != null)
+            CoroutineManager.StopCoroutine(CoHideBossNamePopup);
+        CoHideBossNamePopup = null;
+        if (BossNamePopup != null)
+            ClosePopupUI(BossNamePopup);
+        BossNamePopup = null;
+    }
+
 
     #endregion
 }

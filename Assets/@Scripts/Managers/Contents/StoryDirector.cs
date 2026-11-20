@@ -1007,7 +1007,9 @@ public class StoryDirector : MonoBehaviour
                 Managers.UI.ShowBossNamePopup(1.5f);
                 if (Managers.UI.BossNamePopup != null && Managers.Data.MonsterDic.TryGetValue(boss.id, out Data.MonsterData data))
                     Managers.UI.BossNamePopup.GetText(0).text = Managers.GetString(data.MonsterNameId);   // 그 창의 글은 BossNameText 하나다
-                yield return new WaitForSeconds(StoryUI.Auto ? 0.3f : 2.2f);
+                // 봇도 이름이 다 써질 때까지는 본다(녹화 영상에 이름이 0.3초 스쳤다).
+                yield return new WaitForSeconds(StoryUI.Auto ? 1.5f : 2.2f);
+                Managers.UI.CloseBossNamePopup();
             }
             else
             {
