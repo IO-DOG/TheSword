@@ -43,8 +43,9 @@ public class UI_GuidePopup : UI_Popup
         BindText(typeof(Texts));
         #endregion
 
+        // 이미 누가 쥔 잠금이면 내 것이 아니다 — 닫을 때 남의 잠금(첫 전투 죽음 등)까지 풀지 않는다(WarpUI 와 같다, 11-21 리뷰).
+        _locked = Managers.Game.OnInputLock == false;
         Managers.Game.OnInputLock = true;
-        _locked = true;
 
         //guideAnim = GetImage((int)Images.GuideImage).gameObject.GetComponent<Animator>();
         //btnAnim = GetImage((int)Images.OnlyYestButton).gameObject.GetComponent<Animator>();
@@ -84,7 +85,8 @@ public class UI_GuidePopup : UI_Popup
 
     void YesClick()
     {
-        Managers.Game.OnInputLock = false;
+        if (_locked)
+            Managers.Game.OnInputLock = false;
         _locked = false;
         Managers.Sound.Play(Define.Sound.Effect, "ButtonUI_Ok_SFX");
 

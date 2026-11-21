@@ -611,7 +611,8 @@ public class UI_GameScene : UI_Scene
     public bool TryOpenMenu()
     {
         GameManager g = Managers.Game;
-        if (isOpenMenuPopup || g.IsPlayerDead || FightGate.Pending)
+        // 되살아나는 중(죽음 창이 체크포인트를 읽고 씬을 다시 세운다)에 열면 옛 씬과 같이 부서져, 창을 내린 채인데 새 층이 멈추지 않았다.
+        if (isOpenMenuPopup || g.IsPlayerDead || FightGate.Pending || GameEvents.RespawnPending)
             return false;
         if (g.OnDirect || g.OnConversation || g.OnFade || g.OnInteract || g.OnLever || g.OnInputLock)
             return false;
