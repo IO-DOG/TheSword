@@ -129,7 +129,7 @@ public class StoryDirector : MonoBehaviour
     UI_StoryCardPopup _backdrop;
     bool _letterbox;                        // 레터박스를 이 도구가 내렸다
     bool _levelUpPending;
-    readonly HashSet<string> _walkQueued = new HashSet<string>();   // 줄 세운 걸으며 한마디 — 같은 것을 두 번 세우지 않는다
+    readonly HashSet<string> _barkQueued = new HashSet<string>();   // 줄 세운 한 번뿐인 바크(걸으며 한마디·BarkOnce) — 뜨기 전에 같은 것을 또 세우지 않는다
     bool _endingRunning;
     float _nextWatch;
     bool _offsetMoved, _exposureMoved;
@@ -254,7 +254,7 @@ public class StoryDirector : MonoBehaviour
         _jobs.Clear();
         _running = 0;
         _levelUpPending = false;
-        _walkQueued.Clear();
+        _barkQueued.Clear();
         _endingRunning = false;
         _scene = null;
         _title = false;
@@ -554,7 +554,7 @@ public class StoryDirector : MonoBehaviour
             yield break;
         foreach (StoryScene scene in scenes)
         {
-            if (_walkQueued.Add(scene.Id) == false)
+            if (_barkQueued.Add(scene.Id) == false)
                 continue;   // 내려갔다 2초 안에 다시 올라와 두 번 걸렸다
             StoryScene mine = scene;
             for (int i = 0; i < scene.Lines.Length; i++)    // 한 번에 줄 세운다 — 다른 바크가 두 줄 사이에 끼지 않게
@@ -657,8 +657,11 @@ public class StoryDirector : MonoBehaviour
         List<StoryScene> scenes = Unseen(mechanic);
         if (scenes.Count == 0 || scenes[0].Lines.Length == 0)
             return;
-        MarkSeen(scenes[0]);
-        UI_StoryBark.Show(scenes[0].Lines[0]);
+        StoryScene scene = scenes[0];
+        if (s_instance != null && s_instance._barkQueued.Add(scene.Id) == false)
+            return;     // 이미 줄 서 있다(전투·대화 중이라 아직 안 떴다)
+        // 본 것은 실제로 뜬 순간에 적는다 — 줄 선 채 씬이 바뀌면(그 싸움에서 죽었다) 한 번뿐인 힌트가 사라졌다.
+        UI_StoryBark.Show(scene.Lines[0], () => MarkSeen(scene));
     }
 
     static void OnRespawned()
@@ -1255,10 +1258,12 @@ public class StoryDirector : MonoBehaviour
         }
         finally
         {
+            // 엔딩 씬은 finally 에서 — 본문에서 예외가 나도(Safe 가 삼킨다) 100층에 HUD 없이 레터박스 아래 갇히지 않게.
+            // AbortAll(씬 전환·메뉴)은 Safe 가 반복을 버려 이 finally 가 돌지 않는다.
             _endingRunning = false;
             Release();
+            Managers.Scene.LoadScene(Define.Scene.EndingScene);
         }
-        Managers.Scene.LoadScene(Define.Scene.EndingScene);
     }
 
     // 결말을 이미 본 판에서 100층 계단을 밟았다.
@@ -1272,10 +1277,12 @@ public class StoryDirector : MonoBehaviour
         }
         finally
         {
+            // 엔딩 씬은 finally 에서 — 본문에서 예외가 나도(Safe 가 삼킨다) 100층에 HUD 없이 레터박스 아래 갇히지 않게.
+            // AbortAll(씬 전환·메뉴)은 Safe 가 반복을 버려 이 finally 가 돌지 않는다.
             _endingRunning = false;
             Release();
+            Managers.Scene.LoadScene(Define.Scene.EndingScene);
         }
-        Managers.Scene.LoadScene(Define.Scene.EndingScene);
     }
 
     // 크레딧 음악은 직전 결말을 잇는다 (바이블 6.7): seal 은 여기서 타이틀곡, dawn 은 타이틀곡, hold 는 마검 조우곡.
