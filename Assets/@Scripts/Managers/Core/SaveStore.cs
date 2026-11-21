@@ -252,10 +252,17 @@ public static class SaveStore
 
     /// <summary>WriteText 로 쓴 파일을 읽는다. 본 파일이 깨졌으면 .corrupt 로 비켜 두고 .bak 을 읽는다 — 깨진 것을 .bak 으로 밀어
     /// 좋은 사본을 덮거나, 그 위에 빈 기록을 쓰지 않는다. 없거나 둘 다 못 읽으면 null.</summary>
-    public static T ReadText<T>(string path, Func<string, T> parse) where T : class
+    public static T ReadText<T>(string path, Func<string, T> parse) where T : class => ReadText(path, parse, out _);
+
+    /// <summary>blocked: 파일이 있는데 읽기 자체가 막혔다(IOException·권한 — 켤 때 클라우드 동기화·백신이 쥐고 있었다). 깨진 것이
+    /// 아니므로 비켜 두지 않고 .bak 으로 넘어가지도 않는다. 부른 쪽은 그 실행 동안 이 파일에 쓰지 않는다 — 빈 기록을 쓰면
+    /// 바꿔 끼우기가 좋은 본 파일을 .bak 으로, 다음 쓰기가 그것마저 밀어내 결말·업적·낸 판이 사라졌다(11-21 리뷰).</summary>
+    public static T ReadText<T>(string path, Func<string, T> parse, out bool blocked) where T : class
     {
-        if (TryParse(path, parse, out T value))
+        if (TryParse(path, parse, out T value, out blocked))
             return value;
+        if (blocked)
+            return null;
         if (File.Exists(path))
         {
             try
@@ -268,15 +275,21 @@ public static class SaveStore
                 Debug.LogWarning($"[Save] {Path.GetFileName(path)} 를 비켜 두지 못했다: {ex.Message}");
             }
         }
-        return TryParse(path + ".bak", parse, out value) ? value : null;
+        return TryParse(path + ".bak", parse, out value, out blocked) ? value : null;
     }
 
-    static bool TryParse<T>(string path, Func<string, T> parse, out T value) where T : class
+    static bool TryParse<T>(string path, Func<string, T> parse, out T value, out bool blocked) where T : class
     {
         value = null;
+        blocked = false;
         if (File.Exists(path) == false)
             return false;
         try { value = parse(File.ReadAllText(path)); }
+        catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+        {
+            blocked = true;     // 막혔다 — 깨진 것과 가른다(위 ReadText)
+            Debug.LogWarning($"[Save] {Path.GetFileName(path)} 를 열지 못했다(다른 프로그램이 쥐고 있다?): {ex.Message}");
+        }
         catch (Exception ex) when (IsSaveError(ex)) { Debug.LogWarning($"[Save] {Path.GetFileName(path)} 를 읽지 못했다: {ex.Message}"); }
         return value != null;
     }

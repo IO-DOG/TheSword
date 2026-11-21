@@ -41,7 +41,11 @@ public static class Records
 
     // 에디터는 도메인 리로드 없이 플레이를 되풀이한다 — 지난 플레이에서 읽은 것을 넘기지 않는다.
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStatics() => s_data = null;
+    static void ResetStatics() { s_data = null; s_blocked = false; }
+
+    // 켤 때 Records.json 을 열지 못했다(다른 프로그램이 쥐었다) — 이번 실행은 쓰지 않는다. 빈 기록으로 좋은 파일을 덮지 않게.
+    // ponytail: 실행 하나 동안의 기록(결말·업적 표시)은 메모리에만 남는다. 다음 실행이 파일을 다시 읽는다.
+    static bool s_blocked;
 
     // GameEvents 는 SubsystemRegistration 에서 구독자를 비우므로 그 뒤(BeforeSceneLoad)에 붙는다.
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -116,7 +120,7 @@ public static class Records
                 return s_data;
             // 깨졌으면 .bak 을 읽는다(SaveStore.ReadText) — 깨진 본 파일은 .corrupt 로 비켜 두어 빈 기록으로 덮지 않는다.
             bool any = File.Exists(FilePath) || File.Exists(FilePath + ".bak");
-            s_data = SaveStore.ReadText(FilePath, JsonConvert.DeserializeObject<Data>) ?? new Data();
+            s_data = SaveStore.ReadText(FilePath, JsonConvert.DeserializeObject<Data>, out s_blocked) ?? new Data();
             if (any == false)
             {
                 // 예전에는 마지막으로 본 결말 하나만 PlayerPrefs 에 남았다 — 처음 한 번 옮겨 적는다.
@@ -131,7 +135,7 @@ public static class Records
     // changed 가 false 면 쓰지 않는다 (HashSet.Add 가 이미 있던 값이면 false).
     static void Change(Func<Data, bool> change)
     {
-        if (GameEvents.IsAutoPlaying || change(Current) == false)
+        if (GameEvents.IsAutoPlaying || change(Current) == false || s_blocked)
             return;
         try
         {

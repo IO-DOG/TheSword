@@ -96,6 +96,7 @@ public class StoryDirector : MonoBehaviour
 
     static StoryDirector s_instance;
     static HashSet<string> s_seen;
+    static bool s_seenBlocked;      // 켤 때 StorySeen.json 을 열지 못했다 — 이번 실행은 쓰지 않는다(SaveStore.ReadText 의 blocked)
     static Dictionary<(StoryTrigger, int), List<StoryScene>> s_index;
     static int s_hold;                      // OnDirect 를 이 도구가 쥐고 있는 겹 수
     static int s_epoch;                     // AbortAll 이 올린다. 그 전에 시작한 장면은 다음 걸음에서 멈춘다 (Safe)
@@ -151,6 +152,7 @@ public class StoryDirector : MonoBehaviour
     {
         s_instance = null;
         s_seen = null;
+        s_seenBlocked = false;
         s_index = null;
         s_hold = 0;
         s_debug = false;
@@ -279,7 +281,7 @@ public class StoryDirector : MonoBehaviour
             if (s_seen != null)
                 return s_seen;
             s_seen = new HashSet<string>();
-            List<string> seen = SaveStore.ReadText(SeenPath, JsonConvert.DeserializeObject<List<string>>);   // 깨졌으면 .bak
+            List<string> seen = SaveStore.ReadText(SeenPath, JsonConvert.DeserializeObject<List<string>>, out s_seenBlocked);   // 깨졌으면 .bak
             if (seen != null)
                 s_seen.UnionWith(seen);
             return s_seen;
@@ -296,6 +298,8 @@ public class StoryDirector : MonoBehaviour
         if (s_debug || Seen.Add(scene.Id) == false)
             return;
         Records.MarkSceneSeen(scene.Id);    // 판을 넘어 남는 "본 적 있다" (새 게임 뒤 다시 볼 때 건너뛰기)
+        if (s_seenBlocked)
+            return;
         // 체크포인트와 같은 방식으로 바꿔 끼운다. 쓰다 꺼져도 옛 파일은 남는다.
         try
         {
