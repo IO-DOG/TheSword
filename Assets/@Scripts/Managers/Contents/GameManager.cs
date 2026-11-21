@@ -997,7 +997,14 @@ public class GameManager
         GameSpeed = 1;
         EquipUtility.Apply();
 
-        if (file != null || migrated)
+        bool write = file != null || migrated;
+#if DEMO
+        // 체험판이 본편 저장(21층을 넘었다)을 이어하기로 열었다. 지도가 갈라졌으면 옮겨 온 판을 체험판 해시로 다시 적어 본편으로
+        // 돌아갔을 때 한 번 더 옮겨졌다(그때마다 바뀐 층이 새 판·다 쓴 판으로 잘린다, 11-21 리뷰 B8). 체험판은 본편 저장에 쓰지 않는다.
+        if (migrated && SaveMigration.Frontier(PlayerData) > DemoGate.LastStage + 1)
+            write = false;
+#endif
+        if (write)
         {
             // 고른 사본이 이제 지금의 체크포인트다. 여기서 죽거나 이어하기를 눌러도 이 자리로 온다.
             // 옮겨 온 것도 지금 지도로 적는다 — 처음 것은 .bak 으로 밀려 남는다(SaveStore.Write).
