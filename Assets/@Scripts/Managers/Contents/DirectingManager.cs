@@ -123,58 +123,77 @@ public class Events : MonoBehaviour
     }
     IEnumerator EVENT_1()
     {
-        Managers.UI.CloseGameSceneUI();
-        Managers.Game.OnDirect = true;
-        Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
-
-        // Sound
-        Managers.Sound.FadeAndPlayBGM("EgoSword_Encounter_Event", 0.8f);
-
-        #region #1
+        // 3층 마검과 마주치는 연출. 어디서 예외가 나도 흐름을 돌려준다 — 예전에는 OnDirect 가 켜지고 HUD 가 꺼진 채 남아
+        // Esc 도 메뉴도 안 먹혔다(다른 도입부 연출은 이미 finally 로 묶었다, 11-21 리뷰). 봇은 WatchLocks 가 대신 풀어 드러나지 않았다.
+        bool finished = false;
+        try
         {
-            StartCoPlayEmoji(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);
-            yield return new WaitUntil(() => _coroutineCompleted);
-
-            Managers.Game.CurEventID++;
-        }
-        #endregion
-        #region #2
-        {
-            Managers.Game.CurInteractObject.layer = (int)Define.Layer.Default;
-            float originalSpeed = Managers.Game.PlayerData.MoveSpeed;
-            Managers.Game.Player.Moving(Define.MoveDir.Up, true);
-            yield return new WaitForSeconds(0.2f);
-            Managers.Game.Player.SetState(Define.PlayerState.DrawSword);
-            yield return new WaitForSeconds(1f);
-            Managers.Game.Player.Moving(Define.MoveDir.Back, true);
-            yield return new WaitForSeconds(0.2f);
+            Managers.UI.CloseGameSceneUI();
+            Managers.Game.OnDirect = true;
             Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
-            yield return new WaitForSeconds(1f);
 
-            StartCoPlayEmoji(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);
-            yield return new WaitUntil(() => _coroutineCompleted);
+            // Sound
+            Managers.Sound.FadeAndPlayBGM("EgoSword_Encounter_Event", 0.8f);
 
-            Managers.Game.CurEventID++;
+            #region #1
+            {
+                StartCoPlayEmoji(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);
+                yield return new WaitUntil(() => _coroutineCompleted);
+
+                Managers.Game.CurEventID++;
+            }
+            #endregion
+            #region #2
+            {
+                Managers.Game.CurInteractObject.layer = (int)Define.Layer.Default;
+                float originalSpeed = Managers.Game.PlayerData.MoveSpeed;
+                Managers.Game.Player.Moving(Define.MoveDir.Up, true);
+                yield return new WaitForSeconds(0.2f);
+                Managers.Game.Player.SetState(Define.PlayerState.DrawSword);
+                yield return new WaitForSeconds(1f);
+                Managers.Game.Player.Moving(Define.MoveDir.Back, true);
+                yield return new WaitForSeconds(0.2f);
+                Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
+                yield return new WaitForSeconds(1f);
+
+                StartCoPlayEmoji(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);
+                yield return new WaitUntil(() => _coroutineCompleted);
+
+                Managers.Game.CurEventID++;
+            }
+            #endregion
+            #region #3
+            {
+                Managers.Game.CurInteractObject.layer = (int)Define.Layer.InteractObjects;
+
+                StartCoPlayEmoji(Managers.Data.EventDic[Managers.Game.CurEventID].OtherEmoji, Managers.Game.CurInteractObject.transform);
+                yield return new WaitUntil(() => _coroutineCompleted);
+
+                Managers.Game.CurEventID++;
+            }
+            #endregion
+            #region #4
+            {
+                StartCoPlayEmoji(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);
+                yield return new WaitUntil(() => _coroutineCompleted);
+
+                Managers.Game.CurEventID++;
+            }
+            #endregion
+            finished = true;
         }
-        #endregion
-        #region #3
+        finally
         {
-            Managers.Game.CurInteractObject.layer = (int)Define.Layer.InteractObjects;
-
-            StartCoPlayEmoji(Managers.Data.EventDic[Managers.Game.CurEventID].OtherEmoji, Managers.Game.CurInteractObject.transform);
-            yield return new WaitUntil(() => _coroutineCompleted);
-
-            Managers.Game.CurEventID++;
+            if (finished == false)
+            {
+                Debug.LogWarning("[Directing] 마검 조우 연출이 끊겼다 — 흐름을 돌려준다");
+                if (Managers.Game.CurInteractObject != null)
+                    Managers.Game.CurInteractObject.layer = (int)Define.Layer.InteractObjects;
+                Managers.Game.OnDirect = false;
+                if (Managers.Game.GameScene != null)
+                    Managers.UI.ShowGameSceneUI();
+            }
         }
-        #endregion
-        #region #4
-        {
-            StartCoPlayEmoji(Managers.Data.EventDic[Managers.Game.CurEventID].HeroEmoji, Managers.Game.Player.transform);
-            yield return new WaitUntil(() => _coroutineCompleted);
-
-            Managers.Game.CurEventID++;
-        }
-        #endregion
         Managers.Game.OnDirect = false;
         Managers.UI.CloseGameSceneUI();
         Managers.UI.ShowPopupUI<UI_ConversationPopup>();
@@ -754,6 +773,11 @@ public class Events : MonoBehaviour
     IEnumerator StartKingSlimeDead()
     {
         yield return new WaitForSeconds(0.4f);
+        // 전투창이 닫히며 OnBattle 을 내린 뒤에 창을 걷는다 — 같은 프레임에 두 타이머(전투창 0.3초·여기 0.4초)가 함께 끝나 이쪽이 먼저 돌면
+        // 전투창이 OnBattle 을 켠 채 사라져 4층에서 막힐 수 있었다(11-21 리뷰). 길어도 3초에서 놓는다.
+        float until = Time.unscaledTime + 3f;
+        while (Managers.Game.OnBattle && Time.unscaledTime < until)
+            yield return null;
         Managers.UI.CloseGameSceneUI();
         Managers.Directing.PlayLetterBox();
         Managers.Game.OnDirect = true;
@@ -947,60 +971,84 @@ public class Events : MonoBehaviour
     // 마검 만남
     IEnumerator PlayTutorial_1()
     {
-        Managers.Game.CurEventID = 0;
-        // Set Player Dir
-        Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
-
-        yield return new WaitForSeconds(0.1f);
-
+        // 흐름은 바로 쥔다 — 0.1초 틈에 창 전환 메뉴가 열려 "타이틀로" 를 고르면 이 코루틴(씬을 넘어 산다)이 타이틀에서 깨어나
+        // 부서진 플레이어를 만졌다(11-21 리뷰). 어디서 끊겨도 finally 가 흐름과 HUD·검을 돌려준다.
         Managers.Game.OnDirect = true;
-
-        // Player Movement
-        float originalSpeed = Managers.Game.PlayerData.MoveSpeed;
-        Managers.Game.Player.Speed = 1f;
-        Managers.Game.Player.Moving(Define.MoveDir.Up, true);
-        Managers.Game.Player._back.GetComponent<Animator>().Play("Tutorial_First_Run");
-
-        yield return new WaitForSeconds(0.5f);
-        Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
-        Managers.Game.Player._back.GetComponent<Animator>().Play("Tutorial_First_Idle");
-
-        yield return new WaitForSeconds(1f);
-        UI_ConversationPopup conversation = Managers.UI.ShowPopupUI<UI_ConversationPopup>();
-
-        // Reset Player Stat
-        Managers.Game.Player.Speed = originalSpeed;
-
-        #region 테스트 후 다시 활성화해야 함
-        bool prevConvsersationState = Managers.Game.OnConversation;
-
-        while (true)
+        bool finished = false;
+        try
         {
-            bool currentConversationState = Managers.Game.OnConversation;
-            if (prevConvsersationState && !currentConversationState)
+            Managers.Game.CurEventID = 0;
+            // Set Player Dir
+            Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
+
+            yield return new WaitForSeconds(0.1f);
+
+            Managers.Game.OnDirect = true;    // 씬 준비가 그 사이에 풀었을 수 있어 한 번 더
+
+            // Player Movement
+            float originalSpeed = Managers.Game.PlayerData.MoveSpeed;
+            Managers.Game.Player.Speed = 1f;
+            Managers.Game.Player.Moving(Define.MoveDir.Up, true);
+            Managers.Game.Player._back.GetComponent<Animator>().Play("Tutorial_First_Run");
+
+            yield return new WaitForSeconds(0.5f);
+            Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
+            Managers.Game.Player._back.GetComponent<Animator>().Play("Tutorial_First_Idle");
+
+            yield return new WaitForSeconds(1f);
+            UI_ConversationPopup conversation = Managers.UI.ShowPopupUI<UI_ConversationPopup>();
+
+            // Reset Player Stat
+            Managers.Game.Player.Speed = originalSpeed;
+
+            #region 테스트 후 다시 활성화해야 함
+            bool prevConvsersationState = Managers.Game.OnConversation;
+
+            while (true)
             {
-                break;
+                bool currentConversationState = Managers.Game.OnConversation;
+                if (prevConvsersationState && !currentConversationState)
+                {
+                    break;
+                }
+
+                prevConvsersationState = currentConversationState;
+
+                yield return null;
             }
+            #endregion
 
-            prevConvsersationState = currentConversationState;
+            Managers.Sound.Play(Sound.Effect, "HeroReady_SFX");
+            Managers.Game.Player.SetState(PlayerState.TutorialFirst_Ready);
+            Managers.Game.Player._back.SetActive(false);
 
-            yield return null;
+            yield return new WaitForSeconds(0.5f);
+
+            Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
+            Managers.Game.Player._isEquiptWeapon = true;
+            Managers.Game.Player._weapon.SetActive(true);
+
+            PlayerPrefs.SetInt("ISFIRST", 0);
+            Managers.UI.ShowGameSceneUI();
+            Managers.UI.ShowStageNamePopup(Define.STAGE_NAME_DURATION);
+            finished = true;
         }
-        #endregion
-
-        Managers.Sound.Play(Sound.Effect, "HeroReady_SFX");
-        Managers.Game.Player.SetState(PlayerState.TutorialFirst_Ready);
-        Managers.Game.Player._back.SetActive(false);
-
-        yield return new WaitForSeconds(0.5f);
-
-        Managers.Game.Player.SetState(Define.PlayerState.IdleBack);
-        Managers.Game.Player._isEquiptWeapon = true;
-        Managers.Game.Player._weapon.SetActive(true);
-
-        PlayerPrefs.SetInt("ISFIRST", 0);
-        Managers.UI.ShowGameSceneUI();
-        Managers.UI.ShowStageNamePopup(Define.STAGE_NAME_DURATION);
+        finally
+        {
+            if (finished == false)
+            {
+                Debug.LogWarning("[Directing] 첫 튜토리얼 연출이 끊겼다 — 흐름을 돌려준다");
+                Managers.Game.OnDirect = false;
+                PlayerController pc = Managers.Game.Player;
+                if (pc != null && Managers.Game.GameScene != null)
+                {
+                    pc._isEquiptWeapon = true;
+                    if (pc._weapon != null) pc._weapon.SetActive(true);
+                    if (pc._back != null) pc._back.SetActive(false);
+                    Managers.UI.ShowGameSceneUI();
+                }
+            }
+        }
         Managers.Game.OnDirect = false;
         Managers.Game.SaveGame();
     }
