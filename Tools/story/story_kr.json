@@ -1501,6 +1501,26 @@
         { "key": "walk_44.01", "speaker": "damian", "emotion": "Thinking", "kr": "벽에 쇠사슬이 박혀 있어. 뭘 묶어 뒀을까." },
         { "key": "walk_44.02", "speaker": "sword", "emotion": "Silence", "kr": "……모른다. 숫자나 봐라." }
       ]
+    },
+    {
+      "id": "walk_34",
+      "kind": "bark",
+      "trigger": "floor_bark:34",
+      "staging": "걸으며 한마디. 34층에 처음 들어서고 2초 뒤, 걸음을 막지 않고 뜬다. 수로 물이 아랫층보다 미지근하다 — 위가 용광로(41층~)다. 데미안은 그냥 느낀 대로 말하고, 마검은 웃어넘긴다. 바로 다음 35층 f35_suspect \"다섯 층만 더 가면 뜨거워진다\" → \"너, 이 탑 알지?\" 앞에 몸으로 먼저 깔아 둔다. 수로의 수다스러운 마검.",
+      "lines": [
+        { "key": "walk_34.01", "speaker": "damian", "emotion": "Normal", "kr": "물이 아까보다 미지근해." },
+        { "key": "walk_34.02", "speaker": "sword", "emotion": "Smile", "kr": "크하핫! 발이 덜 시리니 좋잖나." }
+      ]
+    },
+    {
+      "id": "walk_63",
+      "kind": "bark",
+      "trigger": "floor_bark:63",
+      "staging": "걸으며 한마디. 63층에 처음 들어서고 2초 뒤, 걸음을 막지 않고 뜬다. 얼음 바닥 속에 위로 향한 발자국이 갇혀 있다 — 앞서 오른 계약자들(80층 세드릭). 62층 f62_orders 의 그어진 이름들 다음 층. 마검은 알지만 말하지 않고, 밟지 말라고만 한다. 웃음·허접 없음, 심층의 말 적은 마검.",
+      "lines": [
+        { "key": "walk_63.01", "speaker": "damian", "emotion": "Thinking", "kr": "얼음 속에 발자국이 갇혔어. 다 위쪽이야." },
+        { "key": "walk_63.02", "speaker": "sword", "emotion": "Silence", "kr": "……밟지 말고 가라." }
+      ]
     }
   ],
   "prologue_rewrites": {
