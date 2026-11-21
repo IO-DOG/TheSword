@@ -463,6 +463,7 @@ public class UI_TitleScene : UI_Scene
                 Debug.LogWarning($"[Title] 이어하기 실패 — 저장은 그대로 둔다: {Managers.Game.LastSaveError}");
                 GetImage((int)Images.Buttons).gameObject.SetActive(false);
                 ShowNotice(PromptText.Get(Define.TITLE_SAVE_FAILED));
+                PromptText.Set(_noticeText, Define.TITLE_SAVE_FAILED);    // 떠 있는 동안 장치가 바뀌면 "아무 키/버튼" 을 다시 칠한다
                 return;
             }
 

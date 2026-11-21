@@ -567,7 +567,8 @@ public class UI_GameScene : UI_Scene
             GameSettings.ShowForecast = !GameSettings.ShowForecast;
             ShowHint(Managers.GetString(GameSettings.ShowForecast ? ForecastUI.ForecastOn : ForecastUI.ForecastOff), 1.5f);
         }
-        else if (GameKeys.Down(KeyCode.I) && Managers.Game.PlayerData.IsContractedSword
+        // 전투 중에는 아니다 — 패드 Y 는 I(가방)이자 2(철벽)라, 가방을 연 채 싸움에 들어가 철벽을 쓰면 같은 프레임에 가방이 닫혔다(11-21 리뷰).
+        else if (GameKeys.Down(KeyCode.I) && Managers.Game.PlayerData.IsContractedSword && Managers.Game.OnBattle == false
                  && (Managers.UI.FindPopup<UI_InvenPopup>() != null || CanOpenPanel()))
             OnClickMainUIInventoryAImage();
 
