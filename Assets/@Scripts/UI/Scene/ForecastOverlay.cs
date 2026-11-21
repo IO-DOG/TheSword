@@ -377,6 +377,14 @@ public class ForecastOverlay : MonoBehaviour
     }
 
     static Vector2 MarkAt(Vector2 size) => new Vector2(size.x * 0.5f + 1f, 0f);
+    /// <summary>잴 스프라이트. 챕터 보스는 맵에서 원본과 "한 점 위 판"(BossArt.Breathe)을 번갈아 거는데, 그 판은
+    /// 촘촘한 메시를 못 받아(Sprite.OverrideGeometry 가 거부한다) 꼭짓점이 172칸 틀 네 귀퉁이다 — 그 판이 걸린 순간에 재면
+    /// 숫자가 머리 위 0.7 유닛(60층)·옆으로 두 배(20층) 떴다(11-21). 보스는 늘 원본 그림으로 잰다.</summary>
+    static Sprite Drawn(Component c, SpriteRenderer sr)
+    {
+        Sprite art = c is MonsterController m ? BossArt.Of(m.id) : null;
+        return art != null ? art : (sr != null ? sr.sprite : null);
+    }
 
     /// <summary>
     /// 그림이 보이는 윗변 가운데 (월드). 스프라이트 사각형은 위쪽 빈자리까지 품어서(Mob_001_Idle_3 은 사각형 0.86,
@@ -388,7 +396,7 @@ public class ForecastOverlay : MonoBehaviour
     static Vector3 HeadOf(Component mc)
     {
         SpriteRenderer sr = mc.GetComponentInChildren<SpriteRenderer>();
-        Sprite sprite = sr != null ? sr.sprite : null;
+        Sprite sprite = Drawn(mc, sr);
         if (sprite == null)
             return mc.transform.position + Vector3.up * Define.TILE_SIZE;
 
@@ -410,7 +418,7 @@ public class ForecastOverlay : MonoBehaviour
     static float SideOf(Component mc)
     {
         SpriteRenderer sr = mc.GetComponentInChildren<SpriteRenderer>();
-        Sprite sprite = sr != null ? sr.sprite : null;
+        Sprite sprite = Drawn(mc, sr);
         if (sprite == null)
             return Define.TILE_SIZE * 0.5f;
 

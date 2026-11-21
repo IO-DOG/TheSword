@@ -78,6 +78,6 @@ public static class BossArt
             return;
         string key = "BossLunge" + rt.GetInstanceID();   // 보스 등장 밀기 등 같은 판의 다른 트윈은 건드리지 않는다
         DOTween.Complete(key);
-        rt.DOPunchAnchorPos(new Vector2(-24f, 0f), 0.35f, 1, 0f).SetId(key);
+        rt.DOPunchAnchorPos(new Vector2(-24f, 0f), 0.35f, 1, 0f).SetId(key).SetLink(rt.gameObject);
     }
 }
