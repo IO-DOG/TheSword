@@ -232,7 +232,7 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
   `generate_content.altar_sells` 와 **같은 식**(배정밀도, 같은 순서)으로 판다 — 내는 HP 는 내림. 기본 선택은 "지나간다",
   봇은 0.3초 만에 지나간다. 마우스는 창이 뜨고 0.4초 뒤부터 받는다(계단을 두 번 누른 클릭이 사 버렸다).
 - **판 끝**: 100층 보스를 쓰러뜨리면 계단 없이 `StoryDirector.CoEnding` 이 바로 돌므로, 거기서 마지막 띠를 닫고
-  `FinishRun` 이 점수 = round(1000·치름/기준)(낮을수록 좋다)를 **판(RunId)마다 한 번** `RunScored` 로 알린다
+  `FinishRun` 이 점수 = round(1000·치름/기준)(낮을수록 좋다)를 **판(RunId)마다 한 번** `RunScored` 로 알린다(낸 판은 `Records.json` 의 `ScoredRuns` — 클라우드로 오가서 다른 기기에서 같은 판을 다시 끝내도 안 낸다)
   (`Records` 최고 점수·순위표·`ACH_DAWN_PAR`). 엔딩 씬이 판 카드를 보인다. 계단 쪽에도 같은 호출이 있다 — 장부가 두 번 세지 않는다.
 - HUD 의 배부름 게이지: "Lv 58 기준 56 (+2)"(`StageInfoData.ParLevelIn`), 90층부터 "왕좌에서 Lv {DawnLevel}" — 참 결말의
   문턱이 더는 숨어 있지 않다. 탑의 법이면 배지.

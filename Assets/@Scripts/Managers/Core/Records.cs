@@ -32,6 +32,7 @@ public static class Records
         public Dictionary<string, int> Best = new Dictionary<string, int>();   // 판 점수 최고(낮을수록 좋다), GameMode 이름별
         public HashSet<string> ClearedModes = new HashSet<string>();         // 결말까지 간 규칙 (GameMode 이름)
         public HashSet<string> Feats = new HashSet<string>();                // 그 순간에만 풀리는 업적 id (SteamHooks.Earn)
+        public HashSet<string> ScoredRuns = new HashSet<string>();           // 점수를 낸 판(LedgerState.RunId) — SwordLedger.FinishRun
     }
 
     static Data s_data;
@@ -84,6 +85,10 @@ public static class Records
     // Steam 없이·체험판에서 해낸 것도 다음에 붙을 때 SteamHooks.SyncRecords 가 준다.
     public static IReadOnlyCollection<string> Feats => Current.Feats;
     public static void Earn(string achievementId) => Change(d => d.Feats.Add(achievementId));
+    // 이 판(RunId)이 점수를 낸 적이 있다. 클라우드로 오가는 이 파일에 적는다 — PlayerPrefs(레지스트리)에만 두었더니 다른 PC·덱이
+    // 동기화된 100층 입구 체크포인트로 같은 판을 다시 끝내 순위표에 또 올릴 수 있었다(11-21 리뷰).
+    public static bool RunScored(string runId) => Current.ScoredRuns != null && Current.ScoredRuns.Contains(runId);
+    public static void MarkRunScored(string runId) => Change(d => (d.ScoredRuns ??= new HashSet<string>()).Add(runId));
 
     static GameMode CurrentMode => Managers.Game?.PlayerData?.Mode ?? GameMode.Normal;
 

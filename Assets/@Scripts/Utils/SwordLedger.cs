@@ -204,9 +204,10 @@ public static class SwordLedger
         Debug.Log($"[Ledger] 완주: 예언 {l.Foretold} 치름 {l.Paid} (제단 {l.AltarPaid}) 기준 {l.Par} 넘침 {l.Spill} " +
                   $"점수 {score} 별 {string.Join("", l.BandStars)}");
         if (score <= 0 || GameEvents.IsAutoPlaying || string.IsNullOrEmpty(l.RunId)
-            || PlayerPrefs.GetString(ScoredRunKey, "") == l.RunId)
+            || PlayerPrefs.GetString(ScoredRunKey, "") == l.RunId || Records.RunScored(l.RunId))
             return;
-        PlayerPrefs.SetString(ScoredRunKey, l.RunId);
+        Records.MarkRunScored(l.RunId);     // 클라우드로 오간다 — 다른 기기에서 같은 판을 다시 끝내도 내지 않는다
+        PlayerPrefs.SetString(ScoredRunKey, l.RunId);   // 이 판 전의 빌드가 남긴 표시와 같은 자리(옛 판은 여기에만 있다)
         PlayerPrefs.Save();
         FinishedRunScored = true;
         GameEvents.RaiseRunScored(score);
