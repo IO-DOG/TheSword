@@ -320,10 +320,14 @@ public static class SteamHooks
             return;
         if (SteamUserStats.GetAchievement(id, out bool achieved) == false)
             return;
-        s_asked.Add(id);
         if (achieved)
+        {
+            s_asked.Add(id);
             return;
+        }
         bool ok = SteamUserStats.SetAchievement(id);
+        if (ok)
+            s_asked.Add(id);    // 받지 않았으면 다음에 다시 묻는다(11-21 리뷰 — 거절된 해제가 그 실행 내내 다시 안 물렸다)
         s_storeDirty |= ok;
         Debug.Log(ok ? $"[Steam] 업적 {id}" : $"[Steam] 업적 {id} — Steam 이 받지 않았다");
     }
