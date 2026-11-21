@@ -38,7 +38,7 @@ The sword's single eye shows the price of every fight. It hides only one: the pr
 [*][b]What overflows is wasted[/b]: HP has a cap, so when you drink a potion is part of the math. A potion that would overflow right now shows how much it would really restore.
 [*][b]Walk with a click[/b]: click the floor to walk there, double-click to hurry. WASD works too.
 [*][b]A checkpoint on every floor[/b]: the game saves as you enter each floor. Die, and you're back at that floor's entrance; from the menu you can also restart from any of the last ten floors.
-[*][b]The sword's hunger, three endings[/b]: the Ego Sword eats the magic of every monster Damian cuts down. There are two choices at the end and three endings. Only a well-fed sword shows you the true one, and the HUD shows your level next to each floor's par level.
+[*][b]The sword's hunger, three endings[/b]: the Ego Sword eats the magic of every monster Damian cuts down. There are two choices at the end and three endings. Only a well-fed sword shows you the true one. The HUD shows your level next to each floor's par level.
 [/list]
 
 [h2]The Sword's Ledger[/h2]
@@ -65,7 +65,7 @@ Silver font by Poppy Works (CC BY 4.0)
 | Graphics | DirectX 11 compatible graphics card |
 | DirectX | Version 11 |
 | Storage | 500 MB available space |
-| Additional Notes | Keyboard and mouse. Gamepad supported (Xbox layout). Tooltips and swapping equipment use the mouse. |
+| Additional Notes | Keyboard and mouse. Gamepad supported (Xbox layout). |
 
 근거와 측정(빌드 211 MiB)은 `ko.md` 의 같은 절. 프로세서·메모리 행은 일부러 뺐다. "Gamepad supported" 는 패드 직접 입력(`GameKeys`)이 커밋되고 `deck.md` 의 "패드" 점검을 통과한 뒤에 올린다 — 그 전에는 "Keyboard and mouse." 만 둔다. Steam Deck "Verified" 는 말하지 않는다.
 

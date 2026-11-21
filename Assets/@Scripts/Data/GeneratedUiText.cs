@@ -21,7 +21,7 @@ public static class GeneratedUiText
             case 353: return new[] { "Tab: Skip", "Tab: 건너뛰기", "Tab: Skip", "Tab: スキップ", "Tab: 跳过" }[language >= 0 && language <= 4 ? language : 0];
             case 354: return new[] { "HP -{0}", "체력 -{0}", "HP -{0}", "体力 -{0}", "生命 -{0}" }[language >= 0 && language <= 4 ? language : 0];
             case 355: return new[] { "Forecast -{0}", "예측 -{0}", "Forecast -{0}", "予測 -{0}", "预测 -{0}" }[language >= 0 && language <= 4 ? language : 0];
-            case 356: return new[] { "You can now skip fights with Tab. The result is exactly as forecast.", "이제 Tab 으로 전투를 건너뛸 수 있습니다. 결과는 예측 그대로입니다.", "You can now skip fights with Tab. The result is exactly as forecast.", "Tabで戦闘をスキップできます。結果は予測どおりです。", "现在可以按 Tab 跳过战斗。结果与预测完全一致。" }[language >= 0 && language <= 4 ? language : 0];
+            case 356: return new[] { "You can now skip fights with Tab. The result is exactly as forecast.", "이제 Tab 으로 전투를 건너뛸 수 있습니다. 결과는 예측 그대로입니다.", "You can now skip fights with Tab. The result is exactly as forecast.", "これからはTabで戦闘をスキップできます。結果は予測どおりです。", "现在可以按 Tab 跳过战斗。结果与预测完全一致。" }[language >= 0 && language <= 4 ? language : 0];
             case 630: return new[] { "Fonts", "글꼴", "Fonts", "フォント", "字体" }[language >= 0 && language <= 4 ? language : 0];
             case 631: return new[] { "Silver by Poppy Works (CC BY 4.0)", "Silver - Poppy Works (CC BY 4.0)", "Silver by Poppy Works (CC BY 4.0)", "Silver - Poppy Works (CC BY 4.0)", "Silver - Poppy Works (CC BY 4.0)" }[language >= 0 && language <= 4 ? language : 0];
             case 632: return new[] { "DNF Bit Bit v2 by Neople", "DNF Bit Bit v2 - Neople", "DNF Bit Bit v2 by Neople", "DNF Bit Bit v2 - Neople", "DNF Bit Bit v2 - Neople" }[language >= 0 && language <= 4 ? language : 0];
@@ -210,7 +210,7 @@ public static class GeneratedUiText
             case 491: return new[] { "At the Throne: Lv {0}", "왕좌에서 Lv {0}", "At the Throne: Lv {0}", "玉座で Lv {0}", "抵达王座时 Lv {0}" }[language >= 0 && language <= 4 ? language : 0];
             case 492: return new[] { "Tower's Law", "탑의 법", "Tower's Law", "塔の掟", "塔之法则" }[language >= 0 && language <= 4 ? language : 0];
             case 500: return new[] { "The Sword's Ledger", "마검의 장부", "The Sword's Ledger", "魔剣の帳簿", "魔剑的账簿" }[language >= 0 && language <= 4 ? language : 0];
-            case 501: return new[] { "Altar {0} of Paid  Healing spilled {1}", "치름 중 제단 {0}  넘친 회복 {1}", "Altar {0} of Paid  Healing spilled {1}", "支払いのうち祭壇 {0}  溢れた回復 {1}", "付出中祭坛 {0}  溢出治疗 {1}" }[language >= 0 && language <= 4 ? language : 0];
+            case 501: return new[] { "Altar {0} of Paid  Healing wasted {1}", "치름 중 제단 {0}  넘친 회복 {1}", "Altar {0} of Paid  Healing wasted {1}", "支払いのうち祭壇 {0}  溢れた回復 {1}", "付出中祭坛 {0}  溢出恢复 {1}" }[language >= 0 && language <= 4 ? language : 0];
             case 502: return new[] { "Score {0}", "점수 {0}", "Score {0}", "スコア {0}", "分数 {0}" }[language >= 0 && language <= 4 ? language : 0];
             case 503: return new[] { "lower is better", "낮을수록 좋다", "lower is better", "低いほど良い", "越低越好" }[language >= 0 && language <= 4 ? language : 0];
             case 504: return new[] { "Ch. {0}", "{0}장", "Ch. {0}", "第{0}章", "第{0}章" }[language >= 0 && language <= 4 ? language : 0];
@@ -231,7 +231,7 @@ public static class GeneratedUiText
             case 666: return new[] { "Pick with the stick then press A", "스틱으로 고른 뒤 A", "Pick with the stick then press A", "スティックで選んでからA", "用摇杆选择后按A" }[language >= 0 && language <= 4 ? language : 0];
             case 667: return new[] { "Hold RT: 8x speed", "RT 길게: 8배속", "Hold RT: 8x speed", "RT 長押し: 8倍速", "按住 RT: 8倍速" }[language >= 0 && language <= 4 ? language : 0];
             case 668: return new[] { "LB: Skip", "LB: 건너뛰기", "LB: Skip", "LB: スキップ", "LB: 跳过" }[language >= 0 && language <= 4 ? language : 0];
-            case 669: return new[] { "You can now skip fights with LB. The result is exactly as forecast.", "이제 LB 로 전투를 건너뛸 수 있습니다. 결과는 예측 그대로입니다.", "You can now skip fights with LB. The result is exactly as forecast.", "LBで戦闘をスキップできます。結果は予測どおりです。", "现在可以按 LB 跳过战斗。结果与预测完全一致。" }[language >= 0 && language <= 4 ? language : 0];
+            case 669: return new[] { "You can now skip fights with LB. The result is exactly as forecast.", "이제 LB 로 전투를 건너뛸 수 있습니다. 결과는 예측 그대로입니다.", "You can now skip fights with LB. The result is exactly as forecast.", "これからはLBで戦闘をスキップできます。結果は予測どおりです。", "现在可以按 LB 跳过战斗。结果与预测完全一致。" }[language >= 0 && language <= 4 ? language : 0];
             case 670: return new[] { "Hold LB: skip", "LB 길게: 건너뛰기", "Hold LB: skip", "LB長押し: スキップ", "长按LB: 跳过" }[language >= 0 && language <= 4 ? language : 0];
             case 671: return new[] { "LB: skip (seen)", "LB: 건너뛰기 (본 장면)", "LB: skip (seen)", "LB: スキップ (既読)", "LB: 跳过 (已读)" }[language >= 0 && language <= 4 ? language : 0];
             case 672: return new[] { "←→ choose  A receive  B pass", "←→ 고르기  A 받기  B 지나간다", "←→ choose  A receive  B pass", "←→ 選ぶ  A 受け取る  B 通り過ぎる", "←→ 选择  A 领取  B 离开" }[language >= 0 && language <= 4 ? language : 0];
@@ -248,7 +248,7 @@ public static class GeneratedUiText
             case 233: return new[] { "Slow", "느림", "Slow", "遅い", "慢" }[language >= 0 && language <= 4 ? language : 0];
             case 234: return new[] { "Normal", "보통", "Normal", "普通", "中" }[language >= 0 && language <= 4 ? language : 0];
             case 235: return new[] { "Fast", "빠름", "Fast", "速い", "快" }[language >= 0 && language <= 4 ? language : 0];
-            case 236: return new[] { "Instant", "즉시", "Instant", "瞬間", "瞬间" }[language >= 0 && language <= 4 ? language : 0];
+            case 236: return new[] { "Instant", "즉시", "Instant", "瞬時", "瞬间" }[language >= 0 && language <= 4 ? language : 0];
             case 237: return new[] { "Screen shake", "화면 흔들림", "Screen shake", "画面の揺れ", "屏幕震动" }[language >= 0 && language <= 4 ? language : 0];
             case 238: return new[] { "Game", "게임", "Game", "ゲーム", "游戏" }[language >= 0 && language <= 4 ? language : 0];
             case 560: return new[] { "The demo ends here", "체험판은 여기까지", "The demo ends here", "体験版はここまで", "试玩版到此为止" }[language >= 0 && language <= 4 ? language : 0];
