@@ -95,13 +95,15 @@ public static class FontFallback
             // 어느 요청의 답이든 처음 온 것을 받는다 — 마지막 요청만 받으면 앞 요청이 늦게 오고 마지막이 영영 안 올 때 글꼴이 끝내 안 선다.
             if (s_pixel != null)
                 return;
-            s_loadRun++;            // 답이 왔다 — 기다리던 다시 부르기를 걷는다
             Font source = error == null ? Managers.Resource.Load<Font>(PixelFontKey) : null;
             if (source == null)
             {
+                // 실패한 답은 기다리던 다시 부르기를 걷지 않는다 — 걷으면 앞 요청의 오류가 뒤 요청의 10초 감시를 지워, 뒤 요청도 답이 없을 때
+                // 아무도 다시 부르지 않았다(덱에는 윈도 글꼴이 없어 일·중 글자가 □ 로 남는다, 11-22 리뷰).
                 Debug.LogWarning($"[Font] 어드레서블에 '{PixelFontKey}' 가 없다 — 빠진 글자는 윈도 글꼴로 그린다");
                 return;
             }
+            s_loadRun++;            // 글꼴이 왔다 — 기다리던 다시 부르기를 걷는다
             // Silver SDF 와 같은 크기·여백으로 굽는다. 한 줄에 섞여 찍혀도 굵기가 같다.
             s_pixel = TMP_FontAsset.CreateFontAsset(source, 47, 5, GlyphRenderMode.SDFAA, 1024, 1024);
             s_pixelCjk = TMP_FontAsset.CreateFontAsset(source, 47, 5, GlyphRenderMode.SDFAA, 1024, 1024);
