@@ -1320,6 +1320,22 @@ public static class GeneratedStory
             },
             null,
             null),
+        new StoryScene("walk_79", StoryKind.Bark, StoryTrigger.FloorBark, 79,
+            new[]
+            {
+                new StoryLine(0, null, 306240, null),
+                new StoryLine(1, "Illust_MagicalSword_Silense", 306241, null),
+            },
+            null,
+            null),
+        new StoryScene("walk_91", StoryKind.Bark, StoryTrigger.FloorBark, 91,
+            new[]
+            {
+                new StoryLine(1, "Illust_MagicalSword_Nerve", 306280, null),
+                new StoryLine(0, null, 306281, null),
+            },
+            null,
+            null),
     };
 
     // 층별 사실 — 인덱스는 층 번호(1~100). 0 번과 손수 만든 1~4층은 비어 있다.
@@ -1367,10 +1383,10 @@ public static class GeneratedStory
     public static readonly int[] FloorBarks =
     {
         -1, -1, -1, -1, -1, -1, -1, 72, -1, -1, -1, -1, -1, -1, 77, -1, -1, 73, -1, -1,
-        -1, -1, -1, 74, -1, -1, -1, -1, 76, -1, 67, -1, 71, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, 74, -1, -1, -1, -1, 75, -1, 67, -1, 71, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, 68, -1, -1, 78, -1, 69, -1, -1, -1, -1, 70, -1, -1, -1,
-        -1, -1, -1, -1, -1, 65, -1, -1, -1, -1, -1, -1, -1, -1, -1, 66, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, 75, -1, -1, -1, -1, -1, 79, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, 65, -1, -1, 76, -1, -1, -1, -1, -1, -1, 66, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, 79, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1,
     };
     // 마검이 값만 말하는 층 — 죽음 바크는 데미안 것만 (바이블 R13)
