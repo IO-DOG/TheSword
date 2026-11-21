@@ -377,6 +377,10 @@ public class UI_BattlePopup : UI_Popup
         // 치명타 수업(StoryDirector)이 말하는 동안 전투 시계를 세운다. 게이지·치명 횟수가 그 자리에 머문다.
         if (StoryDirector.HoldsBattle) return;
         if (_battle == null || _ending || !Managers.Game.OnBattle) return;
+        // 카드가 Init(Start)을 마치기 전에는 시계를 돌리지 않는다 — Init 이 특성 객체를 새로 갈아 끼우고(갑옷 껍질·거대 횟수·암살 은신이
+        // 처음으로 돌아간다) 죽음 알림(Dead)도 거기서 건다. 빠른 배속에 첫 프레임이 느리면 그 틈에 몇 초가 흘러 실제 값이 예측과 갈리거나,
+        // 그 틈에 승부가 나면 경험치도 끝도 없이 OnBattle 이 켜진 채 남았다(11-21 리뷰). 건너뛰기·스킬(CanSkip·BattleSkills.Use)과 같은 문.
+        if (playerCard == null || monsterCard == null || playerCard.Ready == false || monsterCard.Ready == false) return;
         // 치명타 히트스톱. 그동안 걸음을 미룰 뿐 — 미룬 걸음은 뒤에 그대로 돈다.
         if (Time.unscaledTime < _hitStopUntil) return;
         int steps = Speed;

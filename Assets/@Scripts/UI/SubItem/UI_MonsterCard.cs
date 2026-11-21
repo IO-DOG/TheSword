@@ -388,6 +388,10 @@ public class UI_MonsterCard : UI_BaseCard
         if (_deadHandled)
             return;
         _deadHandled = true;
+        // 거대의 다섯째 대가 놈을 쓰러뜨리며 낸 포효에 플레이어가 먼저 쓰러졌다(ExcuteOnHit 이 쓰러짐보다 포효를 먼저 한다) — 진 싸움이다.
+        // 경험치·레벨업(업적)·드랍·보스 쓰러짐 연출을 주지 않는다. 체크포인트가 되돌리지만 Steam 업적과 화면의 보스 연출은 못 되돌린다(11-21 리뷰).
+        if (Managers.Game.IsPlayerDead)
+            return;
 
         base.Dead();
 
