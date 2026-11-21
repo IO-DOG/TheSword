@@ -17,6 +17,13 @@ public class ConsumableItem : MonoBehaviour
     public ConsumableItem ChoicePartner;
     LineRenderer _choiceLine;
 
+    // 둘 중 하나 선의 재질은 하나를 나눠 쓴다 — 쌍마다 새로 만들어 챕터를 지을 때마다 남았다(11-22 리뷰).
+    static Material s_choiceLine;
+    static Material ChoiceLineMaterial => s_choiceLine != null ? s_choiceLine : (s_choiceLine = new Material(Shader.Find("Sprites/Default")));
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() => s_choiceLine = null;
+
     private void Start()
     {
         if (ChoicePartner != null && _itemIndex_forActive < ChoicePartner._itemIndex_forActive)
@@ -25,7 +32,7 @@ public class ConsumableItem : MonoBehaviour
             // 아이템 프리팹의 처음 재질(SpriteShadowsMaterial)은 셰이더가 사라진 오류 재질이다 — 그림은 아래에서 Item_Shadow 로
             // 갈아 끼우지만 선은 그것을 물고 있어 하늘색이 아니라 자홍색으로 그려졌다(11-18, 99층 조감). Sprites/Default 는
             // GraphicsSettings 의 항상 포함 셰이더라 빌드에도 있다.
-            _choiceLine.sharedMaterial = new Material(Shader.Find("Sprites/Default"));
+            _choiceLine.sharedMaterial = ChoiceLineMaterial;
             _choiceLine.positionCount = 2;
             _choiceLine.startWidth = _choiceLine.endWidth = 0.015f;
             _choiceLine.startColor = _choiceLine.endColor = new Color(0.5f, 1f, 1f, 0.8f);

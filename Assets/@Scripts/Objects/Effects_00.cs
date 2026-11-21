@@ -48,9 +48,14 @@ public class Effects_00 : MonoBehaviour
         dust = Managers.Resource.Instantiate("DustFloaty", transform);
         for (int i = 0; i < leavesPoolSize; i++)
         {
-            fallingLeavesPrefab = Managers.Resource.Instantiate("FallingLeaves", transform);
-            fallingLeavesPrefab.SetActive(false);
-            fallingLeaves.Add(fallingLeavesPrefab);
+            // 없으면 건너뛴다 — 여기서 죽으면 아래 구독과 첫 FirePortalAction 이 안 돌아 그 챕터 내내 안개·빛·공기가 없고
+            // 카메라에 앞 챕터의 색 필터가 남았다(11-22 리뷰, "이펙트가 없어도 게임은 굴러가야 한다").
+            GameObject leaf = Managers.Resource.Instantiate("FallingLeaves", transform);
+            if (leaf == null)
+                continue;
+            fallingLeavesPrefab = leaf;
+            leaf.SetActive(false);
+            fallingLeaves.Add(leaf);
         }
 
         Managers.Game.OnPortalAction -= SetFogPosition;
@@ -110,7 +115,7 @@ public class Effects_00 : MonoBehaviour
 
     void SetFogPosition()
     {
-        if (Managers.Game.Player.gameObject == null)
+        if (Managers.Game.Player == null)     // 부서진 플레이어의 .gameObject 는 예외다 — Unity 의 null 로 본다
             return;
         if (fog == null)
             return;
@@ -128,7 +133,7 @@ public class Effects_00 : MonoBehaviour
 
     void SetDustPosition()
     {
-        if (Managers.Game.Player.gameObject == null)
+        if (Managers.Game.Player == null)     // 부서진 플레이어의 .gameObject 는 예외다 — Unity 의 null 로 본다
             return;
         if (dust == null)
             return;

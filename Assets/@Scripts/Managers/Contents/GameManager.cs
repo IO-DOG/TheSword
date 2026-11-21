@@ -546,12 +546,14 @@ public class GameManager
         return monsters.Length > 0 ? monsters[0] : null;
     }
 
+    // 저장의 활성 표에 그 번호가 없으면 그 오브젝트만 켠 채 둔다 — [] 로 읽으면 예외가 GenerateMap 고리를 끊어 나머지 층·계단·테마가
+    // 통째로 안 섰다(11-22 리뷰).
     public void RefreshMap(int mapId)
     {
         foreach (Transform child in Maps[mapId].transform.Find("Monsters"))
         {
             if (child.TryGetComponent(out MonsterController monster)
-                && Managers.Data.MonsterActiveDic[monster._monsterIndex_forActive] == false)
+                && Managers.Data.MonsterActiveDic.TryGetValue(monster._monsterIndex_forActive, out bool monsterAlive) && monsterAlive == false)
             {
                 monster.gameObject.SetActive(false);
             }
@@ -560,13 +562,13 @@ public class GameManager
         foreach (Transform child in Maps[mapId].transform.Find("Items"))
         {
             if (child.TryGetComponent(out ConsumableItem cItem)
-                && Managers.Data.CItemActiveDic[cItem._itemIndex_forActive] == false)
+                && Managers.Data.CItemActiveDic.TryGetValue(cItem._itemIndex_forActive, out bool cItemAlive) && cItemAlive == false)
             {
                 cItem.gameObject.SetActive(false);
             }
 
             if (child.TryGetComponent(out Equip eItem)
-                && Managers.Data.EItemActiveDic[eItem._itemIndex_forActive] == false)
+                && Managers.Data.EItemActiveDic.TryGetValue(eItem._itemIndex_forActive, out bool eItemAlive) && eItemAlive == false)
             {
                 eItem.gameObject.SetActive(false);
             }
@@ -575,7 +577,7 @@ public class GameManager
         foreach (Transform child in Maps[mapId].transform.Find("Doors"))
         {
             Door door = child.GetComponentInChildren<Door>();
-            if (door != null && Managers.Data.DoorActiveDic[door._doorIndex_forActive] == false)
+            if (door != null && Managers.Data.DoorActiveDic.TryGetValue(door._doorIndex_forActive, out bool doorAlive) && doorAlive == false)
             {
                 door.gameObject.SetActive(false);
             }
@@ -585,7 +587,7 @@ public class GameManager
         foreach (Transform child in Maps[mapId].transform.Find("Pillars"))
         {
             Pillar pillar = child.GetComponentInChildren<Pillar>();
-            if (pillar != null && Managers.Data.PillarActiveDic[pillar._pillarIndex_forActive] == false)
+            if (pillar != null && Managers.Data.PillarActiveDic.TryGetValue(pillar._pillarIndex_forActive, out bool pillarAlive) && pillarAlive == false)
             {
                 pillar.SetInActive();
             }
@@ -594,7 +596,7 @@ public class GameManager
         foreach (Transform child in Maps[mapId].transform.Find("Levers"))
         {
             Lever lever = child.GetComponentInChildren<Lever>();
-            if (lever != null && Managers.Data.LeverActiveDic[lever._leverIndex_forActive] == false)
+            if (lever != null && Managers.Data.LeverActiveDic.TryGetValue(lever._leverIndex_forActive, out bool leverAlive) && leverAlive == false)
             {
                 lever.Play(0f);
                 lever.SetActive();
