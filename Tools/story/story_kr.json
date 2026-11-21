@@ -1521,6 +1521,25 @@
         { "key": "walk_63.01", "speaker": "damian", "emotion": "Thinking", "kr": "걸상째 얼어 있어. 앉았던 사람은 어디 갔지." },
         { "key": "walk_63.02", "speaker": "sword", "emotion": "Silence", "kr": "……일어나서 갔다. 위로." }
       ]
+    },
+    {
+      "id": "walk_26",
+      "kind": "bark",
+      "trigger": "floor_bark:26",
+      "staging": "걸으며 한마디. 26층에 처음 들어서고 2초 뒤, 걸음을 막지 않고 뜬다. 수로의 물방울(챕터 공기 파티클)과 물소리. 조는 마검에게 물소리가 문 두드리는 소리로 들린다 — 바로 다음 27층 f27_sleeptalk \"…세드릭… 문 열어…\" 앞에 꿈의 문을 먼저 깐다. 데미안은 잠꼬대로 넘긴다. 화면에 없는 것은 가리키지 않는다(소리만).",
+      "lines": [
+        { "key": "walk_26.01", "speaker": "sword", "emotion": "Sleep", "kr": "…음냐… 물소리가 문 두드리는 소리 같군…" },
+        { "key": "walk_26.02", "speaker": "damian", "emotion": "Normal", "kr": "자면서도 말이 많네." }
+      ]
+    },
+    {
+      "id": "walk_86",
+      "kind": "bark",
+      "trigger": "floor_bark:86",
+      "staging": "걸으며 한마디. 86층에 처음 들어서고 2초 뒤, 걸음을 막지 않고 뜬다. 81~89층이라 데미안 혼잣말 하나(R13). 균열에서는 모든 것이 위로 떠오르려 한다(티끌 파티클, 83층 \"티끌이 전부 위로 가\") — 이번엔 제 발이 그렇다. 몸으로 느끼는 것만 말한다.",
+      "lines": [
+        { "key": "walk_86.01", "speaker": "damian", "emotion": "Thinking", "kr": "발이 자꾸 뜨려 해. 꾹 디뎌야겠다." }
+      ]
     }
   ],
   "prologue_rewrites": {

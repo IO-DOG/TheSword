@@ -61,7 +61,7 @@ public class Effects_00 : MonoBehaviour
         Managers.Game.OnPortalAction += SetDustPosition;
         Managers.Game.OnPortalAction -= ApplyAir;
         Managers.Game.OnPortalAction += ApplyAir;
-        Managers.Game.OnPortalAction.Invoke();
+        Managers.Game.FirePortalAction();
 
         StartCoroutine(FallingLeaves());
     }

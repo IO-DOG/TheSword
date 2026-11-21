@@ -954,6 +954,14 @@ public class PlayerController : MonoBehaviour
                 _walkBump = true;
                 _walkFromSouth = col.gameObject.layer == (int)Define.Layer.BossDoor
                                  || col.gameObject.layer == (int)Define.Layer.InteractObjects;
+                // 소비 아이템은 뿌리 칸 하나다. 콜라이더가 북쪽으로 0.096 밀려 윗칸 탐침에도 걸려서(PathMover.ItemRootIn), 덮은 칸으로
+                // 잡으면 북쪽에서 누를 때 그 윗칸에 "부딪혀" 걸어 들어가고 줍지 못했다 — 줍기는 뿌리 칸으로 잰다(InNextCell, 11-21).
+                if (col.gameObject.layer == (int)Define.Layer.CItem)
+                {
+                    ConsumableItem item = Util.Find<ConsumableItem>(col.gameObject);
+                    _walkTo.Add(PathMover.Cell(map, item != null ? item.transform.position : col.transform.position));
+                    return true;
+                }
                 // 그것이 덮은 칸 전부 — 콜라이더가 여러 칸을 덮는 보스가 있다(AutoPlayer.BumpWide).
                 // Covers 가 _probe 를 다시 채우므로 이 고리는 여기서 끝낸다.
                 for (int x = -2; x <= 2; x++)

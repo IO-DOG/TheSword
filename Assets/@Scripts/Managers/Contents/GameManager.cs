@@ -64,6 +64,19 @@ public class GameManager
     public Action OnGuardianEffectAction;
     public Action OnPortalAction;
 
+    /// <summary>층을 옮긴 뒤 연출(Effects_00 의 안개·빛·티끌·공기)을 다시 놓는다. 듣는 쪽 예외는 하나씩 삼킨다 — 연출 버그가
+    /// 층 이동을 멈추면 안 된다(GameEvents 와 같은 규칙). 그대로 던지면 계단 뒤의 OnInteract 가 풀리지 않고 체크포인트도 안 써진다.</summary>
+    public void FirePortalAction()
+    {
+        if (OnPortalAction == null)
+            return;
+        foreach (Action a in OnPortalAction.GetInvocationList())
+        {
+            try { a(); }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+    }
+
     public Texture2D _screenShot = null;
     public Sprite _screenShot2 = null;
 
@@ -700,8 +713,7 @@ public class GameManager
                 cam.SetupCameraConfiner();
         }
 
-        if (OnPortalAction != null)
-            OnPortalAction.Invoke();
+        FirePortalAction();
         if (GameScene != null)
             GameScene.Refresh();
         EnterFloor(false);
