@@ -45,6 +45,8 @@ WALK_LINES = 2                                    # 걸으며 한마디(floor_ba
 CHAPTER_FIRST = {5, 21, 41, 61, 81}               # 이 층은 chapter_start 를 쓴다
 MAX_LINES, SOFT_WIDTH = 3, 26
 TYPOS = ("외뢰서", "버텨기", "있을꺼야", "받친다")    # BRIEF 4절
+# 화면에 없는 것(바이블 7.1·8절) — 대사가 가리키면 플레이어가 맵에서 찾다 만다. 57층 "모루" 가 그랬다(11-21, 빈 칼 거푸집으로).
+NOT_ON_SCREEN = ("모루", "깃발", "비문", "낙서", "칼 더미")
 ITEMS = ("monster_book", "warp_ring", "key", "potion", "rune")
 # 도감 설명은 한 벌씩 따로 쓴다(STORY_BIBLE 13절). 예전 mob_desc 는 특성 문장 틀을 되풀이해 기계가 쓴 것처럼
 # 읽혔다 — 간혹 40번, 그중에는 40번. 그리고 같은 챕터·같은 그림도 띠마다 특성이 달라서
@@ -224,6 +226,9 @@ def check(doc, old_prologue):
             for t in TYPOS:
                 if t in kr:
                     err.append(f"{at}: 오탈자 '{t}'")
+            for t in NOT_ON_SCREEN:
+                if t in kr:
+                    err.append(f"{at}: 화면에 없는 '{t}' 를 가리킨다 (바이블 8절 — 몸으로 느끼는 것·실제 소품만)")
 
     for sid, cid in choice_ids:
         if cid not in ending_ids:
@@ -431,6 +436,7 @@ def selftest():
         "목록 밖 감정": lambda d: first(d)["lines"][0].update(emotion="Bad"),
         "네 줄": lambda d: first(d)["lines"][0].update(kr="가\n나\n다\n라"),
         "없는 화자": lambda d: first(d)["lines"][0].update(speaker="nobody"),
+        "화면에 없는 소품": lambda d: first(d)["lines"][0].update(kr="모루가 있다."),
         "도감 빈칸": lambda d: d["bestiary"]["mob_desc"].pop("3:7"),
         "도감 틀 문구": lambda d: d["bestiary"]["mob_desc"].update({"0:0": "간혹 이런 놈이 섞여 있다."}),
         "도감 규칙 낱말": lambda d: d["bestiary"]["mob_desc"].update({"0:0": "평타는 20%만 들어간다."}),
