@@ -129,6 +129,7 @@ public class StoryDirector : MonoBehaviour
     UI_StoryCardPopup _backdrop;
     bool _letterbox;                        // 레터박스를 이 도구가 내렸다
     bool _levelUpPending;
+    readonly HashSet<string> _walkQueued = new HashSet<string>();   // 줄 세운 걸으며 한마디 — 같은 것을 두 번 세우지 않는다
     bool _endingRunning;
     float _nextWatch;
     bool _offsetMoved, _exposureMoved;
@@ -253,6 +254,7 @@ public class StoryDirector : MonoBehaviour
         _jobs.Clear();
         _running = 0;
         _levelUpPending = false;
+        _walkQueued.Clear();
         _endingRunning = false;
         _scene = null;
         _title = false;
@@ -512,8 +514,14 @@ public class StoryDirector : MonoBehaviour
 
     static void OnFloorEntered(int stageId, bool firstVisit)
     {
-        if (s_instance == null || firstVisit == false || Contracted == false)
+        if (s_instance == null || Contracted == false)
             return;
+        // 다시 온 층: 그 층의 걸으며 한마디가 아직 안 떴으면(들어서고 2초 안에 계단을 되밟아 내려갔다) 다시 건다 — 본 것은 Unseen 이 거른다.
+        if (firstVisit == false)
+        {
+            s_instance.WalkBark(stageId + 1);
+            return;
+        }
         List<StoryScene> chain = FloorChain(stageId + 1);
         if (chain.Count > 0)
         {
@@ -534,15 +542,20 @@ public class StoryDirector : MonoBehaviour
         List<StoryScene> scenes = Unseen(StoryTrigger.FloorBark, floor);
         if (scenes.Count == 0)
             return false;
-        StartCoroutine(CoWalkBark(scenes));
+        StartCoroutine(CoWalkBark(scenes, floor));
         return true;
     }
 
-    static IEnumerator CoWalkBark(List<StoryScene> scenes)
+    // 2초 사이에 층을 옮겼으면(계단을 되밟았다) 접는다 — 예전에는 아래층에서 떠 본 것으로 적혀 제 층에서는 영영 안 떴다.
+    IEnumerator CoWalkBark(List<StoryScene> scenes, int floor)
     {
         yield return new WaitForSeconds(2f);
+        if (CurFloor != floor)
+            yield break;
         foreach (StoryScene scene in scenes)
         {
+            if (_walkQueued.Add(scene.Id) == false)
+                continue;   // 내려갔다 2초 안에 다시 올라와 두 번 걸렸다
             StoryScene mine = scene;
             for (int i = 0; i < scene.Lines.Length; i++)    // 한 번에 줄 세운다 — 다른 바크가 두 줄 사이에 끼지 않게
                 UI_StoryBark.Show(scene.Lines[i], i == 0 ? () => MarkSeen(mine) : (Action)null);
@@ -556,12 +569,14 @@ public class StoryDirector : MonoBehaviour
     {
         int scene = FloorFact(GeneratedStory.FloorBarks, floor, -1);
         if (scene >= 0)
-            StartCoroutine(CoBarkLater(GeneratedStory.Scenes[scene].Lines[0], 2f));
+            StartCoroutine(CoBarkLater(GeneratedStory.Scenes[scene].Lines[0], 2f, floor));
     }
 
-    static IEnumerator CoBarkLater(StoryLine line, float delay)
+    static IEnumerator CoBarkLater(StoryLine line, float delay, int floor = 0)
     {
         yield return new WaitForSeconds(delay);
+        if (floor > 0 && CurFloor != floor)
+            yield break;    // 층 유형 바크 — 그 사이 층을 옮겼다
         UI_StoryBark.Show(line);
     }
 
