@@ -64,6 +64,10 @@ public static class GameKeys
     static int _deviceVersion;
     static float _mouseTravel;          // 패드를 쓴 뒤로 마우스가 실제로 움직인 양(Mouse X·Y 축 — 감도 0.1 이라 1 이 약 10px)
     const float MouseSlop = 1f;         // 이만큼 움직여야 마우스로 돌아간다. 커서 좌표의 변화로 재면 창 크기만 바꿔도(설정의 화면 모드) 넘어갔다
+    // 그 양은 최근 이만큼(초) 사이의 움직임만 센다 — 덱 트랙패드를 스치듯 조금씩 민 것이 걷는 동안 쌓여 안내가 키보드로 깜빡였다(11-21 리뷰 B9).
+    // 손으로 마우스를 움직이면 이 창 안에 금방 넘는다.
+    const float MouseWindow = 0.25f;
+    static float _mouseAt;
 
     // 에디터는 도메인 리로드 없이 플레이를 되풀이한다 — 지난 플레이의 쥔 방향을 넘기지 않고, 그새 더한 축을 다시 묻는다.
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -73,6 +77,7 @@ public static class GameKeys
         _probed = false;
         _deviceVersion = 0;     // 다음 Poll 이 꽂힌 패드를 다시 묻고 커서를 다시 정한다
         _mouseTravel = 0f;
+        _mouseAt = 0f;
         System.Array.Clear(_held, 0, _held.Length);
         System.Array.Clear(_was, 0, _was.Length);
         System.Array.Clear(_pulse, 0, _pulse.Length);
@@ -208,7 +213,12 @@ public static class GameKeys
             return;
         }
         if (_usingPad && _hasMouse)
-            _mouseTravel += Mathf.Abs(Input.GetAxisRaw("Mouse X")) + Mathf.Abs(Input.GetAxisRaw("Mouse Y"));
+        {
+            float leak = MouseSlop / MouseWindow * Mathf.Max(0f, now - _mouseAt);
+            _mouseTravel = Mathf.Max(0f, _mouseTravel - leak)
+                           + Mathf.Abs(Input.GetAxisRaw("Mouse X")) + Mathf.Abs(Input.GetAxisRaw("Mouse Y"));
+        }
+        _mouseAt = now;
         if (Input.anyKeyDown || _mouseTravel > MouseSlop || Input.mouseScrollDelta.y != 0f)
         {
             SetDevice(false);

@@ -150,6 +150,15 @@ static class Program
             Check(GameKeys.AnyHeld == false, "drift is not a key");    // InputManager 가 매 프레임 이렇게 묻는다 — 그래야 움직임이 쌓인다
         }
         Check(GameKeys.UsingPad, "a little mouse drift stays on pad");
+        bool stayed = true;
+        for (int i = 0; i < 300; i++)     // 5초 동안 트랙패드를 스치듯(모두 합하면 15) — 걷는 동안 쌓여 넘어가면 안 된다(B9)
+        {
+            Step(() => { Input.Axes["Mouse X"] = 0.05f; });
+            stayed &= GameKeys.UsingPad;  // 프레임마다 묻는다 — 묻지 않은 프레임은 GameKeys 가 재지 않는다
+        }
+        Check(stayed, "slow drift over seconds stays on pad");
+        Step(() => { Input.Axes["Mouse X"] = 0.6f; });
+        Check(GameKeys.UsingPad, "one small flick is not enough");
         Step(() => { Input.Axes["Mouse X"] = 0.6f; });
         Check(!GameKeys.UsingPad && Cursor.visible, "real mouse motion switches back");
         Step(() => { Input.Axes["Mouse X"] = 0f; Input.Axes["PadDPadY"] = 1f; });
