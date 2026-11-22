@@ -836,9 +836,28 @@ def coverage(scenes):
     return ", ".join(f"{k} {v}" for k, v in sorted(counts.items()))
 
 
+def walk_bark_room(scenes, speaker_rows, facts):
+    """걸으며 한마디를 하나 더 넣어도 층 유형 바크 변주가 다 서는 빈 층. 한마디는 그 층의 바크 자리를 쓰고, 81~89층엔
+    마검 변주가 못 서서 유형마다 남는 칸이 다르다 — 손으로 세면 틀린다(11-22 에 75·42층이 그랬다). 하나씩 넣어 잰다."""
+    types = {s["arg"] for s in scenes if s["trigger"] == "FloorType"}
+    variants = [i for i, s in enumerate(scenes) if s["trigger"] == "FloorType"]
+    taken = (entry_floors(scenes) | {20 * (c + 1) for c in range(CHAPTERS)}
+             | {s["arg"] for s in scenes if s["trigger"] == "FloorBark"})
+    probe = next(s for s in scenes if s["trigger"] == "FloorBark")
+    room = []
+    for f in range(gc.HANDMADE_FLOORS + 1, gc.TOTAL_FLOORS + 1):
+        if f in taken or facts[f]["type"] not in types:
+            continue
+        plan = bark_schedule(scenes + [dict(probe, arg=f, id="probe")], speaker_rows, facts)
+        if all(i in plan for i in variants):
+            room.append(f)
+    return room
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--check", action="store_true", help="쓰지 않고 검사만")
+    ap.add_argument("--room", action="store_true", help="걸으며 한마디를 하나 더 넣을 수 있는 빈 층만 찍는다")
     args = ap.parse_args()
 
     story, source = load_story()
@@ -850,6 +869,9 @@ def main():
     checks = {"errors": [], "warnings": []}
     book, speaker_rows, scenes = build(story, translations, current, facts, checks)
     plan = bark_schedule(scenes, speaker_rows, facts)
+    if args.room:
+        print("걸으며 한마디를 하나 더 넣을 수 있는 층:", "·".join(map(str, walk_bark_room(scenes, speaker_rows, facts))))
+        return
     check(scenes, speaker_rows, facts, fact_problems, checks, plan)
 
     story_check = run_story_check()
