@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UI_MagicalSwordCheckPopup : UI_Popup
 {
@@ -38,6 +39,7 @@ public class UI_MagicalSwordCheckPopup : UI_Popup
         GetButton((int)Buttons.YesBtn).gameObject.BindEvent(YesPointerExit, type: Define.UIEvent.PointerExit);
 
         GetText((int)Texts.MagicalSwordCheckText).text = Managers.GetString(Managers.Data.ScriptDic[Define.SWOARD_ALERT].id);
+        _scroll = GetComponentInChildren<ScrollRect>();
 
         Managers.Game.OnConversation = true;
         _locked = true;
@@ -58,6 +60,26 @@ public class UI_MagicalSwordCheckPopup : UI_Popup
             return;
         if (GameKeys.Down(KeyCode.Return) || GameKeys.Down(KeyCode.KeypadEnter) || GameKeys.Down(KeyCode.Space))
             YesClick();
+        else
+            ScrollByKeys();
+    }
+
+    // 계약서는 네 언어 모두 창보다 길다(스무 줄 남짓, 창에 여섯 줄) — 마우스 휠·끌기로만 내려가서 키보드·패드(스팀 덱)로는
+    // 첫 여섯 줄밖에 못 읽었다(11-23). 위·아래(W/S·화살표·스틱·십자키)를 누르는 동안 내린다.
+    ScrollRect _scroll;
+    const float ScrollSpeed = 420f;     // 캔버스 단위/초 — 한 줄(약 31)을 0.07초에
+
+    void ScrollByKeys()
+    {
+        if (_scroll == null || _scroll.content == null || _scroll.viewport == null)
+            return;
+        float dir = (GameKeys.Held(KeyCode.W) || GameKeys.Held(KeyCode.UpArrow) ? 1f : 0f)
+                  - (GameKeys.Held(KeyCode.S) || GameKeys.Held(KeyCode.DownArrow) ? 1f : 0f);
+        float extra = _scroll.content.rect.height - _scroll.viewport.rect.height;
+        if (dir == 0f || extra <= 0f)
+            return;
+        _scroll.velocity = Vector2.zero;
+        _scroll.verticalNormalizedPosition = Mathf.Clamp01(_scroll.verticalNormalizedPosition + dir * ScrollSpeed * Time.unscaledDeltaTime / extra);
     }
 
     // 이 창이 건 대화 잠금. 어떤 길로 사라지든 풀고 간다.
