@@ -687,24 +687,62 @@ public class GameManager
         if (OnBattle || OnFade || OnDirect || OnInteract || OnLever)     // 레버 몸짓의 끝(OnComplete)이 OnLever 를 푼다 — 아래 DOKill 이 끊으면 안 된다
             return false;
 
+        // 한 걸음 도중에 워프하면 그 걸음(PlayerController.Moving 의 DOMove)이 끝까지 돌아 몸을 옛 층의 칸으로 되돌렸다 — 끊고 세운다.
+        // 부딪히는 몸짓(InteractAnim)은 OnInteract 를 쥐어 위에서 막혔다.
+        Player.transform.DOKill();
+        Player.SetIdleState(Player._moveDir);
+
+        // 같은 챕터 안이면 다시 짓지 않는다 — 계단처럼(PortalController 는 챕터 경계에서만 짓는다). 떨군 보상은 짓기 전처럼 먼저 주워 둔다.
+        if (Maps.ContainsKey(stageId))
+        {
+            CollectDrops();
+            ArriveByWarp(stageId);
+            Managers.UI.ShowStageNamePopup(1f);     // 계단처럼 새 층 이름 — 워프 창을 층 이름이 떠 있는 동안 열면 옛 층 이름이 남았다
+            return true;
+        }
+        // 챕터를 넘으면 20개 층을 짓는다(한 프레임 0.7~1초, 덱은 더). 계단처럼 짧은 삽화가 화면을 덮은 동안 짓고 세운다 —
+        // 예전에는 가릴 것 없이 화면이 굳었다(11-22 리뷰). 삽화가 걷힐 때까지 OnInteract 를 쥐어 걷거나 다시 워프하지 못하게 한다.
+        if (GameScene == null)
+        {
+            PlayerData.CurStageid = stageId;    // GenerateMap 이 읽는다(계단도 짓기 전에 옮긴다)
+            GenerateMap(stageId);
+            ArriveByWarp(stageId);
+            return true;
+        }
+        OnInteract = true;
+        GameScene.StartCoroutine(CoWarpAcrossChapter(stageId));
+        return true;
+    }
+
+    IEnumerator CoWarpAcrossChapter(int stageId)
+    {
+        try
+        {
+            yield return GameScene.CoShowLoadingIllust(false, () =>
+            {
+                PlayerData.CurStageid = stageId;    // GenerateMap 이 읽는다(계단도 짓기 전에 옮긴다)
+                GenerateMap(stageId);
+                ArriveByWarp(stageId);
+            });
+            Managers.UI.ShowStageNamePopup(1f);
+        }
+        finally
+        {
+            OnInteract = false;
+        }
+    }
+
+    // 워프한 층에 선다: 층 번호 → 스폰 자리 → 카메라 경계 → 층 입구(체크포인트).
+    void ArriveByWarp(int stageId)
+    {
         // 층 번호부터 옮긴다. 카메라 경계·몬스터 배율·계단의 층 계산이 전부 CurStageid 를 읽는다.
         // 예전에는 맨 끝에 옮겨서 경계가 옛 층으로 잡히고, 아래의 스폰 지점도 챕터 첫 층 것이라
         // 몸은 챕터 첫 층에 서고 게임은 고른 층이라고 여겼다 — 그 차이가 계단마다 이어졌다.
         PlayerData.CurStageid = stageId;
         OnStaticResolution = stageId == 2;
-        // 같은 챕터 안이면 다시 짓지 않는다 — 계단처럼(PortalController 는 챕터 경계에서만 짓는다). 예전에는 늘 20개 층을 한 프레임에
-        // 다시 지어 덱에서 0.5~1.5초 멈췄다(가릴 그림도 없이). 떨군 보상은 짓기 전처럼 먼저 주워 둔다.
-        if (Maps.ContainsKey(stageId))
-            CollectDrops();
-        else
-            GenerateMap(stageId);
 
         Transform arrival = ArrivalPoint(stageId);
         Vector3 pos = arrival != null ? arrival.position : Player.transform.position;
-        // 한 걸음 도중에 워프하면 그 걸음(PlayerController.Moving 의 DOMove)이 끝까지 돌아 몸을 옛 층의 칸으로 되돌렸다 — 끊고 세운다.
-        // 부딪히는 몸짓(InteractAnim)은 OnInteract 를 쥐어 위에서 막혔다.
-        Player.transform.DOKill();
-        Player.SetIdleState(Player._moveDir);
         Player.transform.position = pos;
         Player._cellPos = pos;
 
@@ -719,8 +757,6 @@ public class GameManager
         if (GameScene != null)
             GameScene.Refresh();
         EnterFloor(false);
-        Managers.UI.ShowStageNamePopup(1f);     // 계단처럼 새 층 이름 — 워프 창을 층 이름이 떠 있는 동안 열면 옛 층 이름이 남았다
-        return true;
     }
 
     /// <summary>
