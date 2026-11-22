@@ -492,6 +492,20 @@ public class GameManager
             if (t.gameObject.layer == (int)Define.Layer.BossEventTrigger)
                 t.gameObject.SetActive(false);
         }
+
+        // 분열 슬라임 셋과 노랑의 물약은 킹 슬라임이 쓰러질 때 연출이 세우는 것이라 맵 데이터에 없다. 셋을 다 잡기 전에 3층으로 내려갔다
+        // 불러오면(죽음·이 층 다시 시작·이어하기) 아무도 안 서서 4층 출구가 그냥 열렸다 — 5층 Lv16 셈이 깨진다. 잡지 않은 것·안 마신 것은 다시 세운다.
+        // 5층에 이미 올라간 판은 두지 않는다 — 분열 슬라임이 제 번호를 갖기 전(옛 세이브)에 잡은 것이 다시 서서 4층 출구를 막는다.
+        List<bool> visited = Managers.Game.PlayerData.FirstEnterMapCheck;
+        if (visited != null && visited.Count > 4 && visited[4])
+            return;
+        for (int i = 0; i < 3; i++)
+        {
+            if (Managers.Data.MonsterActiveDic.TryGetValue(SplitSlimeActiveIndex + i, out bool alive) == false || alive)
+                Events.SpawnSplitSlime(map, i, effects: false);
+        }
+        if (Managers.Data.CItemActiveDic.TryGetValue(SplitPotionActiveIndex, out bool left) == false || left)
+            Events.SpawnSplitPotion(map);
     }
 
     /// <summary>보스가 하나라도 살아 있는가. 4층은 킹 슬라임(Boss 태그)에 더해, 그가 쓰러지면 연출이 세우는 분열 슬라임

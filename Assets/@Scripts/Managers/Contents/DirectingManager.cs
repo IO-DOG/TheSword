@@ -863,7 +863,7 @@ public class Events : MonoBehaviour
 
             yield return new WaitForSeconds(1f);
 
-            SpawnSplitPotion(slimes[0]);
+            SpawnSplitPotion(map);
             MoveCamera(cam, Define.DEFALUT_CAMERA_OFFSET, 1f);
 
             yield return new WaitForSeconds(1);
@@ -877,7 +877,7 @@ public class Events : MonoBehaviour
                 Debug.LogWarning("[Directing] 킹 슬라임 분열 연출이 끊겼다 — 분열 슬라임만 세운다");
                 while (slimes.Count < SplitSlimes.Length)
                     slimes.Add(SpawnSplitSlime(map, slimes.Count, false));
-                SpawnSplitPotion(slimes[0]);
+                SpawnSplitPotion(map);
                 MoveCamera(cam, Define.DEFALUT_CAMERA_OFFSET, 0.5f);
             }
             // 킹 슬라임이 쓰러진 순간(UI_MonsterCard.Dead)의 관문 셈에는 아직 분열 슬라임이 없어 출구가 열렸다.
@@ -901,7 +901,7 @@ public class Events : MonoBehaviour
         ("BlueSlimePos", 8, "PoisonExplosionBlue"),
     };
 
-    static GameObject SpawnSplitSlime(GameObject map, int index, bool effects)
+    internal static GameObject SpawnSplitSlime(GameObject map, int index, bool effects)
     {
         (string posName, int id, string fx) = SplitSlimes[index];
         GameObject slime = Managers.Resource.Instantiate("BossMonster_3Slimes", map != null ? map.transform : null);
@@ -936,17 +936,19 @@ public class Events : MonoBehaviour
         return slime;
     }
 
-    // 노랑 슬라임(대거)은 몸속에 물약을 품었다 — 그 자리 앞에 떨어진다.
-    static void SpawnSplitPotion(GameObject yellowSlime)
+    // 노랑 슬라임(대거)은 몸속에 물약을 품었다 — 그 자리(YellowSlimePos) 앞에 떨어진다. 4층 맵 밑에 둔다 — 예전에는 부모 없이 세워
+    // 안 마시고 챕터를 넘으면 지운 맵과 같이 안 사라지고 다음 챕터의 같은 자리(맵은 100 간격으로 놓인다)에 떠 있었다.
+    internal static void SpawnSplitPotion(GameObject map)
     {
-        GameObject potion = Managers.Resource.Instantiate("ConsumableItem");
+        GameObject potion = Managers.Resource.Instantiate("ConsumableItem", map != null ? map.transform : null);
         ConsumableItem item = potion != null ? potion.GetComponent<ConsumableItem>() : null;
         if (item == null)
             return;
         item.id = 7;
         // 맵 데이터에 없는 물약이다. 프리팹의 0 을 그대로 두면 마실 때 1층 0번 물약이 먹은 것으로 저장됐다.
         item._itemIndex_forActive = GameManager.SplitPotionActiveIndex;
-        float x = yellowSlime != null ? yellowSlime.transform.position.x : potion.transform.position.x;
+        GameObject at = GameObject.Find(SplitSlimes[0].pos);
+        float x = at != null ? at.transform.position.x : potion.transform.position.x;
         potion.transform.position = new Vector3(x, 0f, -4.05f);
         potion.transform.localScale = new Vector3(1f, 2f, 1f);
     }
