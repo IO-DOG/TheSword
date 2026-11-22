@@ -221,9 +221,10 @@ public static class CodeUI
     /// </summary>
     public static TextMeshProUGUI VersionLabel(Transform parent, TMP_FontAsset font)
     {
-        TextMeshProUGUI label = NewText(parent, "Version", font, 24f, new Color(0.8f, 0.8f, 0.8f), TextAlignmentOptions.BottomRight);
+        // 30 — 24 는 Steam Deck(1280x800)에서 글리프 8.0px 라 9px 기준 아래였다(11-22 잼).
+        TextMeshProUGUI label = NewText(parent, "Version", font, 30f, new Color(0.8f, 0.8f, 0.8f), TextAlignmentOptions.BottomRight);
         label.fontSharedMaterial = Outlined(font, 0.3f);
-        Place(label.rectTransform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-24f, 16f), new Vector2(400f, 32f));
+        Place(label.rectTransform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-24f, 16f), new Vector2(400f, 40f));
         label.text = VersionText;
         return label;
     }
