@@ -509,6 +509,14 @@ public class StoryDirector : MonoBehaviour
         if (chapter >= 0)
             chain.AddRange(Unseen(StoryTrigger.ChapterStart, chapter));
         chain.AddRange(Unseen(StoryTrigger.FloorFirst, floor));
+        // 카드 그림 위에 뜨는 대화(Backdrop)부터 남았으면 — 카드만 보고 끈 뒤 이어 틀 때 — 그 카드를 다시 깐다.
+        // 예전에는 마을 무덤 카드 없이 빈 맵 위에서 촌장이 말했다.
+        if (chain.Count > 0 && chain[0].Kind != StoryKind.Card && HasCue(chain[0], StoryCueKind.Backdrop))
+        {
+            int at = Array.IndexOf(GeneratedStory.Scenes, chain[0]);
+            if (at > 0 && GeneratedStory.Scenes[at - 1].Kind == StoryKind.Card)
+                chain.Insert(0, GeneratedStory.Scenes[at - 1]);
+        }
         return chain;
     }
 
@@ -954,7 +962,13 @@ public class StoryDirector : MonoBehaviour
     IEnumerator CoStandalone(List<StoryScene> chain, bool letterbox)
     {
         // 차례를 기다리는 동안 이미 봤을 수 있다 (같은 일이 두 번 알려졌다)
-        chain = chain.FindAll(s => HasSeen(s) == false);
+        // 본 배경 카드는 그 위에 뜰 대화가 아직 남았으면 둔다 (FloorChain 이 다시 깔았다).
+        List<StoryScene> left = new List<StoryScene>();
+        for (int i = 0; i < chain.Count; i++)
+            if (HasSeen(chain[i]) == false || chain[i].Kind == StoryKind.Card && i + 1 < chain.Count
+                && HasSeen(chain[i + 1]) == false && HasCue(chain[i + 1], StoryCueKind.Backdrop))
+                left.Add(chain[i]);
+        chain = left;
         if (chain.Count == 0)
             yield break;
         Acquire();
