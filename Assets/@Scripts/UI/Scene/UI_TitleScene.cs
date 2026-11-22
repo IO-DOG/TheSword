@@ -507,6 +507,10 @@ public class UI_TitleScene : UI_Scene
         float line = _noticeText.GetPreferredValues(message).x;
         float width = Mathf.Min(MaxWidth, line / Mathf.Max(1f, Mathf.Ceil(line / MaxWidth)) + _noticeText.fontSize * 2f);
         float height = _noticeText.GetPreferredValues(message, width, 0f).y;
+        // 이어하기 실패가 붙인 다시 칠하기(PromptText)가 남아 있으면 장치·언어가 바뀔 때 다른 알림 위에 옛 글을 다시 쓴다. 필요한 쪽이 부른 뒤 다시 붙인다.
+        PromptText repaint = _noticeText.GetComponent<PromptText>();
+        if (repaint != null)
+            DestroyImmediate(repaint);
         _noticeText.text = message;
         CodeUI.Place(_noticeText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(width, height));
         _notice.rectTransform.sizeDelta = new Vector2(0f, height + Pad * 2f);

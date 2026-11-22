@@ -460,10 +460,23 @@ public class UI_GameScene : UI_Scene
         int count = Physics.OverlapBoxNonAlloc(cell.Value + Vector3.up * 0.5f, new Vector3(0.1f, 0.5f, 0.1f), s_pointed,
             Quaternion.identity, PadPointMask);
         for (int i = 0; i < count && collider == null; i++)
-            if (s_pointed[i] != null && s_pointed[i].gameObject.activeInHierarchy)
+            if (s_pointed[i] != null && s_pointed[i].gameObject.activeInHierarchy && RootInCell(s_pointed[i], cell.Value))
                 collider = s_pointed[i];
         screen = cam.WorldToScreenPoint(cell.Value);
         return collider != null;
+    }
+
+    // 소비 아이템 콜라이더는 제 칸보다 북쪽으로 0.096 밀려 있어(PlayerController.InNextCell 과 같은 까닭) 남쪽 옆 칸을 보면 그 아래 칸의
+    // 물약이 걸렸다 — 몬스터를 옆에서 봐도 그 밑 물약 설명이 떴다. 소비 아이템은 뿌리가 그 칸에 있을 때만 가리킨다.
+    static bool RootInCell(Collider c, Vector3 cell)
+    {
+        if (c.gameObject.layer != (int)Define.Layer.CItem)
+            return true;
+        ConsumableItem item = Util.Find<ConsumableItem>(c.gameObject);
+        if (item == null)
+            return true;
+        Vector3 d = item.transform.position - cell;
+        return Mathf.Abs(d.x) < Define.TILE_SIZE * 0.5f && Mathf.Abs(d.z) < Define.TILE_SIZE * 0.5f;
     }
 
     /// <summary>맵 위 숫자가 보이고 워프 창이 맵을 덮지 않았다 — 툴팁의 조건에서 장치만 뺀 것. 클릭 걷기(PlayerController)가 쓴다:
@@ -793,7 +806,15 @@ public class UI_GameScene : UI_Scene
         rt.sizeDelta = new Vector2(Mathf.Clamp(_hintText.GetPreferredValues(message).x + 64f, 240f, 1200f), rt.sizeDelta.y);
         _hint.alpha = 1f;
         _hint.gameObject.SetActive(true);
-        _hint.transform.SetAsLastSibling();
+        // HUD 맨 위에 두되 층 그림(LoadingIllustImage — 마지막 자식이라 다 덮는다) 밑에 — 위로 올리면 계단 삽화 위에 안내가 남았다.
+        Transform illust = GetImage((int)Images.LoadingIllustImage).transform;
+        if (illust.parent == _hint.transform.parent)
+        {
+            int at = illust.GetSiblingIndex(), now = _hint.transform.GetSiblingIndex();
+            _hint.transform.SetSiblingIndex(now < at ? at - 1 : at);    // 바로 밑(앞에서 빠지면 한 칸씩 당겨진다)
+        }
+        else
+            _hint.transform.SetAsLastSibling();
         _hintUntil = Time.unscaledTime + seconds;
         _hintDevice = GameKeys.DeviceVersion;
     }
