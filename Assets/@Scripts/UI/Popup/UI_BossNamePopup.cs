@@ -24,6 +24,14 @@ public class UI_BossNamePopup : UI_Popup
         BindText(typeof(Texts));
         BindImage(typeof(Images));
         #endregion
+
+        // 긴 이름은 밑줄 띠(선 500 + 양 끝 장식) 안으로 줄인다 — 130pt 그대로면 영어 넷("Bell-Antlered Stag" 690)·일본어 "残り火のふいご蛾" 가
+        // 양 끝 장식 밖으로 삐져나왔다(11-23). 줄바꿈은 프리팹이 끈 채라 한 줄로 줄어든다. 짧은 이름은 130 그대로다.
+        TMPro.TMP_Text label = GetText((int)Texts.BossNameText);
+        label.fontSizeMax = label.fontSize;
+        label.fontSizeMin = 72f;
+        label.enableAutoSizing = true;
+        label.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 480f);
     }
 
     public override bool Init()
