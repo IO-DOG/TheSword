@@ -259,7 +259,7 @@ App Admin → Application → **Steam Cloud** [S9].
 | Main capsule | 1232×706 | |
 | Vertical capsule | 748×896 | 세일 페이지 |
 | Page background | 1438×810 | 선택. 없으면 마지막 스크린샷으로 만든다 |
-| Screenshots | 1920×1080 이상, 16:9, **5장 이상** | **게임 화면만**(콘셉트 아트·컷신 스틸 금지). 4장 이상은 "모든 연령" 표시 |
+| Screenshots | 1920×1080 이상, 16:9, **5장 이상** | **게임 화면만**(콘셉트 아트·컷신 스틸 금지). 4장 이상은 "모든 연령" 표시. **준비됨**(11-22 재촬영, 지금 지도·보스 그림): 로컬 `Build/Store/screenshots_v2/<en·sc·kr·jp>/` 7장씩, 커밋 안 함 |
 | Library capsule | 600×900 | |
 | Library header | 920×430 | |
 | Library hero | 3840×1240 | **글자 금지**, 안전 영역 860×380 |
@@ -267,7 +267,7 @@ App Admin → Application → **Steam Cloud** [S9].
 | Shortcut icon | 256×256 또는 512×512, ICO·PNG | |
 | App icon | 184×184 JPG | |
 | Event cover / header | 800×450 / 1920×622 | 이벤트·공지 |
-| Trailer | 첫 5초: "−31" 표시 → 싸움 → 정확히 −31 → 레벨 업 → 모든 값이 줄어든다 (MASTER_PLAN §7) | 오너의 게임 소개 영상: https://youtu.be/9tGbBxhbzCo ("TheSword 게임영상", 2026-11-12 오너가 알려 줌). Steam 은 링크가 아니라 **영상 파일**(MP4 등)을 Steamworks "트레일러" 에 올린다 — 원본 파일로 올린다 |
+| Trailer | 첫 5초: "−31" 표시 → 싸움 → 정확히 −31 → 레벨 업 → 모든 값이 줄어든다 (MASTER_PLAN §7) | 오너의 게임 소개 영상: https://youtu.be/9tGbBxhbzCo ("TheSword 게임영상", 2026-11-12 오너가 알려 줌). Steam 은 링크가 아니라 **영상 파일**(MP4 등)을 Steamworks "트레일러" 에 올린다 — 원본 파일로 올린다. **스토어 트레일러 준비됨**(11-22, 61.65초 1080p60, 네 언어): 로컬 `Build/Store/trailer/TheSword_Trailer_<언어>_1080p60.mp4`, 커밋 안 함 |
 
 - 캡슐에는 게임 이름과 공식 부제 말고 글을 넣지 않는다(평점·수상·"지금 할인" 금지) [S15].
 - 그림 속 글자는 언어마다 바꿔 올려야 한다 [S16]. 한국어·영어·간체·일본어 로고(MASTER_PLAN §8 "logos in 5 languages").
@@ -319,8 +319,9 @@ App Admin → Application → **Steam Cloud** [S9].
 - [x] 크레딧·고지: Silver 글꼴(Poppy Works, **CC BY 4.0 — 표기 의무**), DNF BitBit(표기 권장), MIT 고지(UIEffect, ParticleEffectForUGUI, **Steamworks.NET**)를
       크레딧이나 게임 폴더의 고지 파일로 싣는다(r07). 크레딧은 마지막 인사 앞에 제3자 블록(`UI_StoryCreditsPopup.ThirdParty`, 문구 `Tools/ui_text_parts/credits.py` 630~638),
       전문은 `Steam/THIRD_PARTY_NOTICES.txt`(`GameBuild` 가 두 빌드에 복사). 의존성·에셋을 바꾸면 이 파일도 고친다(마지막 점검 2026-11-03).
-      Silver 는 itch.io 설명에 제작비·수익이 $100,000 을 넘으면 hello@poppy.works 로 문의하라는 문구가 있다고 한다(검색 요약으로만 봤다 — 페이지를 직접 열어 확인한다).
-- [ ] 버전 번호가 타이틀이나 메뉴에 보인다(r07) — 타이틀·게임 메뉴 오른쪽 아래 `v1.0.0`(체험판은 `v1.0.0 Demo`, `CodeUI.VersionLabel`). 에디터에서 자리를 본 뒤 체크한다.
+      Silver(poppyworks.itch.io/silver, 11-22 페이지에서 직접 확인): CC BY 4.0, "Poppy Works" 표기면 상업용도 무료. **제작비·수익 합이 $100,000 을 넘으면 hello@poppy.works 로 라이선스 문의**(그 전엔 할 일 없음).
+      "게임에 쓰면 메일 주세요"·기부는 부탁이지 조건이 아니다.
+- [x] 버전 번호가 타이틀이나 메뉴에 보인다(r07) — 타이틀·게임 메뉴 오른쪽 아래 `v1.0.0`(체험판은 `v1.0.0 Demo`, `CodeUI.VersionLabel`). 11-22 에디터 1280x800 에서 확인(Deck 9px 기준에 맞춰 30pt, 10px).
 - [ ] 통계 4 → 업적 20 → 순위표 2 → Rich Presence 5 → Publish, `check_steam.py` 통과, 봇 한 판 뒤 풀린 업적 0·순위표 기록 0
 - [ ] Steam Cloud 5줄, 두 PC 시험 1~4. 데모의 Shared cloud APP ID 는 0 — **출시일에** 본편 AppID 로 바꾸고 시험 5(4절)
 - [ ] Steam Input 템플릿(Gamepad), Deck 점검(`deck.md`), 호환성 검토 신청(링크가 열려 있으면 — 6절)
