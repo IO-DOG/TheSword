@@ -784,6 +784,7 @@ public class Events : MonoBehaviour
         CameraController cam = Managers.Game.MainCamera != null ? Managers.Game.MainCamera.GetComponentInChildren<CameraController>() : null;
         GameObject map = GameObject.Find("Dungeon_00_003");
         List<GameObject> slimes = new List<GameObject>();
+        bool finished = false;
         try
         {
             StopParticle(GameObject.Find("SmokeFlatWhiteGreen"));
@@ -867,9 +868,13 @@ public class Events : MonoBehaviour
             MoveCamera(cam, Define.DEFALUT_CAMERA_OFFSET, 1f);
 
             yield return new WaitForSeconds(1);
+            finished = true;
         }
         finally
         {
+            // 예외로 끊기면 아래(OnDirect 를 내리는 줄)가 돌지 않는다 — 연출 잠금을 쥔 채 4층에 멈추지 않게 여기서 푼다.
+            if (finished == false)
+                Managers.Game.OnDirect = false;
             // 분열 슬라임 셋을 다 잡아야 4층 출구가 열린다. 연출이 어디서 끊겨도 셋(과 노랑의 물약)은 세운다 —
             // 예전에는 연기 하나를 못 찾으면 여기서 멈춰 보스방에 갇혔다.
             if (slimes.Count < SplitSlimes.Length)

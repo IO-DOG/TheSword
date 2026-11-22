@@ -135,7 +135,7 @@ public class UI_EndingScene : UI_Scene
             CardLine(box, number, 40f, ink, ref y, 56f).text = string.Format(Managers.GetString(CardChapter), chapter + 1) + stars;
         }
 
-        TextMeshProUGUI hint = CodeUI.NewText(box, "AnyKey", prose, 26f, soft, TextAlignmentOptions.Center);
+        TextMeshProUGUI hint = CodeUI.NewText(box, "AnyKey", prose, 28f, soft, TextAlignmentOptions.Center);   // 26 이면 덱(1280x800) 영어 8.7px
         CodeUI.Place(hint.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 48f), new Vector2(1600f, 40f));
         PromptText.Set(hint, AnyKey);
 
