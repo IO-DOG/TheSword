@@ -376,6 +376,23 @@ def bark_schedule(scenes, speaker_rows, facts):
             if i not in plan:
                 spot = next((f for f in free if facts[f]["type"] == kind
                              and plan[f] == -1 and fits(i, f)), None)
+                # 빈 층이 없으면 두 번 이상 뜨는 같은 유형 변주의 자리를 하나 넘겨받는다 — 변주마다 한 번은 서고(R15),
+                # 걸으며 한마디가 바크 자리를 써도 덜 막힌다(11-22: 빈 층만 보던 때는 한마디 자리가 88층 하나로 줄었다).
+                if spot is None:
+                    spot = next((f for f in free if facts[f]["type"] == kind and plan[f] != -1
+                                 and plan.count(plan[f]) >= 2 and fits(i, f)), None)
+                # 그래도 없으면 한 칸 바꾼다: 다른 변주 j 의 자리에 서고, j 는 제가 설 수 있는 빈 층으로 옮긴다 — 81~89층엔 마검 변주가
+                # 못 서서, 마검 변주가 설 층을 데미안 변주가 먼저 차지하면 막혔다(11-22, 관문 7·42·82층).
+                if spot is None:
+                    for g in free:
+                        j = plan[g]
+                        if facts[g]["type"] != kind or j == -1 or fits(i, g) is False:
+                            continue
+                        move = next((f for f in free if facts[f]["type"] == kind and plan[f] == -1 and fits(j, f)), None)
+                        if move is not None:
+                            plan[move] = j
+                            spot = g
+                            break
                 if spot is not None:
                     plan[spot] = i
     return plan
