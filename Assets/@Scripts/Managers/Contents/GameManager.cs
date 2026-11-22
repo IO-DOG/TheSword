@@ -719,6 +719,7 @@ public class GameManager
         if (GameScene != null)
             GameScene.Refresh();
         EnterFloor(false);
+        Managers.UI.ShowStageNamePopup(1f);     // 계단처럼 새 층 이름 — 워프 창을 층 이름이 떠 있는 동안 열면 옛 층 이름이 남았다
         return true;
     }
 
@@ -1030,6 +1031,10 @@ public class GameManager
     {
         if (LoadGame(file) == false)
             return false;
+        // 씬을 떠나기 전에 이야기를 걷는다 — 메뉴가 떠 있는 동안 줄 서 있던 장면이 불러오기가 창을 다 걷은 이 프레임에
+        // "한가하다" 고 보고 시작해 OnDirect 를 쥔 채 새 씬으로 넘어갔다. 불러오기에 실패하면 이 층에 남으니 걷지 않는다
+        // (예전에는 먼저 걷어서, 실패한 뒤 기다리던 레벨업·넘친 물약 수업과 걸으며 한마디가 이번 방문에 다시 안 걸렸다).
+        StoryDirector.AbortAll();
 
         // 불러온 상태로 옛 맵이 한 프레임 비치지 않게 가린다.
         if (ParentMap != null)

@@ -449,6 +449,15 @@ public class UI_TitleScene : UI_Scene
         }
         else
         {
+#if DEMO
+            // 본편 저장(21층을 넘었다)은 체험판으로 잇지 않는다 — 층에 들어설 때마다 체험판 해시로 체크포인트를 다시 적어,
+            // 본편으로 돌아가면 한 번 더 옮겨지며 바뀐 층이 "다 쓴 판" 으로 잘렸다(11-22 리뷰, B8 의 나머지). 새 게임 단추와 같은 말로 알린다.
+            if (HasFullGameSave())
+            {
+                UI_ConfirmPopup.Tell(Managers.GetString(UI_DemoEndPopup.FULL_SAVE));
+                return;
+            }
+#endif
             // 저장된 것을 <b>실제로 불러온 뒤에</b> 들어간다.
             //
             // 예전에는 씬만 바꿨다. 앱을 새로 켠 직후라면 GameManager.Init 이 이미

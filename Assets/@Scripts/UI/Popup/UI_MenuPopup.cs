@@ -392,11 +392,7 @@ public class UI_MenuPopup : UI_Popup
     /// <summary>체크포인트에서 다시 선다. file 이 null 이면 지금 층에 들어선 때(Checkpoint.json).</summary>
     void Restart(string file)
     {
-        // 씬을 떠나기 전에 이야기를 걷는다(타이틀로도 같다). 메뉴가 떠 있는 동안 줄 서 있던 장면(첫 룬·넘친 물약·
-        // 레벨업)이, 불러오기가 창을 다 걷은 이 프레임에 "한가하다" 고 보고 시작해서 OnDirect 를 쥔 채 새 씬으로
-        // 넘어갔다 — 캐릭터가 굳고 Esc 도 막혔다. 떠나기 전에 걷으면 그 틈이 없다.
-        // 불러오기가 실패해 이 층에 남아도 걷힌 장면은 틀기 전이라 본 것으로 적히지 않았다.
-        StoryDirector.AbortAll();
+        // 이야기는 RestartFromCheckpoint 가 불러오기에 성공한 뒤 씬을 떠나기 전에 걷는다(실패하면 이 층에 남으니 두고).
         if (Managers.Game.RestartFromCheckpoint(file))
             DropAbandonedBattle();
         else
