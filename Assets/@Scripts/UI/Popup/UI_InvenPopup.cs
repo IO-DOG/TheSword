@@ -788,29 +788,9 @@ public class UI_InvenPopup : UI_Popup
         // 계산하고 CurSword 를 직접 대입해서, 부위마다 규칙이 갈라져 있었다.
         Managers.Game.SwapEquip(equipId);
 
-        SetTypeListImage(_listType);
-        RefreshSlotIcon(_listType, equipId);
-        if (_listType == Define.Types.Sword)
-            ShowSwordIllust();
-        Refresh();
-    }
-
-    /// <summary>부위 칸의 그림을 지금 낀 것으로 바꾼다.</summary>
-    void RefreshSlotIcon(Define.Types type, int equipId)
-    {
-        Sprite sprite = Managers.Resource.Load<Sprite>($"{Managers.Data.EquipDic[equipId].ImageName}");
-        if (sprite == null)
-            return;
-
-        switch (type)
-        {
-            case Define.Types.Sword: GetImage((int)Images.sword).sprite = sprite; break;
-            case Define.Types.Shield: GetImage((int)Images.shield).sprite = sprite; break;
-            case Define.Types.Necklace: GetImage((int)Images.necklace).sprite = sprite; break;
-            case Define.Types.Ring: GetImage((int)Images.ring).sprite = sprite; break;
-            case Define.Types.Shoes: GetImage((int)Images.shoes).sprite = sprite; break;
-            case Define.Types.Book: GetImage((int)Images.book).sprite = sprite; break;
-        }
+        // SwapEquip → HudRefreshed → Redraw 가 이 칸을 이미 다시 그렸다. 예전에는 끝에 Refresh() 를 또 불러 목록·칸 표시·검 그림을
+        // 다 꺼 버렸다 — 낀 뒤 설명만 남았고, 패드 X(다음 장비)를 누를 때마다 접혔다.
+        ShowSlot(_listType);
     }
 
     /// <summary>

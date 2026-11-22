@@ -12,7 +12,6 @@ using UnityEngine.UI;
 public class KeyInventory
 {
     const int NUM_OF_KEYS = ConsumableItem.NUM_OF_KEYS;
-    List<ConsumableItem> _items = new List<ConsumableItem>();
     public List<int> _keys = new List<int>(NUM_OF_KEYS);
     const float TellHold = 0.5f;
     Door _toldDoor;         // 금고 알림(152)을 막 닫은 문과 그 기한 — TryUseKey
@@ -44,21 +43,21 @@ public class KeyInventory
 
     public void AddItem(ConsumableItem item)
     {
-        if (item != null)
-            _items.Add(item);
-
-        if (item.GetComponent<ConsumableItem>().id < NUM_OF_KEYS)
+        // 줍기는 이미 그 아이템을 쓴 것으로 적었다 — 여기서 칸이 비어 터지면 열쇠가 영영 사라진다(TryUseKey·ShowKeySlot 과 같은 문).
+        EnsureKeys();
+        int id = item.id;
+        if (id < NUM_OF_KEYS)
         {
-            _keys[item.GetComponent<ConsumableItem>().id]++;
-            if (item.GetComponent<ConsumableItem>().id == 0)
+            _keys[id]++;
+            if (id == 0)
                 PlayerPrefs.SetInt("ISOPENGREENKEY", 1);
-            if (item.GetComponent<ConsumableItem>().id == 1)
+            if (id == 1)
                 PlayerPrefs.SetInt("ISOPENYELLOWKEY", 1);
-            if (item.GetComponent<ConsumableItem>().id == 2)
+            if (id == 2)
                 PlayerPrefs.SetInt("ISOPENREDKEY", 1);
-            if (Managers.Game.Player._keyInventory.transform.GetChild(item.GetComponent<ConsumableItem>().id).gameObject.activeSelf == false)
+            if (Managers.Game.Player._keyInventory.transform.GetChild(id).gameObject.activeSelf == false)
             {
-                Managers.Game.Player._keyInventory.transform.GetChild(item.GetComponent<ConsumableItem>().id).gameObject.SetActive(true);
+                Managers.Game.Player._keyInventory.transform.GetChild(id).gameObject.SetActive(true);
             }
             ShowKeySlot(Managers.Game.Player._keyInventory);
             Managers.Game.PlayerData.KeyInventory = _keys;
