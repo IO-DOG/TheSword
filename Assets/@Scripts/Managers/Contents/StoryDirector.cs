@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 public enum StoryKind { Dialogue, Card, Bark, Choice, Credits }
 public enum StoryTrigger { Prologue, Village, ChapterStart, FloorFirst, TraitFirst, FloorType, Mechanic, Death, BossIntro, BossDefeat, Ending, Epilogue, Credits, FloorBark }
 public enum StoryPrologue { ContractAfter, KingslimeReveal, KingslimeClear }
-public enum StoryMechanic { Forecast, Fatal, Overflow, Vault, SpareKey, Choice, Rune, NoKey, Warp, Death, Crit, LevelUp }
+public enum StoryMechanic { Forecast, Fatal, Overflow, Vault, SpareKey, Choice, Rune, NoKey, Warp, Death, Crit, LevelUp, Fork }   // 맨 끝에만 더한다(story_gen.MECHANICS 순서)
 public enum StoryEnding { Choice, Seal, Hold, Dawn }
 public enum StoryPortrait { None, Damian, Sword, Boss }
 public enum StoryCueKind { Emote, Shake, Flash, White, Dark, Clear, CamUp, CamClose, CamPlayer, CamMonster, CamBoss, Pose, Bgm, BgmStop, BgmFloor, Fx, Boom, Soul, Hands, VortexIn, VortexStop, Walk, Backdrop, Letterbox, BgmLow }
@@ -657,6 +657,12 @@ public class StoryDirector : MonoBehaviour
         Door door = NearestDoor();
         if (door != null && door._doorIndex_forActive == FloorFact(GeneratedStory.VaultDoors, CurFloor, -1))
             return;     // 금고 문은 그 앞에 설 때 따로 가르친다 (WatchFloor)
+        if (door != null && door._doorIndex_forActive == FloorFact(GeneratedStory.ForkDoors, CurFloor, -1)
+            && Unseen(StoryMechanic.Fork).Count > 0)
+        {
+            BarkOnce(StoryMechanic.Fork);   // 갈림길 문 — 열쇠가 없어도 정예 길로 돈다
+            return;
+        }
         BarkOnce(StoryMechanic.NoKey);
     }
 
@@ -734,6 +740,24 @@ public class StoryDirector : MonoBehaviour
             if (door != null && Near(me, door.transform.position))
             {
                 EnqueueScenes(scenes, false, 0f);
+                return;
+            }
+        }
+
+        // 갈림길(지도 v2): 노랑 문이나 갈림길 정예(id 자리 5) 옆에 처음 서면 한 줄 — 둘 다 길이라는 것만.
+        int fork = FloorFact(GeneratedStory.ForkDoors, floor, -1);
+        if (fork >= 0 && Unseen(StoryMechanic.Fork).Count > 0
+            && Managers.Data.DoorActiveDic.TryGetValue(fork, out bool forkClosed) && forkClosed)
+        {
+            Door door = FindDoor(fork);
+            bool near = door != null && Near(me, door.transform.position);
+            GameObject map = near ? null : CurrentMap();
+            if (map != null)
+                foreach (MonsterController mc in map.GetComponentsInChildren<MonsterController>(false))
+                    if (mc.id >= 1000 && mc.id % 8 == 5 && Near(me, mc.transform.position)) { near = true; break; }
+            if (near)
+            {
+                BarkOnce(StoryMechanic.Fork);
                 return;
             }
         }

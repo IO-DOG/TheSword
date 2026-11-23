@@ -32,7 +32,7 @@ TRIGGERS = [                                      # (패턴, 인자 검사) — 
     (r"floor_bark:([1-9][0-9]*)", lambda n: 5 <= int(n) <= 100),
     (r"trait_first:" + _ONE("beast magic guardian immortal knight titan assassin armor"), None),
     (r"floor_type:" + _ONE("basic stingy gate plenty treasure"), None),
-    (r"mechanic_first:" + _ONE("forecast fatal overflow vault spare_key choice rune nokey warp death crit levelup"), None),
+    (r"mechanic_first:" + _ONE("forecast fatal overflow vault spare_key choice rune nokey warp death crit levelup fork"), None),
     (r"death", None),
     (r"boss_intro:([0-4])", None),
     (r"boss_defeat:([0-4])", None),

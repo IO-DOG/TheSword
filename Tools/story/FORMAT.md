@@ -76,7 +76,7 @@
 | `floor_bark:<n>` | n층에 처음 들어서고 2초 뒤, 걸음을 막지 않고 (bark 전용, 한 층에 한 장면, 한두 줄). 이야기 장면 사이의 빈 층을 잇는 "걸으며 한마디" 다. 그 층의 층 유형 바크 자리에 뜬다. 들어설 때 장면이 걸린 층(`floor_first`·챕터 첫 층)과 보스 층에는 못 쓴다. 81~89층은 데미안 줄만(R13) |
 | `trait_first:<t>` | 특성 t 몬스터에게 **처음 부딪혔을 때**, 싸움 직전(보스 등장 뒤, 첫 ✖ 수업 앞). 들어설 때가 아니다. 첫 층은 `generate_content.BAND_TRAITS` 가 정한다(바이블 부록 A.3). t = beast magic guardian immortal knight titan assassin armor |
 | `floor_type:<t>` | 그 유형의 층에 들어설 때 가끔 (bark 전용). t = basic stingy gate plenty treasure |
-| `mechanic_first:<m>` | m 을 처음 겪을 때. m = forecast(첫 예측 표시) fatal(처음으로 ✖ 상대에게 부딪힘) overflow(물약이 넘침) vault(금고 문 앞) spare_key(여분 열쇠 획득) choice(둘 중 하나 보상 앞) rune(첫 룬) nokey(열쇠 없이 문에 부딪힘) warp(워프석 반지 획득) death(처음 죽고 되살아났을 때) crit(치명타 한 대 전) levelup(첫 레벨업, 5층 이후) |
+| `mechanic_first:<m>` | m 을 처음 겪을 때. m = forecast(첫 예측 표시) fatal(처음으로 ✖ 상대에게 부딪힘) overflow(물약이 넘침) vault(금고 문 앞) spare_key(여분 열쇠 획득) choice(둘 중 하나 보상 앞) rune(첫 룬) nokey(열쇠 없이 문에 부딪힘) warp(워프석 반지 획득) death(처음 죽고 되살아났을 때) crit(치명타 한 대 전) levelup(첫 레벨업, 5층 이후) fork(갈림길 — 노랑 문·갈림길 정예 옆, 또는 열쇠 없이 그 문에 부딪힘) |
 | `death` | 죽고 되살아날 때마다 (bark, 변주) |
 | `boss_intro:<c>` | 챕터 c 보스에게 처음 부딪혔을 때, 전투 직전 |
 | `boss_defeat:<c>` | 챕터 c 보스를 쓰러뜨린 직후 |

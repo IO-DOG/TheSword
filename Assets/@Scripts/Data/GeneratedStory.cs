@@ -1399,6 +1399,13 @@ public static class GeneratedStory
             },
             null,
             null),
+        new StoryScene("mech_fork", StoryKind.Bark, StoryTrigger.Mechanic, 12,
+            new[]
+            {
+                new StoryLine(1, null, 306640, null),
+            },
+            null,
+            null),
     };
 
     // 층별 사실 — 인덱스는 층 번호(1~100). 0 번과 손수 만든 1~4층은 비어 있다.

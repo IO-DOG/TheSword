@@ -63,7 +63,7 @@ COLUMNS = bestiary.COLUMNS
 KINDS = {"dialogue": "Dialogue", "card": "Card", "bark": "Bark", "choice": "Choice", "credits": "Credits"}
 PROLOGUES = ["contract_after", "kingslime_reveal", "kingslime_clear"]          # StoryPrologue
 MECHANICS = ["forecast", "fatal", "overflow", "vault", "spare_key", "choice",    # StoryMechanic
-             "rune", "nokey", "warp", "death", "crit", "levelup"]
+             "rune", "nokey", "warp", "death", "crit", "levelup", "fork"]
 ENDINGS = ["choice", "seal", "hold", "dawn"]                                    # StoryEnding
 TRAITS = {"beast": 1, "magic": 2, "guardian": 3, "immortal": 4,                 # Define.Trait
           "knight": 5, "titan": 6, "assassin": 7, "armor": 8}
@@ -682,7 +682,7 @@ def check(scenes, speaker_rows, facts, fact_problems, checks, plan):
                 errors.append(f"{s['id']}: {a}층에 걸으며 한마디가 둘이다 — 한 장면에 두 줄까지 쓴다")
             if SWORD_QUIET[0] <= a <= SWORD_QUIET[1] and any(speaker_rows[line[0]][0] == "sword" for line in s["lines"]):
                 errors.append(f"{s['id']}: {SWORD_QUIET[0]}~{SWORD_QUIET[1]}층의 마검은 값만 말한다 — 데미안 것만 (R13)")
-        if s["kind"] == "Bark" and t == "Mechanic" and MECHANICS[s["arg"]] not in ("spare_key", "nokey"):
+        if s["kind"] == "Bark" and t == "Mechanic" and MECHANICS[s["arg"]] not in ("spare_key", "nokey", "fork"):
             warnings.append(f"{s['id']}: 이 mechanic 은 대화로 트는 자리다 — 바크로 두면 막지 않고 지나간다")
     # 장면 전체 레터박스·곡 낮추기는 층 입구 장면(floor_first)에만 — 그 무리(CoFloorChain)는 끝에서 Restore 가 되돌린다.
     # 프롤로그·결말·치명타 수업에는 Restore 가 없고, 보스·프롤로그는 제 레터박스가 있다. 곡 낮추기는 곡을 바꾸는 신호와
