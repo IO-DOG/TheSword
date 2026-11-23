@@ -181,6 +181,21 @@ public static class CodeUI
     }
 
     /// <summary>
+    /// 밑줄 장식 띠(선 500 + 양 끝 장식, 보스 이름·층 이름 창) 위의 이름을 띠 안으로 줄인다. 글 칸이 438 인데 줄바꿈 없이 넘쳐 그려져서
+    /// 긴 이름이 양 끝 장식 밖으로 나갔다(11-23 — 층 이름은 영어 41·한국어 16·일본어 16개, 가장 긴 "Inside the Forest of Demons" 는 68px).
+    /// 짧은 이름은 프리팹 크기 그대로다.
+    /// </summary>
+    public static void FitBand(TMP_Text label, float minSize)
+    {
+        if (label == null)
+            return;
+        label.fontSizeMax = label.fontSize;
+        label.fontSizeMin = minSize;
+        label.enableAutoSizing = true;
+        label.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 480f);
+    }
+
+    /// <summary>
     /// 높이를 1080 에 맞춘 캔버스에 세운 창의 배율. 화면을 넘으면 창째로 줄이고, 작은 화면(Steam Deck 800p·720p)에서는
     /// 남는 자리만큼 키운다 — 거기서는 캔버스가 0.74 배라 24pt 글자가 9px 남짓이었고 창 둘레는 비어 있었다.
     /// 1080p 부터는 키우지 않는다(도트가 정수 배로 남는다). 키워도 화면의 글자는 1080p 때의 크기를 넘지 않는다.

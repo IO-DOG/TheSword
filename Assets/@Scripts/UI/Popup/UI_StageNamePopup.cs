@@ -51,6 +51,7 @@ public class UI_StageNamePopup : UI_Popup
         band.anchoredPosition = new Vector2(0f, BandY);
         band.sizeDelta = new Vector2(0f, BandHeight);
         band.SetAsFirstSibling();      // 글자와 장식선 뒤
+        CodeUI.FitBand(GetText((int)Texts.StageNameText), 48f);   // 긴 층 이름이 밑줄 양 끝 장식 밖으로 나갔다(11-23)
 
         TextAnimator_TMP animator = GetText((int)Texts.StageNameText).GetComponent<TextAnimator_TMP>();
         if (animator != null)
