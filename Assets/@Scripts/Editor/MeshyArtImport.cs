@@ -610,6 +610,7 @@ public static class MeshyArtImport
             File.WriteAllBytes(path, copy.EncodeToPNG());
             Object.DestroyImmediate(copy);
         }
+        LiftWall(path);
 
         AssetDatabase.ImportAsset(path);
         var importer = (TextureImporter)AssetImporter.GetAtPath(path);
@@ -621,6 +622,30 @@ public static class MeshyArtImport
         importer.textureCompression = palette ? TextureImporterCompression.Uncompressed : TextureImporterCompression.Compressed;
         importer.SaveAndReimport();
         return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+    }
+
+    /// <summary>챕터별 벽 바탕색 배율(sRGB 값에 곱한다). 11-24 오너: 왕좌(챕터 4) 벽이 거의 검어 방이 허공에 뜬 판처럼 보였다 —
+    /// 바탕색 밝기 평균 20(다른 챕터 80~95)이라 조명·안개를 바꿔도 그대로였다. 그림 자체를 밝힌다(빛 그림 _Emit 은 그대로).</summary>
+    static readonly float[] WallLift = { 1f, 1f, 1f, 1f, 3f };
+
+    /// <summary>Built/Wall_C{n}_{변형}_0.png 를 WallLift 만큼 밝힌다. 구울 때(Bake) 한 번 — 이미 구운 파일에 다시 부르면 또 밝아진다.</summary>
+    public static void LiftWall(string path)
+    {
+        Match m = Regex.Match(Path.GetFileName(path), @"^Wall_C([0-4])_[A-Za-z0-9]+_\d+\.png$");
+        if (m.Success == false)
+            return;
+        float k = WallLift[m.Groups[1].Value[0] - '0'];
+        if (k == 1f)
+            return;
+        var t = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+        t.LoadImage(File.ReadAllBytes(path));
+        Color32[] px = t.GetPixels32();
+        for (int i = 0; i < px.Length; i++)
+            px[i] = new Color32((byte)Mathf.Min(255, px[i].r * k), (byte)Mathf.Min(255, px[i].g * k), (byte)Mathf.Min(255, px[i].b * k), px[i].a);
+        t.SetPixels32(px);
+        t.Apply();
+        File.WriteAllBytes(path, t.EncodeToPNG());
+        Object.DestroyImmediate(t);
     }
 
     static int Triangles(Renderer r)
