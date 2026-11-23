@@ -270,7 +270,7 @@ def floor_facts():
         with open(os.path.join(gc.STREAM, f"Dungeon_{did}.csv"), encoding="utf-8-sig") as f:
             grid = [[c.strip() for c in line.split(",")] for line in f.read().splitlines()]
         cells = [(x, y, c) for y, row in enumerate(grid) for x, c in enumerate(row)]
-        fact = dict(type=-1, traits=0, vault=-1, spare=-1, choice=False, boss=None)
+        fact = dict(type=-1, traits=0, vault=-1, spare=-1, choice=False, boss=None, fork=-1)
         facts[floor] = fact
         if floor <= gc.HANDMADE_FLOORS:
             continue   # 손수 만든 도입부. 이야기 트리거는 5층부터다
@@ -286,13 +286,15 @@ def floor_facts():
                 if c.startswith("B_"):
                     fact["boss"] = mid
 
-        # 금고 문: 막아도 계단까지 길이 남는 문 (큰길 문은 막으면 계단이 끊긴다).
+        # 금고 문: 막으면 그 뒤 골방만 끊기는 문 (큰길 문은 막으면 계단이 끊긴다). 갈림길 노랑 문은 막아도 아무것도 안 끊긴다.
         spawn, up = layout_gen._endpoints(grid)
-        vaults = []
+        vaults, forks = [], []
         if spawn is not None and up is not None:
-            doors = [(x, y) for x, y, c in cells if c in layout_gen.DOOR_CELLS]
-            main = [d for d in doors if up not in layout_gen._flood_locked(grid, spawn, {d})]
-            vaults = layout_gen.vault_doors(grid, main)
+            _, vaults, forks = layout_gen.door_roles(grid)
+        if bool(forks) != bool(gc.fork_of(floor)) or len(forks) > 1:
+            problems.append(f"{floor}층: 갈림길 문 {len(forks)}개 (갈림길 층인가 {gc.fork_of(floor)})")
+        if forks:
+            fact["fork"] = count_at(stage, 5, forks[0])        # Define.ObjectType.Door
         if len(vaults) > 1:
             problems.append(f"{floor}층: 금고 문이 {len(vaults)}개")
         if vaults:
@@ -303,7 +305,9 @@ def floor_facts():
         colors = [c for _, _, c in keys]
         spare = []
         for x, y, c in keys:
-            if colors.count(c) < 2:
+            # 갈림길 short 층(노랑 큰길 열쇠가 없는 층)은 골방의 노랑 하나가 곧 여분이다
+            mains = 0 if (c == layout_gen.KEY_ITEM[1] and gc.fork_of(floor) == "short") else 1
+            if colors.count(c) < mains + 1:
                 continue
             nbr = [(x + dx, y + dy) for dx, dy in layout_gen.NEIGHBORS
                    if layout_gen._inside((x + dx, y + dy)) and layout_gen._passable(grid, (x + dx, y + dy))]
@@ -313,7 +317,7 @@ def floor_facts():
             problems.append(f"{floor}층: 여분 열쇠 후보가 {len(spare)}개")
         if spare:
             fact["spare"] = count_at(stage, 3, spare[0])       # Define.ObjectType.CItem
-        if (fact["vault"] == -1) != (not vaults) or (fact["spare"] == -1) != (not spare):
+        if (fact["vault"] == -1) != (not vaults) or (fact["spare"] == -1) != (not spare) or (fact["fork"] == -1) != (not forks):
             problems.append(f"{floor}층: 금고 문/여분 열쇠가 MapData 에 없다 (mapdata_gen 을 다시 돌릴 것)")
     return facts, problems
 
@@ -803,6 +807,8 @@ def emit_cs(scenes, speaker_rows, facts, source, plan):
           "generate_content.floor_type: 0 기본 1 인색 2 관문 3 넉넉 4 보물")
     array("int", "VaultDoors", (str(facts[f]["vault"]) if f else "-1" for f in floors),
           "금고 문(네 번째 문)의 Door._doorIndex_forActive, 없으면 -1")
+    array("int", "ForkDoors", (str(facts[f]["fork"]) if f else "-1" for f in floors),
+          "갈림길 노랑 문(막아도 정예 길이 도는 문)의 Door._doorIndex_forActive, 없으면 -1 — KeyInventory.StrandedFloor 가 큰길 문으로 안 센다")
     array("int", "SpareKeys", (str(facts[f]["spare"]) if f else "-1" for f in floors),
           "여분 열쇠의 ConsumableItem._itemIndex_forActive, 없으면 -1")
     array("bool", "ChoiceFloors", (("true" if facts[f]["choice"] else "false") if f else "false" for f in floors),

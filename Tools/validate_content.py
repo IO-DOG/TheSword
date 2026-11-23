@@ -295,7 +295,7 @@ def as_run(monsters):
     for mid, m in monsters.items():
         if mid >= G.MOB_ID_BASE:
             floor, order = divmod(mid - G.MOB_ID_BASE, 8)
-            run.append(dict(m, _floor=floor, _boss=False, _order=order))
+            run.append(dict(m, _floor=floor, _boss=False, _order=order, _fork=order == G.FORK_SLOT))
         elif G.BOSS_ID_BASE <= mid < G.BOSS_ID_BASE + len(G.CHAPTER_THEMES):
             run.append(dict(m, _floor=(mid - G.BOSS_ID_BASE + 1) * G.FLOORS_PER_CHAPTER,
                             _boss=True))
@@ -564,6 +564,8 @@ def main():
         # 여분으로만 열리고 안 열어도 진행은 된다. 그래서 층 단위로 볼 것은
         # "큰길 몫이 있는가" 와 "금고가 층당 하나를 넘지 않는가" 다.
         for c in range(NUM_OF_KEYS):
+            if c == 1 and G.fork_of(sid + 1) == "short" and doors[c] and keys[c] == 0:
+                continue        # 갈림길 short 층(지도 v2) — 노랑 큰길 열쇠가 없다. 들고 온 노랑으로 열거나 정예 길로 돈다
             if doors[c] and keys[c] == 0:
                 errors.append(f"{did}: {KEY_COLOR[c]} 문 {doors[c]}개인데 "
                               f"그 색 열쇠가 없다 -> 진행 불가")
@@ -575,7 +577,8 @@ def main():
         # 큰길 몫(색깔별 하나씩)을 뺀 나머지 = 실제로 고를 수 있는 부분.
         # 전체 비율은 큰길 1:1 에 희석돼 늘 90%대로 보인다 — 볼 것은 이쪽이다.
         tower["vaults"] = [a + max(0, b - 1) for a, b in zip(tower["vaults"], doors)]
-        tower["spares"] = [a + max(0, b - 1) for a, b in zip(tower["spares"], keys)]
+        mains = [1, 0 if G.fork_of(sid + 1) == "short" else 1, 1]   # 갈림길 short 층은 노랑 큰길 몫이 없다
+        tower["spares"] = [a + max(0, b - m) for a, b, m in zip(tower["spares"], keys, mains)]
 
     # ---- 층끼리 닮음 — 같은 지도가 되풀이되면 96층이 한 층처럼 보인다(옛 생성기: 거울상까지 같은 층 한 쌍)
     if layouts:

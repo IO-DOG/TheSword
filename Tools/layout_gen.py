@@ -1020,6 +1020,10 @@ def validate_layout(grid, regions, doors):
         spots = [(x, y) for y in range(GRID_H) for x in range(GRID_W)
                  if grid[y][x] == key]
         if not spots:
+            # 갈림길 short 층(layout_v2) — 그 층엔 이 색 열쇠가 없다. 그 문을 잠가도 계단에 닿는(정예 길이 도는) 문일 때만
+            # 닫힌 채로 두고 뒤를 잰다. 큰길 문이면 예전처럼 "열쇠 없음" 이다.
+            if stairs in _flood_locked(grid, start, {doors[i]}):
+                continue
             return False, f"열쇠{i} 없음"
         if not any(c in reach for c in spots):
             return False, f"열쇠{i} 도달 불가"
@@ -1030,6 +1034,24 @@ def validate_layout(grid, regions, doors):
     if stairs not in _flood_locked(grid, start, door_set - opened):
         return False, "계단 도달 불가"
     return True, ""
+
+
+def door_roles(grid):
+    """문을 셋으로 가른다 — (큰길, 금고, 갈림길). 큰길은 막으면 계단이 끊기는 문, 금고는 막으면 그 뒤 골방이 끊기는 문,
+    갈림길(layout_v2 의 노랑 문)은 막아도 아무 칸도 안 끊기는 문이다 — 정예가 선 둘째 통로가 돈다(몬스터는 지나갈 수 있는 칸)."""
+    spawn, up = _endpoints(grid)
+    doors = [(x, y) for y in range(len(grid)) for x in range(len(grid[y])) if grid[y][x].strip() in DOOR_CELLS]
+    full = len(_flood_locked(grid, spawn, set()))
+    main, vault, fork = [], [], []
+    for d in doors:
+        r = _flood_locked(grid, spawn, {d})
+        if up not in r:
+            main.append(d)
+        elif len(r) < full:              # 잠긴 문 칸 자체는 닿는 것으로 센다(_flood_locked)
+            vault.append(d)
+        else:
+            fork.append(d)
+    return main, vault, fork
 
 
 def vault_doors(grid, doors):

@@ -37,6 +37,7 @@ from thesword_balance import (
     NONE, BEAST, MAGIC, GUARDIAN, IMMORTAL, KNIGHT, TITAN, ASSASSIN, ARMOR,
     TRAIT_NAME,
 )
+import layout_v2
 from layout_gen import (build_floor_layout, validate_layout, check_doors,
                         check_sealed_by_portal, check_vault_safe, check_behind_boss,
                         check_structure, check_variety, floor_similarity,
@@ -152,7 +153,9 @@ BOSS_DURATION = 34.0
 # 죽는다. 물약·특성·전투 길이를 바꾸면 [7/7] 이 다시 잰다(check_tower 가 문이다).
 # 11-16: 5층 입구 경험치를 실측(78)으로 바로잡자(HANDMADE_PREFAB_SWAP — 예전 셈은 60 이 많았다) 0.110 은 물약 7개에서
 # 막히고 15층 탑의 법 제단 문턱이 18층에 갇혔다. 0.108 로 내렸다(챕터 0 최저 21%@18, 실수 허용 10).
-TOWER_MOB_HP_LOSS = (0.108, 0.104, 0.104, 0.104, 0.104)     # 챕터별
+# 11-23: 지도 v2 + 갈림길(fork_of) — 노랑 열쇠가 없는 갈림길 9개 층에서 덤 없는 탑의 법 경로는 정예와 싸운다. 그 아홉 번이
+# 실수 허용을 10 -> 1 로 먹었다(정예를 자리 4 의 0.7 배로 낮춰도 1). 0.004 씩 내렸다 — 정예 1.2 배에서 실수 허용 12(0.003 이면 9).
+TOWER_MOB_HP_LOSS = (0.104, 0.100, 0.100, 0.100, 0.100)     # 챕터별
 TOWER_MIN_WASTE = 10            # 보이는 대로 마시며 물약을 이만큼 버려도 완주해야 한다
 
 # 몬스터 방어력 = 설계 플레이어 공격력 x 0.6 x 특성 배수, 단 0.7 을 넘지 않는다.
@@ -646,6 +649,27 @@ def floor_type(floor):
     return (floor - HANDMADE_FLOORS - 1) % len(FLOOR_TYPES)
 
 
+# 갈림길(2026-11-23 오너 "추천대로" — 지도 v2 + 갈림길 B, `.omc/plans/fork-proto.md`). 층 유형 2(관문) 19개 층에서 구역 1 -> 2 사이에
+# 길이 둘이다: 노랑 문(열쇠를 쓰고 HP 를 아낀다) / 정예 길(문 없이 갈림길 정예가 막는다 — 잡으면 열쇠가 남는다, 금고·다음 층).
+# 번갈아 — 짝수째(key)는 그 층에 노랑 열쇠가 있고, 홀수째(short)는 없다(들고 온 노랑으로 열거나 정예와 싸운다).
+# 정예 = 그 층 정예(자리 4)의 사본, 경험치 0("층 몹을 다 잡으면 1레벨" 은 그대로), 공격만 올려 설계 플레이어가 잃는 HP 가
+# 자리 4 의 FORK_LOSS 배가 되게 한다. 시험판은 공격 x1.3 이었는데 한 대 값이 공격 - 방어라 뒤 챕터에서 손실이 3~9배로 뛰었다
+# (72·92층 최대 HP 의 93~94%) — 노랑 열쇠가 없는 층에서 정답 경로가 72층에 죽었다. 손실 배수로 두면 챕터마다 같은 무게다.
+# 탑의 법은 1.5 배에서도 98층에 막혀(보이는 대로·덤 없이) 1.2 배다 — 그래도 몹 손실을 0.004 내렸다(TOWER_MOB_HP_LOSS).
+FORK_FLOOR_TYPE = 2
+FORK_SLOT = 5                  # 몬스터 id 자리(층 x 8 + 5)
+FORK_LOSS = 2.0
+FORK_BEFORE = 2              # 완주 계산에서 정예 앞에 치르는 관문 수(지도에서 1~2 — simulate_run)
+TOWER_FORK_LOSS = 1.2
+
+
+def fork_of(floor):
+    """그 층의 갈림길 — None / "key"(그 층에 노랑 열쇠가 있다) / "short"(없다)."""
+    if floor <= HANDMADE_FLOORS or floor_type(floor) != FORK_FLOOR_TYPE:
+        return None
+    return "key" if ((floor - HANDMADE_FLOORS - 1) // len(FLOOR_TYPES)) % 2 == 0 else "short"
+
+
 def floor_potions(floor):
     """그 층 구역에 놓는 회복 아이템 비율 목록 (계단 앞 물약은 따로다)."""
     kind = floor_type(floor)
@@ -1014,7 +1038,7 @@ def target_level(floor, start_level):
     return start_level + (floor - HANDMADE_FLOORS - 1)
 
 
-def build_monsters(ptable, start_level, mob_loss=None):
+def build_monsters(ptable, start_level, mob_loss=None, fork_loss=FORK_LOSS):
     """층별 몬스터 1종 + 챕터별 보스 1종을 만든다 (5~100층).
 
     mob_loss 를 주면 그 손실로 푼다(챕터별 목록, 하나면 전 챕터) — 탑의 법(TOWER_MOB_HP_LOSS) 표가 같은
@@ -1066,6 +1090,32 @@ def build_monsters(ptable, start_level, mob_loss=None):
                 ))
                 k += 1
 
+        if fork_of(floor):
+            src = monsters[-1]
+            assert src["_floor"] == floor and src["_order"] == MOBS_PER_FLOOR - 1, "갈림길 정예는 자리 4 의 사본이다"
+            k = FORK_SLOT
+            # 그림·이름은 그 층에 없는 종으로 — 자리 4 와 같은 그림·이름에 공격만 다르면 "같은 놈" 이 거짓말이 된다(층에는 같은 종이 셋 선다 절).
+            # 특성은 자리 4(띠의 정예 특성) 그대로다.
+            art_idx = (idx + k) % len(MOB_ART)
+            elite = dict(src, id=MOB_ID_BASE + floor * 8 + k, RewardExp=0.0, MonsterNameId=MOB_NAME_BASE + floor * 8 + k,
+                         MonsterDescId=MOB_DESC_BASE + floor * 8 + k, _order=k, _fork=True, _art=art_idx,
+                         Name=bestiary.mob_name(KR, "kr", ch, art_idx),
+                         IdleAnimStr=MOB_ART[art_idx][0], AttackAnimStr=MOB_ART[art_idx][1])
+            par = player_with_runes(ptable, level, floor)
+            target = fork_loss * simulate_battle(par, creature_of(src))[2]
+            lo, hi = src["Attack"], src["Attack"] * 3          # 공격 탐색은 내림(solve_monster 와 같다)
+            while hi - lo > 1:
+                elite["Attack"] = float((lo + hi) // 2)
+                won, _, lost = simulate_battle(player_with_runes(ptable, level, floor), creature_of(elite))
+                if won and lost <= target:
+                    lo = elite["Attack"]
+                else:
+                    hi = elite["Attack"]
+            elite["Attack"] = float(lo)
+            got = simulate_battle(player_with_runes(ptable, level, floor), creature_of(elite))[2]
+            assert got >= 0.8 * target, f"{floor}층 갈림길 정예 손실 {got:.0f} < 목표 {target:.0f} (공격 탐색 상한 3배)"
+            monsters.append(elite)
+
         if boss:
             # 보스는 층의 몹 다섯을 다 잡고 한 레벨 오른 뒤에 만난다(계단 방 입구).
             # 도착 레벨로 풀면 실제로는 설계보다 싸다 — 20층 보스가 28% 가 아니라 15% 였다.
@@ -1115,7 +1165,7 @@ def creature_of(md):
 def simulate_run(ptable, monsters, start_state, verbose=True,
                  skip_optional=False, skip_runes=False, greedy=False,
                  skip_potions=False, behind=0, atk_behind=0, altar=None, waste_floors=(),
-                 reserve=None, first=HANDMADE_FLOORS + 1, extras=True):
+                 reserve=None, first=HANDMADE_FLOORS + 1, extras=True, fork="auto"):
     """5층부터 100층까지 실제 전투 공식으로 완주 시뮬레이션.
 
     1~4층(손수 만든 구간)은 simulate_handmade 가 이미 돌린 뒤라,
@@ -1147,6 +1197,8 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
                      그 앞 층들의 덤은 다시 세어 들고 시작한다.
       extras         공짜 덤(extras_at — 여분 열쇠·금고·둘 중 하나의 룬)을 챙긴다. 일반 표의 완주 보장 경로다.
                      탑의 법은 덤 없이 보장한다(False) — 더 빡빡한 문이다. skip_runes 면 덤의 룬도 안 줍는다.
+      fork           갈림길(fork_of). "auto" — 노랑 열쇠가 있는 층은 문 길, 없는 층(short)은 덤의 여분 노랑이 있으면 문,
+                     없으면 정예와 싸운다(완주 보장 경로). "elite" — 갈림길마다 정예 길(열쇠 층이면 그 노랑이 여분으로 남는다).
 
     플레이어는 마검을 든 채로 싸운다(stats_with_runes). 전투 사이에 치명 횟수와
     방어 게이지를 넘겨 받지 않는 것만 게임과 다르다 — thesword_balance 머리말 참조.
@@ -1188,13 +1240,29 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
 
     for floor in range(first, TOTAL_FLOORS + 1):
         floor_mons = by_floor[floor]
-        mobs = sorted((m for m in floor_mons if not m["_boss"]),
+        mobs = sorted((m for m in floor_mons if not m["_boss"] and not m.get("_fork")),
                       key=lambda m: m["_order"])
         if skip_optional is True or (skip_optional and floor in skip_optional):
             # 관문에는 약한 놈부터 선다(layout_gen 의 배치 순서와 같다).
             # 보스는 계단 방 입구에 서 있으므로 지나칠 수 없다.
             mobs = mobs[:FORCED_PER_FLOOR]
         boss = next((m for m in floor_mons if m["_boss"]), None)
+        # 갈림길 정예는 구역 1 -> 2 사이에 선다. v2 지도는 그 앞에 관문이 하나나 둘이고 구역 1 물약 하나만 그 앞이다
+        # (19층 실측, 11-23 리뷰) — 관문 둘 뒤에 싸우고, 구역 2 물약은 정예를 넘은 뒤에야 쓴다고 센다.
+        elite = next((m for m in floor_mons if m.get("_fork")), None)
+        elite_at = None
+        if elite is not None:
+            fight = fork == "elite"
+            if fork == "elite" and fork_of(floor) == "key":
+                keys[1] += 1
+            elif fork != "elite" and fork_of(floor) == "short":
+                if extras and keys[1] > 0:
+                    keys[1] -= 1
+                else:
+                    fight = True
+            if fight:
+                elite_at = FORK_BEFORE
+                mobs = mobs[:elite_at] + [elite] + mobs[elite_at:]
 
         if behind and level > target_level(floor, base) - behind:
             level, exp = target_level(floor, base) - behind, 0.0
@@ -1221,6 +1289,8 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
         # floor_potions 를 본다.
         heals = floor_potions(floor)
         potions = [] if skip_potions else [(h, min(MIN_TOLLS, len(fights) - 1)) for h in heals]
+        if elite_at is not None and not skip_potions:
+            potions = [(h, elite_at if k == 0 else elite_at + 1) for k, h in enumerate(heals)]
         # 보스층은 보스 직전에 쓸 큰 물약과, 올라가기 전에 채울 물약을 따로 둔다.
         # 큰 것 하나만 두면 보스를 잡고 빈사로 다음 층에 올라가 그대로 죽는다.
         # 이 둘은 구역3(계단 앞)이라 <b>반드시 밟는다</b> — skip_potions 로도 안 빠진다.
@@ -1396,6 +1466,8 @@ BAD_ROUTES = [
     ("제단에서 살 수 있을 때마다 방어를 산다", dict(altar="dfn"), False, ""),
     # 완주 보장이 덤(여분 열쇠·금고·둘 중 하나)을 센다(extras_at). 그걸 다 거르는 사람이 어디까지 가는지만 찍는다.
     ("덤을 전부 지나친다 (물약은 보이는 대로)", dict(extras=False, greedy=True), None, ""),
+    # 갈림길(fork_of) — 정답 경로는 열쇠가 있으면 문, 없으면 정예다. 늘 정예 길로 가도(열쇠를 남겨도) 막히면 안 된다.
+    ("갈림길마다 정예 길로 간다", dict(fork="elite"), False, ""),
 ]
 
 
@@ -1459,7 +1531,8 @@ def designed_price(ptable, monsters, start_level):
     함수. 공격·방어를 얹어 재면 크기 룬과 제단이 "몇 HP 값인가" 가 나온다."""
     by_floor = {}
     for m in monsters:
-        by_floor.setdefault(m["_floor"], []).append(m)
+        if not m.get("_fork"):             # 갈림길 정예는 거를 수 있는 값이다 — 룬의 값에 안 센다
+            by_floor.setdefault(m["_floor"], []).append(m)
 
     @functools.lru_cache(maxsize=None)
     def price(floor, datk=0, ddfn=0):
@@ -1502,7 +1575,7 @@ def report_breakpoints(ptable, monsters, start_level):
     +3 이나 +6 이라, +0 만 재면 룬 하나 집기 전의 사람만 본다(예전 설계가 62 -> 10 이었다)."""
     by_floor = {}
     for m in monsters:
-        if not m["_boss"]:
+        if not m["_boss"] and not m.get("_fork"):
             by_floor.setdefault(m["_floor"], []).append(m)
     cols = []
     for off in (0, 3, 6):
@@ -2008,7 +2081,7 @@ def emit_layouts(monsters, write=True):
     choices, econ, made = {}, {}, {}
     for floor in range(HANDMADE_FLOORS + 1, TOTAL_FLOORS + 1):
         did, ch, _ = dungeon_id(floor)
-        mobs = sorted((m for m in by_floor[floor] if not m["_boss"]),
+        mobs = sorted((m for m in by_floor[floor] if not m["_boss"] and not m.get("_fork")),
                       key=lambda m: m["_order"])
         boss = next((m for m in by_floor[floor] if m["_boss"]), None)
         walls = CHAPTER_THEMES[ch][1]
@@ -2024,23 +2097,36 @@ def emit_layouts(monsters, write=True):
         region2 = [POTION_BY_HEAL[h] for h in heals[1:]]
         pots = [[], region1, region2, region3]
 
+        # 지도 v2(layout_v2) — 챕터마다 다른 건축 + 갈림길. 생성기 쪽 검사를 다 통과한 씨앗만 받는다:
+        # 아래의 문·포탈·금고·보스 앞 검사는 예전 생성기에선 배치가 이미 지키던 것이라 알리기만 했지만,
+        # v2 는 모양이 자유라 걸릴 수 있다 — 걸리면 버리고 다시 뽑는다.
+        fork = fork_of(floor)
+        elite = next((m for m in by_floor[floor] if m.get("_fork")), None)
+        elite_code = f"M_{elite['id']:03d}" if elite else None
         grid = None
         for attempt in range(LAYOUT_ATTEMPTS):
-            g, origins, doors = build_floor_layout(
-                [m["id"] for m in mobs], boss["id"] if boss else None, walls,
-                seed=floor * 1000 + attempt, mobs_in_floor=MOBS_PER_FLOOR,
-                equip_id=CHAPTER_EQUIP_REWARD.get(floor), potions=pots,
-                rune=rune_of(floor), alcove=alcove_plan(floor), layout_kind=floor_type(floor),
-                choice=choice_pair(floor))
-            if g is None:
+            r, _ = layout_v2.build_floor_v2(
+                ch, floor * 1000 + attempt, [m["id"] for m in mobs], boss["id"] if boss else None, walls,
+                pots, rune_of(floor), alcove_plan(floor), choice_pair(floor), CHAPTER_EQUIP_REWARD.get(floor),
+                elite_id=elite["id"] if elite else None, short=fork == "short")
+            if r is None:
                 continue
+            g, origins, doors, ecell = r
             ok, err = validate_layout(g, origins, doors)
-            # 눈에 이상한 구조(통로 한가운데 문 등)와 앞 층을 닮은 지도는 버리고 다시 뽑는다.
-            # 거울상까지 같은 층이 둘 있었다(11층과 67층) — 오너가 직접 찾았다.
-            if ok and not check_structure(g) and not any(
-                    floor_similarity(g, other) > SAME_FLOOR_MAX for other in made.values()):
-                grid = g
-                break
+            if not ok or check_structure(g) or layout_v2.check_fork(g, doors, ecell) or check_doors(g) \
+                    or check_sealed_by_portal(g) or check_vault_safe(g, doors) \
+                    or (boss and check_behind_boss(g, (POTION_BY_HEAL[BOSS_FLOOR_POTIONS[0]],))) \
+                    or len(layout_v2.dead_end_items(g, elite_code)) != 1:
+                continue
+            c = floor_choices(g, doors)
+            if c["forced_mobs"] < FORCED_PER_FLOOR or c["forced_runes"] < c["runes"] or (c["boss"] and not c["boss_forced"]) \
+                    or c["choice_rewards"] != (2 if choice_pair(floor) else 0):
+                continue
+            # 거울상까지 같은 층이 둘 있었다(11층과 67층) — 오너가 직접 찾았다. 앞 층을 닮은 지도는 버린다.
+            if any(floor_similarity(g, other) > SAME_FLOOR_MAX for other in made.values()):
+                continue
+            grid = g
+            break
         if grid is None:
             failures.append(f"Dungeon_{did}")
             continue
@@ -2140,8 +2226,12 @@ def report_keys(econ):
 
     가정 하나: 여분 열쇠는 골방 파수꾼 뒤에 있으므로 <b>그 곁길 전투를
     치른다</b>고 본다. 안 치르면 금고는 하나도 열 수 없다 — 그 수도 같이 찍는다.
+
+    갈림길 short 층(fork_of)은 그 층에 노랑 열쇠가 없다 — 큰길 몫이 0 이고, 노랑 문은 들고 온 여분으로 열거나
+    정예와 싸운다. 층을 오르는 셈에서 여분 노랑이 있으면 거기 쓴다(금고와 같은 주머니를 다툰다).
     """
     floors = sorted(econ)
+    need = {f: [1, 0 if fork_of(f) == "short" else 1, 1] for f in floors}
     main = [0, 0, 0]
     spare_total = [0, 0, 0]
     vault_total = [0, 0, 0]
@@ -2151,7 +2241,7 @@ def report_keys(econ):
         guarded += g
         for c in range(3):
             main[c] += m[c]
-            spare_total[c] += keys[c] - 1          # 큰길 몫 하나를 뺀 나머지
+            spare_total[c] += keys[c] - need[f][c]  # 큰길 몫을 뺀 나머지
             vault_total[c] += v[c]
 
     # 층을 순서대로 오른다. "보이면 연다" 와 "곁길을 전부 지나친다" 둘.
@@ -2159,10 +2249,17 @@ def report_keys(econ):
     opened = [0, 0, 0]
     locked = [0, 0, 0]
     surplus_floors = shortage_floors = decision_floors = 0
+    fork_key = fork_fight = 0
     for i, f in enumerate(floors):
         keys, _, v, _g = econ[f]
         for c in range(3):
-            spare[c] += keys[c] - 1
+            spare[c] += keys[c] - need[f][c]
+        if fork_of(f) == "short":
+            if spare[1] > 0:
+                spare[1] -= 1
+                fork_key += 1
+            else:
+                fork_fight += 1
         shortage = False
         for c in range(3):
             for _ in range(v[c]):
@@ -2198,6 +2295,8 @@ def report_keys(econ):
           " — 열 수 있는데 같은 색 금고가 뒤에 또 있다" % decision_floors)
     print("       다만 아껴 두는 값은 룬의 크기가 아니라 종류다 —"
           " 급한 능력치가 아니면 먼저 여는 쪽이 대체로 낫다")
+    print("      갈림길 %d층 중 노랑 열쇠가 없는 층 %d — 보이는 대로 열면 여분으로 연다 %d · 정예와 싸운다 %d"
+          % (sum(1 for f in floors if fork_of(f)), sum(1 for f in floors if fork_of(f) == "short"), fork_key, fork_fight))
     print("      여분 열쇠 %d개 중 파수꾼 뒤에 있는 것 %d개"
           " — 곁길을 전부 지나치면 금고 %d개가 전부 잠긴다"
           % (sum(spare_total), guarded, sum(vault_total)))
@@ -2221,7 +2320,7 @@ def report_keys(econ):
         keys, m, _v, _g = econ[f]
         if m != [1, 1, 1]:
             broken.append(f"{f}층 큰길 문 {m} — 층마다 색깔별로 하나여야 한다")
-        if min(keys) < 1:
+        if any(keys[c] < need[f][c] for c in range(3)):
             broken.append(f"{f}층 열쇠 {keys} — 큰길 몫이 빈다")
     return broken
 
@@ -2243,7 +2342,7 @@ def build_all(dry_run=False):
 
     print(f"[2/7] {HANDMADE_FLOORS + 1}~{TOTAL_FLOORS}층 몬스터 스탯 역산 중...")
     monsters = build_monsters(ptable, start_level)
-    tower = build_monsters(ptable, start_level, mob_loss=TOWER_MOB_HP_LOSS)
+    tower = build_monsters(ptable, start_level, mob_loss=TOWER_MOB_HP_LOSS, fork_loss=TOWER_FORK_LOSS)
     print(f"      몬스터 {len(monsters)}종 생성 (탑의 법 표도 같은 수 — 챕터별 몹 손실 "
           + "/".join(f"{x:g}" for x in TOWER_MOB_HP_LOSS) + ")")
     # 다른 종이 같은 이름을 달면 도감에 같은 이름이 스탯만 다르게 뜬다. 쓰기 전에 막는다.

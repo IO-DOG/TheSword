@@ -410,6 +410,22 @@ def floor_spec(world, floor):
     """
     g = _grid(floor)
     spawn, up = L._endpoints(g)
+    # 갈림길(G.fork_of) — 정예 칸은 막고(fork_gate 가 "문이냐 정예냐" 를 따로 다룬다), 그 층에 노랑 열쇠가 없으면(short)
+    # 문 길을 잴 수 있게 노랑 열쇠를 구역 1 의 빈 칸에 하나 놓은 셈 친다(큰길 열쇠는 spec 에 안 들어간다 — MAIN_KEY).
+    # 노랑을 실제로 들고 왔는지·정예와 싸우는지는 fork_gate 가 keys 로 센다.
+    fork_id = None
+    for y, row in enumerate(g):
+        for x, v in enumerate(row):
+            if v.startswith("M_") and int(v[2:]) % 8 == G.FORK_SLOT:
+                fork_id, row[x] = int(v[2:]), "W_01"
+    assert (fork_id is not None) == bool(G.fork_of(floor)), (floor, fork_id)
+    if G.fork_of(floor) == "short":
+        dset = [(x, y) for y, row in enumerate(g) for x, v in enumerate(row) if v in L.DOOR_CELLS]
+        main0 = sorted((d for d in dset if L._cuts_path(g, spawn, up, d)), key=lambda d: (int(g[d[1]][d[0]]) - 3) % 3)
+        zone1 = L._flood_locked(g, spawn, set(main0[1:])) - L._flood_locked(g, spawn, set(main0))
+        spot = next(c for c in sorted(zone1) if g[c[1]][c[0]] == L.FLOOR
+                    and sum(L._inside(n) and L._passable(g, n) for n in ((c[0] + dx, c[1] + dy) for dx, dy in L.NEIGHBORS)) >= 2)
+        g[spot[1]][spot[0]] = L.KEY_ITEM[1]
     cells = {(x, y): c for y, row in enumerate(g) for x, c in enumerate(row)}
     doors = [c for c, v in cells.items() if v in L.DOOR_CELLS]
     main = sorted((d for d in doors if L._cuts_path(g, spawn, up, d)), key=lambda d: (int(cells[d]) - 3) % 3)
@@ -438,7 +454,7 @@ def floor_spec(world, floor):
 
     spec = dict(floor=floor, band=G.band_of(floor), chapter=(floor - 1) // G.FLOORS_PER_CHAPTER,
                 regions=[dict(forced=[], side=[], pots=[]) for _ in range(4)],
-                boss=None, after_boss=[], rune=None, vault=None, choice=None)
+                boss=None, after_boss=[], rune=None, vault=None, choice=None, fork=fork_id)
     for c, v in cells.items():
         if v.startswith("M_"):
             mid = int(v[2:])
@@ -534,6 +550,7 @@ class Persona:
         self.rune_floors = ()       # 보물 층 가운데 treasure 와 달리 룬을 집는 층 (봇이 지도 때문에 그런 층)
         self.altar, self.altar_t, self.altar_stat = "never", 0.6, "atk"
         self.skill = SKILL_NONE
+        self.fork, self.fork_cap = "fight", 0.12      # 갈림길: fight(늘 정예) / key(열쇠가 있으면 쓴다) / smart(정예가 최대 HP 의 fork_cap 넘으면 열쇠)
         for k, v in kw.items():
             assert hasattr(self, k), k
             setattr(self, k, v)
@@ -579,6 +596,9 @@ def sample_persona(seed):
     P.altar = pick(("never", .25), ("atk", .2), ("dfn", .2), ("alt", .1), ("rich", .2), ("random", .05))
     P.altar_t, P.altar_stat = r.uniform(.55, .8), r.choice(("atk", "dfn"))
     P.skill = pick((SKILL_NONE, .35), (SKILL_MASH, .25), (SKILL_TIMED, .25), (SKILL_BOT, .15))
+    # 갈림길(지도 v2) 습관은 맨 끝에 뽑는다 — 가운데서 뽑으면 같은 씨앗의 뒤 습관이 전부 바뀌어 지도 전·후를 견줄 수 없다
+    P.fork = pick(("fight", .35), ("key", .35), ("smart", .30))
+    P.fork_cap = r.uniform(.06, .20)
     return P
 
 
@@ -946,6 +966,28 @@ class Run:
         self.grinds += fought
         return fought
 
+    def fork_gate(self, spec, pots):
+        """갈림길(구역 1 -> 2, G.fork_of). key: 그 층에 노랑 열쇠가 있다 — 정예를 잡으면 그 열쇠가 남는다(금고·다음 층).
+        short: 그 층에 노랑 열쇠가 없다 — 들고 온 노랑 열쇠로 문을 열거나, 없거나 안 쓰면 정예와 싸운다."""
+        f, P = spec["floor"], self.P
+        md = self.mons[spec["fork"]]
+        pr = self.price(md)
+        mx = self.stats()["hp"]
+        if G.fork_of(f) == "key":
+            default = P.fork == "fight" or (P.fork == "smart" and pr[1] <= P.fork_cap * mx)
+            if self.decide(f, ("fork",), default and pr[0], (True, False)):
+                self.battle(md, f, pots)
+                self.keys[1] += 1
+        else:
+            have = self.keys[1] > 0
+            use = have and (P.fork == "key" or (P.fork == "smart" and pr[1] > P.fork_cap * mx) or not pr[0])
+            if have:
+                use = self.decide(f, ("fork",), use, (True, False))
+            if use:
+                self.keys[1] -= 1
+            else:
+                self.battle(md, f, pots)
+
     # ---- 층
     def play_floor(self, spec):
         f = spec["floor"]
@@ -988,6 +1030,8 @@ class Run:
                 while pots and self.hp < 0.9 * self.stats()["hp"]:
                     pots.sort()
                     self.drink(pots.pop(0)[0], f)
+            if r == 1 and spec["fork"]:
+                self.fork_gate(spec, pots)
             if r < 3:
                 continue
             if spec["vault"]:
@@ -1415,7 +1459,7 @@ def report(results, seconds, mob_loss=None, stages=None):
                     continue
                 ws = [w for r in group for w in r["weights"]]
                 say(f"    {label} ({len(group)}판)")
-                for kind in ("side", "pot", "vault", "pair", "altar"):
+                for kind in ("side", "pot", "vault", "pair", "altar", "fork"):
                     xs = [w for w in ws if w[1] == kind]
                     if xs:
                         say(f"      {kind:6} 판당 {len(xs) / len(group):5.1f}개 · 차이 p50 {100 * q([w[2] for w in xs], .5):4.1f}% "

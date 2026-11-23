@@ -796,8 +796,9 @@ public static class MapBuilder
     }
 
     /// <summary>정예 — 층에서 가장 센 놈. 생성 몬스터 id = 1000 + 층*8 + 서열이고 정예는 서열 4 다
-    /// (generate_content.MOB_SPECIES_RUN 의 마지막 자리). 전투창의 맞는 이펙트 크기(UI_MonsterCard)도 이것으로 가른다.</summary>
-    public static bool IsElite(int id) => id >= 1000 && id % 8 == 4;
+    /// (generate_content.MOB_SPECIES_RUN 의 마지막 자리). 갈림길 층(지도 v2)의 갈림길 정예는 서열 5(generate_content.FORK_SLOT)다.
+    /// 전투창의 맞는 이펙트 크기(UI_MonsterCard)도 이것으로 가른다.</summary>
+    public static bool IsElite(int id) => id >= 1000 && (id % 8 == 4 || id % 8 == 5);
 
     static Transform NewContainer(GameObject root, string name)
     {

@@ -124,11 +124,13 @@ public class KeyInventory
 
         int topVault = top + 1 < GeneratedStory.VaultDoors.Length ? GeneratedStory.VaultDoors[top + 1] : -1;
         int topSpare = top + 1 < GeneratedStory.SpareKeys.Length ? GeneratedStory.SpareKeys[top + 1] : -1;
+        // 갈림길 노랑 문(지도 v2)은 닫혀 있어도 정예 길이 돈다 — 그 문 몫의 열쇠를 남겨 둘 까닭이 없다.
+        int topFork = top + 1 < GeneratedStory.ForkDoors.Length ? GeneratedStory.ForkDoors[top + 1] : -1;
         int need = 0;
         foreach (ObjectData obj in map.Objects)
         {
             // 색은 MapBuilder.BuildDoor 와 같은 셈 — 셀 코드 3·6 초록, 4·7 노랑, 5·8 빨강.
-            if (obj.ObjectType == (int)Define.ObjectType.Door && obj.Count != topVault && (obj.Id - 3) % NUM_OF_KEYS == door._keyIndex
+            if (obj.ObjectType == (int)Define.ObjectType.Door && obj.Count != topVault && obj.Count != topFork && (obj.Id - 3) % NUM_OF_KEYS == door._keyIndex
                 && Managers.Data.DoorActiveDic.TryGetValue(obj.Count, out bool closed) && closed)
                 need++;
             // 그 층의 큰길 열쇠가 아직 바닥에 있으면 그 문 몫은 그것이 맡는다 — 색마다 열쇠는 제 색 문 앞의 방(다른 색 문 너머)에

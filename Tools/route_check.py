@@ -63,7 +63,7 @@ def play(ptable, monsters, start, blunder_floors=(), skip_floors=(), waste_floor
     waste = set(waste_floors)
 
     for floor in range(G.HANDMADE_FLOORS + 1, G.TOTAL_FLOORS + 1):
-        mons = sorted((m for m in by_floor[floor] if not m["_boss"]),
+        mons = sorted((m for m in by_floor[floor] if not m["_boss"] and not m.get("_fork")),   # 갈림길 정예는 거를 수 있다
                       key=lambda m: m["_order"])
         boss = next((m for m in by_floor[floor] if m["_boss"]), None)
         fights = list(mons) + ([boss] if boss else [])

@@ -33,7 +33,7 @@ public static class MonsterTint
     // 자리를 그대로 서열로 쓰면 같은 놈 셋이 서로 다른 진하기로 나와 다른
     // 종으로 읽힌다 — 그러면 "같은 놈을 세 번 만난다" 는 임계가 사라진다.
     // 묶음의 첫 자리로 되돌려 셋이 같은 색을 입게 한다.
-    static readonly int[] SpeciesRank = { 0, 0, 0, 3, 4 };
+    static readonly int[] SpeciesRank = { 0, 0, 0, 3, 4, 4 };   // 5 = 갈림길 정예(지도 v2) — 정예만큼 진하다
 
     // 챕터 안에서 다섯 층마다 색을 조금씩 돌린다.
     //
