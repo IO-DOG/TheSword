@@ -38,7 +38,7 @@ from thesword_balance import (
     TRAIT_NAME,
 )
 import layout_v2
-from layout_gen import (build_floor_layout, validate_layout, check_doors,
+from layout_gen import (validate_layout, check_doors,
                         check_sealed_by_portal, check_vault_safe, check_behind_boss,
                         check_structure, check_variety, floor_similarity,
                         floor_choices, key_economy, KEY_ITEM, MIN_TOLLS,
@@ -590,7 +590,7 @@ BOSS_RUNE_FLOORS = (40, 60, 80)
 
 
 def choice_pair(floor):
-    """그 층의 "둘 중 하나" 보상 (셀코드, 셀코드, 놓는 곳) 또는 None — build_floor_layout 의 choice."""
+    """그 층의 "둘 중 하나" 보상 (셀코드, 셀코드, 놓는 곳) 또는 None — layout_v2.place 의 choice."""
     if floor_type(floor) == 4:
         # 보물 층: 넉넉한 물약이냐, 계단 룬과 같은 능력치의 크기 룬이냐.
         return (POTION_BY_HEAL[GENEROUS_POTION],
@@ -1296,7 +1296,7 @@ def simulate_run(ptable, monsters, start_state, verbose=True,
         # 보스층은 보스 직전에 쓸 큰 물약과, 올라가기 전에 채울 물약을 따로 둔다.
         # 큰 것 하나만 두면 보스를 잡고 빈사로 다음 층에 올라가 그대로 죽는다.
         # 이 둘은 구역3(계단 앞)이라 <b>반드시 밟는다</b> — skip_potions 로도 안 빠진다.
-        # 큰 물약은 보스 앞, 계단 앞 물약은 보스 뒤에 놓인다 — build_floor_layout 이
+        # 큰 물약은 보스 앞, 계단 앞 물약은 보스 뒤에 놓인다 — layout_v2.place 가
         # 그렇게 놓고 check_behind_boss 가 완성된 격자에서 다시 잰다([4/7]).
         if boss:
             potions.append((BOSS_FLOOR_POTIONS[0], len(fights) - 1))
@@ -2089,7 +2089,7 @@ def emit_layouts(monsters, write=True):
         walls = CHAPTER_THEMES[ch][1]
 
         # 구역별 회복 아이템 (없는 구역은 None)
-        # 보스층 구역3 은 [보스 앞, 보스 뒤] 순서다 — build_floor_layout 이 첫째만 보스 앞에 놓는다.
+        # 보스층 구역3 은 [보스 앞, 보스 뒤] 순서다 — layout_v2.place 가 첫째만 보스 앞에 놓는다.
         region3 = [POTION_BY_HEAL[EXIT_POTION]]
         if boss:
             region3.insert(0, POTION_BY_HEAL[BOSS_FLOOR_POTIONS[0]])

@@ -34,7 +34,7 @@ The sword's single eye shows the price of every fight. It hides only one: the pr
 
 [h2]Climb 100 floors[/h2]
 [list]
-[*][b]100 floors, five chapters[/b]: the Mossy Catacombs, the Collapsed Aqueduct, the Ashen Furnace, the Frozen Depths and the Rift of the Throne. Green, yellow and red doors and keys, vaults and spare keys, permanent runes, either-or rewards, and a chapter boss every 20 floors. Beat the 20F boss for the Warpstone Ring and jump back to any floor you've visited.
+[*][b]100 floors, five chapters[/b]: the Mossy Catacombs, the Collapsed Aqueduct, the Ashen Furnace, the Frozen Depths and the Rift of the Throne. Each chapter builds its floors its own way: cross-shaped halls, canals and pillared halls, workshops, ice caverns, cloisters. Green, yellow and red doors and keys, vaults and spare keys, elite-guarded paths around yellow doors, permanent runes, either-or rewards, and a chapter boss every 20 floors. Beat the 20F boss for the Warpstone Ring and jump back to any floor you've visited.
 [*][b]What overflows is wasted[/b]: HP has a cap, so when you drink a potion is part of the math. A potion that would overflow right now shows how much it would really restore.
 [*][b]Walk with a click[/b]: click the floor to walk there, double-click to hurry. WASD works too.
 [*][b]A checkpoint on every floor[/b]: the game saves as you enter each floor. Die, and you're back at that floor's entrance; from the menu you can also restart from any of the last ten floors.

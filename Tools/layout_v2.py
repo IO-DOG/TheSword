@@ -1,6 +1,6 @@
 """지도 v2 — 한 층의 배치(2026-11-23 오너 결정 "추천대로": 챕터마다 다른 건축 + 갈림길 B).
 
-모양(layout_v2_shapes)을 지은 뒤 지금 생성기(layout_gen.build_floor_layout)와 같은 계획을 얹는다:
+모양(layout_v2_shapes)을 지은 뒤 예전 생성기(11-09 의 layout_gen.build_floor_layout, 지금은 지웠다)와 같은 계획을 얹는다:
 아래 계단, 관문 셋(길 순서대로 약한 놈부터), 열쇠 셋(구역마다), 곁길 둘(금고 층이 아니면 첫째는 골방 파수꾼),
 골방(여분 열쇠·금고·물약), 층 유형별 물약, 룬(계단 구역의 길목 — 반드시 밟는다), 보스(계단 앞 길목), 둘 중 하나, 장비.
 검사는 layout_gen 의 것을 그대로 쓴다(validate_layout·check_doors·check_structure·check_sealed_by_portal·check_vault_safe·
