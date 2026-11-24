@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 public enum StoryKind { Dialogue, Card, Bark, Choice, Credits }
 public enum StoryTrigger { Prologue, Village, ChapterStart, FloorFirst, TraitFirst, FloorType, Mechanic, Death, BossIntro, BossDefeat, Ending, Epilogue, Credits, FloorBark }
 public enum StoryPrologue { ContractAfter, KingslimeReveal, KingslimeClear }
-public enum StoryMechanic { Forecast, Fatal, Overflow, Vault, SpareKey, Choice, Rune, NoKey, Warp, Death, Crit, LevelUp, Fork }   // 맨 끝에만 더한다(story_gen.MECHANICS 순서)
+public enum StoryMechanic { Forecast, Fatal, Overflow, Vault, SpareKey, Choice, Rune, NoKey, Warp, Death, Crit, LevelUp, Fork, Current, Furnace, Ice, Rift }   // 맨 끝에만 더한다(story_gen.MECHANICS 순서)
 public enum StoryEnding { Choice, Seal, Hold, Dawn }
 public enum StoryPortrait { None, Damian, Sword, Boss }
 public enum StoryCueKind { Emote, Shake, Flash, White, Dark, Clear, CamUp, CamClose, CamPlayer, CamMonster, CamBoss, Pose, Bgm, BgmStop, BgmFloor, Fx, Boom, Soul, Hands, VortexIn, VortexStop, Walk, Backdrop, Letterbox, BgmLow }
@@ -762,6 +762,14 @@ public class StoryDirector : MonoBehaviour
             }
         }
 
+        // 챕터 기믹(11-24): 그 칸 옆에 처음 서면 규칙을 두 줄로 — 물살은 못 거슬러 나오고, 화로 방은 세고, 얼음은 미끄럽고, 균열은 건너뛴다.
+        StoryMechanic gimmick = GimmickNear(floor, me);
+        if (gimmick != StoryMechanic.Forecast)
+        {
+            EnqueueScenes(Unseen(gimmick), false, 0f);
+            return;
+        }
+
         if (floor < GeneratedStory.ChoiceFloors.Length && GeneratedStory.ChoiceFloors[floor])
         {
             List<StoryScene> scenes = Unseen(StoryMechanic.Choice);
@@ -780,6 +788,37 @@ public class StoryDirector : MonoBehaviour
     }
 
     // 바로 옆 칸 (대각선·문짝의 두께까지).
+    /// <summary>me 옆(이웃 8칸)에 아직 안 배운 기믹이 있으면 그 수업, 없으면 Forecast(= 없음).</summary>
+    static StoryMechanic GimmickNear(int floor, Vector3 me)
+    {
+        GameObject map = CurrentMap();
+        if (map == null)
+            return StoryMechanic.Forecast;
+        Vector2Int at = PathMover.Cell(map, me);
+        bool Close(int x, int y) => Mathf.Abs(x - at.x) <= 1 && Mathf.Abs(-y - at.y) <= 1;     // 생성기 칸 (열, 행) -> PathMover (x, -y)
+
+        if (GeneratedGimmicks.Currents.TryGetValue(floor, out (int x, int y, int dir)[] cur) && Unseen(StoryMechanic.Current).Count > 0
+            && map.GetComponent<FloorCurrents>() is FloorCurrents fc && fc.Active)
+            foreach (var c in cur)
+                if (Close(c.x, c.y)) return StoryMechanic.Current;
+        if (GeneratedGimmicks.Ice.TryGetValue(floor, out (int x, int y)[] ice) && Unseen(StoryMechanic.Ice).Count > 0)
+            foreach (var c in ice)
+                if (Close(c.x, c.y)) return StoryMechanic.Ice;
+        if (GeneratedGimmicks.Rifts.TryGetValue(floor, out (int ax, int ay, int bx, int by) r) && Unseen(StoryMechanic.Rift).Count > 0
+            && (Close(r.ax, r.ay) || Close(r.bx, r.by)))
+            return StoryMechanic.Rift;
+        if (GeneratedGimmicks.Furnaces.TryGetValue(floor, out (int x, int y, float mul, int[] ids) f) && Unseen(StoryMechanic.Furnace).Count > 0
+            && map.GetComponent<FloorFurnace>() is FloorFurnace ff && ff.IsLit)
+        {
+            if (Close(f.x, f.y))
+                return StoryMechanic.Furnace;
+            foreach (MonsterController mc in map.GetComponentsInChildren<MonsterController>(false))
+                if (System.Array.IndexOf(f.ids, mc.id) >= 0 && Near(me, mc.transform.position))
+                    return StoryMechanic.Furnace;
+        }
+        return StoryMechanic.Forecast;
+    }
+
     static bool Near(Vector3 a, Vector3 b)
     {
         Vector2 d = new Vector2(a.x - b.x, a.z - b.z);

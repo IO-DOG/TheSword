@@ -63,7 +63,8 @@ COLUMNS = bestiary.COLUMNS
 KINDS = {"dialogue": "Dialogue", "card": "Card", "bark": "Bark", "choice": "Choice", "credits": "Credits"}
 PROLOGUES = ["contract_after", "kingslime_reveal", "kingslime_clear"]          # StoryPrologue
 MECHANICS = ["forecast", "fatal", "overflow", "vault", "spare_key", "choice",    # StoryMechanic
-             "rune", "nokey", "warp", "death", "crit", "levelup", "fork"]
+             "rune", "nokey", "warp", "death", "crit", "levelup", "fork",
+             "current", "furnace", "ice", "rift"]    # 챕터 기믹(11-24)
 ENDINGS = ["choice", "seal", "hold", "dawn"]                                    # StoryEnding
 TRAITS = {"beast": 1, "magic": 2, "guardian": 3, "immortal": 4,                 # Define.Trait
           "knight": 5, "titan": 6, "assassin": 7, "armor": 8}

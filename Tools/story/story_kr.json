@@ -1688,6 +1688,46 @@
       "lines": [
         { "key": "mech_fork.01", "speaker": "sword", "emotion": "Normal", "kr": "문만 길이 아니다. 저놈을 베면 열쇠가 남지." }
       ]
+    },
+    {
+      "id": "mech_current",
+      "kind": "dialogue",
+      "trigger": "mechanic_first:current",
+      "staging": "수로의 물살 칸 옆에 처음 섰을 때(대개 21~23층). 물살은 화살표 쪽으로만 들어가고 거꾸로는 못 나온다, 그 곁가지의 수문 레버를 당기면 멎는다 — 규칙 둘만 말한다.",
+      "lines": [
+        { "key": "mech_current.01", "speaker": "sword", "emotion": "Normal", "kr": "물길이다. 화살표 쪽으로만 흐른다.\n타고 들어가면 거꾸로는 못 나온다." },
+        { "key": "mech_current.02", "speaker": "damian", "emotion": "Thinking", "kr": "안쪽 수문 레버를 당기면 멎겠지.\n길목 놈부터 셈해 보고 타자." }
+      ]
+    },
+    {
+      "id": "mech_furnace",
+      "kind": "dialogue",
+      "trigger": "mechanic_first:furnace",
+      "staging": "용광로의 풀무 화로나 그 방 몬스터(발밑에 잉걸 빛) 옆에 처음 섰을 때(대개 41~43층). 켜진 동안 그 방 놈들이 세고, 밸브(레버)를 잠그면 꺼진다.",
+      "lines": [
+        { "key": "mech_furnace.01", "speaker": "sword", "emotion": "Smile", "kr": "풀무 화로다. 불 쬐는 방 놈들은\n더 세게 친다. 숫자 올라간 거 보이지?" },
+        { "key": "mech_furnace.02", "speaker": "damian", "emotion": "Thinking", "kr": "밸브를 잠그면 꺼지는군.\n끄러 갈지, 비싸게 벨지." }
+      ]
+    },
+    {
+      "id": "mech_ice",
+      "kind": "dialogue",
+      "trigger": "mechanic_first:ice",
+      "staging": "심층의 얼음 칸 옆에 처음 섰을 때(대개 61~63층). 디디면 막힐 때까지 미끄러지고, 몬스터가 멈춤돌이라 잡는 순서가 설 자리를 바꾼다.",
+      "lines": [
+        { "key": "mech_ice.01", "speaker": "sword", "emotion": "Normal", "kr": "얼음판이다. 한 번 디디면\n막힐 때까지 미끄러진다." },
+        { "key": "mech_ice.02", "speaker": "damian", "emotion": "Thinking", "kr": "놈들이 멈춤돌이네.\n누굴 먼저 베느냐가 설 자리를 바꿔." }
+      ]
+    },
+    {
+      "id": "mech_rift",
+      "kind": "dialogue",
+      "trigger": "mechanic_first:rift",
+      "staging": "왕좌의 균열 칸 옆에 처음 섰을 때(대개 81~83층). 81~89층이라 데미안만 말한다(R13). 한쪽을 밟으면 다른 쪽에 서고, 사이의 관문 몬스터를 건너뛰면 HP 는 아끼고 경험치는 못 받는다.",
+      "lines": [
+        { "key": "mech_rift.01", "speaker": "damian", "emotion": "Question", "kr": "균열 둘이 이어져 있어.\n밟으면 건너편에 선다." },
+        { "key": "mech_rift.02", "speaker": "damian", "emotion": "Thinking", "kr": "사이의 놈은 건너뛰겠지.\n피는 아끼고, 그만큼 덜 크고." }
+      ]
     }
   ],
   "prologue_rewrites": {

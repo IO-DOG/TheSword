@@ -1406,6 +1406,38 @@ public static class GeneratedStory
             },
             null,
             null),
+        new StoryScene("mech_current", StoryKind.Dialogue, StoryTrigger.Mechanic, 13,
+            new[]
+            {
+                new StoryLine(1, null, 306680, null),
+                new StoryLine(0, "Illust_Adventurer_Thinking", 306681, null),
+            },
+            null,
+            null),
+        new StoryScene("mech_furnace", StoryKind.Dialogue, StoryTrigger.Mechanic, 14,
+            new[]
+            {
+                new StoryLine(1, "Illust_MagicalSword_Smile", 306720, null),
+                new StoryLine(0, "Illust_Adventurer_Thinking", 306721, null),
+            },
+            null,
+            null),
+        new StoryScene("mech_ice", StoryKind.Dialogue, StoryTrigger.Mechanic, 15,
+            new[]
+            {
+                new StoryLine(1, null, 306760, null),
+                new StoryLine(0, "Illust_Adventurer_Thinking", 306761, null),
+            },
+            null,
+            null),
+        new StoryScene("mech_rift", StoryKind.Dialogue, StoryTrigger.Mechanic, 16,
+            new[]
+            {
+                new StoryLine(0, "Illust_Adventurer_Question", 306800, null),
+                new StoryLine(0, "Illust_Adventurer_Thinking", 306801, null),
+            },
+            null,
+            null),
     };
 
     // 층별 사실 — 인덱스는 층 번호(1~100). 0 번과 손수 만든 1~4층은 비어 있다.
