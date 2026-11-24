@@ -60,7 +60,8 @@ public class MonsterController : MonoBehaviour
         Managers.Game.MonsterData[0].MaxHP = Managers.Data.MonsterDic[id].MaxHP;
         Managers.Game.MonsterData[0].CurHP = Managers.Data.MonsterDic[id].MaxHP;
         
-        Managers.Game.MonsterData[0].Attack = Managers.Data.StageInfoDic[stageId].ATK * Managers.Data.MonsterDic[id].Attack;
+        // 용광로의 풀무 화로(11-24): 켜진 방의 몬스터는 공격이 세다 — 예측(BattleForecast.MonsterOf)과 같은 배율
+        Managers.Game.MonsterData[0].Attack = Managers.Data.StageInfoDic[stageId].ATK * Managers.Data.MonsterDic[id].Attack * FloorFurnace.AttackMul(id);
         Managers.Game.MonsterData[0].Defence = Managers.Data.StageInfoDic[stageId].DEF * Managers.Data.MonsterDic[id].Defence;
 
         Managers.Game.MonsterData[0].AttackSpeed = Managers.Data.MonsterDic[id].AttackSpeed;

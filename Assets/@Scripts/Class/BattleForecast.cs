@@ -163,7 +163,7 @@ public static class BattleForecast
         c.Ability = table.Ability;
         c.MaxHP = table.MaxHP;
         c.CurHP = table.MaxHP;
-        c.Attack = stage.ATK * table.Attack;
+        c.Attack = stage.ATK * table.Attack * FloorFurnace.AttackMul(table.id);   // 풀무 화로(11-24) — 전투와 같은 배율
         c.Defence = stage.DEF * table.Defence;
         c.AttackSpeed = table.AttackSpeed;
         c.DefenceSpeed = table.DefenceSpeed;

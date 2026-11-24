@@ -1548,6 +1548,28 @@ def check_tower(ptable, tower, start_state):
     return n >= TOWER_MIN_WASTE
 
 
+def furnace_mul(ptable, monsters, start_level, floor, ids, guard_id):
+    """화로 방 몬스터의 공격 배율. 켜진 채 싸우면 더 치르는 값이 밸브 파수꾼 한 판 값과 같아지게 — "끄러 갈까, 그냥 싸울까" 가
+    비슷한 무게가 되도록. 설계 플레이어(그 층 목표 레벨)로 잰다. 완주 보장은 꺼진 화로(배율 1)로 잰다 — 밸브가 화로 방보다 먼저 닿는다."""
+    by_id = {m["id"]: m for m in monsters}
+    lvl = target_level(floor, start_level)
+
+    def loss(md, mul=1.0):
+        p = player_with_runes(ptable, lvl, floor)
+        won, _, l = simulate_battle(p, creature_of(dict(md, Attack=md["Attack"] * mul)))
+        return l if won else p.max_hp
+    off = sum(loss(by_id[i]) for i in ids)
+    want = off + loss(by_id[guard_id])
+    lo, hi = 1.0, 1.6
+    for _ in range(24):
+        mid = (lo + hi) / 2
+        if sum(loss(by_id[i], mid) for i in ids) < want:
+            lo = mid
+        else:
+            hi = mid
+    return round(lo, 4)
+
+
 def designed_price(ptable, monsters, start_level):
     """저울: 설계한 플레이어(목표 레벨, 보스는 +1)가 한 층의 몬스터 전부에게 잃는 HP 를 돌려주는
     함수. 공격·방어를 얹어 재면 크기 룬과 제단이 "몇 HP 값인가" 가 나온다."""
@@ -2095,6 +2117,7 @@ def emit_scripts(monsters):
 
 WATER_TRIES = 60   # 수로 층에서 물살이 들어가는 씨앗을 찾을 때까지 더 뽑는 횟수
 RIFTS = {}      # 층 -> (균열 a, 균열 b) — 왕좌
+FURNACES = {}   # 층 -> (화로 칸, 화로 방 몬스터 id, 밸브 파수꾼 id) — 용광로. 배율은 furnace_mul 이 정한다
 WATER = {}      # 층 -> (물살, 레버) — emit_layouts 가 채우고 GeneratedGimmicks.cs 로 굽는다
 
 
@@ -2158,6 +2181,24 @@ def emit_layouts(monsters, write=True):
             rift = gimmicks.place_rift(g, elite_code) if ch == gimmicks.RIFT_CHAPTER and not boss else None
             if rift:
                 RIFTS[floor] = rift
+            elif ch == gimmicks.FORGE_CHAPTER and not boss:
+                # 용광로: 풀무 화로 + 밸브(레버). 밸브 길목은 곁길 몬스터가 지킨다 — 화로 방보다 먼저 닿는다.
+                def floor_ok(gg, origins=origins, doors=doors, ecell=ecell):
+                    if not validate_layout(gg, origins, doors)[0] or check_structure(gg) or layout_v2.check_fork(gg, doors, ecell)                             or check_doors(gg) or check_sealed_by_portal(gg) or check_vault_safe(gg, doors)                             or len(layout_v2.dead_end_items(gg, elite_code)) != 1:
+                        return "layout"
+                    cc = floor_choices(gg, doors)
+                    if not (cc["forced_mobs"] >= FORCED_PER_FLOOR and cc["forced_runes"] >= cc["runes"]
+                            and cc["choice_rewards"] == (2 if choice_pair(floor) else 0)):
+                        return "choices"
+                    return None
+                plain = [list(rr) for rr in g]
+                fz = gimmicks.add_furnace(g, doors, floor, floor_ok, elite_code)
+                if fz:
+                    fcell, fmobs, _, gcell = fz
+                    FURNACES[floor] = (fcell, [int(g[y][x][2:].rstrip("~")) for x, y in fmobs], int(g[gcell[1]][gcell[0]][2:].rstrip("~")))
+                elif attempt < LAYOUT_ATTEMPTS - 1 and attempt < WATER_TRIES:
+                    fallback = fallback or (plain, doors)
+                    continue
             elif ch in (gimmicks.WATER_CHAPTER, gimmicks.RIFT_CHAPTER) and not boss:
                 def floor_ok(gg, origins=origins, doors=doors, ecell=ecell):
                     for name, bad in (("validate", lambda: not validate_layout(gg, origins, doors)[0]), ("structure", lambda: check_structure(gg)),
@@ -2429,6 +2470,9 @@ def build_all(dry_run=False):
           f"(1~{HANDMADE_FLOORS}층은 원본 유지)")
     print(f"      물살·수문 레버 {len(WATER)}층: {', '.join(map(str, sorted(WATER)))}")
     print(f"      왕좌 짝 균열 {len(RIFTS)}층: {', '.join(map(str, sorted(RIFTS)))}")
+    if FURNACES:
+        muls = {f: furnace_mul(ptable, monsters, start_level, f, ids, gid) for f, (_, ids, gid) in FURNACES.items()}
+        print(f"      용광로 화로 {len(FURNACES)}층: " + ", ".join(f"{f}(x{muls[f]:.2f}·{len(FURNACES[f][1])}마리)" for f in sorted(FURNACES)))
     if os.environ.get("THESWORD_GIMMICK_DEBUG"):
         print("      (물살 시도)", dict(gimmicks.REASONS))
     if failures:
@@ -2513,8 +2557,10 @@ def build_all(dry_run=False):
     # 정해지므로 다시 뽑아도 같은 격자가 나온다.
     WATER.clear()
     RIFTS.clear()
+    FURNACES.clear()
     emit_layouts(monsters, write=True)
-    gimmicks.emit_cs(os.path.join(ROOT, "Assets", "@Scripts", "Data", "GeneratedGimmicks.cs"), WATER, RIFTS)
+    gimmicks.emit_cs(os.path.join(ROOT, "Assets", "@Scripts", "Data", "GeneratedGimmicks.cs"), WATER, RIFTS,
+                     {f: (c, furnace_mul(ptable, monsters, start_level, f, ids, gid), ids) for f, (c, ids, gid) in FURNACES.items()})
 
     # 레이아웃 CSV 를 쓴 "다음에" 돌려야 한다. MapBuilder 가 읽는 것은 이 JSON 이다.
     print("      MapData.json 생성 (CSV -> 런타임 오브젝트 배치)")

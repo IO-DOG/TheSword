@@ -288,8 +288,94 @@ def place_rift(grid, elite_code=None):
     return None if best is None else (best[1], best[2])
 
 
-def emit_cs(path, water, rifts=None):
-    """water: {층: (물살 목록, 레버)}, rifts: {층: (a, b)} -> GeneratedGimmicks.cs"""
+# ------------------------------------------------------------------ 용광로(챕터 2) — 풀무 화로와 밸브
+FORGE_CHAPTER = 2
+
+
+def add_furnace(grid, doors, floor, floor_ok, elite_code=None):
+    """몬스터가 둘 이상 선 방 하나에 화로를 놓고, 그 방 몬스터를 지나지 않고 닿는 곳에 밸브(레버, 셀 12)를 둔다.
+    밸브 길목은 곁길 몬스터 하나가 지킨다(물살과 같은 길 — 관문·골방 파수꾼이 아닌 놈을 옮긴다).
+    성공하면 grid 를 고치고 (화로 칸, 화로 방 몬스터 칸들, 밸브, 길목 몬스터 칸) 을 돌려준다. 완주 보장은 꺼진 화로로 잰다
+    — 밸브가 화로 방보다 먼저 닿으니 다 잡는 정답 경로는 밸브를 먼저 잠근다."""
+    from layout_gen import _unavoidable_mob
+    s = _spawn(grid)
+    reach = _flood(grid, s)
+    rooms = _room_cells(grid)
+    comps = []
+    left = set(rooms)
+    while left:
+        st = left.pop(); comp = {st}; q = [st]
+        while q:
+            c = q.pop()
+            for n in _open_n(grid, c):
+                if n in left:
+                    left.remove(n); comp.add(n); q.append(n)
+        comps.append(comp)
+    best = None
+    for comp in comps:
+        mobs = sorted(q for q in comp if _cell(grid, q).startswith("M_") and _cell(grid, q) != elite_code)
+        plain = [q for q in comp if _cell(grid, q) == "1"]
+        if len(mobs) < 2 or not plain:
+            continue
+        if best is None or len(mobs) > len(best[1]):
+            best = (comp, mobs, plain)
+    if best is None:
+        return None
+    comp, mobs, plain = best
+    cx = sum(q[0] for q in comp) / len(comp); cy = sum(q[1] for q in comp) / len(comp)
+    furnace = min(plain, key=lambda q: ((q[0] - cx) ** 2 + (q[1] - cy) ** 2, q))
+    before = _flood(grid, s, blocked=set(mobs))                # 화로 방 몬스터를 안 지나고 닿는 곳
+
+    def keeps(g, q):
+        return _flood(g, s, blocked={q}) | {q} == _flood(g, s)
+    items_all = {q for q in reach if _cell(grid, q).startswith(("I_", "E_"))}
+
+    def guards_something(g, q):
+        return bool(items_all - _flood(g, s, blocked={q}))
+    walls = collections.Counter(v for row in grid for v in row if v.startswith("W"))
+    rock = walls.most_common(1)[0][0] if walls else "W_01"
+    cands = sorted((q for q in before if _cell(grid, q) == "1" and q not in comp and q != furnace
+                    and min(abs(q[0] - m[0]) + abs(q[1] - m[1]) for m in mobs) >= 3 and keeps(grid, q)),
+                   key=lambda q: -min(abs(q[0] - s[0]) + abs(q[1] - s[1]), 30))
+    movers = [q for q in sorted(reach) if _cell(grid, q).startswith("M_") and q not in mobs and _cell(grid, q) != elite_code
+              and not _unavoidable_mob(grid, doors, q) and not guards_something(grid, q)]
+    for lever in cands[:25]:
+        g = [list(r) for r in grid]
+        g[lever[1]][lever[0]] = LEVER
+        # 이미 몬스터가 지키는가(그 몬스터를 막으면 밸브에 못 간다)
+        guard = next((m for m in sorted(reach) if _cell(g, m).startswith("M_") and m not in mobs
+                      and lever not in _flood(g, s, blocked={m} | set(mobs))), None)
+        if guard is None:
+            path_cells = [c for c in sorted(before) if _cell(g, c) == "1" and c != lever and c != furnace and c not in comp
+                          and lever not in _flood(g, s, blocked={c} | set(mobs))]
+            done = None
+            for m in movers:
+                for c in path_cells:
+                    g2 = [list(r) for r in g]
+                    g2[c[1]][c[0]], g2[m[1]][m[0]] = g2[m[1]][m[0]], "1"
+                    if len(_open_n(g2, m)) == 1:
+                        g2[m[1]][m[0]] = rock
+                    if lever in _flood(g2, s, blocked={c} | set(mobs)):
+                        continue
+                    if s not in _flood(g2, s) or floor_ok(g2):
+                        continue
+                    done = (g2, c)
+                    break
+                if done:
+                    break
+            if not done:
+                continue
+            g, guard = done
+        elif floor_ok(g):
+            continue
+        for yy, row in enumerate(g):
+            grid[yy][:] = row
+        return furnace, mobs, lever, guard
+    return None
+
+
+def emit_cs(path, water, rifts=None, furnaces=None):
+    """water: {층: (물살 목록, 레버)}, rifts: {층: (a, b)}, furnaces: {층: (화로 칸, 배율, 몬스터 id 목록)} -> GeneratedGimmicks.cs"""
     lines = ["// 생성 파일 — Tools/generate_content.py 가 쓴다(Tools/gimmicks.py). 손으로 고치지 않는다.",
              "using System.Collections.Generic;", "",
              "public static class GeneratedGimmicks", "{",
@@ -306,6 +392,13 @@ def emit_cs(path, water, rifts=None):
     for f in sorted(rifts or {}):
         (ax, ay), (bx, by) = rifts[f]
         lines.append("        { %d, (%d, %d, %d, %d) }," % (f, ax, ay, bx, by))
+    lines += ["    };", "",
+              "    /// <summary>층(1부터) -> 풀무 화로 (칸, 공격 배율, 화로 방 몬스터 id). 그 층 밸브(레버)를 잠그면 꺼진다.</summary>",
+              "    public static readonly Dictionary<int, (int x, int y, float mul, int[] ids)> Furnaces = new Dictionary<int, (int x, int y, float mul, int[] ids)>",
+              "    {"]
+    for f in sorted(furnaces or {}):
+        (fx, fy), mul, ids = furnaces[f]
+        lines.append("        { %d, (%d, %d, %.4ff, new[] { %s }) }," % (f, fx, fy, mul, ", ".join(map(str, ids))))
     lines += ["    };", "}", ""]
     with open(path, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("\n".join(lines))

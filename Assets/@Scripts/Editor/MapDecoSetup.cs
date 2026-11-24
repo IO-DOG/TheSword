@@ -134,6 +134,10 @@ public static class MapDecoSetup
                 grid[rf.ay][rf.ax] = "CUR";   // 균열 칸에도 바닥 장식을 얹지 않는다
                 grid[rf.by][rf.bx] = "CUR";
             }
+            if (int.TryParse(dungeonId.Substring(3), out int fidx)
+                && GeneratedGimmicks.Furnaces.TryGetValue(chapter * 20 + fidx + 1, out (int x, int y, float mul, int[] ids) fz))
+                grid[fz.y][fz.x] = "CUR";     // 화로 칸
+
             GameObject root = BuildOne(dungeonId, chapter, grid);
             if (root == null)
                 continue;
