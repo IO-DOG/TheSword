@@ -291,7 +291,7 @@ public class UI_MonsterManualPopup : UI_Popup
 
         // 능력치: HUD 와 같은 칸에 같은 값 (공격·방어는 층 배수를 곱한 것 — UI_MonsterInfo 와 같다).
         Data.StageInfoData stage = Managers.Data.StageInfoDic[Managers.Game.PlayerData.CurStageid];
-        StatBox(row, "MainUI_Status_ATK", 462f, stage.ATK * e.Data.Attack);
+        StatBox(row, "MainUI_Status_ATK", 462f, Mathf.Round(stage.ATK * e.Data.Attack * FloorFurnace.AttackMul(e.Id)));   // 다음 싸움 상대 — 풀무 화로 배율 포함
         StatBox(row, "MainUI_Status_DEF", 606f, stage.DEF * e.Data.Defence);
         StatBox(row, "MainUI_Status_HP", 750f, e.Data.MaxHP);
 

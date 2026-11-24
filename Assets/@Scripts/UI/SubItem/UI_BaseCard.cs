@@ -111,7 +111,7 @@ public class UI_BaseCard : UI_Base
         if (nameLabel != null && nameId != 0)
             PromptText.Set(nameLabel, () => Managers.GetString(nameId));
         GetText((int)Texts.HPBarText).text = Mathf.CeilToInt(_creature.CurHP).ToString();   // 야수의 회복 등으로 소수가 남으면 "231.6" 이 찍혔다
-        GetText((int)Texts.AttackStatusText).text = _creature.Attack.ToString();
+        GetText((int)Texts.AttackStatusText).text = Mathf.RoundToInt(_creature.Attack).ToString();   // 화로 배율(11-24)이 소수를 만든다 — "201.997"
         GetText((int)Texts.DefenceStatusText).text = _creature.Defence.ToString();
 
         // 체력바를 몬스터 그림보다 위에 그린다.
