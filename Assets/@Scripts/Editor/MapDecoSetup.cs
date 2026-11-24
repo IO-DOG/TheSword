@@ -128,6 +128,12 @@ public static class MapDecoSetup
                 foreach ((int x, int y, int dir) c in cur)
                     if (c.y < grid.Length && c.x < grid[c.y].Length)
                         grid[c.y][c.x] = "CUR";
+            if (int.TryParse(dungeonId.Substring(3), out int ridx)
+                && GeneratedGimmicks.Rifts.TryGetValue(chapter * 20 + ridx + 1, out (int ax, int ay, int bx, int by) rf))
+            {
+                grid[rf.ay][rf.ax] = "CUR";   // 균열 칸에도 바닥 장식을 얹지 않는다
+                grid[rf.by][rf.bx] = "CUR";
+            }
             GameObject root = BuildOne(dungeonId, chapter, grid);
             if (root == null)
                 continue;

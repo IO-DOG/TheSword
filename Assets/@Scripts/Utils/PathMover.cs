@@ -46,6 +46,8 @@ public class PathMover
 
     // BFS 재사용 버퍼
     readonly Dictionary<Vector2Int, Vector2Int> _from = new Dictionary<Vector2Int, Vector2Int>();
+    // 왕좌의 짝 균열(FloorRifts)로 닿은 칸 -> 밟은 균열 칸. 첫걸음 방향은 균열 칸 쪽이다.
+    readonly Dictionary<Vector2Int, Vector2Int> _via = new Dictionary<Vector2Int, Vector2Int>();
     readonly Queue<Vector2Int> _queue = new Queue<Vector2Int>();
     readonly Dictionary<Vector2Int, bool> _solid = new Dictionary<Vector2Int, bool>();
     static readonly Collider[] s_hits = new Collider[8];
@@ -170,6 +172,7 @@ public class PathMover
     public void Flood(Vector2Int start)
     {
         _from.Clear();
+        _via.Clear();
         Dist.Clear();
         _queue.Clear();
 
@@ -202,6 +205,17 @@ public class PathMover
                     continue;
                 if (FloorCurrents.Blocks(_map, cur, next))   // 수로의 물살 — 거꾸로는 못 간다(걸음과 같은 판정)
                     continue;
+                // 왕좌의 짝 균열: 균열 칸에 들어서면 짝 칸에 선다(걸음을 마칠 때 PlayerController 가 옮긴다)
+                if (FloorRifts.TryPair(_map, next, out Vector2Int land))
+                {
+                    if (Dist.ContainsKey(land) || Solid(land))
+                        continue;
+                    Dist[land] = d + 1;
+                    _from[land] = cur;
+                    _via[land] = next;
+                    _queue.Enqueue(land);
+                    continue;
+                }
                 Dist[next] = d + 1;
                 _from[next] = cur;
                 _queue.Enqueue(next);
@@ -296,7 +310,7 @@ public class PathMover
             cur = prev;
         }
 
-        Vector2Int step = cur - start;
+        Vector2Int step = (_via.TryGetValue(cur, out Vector2Int rift) ? rift : cur) - start;
         if (step.y > 0) return Define.MoveDir.Up;
         if (step.y < 0) return Define.MoveDir.Down;
         if (step.x < 0) return Define.MoveDir.Left;

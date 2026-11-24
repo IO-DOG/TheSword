@@ -2094,6 +2094,7 @@ def emit_scripts(monsters):
 # ------------------------------------------------------------------ 층 레이아웃
 
 WATER_TRIES = 60   # 수로 층에서 물살이 들어가는 씨앗을 찾을 때까지 더 뽑는 횟수
+RIFTS = {}      # 층 -> (균열 a, 균열 b) — 왕좌
 WATER = {}      # 층 -> (물살, 레버) — emit_layouts 가 채우고 GeneratedGimmicks.cs 로 굽는다
 
 
@@ -2153,7 +2154,11 @@ def emit_layouts(monsters, write=True):
             if any(floor_similarity(g, other) > SAME_FLOOR_MAX for other in made.values()):
                 continue
             # 수로의 기믹(11-24 오너): 물살 + 수문 레버. 고친 격자도 위 검사를 전부 다시 지나야 한다 — 못 지나면 그 층은 물살 없이 둔다.
-            if ch == gimmicks.WATER_CHAPTER and not boss:
+            # 왕좌(총복습)는 관문 하나를 건너뛰는 짝 균열 — 자리가 없는 층은 수로의 물살을 섞어 낸다.
+            rift = gimmicks.place_rift(g, elite_code) if ch == gimmicks.RIFT_CHAPTER and not boss else None
+            if rift:
+                RIFTS[floor] = rift
+            elif ch in (gimmicks.WATER_CHAPTER, gimmicks.RIFT_CHAPTER) and not boss:
                 def floor_ok(gg, origins=origins, doors=doors, ecell=ecell):
                     for name, bad in (("validate", lambda: not validate_layout(gg, origins, doors)[0]), ("structure", lambda: check_structure(gg)),
                                       ("fork", lambda: layout_v2.check_fork(gg, doors, ecell)), ("doors", lambda: check_doors(gg)),
@@ -2422,7 +2427,8 @@ def build_all(dry_run=False):
      unsafe_vaults, behind_boss, econ, made) = emit_layouts(monsters, write=False)
     print(f"      {written}/{TOTAL_FLOORS - HANDMADE_FLOORS} 층 생성 "
           f"(1~{HANDMADE_FLOORS}층은 원본 유지)")
-    print(f"      수로 물살·수문 레버 {len(WATER)}층: {', '.join(map(str, sorted(WATER)))}")
+    print(f"      물살·수문 레버 {len(WATER)}층: {', '.join(map(str, sorted(WATER)))}")
+    print(f"      왕좌 짝 균열 {len(RIFTS)}층: {', '.join(map(str, sorted(RIFTS)))}")
     if os.environ.get("THESWORD_GIMMICK_DEBUG"):
         print("      (물살 시도)", dict(gimmicks.REASONS))
     if failures:
@@ -2506,8 +2512,9 @@ def build_all(dry_run=False):
     # [4/7] 은 검사만 한다 — 검사가 다 통과한 뒤에야 쓴다. 씨앗이 층수로
     # 정해지므로 다시 뽑아도 같은 격자가 나온다.
     WATER.clear()
+    RIFTS.clear()
     emit_layouts(monsters, write=True)
-    gimmicks.emit_cs(os.path.join(ROOT, "Assets", "@Scripts", "Data", "GeneratedGimmicks.cs"), WATER)
+    gimmicks.emit_cs(os.path.join(ROOT, "Assets", "@Scripts", "Data", "GeneratedGimmicks.cs"), WATER, RIFTS)
 
     # 레이아웃 CSV 를 쓴 "다음에" 돌려야 한다. MapBuilder 가 읽는 것은 이 JSON 이다.
     print("      MapData.json 생성 (CSV -> 런타임 오브젝트 배치)")

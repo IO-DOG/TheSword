@@ -449,6 +449,8 @@ public class PlayerController : MonoBehaviour
         transform.DOMove(_cellPos, _duration * durationScale).SetEase(Ease.Linear).OnComplete(() =>
         {
             Managers.Sound.Play(Define.Sound.Effect, "HeroMove_SFX");
+            if (OnBuiltFloor())
+                RiftJump();
 
             _isMoving = false;
         });
@@ -482,9 +484,27 @@ public class PlayerController : MonoBehaviour
                                 PathMover.WallMask, QueryTriggerInteraction.Collide);
     }
 
+    static GameObject CurrentMap()
+    {
+        return Managers.Game.Maps != null && Managers.Game.Maps.TryGetValue(Managers.Game.PlayerData.CurStageid, out GameObject m) ? m : null;
+    }
+
+    /// <summary>왕좌의 짝 균열(11-24): 걸음을 마친 칸이 균열이면 짝 칸으로 옮긴다. PathMover 가 같은 간선으로 길을 잰다.</summary>
+    void RiftJump()
+    {
+        GameObject map = CurrentMap();
+        if (map == null || FloorRifts.TryPair(map, PathMover.Cell(map, _cellPos), out Vector2Int pair) == false)
+            return;
+        Vector3 to = map.transform.TransformPoint(new Vector3(pair.x * PathMover.Tile, 0f, pair.y * PathMover.Tile));
+        to.y = _cellPos.y;
+        _cellPos = to;
+        transform.position = to;
+        Managers.Sound.Play(Define.Sound.Effect, "HeroMove_SFX");
+    }
+
     bool CurrentBlocks()
     {
-        GameObject map = Managers.Game.Maps != null && Managers.Game.Maps.TryGetValue(Managers.Game.PlayerData.CurStageid, out GameObject m) ? m : null;
+        GameObject map = CurrentMap();
         if (map == null || map.GetComponent<FloorCurrents>() == null)
             return false;
         return FloorCurrents.Blocks(map, PathMover.Cell(map, _cellPos), PathMover.Cell(map, _cellPos + _nextCellPos));

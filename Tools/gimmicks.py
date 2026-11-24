@@ -210,8 +210,86 @@ def check_water(grid, currents, lever):
     return issues
 
 
-def emit_cs(path, water):
-    """water: {층: (물살 목록, 레버)} -> GeneratedGimmicks.cs"""
+# ------------------------------------------------------------------ 왕좌(챕터 4) — 짝 균열
+RIFT_CHAPTER = 4
+
+
+def _room_cells(grid):
+    out = set()
+    for y in range(len(grid)):
+        for x in range(len(grid[y])):
+            for ox in (0, -1):
+                for oy in (0, -1):
+                    if all(_walk(_cell(grid, (x + ox + i, y + oy + j))) for i in (0, 1) for j in (0, 1)):
+                        out.add((x, y))
+    return out
+
+
+def place_rift(grid, elite_code=None):
+    """같은 구역 안의 관문 몬스터 하나를 건너뛰는 짝 균열. (a, b) 또는 None. 지도는 안 고친다(균열 칸은 빈 바닥 그대로).
+    문은 건너뛰지 않는다(열쇠 셈) — 문을 벽으로 친 그래프에서 관문 T 하나만 사이에 둔 두 방 칸을 잇는다."""
+    s = _spawn(grid)
+    is_door = lambda v: v is not None and v.isdigit() and 3 <= int(v) <= 8
+
+    def zone(start, blocked):
+        seen = {start}; q = collections.deque([start])
+        while q:
+            c = q.popleft()
+            for dx, dy in DIRS:
+                n = (c[0] + dx, c[1] + dy)
+                v = _cell(grid, n)
+                if n in seen or n in blocked or not _walk(v) or is_door(v):
+                    continue
+                seen.add(n); q.append(n)
+        return seen
+
+    rooms = _room_cells(grid)
+    reach = _flood(grid, s)
+    best = None
+    for t in sorted(reach):
+        v = _cell(grid, t)
+        if not v.startswith("M_") or v == elite_code:
+            continue
+        front_all = _flood(grid, s, blocked={t})
+        nbs = [n for n in _open_n(grid, t) if not is_door(_cell(grid, n))]
+        fr = [n for n in nbs if n in front_all]
+        bk = [n for n in nbs if n not in front_all]
+        if not fr or not bk:
+            continue                                   # 관문이 아니다(돌아갈 수 있다)
+        F = zone(fr[0], {t})
+        R = zone(bk[0], {t})
+        if F & R:
+            continue
+
+        def dist_from_t(region):
+            d = {t: 0}; q = collections.deque([t])
+            while q:
+                c = q.popleft()
+                for n in _open_n(grid, c):
+                    if n in region and n not in d:
+                        d[n] = d[c] + 1; q.append(n)
+            return d
+        df, dr = dist_from_t(F), dist_from_t(R)
+
+        def ok_end(c, d):
+            if _cell(grid, c) != "1" or not (2 <= d.get(c, 0) <= 12):
+                return False
+            if any(_cell(grid, (c[0] + dx, c[1] + dy)) in ("11", "14", "15", "16") for dx, dy in DIRS):
+                return False
+            return s in _flood(grid, s, blocked={c}) and _flood(grid, s, blocked={c}) | {c} == reach
+        A = [c for c in sorted(F) if ok_end(c, df)]
+        B = [c for c in sorted(R) if ok_end(c, dr)]
+        if not A or not B:
+            continue
+        a = max(A, key=lambda c: df[c]); b = max(B, key=lambda c: dr[c])
+        score = (len(R), df[a] + dr[b])
+        if best is None or score > best[0]:
+            best = (score, a, b)
+    return None if best is None else (best[1], best[2])
+
+
+def emit_cs(path, water, rifts=None):
+    """water: {층: (물살 목록, 레버)}, rifts: {층: (a, b)} -> GeneratedGimmicks.cs"""
     lines = ["// 생성 파일 — Tools/generate_content.py 가 쓴다(Tools/gimmicks.py). 손으로 고치지 않는다.",
              "using System.Collections.Generic;", "",
              "public static class GeneratedGimmicks", "{",
@@ -221,6 +299,13 @@ def emit_cs(path, water):
     for f in sorted(water):
         cur, _ = water[f]
         lines.append("        { %d, new[] { %s } }," % (f, ", ".join("(%d, %d, %d)" % c for c in cur)))
+    lines += ["    };", "",
+              "    /// <summary>층(1부터) -> 짝 균열 두 칸 (열, 행). 한쪽에 들어서면 다른 쪽으로 옮겨진다(같은 구역의 관문 하나를 건너뛴다).</summary>",
+              "    public static readonly Dictionary<int, (int ax, int ay, int bx, int by)> Rifts = new Dictionary<int, (int ax, int ay, int bx, int by)>",
+              "    {"]
+    for f in sorted(rifts or {}):
+        (ax, ay), (bx, by) = rifts[f]
+        lines.append("        { %d, (%d, %d, %d, %d) }," % (f, ax, ay, bx, by))
     lines += ["    };", "}", ""]
     with open(path, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("\n".join(lines))
