@@ -271,6 +271,7 @@ public static class MapBuilder
             }
         }
 
+        FloorCurrents.Attach(root, mapId + 1);   // 수로의 물살(11-24) — 그 층에 없으면 아무것도 안 한다
         return root;
     }
 

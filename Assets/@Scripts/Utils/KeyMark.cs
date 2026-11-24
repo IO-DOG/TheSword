@@ -71,9 +71,13 @@ public static class KeyMark
     }
 
     /// <summary>맵 위에 세운다. at 은 표지 아래끝 가운데(월드). parent 가 꺼지면(열쇠를 주우면) 같이 사라진다.</summary>
-    public static GameObject Stand(Transform parent, int keyIndex, Vector3 at)
+    public static GameObject Stand(Transform parent, int keyIndex, Vector3 at) => StandSprite(parent, Get(keyIndex), at);
+
+    /// <summary>코드로 그린 표지 하나를 세운다(물살 화살표 등) — 깊이 받침까지 같은 길.</summary>
+    public static Sprite DrawShape(string[] rows, Color32 fill) => Draw(rows, fill);
+
+    public static GameObject StandSprite(Transform parent, Sprite sprite, Vector3 at)
     {
-        Sprite sprite = Get(keyIndex);
         if (sprite == null || parent == null)
             return null;
         var go = new GameObject("KeyMark");

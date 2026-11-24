@@ -200,6 +200,8 @@ public class PathMover
 
                 if (Dist.ContainsKey(next) || Solid(next))
                     continue;
+                if (FloorCurrents.Blocks(_map, cur, next))   // 수로의 물살 — 거꾸로는 못 간다(걸음과 같은 판정)
+                    continue;
                 Dist[next] = d + 1;
                 _from[next] = cur;
                 _queue.Enqueue(next);

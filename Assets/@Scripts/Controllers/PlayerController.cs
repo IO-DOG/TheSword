@@ -482,6 +482,14 @@ public class PlayerController : MonoBehaviour
                                 PathMover.WallMask, QueryTriggerInteraction.Collide);
     }
 
+    bool CurrentBlocks()
+    {
+        GameObject map = Managers.Game.Maps != null && Managers.Game.Maps.TryGetValue(Managers.Game.PlayerData.CurStageid, out GameObject m) ? m : null;
+        if (map == null || map.GetComponent<FloorCurrents>() == null)
+            return false;
+        return FloorCurrents.Blocks(map, PathMover.Cell(map, _cellPos), PathMover.Cell(map, _cellPos + _nextCellPos));
+    }
+
     static bool OnBuiltFloor()
     {
         Data.StageInfoData info;
@@ -526,6 +534,10 @@ public class PlayerController : MonoBehaviour
         // 손수 만든 1~4층은 벽이 바닥에 앉아 있어 광선이 전부 본다 — 거기는 그대로 둔다(3층 제단 방의 나무 장식 하나가
         // 옆 칸에 걸쳐 있어, 탐침으로 재면 걷던 칸 하나가 막힌다).
         if (OnBuiltFloor() && WallAt(_cellPos + _nextCellPos) && (hit.collider == null || BehindWall(hit.collider.gameObject.layer)))
+            return true;
+
+        // 수로의 물살(11-24): 물살 칸에는 그 방향으로만 들어가고 거꾸로는 못 나온다 — PathMover 와 같은 판정.
+        if (OnBuiltFloor() && CurrentBlocks())
             return true;
 
         if (hit.collider != null)

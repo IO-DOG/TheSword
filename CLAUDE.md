@@ -207,7 +207,7 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
   서로 맞는지 본다.
 - **Shift 를 전투 키로 쓰지 않는다.** Shift+Tab 은 Steam 오버레이라 가속(Shift)과 건너뛰기(Tab)가 겹쳤다.
   가속은 Space 만, Deck 은 R2 → Space.
-- 업적 20개(`Steam/achievements.csv`)·통계 4·Rich Presence(`mode` normal/tower)·순위표 `LB_NORMAL_V3`/`LB_TOWER_V3`
+- 업적 20개(`Steam/achievements.csv`)·통계 4·Rich Presence(`mode` normal/tower)·순위표 `LB_NORMAL_V4`/`LB_TOWER_V4`
   (오름차순, 최고만). 점수는 받자마자 PlayerPrefs `STEAM_PENDING_SCORE` 에 적고 Steam 이 받았다고 할 때 지운다 —
   Steam 없이 끝낸 판도 다음에 붙을 때 올라간다. 콘텐츠 판(MapData)을 바꾸면 `_V` 를 올린다.
 - **체험판**은 `GameBuild.WindowsDemo`(→ `Build/WindowsDemo`)가 `DEMO` 정의를 그 빌드에만 얹어 굽는다(플레이어 설정은
@@ -745,6 +745,15 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
 - 문은 세 갈래다(`layout_gen.door_roles`): 큰길(막으면 계단이 끊긴다)·금고(막으면 골방이 끊긴다)·**갈림길**(막아도 아무것도 안 끊긴다).
   `story_gen` 이 `GeneratedStory.ForkDoors` 를 쓰고 `KeyInventory.StrandedFloor` 는 그 문을 "남겨 둘 큰길 문" 으로 안 센다.
   `fun_sim` 은 정예 칸을 막고 읽은 뒤 `fork_gate` 로 문/정예를 고른다(습관 fight·key·smart). 설계·숫자는 `.omc/plans/fork-proto.md`.
+
+**챕터 기믹 — 수로의 물살(2026-11-24 오너 "챕터마다 기믹, 제안대로").** 수로(21~39층, 보스 층 제외) 16개 층에서 곁가지로 들어가는 곧은 통로 한 칸이 물살이다
+(`Tools/gimmicks.py`). 물살 칸에는 화살표 방향으로만 들어가고 거꾸로는 못 나온다 — 그 곁가지 안쪽의 수문 레버(셀 12)를 당겨야 그 층 물살이 멈춰 돌아온다.
+레버 길목은 곁길 몬스터 하나가 지킨다(생성기가 관문도 골방 파수꾼도 아닌 놈을 옮기고, 비운 자리가 빈 막다른 칸이면 바위로 메운다). 판단: 앞을 다 치우고 탈까,
+레버 앞 몬스터를 지금 이길 수 있나(머리 위 예측). 완주 계산은 그대로다 — 순서만 바뀐다(정답 경로는 다 잡는다). 못 이기고 갇히면 "이 층 다시 시작".
+지도 CSV 에는 레버 한 칸만 더하고, 물살 칸·방향은 `GeneratedGimmicks.cs`(생성기가 굽는다)에 둔다 — CSV 셀 코드를 읽는 곳이 수십 곳이라 새 코드를 안 만들었다.
+걸음(`PlayerController.CurrentBlocks`)·클릭 이동·봇(`PathMover.Flood`)이 같은 `FloorCurrents.Blocks` 를 본다. 레버 상태는 `LeverActiveDic`(체크포인트에 남는다) 그대로.
+생성기는 수로 층에서 물살이 안 들어가는 씨앗이면 `WATER_TRIES` 번 더 뽑고, 고친 격자도 층 검사 전부를 다시 지나야 한다(`gimmicks.add_water` 의 `floor_ok`).
+장식 굽기(`MapDecoSetup`)는 물살 칸에 바닥 장식을 두지 않는다. 물살 칸이 바뀌면 순위표 `_V` 를 올린다(지금 V4).
 
 골방 안의 덤은 **완주 계산에 넣지 않는다.** 안 잡고 지나갈 수 있는 것을 셈에 넣으면
 완주 보장이 거짓말이 된다. 파수꾼도 그 층 다섯 마리 중 하나를 옮겨 세운 것이지

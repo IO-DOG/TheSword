@@ -121,7 +121,14 @@ public static class MapDecoSetup
             if (int.TryParse(dungeonId.Substring(0, 2), out chapter) == false)
                 continue;
 
-            GameObject root = BuildOne(dungeonId, chapter, ReadGrid(csv));
+            string[][] grid = ReadGrid(csv);
+            // 물살 칸(GeneratedGimmicks, 11-24)은 CSV 에 없다 — 빈 바닥으로 보고 장식을 얹지 않게 표시해 둔다.
+            if (int.TryParse(dungeonId.Substring(3), out int idx)
+                && GeneratedGimmicks.Currents.TryGetValue(chapter * 20 + idx + 1, out (int x, int y, int dir)[] cur))
+                foreach ((int x, int y, int dir) c in cur)
+                    if (c.y < grid.Length && c.x < grid[c.y].Length)
+                        grid[c.y][c.x] = "CUR";
+            GameObject root = BuildOne(dungeonId, chapter, grid);
             if (root == null)
                 continue;
 

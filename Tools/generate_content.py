@@ -38,6 +38,7 @@ from thesword_balance import (
     TRAIT_NAME,
 )
 import layout_v2
+import gimmicks
 from layout_gen import (validate_layout, check_doors,
                         check_sealed_by_portal, check_vault_safe, check_behind_boss,
                         check_structure, check_variety, floor_similarity,
@@ -2092,6 +2093,10 @@ def emit_scripts(monsters):
 
 # ------------------------------------------------------------------ 층 레이아웃
 
+WATER_TRIES = 60   # 수로 층에서 물살이 들어가는 씨앗을 찾을 때까지 더 뽑는 횟수
+WATER = {}      # 층 -> (물살, 레버) — emit_layouts 가 채우고 GeneratedGimmicks.cs 로 굽는다
+
+
 def emit_layouts(monsters, write=True):
     """100층 레이아웃 CSV 출력. 도달 불가 레이아웃은 시드를 바꿔 재생성한다."""
     by_floor = {}
@@ -2125,6 +2130,7 @@ def emit_layouts(monsters, write=True):
         elite = next((m for m in by_floor[floor] if m.get("_fork")), None)
         elite_code = f"M_{elite['id']:03d}" if elite else None
         grid = None
+        fallback = None
         for attempt in range(LAYOUT_ATTEMPTS):
             r, _ = layout_v2.build_floor_v2(
                 ch, floor * 1000 + attempt, [m["id"] for m in mobs], boss["id"] if boss else None, walls,
@@ -2146,8 +2152,31 @@ def emit_layouts(monsters, write=True):
             # 거울상까지 같은 층이 둘 있었다(11층과 67층) — 오너가 직접 찾았다. 앞 층을 닮은 지도는 버린다.
             if any(floor_similarity(g, other) > SAME_FLOOR_MAX for other in made.values()):
                 continue
+            # 수로의 기믹(11-24 오너): 물살 + 수문 레버. 고친 격자도 위 검사를 전부 다시 지나야 한다 — 못 지나면 그 층은 물살 없이 둔다.
+            if ch == gimmicks.WATER_CHAPTER and not boss:
+                def floor_ok(gg, origins=origins, doors=doors, ecell=ecell):
+                    for name, bad in (("validate", lambda: not validate_layout(gg, origins, doors)[0]), ("structure", lambda: check_structure(gg)),
+                                      ("fork", lambda: layout_v2.check_fork(gg, doors, ecell)), ("doors", lambda: check_doors(gg)),
+                                      ("portal", lambda: check_sealed_by_portal(gg)), ("vault", lambda: check_vault_safe(gg, doors)),
+                                      ("dead_end", lambda: len(layout_v2.dead_end_items(gg, elite_code)) != 1)):
+                        if bad():
+                            return name
+                    cc = floor_choices(gg, doors)
+                    if not (cc["forced_mobs"] >= FORCED_PER_FLOOR and cc["forced_runes"] >= cc["runes"]
+                            and cc["choice_rewards"] == (2 if choice_pair(floor) else 0)):
+                        return "choices"
+                    return None
+                plain = [list(rr) for rr in g]
+                w = gimmicks.add_water(g, doors, floor, floor_ok, elite_code)
+                if w:
+                    WATER[floor] = w
+                elif attempt < LAYOUT_ATTEMPTS - 1 and attempt < WATER_TRIES:
+                    fallback = fallback or (plain, doors)   # 물살이 안 들어가면 씨앗을 더 뽑아 본다 — 끝내 없으면 처음 것
+                    continue
             grid = g
             break
+        if grid is None and fallback:
+            grid, doors = fallback
         if grid is None:
             failures.append(f"Dungeon_{did}")
             continue
@@ -2393,6 +2422,9 @@ def build_all(dry_run=False):
      unsafe_vaults, behind_boss, econ, made) = emit_layouts(monsters, write=False)
     print(f"      {written}/{TOTAL_FLOORS - HANDMADE_FLOORS} 층 생성 "
           f"(1~{HANDMADE_FLOORS}층은 원본 유지)")
+    print(f"      수로 물살·수문 레버 {len(WATER)}층: {', '.join(map(str, sorted(WATER)))}")
+    if os.environ.get("THESWORD_GIMMICK_DEBUG"):
+        print("      (물살 시도)", dict(gimmicks.REASONS))
     if failures:
         print(f"  [실패] 레이아웃 생성 불가: {', '.join(failures)}")
         return False
@@ -2473,7 +2505,9 @@ def build_all(dry_run=False):
     emit_scripts(monsters)
     # [4/7] 은 검사만 한다 — 검사가 다 통과한 뒤에야 쓴다. 씨앗이 층수로
     # 정해지므로 다시 뽑아도 같은 격자가 나온다.
+    WATER.clear()
     emit_layouts(monsters, write=True)
+    gimmicks.emit_cs(os.path.join(ROOT, "Assets", "@Scripts", "Data", "GeneratedGimmicks.cs"), WATER)
 
     # 레이아웃 CSV 를 쓴 "다음에" 돌려야 한다. MapBuilder 가 읽는 것은 이 JSON 이다.
     print("      MapData.json 생성 (CSV -> 런타임 오브젝트 배치)")
