@@ -374,7 +374,129 @@ def add_furnace(grid, doors, floor, floor_ok, elite_code=None):
     return None
 
 
-def emit_cs(path, water, rifts=None, furnaces=None):
+# ------------------------------------------------------------------ 심층(챕터 3) — 얼음 미끄럼
+ICE_CHAPTER = 3
+
+
+def slide_moves(grid, ice, c, alive):
+    """c 에서 네 방향으로 한 번 움직였을 때 서는 칸들. 얼음 칸에 들어서면 막힐 때까지 미끄러진다 —
+    벽·몬스터(alive) 앞에서 서고, 물건 칸에 닿으면 주우며 그 칸에 선다, 얼음이 아닌 바닥(열린 문 칸 포함)에 닿으면 거기 선다."""
+    out = []
+    for dx, dy in DIRS:
+        n = (c[0] + dx, c[1] + dy)
+        v = _cell(grid, n)
+        if not _walk(v) or n in alive:
+            continue
+        if n not in ice or v.startswith(("I_", "E_")):
+            out.append(n)
+            continue
+        pos = n
+        while True:
+            m = (pos[0] + dx, pos[1] + dy)
+            w = _cell(grid, m)
+            # 문은 연 것으로 친다 — 열린 문 칸은 얼음이 아닌 바닥이라 거기 선다(77층: 닫힌 문 앞에서 서던 자리가 문을 열면 사라졌다)
+            if not _walk(w) or m in alive:
+                break
+            if w.startswith(("I_", "E_")) or m not in ice:
+                pos = m
+                break
+            pos = m
+        out.append(pos)
+    return out
+
+
+def slide_reach(grid, ice, start, alive):
+    seen = {start}; q = collections.deque([start])
+    while q:
+        c = q.popleft()
+        for n in slide_moves(grid, ice, c, alive):
+            if n not in seen:
+                seen.add(n); q.append(n)
+    return seen
+
+
+def check_ice(grid, ice):
+    """얼음이 있어도 다 잡고 다 줍고 계단에 닿는가, 갇히는 칸은 없는가(몬스터는 닿는 대로 잡아 가며 잰다). 빈 목록이면 정상."""
+    s = _spawn(grid)
+    mobs = {q for y, r in enumerate(grid) for x, v in enumerate(r) for q in [(x, y)] if v.startswith(("M_", "B_"))}
+    alive = set(mobs)
+    seen_all = set()
+    while True:
+        reach = slide_reach(grid, ice, s, alive)
+        seen_all |= reach
+        killable = {m for m in alive if any((m[0] + dx, m[1] + dy) in reach for dx, dy in DIRS)}
+        if not killable:
+            break
+        alive -= killable
+    issues = []
+    if alive:
+        issues.append(f"못 잡는 몬스터 {len(alive)}")
+    need = {q for y, r in enumerate(grid) for x, v in enumerate(r) for q in [(x, y)]
+            if v.startswith(("I_", "E_")) or v == "12" or (v.isdigit() and 3 <= int(v) <= 8)}
+    lost = need - seen_all
+    if lost:
+        issues.append(f"못 닿는 물건·문·레버 {len(lost)}")
+    if not any(_cell(grid, (q[0] + dx, q[1] + dy)) == "14" for q in seen_all for dx, dy in DIRS):
+        issues.append("계단에 못 닿는다")
+    final = slide_reach(grid, ice, s, set())
+    # 어떤 순서로 잡아도 잃는 것이 없어야 한다 — 멈춤돌이 다 사라진 최악(전부 잡음)에서도 물건·문·레버에 닿고,
+    # 몬스터마다 다른 놈이 다 없어도 옆에 설 수 있어야 한다(77층: 멈춤돌을 먼저 잡자 초록 열쇠가 영영 닿지 않았다)
+    # 물건도 멈춤돌이다(주우면 사라진다) — 최악은 "다른 물건은 다 줍고 몬스터는 다 잡은" 상태
+    items = [q for q in need if _cell(grid, q).startswith(("I_", "E_"))]
+    bare = [list(r) for r in grid]
+    for q in items:
+        bare[q[1]][q[0]] = "1"
+    for i in items:
+        g1 = [list(r) for r in bare]
+        g1[i[1]][i[0]] = grid[i[1]][i[0]]
+        if i not in slide_reach(g1, ice, s, set()):
+            issues.append(f"{i} 물건은 멈춤돌(다른 몬스터·물건)이 없으면 못 닿는다")
+            break
+    rest = need - set(items)
+    if rest - slide_reach(bare, ice, s, set()):
+        issues.append(f"멈춤돌이 다 사라지면 못 닿는 문·레버 {len(rest - slide_reach(bare, ice, s, set()))}")
+    for m in mobs:
+        alone = slide_reach(bare, ice, s, {m})
+        if not any((m[0] + dx, m[1] + dy) in alone for dx, dy in DIRS):
+            issues.append(f"{m} 는 다른 멈춤돌이 없으면 못 잡는다")
+            break
+    for c in final:
+        if s not in slide_reach(grid, ice, c, set()):
+            issues.append(f"{c} 에서 돌아오지 못한다(갇힌다)")
+            break
+    return issues
+
+
+def place_ice(grid, elite_code=None):
+    """몬스터·물건이 있는 방 하나를 얼음으로 깐다(빈 바닥 + 물건 칸). 지도는 안 고친다. 얼음 칸 목록 또는 None."""
+    s = _spawn(grid)
+    rooms = _room_cells(grid)
+    comps, left = [], set(rooms)
+    while left:
+        st = left.pop(); comp = {st}; q = [st]
+        while q:
+            c = q.pop()
+            for n in _open_n(grid, c):
+                if n in left:
+                    left.remove(n); comp.add(n); q.append(n)
+        comps.append(comp)
+    best = None
+    for comp in comps:
+        ice = {q for q in comp if _cell(grid, q) == "1" or _cell(grid, q).startswith(("I_", "E_"))}
+        ice -= {q for q in ice if any(_cell(grid, (q[0] + dx, q[1] + dy)) in ("11", "14", "15", "16") for dx, dy in DIRS)}
+        if len(ice) < 10:
+            continue
+        stop = sum(1 for q in comp if _cell(grid, q).startswith("M_"))
+        items = sum(1 for q in ice if _cell(grid, q).startswith("I_"))
+        if check_ice(grid, ice):
+            continue
+        score = (stop > 0, items, len(ice))
+        if best is None or score > best[0]:
+            best = (score, ice)
+    return None if best is None else sorted(best[1])
+
+
+def emit_cs(path, water, rifts=None, furnaces=None, ice=None):
     """water: {층: (물살 목록, 레버)}, rifts: {층: (a, b)}, furnaces: {층: (화로 칸, 배율, 몬스터 id 목록)} -> GeneratedGimmicks.cs"""
     lines = ["// 생성 파일 — Tools/generate_content.py 가 쓴다(Tools/gimmicks.py). 손으로 고치지 않는다.",
              "using System.Collections.Generic;", "",
@@ -399,6 +521,12 @@ def emit_cs(path, water, rifts=None, furnaces=None):
     for f in sorted(furnaces or {}):
         (fx, fy), mul, ids = furnaces[f]
         lines.append("        { %d, (%d, %d, %.4ff, new[] { %s }) }," % (f, fx, fy, mul, ", ".join(map(str, ids))))
+    lines += ["    };", "",
+              "    /// <summary>층(1부터) -> 얼음 칸 (열, 행). 들어서면 막힐 때까지 미끄러진다(물건 칸에서는 주우며 선다).</summary>",
+              "    public static readonly Dictionary<int, (int x, int y)[]> Ice = new Dictionary<int, (int x, int y)[]>",
+              "    {"]
+    for f in sorted(ice or {}):
+        lines.append("        { %d, new[] { %s } }," % (f, ", ".join("(%d, %d)" % c for c in ice[f])))
     lines += ["    };", "}", ""]
     with open(path, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("\n".join(lines))

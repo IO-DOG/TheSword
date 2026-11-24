@@ -137,6 +137,11 @@ public static class MapDecoSetup
             if (int.TryParse(dungeonId.Substring(3), out int fidx)
                 && GeneratedGimmicks.Furnaces.TryGetValue(chapter * 20 + fidx + 1, out (int x, int y, float mul, int[] ids) fz))
                 grid[fz.y][fz.x] = "CUR";     // 화로 칸
+            if (int.TryParse(dungeonId.Substring(3), out int iidx)
+                && GeneratedGimmicks.Ice.TryGetValue(chapter * 20 + iidx + 1, out (int x, int y)[] ice))
+                foreach ((int x, int y) c in ice)
+                    if (grid[c.y][c.x] == "1")
+                        grid[c.y][c.x] = "CUR";   // 얼음 칸에 바닥 장식을 얹지 않는다
 
             GameObject root = BuildOne(dungeonId, chapter, grid);
             if (root == null)

@@ -273,6 +273,7 @@ public static class MapBuilder
 
         FloorCurrents.Attach(root, mapId + 1);   // 수로의 물살(11-24) — 그 층에 없으면 아무것도 안 한다
         FloorRifts.Attach(root, mapId + 1);      // 왕좌의 짝 균열(11-24)
+        FloorIce.Attach(root, mapId + 1);        // 심층의 얼음 미끄럼(11-24)
         FloorFurnace.Attach(root, mapId + 1);    // 용광로의 풀무 화로(11-24) — 몬스터를 다 세운 뒤라야 발밑 잉걸을 단다
         return root;
     }

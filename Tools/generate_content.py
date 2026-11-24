@@ -2117,6 +2117,7 @@ def emit_scripts(monsters):
 
 WATER_TRIES = 60   # 수로 층에서 물살이 들어가는 씨앗을 찾을 때까지 더 뽑는 횟수
 RIFTS = {}      # 층 -> (균열 a, 균열 b) — 왕좌
+ICE = {}        # 층 -> 얼음 칸 목록 — 심층
 FURNACES = {}   # 층 -> (화로 칸, 화로 방 몬스터 id, 밸브 파수꾼 id) — 용광로. 배율은 furnace_mul 이 정한다
 WATER = {}      # 층 -> (물살, 레버) — emit_layouts 가 채우고 GeneratedGimmicks.cs 로 굽는다
 
@@ -2181,6 +2182,11 @@ def emit_layouts(monsters, write=True):
             rift = gimmicks.place_rift(g, elite_code) if ch == gimmicks.RIFT_CHAPTER and not boss else None
             if rift:
                 RIFTS[floor] = rift
+            elif ch == gimmicks.ICE_CHAPTER and not boss:
+                # 심층: 얼음 미끄럼 — 지도는 안 고친다(얼음 칸만 고른다). 다 잡고 다 줍고 갇히지 않는 방만(check_ice).
+                ice = gimmicks.place_ice(g, elite_code)
+                if ice:
+                    ICE[floor] = ice
             elif ch == gimmicks.FORGE_CHAPTER and not boss:
                 # 용광로: 풀무 화로 + 밸브(레버). 밸브 길목은 곁길 몬스터가 지킨다 — 화로 방보다 먼저 닿는다.
                 def floor_ok(gg, origins=origins, doors=doors, ecell=ecell):
@@ -2470,6 +2476,7 @@ def build_all(dry_run=False):
           f"(1~{HANDMADE_FLOORS}층은 원본 유지)")
     print(f"      물살·수문 레버 {len(WATER)}층: {', '.join(map(str, sorted(WATER)))}")
     print(f"      왕좌 짝 균열 {len(RIFTS)}층: {', '.join(map(str, sorted(RIFTS)))}")
+    print(f"      심층 얼음 미끄럼 {len(ICE)}층: " + ", ".join(f"{f}({len(c)}칸)" for f, c in sorted(ICE.items())))
     if FURNACES:
         muls = {f: furnace_mul(ptable, monsters, start_level, f, ids, gid) for f, (_, ids, gid) in FURNACES.items()}
         print(f"      용광로 화로 {len(FURNACES)}층: " + ", ".join(f"{f}(x{muls[f]:.2f}·{len(FURNACES[f][1])}마리)" for f in sorted(FURNACES)))
@@ -2558,9 +2565,10 @@ def build_all(dry_run=False):
     WATER.clear()
     RIFTS.clear()
     FURNACES.clear()
+    ICE.clear()
     emit_layouts(monsters, write=True)
     gimmicks.emit_cs(os.path.join(ROOT, "Assets", "@Scripts", "Data", "GeneratedGimmicks.cs"), WATER, RIFTS,
-                     {f: (c, furnace_mul(ptable, monsters, start_level, f, ids, gid), ids) for f, (c, ids, gid) in FURNACES.items()})
+                     {f: (c, furnace_mul(ptable, monsters, start_level, f, ids, gid), ids) for f, (c, ids, gid) in FURNACES.items()}, ICE)
 
     # 레이아웃 CSV 를 쓴 "다음에" 돌려야 한다. MapBuilder 가 읽는 것은 이 JSON 이다.
     print("      MapData.json 생성 (CSV -> 런타임 오브젝트 배치)")

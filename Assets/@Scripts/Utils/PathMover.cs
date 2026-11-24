@@ -205,6 +205,37 @@ public class PathMover
                     continue;
                 if (FloorCurrents.Blocks(_map, cur, next))   // 수로의 물살 — 거꾸로는 못 간다(걸음과 같은 판정)
                     continue;
+                // 심층의 얼음: 들어서면 막힐 때까지 미끄러진다 — 그 끝 칸을 이 걸음의 도착으로 센다(걸음과 같은 규칙)
+                if (FloorIce.IsIce(_map, next))
+                {
+                    Vector2Int step = next - cur, pos = next;
+                    while (true)
+                    {
+                        Vector2Int m = pos + step;
+                        if (InsideMap(CellCenter(m)) == false || DoorIn(m) || FloorCurrents.Blocks(_map, pos, m))
+                            break;
+                        // 물건 칸에 닿으면 주우며 그 칸에 선다(걸음·생성기 check_ice 와 같은 규칙)
+                        if (ItemRootIn(m, CellCenter(m), ProbeHalf) || Physics.CheckBox(CellCenter(m), ProbeHalf, Quaternion.identity,
+                                1 << (int)Define.Layer.EItem, QueryTriggerInteraction.Collide))
+                        {
+                            pos = m;
+                            break;
+                        }
+                        if (Solid(m))
+                            break;
+                        pos = m;
+                        if (FloorIce.IsIce(_map, m) == false)
+                            break;
+                    }
+                    if (Dist.ContainsKey(pos) == false)
+                    {
+                        Dist[pos] = d + 1;
+                        _from[pos] = cur;
+                        _via[pos] = next;
+                        _queue.Enqueue(pos);
+                    }
+                    continue;
+                }
                 // 왕좌의 짝 균열: 균열 칸에 들어서면 짝 칸에 선다(걸음을 마칠 때 PlayerController 가 옮긴다)
                 if (FloorRifts.TryPair(_map, next, out Vector2Int land))
                 {
@@ -325,6 +356,12 @@ public class PathMover
         if (step.x < 0) return Define.MoveDir.Left;
         if (step.x > 0) return Define.MoveDir.Right;
         return Define.MoveDir.None;
+    }
+
+    /// <summary>그 칸에 문이 서 있는가(열쇠가 있어도) — 미끄러지다가는 문 앞에 선다.</summary>
+    bool DoorIn(Vector2Int cell)
+    {
+        return Physics.CheckBox(CellCenter(cell), ProbeHalf, Quaternion.identity, DoorMask, QueryTriggerInteraction.Collide);
     }
 
     public Vector3 CellCenter(Vector2Int cell)

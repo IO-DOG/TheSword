@@ -407,6 +407,7 @@ public class PlayerController : MonoBehaviour
         }
 
         _isMoving = true;
+        _pickedThisStep = false;
         int moveCount = PlayerPrefs.GetInt("MOVECOUNT", 0);
         moveCount++;
         PlayerPrefs.SetInt("MOVECOUNT", moveCount);
@@ -450,7 +451,11 @@ public class PlayerController : MonoBehaviour
         {
             Managers.Sound.Play(Define.Sound.Effect, "HeroMove_SFX");
             if (OnBuiltFloor())
+            {
                 RiftJump();
+                if (SlideOn(moveDir))
+                    return;                 // 얼음 — 같은 방향으로 이어 미끄러진다(_isMoving 은 다음 걸음이 쥔다)
+            }
 
             _isMoving = false;
         });
@@ -482,6 +487,35 @@ public class PlayerController : MonoBehaviour
     {
         return Physics.CheckBox(cell + Vector3.up * (PathMover.Tile * 0.5f), PathMover.ProbeHalf, Quaternion.identity,
                                 PathMover.WallMask, QueryTriggerInteraction.Collide);
+    }
+
+    // 심층의 얼음(11-24) — 미끄러지는 중인가, 이번 걸음에 무엇을 주웠나
+    bool _sliding;
+    bool _pickedThisStep;
+    static readonly int SlideStopMask = (1 << (int)Define.Layer.Wall) | (1 << (int)Define.Layer.Monster) | (1 << (int)Define.Layer.Door)
+                                        | (1 << (int)Define.Layer.Lever) | (1 << (int)Define.Layer.Portal);
+
+    /// <summary>얼음 칸에 들어섰으면 같은 방향으로 한 칸 더 간다. 이어 갔으면 true.</summary>
+    bool SlideOn(Define.MoveDir moveDir)
+    {
+        GameObject map = CurrentMap();
+        if (map == null || _pickedThisStep || FloorIce.IsIce(map, PathMover.Cell(map, _cellPos)) == false)
+            return false;
+        _isMoving = false;
+        _sliding = true;
+        try { Moving(moveDir, true); }
+        finally { _sliding = false; }
+        return _isMoving;
+    }
+
+    /// <summary>미끄러지는 중에 앞 칸이 막혔는가 — 몬스터·문·레버·계단·벽이면 건드리지 않고 선다.</summary>
+    bool SlideBlocked()
+    {
+        Vector3 next = _cellPos + _nextCellPos;
+        if (WallAt(next))
+            return true;
+        return Physics.CheckBox(next + Vector3.up * (PathMover.Tile * 0.5f), PathMover.ProbeHalf, Quaternion.identity,
+                                SlideStopMask, QueryTriggerInteraction.Collide);
     }
 
     static GameObject CurrentMap()
@@ -525,6 +559,8 @@ public class PlayerController : MonoBehaviour
     bool isObstacled()
     {
         bool somethingExist = false;
+        if (_sliding && SlideBlocked())
+            return true;
 
         RaycastHit hit;
         Physics.Raycast(transform.position + _interpolateRayPos, _nextCellPos, out hit, _offset * 1.3f);
@@ -580,14 +616,20 @@ public class PlayerController : MonoBehaviour
             {
                 ConsumableItem citem = Util.Find<ConsumableItem>(hit.collider.gameObject);
                 if (citem != null && InNextCell(citem))
+                {
                     citem.PickUp();
+                    _pickedThisStep = true;     // 얼음 위에서는 주운 칸에 선다
+                }
             }
             // Checking Item
             else if (hit.collider.gameObject.layer == (int)Define.Layer.EItem)
             {
                 Equip equip = Util.Find<Equip>(hit.collider.gameObject);
                 if (equip != null)
+                {
                     equip.PickUp();
+                    _pickedThisStep = true;
+                }
             }
             //Checking Door
             else if (hit.collider.gameObject.layer == (int)Define.Layer.Door)
