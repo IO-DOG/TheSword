@@ -205,6 +205,25 @@ POTION_USE_THRESHOLD = 0.55  # 이 비율 밑으로 떨어지면 마신다 (실�
 MOB_ART = ([(f"Mob_C0_I{i:03d}", f"Mob_C0_A{i:03d}") for i in range(8)]
            + [("Mob_C0_I008", "Mob_C0_I008"), ("Mob_C0_I009", "Mob_C0_A009")])
 
+# 챕터 전용 종(11-24 오너: "얼음맵이면 얼음 특성이 있는 듯한 몬스터"). 그 챕터의 일반 몹은 MOB_ART 대신 이 목록에서 고른다.
+# 시트는 Sprites/MonsterSprites/Chapter/Mob_C{챕터}_{번호}_Idle|Attack.png, 상태는 MonsterArtSetup 이 만든다.
+# 이름·설명은 bestiary 의 chapter_species(art 번호 OWN_ART + i). 그림은 이미 챕터 색이라 MonsterTint 가 색조를 안 입힌다.
+OWN_ART = 100
+CHAPTER_ART = {
+    3: [(f"Mob_C3_I{i:03d}", f"Mob_C3_A{i:03d}") for i in range(5)],   # 서리 해골·서리 스라소니·서리 파수 구울·고드름 까마귀·서리 망령
+}
+
+
+def art_of(ch, n):
+    """그 챕터의 n 번째 그림 -> (art 번호, (대기, 공격)). 전용 종이 있으면 그것, 없으면 공용 10종."""
+    own = CHAPTER_ART.get(ch)
+    if own:
+        i = n % len(own)
+        return OWN_ART + i, own[i]
+    i = n % len(MOB_ART)
+    return i, MOB_ART[i]
+
+
 # 챕터 보스가 입는 그림 (MOB_ART 의 인덱스). 그림이 특성을 말하게 고른다 —
 #   20층 늑대(야수) · 40층 고블린 방패병(수호) · 60층 잿빛 파수꾼(마법)
 #   80층 해골 전사(불사) · 100층 심연의 거수(거대, 가장 큰 86x68)
@@ -1071,8 +1090,7 @@ def build_monsters(ptable, start_level, mob_loss=None, fork_loss=FORK_LOSS):
                 MOB_DURATION * ramp, aspd, trait, floor, breakpoint_of(floor, ri))
             # 층마다 다른 종이 서게 고른다. 가장 센 놈(정예)은 그림이 아니라
             # 색이 진하고 몸집이 커서 눈에 띈다 (MonsterTint / MapBuilder.SetupLook).
-            art_idx = (idx + slot) % len(MOB_ART)
-            art = MOB_ART[art_idx]
+            art_idx, art = art_of(ch, idx + slot)
             slash, hit = TRAIT_FX[trait]    # 정예도 제 특성의 것이다 — 크기는 전투창이 서열로 키운다
             for _ in range(run):
                 monsters.append(dict(
@@ -1098,11 +1116,12 @@ def build_monsters(ptable, start_level, mob_loss=None, fork_loss=FORK_LOSS):
             k = FORK_SLOT
             # 그림·이름은 그 층에 없는 종으로 — 자리 4 와 같은 그림·이름에 공격만 다르면 "같은 놈" 이 거짓말이 된다(층에는 같은 종이 셋 선다 절).
             # 특성은 자리 4(띠의 정예 특성) 그대로다.
-            art_idx = (idx + k) % len(MOB_ART)
+            used = {m["_art"] for m in monsters if m["_floor"] == floor}
+            art_idx, eart = next(art_of(ch, idx + k + j) for j in range(12) if art_of(ch, idx + k + j)[0] not in used)
             elite = dict(src, id=MOB_ID_BASE + floor * 8 + k, RewardExp=0.0, MonsterNameId=MOB_NAME_BASE + floor * 8 + k,
                          MonsterDescId=MOB_DESC_BASE + floor * 8 + k, _order=k, _fork=True, _art=art_idx,
                          Name=bestiary.mob_name(KR, "kr", ch, art_idx),
-                         IdleAnimStr=MOB_ART[art_idx][0], AttackAnimStr=MOB_ART[art_idx][1])
+                         IdleAnimStr=eart[0], AttackAnimStr=eart[1])
             par = player_with_runes(ptable, level, floor)
             target = fork_loss * simulate_battle(par, creature_of(src))[2]
             lo, hi = src["Attack"], src["Attack"] * 3          # 공격 탐색은 내림(solve_monster 와 같다)

@@ -96,6 +96,18 @@ public static class MonsterTint
         // 같은 경계라야 색이 바뀔 때 규칙도 바뀐다. 예전 floor/5 는 한 층 어긋나(5~9, 10~14 …)
         // 띠의 마지막 층 몹만 다음 띠의 색을 입었다.
         int variant = ((floor - 1) / 5) % VariantHue.Length;
+        // 챕터 전용 그림(Mob_C3_… — 11-24)은 이미 챕터 색이다 — 색조는 안 입히고 서열의 진하기만(알파는 1 그대로).
+        if (OwnArt(md))
+        {
+            float k = Depth[Mathf.Clamp(order, 0, Depth.Length - 1)];
+            return k >= 1f ? Color.white : new Color(k, k, k, 1f);
+        }
         return For(md.Chapter, order, variant);
+    }
+
+    /// <summary>챕터마다 따로 그린 종인가(기존 10종 Mob_C0_* 이 아닌 것).</summary>
+    public static bool OwnArt(Data.MonsterData md)
+    {
+        return md.IdleAnimStr != null && md.IdleAnimStr.StartsWith("Mob_C") && md.IdleAnimStr.StartsWith("Mob_C0_") == false;
     }
 }

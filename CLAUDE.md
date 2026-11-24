@@ -137,6 +137,10 @@ DOTween Pro 도 2026-11-05 에 뺐다 — Pro 컴포넌트(`DOTweenAnimation`·`
 어드레서블은 `AddressableSetup.Required`. 그림이 없으면(null) 예전 몹 시트로 돌아간다. **오너가 AI 이미지 생성으로 뽑은 시안이다** — Steam AI 공개 셋째 줄(`Steam/store/ko.md`).
 업적 아이콘 `ACH_BOSS20~100` 도 이 그림이다(11-20, 1배 — 만든 법은 `Steam/art/README.md` 업적 아이콘 절).
 
+**챕터 전용 종**(11-24 오너 "얼음맵이면 얼음 특성이 있는 듯한 몬스터"): `Sprites/MonsterSprites/Chapter/Mob_C{챕터}_{번호}_Idle|Attack.png` 를 두면
+`MonsterArtSetup.Build` 가 잘라(발밑 피벗) `Mob_C{챕터}_I{번호}`/`_A{번호}` 상태를 만들고, `generate_content.CHAPTER_ART` 가 그 챕터의 몹 그림을 거기서 고른다
+(갈림길 정예는 그 층에 없는 그림으로). 이름·설명은 `bestiary.CHAPTER_SPECIES`(네 언어, art 번호 100+). 이미 챕터 색이라 `MonsterTint.OwnArt` 면 색조 없이 서열 진하기만.
+지금 챕터 3(얼어붙은 심층) 5종 — 서리 해골·서리 스라소니·서리 파수 구울·고드름 까마귀(기존 몸을 고친 것)·서리 망령(새로 그린 것). 생성 모델 없이 코드로 그렸다.
 같은 그림을 색으로 갈라 쓴다(`MonsterTint`): 색조=챕터, 진하기=층 안 서열,
 그리고 **다섯 층마다 색 갈래**가 바뀐다(한 챕터 20층이 같은 색이면 같은 놈으로 보인다).
 

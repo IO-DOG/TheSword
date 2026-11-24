@@ -29,6 +29,7 @@ public static class MonsterArtSetup
     const string IdleDir = "Assets/@Resources/Sprites/MonsterSprites/Idle";
     const string AttackDir = "Assets/@Resources/Sprites/MonsterSprites/Attack";
     const string LegacyDir = "Assets/@Resources/Sprites/LegacySprites";
+    const string ChapterDir = "Assets/@Resources/Sprites/MonsterSprites/Chapter";
 
     const float Fps = 12f;
 
@@ -48,6 +49,19 @@ public static class MonsterArtSetup
         map["Mob_C0_I008"] = $"{IdleDir}/Boss_C1_I000.png";
         map["Mob_C0_I009"] = $"{LegacyDir}/Monster_Idle.png";
         map["Mob_C0_A009"] = $"{LegacyDir}/Monster_Attack.png";   // 위에서 잘라 준다
+
+        // 챕터 전용 종(11-24 오너 "얼음맵이면 얼음 특성이 있는 듯한 몬스터"): Chapter/Mob_C{챕터}_{번호}_Idle|Attack.png
+        // -> 상태 Mob_C{챕터}_I{번호:000} / _A{번호:000}. generate_content.CHAPTER_ART 가 같은 이름을 쓴다.
+        if (Directory.Exists(ChapterDir))
+            foreach (string file in Directory.GetFiles(ChapterDir, "Mob_C*_*_*.png"))
+            {
+                string[] p = Path.GetFileNameWithoutExtension(file).Split('_');   // Mob, C3, 04, Idle
+                if (p.Length != 4 || int.TryParse(p[2], out int n) == false)
+                    continue;
+                string kind = p[3] == "Idle" ? "I" : p[3] == "Attack" ? "A" : null;
+                if (kind != null)
+                    map[$"Mob_{p[1]}_{kind}{n:000}"] = file.Replace('\\', '/');
+            }
 
         return map;
     }
@@ -79,6 +93,8 @@ public static class MonsterArtSetup
             if (File.Exists(path) == false)
                 continue;
 
+            if (path.StartsWith(ChapterDir))
+                PixelImport(path);
             Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
             if (tex == null || tex.height <= 0 || tex.width % tex.height != 0)
                 continue;
@@ -208,6 +224,26 @@ public static class MonsterArtSetup
     }
 
 
+    /// <summary>챕터 종 시트를 기존 몹 시트와 같은 설정으로 들인다 — 스프라이트·점 필터·100 PPU·밉맵 없음·무압축.</summary>
+    static void PixelImport(string path)
+    {
+        var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+        if (importer == null)
+            return;
+        if (importer.textureType == TextureImporterType.Sprite && importer.filterMode == FilterMode.Point
+            && importer.spritePixelsPerUnit == 100 && importer.mipmapEnabled == false
+            && importer.textureCompression == TextureImporterCompression.Uncompressed)
+            return;
+        importer.textureType = TextureImporterType.Sprite;
+        importer.spriteImportMode = SpriteImportMode.Multiple;
+        importer.filterMode = FilterMode.Point;
+        importer.spritePixelsPerUnit = 100;
+        importer.mipmapEnabled = false;
+        importer.alphaIsTransparency = true;
+        importer.textureCompression = TextureImporterCompression.Uncompressed;
+        importer.SaveAndReimport();
+    }
+
     /// <summary>가로로 이어 붙인 시트를 프레임 수만큼 잘라 준다.
     ///
     /// 예전 Monster_Attack.png 는 다른 공격 시트와 같은 258x86(86 짜리 세 장)인데
@@ -236,8 +272,9 @@ public static class MonsterArtSetup
             {
                 name = $"{baseName}_{i}",
                 rect = new Rect(i * size, 0, size, size),
-                pivot = new Vector2(0.5f, 0.5f),
-                alignment = SpriteAlignment.Center,
+                // 챕터 종은 기존 몹 시트처럼 발밑 가운데 피벗(SitOnFloor·전투 카드가 그 자리를 본다)
+                pivot = path.StartsWith(ChapterDir) ? new Vector2(0.5f, 0f) : new Vector2(0.5f, 0.5f),
+                alignment = path.StartsWith(ChapterDir) ? SpriteAlignment.BottomCenter : SpriteAlignment.Center,
                 spriteID = GUID.Generate(),
             });
         }

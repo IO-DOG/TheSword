@@ -215,6 +215,33 @@ FALLBACK = {
 }
 
 
+# 챕터 전용 종 (generate_content.CHAPTER_ART, art 번호 OWN_ART + i) — 11-24. 이름에 챕터 말이 이미 들어 있어 접두어를 안 붙인다.
+# 스토리 파일의 bestiary.chapter_species {"3": [{"name", "desc"}, ...]} 가 있으면 덮는다.
+OWN_ART = 100
+CHAPTER_SPECIES = {
+    "kr": {3: [("서리 해골", "탑지기 초소를 지키다 얼어붙은 해골.\\n갈비뼈 속 연보라 불씨가 꺼지지 않는다."),
+               ("서리 스라소니", "눈 덮인 가면을 쓴 스라소니.\\n뒷몸이 눈보라로 흩어져 발소리가 없다."),
+               ("서리 파수 구울", "녹슨 목가리개를 두른 굶주린 구울.\\n언 갈기를 세우고 뼈를 갉는다."),
+               ("고드름 까마귀", "날개 끝에 고드름이 매달린 까마귀.\\n심층의 찬바람을 타고 내리꽂힌다."),
+               ("서리 망령", "언 숨결로 지은 빈 망토.\\n몸이 없어 칼이 스쳐 지나간다.")]},
+    "en": {3: [("Frost Skeleton", "A skeleton frozen at its watch post.\\nA lilac ember in its ribs never goes out."),
+               ("Frost Lynx", "A lynx wearing a mask of snow.\\nIts hindquarters drift as snow, so it makes no sound."),
+               ("Frostwatch Ghoul", "A starving ghoul in a rusted gorget.\\nIt gnaws bones with its frozen mane on end."),
+               ("Icicle Crow", "A crow with icicles on its wingtips.\\nIt dives on the cold winds of the depths."),
+               ("Frost Wraith", "An empty cloak woven of frozen breath.\\nWith no body inside, blades pass right through.")]},
+    "jp": {3: [("霜の骸骨", "見張り所で凍りついた骸骨。\\n肋骨の中の薄紫の火種が消えない。"),
+               ("霜の山猫", "雪の仮面をかぶった山猫。\\n後ろ足が吹雪に散り、足音がない。"),
+               ("霜番の屍鬼", "錆びた喉当てをつけた飢えた屍鬼。\\n凍ったたてがみを逆立てて骨をかじる。"),
+               ("氷柱鴉", "翼の先に氷柱を下げた鴉。\\n深層の冷たい風に乗って急降下する。"),
+               ("霜の亡霊", "凍った息で編まれた空っぽの外套。\\n中身がなく、刃がすり抜ける。")]},
+    "cn": {3: [("霜骷髅", "在哨所冻住的骷髅。\\n肋骨里的淡紫火种从未熄灭。"),
+               ("霜山猫", "戴着雪面具的山猫。\\n后身化作风雪散开，没有脚步声。"),
+               ("霜哨食尸鬼", "戴着生锈护喉的饥饿食尸鬼。\\n竖起冻结的毛发啃着骨头。"),
+               ("冰锥鸦", "翼尖挂着冰锥的乌鸦。\\n乘着深层的寒风俯冲而下。"),
+               ("霜之怨灵", "以冻结气息织成的空斗篷。\\n里面没有身体，刀刃一穿而过。")]},
+}
+
+
 def _text(v):
     """스토리 파일의 문구. 진짜 줄바꿈은 ScriptData 식 \\n 으로 바꾼다."""
     if not isinstance(v, str) or not v.strip():
@@ -259,6 +286,13 @@ def _merge(lang, story):
         if isinstance(tid, int) and 0 <= tid < len(t["traits"]):
             name, desc = t["traits"][tid]
             t["traits"][tid] = (_text(row.get("name")) or name, _text(row.get("desc")) or desc)
+    t["chapter_species"] = {ch: list(rows) for ch, rows in CHAPTER_SPECIES[lang].items()}
+    for key, rows in (story.get("chapter_species") or {}).items():
+        ch = int(key)
+        for i, row in enumerate(rows or []):
+            if ch in t["chapter_species"] and i < len(t["chapter_species"][ch]):
+                name, desc = t["chapter_species"][ch][i]
+                t["chapter_species"][ch][i] = (_text(row.get("name")) or name, _text(row.get("desc")) or desc)
     items = story.get("items") or {}
     for key, item in (("book", "monster_book"), ("ring", "warp_ring")):
         row = items.get(item) or {}
@@ -282,12 +316,16 @@ def floor_name(t, lang, ch, floor):
 
 
 def mob_name(t, lang, ch, art):
+    if art >= OWN_ART:
+        return t["chapter_species"][ch][art - OWN_ART][0]
     prefix, species = t["prefixes"][ch], t["species"][art]
     # 접두어가 종 이름에 이미 들어 있으면 한 번만 쓴다 ("심연 심연의 거수" 방지).
     return species if prefix in species else f"{prefix}{JOIN[lang]}{species}"
 
 
 def mob_desc(t, lang, ch, art):
+    if art >= OWN_ART:
+        return t["chapter_species"][ch][art - OWN_ART][1]
     if (ch, art) in t["mob_desc"]:
         return t["mob_desc"][ch, art]
     return f"{t['species_desc'][art]}\\n{t['chapter_desc'][ch]}"
@@ -305,6 +343,7 @@ def name_clashes(books):
         t, seen = books[lang], {}
         named = [(mob_name(t, lang, c, a), f"chapters[{c}] + species art {a}")
                  for c in range(len(t["chapters"])) for a in range(len(t["species"]))]
+        named += [(name, f"chapter_species {c}:{i}") for c, rows in t["chapter_species"].items() for i, (name, _) in enumerate(rows)]
         named += [(name, f"bosses chapter {c}") for c, (name, _) in enumerate(t["bosses"])]
         for name, who in named:
             if name in seen:
