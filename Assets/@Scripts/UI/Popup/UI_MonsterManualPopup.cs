@@ -171,10 +171,12 @@ public class UI_MonsterManualPopup : UI_Popup
         dim.gameObject.BindEvent(Close);     // 창 밖을 누르면 닫는다
 
         int n = _entries.Count;
+        string rule = FloorRuleText();
+        float ruleHeight = rule != null ? RuleHeight + 8f : 0f;
         // 설명은 Read 로 다 들어가는 높이를 주되, 줄(96)을 누르지 않는 만큼만. 모자라면 글자가 Small 까지 줄어 들어간다.
-        float spare = ScreenHeight - 40f - (Pad * 2f + HeaderHeight + FooterHeight + 28f) - (n * RowHeight + (n - 1) * RowGap);
+        float spare = ScreenHeight - 40f - (Pad * 2f + HeaderHeight + FooterHeight + 28f + ruleHeight) - (n * RowHeight + (n - 1) * RowGap);
         _detailHeight = Mathf.Max(DetailHeightFor(_entries, Small), Mathf.Min(DetailHeightFor(_entries, Read), spare));
-        float fixedPart = Pad * 2f + HeaderHeight + FooterHeight + (n > 0 ? _detailHeight + 28f : 0f);
+        float fixedPart = Pad * 2f + HeaderHeight + FooterHeight + (n > 0 ? _detailHeight + 28f : 0f) + ruleHeight;
         // 줄이 많아 화면을 넘으면 줄을 낮춘다. 지금 데이터의 한 층은 많아야 다섯 종이다.
         float rowHeight = n > 0 ? Mathf.Min(RowHeight, (ScreenHeight - 40f - fixedPart - (n - 1) * RowGap) / n) : 0f;
         float rowsHeight = n > 0 ? n * rowHeight + (n - 1) * RowGap : 60f;
@@ -207,6 +209,8 @@ public class UI_MonsterManualPopup : UI_Popup
             BuildDetail(root, y);
             y -= _detailHeight + 12f;
         }
+        if (rule != null)
+            BuildRule(root, y, rule);
 
         TextMeshProUGUI footer = CodeUI.NewText(root, "Controls", _prose, Read, Soft, TextAlignmentOptions.Center);
         CodeUI.Place(footer.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, Pad - 6f), new Vector2(PanelWidth - Pad * 2f, FooterHeight));
@@ -332,6 +336,39 @@ public class UI_MonsterManualPopup : UI_Popup
     }
 
     float _detailHeight = MinDetailHeight;
+    const float RuleHeight = 40f;
+
+    /// <summary>이 층의 챕터 기믹 규칙 한 줄(11-24) — 첫 만남 수업은 한 번뿐이라 여기서 다시 본다. 없으면 null.</summary>
+    static string FloorRuleText()
+    {
+        GameManager g = Managers.Game;
+        int floor = g.PlayerData.CurStageid + 1;
+        GameObject map = g.Maps != null && g.Maps.TryGetValue(g.PlayerData.CurStageid, out GameObject m) ? m : null;
+        if (map == null)
+            return null;
+        string Stopped(bool on) => on ? "" : " " + Managers.GetString(ForecastUI.RuleStopped);
+        if (map.GetComponent<FloorCurrents>() is FloorCurrents fc)
+            return Managers.GetString(ForecastUI.RuleCurrent) + Stopped(fc.Active);
+        if (map.GetComponent<FloorFurnace>() is FloorFurnace ff)
+            return Managers.GetString(ForecastUI.RuleFurnace) + Stopped(ff.IsLit);
+        if (GeneratedGimmicks.Ice.ContainsKey(floor))
+            return Managers.GetString(ForecastUI.RuleIce);
+        if (GeneratedGimmicks.Rifts.ContainsKey(floor))
+            return Managers.GetString(ForecastUI.RuleRift);
+        return null;
+    }
+
+    void BuildRule(Transform root, float top, string rule)
+    {
+        float width = PanelWidth - Pad * 2f;
+        TextMeshProUGUI label = CodeUI.NewText(root, "FloorRuleLabel", _prose, Read, TraitGold);
+        CodeUI.Place(label.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-width / 2f + 70f, top), new Vector2(120f, RuleHeight));
+        CodeUI.Fit(label, Small).text = Managers.GetString(ForecastUI.FloorRule);
+        TextMeshProUGUI text = CodeUI.NewText(root, "FloorRule", _prose, Read, Ink);
+        CodeUI.Place(text.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(70f, top), new Vector2(width - 140f, RuleHeight));
+        text.alignment = TextAlignmentOptions.MidlineLeft;
+        CodeUI.Fit(text, Small).text = rule;
+    }
 
     /// <summary>
     /// 설명 칸 높이 = 이 층에서 가장 긴 설명(특성·몬스터)이 그 글자 크기로 다 들어가는 높이. Small 아래로는 줄이지 않는다 — 줄이던

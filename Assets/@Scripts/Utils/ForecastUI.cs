@@ -38,6 +38,12 @@ public static class ForecastUI
     public const int WarpTitle = 285;
     public const int FloorN = 286;          // {0}층
     public const int Vault = 287;
+    public const int FloorRule = 289;       // 도감 아래 "이 층" — 챕터 기믹(11-24)
+    public const int RuleCurrent = 290;
+    public const int RuleFurnace = 291;
+    public const int RuleIce = 292;
+    public const int RuleRift = 293;
+    public const int RuleStopped = 294;     // 레버로 멈춘 물살·꺼진 화로
     public const int WarpHelp = 288;
 
     // 값이 바뀐 것을 보이는 문구 (Tools/ui_text_parts/feel.py)

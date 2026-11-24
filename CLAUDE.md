@@ -770,7 +770,7 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
 통과한 방만 고른다. 걸음은 `PlayerController.SlideOn`(걸음을 마칠 때 이어 간다, `_sliding` 이면 `SlideBlocked` 가 막힌 칸에서 선다), 길찾기는 `PathMover.Flood` 가 미끄럼 끝 칸을 간선으로 잰다
 (물건 칸에서 서는 것까지 같은 규칙 — 처음에 "물건 앞에서 선다" 로 셌더니 77층 얼음 방의 설 자리가 비어 봇이 갇힌 줄 알았다). 얼음 칸에 바닥 장식을 안 둔다.
 **기믹은 처음 만날 때 두 줄로 가르친다**(11-24) — 물살·화로(또는 그 방 몬스터)·얼음·균열 칸 옆에 처음 서면 `mechanic_first:current|furnace|ice|rift` 대화(`StoryDirector.GimmickNear`, `WatchFloor`).
-균열은 81~89층이라 데미안만 말한다(R13). 꺼진 물살·화로 앞에서는 안 뜬다.
+균열은 81~89층이라 데미안만 말한다(R13). 꺼진 물살·화로 앞에서는 안 뜬다. 다시 볼 자리는 도감(M) 아래 "이 층" 줄이다(`UI_MonsterManualPopup.FloorRuleText`, 멈춘 물살·꺼진 화로는 "(멈춤)").
 
 골방 안의 덤은 **완주 계산에 넣지 않는다.** 안 잡고 지나갈 수 있는 것을 셈에 넣으면
 완주 보장이 거짓말이 된다. 파수꾼도 그 층 다섯 마리 중 하나를 옮겨 세운 것이지
