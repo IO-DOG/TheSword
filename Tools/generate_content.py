@@ -211,8 +211,13 @@ MOB_ART = ([(f"Mob_C0_I{i:03d}", f"Mob_C0_A{i:03d}") for i in range(8)]
 # 이름·설명은 bestiary 의 chapter_species(art 번호 OWN_ART + i). 그림은 이미 챕터 색이라 MonsterTint 가 색조를 안 입힌다.
 OWN_ART = 100
 CHAPTER_ART = {
+    1: [(f"Mob_C1_I{i:03d}", f"Mob_C1_A{i:03d}") for i in range(5)],   # 수렁 개구리·녹슨 방패병·뱀장어 검사·껍질게·물방울 정령
+    2: [(f"Mob_C2_I{i:03d}", f"Mob_C2_A{i:03d}") for i in range(5)],   # 잿불 임프·그을음박쥐·잿불 기사·슬래그 덩어리·슬래그 골렘
     3: [(f"Mob_C3_I{i:03d}", f"Mob_C3_A{i:03d}") for i in range(5)],   # 서리 해골·서리 스라소니·서리 파수 구울·고드름 까마귀·서리 망령
+    4: [(f"Mob_C4_I{i:03d}", f"Mob_C4_A{i:03d}") for i in range(5)],   # 공허까마귀·심연 사냥개·균열 거인·껍질지네·심연 방패병
 }
+# 챕터마다 그림 다섯 — 층의 세 자리(0·3·4)와 갈림길 정예가 서로 다른 그림이 되려면 다섯은 있어야 한다(넷이면 4번 자리가 0번과 같은 그림).
+assert all(len(v) >= 5 for v in CHAPTER_ART.values())
 
 
 def art_of(ch, n):
