@@ -5,6 +5,17 @@
 
 ---
 
+## 2026-11-26 (0시) — 챕터 몬스터 도감 설명 교정(영·일·중 다섯 문장)
+
+- 11-24 에 넣은 챕터 몬스터 20종의 도감 설명(`Tools/bestiary.py` 의 `CHAPTER_SPECIES`, 네 언어)을 처음으로 교정했다. 한국어는 고칠 것이 없었다.
+  - 영어 — 껍질게 "Break the shell before you see the meat" → "You have to crack the shell to get at the meat"(순서가 거꾸로였다),
+    물방울 정령 "A drop that fell … woke up" → "A drop of water fell … and woke"(문장이 덜 끝났다),
+    뱀장어 검사 "Its slippery body strikes first" → "Slippery and quick, it strikes first"(몸이 찌르는 꼴이었다).
+  - 일본어 — 슬래그 골렘 "ひびのたびに" → "裂け目ごとに火が息をしている"(たびに 는 "~할 때마다" 라 뜻이 틀렸다).
+  - 중국어 — 뱀장어 검사 "滑溜的身体先刺出" → "仗着滑溜的身子抢先出手"(몸이 찌르는 꼴).
+- `generate_content --write` → `story_gen` 으로 구웠다 — 바뀐 것은 ScriptData 의 그 문장 줄뿐이고 MapData·몬스터 표는 그대로다. 출시 빌드에는 다음 굽기 때 들어간다.
+- 검증: 규칙 검사 13개 통과, `glyph_check` Silver 에 없는 글자 0(중국어 글자 1270 → 1271).
+
 ## 2026-11-25 (23시) — 화로 밸브를 판단으로 만드는 길(시험만, 데이터 그대로)
 
 - 22시에 "밸브는 거의 판단이 아니다" 를 쟀다. 까닭을 생성기에서 찾았다 — `gimmicks.add_furnace` 가 밸브를 "이미 지키는 몬스터" 를 찾을 때 **관문도 파수꾼으로 쳐서**,
