@@ -44,6 +44,7 @@ public static class ForecastUI
     public const int RuleIce = 292;
     public const int RuleRift = 293;
     public const int RuleStopped = 294;     // 레버로 멈춘 물살·꺼진 화로
+    public const int FurnaceTag = 295;      // 도감 줄 이름 옆(화로 방의 놈)
     public const int WarpHelp = 288;
 
     // 값이 바뀐 것을 보이는 문구 (Tools/ui_text_parts/feel.py)

@@ -72,6 +72,7 @@ public static class GeneratedUiText
             case 292: return new[] { "Ice: you slide until something stops you. You stop before monsters and on items.", "얼음: 디디면 막힐 때까지 미끄러진다. 몬스터 앞에서 서고 물건은 주우며 선다.", "Ice: you slide until something stops you. You stop before monsters and on items.", "氷: 踏めば止まるまで滑る。敵の手前で止まり 物は拾って止まる。", "冰面：踩上就一直滑到被挡住。在怪物前停下 踩到物品会拾起并停下。" }[language >= 0 && language <= 4 ? language : 0];
             case 293: return new[] { "Rift: step into one and you stand at the other. Skipping the monster between saves HP but gives no EXP.", "균열: 한쪽을 밟으면 다른 쪽에 선다. 사이의 몬스터를 건너뛰면 체력은 아끼고 경험치는 못 받는다.", "Rift: step into one and you stand at the other. Skipping the monster between saves HP but gives no EXP.", "裂け目: 片方を踏めばもう片方に立つ。間の敵を飛ばせば体力は残るが経験値は入らない。", "裂缝：踩进一边就站到另一边。跳过中间的怪物能省体力 但得不到经验。" }[language >= 0 && language <= 4 ? language : 0];
             case 294: return new[] { "(stopped)", "(멈춤)", "(stopped)", "(停止)", "(已停止)" }[language >= 0 && language <= 4 ? language : 0];
+            case 295: return new[] { "Furnace", "화로", "Furnace", "炉", "火炉" }[language >= 0 && language <= 4 ? language : 0];
             case 9: return new[] { "Continue", "계속하기", "Continue", "続ける", "继续" }[language >= 0 && language <= 4 ? language : 0];
             case 10: return new[] { "Settings", "설정", "Settings", "設定", "设置" }[language >= 0 && language <= 4 ? language : 0];
             case 11: return new[] { "Language", "언어", "Language", "言語", "语言" }[language >= 0 && language <= 4 ? language : 0];

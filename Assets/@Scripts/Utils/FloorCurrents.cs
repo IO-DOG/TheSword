@@ -31,6 +31,13 @@ public class FloorCurrents : MonoBehaviour
         return fc != null && fc.BlocksStep(from, to);
     }
 
+    /// <summary>그 칸이 (흐르는) 물살 칸인가 — 고르지 않은 걸음(StoryDirector 의 뒷걸음)이 들어서지 않게.</summary>
+    public static bool IsCurrent(GameObject map, Vector2Int cell)
+    {
+        FloorCurrents fc = map != null ? map.GetComponent<FloorCurrents>() : null;
+        return fc != null && fc.Active && fc._flow.ContainsKey(cell);
+    }
+
     public bool Active
     {
         get

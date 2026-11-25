@@ -13,6 +13,7 @@ public class FloorFurnace : MonoBehaviour
     Lever _lever;
     bool _shownLit = true;
     SpriteRenderer _fire;
+    SpriteRenderer _fireDepth;     // StandSprite 가 밑에 까는 깊이 판 — 같은 그림을 바꿔 주지 않으면 꺼진 화로 밑에 불꽃이 남는다
     readonly List<GameObject> _embers = new List<GameObject>();
     float _clock;
     int _frame;
@@ -61,6 +62,7 @@ public class FloorFurnace : MonoBehaviour
             fire.name = "Furnace";
             fire.transform.localScale *= 2.6f;       // 표지(11px)가 아니라 칸 하나를 채우는 화로로 보이게 — 정수배에 가깝게
             ff._fire = fire.GetComponent<SpriteRenderer>();
+            ff._fireDepth = fire.transform.Find("Depth")?.GetComponent<SpriteRenderer>();
         }
         // 화로 방 몬스터 발밑의 잉걸 빛 — 어느 놈이 센지 보이게
         foreach (MonsterController mc in root.GetComponentsInChildren<MonsterController>(true))
@@ -89,7 +91,15 @@ public class FloorFurnace : MonoBehaviour
             return;
         _clock = 0f;
         _frame = (_frame + 1) % 3;
-        _fire.sprite = Frames(lit)[lit ? _frame : 0];
+        SetFire(Frames(lit)[lit ? _frame : 0]);
+    }
+
+    void SetFire(Sprite s)
+    {
+        if (_fire != null)
+            _fire.sprite = s;
+        if (_fireDepth != null)
+            _fireDepth.sprite = s;
     }
 
     void Refresh(bool first)
@@ -101,8 +111,7 @@ public class FloorFurnace : MonoBehaviour
             GameEvents.RaiseHudRefreshed();     // 머리 위 예측을 다시 잰다
         }
         _shownLit = lit;
-        if (_fire != null)
-            _fire.sprite = Frames(lit)[0];
+        SetFire(Frames(lit)[0]);
         foreach (GameObject e in _embers)
             if (e != null)
                 e.SetActive(lit);

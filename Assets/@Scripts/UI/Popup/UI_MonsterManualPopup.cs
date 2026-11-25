@@ -126,7 +126,8 @@ public class UI_MonsterManualPopup : UI_Popup
             Data.MonsterData md;
             if (ForecastUI.IsStanding(mc) == false || Managers.Data.MonsterDic.TryGetValue(mc.id, out md) == false)
                 continue;
-            Entry same = _entries.Find(e => SameSpecies(e.Data, md));
+            // 화로 방(11-24)의 놈은 같은 종이라도 값이 달라 따로 세운다 — 묶으면 줄의 값이 먼저 찾은 한 마리 것이었다
+            Entry same = _entries.Find(e => SameSpecies(e.Data, md) && FloorFurnace.AttackMul(e.Id) == FloorFurnace.AttackMul(mc.id));
             if (same != null)
                 same.Alive++;
             else
@@ -282,7 +283,8 @@ public class UI_MonsterManualPopup : UI_Popup
         string count = e.Alive > 1 ? $" <size=80%><color=#9AA4B8>{string.Format(Managers.GetString(ForecastUI.Count), e.Alive)}</color></size>" : "";
         TextMeshProUGUI name = CodeUI.NewText(row, "Name", _prose, 30f, Ink);
         CodeUI.Place(name.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(144f, 18f), new Vector2(306f, 38f));
-        CodeUI.Fit(name, 16f).text = Managers.GetString(e.Data.MonsterNameId) + count;
+        string furnace = FloorFurnace.AttackMul(e.Id) > 1f ? "  <color=#FF9A40>" + Managers.GetString(ForecastUI.FurnaceTag) + "</color>" : "";   // 같은 종이 화로 안팎 두 줄일 때 갈라 보이게
+        CodeUI.Fit(name, 16f).text = Managers.GetString(e.Data.MonsterNameId) + count + furnace;
 
         Data.MonsterClassData trait;
         Managers.Data.MonsterClassDic.TryGetValue(e.Data.Ability, out trait);
@@ -347,15 +349,16 @@ public class UI_MonsterManualPopup : UI_Popup
         if (map == null)
             return null;
         string Stopped(bool on) => on ? "" : " " + Managers.GetString(ForecastUI.RuleStopped);
+        var rules = new List<string>();     // 92층처럼 둘이 겹치는 층이 있다(균열 + 물살)
         if (map.GetComponent<FloorCurrents>() is FloorCurrents fc)
-            return Managers.GetString(ForecastUI.RuleCurrent) + Stopped(fc.Active);
+            rules.Add(Managers.GetString(ForecastUI.RuleCurrent) + Stopped(fc.Active));
         if (map.GetComponent<FloorFurnace>() is FloorFurnace ff)
-            return Managers.GetString(ForecastUI.RuleFurnace) + Stopped(ff.IsLit);
+            rules.Add(Managers.GetString(ForecastUI.RuleFurnace) + Stopped(ff.IsLit));
         if (GeneratedGimmicks.Ice.ContainsKey(floor))
-            return Managers.GetString(ForecastUI.RuleIce);
+            rules.Add(Managers.GetString(ForecastUI.RuleIce));
         if (GeneratedGimmicks.Rifts.ContainsKey(floor))
-            return Managers.GetString(ForecastUI.RuleRift);
-        return null;
+            rules.Add(Managers.GetString(ForecastUI.RuleRift));
+        return rules.Count == 0 ? null : string.Join("  ", rules);
     }
 
     void BuildRule(Transform root, float top, string rule)

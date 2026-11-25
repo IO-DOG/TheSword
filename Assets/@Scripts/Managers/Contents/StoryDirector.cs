@@ -972,6 +972,14 @@ public class StoryDirector : MonoBehaviour
                      : facing == Define.MoveDir.Left ? Vector3.right : Vector3.left;
         if (Physics.Raycast(p.transform.position + Vector3.up * (Define.TILE_SIZE / 2f), away, Define.TILE_SIZE * 1.3f))
             return;
+        // 챕터 기믹(11-24) 칸은 콜라이더가 없다 — 뒷걸음이 물살에 실려 곁가지로 가거나, 균열로 관문을 넘거나, 얼음에 미끄러지면 안 된다
+        GameObject map = CurrentMap();
+        if (map != null)
+        {
+            Vector2Int behind = PathMover.Cell(map, p._cellPos + away * Define.TILE_SIZE);
+            if (FloorCurrents.IsCurrent(map, behind) || FloorIce.IsIce(map, behind) || FloorRifts.TryPair(map, behind, out _))
+                return;
+        }
         foreach (Collider c in Physics.OverlapBox(p._cellPos + away * Define.TILE_SIZE, Vector3.one * (Define.TILE_SIZE * 0.45f),
                                                   Quaternion.identity, ~0, QueryTriggerInteraction.Collide))
         {
