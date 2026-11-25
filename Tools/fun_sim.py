@@ -48,6 +48,7 @@ import functools
 import math
 import os
 import random
+import re
 import sys
 
 import generate_content as G
@@ -297,7 +298,8 @@ def check_engine(world, sample=None, rng_seed=7):
     """사건 단위 시계가 (1) simulate_battle 과 모든 몬스터·설계 상태에서, (2) BattleStepper 의 float 시계와
     무작위 이어 받기 상태에서 같은지 본다. 어긋나면 AssertionError."""
     rng = random.Random(rng_seed)
-    rows = [md for md in MONSTER_BY_KEY.values() if md.get("_floor")]
+    # 화로의 "켜진" 판(World.lit)은 공격만 올리고 기준 값은 그대로다 — 데이터의 줄이 아니라 대조에서 뺀다.
+    rows = [md for md in MONSTER_BY_KEY.values() if md.get("_floor") and not md["_key"][0].startswith("lit:")]
     if sample:
         rows = rng.sample(rows, min(sample, len(rows)))
     n1 = n2 = 0
@@ -335,6 +337,18 @@ TABLES = {"normal": "MonsterData", "tower": G.TOWER_TABLE}
 MAIN_KEY = {"I_00": 0, "I_01": 1, "I_02": 2}
 
 
+GIMMICKS_CS = os.path.join(G.ROOT, "Assets", "@Scripts", "Data", "GeneratedGimmicks.cs")
+
+
+def read_furnaces():
+    """층 -> (배율, 화로 방 몬스터 id). 게임이 읽는 GeneratedGimmicks.cs 를 그대로 읽는다."""
+    if not os.path.exists(GIMMICKS_CS):
+        return {}
+    src = open(GIMMICKS_CS, encoding="utf-8").read()
+    return {int(f): (float(mul), [int(i) for i in ids.split(",")])
+            for f, mul, ids in re.findall(r"\{ (\d+), \(\d+, \d+, ([\d.]+)f, new\[\] \{ ([\d, ]+) \}\) \}", src)}
+
+
 class World:
     """한 번 읽어 두는 것들. 작업 프로세스마다 하나씩 짓는다.
     mob_loss 를 주면 같은 지도에 그 손실로 푼 몬스터 표를 하나 더 지어 "whatif" 로 둔다(generate_content.build_monsters
@@ -369,6 +383,17 @@ class World:
                 rows[md["id"]] = md
                 MONSTER_BY_KEY[md["_key"]] = md
             self.tables["whatif"] = rows
+        # 용광로 화로(11-24) — 켜진 동안 그 방 몬스터의 공격이 배율만큼 세다(FloorFurnace.AttackMul). 기준(ParLoss)은 그대로라
+        # 켠 채 싸우면 장부가 나빠진다. 같은 줄의 "켜진" 판을 따로 지어 둔다(키가 달라 값 캐시가 섞이지 않는다).
+        self.furnaces = read_furnaces()
+        self.lit = {}
+        for name, rows in self.tables.items():
+            lit = {}
+            for mul, ids in self.furnaces.values():
+                for i in ids:
+                    md = dict(rows[i], Attack=rows[i]["Attack"] * mul, _key=("lit:" + name, i))
+                    MONSTER_BY_KEY[md["_key"]] = lit[i] = md
+            self.lit[name] = lit
         self.specs = {f: floor_spec(self, f) for f in range(G.HANDMADE_FLOORS + 1, G.TOTAL_FLOORS + 1)}
 
     def gain(self, code):
@@ -454,7 +479,7 @@ def floor_spec(world, floor):
 
     spec = dict(floor=floor, band=G.band_of(floor), chapter=(floor - 1) // G.FLOORS_PER_CHAPTER,
                 regions=[dict(forced=[], side=[], pots=[]) for _ in range(4)],
-                boss=None, after_boss=[], rune=None, vault=None, choice=None, fork=fork_id)
+                boss=None, after_boss=[], rune=None, vault=None, choice=None, fork=fork_id, furnace=None)
     for c, v in cells.items():
         if v.startswith("M_"):
             mid = int(v[2:])
@@ -485,6 +510,19 @@ def floor_spec(world, floor):
         inner = [n for n in passable_nbrs(d) if n in taken]
         assert len(inner) == 1, (floor, d)
         spec["vault"] = ((int(cells[d]) - 3) % 3, world.gain(cells[inner[0]]))
+    # 화로: 밸브(레버 12)에 닿으려면 잡아야 하는 몬스터 — 그 칸을 막으면 문을 다 열어도 밸브에 못 닿는다. 곁길 파수꾼
+    # (gimmicks.add_furnace 의 길목)일 수도, 누구나 먼저 잡는 관문일 수도 있다(41층 — 그러면 끄는 데 드는 것은 걸음뿐이다).
+    if floor in world.furnaces:
+        mul, ids = world.furnaces[floor]
+        lever = next(c for c, v in cells.items() if v == "12")
+        cut = []
+        for c, v in cells.items():
+            if v.startswith("M_") and int(v[2:]) not in ids:
+                blocked = [list(row) for row in g]
+                blocked[c[1]][c[0]] = "W_00"
+                if lever not in L._flood_locked(blocked, spawn, set()):
+                    cut.append(int(v[2:]))
+        spec["furnace"] = (ids, cut, region[lever])
     pair = [(c, v) for c, v in cells.items() if v.endswith("~")]
     if pair:
         behind = boss_cell is not None and all(c not in before_boss for c, _ in pair)
@@ -539,6 +577,8 @@ class Persona:
       bosspick  40·60·80층 보스 뒤 둘 중 하나: atk / dfn / random
       altar     never / atk / dfn / alt(번갈아) / rich(사고도 altar_t 이상 남으면, altar_stat) / random
       skill     none / mash / timed / bot (fight 의 머리말)
+      valve     용광로 화로: first 밸브 길목이 비는 대로 먼저 잠근다 / order 밸브가 있는 구역을 다 돈 뒤에야 잠근다
+                (그 사이 화로 방 놈과 싸우면 켜진 판 — World.lit). 밸브 길목은 대개 누구나 먼저 잡는 관문이다
     """
 
     def __init__(self, seed, name="", **kw):
@@ -550,6 +590,7 @@ class Persona:
         self.rune_floors = ()       # 보물 층 가운데 treasure 와 달리 룬을 집는 층 (봇이 지도 때문에 그런 층)
         self.altar, self.altar_t, self.altar_stat = "never", 0.6, "atk"
         self.skill = SKILL_NONE
+        self.valve = "first"            # 화로: first 밸브 파수꾼을 먼저 잡아 끈다(값이 더 들면 안 끈다) / order 늘 하던 순서대로(켠 채 싸울 수 있다)
         self.fork, self.fork_cap = "fight", 0.12      # 갈림길: fight(늘 정예) / key(열쇠가 있으면 쓴다) / smart(정예가 최대 HP 의 fork_cap 넘으면 열쇠)
         for k, v in kw.items():
             assert hasattr(self, k), k
@@ -598,6 +639,8 @@ def sample_persona(seed):
     P.skill = pick((SKILL_NONE, .35), (SKILL_MASH, .25), (SKILL_TIMED, .25), (SKILL_BOT, .15))
     # 갈림길(지도 v2) 습관은 맨 끝에 뽑는다 — 가운데서 뽑으면 같은 씨앗의 뒤 습관이 전부 바뀌어 지도 전·후를 견줄 수 없다
     P.fork = pick(("fight", .35), ("key", .35), ("smart", .30))
+    # 화로(11-24)도 맨 끝 — 반은 첫 만남 수업("밸브를 잠그면 꺼진다")대로 먼저 끄고, 반은 하던 순서대로 싸운다. 짐작이다.
+    P.valve = pick(("first", .5), ("order", .5))
     P.fork_cap = r.uniform(.06, .20)
     return P
 
@@ -611,7 +654,7 @@ REFERENCE = {
     # 11-16 봇 완주와 층마다 견줘 맞췄다: 둘 중 하나는 29층만 룬이고(AutoPlayer 는 룬을 아무 때나, 물약은 70% 아래거나 층을 비운 뒤에
     # 줍는다 — 29층은 층을 비우기 전에 룬에 닿는다), 보스 뒤 셋(40·60·80)은 셋 다 공격이었다(예전 random 은 40·80 을 방어로 골랐다).
     "봇": dict(potion="topup", pot_t=.7, side="all", vault="open", treasure="potion", rune_floors=(29,),
-              bosspick="atk", altar="never", skill=SKILL_BOT),
+              bosspick="atk", altar="never", skill=SKILL_BOT, valve="order"),      # AutoPlayer 는 화로를 모른다
     # 생성기의 정답 경로(simulate_run 기본): 다 잡고, 구역 물약은 죽을 때만 마시고 남으면 두고 간다(계단 쪽 물약은
     # 마신다). 덤(금고·둘 중 하나·제단)은 안 줍는다.
     "정답 경로": dict(potion="needed", pot_t=0.0, sweep=False, side="all", vault="never", treasure="none",
@@ -989,10 +1032,47 @@ class Run:
                 self.battle(md, f, pots)
 
     # ---- 층
+    def mon(self, mid):
+        """그 몬스터의 줄 — 화로가 켜진 방의 놈이면 켜진 판."""
+        return self.W.lit[self.table][mid] if mid in self.lit_ids else self.mons[mid]
+
+    def eager(self):
+        """밸브를 닿는 대로 먼저 끄는 사람인가. 다시 하는 판(내려와 다시 친다)은 안다."""
+        return self.P.valve == "first" or self.mode != "normal"
+
+    def fought(self, mid):
+        """싸운 뒤 — 화로 방 놈이면 그 몫을 지우고, 밸브 길목이 다 비면 먼저 끄는 사람은 바로 잠근다."""
+        self.lit_ids.discard(mid)
+        self.valve_cut.discard(mid)
+        if self.lit_ids and not self.valve_cut and self.eager():
+            self.lit_ids = set()
+
+    def valve_first(self, spec, r, f, pots):
+        """밸브를 먼저 끄는 사람: 화로 방 몬스터가 남았고 길목의 곁길 파수꾼이 이 구역에 있으면, 켠 채 더 치를 값이
+        파수꾼 값보다 클 때 먼저 잡는다(gimmicks.furnace_mul 이 두 값을 비슷하게 맞췄다)."""
+        if not self.lit_ids or not self.eager():
+            return
+        st = self.stats()
+        for guard, _ in spec["regions"][r]["side"]:
+            if guard not in self.valve_cut:
+                continue
+            extra = sum(self.price(self.W.lit[self.table][i], st)[1] - self.price(self.mons[i], st)[1] for i in self.lit_ids)
+            g = self.price(self.mons[guard], st)
+            if g[0] and g[1] < self.hp and extra > g[1]:
+                self.battle(self.mons[guard], f, pots)
+                self.early.add(guard)
+                self.fought(guard)
+
     def play_floor(self, spec):
         f = spec["floor"]
         P = self.P
         pots = []
+        fz = spec.get("furnace")
+        self.lit_ids = set(fz[0]) if fz else set()
+        self.valve_cut = set(fz[1]) if fz else set()
+        self.early = set()                              # 밸브를 끄러 가며 먼저 잡은 곁길 파수꾼
+        if self.lit_ids and not self.valve_cut and self.eager():
+            self.lit_ids = set()                        # 길목이 없다 — 들어서자마자 끈다
         if self.skill_scope == "floor":
             self.kit = (True, True, True)
             ids = [m for reg in spec["regions"] for m in reg["forced"] + [s for s, _ in reg["side"]]]
@@ -1011,20 +1091,28 @@ class Run:
                 for h, _ in sorted(pots):
                     self.drink(h, f)
                 pots.clear()
+            if self.lit_ids:
+                self.valve_first(spec, r, f, pots)
             for mid in reg["forced"]:
-                self.battle(self.mons[mid], f, pots)
+                self.battle(self.mon(mid), f, pots)
+                self.fought(mid)
             for i, (mid, loot) in enumerate(reg["side"]):
-                md = self.mons[mid]
+                if mid in self.early:
+                    continue                            # 밸브를 끄러 가며 먼저 잡았다
+                md = self.mon(mid)
                 if not self.want_side(f, (r, i), md, loot, self.price(md)):
                     self.skipped_mobs.append((f, mid, loot))
                     continue
                 self.battle(md, f, pots)
+                self.fought(mid)
                 if loot and loot[0] == "key":
                     self.keys[loot[1]] += 1
                 elif loot:
                     pots.append((loot[1], r))
                     if P.potion == "greedy" or self.mode != "normal":
                         self.drink(pots.pop()[0], f)
+            if self.lit_ids and not self.valve_cut and r >= spec["furnace"][2]:
+                self.lit_ids = set()                    # 하던 순서대로 가는 사람도 밸브가 있는 구역을 다 돌면 잠근다
             if P.potion == "topup" and self.mode == "normal":
                 # AutoPlayer: 몬스터를 다 잡고 나서(PriMonster < PriTopUp) 90% 아래면 작은 것부터 채운다.
                 while pots and self.hp < 0.9 * self.stats()["hp"]:
