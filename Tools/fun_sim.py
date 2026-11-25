@@ -609,7 +609,8 @@ class Persona:
       bosspick  40·60·80층 보스 뒤 둘 중 하나: atk / dfn / random
       altar     never / atk / dfn / alt(번갈아) / rich(사고도 altar_t 이상 남으면, altar_stat) / random
       skill     none / mash / timed / bot (fight 의 머리말)
-      valve     용광로 화로: first 밸브 길목이 비는 대로 먼저 잠근다 / order 밸브가 있는 구역을 다 돈 뒤에야 잠근다
+      valve     용광로 화로: first 밸브 길목이 비는 대로 먼저 잠근다 / order 밸브가 있는 구역을 다 돈 뒤에야 잠근다 /
+                late 몬스터를 다 잡은 뒤에야(봇 — AutoPlayer 의 레버 순위가 몬스터 뒤)
                 (그 사이 화로 방 놈과 싸우면 켜진 판 — World.lit). 밸브 길목은 대개 누구나 먼저 잡는 관문이다
       rift      왕좌 짝 균열: skip 균열로 사이의 관문을 건너뛴다(싸움·경험치 없음) / fight 걸어가 싸운다
     """
@@ -673,10 +674,11 @@ def sample_persona(seed):
     P.skill = pick((SKILL_NONE, .35), (SKILL_MASH, .25), (SKILL_TIMED, .25), (SKILL_BOT, .15))
     # 갈림길(지도 v2) 습관은 맨 끝에 뽑는다 — 가운데서 뽑으면 같은 씨앗의 뒤 습관이 전부 바뀌어 지도 전·후를 견줄 수 없다
     P.fork = pick(("fight", .35), ("key", .35), ("smart", .30))
-    # 화로(11-24)도 맨 끝 — 반은 첫 만남 수업("밸브를 잠그면 꺼진다")대로 먼저 끄고, 반은 하던 순서대로 싸운다. 짐작이다.
+    P.fork_cap = r.uniform(.06, .20)
+    # 화로·균열(11-24)은 그 뒤 — 앞 습관(fork_cap 까지)이 씨앗마다 그대로다. 반은 첫 만남 수업("밸브를 잠그면 꺼진다")대로 먼저 끄고,
+    # 반은 하던 순서대로 싸운다. 짐작이다.
     P.valve = pick(("first", .5), ("order", .5))
     P.rift = pick(("skip", .5), ("fight", .5))        # 왕좌 균열(11-24) — 짐작이다
-    P.fork_cap = r.uniform(.06, .20)
     return P
 
 
@@ -689,7 +691,7 @@ REFERENCE = {
     # 11-16 봇 완주와 층마다 견줘 맞췄다: 둘 중 하나는 29층만 룬이고(AutoPlayer 는 룬을 아무 때나, 물약은 70% 아래거나 층을 비운 뒤에
     # 줍는다 — 29층은 층을 비우기 전에 룬에 닿는다), 보스 뒤 셋(40·60·80)은 셋 다 공격이었다(예전 random 은 40·80 을 방어로 골랐다).
     "봇": dict(potion="topup", pot_t=.7, side="all", vault="open", treasure="potion", rune_floors=(29,),
-              bosspick="atk", altar="never", skill=SKILL_BOT, valve="order"),      # AutoPlayer 는 화로를 모른다
+              bosspick="atk", altar="never", skill=SKILL_BOT, valve="late"),   # AutoPlayer: 레버(PriLever 6)는 몬스터(2)보다 늘 뒤
     # 생성기의 정답 경로(simulate_run 기본): 다 잡고, 구역 물약은 죽을 때만 마시고 남으면 두고 간다(계단 쪽 물약은
     # 마신다). 덤(금고·둘 중 하나·제단)은 안 줍는다.
     "정답 경로": dict(potion="needed", pot_t=0.0, sweep=False, side="all", vault="never", treasure="none",
@@ -1089,7 +1091,7 @@ class Run:
         if not self.lit_ids or not self.eager():
             return
         st = self.stats()
-        for guard, _ in spec["regions"][r]["side"]:
+        for guard, loot in spec["regions"][r]["side"]:
             if guard not in self.valve_cut:
                 continue
             extra = sum(self.price(self.W.lit[self.table][i], st)[1] - self.price(self.mons[i], st)[1] for i in self.lit_ids)
@@ -1098,6 +1100,16 @@ class Run:
                 self.battle(self.mons[guard], f, pots)
                 self.early.add(guard)
                 self.fought(guard)
+                self.loot(loot, r, f, pots)
+
+    def loot(self, loot, r, f, pots):
+        """곁길 몬스터가 지키던 골방 덤을 줍는다 — 여분 열쇠는 들고, 물약은 그 구역 물약에 얹는다."""
+        if loot and loot[0] == "key":
+            self.keys[loot[1]] += 1
+        elif loot:
+            pots.append((loot[1], r))
+            if self.P.potion == "greedy" or self.mode != "normal":
+                self.drink(pots.pop()[0], f)
 
     def play_floor(self, spec):
         f = spec["floor"]
@@ -1129,7 +1141,10 @@ class Run:
                 pots.clear()
             if self.lit_ids:
                 self.valve_first(spec, r, f, pots)
-            for mid in reg["forced"]:
+            forced = reg["forced"]
+            if self.lit_ids and self.eager():
+                forced = sorted(forced, key=lambda m: m not in self.valve_cut)    # 밸브 길목의 관문부터(칸 순서에 기대지 않게)
+            for mid in forced:
                 if mid == spec.get("rift") and self.P.rift == "skip" and self.mode == "normal":
                     self.rifted.append((f, mid))         # 균열로 건너뛰었다 — 싸움도 경험치도 없다
                     continue
@@ -1144,14 +1159,9 @@ class Run:
                     continue
                 self.battle(md, f, pots)
                 self.fought(mid)
-                if loot and loot[0] == "key":
-                    self.keys[loot[1]] += 1
-                elif loot:
-                    pots.append((loot[1], r))
-                    if P.potion == "greedy" or self.mode != "normal":
-                        self.drink(pots.pop()[0], f)
-            if self.lit_ids and not self.valve_cut and r >= spec["furnace"][2]:
-                self.lit_ids = set()                    # 하던 순서대로 가는 사람도 밸브가 있는 구역을 다 돌면 잠근다
+                self.loot(loot, r, f, pots)
+            if self.lit_ids and not self.valve_cut and r >= (3 if P.valve == "late" else spec["furnace"][2]):
+                self.lit_ids = set()                    # 하던 순서대로 가는 사람도 밸브가 있는 구역을 다 돌면 잠근다(봇은 몬스터를 다 잡은 뒤)
             if P.potion == "topup" and self.mode == "normal":
                 # AutoPlayer: 몬스터를 다 잡고 나서(PriMonster < PriTopUp) 90% 아래면 작은 것부터 채운다.
                 while pots and self.hp < 0.9 * self.stats()["hp"]:
