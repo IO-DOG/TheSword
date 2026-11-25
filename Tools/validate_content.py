@@ -183,6 +183,38 @@ def address_guid(address):
     return m.group(1) if m else None
 
 
+_GIMMICK_CELLS = None
+
+
+def gimmick_cells(floor, grid):
+    """그 층(1부터)에서 바닥 장식을 얹지 않는 칸 — MapDecoSetup.Build 가 "CUR" 로 표시하는 것과 같다
+    (물살·균열 두 칸·화로 칸·빈 바닥인 얼음 칸). 굽는 쪽과 같은 것을 읽게 GeneratedGimmicks.cs 를 그대로 읽는다."""
+    global _GIMMICK_CELLS
+    if _GIMMICK_CELLS is None:
+        path = os.path.join(G.ROOT, "Assets", "@Scripts", "Data", "GeneratedGimmicks.cs")
+        src = open(path, encoding="utf-8").read() if os.path.exists(path) else ""
+        table = collections.defaultdict(set)
+        for name in ("Currents", "Rifts", "Furnaces", "Ice"):
+            m = re.search(r" %s = new .*?\n    \{\n(.*?)\n    \};" % name, src, re.S)
+            for line in (m.group(1).splitlines() if m else ()):
+                f = re.match(r"\s*\{ (\d+), (.*) \},?$", line)
+                if not f:
+                    continue
+                nums = [int(v) for v in re.findall(r"-?\d+(?:\.\d+)?", f.group(2)) if "." not in v]
+                fl = int(f.group(1))
+                if name == "Currents":
+                    table[fl] |= {("any", nums[i], nums[i + 1]) for i in range(0, len(nums), 3)}
+                elif name == "Rifts":
+                    table[fl] |= {("any", nums[0], nums[1]), ("any", nums[2], nums[3])}
+                elif name == "Furnaces":
+                    table[fl].add(("any", nums[0], nums[1]))
+                else:
+                    table[fl] |= {("floor", nums[i], nums[i + 1]) for i in range(0, len(nums), 2)}
+        _GIMMICK_CELLS = table
+    return {(x, y) for k, x, y in _GIMMICK_CELLS.get(floor, ())
+            if k == "any" or (y < len(grid) and x < len(grid[y]) and grid[y][x] == "1")}
+
+
 def check_deco(did, grid, godray, point_light):
     """장식 프리팹이 <b>지금</b> 격자로 구워졌는가. MapDecoSetup.Build 는 에디터에서만 돈다.
 
@@ -217,7 +249,9 @@ def check_deco(did, grid, godray, point_light):
                       for dx in (-1, 0) for dy in (-1, 0))
         return in_room and not any(gate(n) for n in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)))
 
-    rays, astray, in_way = set(), 0, 0
+    chap, idx = (int(v) for v in did.split("_"))
+    gimmick = gimmick_cells(chap * 20 + idx + 1, grid)
+    rays, astray, in_way, on_gimmick = set(), 0, 0, 0
     with open(path, encoding="utf-8") as f:
         blocks = f.read().split("--- !u!")
     for b in blocks:
@@ -232,10 +266,12 @@ def check_deco(did, grid, godray, point_light):
             astray += 1
         elif kind(c) == "open" and src != point_light and not room_edge(c):
             in_way += 1
+        elif kind(c) == "open" and src != point_light and c in gimmick:
+            on_gimmick += 1
     stairs = {c for c, v in cells.items() if v == STAIRS_UP}
-    if rays != stairs or astray or in_way:
+    if rays != stairs or astray or in_way or on_gimmick:
         warnings.append(f"{did}: 장식이 옛 격자로 구워졌다 (빛기둥 {sorted(rays)}, 위층 계단 {sorted(stairs)}, "
-                        f"자리 밖 장식 {astray}개, 통로·문 앞에 선 장식 {in_way}개) — 에디터를 닫고 MapDecoSetup.Build")
+                        f"자리 밖 장식 {astray}개, 통로·문 앞에 선 장식 {in_way}개, 기믹 칸 위 장식 {on_gimmick}개) — 에디터를 닫고 MapDecoSetup.Build")
 
 
 def check_traits(classes, monsters):
