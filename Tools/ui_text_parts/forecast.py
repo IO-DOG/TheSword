@@ -68,7 +68,7 @@ TEXT = {
           "炉: 燃えている間 その部屋の敵(足元の光)は攻撃が強い。バルブを閉めれば消える。",
           "火炉：燃着时 该房间的怪物(脚下发光)攻击更强。关上风门就会熄灭。"),
     292: ("얼음: 디디면 막힐 때까지 미끄러진다. 몬스터 앞에서 서고 물건은 주우며 선다.",
-          "Ice: you slide until something stops you. You stop before monsters and on items.",
+          "Ice: you slide until something stops you. You stop in front of monsters. On items you pick them up and stop.",
           "氷: 踏めば止まるまで滑る。敵の手前で止まり 物は拾って止まる。",
           "冰面：踩上就一直滑到被挡住。在怪物前停下 踩到物品会拾起并停下。"),
     293: ("균열: 한쪽을 밟으면 다른 쪽에 선다. 사이의 몬스터를 건너뛰면 체력은 아끼고 경험치는 못 받는다.",
