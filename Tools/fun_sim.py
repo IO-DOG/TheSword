@@ -1075,8 +1075,8 @@ class Run:
         return self.W.lit[self.table][mid] if mid in self.lit_ids else self.mons[mid]
 
     def eager(self):
-        """밸브를 닿는 대로 먼저 끄는 사람인가. 다시 하는 판(내려와 다시 친다)은 안다."""
-        return self.P.valve == "first" or self.mode != "normal"
+        """밸브를 닿는 대로 먼저 끄는 사람인가. 다시 하는 판(내려와 다시 친다)은 안다. 층마다 한 번 정한다(play_floor)."""
+        return self.valve_eager or self.mode != "normal"
 
     def fought(self, mid):
         """싸운 뒤 — 화로 방 놈이면 그 몫을 지우고, 밸브 길목이 다 비면 먼저 끄는 사람은 바로 잠근다."""
@@ -1119,6 +1119,8 @@ class Run:
         self.lit_ids = set(fz[0]) if fz else set()
         self.valve_cut = set(fz[1]) if fz else set()
         self.early = set()                              # 밸브를 끄러 가며 먼저 잡은 곁길 파수꾼
+        # 밸브를 먼저 끌까 — 판단으로 센다([6] 판단의 무게). 봇(late)은 고르지 않는다.
+        self.valve_eager = bool(fz) and P.valve != "late" and self.decide(f, ("valve",), P.valve == "first", (True, False))
         if self.lit_ids and not self.valve_cut and self.eager():
             self.lit_ids = set()                        # 길목이 없다 — 들어서자마자 끈다
         if self.skill_scope == "floor":
@@ -1145,7 +1147,7 @@ class Run:
             if self.lit_ids and self.eager():
                 forced = sorted(forced, key=lambda m: m not in self.valve_cut)    # 밸브 길목의 관문부터(칸 순서에 기대지 않게)
             for mid in forced:
-                if mid == spec.get("rift") and self.P.rift == "skip" and self.mode == "normal":
+                if mid == spec.get("rift") and self.mode == "normal" and self.decide(f, ("rift",), P.rift == "skip", (True, False)):
                     self.rifted.append((f, mid))         # 균열로 건너뛰었다 — 싸움도 경험치도 없다
                     continue
                 self.battle(self.mon(mid), f, pots)
@@ -1595,7 +1597,7 @@ def report(results, seconds, mob_loss=None, stages=None):
                     continue
                 ws = [w for r in group for w in r["weights"]]
                 say(f"    {label} ({len(group)}판)")
-                for kind in ("side", "pot", "vault", "pair", "altar", "fork"):
+                for kind in ("side", "pot", "vault", "pair", "altar", "fork", "valve", "rift"):
                     xs = [w for w in ws if w[1] == kind]
                     if xs:
                         say(f"      {kind:6} 판당 {len(xs) / len(group):5.1f}개 · 차이 p50 {100 * q([w[2] for w in xs], .5):4.1f}% "
