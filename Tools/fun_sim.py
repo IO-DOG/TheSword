@@ -349,6 +349,15 @@ def read_furnaces():
             for f, mul, ids in re.findall(r"\{ (\d+), \(\d+, \d+, ([\d.]+)f, new\[\] \{ ([\d, ]+) \}\) \}", src)}
 
 
+def read_rifts():
+    """층 -> ((ax, ay), (bx, by)) 짝 균열 두 칸(열, 행)."""
+    if not os.path.exists(GIMMICKS_CS):
+        return {}
+    src = open(GIMMICKS_CS, encoding="utf-8").read()
+    return {int(f): ((int(a), int(b)), (int(c), int(d)))
+            for f, a, b, c, d in re.findall(r"\{ (\d+), \((\d+), (\d+), (\d+), (\d+)\) \}", src)}
+
+
 class World:
     """한 번 읽어 두는 것들. 작업 프로세스마다 하나씩 짓는다.
     mob_loss 를 주면 같은 지도에 그 손실로 푼 몬스터 표를 하나 더 지어 "whatif" 로 둔다(generate_content.build_monsters
@@ -386,6 +395,7 @@ class World:
         # 용광로 화로(11-24) — 켜진 동안 그 방 몬스터의 공격이 배율만큼 세다(FloorFurnace.AttackMul). 기준(ParLoss)은 그대로라
         # 켠 채 싸우면 장부가 나빠진다. 같은 줄의 "켜진" 판을 따로 지어 둔다(키가 달라 값 캐시가 섞이지 않는다).
         self.furnaces = read_furnaces()
+        self.rifts = read_rifts()
         self.lit = {}
         for name, rows in self.tables.items():
             lit = {}
@@ -479,7 +489,7 @@ def floor_spec(world, floor):
 
     spec = dict(floor=floor, band=G.band_of(floor), chapter=(floor - 1) // G.FLOORS_PER_CHAPTER,
                 regions=[dict(forced=[], side=[], pots=[]) for _ in range(4)],
-                boss=None, after_boss=[], rune=None, vault=None, choice=None, fork=fork_id, furnace=None)
+                boss=None, after_boss=[], rune=None, vault=None, choice=None, fork=fork_id, furnace=None, rift=None)
     for c, v in cells.items():
         if v.startswith("M_"):
             mid = int(v[2:])
@@ -523,6 +533,28 @@ def floor_spec(world, floor):
                 if lever not in L._flood_locked(blocked, spawn, set()):
                     cut.append(int(v[2:]))
         spec["furnace"] = (ids, cut, region[lever])
+    # 짝 균열(왕좌): 문을 벽으로 친 그래프에서 두 칸 사이에 선 관문 하나(gimmicks.place_rift) — 균열을 쓰면 그놈을 건너뛴다.
+    if floor in world.rifts:
+        a, b = world.rifts[floor]
+        g0 = _grid(floor)                           # 갈림길 정예 칸을 벽으로 바꾸기 전의 격자
+        c0 = {(x, y): v for y, row in enumerate(g0) for x, v in enumerate(row)}
+
+        def zone(blocked):
+            seen, stack = {a}, [a]
+            while stack:
+                x, y = stack.pop()
+                for dx, dy in L.NEIGHBORS:
+                    n = (x + dx, y + dy)
+                    if n in seen or n == blocked or not L._inside(n) or not L._passable(g0, n) or c0.get(n) in L.DOOR_CELLS:
+                        continue
+                    seen.add(n)
+                    stack.append(n)
+            return seen
+        assert b in zone(None), floor
+        between = [int(v[2:]) for c, v in c0.items()
+                   if v.startswith("M_") and int(v[2:]) % 8 != G.FORK_SLOT and b not in zone(c)]   # 갈림길 정예는 따로(fork_gate)
+        assert len(between) == 1 and any(between[0] in r["forced"] for r in spec["regions"]), (floor, between)
+        spec["rift"] = between[0]
     pair = [(c, v) for c, v in cells.items() if v.endswith("~")]
     if pair:
         behind = boss_cell is not None and all(c not in before_boss for c, _ in pair)
@@ -579,6 +611,7 @@ class Persona:
       skill     none / mash / timed / bot (fight 의 머리말)
       valve     용광로 화로: first 밸브 길목이 비는 대로 먼저 잠근다 / order 밸브가 있는 구역을 다 돈 뒤에야 잠근다
                 (그 사이 화로 방 놈과 싸우면 켜진 판 — World.lit). 밸브 길목은 대개 누구나 먼저 잡는 관문이다
+      rift      왕좌 짝 균열: skip 균열로 사이의 관문을 건너뛴다(싸움·경험치 없음) / fight 걸어가 싸운다
     """
 
     def __init__(self, seed, name="", **kw):
@@ -590,6 +623,7 @@ class Persona:
         self.rune_floors = ()       # 보물 층 가운데 treasure 와 달리 룬을 집는 층 (봇이 지도 때문에 그런 층)
         self.altar, self.altar_t, self.altar_stat = "never", 0.6, "atk"
         self.skill = SKILL_NONE
+        self.rift = "fight"             # 왕좌 짝 균열: skip 균열로 그 관문을 건너뛴다(HP 를 아끼고 경험치를 못 받는다) / fight 걸어가 싸운다
         self.valve = "first"            # 화로: first 밸브 파수꾼을 먼저 잡아 끈다(값이 더 들면 안 끈다) / order 늘 하던 순서대로(켠 채 싸울 수 있다)
         self.fork, self.fork_cap = "fight", 0.12      # 갈림길: fight(늘 정예) / key(열쇠가 있으면 쓴다) / smart(정예가 최대 HP 의 fork_cap 넘으면 열쇠)
         for k, v in kw.items():
@@ -641,6 +675,7 @@ def sample_persona(seed):
     P.fork = pick(("fight", .35), ("key", .35), ("smart", .30))
     # 화로(11-24)도 맨 끝 — 반은 첫 만남 수업("밸브를 잠그면 꺼진다")대로 먼저 끄고, 반은 하던 순서대로 싸운다. 짐작이다.
     P.valve = pick(("first", .5), ("order", .5))
+    P.rift = pick(("skip", .5), ("fight", .5))        # 왕좌 균열(11-24) — 짐작이다
     P.fork_cap = r.uniform(.06, .20)
     return P
 
@@ -692,7 +727,7 @@ class Run:
     """한 판. 상태는 전부 이 객체에 있고 층 입구마다 통째로 떠 둔다(체크포인트)."""
 
     LIST_FIELDS = ("keys", "skipped", "stars", "bands", "fights", "lows", "floor_log", "deaths",
-                   "decisions", "potlog", "left", "extras", "skipped_mobs")
+                   "decisions", "potlog", "left", "extras", "skipped_mobs", "rifted")
 
     def __init__(self, world, table, persona, record_decisions=False, overrides=None, density=False,
                  skill_scope="floor"):
@@ -717,6 +752,7 @@ class Run:
         self.potlog = []                # (층, 회복량, 넘친 양, 쓰지 않고 둔 양)
         self.left = []                  # 지나온 층에 두고 온 물약 (층, 회복) — 막히면 내려가서 마신다
         self.retreats = 0               # 그렇게 내려간 횟수
+        self.rifted = []                # 균열로 건너뛴 관문 (층, id)
         self.skipped_mobs = []          # 지나친 곁길 몬스터 (층, id, 덤) — 그 층에 남아 있다. 막히면 내려가서 잡는다
         self.grinds = 0                 # 그렇게 내려가 잡은 횟수
         self.extras = []                # 챕터 끝마다 (층, 공격, 방어, 체력) — 계단 룬 밖으로 얹은 것
@@ -1094,6 +1130,9 @@ class Run:
             if self.lit_ids:
                 self.valve_first(spec, r, f, pots)
             for mid in reg["forced"]:
+                if mid == spec.get("rift") and self.P.rift == "skip" and self.mode == "normal":
+                    self.rifted.append((f, mid))         # 균열로 건너뛰었다 — 싸움도 경험치도 없다
+                    continue
                 self.battle(self.mon(mid), f, pots)
                 self.fought(mid)
             for i, (mid, loot) in enumerate(reg["side"]):
