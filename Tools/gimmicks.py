@@ -342,9 +342,11 @@ def add_furnace(grid, doors, floor, floor_ok, elite_code=None):
     for lever in cands[:25]:
         g = [list(r) for r in grid]
         g[lever[1]][lever[0]] = LEVER
-        # 이미 몬스터가 지키는가(그 몬스터를 막으면 밸브에 못 간다)
+        # 이미 곁길 몬스터가 지키는가(그 몬스터를 막으면 밸브에 못 간다). 관문은 파수꾼으로 치지 않는다 —
+        # 누구나 먼저 잡는 놈이라 밸브가 판단이 안 됐다(11-25 판단의 무게 7%, 11-26 오너 "화로는 옮겨").
         guard = next((m for m in sorted(reach) if _cell(g, m).startswith("M_") and m not in mobs
-                      and lever not in _flood(g, s, blocked={m} | set(mobs))), None)
+                      and lever not in _flood(g, s, blocked={m} | set(mobs))
+                      and _cell(g, m) != elite_code and not _unavoidable_mob(g, doors, m)), None)
         if guard is None:
             path_cells = [c for c in sorted(before) if _cell(g, c) == "1" and c != lever and c != furnace and c not in comp
                           and lever not in _flood(g, s, blocked={c} | set(mobs))]
@@ -356,6 +358,9 @@ def add_furnace(grid, doors, floor, floor_ok, elite_code=None):
                     if len(_open_n(g2, m)) == 1:
                         g2[m[1]][m[0]] = rock
                     if lever in _flood(g2, s, blocked={c} | set(mobs)):
+                        continue
+                    # 옮긴 놈이 큰길에 서면 관문이 하나 더 생길 뿐이다(11-26 첫 시도: 12층 중 9층이 그랬다) — 곁길이어야 판단이 된다
+                    if _unavoidable_mob(g2, doors, c):
                         continue
                     if s not in _flood(g2, s) or floor_ok(g2):
                         continue

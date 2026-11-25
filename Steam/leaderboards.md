@@ -22,8 +22,8 @@
 
 | API Name | 규칙 | Sort Method | Display Type | Writes | Reads | Community Name |
 |---|---|---|---|---|---|---|
-| `LB_NORMAL_V4` | 보통 (`GameMode.Normal`) | **Ascending** | **Numeric** | Trusted 끔 | Friends 끔 | 보통 — 점수 (낮을수록 좋다) / Normal — Score (lower is better) |
-| `LB_TOWER_V4` | 탑의 법 (`GameMode.Tower`) | **Ascending** | **Numeric** | Trusted 끔 | Friends 끔 | 탑의 법 — 점수 / Tower's Law — Score |
+| `LB_NORMAL_V5` | 보통 (`GameMode.Normal`) | **Ascending** | **Numeric** | Trusted 끔 | Friends 끔 | 보통 — 점수 (낮을수록 좋다) / Normal — Score (lower is better) |
+| `LB_TOWER_V5` | 탑의 법 (`GameMode.Tower`) | **Ascending** | **Numeric** | Trusted 끔 | Friends 끔 | 탑의 법 — 점수 / Tower's Law — Score |
 
 - **Ascending**: 낮은 점수가 1위다(Steam: "For positional based leaderboards, use Ascending").
 - 올리기는 **KeepBest** — Steam 이 그 사람의 가장 좋은(낮은) 점수만 남긴다. 더 나쁜 판을 끝내도 기록이 나빠지지 않는다.
@@ -68,13 +68,14 @@
   → `SteamHooks` 의 `BoardNormal`·`BoardTower` 를 `_V2` 로 올리고, 이 문서의 표에 새 줄을 더하고, Steamworks 에 새 표 둘을 만든다.
 - 옛 표는 지우지 않는다(옛 기록). Community Name 에 "(v1)" 을 붙여 둔다.
 - V2 → V3(2026-11-23): 지도 v2(챕터별 건축) + 갈림길, 탑의 법 몹 손실 0.004 내림. 앱이 아직 없어 Steamworks 에 만든 표는 없다 — V3 둘만 만든다.
-- V3 → V4(2026-11-24): 수로 16개 층에 물살·수문 레버, 왕좌 18개 층에 짝 균열(왕좌 층 다시 뽑음)·92층 물살. 용광로 19개 층에 풀무 화로·밸브. 출시 전이라 같은 날의 바뀜은 V4 하나로 묶었다. 앱이 아직 없어 V4 둘만 만든다.
+- V3 → V4(2026-11-24): 수로 16개 층에 물살·수문 레버, 왕좌 18개 층에 짝 균열(왕좌 층 다시 뽑음)·92층 물살. 용광로 19개 층에 풀무 화로·밸브. 출시 전이라 같은 날의 바뀜은 V4 하나로 묶었다.
+- V4 → V5(2026-11-26): 화로 밸브를 곁길 파수꾼 뒤로(오너 "화로는 옮겨") — 용광로 17개 층(41~59층 중 45·55 빼고) 지도가 바뀌고 화로는 11개 층(41·43·45·46·49·50·51·52·55·57·59). 앱이 아직 없어 V5 둘만 만든다.
 - 자세한 값의 순서를 바꿀 때도 올린다 — 한 표 안의 행들은 같은 형식이어야 한다.
 - 출시 전(Playtest)까지는 임시다(MASTER_PLAN §7) — 출시할 때 App Admin 에서 `_V1` 두 표를 지우고 같은 설정으로 다시 만들어 빈 표로 시작해도 된다.
 
 ## 시험
 
-- Steam 을 켠 채 에디터·개발 빌드로 한 판을 끝낸다(아직 점수를 내지 않은 판의 100층 입구 체크포인트에서 이어 해도 된다). 로그: `[Steam] 순위표 LB_NORMAL_V4 점수 874 (바뀜 True, 순위 1)`, 그 뒤 PlayerPrefs 의
+- Steam 을 켠 채 에디터·개발 빌드로 한 판을 끝낸다(아직 점수를 내지 않은 판의 100층 입구 체크포인트에서 이어 해도 된다). 로그: `[Steam] 순위표 LB_NORMAL_V5 점수 874 (바뀜 True, 순위 1)`, 그 뒤 PlayerPrefs 의
   `STEAM_PENDING_SCORE` 가 없다. 못 올리면 "찾지 못했다" / "올리지 못했다 — 다음 씬에서 다시" 가 찍히고 그 값이 남는다.
 - 꺼져도 남는지: 점수가 난 뒤 결말을 고르기 전에 게임을 끈다 → `STEAM_PENDING_SCORE` 가 남아 있다 → 다시 켜면 타이틀에서 올라가고
   (결말 칸 0) 값이 지워진다. Steam 을 끈 채 끝낸 판도 같다.
