@@ -42,7 +42,7 @@ public static class GeneratedUiText
             case 262: return new[] { "x{0}", "{0}마리", "x{0}", "{0}体", "{0}只" }[language >= 0 && language <= 4 ? language : 0];
             case 263: return new[] { "If fought next", "다음에 싸우면", "If fought next", "次に戦うと", "下一战" }[language >= 0 && language <= 4 ? language : 0];
             case 264: return new[] { "hits taken: {0}", "{0}대 맞음", "hits taken: {0}", "被弾 {0}回", "挨打 {0}次" }[language >= 0 && language <= 4 ? language : 0];
-            case 265: return new[] { "ATK +{0} → one hit fewer", "공격 +{0} → 한 대 덜 맞음", "ATK +{0} → one hit fewer", "攻撃 +{0} → 被弾 1回減", "攻击 +{0} → 少挨一次" }[language >= 0 && language <= 4 ? language : 0];
+            case 265: return new[] { "ATK +{0} → one hit fewer", "공격 +{0} → 한 대 덜 맞음", "ATK +{0} → one hit fewer", "攻撃 +{0} → 被弾 1回減る", "攻击 +{0} → 少挨一次" }[language >= 0 && language <= 4 ? language : 0];
             case 266: return new[] { "ATK +{0} → -{1}", "공격 +{0} → -{1}", "ATK +{0} → -{1}", "攻撃 +{0} → -{1}", "攻击 +{0} → -{1}" }[language >= 0 && language <= 4 ? language : 0];
             case 267: return new[] { "ATK +{0} → you win", "공격 +{0} → 이긴다", "ATK +{0} → you win", "攻撃 +{0} → 勝てる", "攻击 +{0} → 能赢" }[language >= 0 && language <= 4 ? language : 0];
             case 268: return new[] { "DEF +1 → -{0}", "방어 +1 → -{0}", "DEF +1 → -{0}", "防御 +1 → -{0}", "防御 +1 → -{0}" }[language >= 0 && language <= 4 ? language : 0];
