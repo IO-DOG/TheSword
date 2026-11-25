@@ -177,9 +177,10 @@ public class FloorCurrents : MonoBehaviour
 
     static Sprite[] Draw(bool flowing)
     {
-        var deep = new Color32(38, 92, 156, 200);
-        var mid = new Color32(70, 140, 210, 210);
-        var foam = new Color32(120, 180, 235, 220);
+        // 청록 쪽으로 밝게 — 수로 벽이 짙은 파랑이라 예전 색(38,92,156)이면 물살 칸이 벽 한 칸처럼 읽혔다(11-25 기믹 층 훑기).
+        var deep = new Color32(28, 122, 152, 210);
+        var mid = new Color32(62, 176, 206, 220);
+        var foam = new Color32(175, 236, 250, 235);
         var frames = new Sprite[FrameCount];
         for (int f = 0; f < FrameCount; f++)
         {
