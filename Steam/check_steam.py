@@ -92,6 +92,11 @@ for r in rows:
     empty = [k for k in r if k.startswith(("name_", "desc_")) and not r[k].strip()]
     if empty:
         fail(f"achievements.csv {api}: 빈 칸 {empty}")
+    # 을/를 이 앞 글자의 받침과 맞는가 — 11-19 보스 이름을 바꿀 때 "종뿔사슴를"·"소라을" 이 남았다(11-26).
+    # ponytail: 목적격 을/를 만 본다(은/는·이/가 는 "않는다"·"아이" 같은 낱말에 걸린다). "마을" 같은 낱말이 오면 여기서 걸린다.
+    for m in re.finditer(r"([가-힣])(을|를)(?![가-힣])", r["name_koreana"] + " " + r["desc_koreana"]):
+        if ((ord(m.group(1)) - 0xAC00) % 28 != 0) != (m.group(2) == "을"):
+            fail(f"achievements.csv {api}: 조사 '{m.group(0)}' 가 받침과 안 맞는다")
     if api == "ACH_TOWER" and tower:
         for lang, column in LANGS.items():
             if column and tower[column] not in r["name_" + lang]:
