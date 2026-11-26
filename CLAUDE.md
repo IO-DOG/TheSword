@@ -755,7 +755,7 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
 지도 CSV 에는 레버 한 칸만 더하고, 물살 칸·방향은 `GeneratedGimmicks.cs`(생성기가 굽는다)에 둔다 — CSV 셀 코드를 읽는 곳이 수십 곳이라 새 코드를 안 만들었다.
 걸음(`PlayerController.CurrentBlocks`)·클릭 이동·봇(`PathMover.Flood`)이 같은 `FloorCurrents.Blocks` 를 본다. 레버 상태는 `LeverActiveDic`(체크포인트에 남는다) 그대로. 수문 레버 위에는 흐르는 동안 물방울 표지(11-26 — 화로 밸브와 같은 레버 그림이라 어느 것인지 안 보였다).
 생성기는 수로 층에서 물살이 안 들어가는 씨앗이면 `WATER_TRIES` 번 더 뽑고, 고친 격자도 층 검사 전부를 다시 지나야 한다(`gimmicks.add_water` 의 `floor_ok`).
-장식 굽기(`MapDecoSetup`)는 물살 칸에 바닥 장식을 두지 않는다(균열·화로·얼음 칸도 — `validate_content` 가 구운 장식을 `GeneratedGimmicks.cs` 와 대조한다, 11-25). 물살 칸이 바뀌면 순위표 `_V` 를 올린다(지금 V4).
+장식 굽기(`MapDecoSetup`)는 물살 칸에 바닥 장식을 두지 않는다(균열·화로·얼음 칸도 — `validate_content` 가 구운 장식을 `GeneratedGimmicks.cs` 와 대조한다, 11-25). 물살 칸이 바뀌면 순위표 `_V` 를 올린다(지금 V5).
 **왕좌의 짝 균열(같은 날).** 왕좌(81~99층) 18개 층에 보라 균열 두 칸 — 한쪽에 들어서면 다른 쪽에 선다(`FloorRifts`, 균열 칸 자체에는 서지 않는다).
 두 칸은 문을 벽으로 친 그래프에서 관문 몬스터 하나만 사이에 둔다(`gimmicks.place_rift` — 문은 건너뛰지 않는다, 열쇠 셈). 그놈을 건너뛰면 지금 HP 를 아끼고 경험치(층 레벨업 몫의 약 1/5)를 못 받는다.
 완주 보장은 균열을 안 쓰는 길로 잰다(관문 수 검사는 CSV 만 본다). `PathMover.Flood` 가 균열을 순간이동 간선으로 재고(`_via` — 첫걸음은 균열 칸 쪽), 걸음은 `PlayerController.RiftJump`
