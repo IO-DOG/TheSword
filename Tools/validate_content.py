@@ -215,6 +215,34 @@ def gimmick_cells(floor, grid):
             if k == "any" or (y < len(grid) and x < len(grid[y]) and grid[y][x] == "1")}
 
 
+def check_furnace_guards():
+    """화로 층마다 (층, 까닭) — 화로 방 몬스터를 막은 채 그 칸을 막으면 밸브(12)에 못 가는 몬스터 가운데 곁길(관문·정예 아님)이 없으면 걸린다."""
+    import fun_sim
+    import gimmicks
+    world = fun_sim.World()
+    out = []
+    for floor in sorted(world.furnaces):
+        spec = fun_sim.floor_spec(world, floor)
+        hot_ids = set(spec["furnace"][0])
+        side = {s[0] for r in spec["regions"] for s in r["side"]}
+        forced = {m for r in spec["regions"] for m in r["forced"]}
+        did = f"{(floor - 1) // 20:02d}_{(floor - 1) % 20:03d}"
+        with open(os.path.join(G.STREAM, f"Dungeon_{did}.csv"), encoding="utf-8-sig") as f:
+            grid = [[c.strip() for c in line.split(",")] for line in f.read().splitlines()]
+        cells = {(x, y): v.rstrip("~") for y, row in enumerate(grid) for x, v in enumerate(row)}
+        lever = next((c for c, v in cells.items() if v == "12"), None)
+        if lever is None:
+            out.append((floor, "레버(12)가 없다"))
+            continue
+        hot = {c for c, v in cells.items() if v.startswith("M_") and int(v[2:]) in hot_ids}
+        start = gimmicks._spawn(grid)
+        cut = {int(v[2:]) for c, v in cells.items() if v.startswith("M_") and c not in hot
+               and lever not in gimmicks._flood(grid, start, blocked={c} | hot)}
+        if not cut & side:
+            out.append((floor, f"막는 몬스터 {sorted(cut)} 가운데 곁길이 없다(관문 {sorted(cut & forced)}) — 끄는 값이 걸음뿐이다"))
+    return out
+
+
 def check_deco(did, grid, godray, point_light):
     """장식 프리팹이 <b>지금</b> 격자로 구워졌는가. MapDecoSetup.Build 는 에디터에서만 돈다.
 
@@ -625,6 +653,12 @@ def main():
             errors.append(f"{a} 와 {b} 의 바닥이 {sim:.0%} 같다 (문턱 {SAME_FLOOR_MAX:.0%}, 거울 포함)")
         if mean > SAME_FLOOR_MEAN:
             errors.append(f"층끼리 닮음 평균 {mean:.2f} 이 문턱 {SAME_FLOOR_MEAN} 을 넘는다")
+
+    # ---- 화로 밸브는 곁길 파수꾼 뒤다(11-26 오너 "화로는 옮겨") — 밸브를 막는 몬스터 가운데 관문도 갈림길 정예도 아닌 놈이
+    # 하나는 있어야 "먼저 끌까" 가 판단이 된다. 첫 시도에선 옮겨 세운 파수꾼이 큰길에 서서 넷째 관문이 됐다(12층 중 9층).
+    # 관문/곁길은 fun_sim.floor_spec 의 표지를 그대로 쓴다(갈림길 층의 격자 손질까지 한 곳에서).
+    for floor, why in check_furnace_guards():
+        errors.append(f"{floor}층 화로 밸브: {why}")
 
     # ---- 공통 프리팹
     # 문은 색x방향 여섯 종이 다 있어야 한다 — 하나라도 없으면 BuildDoor 가
