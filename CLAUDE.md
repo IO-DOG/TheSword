@@ -753,7 +753,7 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
 레버 길목은 곁길 몬스터 하나가 지킨다(생성기가 관문도 골방 파수꾼도 아닌 놈을 옮기고, 비운 자리가 빈 막다른 칸이면 바위로 메운다). 판단: 앞을 다 치우고 탈까,
 레버 앞 몬스터를 지금 이길 수 있나(머리 위 예측). 완주 계산은 그대로다 — 순서만 바뀐다(정답 경로는 다 잡는다). 못 이기고 갇히면 "이 층 다시 시작".
 지도 CSV 에는 레버 한 칸만 더하고, 물살 칸·방향은 `GeneratedGimmicks.cs`(생성기가 굽는다)에 둔다 — CSV 셀 코드를 읽는 곳이 수십 곳이라 새 코드를 안 만들었다.
-걸음(`PlayerController.CurrentBlocks`)·클릭 이동·봇(`PathMover.Flood`)이 같은 `FloorCurrents.Blocks` 를 본다. 레버 상태는 `LeverActiveDic`(체크포인트에 남는다) 그대로.
+걸음(`PlayerController.CurrentBlocks`)·클릭 이동·봇(`PathMover.Flood`)이 같은 `FloorCurrents.Blocks` 를 본다. 레버 상태는 `LeverActiveDic`(체크포인트에 남는다) 그대로. 수문 레버 위에는 흐르는 동안 물방울 표지(11-26 — 화로 밸브와 같은 레버 그림이라 어느 것인지 안 보였다).
 생성기는 수로 층에서 물살이 안 들어가는 씨앗이면 `WATER_TRIES` 번 더 뽑고, 고친 격자도 층 검사 전부를 다시 지나야 한다(`gimmicks.add_water` 의 `floor_ok`).
 장식 굽기(`MapDecoSetup`)는 물살 칸에 바닥 장식을 두지 않는다(균열·화로·얼음 칸도 — `validate_content` 가 구운 장식을 `GeneratedGimmicks.cs` 와 대조한다, 11-25). 물살 칸이 바뀌면 순위표 `_V` 를 올린다(지금 V4).
 **왕좌의 짝 균열(같은 날).** 왕좌(81~99층) 18개 층에 보라 균열 두 칸 — 한쪽에 들어서면 다른 쪽에 선다(`FloorRifts`, 균열 칸 자체에는 서지 않는다).

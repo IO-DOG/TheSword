@@ -73,6 +73,20 @@ public class FloorCurrents : MonoBehaviour
             fc._flow[cell] = c.dir;
             fc._looks.Add(fc.Look(root.transform, cell, c.dir));
         }
+        // 수문 레버 위에 물방울 표지 — 다른 레버(용광로 밸브)와 같은 그림이라 어느 것이 물살을 멈추는지 안 보였다(11-26, 화로 밸브와 같은 길).
+        // 화살표와 같은 목록에 넣어 물살이 멎으면 같이 사라진다.
+        if (fc._lever != null)
+        {
+            Transform lt = fc._lever.transform;
+            Renderer look = fc._lever.GetComponentInChildren<Renderer>();
+            Vector3 top = look != null ? new Vector3(lt.position.x, look.bounds.max.y + 0.02f, lt.position.z) : lt.position + new Vector3(0f, 0.34f, 0f);
+            GameObject drop = KeyMark.StandSprite(root.transform, Drop(), top);
+            if (drop != null)
+            {
+                drop.name = "CurrentLeverMark";
+                fc._arrows.Add(drop);
+            }
+        }
         fc.Refresh(true);
     }
 
@@ -108,6 +122,16 @@ public class FloorCurrents : MonoBehaviour
                 s_arrows[d] = KeyMark.DrawShape(Rotate(up, d), new Color32(150, 215, 255, 255));
         }
         return s_arrows[dir & 3];
+    }
+
+    static Sprite s_drop;
+
+    static Sprite Drop()
+    {
+        if (s_drop == null)
+            s_drop = KeyMark.DrawShape(new[] { "...X...", "..XOX..", "..XOX..", ".XOOOX.", "XOOOOOX", "XOOOOOX", "XOOOOOX", ".XOOOX.", "..XXX.." },
+                                       new Color32(150, 215, 255, 255));
+        return s_drop;
     }
 
     /// <summary>위를 가리키는 모양을 시계 방향으로 d 번 돌린다.</summary>
@@ -166,7 +190,7 @@ public class FloorCurrents : MonoBehaviour
     static Sprite[] s_flow, s_calm;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStatics() { s_flow = null; s_calm = null; s_arrows = null; }
+    static void ResetStatics() { s_flow = null; s_calm = null; s_arrows = null; s_drop = null; }
 
     static Sprite[] Frames(bool flowing)
     {
