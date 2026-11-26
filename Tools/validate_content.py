@@ -215,12 +215,19 @@ def gimmick_cells(floor, grid):
             if k == "any" or (y < len(grid) and x < len(grid[y]) and grid[y][x] == "1")}
 
 
+FURNACE_FLOORS_MIN = 11     # 11-26 밸브를 곁길 파수꾼 뒤로 옮긴 뒤 41·43·45·46·49·50·51·52·55·57·59
+
+
 def check_furnace_guards():
     """화로 층마다 (층, 까닭) — 화로 방 몬스터를 막은 채 그 칸을 막으면 밸브(12)에 못 가는 몬스터 가운데 곁길(관문·정예 아님)이 없으면 걸린다."""
     import fun_sim
     import gimmicks
     world = fun_sim.World()
     out = []
+    # 화로가 들어간 층 수 — 생성기는 화로가 안 들어가면 화로 없이 조용히 넘어간다(11-26 리뷰). 11층 밑으로 줄면 멈춘다.
+    # ponytail: 하한 하나로만 막는다 — 생성 규칙을 바꿔 층이 바뀌면 이 수와 CLAUDE.md 화로 절을 같이 고친다.
+    if len(world.furnaces) < FURNACE_FLOORS_MIN:
+        out.append((0, f"화로가 {len(world.furnaces)}층뿐이다(하한 {FURNACE_FLOORS_MIN}) — 생성기가 화로를 못 넣은 층이 늘었다"))
     for floor in sorted(world.furnaces):
         spec = fun_sim.floor_spec(world, floor)
         hot_ids = set(spec["furnace"][0])

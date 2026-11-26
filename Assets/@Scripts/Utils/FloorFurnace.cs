@@ -104,7 +104,7 @@ public class FloorFurnace : MonoBehaviour
         if (lit != _shownLit)
             Refresh(false);
         _clock += Time.deltaTime;
-        if (_clock < 0.12f || _fire == null)
+        if (_clock < 0.12f || (_fire == null && _valveFire == null))    // 화로 그림이 없어도 밸브 표지는 일렁인다
             return;
         _clock = 0f;
         _frame = (_frame + 1) % 3;
