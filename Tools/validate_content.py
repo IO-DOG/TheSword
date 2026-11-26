@@ -218,6 +218,25 @@ def gimmick_cells(floor, grid):
 FURNACE_FLOORS_MIN = 11     # 11-26 밸브를 곁길 파수꾼 뒤로 옮긴 뒤 41·43·45·46·49·50·51·52·55·57·59
 
 
+def check_gimmick_levers():
+    """물살·화로 층마다 레버(12)가 꼭 하나인가 — FloorCurrents·FloorFurnace 는 층의 첫 레버를 수문·밸브로 잡고 그 위에 표지를 세운다(11-26).
+    레버가 둘이면 표지와 켜짐 상태가 엉뚱한 레버에 붙는다(11-27 리뷰). (층, 레버 수) 를 돌려준다."""
+    path = os.path.join(G.ROOT, "Assets", "@Scripts", "Data", "GeneratedGimmicks.cs")
+    src = open(path, encoding="utf-8").read() if os.path.exists(path) else ""
+    floors = set()
+    for name in ("Currents", "Furnaces"):
+        m = re.search(r" %s = new .*?\n    \{\n(.*?)\n    \};" % name, src, re.S)
+        floors |= {int(f) for f in re.findall(r"^\s*\{ (\d+),", m.group(1), re.M)} if m else set()
+    out = []
+    for floor in sorted(floors):
+        did = f"{(floor - 1) // 20:02d}_{(floor - 1) % 20:03d}"
+        with open(os.path.join(G.STREAM, f"Dungeon_{did}.csv"), encoding="utf-8-sig") as f:
+            n = sum(c.strip().rstrip("~") == "12" for line in f for c in line.split(","))
+        if n != 1:
+            out.append((floor, n))
+    return out
+
+
 def check_furnace_guards():
     """화로 층마다 (층, 까닭) — 화로 방 몬스터를 막은 채 그 칸을 막으면 밸브(12)에 못 가는 몬스터 가운데 곁길(관문·정예 아님)이 없으면 걸린다."""
     import fun_sim
@@ -666,6 +685,8 @@ def main():
     # 관문/곁길은 fun_sim.floor_spec 의 표지를 그대로 쓴다(갈림길 층의 격자 손질까지 한 곳에서).
     for floor, why in check_furnace_guards():
         errors.append(f"{floor}층 화로 밸브: {why}")
+    for floor, n in check_gimmick_levers():
+        errors.append(f"{floor}층: 물살·화로 층인데 레버가 {n}개 — 수문·밸브 표지가 첫 레버에 붙는다(하나여야 한다)")
 
     # ---- 공통 프리팹
     # 문은 색x방향 여섯 종이 다 있어야 한다 — 하나라도 없으면 BuildDoor 가
