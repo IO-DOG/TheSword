@@ -237,6 +237,23 @@ def check_gimmick_levers():
     return out
 
 
+def check_map_archive(json_path=None, archive_dir=None):
+    """지금 MapData 의 세이브 옮기기 보관본(K1, SaveMigration.Archive)이 있고 내용이 같은가. 없으면 까닭 한 줄, 있으면 None.
+    빌드(GameBuild)가 굽기 전에 만들므로 지도를 다시 뽑은 뒤 첫 빌드 전에는 없는 게 정상이다 — 그래서 경고다(빌드가 만든 파일을 커밋한다)."""
+    import gzip
+    import hashlib
+    json_path = json_path or os.path.join(JSOND, "MapData.json")
+    archive_dir = archive_dir or os.path.normpath(os.path.join(G.STREAM, "..", "MapDataArchive"))
+    raw = open(json_path, "rb").read()
+    raw = raw[3:] if raw.startswith(b"\xef\xbb\xbf") else raw   # C# File.ReadAllText 가 BOM 을 떼고 해시한다
+    path = os.path.join(archive_dir, f"MapData_{hashlib.sha256(raw).hexdigest()[:16].upper()}.json.gz")
+    if not os.path.exists(path):
+        return f"지금 지도의 세이브 옮기기 보관본이 없다({os.path.basename(path)}) — 다음 빌드가 만든다, 그 파일을 커밋한다(K1)"
+    if gzip.open(path).read() != raw:
+        return f"{os.path.basename(path)} 내용이 지금 MapData 와 다르다 — 지우고 다시 빌드"
+    return None
+
+
 def check_furnace_guards():
     """화로 층마다 (층, 까닭) — 화로 방 몬스터를 막은 채 그 칸을 막으면 밸브(12)에 못 가는 몬스터 가운데 곁길(관문·정예 아님)이 없으면 걸린다."""
     import fun_sim
@@ -687,6 +704,9 @@ def main():
         errors.append(f"{floor}층 화로 밸브: {why}")
     for floor, n in check_gimmick_levers():
         errors.append(f"{floor}층: 물살·화로 층인데 레버가 {n}개 — 수문·밸브 표지가 첫 레버에 붙는다(하나여야 한다)")
+    why = check_map_archive()
+    if why:
+        warnings.append(why)
 
     # ---- 공통 프리팹
     # 문은 색x방향 여섯 종이 다 있어야 한다 — 하나라도 없으면 BuildDoor 가
