@@ -14,6 +14,8 @@ public class FloorFurnace : MonoBehaviour
     bool _shownLit = true;
     SpriteRenderer _fire;
     SpriteRenderer _fireDepth;     // StandSprite 가 밑에 까는 깊이 판 — 같은 그림을 바꿔 주지 않으면 꺼진 화로 밑에 불꽃이 남는다
+    GameObject _valveMark;         // 밸브(레버) 위의 작은 불꽃 — 켜진 동안만
+    SpriteRenderer _valveFire, _valveDepth;
     readonly List<GameObject> _embers = new List<GameObject>();
     float _clock;
     int _frame;
@@ -64,6 +66,21 @@ public class FloorFurnace : MonoBehaviour
             ff._fire = fire.GetComponent<SpriteRenderer>();
             ff._fireDepth = fire.transform.Find("Depth")?.GetComponent<SpriteRenderer>();
         }
+        // 밸브 위에 같은 불꽃(표지 크기) — 수로의 수문 레버와 같은 그림이라 어느 레버가 이 화로를 끄는지 안 보였다.
+        // 11-26 밸브를 곁길 파수꾼 뒤로 옮겨 "먼저 끌까" 가 판단이 됐으니 끌 자리가 보여야 한다. 꺼지면 같이 사라진다.
+        if (ff._lever != null)
+        {
+            Transform lt = ff._lever.transform;
+            Renderer look = ff._lever.GetComponentInChildren<Renderer>();
+            Vector3 top = look != null ? new Vector3(lt.position.x, look.bounds.max.y + 0.02f, lt.position.z) : lt.position + new Vector3(0f, 0.34f, 0f);
+            ff._valveMark = KeyMark.StandSprite(root.transform, Frames(true)[0], top);
+            if (ff._valveMark != null)
+            {
+                ff._valveMark.name = "FurnaceValveMark";
+                ff._valveFire = ff._valveMark.GetComponent<SpriteRenderer>();
+                ff._valveDepth = ff._valveMark.transform.Find("Depth")?.GetComponent<SpriteRenderer>();
+            }
+        }
         // 화로 방 몬스터 발밑의 잉걸 빛 — 어느 놈이 센지 보이게
         foreach (MonsterController mc in root.GetComponentsInChildren<MonsterController>(true))
         {
@@ -100,6 +117,10 @@ public class FloorFurnace : MonoBehaviour
             _fire.sprite = s;
         if (_fireDepth != null)
             _fireDepth.sprite = s;
+        if (_valveFire != null)
+            _valveFire.sprite = s;
+        if (_valveDepth != null)
+            _valveDepth.sprite = s;
     }
 
     void Refresh(bool first)
@@ -115,6 +136,8 @@ public class FloorFurnace : MonoBehaviour
         foreach (GameObject e in _embers)
             if (e != null)
                 e.SetActive(lit);
+        if (_valveMark != null)
+            _valveMark.SetActive(lit);
     }
 
     // ------------------------------------------------------------ 그림 (코드로 그린다)
