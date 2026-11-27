@@ -232,6 +232,8 @@ public class CameraController : MonoBehaviour
 
     public static IEnumerator CoExposure(float time, Exposure exposure)
     {
+        if (exposure == Exposure.White && GameSettings.ReduceFlash)     // 하얗게 올리는 쪽만 뺀다 — 되돌리는 쪽(Default)은 그대로 돌아야 한다
+            yield break;
         Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
         ColorAdjustments colorAdjustment;
 
@@ -263,6 +265,8 @@ public class CameraController : MonoBehaviour
 
     public static IEnumerator WhiteBang(float time)
     {
+        if (GameSettings.ReduceFlash)       // 화면 전체가 하얗게 번쩍이는 연출 — 설정으로 끈다
+            yield break;
         Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
         ColorAdjustments colorAdjustment;
         if (postProcessingVolume.profile.TryGet<ColorAdjustments>(out colorAdjustment))

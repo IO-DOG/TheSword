@@ -15,4 +15,6 @@ TEXT = {
     239: ("대사 자동 넘김", "Auto-advance dialogue", "セリフの自動送り", "对话自动播放"),
     # small mark on the dialogue box while 239 is on (UI_ConversationPopup.ShowAutoMark)
     240: ("자동", "AUTO", "オート", "自动"),
+    # hides the hit explosions / white hit flash in battle and the full-screen white flashes of cutscenes (GameSettings.ReduceFlash)
+    241: ("번쩍임 줄이기", "Reduce flashes", "点滅を抑える", "减少闪光"),
 }

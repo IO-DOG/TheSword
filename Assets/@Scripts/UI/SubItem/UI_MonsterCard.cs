@@ -218,7 +218,9 @@ public class UI_MonsterCard : UI_BaseCard
     {
         if (Quiet)
             return;
-        StartCoroutine(CoDamagedMat(PlayHit()));
+        string pose = PlayHit();
+        if (GameSettings.ReduceFlash == false)      // 흰 번쩍임만 뺀다 — 맞는 동작·밀림은 그대로
+            StartCoroutine(CoDamagedMat(pose));
         Recoil();
     }
 
@@ -296,6 +298,8 @@ public class UI_MonsterCard : UI_BaseCard
 
     void CreatePlayerHitParticle()
     {
+        if (GameSettings.ReduceFlash)
+            return;
         GameObject player = Opponent<UI_PlayerCard>() != null ? Opponent<UI_PlayerCard>().gameObject : null;
         if (player == null)
             return;

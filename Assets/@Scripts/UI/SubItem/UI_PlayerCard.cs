@@ -173,7 +173,7 @@ public class UI_PlayerCard : UI_BaseCard
 
     public override void StartDamagedMat()
     {
-        if (Quiet)
+        if (Quiet || GameSettings.ReduceFlash)
             return;
         StartCoroutine(CoDamagedMat());
     }
@@ -250,6 +250,8 @@ public class UI_PlayerCard : UI_BaseCard
 
     void CreateMonsterHitParticle()
     {
+        if (GameSettings.ReduceFlash)       // 번쩍임 줄이기 — 타격 폭발을 띄우지 않는다(피해 숫자·맞는 동작은 뜬다)
+            return;
         int swordId = Managers.Game.PlayerData.CurSword;
         string hitFX = Managers.Data.EquipDic[swordId].HitFX;
         GameObject monster = Opponent<UI_MonsterCard>() != null ? Opponent<UI_MonsterCard>().gameObject : null;

@@ -8,6 +8,7 @@ public static class GameSettings
     const string KeyLanguage = "SET_LANGUAGE";
     const string KeyShake = "SET_SCREEN_SHAKE";
     const string KeyAutoAdvance = "SET_AUTO_ADVANCE";
+    const string KeyReduceFlash = "SET_REDUCE_FLASH";
     const string KeyTextSpeed = "SET_TEXT_SPEED";
     const string KeyForecast = "SET_SHOW_FORECAST";
     const string KeyVSync = "SET_VSYNC";
@@ -67,6 +68,14 @@ public static class GameSettings
     {
         get => PlayerPrefs.GetInt(KeyAutoAdvance, 0) == 1;
         set { PlayerPrefs.SetInt(KeyAutoAdvance, value ? 1 : 0); Commit(); }
+    }
+
+    // 번쩍임 줄이기(11-28). 켜면 전투의 타격 폭발 이펙트와 맞은 쪽의 흰 번쩍임, 연출의 화면 전체 흰빛(WhiteBang·노출 올리기)을 띄우지 않는다 —
+    // 빛에 민감한 사람, 4배속에서 눈이 피곤한 사람을 위해. 베는 선·피해 숫자·맞는 동작·밀림은 그대로다. 기본 꺼짐.
+    public static bool ReduceFlash
+    {
+        get => PlayerPrefs.GetInt(KeyReduceFlash, 0) == 1;
+        set { PlayerPrefs.SetInt(KeyReduceFlash, value ? 1 : 0); Commit(); }
     }
 
     // 대사 글자가 찍히는 속도. 0 느림, 1 보통, 2 빠름, 3 한 번에.

@@ -909,6 +909,7 @@ python validate_content.py            # 산출물 검증 (Unity 없이 실행 �
   맨 위 팝업을 **그냥 뽑아** 버려서, 잠금을 쥔 팝업(안내·보스방·대화·계약·게임오버)이 잠금을 풀지
   못한 채 사라지고 플레이어가 영영 멈췄다. 잠금을 쥔 팝업은 ESC 를 삼키고, `OnDestroy` 에서도
   자기가 쥔 잠금만 푼다. 팝업마다 따로 ESC 를 받지 않는다 — 한 번 누른 ESC 가 두 창을 닫았다.
+- **번쩍임 줄이기**(11-28, 설정 — `GameSettings.ReduceFlash`, 기본 꺼짐): 전투의 타격 폭발 이펙트(`CreateMonsterHitParticle`·`CreatePlayerHitParticle`)와 맞은 쪽의 흰 번쩍임(`CoDamagedMat`), 연출의 화면 전체 흰빛(`CameraController.WhiteBang`, `CoExposure(White)`)을 띄우지 않는다. 베는 선·피해 숫자·맞는 동작·밀림은 그대로다. 새 번쩍이는 연출을 더하면 이 설정을 보게 한다.
 - 메뉴가 떠 있으면 `Time.timeScale = 0` 이다(`UIManager.RefreshTimeScale`) — 전투도 멈춘다.
   창을 내리면(알트탭) `Managers.PauseWhileAway` 가 메뉴를 연다 — 그 순간 못 열면(연출·가방·전투창이 서기 전 프레임, `TryOpenMenu` 가
   거절한다) 열릴 때까지 매 프레임 다시 본다. 예전에는 `UI_GameScene.OnApplicationFocus` 가 한 번만 물었고, 연출 중엔 HUD 가 꺼져 그 알림도
