@@ -114,6 +114,38 @@ def chapters(floors, spans, total):
     return [f"{stamp(t)} {name}" for t, name in out if t < total]
 
 
+def story_chapters(floors, spans, keep):
+    """이야기 영상의 유튜브 챕터: 완주 영상의 챕터 시각(프롤로그·챕터 첫 층·결말)을 잘라 이은 영상의 시각으로 옮긴다.
+    그 시각이 잘려 나간 자리면 그 뒤 첫 구간의 머리다. 10초보다 가까우면 뒤의 것을 뺀다."""
+    def moved(t):
+        at = 0.0
+        for a, b in keep:
+            if t <= a:
+                return at
+            if t < b:
+                return at + (t - a)
+            at += b - a
+        return None
+    marks = [(0.0, "프롤로그 — 마검과의 계약")]
+    seen = set()
+    for t, floor in floors:
+        if floor in seen:
+            continue
+        seen.add(floor)
+        name = f"{CHAPTER_NAMES[1]} (5층~)" if floor == 5 else f"{CHAPTER_NAMES[floor]} ({floor}층~)" if floor in CHAPTER_NAMES and floor > 1 else None
+        if name and moved(t) is not None:
+            marks.append((moved(t), name))
+    for k, a, _, _ in spans:
+        if k == "ending" and moved(a) is not None:
+            marks.append((moved(a), "결말"))
+            break
+    out = []
+    for t, name in sorted(marks):
+        if not out or t - out[-1][0] >= 10:
+            out.append((t, name))
+    return [f"{stamp(t)} {name}" for t, name in out]
+
+
 def cut(video, keep, out):
     """구간마다 따로 잘라(같은 인코딩) 이어 붙인다. 한 번에 select/aselect 로 고르면 구간마다 소리·그림이 한 프레임 안쪽으로
     어긋난 채 쌓여 백 구간쯤이면 0.1초를 넘는다(11-28 리뷰) — 따로 자르면 구간 머리에서 매번 다시 맞는다."""
@@ -149,6 +181,9 @@ def self_check():
     marks = chapters([(22.0, 1), (300.0, 5), (301.0, 5), (900.0, 20), (1000.0, 21)], [("ending", 2000.0, None, 100)], 2100.0)
     assert marks == ["0:00 1층 — 프롤로그, 마검과의 계약", "5:00 이끼 낀 지하 묘소 (5층~)", "15:00 20층 보스 — 종뿔사슴",
                      "16:40 무너진 수로 (21층~)", "33:20 결말"], marks
+    keep = [[0.0, 27.0], [99.3, 120.0], [1990.0, 2100.0]]
+    got = story_chapters([(22.0, 1), (60.0, 5), (110.0, 21)], [("ending", 2000.0, None, 100)], keep)
+    assert got == ["0:00 프롤로그 — 마검과의 계약", "0:27 이끼 낀 지하 묘소 (5층~)", "0:37 무너진 수로 (21층~)", "0:57 결말"], got
     print("story_cut 자기검사 통과")
 
 
@@ -163,6 +198,7 @@ if __name__ == "__main__":
     ap.add_argument("--barks", action="store_true", help="걸으며 한마디도 넣는다")
     ap.add_argument("--list", action="store_true", help="구간만 찍는다")
     ap.add_argument("--chapters", action="store_true", help="완주 영상의 유튜브 챕터 줄")
+    ap.add_argument("--story-chapters", action="store_true", help="이야기 영상의 유튜브 챕터 줄")
     a = ap.parse_args()
     total = duration(a.video)
     spans, floors = read_log(a.log)
@@ -170,6 +206,9 @@ if __name__ == "__main__":
         print("\n".join(chapters(floors, spans, total)))
         sys.exit(0)
     keep = merge(spans, total, a.barks)
+    if a.story_chapters:
+        print(os.linesep.join(story_chapters(floors, spans, keep)))
+        sys.exit(0)
     if not keep:
         sys.exit("이야기 구간이 없다 — THESWORD_RECORD_READ=1 로 찍은 로그인가")
     length = sum(b - a_ for a_, b in keep)
