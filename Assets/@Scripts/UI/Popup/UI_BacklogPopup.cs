@@ -79,6 +79,7 @@ public class UI_BacklogPopup : UI_Popup
         _body = CodeUI.NewText(root, "Lines", prose, 40f, Ink, TextAlignmentOptions.TopLeft);
         CodeUI.Place(_body.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -Pad - 72f), new Vector2(bodyWidth, bodyHeight));
         _body.textWrappingMode = TextWrappingModes.Normal;
+        _body.overflowMode = TextOverflowModes.Truncate;    // 한 줄이 쪽보다 길어도 아래 안내 글을 덮지 않게
         _body.lineSpacing = 6f;
 
         // 끝에서부터 쪽을 채운다. 줄 하나의 높이는 TMP 에 물어 잰다(글자 크기·줄바꿈 그대로).

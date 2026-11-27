@@ -284,7 +284,10 @@ public class UI_ConversationPopup : UI_Popup
 
         string text = Managers.GetString(Managers.Data.ScriptDic[Managers.Data.EventDic[Managers.Game.CurEventID].ScriptID].id);
         GetText((int)Texts.ConversationText).text = text;
-        StoryUI.Remember(GetText((int)Texts.SpeakerText).text, text);
+        // 초상화가 둘 다 없는 줄(내레이션 꼴의 이벤트)은 화자 칸에 앞 줄의 이름이 남아 있다 — 기록에는 화자 없이 적는다
+        bool spoken = string.IsNullOrEmpty(Managers.Data.EventDic[Managers.Game.CurEventID].IllustLeft) == false
+                      || string.IsNullOrEmpty(Managers.Data.EventDic[Managers.Game.CurEventID].IllustRight) == false;
+        StoryUI.Remember(spoken ? GetText((int)Texts.SpeakerText).text : "", text);
         _textFrame = Time.frameCount;
 
 

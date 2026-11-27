@@ -163,7 +163,7 @@ def cut(video, keep, out):
         listing = os.path.join(tmp, "list.txt")
         with open(listing, "w", encoding="utf-8") as f:
             for p in parts:
-                f.write("file '" + p.replace(os.sep, "/") + "'" + os.linesep)
+                f.write("file '" + p.replace(os.sep, "/") + "'" + '\n')     # 글 모드라 줄 끝은 파이썬이 맞춘다(os.linesep 을 쓰면 CR 이 둘)
         r = subprocess.run([ffmpeg(), "-hide_banner", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", listing,
                             "-c", "copy", "-movflags", "+faststart", out])
         if r.returncode != 0 or not os.path.exists(out):
@@ -207,7 +207,7 @@ if __name__ == "__main__":
         sys.exit(0)
     keep = merge(spans, total, a.barks)
     if a.story_chapters:
-        print(os.linesep.join(story_chapters(floors, spans, keep)))
+        print('\n'.join(story_chapters(floors, spans, keep)))
         sys.exit(0)
     if not keep:
         sys.exit("이야기 구간이 없다 — THESWORD_RECORD_READ=1 로 찍은 로그인가")
