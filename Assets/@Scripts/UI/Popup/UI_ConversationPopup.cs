@@ -284,6 +284,7 @@ public class UI_ConversationPopup : UI_Popup
 
         string text = Managers.GetString(Managers.Data.ScriptDic[Managers.Data.EventDic[Managers.Game.CurEventID].ScriptID].id);
         GetText((int)Texts.ConversationText).text = text;
+        StoryUI.Remember(GetText((int)Texts.SpeakerText).text, text);
         _textFrame = Time.frameCount;
 
 
@@ -414,6 +415,7 @@ public class UI_ConversationPopup : UI_Popup
         TMP_Text text = GetText((int)Texts.ConversationText);
         text.horizontalAlignment = narration ? HorizontalAlignmentOptions.Center : HorizontalAlignmentOptions.Left;
         text.text = Managers.GetString(line.ScriptId);
+        StoryUI.Remember(narration ? "" : GetText((int)Texts.SpeakerText).text, text.text);
         _textFrame = Time.frameCount;
         _isAllTextShown = false;
 

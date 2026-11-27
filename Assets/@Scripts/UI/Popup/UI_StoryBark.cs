@@ -125,6 +125,7 @@ public class UI_StoryBark : MonoBehaviour
         _portrait.enabled = _portrait.sprite != null;
         _name.text = who.NameId != 0 ? Managers.GetString(who.NameId) : "";
         _text.text = Managers.GetString(line.ScriptId);
+        StoryUI.Remember(_name.text, _text.text);
         _shownFor = 0f;
     }
 }

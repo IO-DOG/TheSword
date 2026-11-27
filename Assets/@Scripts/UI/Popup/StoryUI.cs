@@ -42,6 +42,27 @@ public static class StoryUI
     /// 다 보인 대사·카드만 읽을 만큼 머문 뒤 넘긴다. 누르면 평소처럼 바로 넘어간다.</summary>
     public static bool AutoRead => Auto == false && GameSettings.AutoAdvance;
 
+    /// <summary>
+    /// 지난 대사(11-28): 이번 실행에서 뜬 대사·바크를 최근 LogMax 줄까지 기억한다(화자, 글 — 뜰 때의 언어 그대로). 메뉴의 "지난 대사"
+    /// (UI_BacklogPopup)가 보인다. 저장하지 않는다 — ponytail: 끄면 사라진다, 판을 넘겨 남기려면 StorySeen 처럼 파일로.
+    /// </summary>
+    const int LogMax = 80;
+    static readonly System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<string, string>> s_log =
+        new System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<string, string>>();
+    public static System.Collections.Generic.IReadOnlyList<System.Collections.Generic.KeyValuePair<string, string>> Log => s_log;
+    public static void Remember(string who, string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return;
+        who = who ?? "";
+        // 같은 줄을 다시 칠한 것(언어 바꾸기·되감기)은 한 번만
+        if (s_log.Count > 0 && s_log[s_log.Count - 1].Key == who && s_log[s_log.Count - 1].Value == text)
+            return;
+        s_log.Add(new System.Collections.Generic.KeyValuePair<string, string>(who, text));
+        if (s_log.Count > LogMax)
+            s_log.RemoveAt(0);
+    }
+
     /// <summary>건너뛰기 키. 패드는 LB 다(GameKeys) — 전투 건너뛰기와 같은 키다.</summary>
     public const KeyCode SkipKey = KeyCode.Tab;
     /// <summary>이만큼(실시간 초) 누르고 있으면 지금 장면을 끝까지 넘긴다.</summary>
@@ -73,6 +94,7 @@ public static class StoryUI
     {
         Skipping = false;
         ReadPace = false;
+        s_log.Clear();
         s_hint = null;
         s_hintText = null;
         s_hintFill = null;

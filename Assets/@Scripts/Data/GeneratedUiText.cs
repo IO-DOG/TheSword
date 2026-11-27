@@ -251,6 +251,7 @@ public static class GeneratedUiText
             case 673: return new[] { "A continue", "A 계속", "A continue", "A 続ける", "A 继续" }[language >= 0 && language <= 4 ? language : 0];
             case 674: return new[] { "Stick Choose   A Start   B Back", "스틱 고르기   A 시작   B 뒤로", "Stick Choose   A Start   B Back", "スティック 選択   A 開始   B 戻る", "摇杆 选择   A 开始   B 返回" }[language >= 0 && language <= 4 ? language : 0];
             case 675: return new[] { "RB Next slot   X Next item   Y / B Close", "RB 칸 바꾸기   X 다음 장비   Y / B 닫기", "RB Next slot   X Next item   Y / B Close", "RB 欄を切替   X 次の装備   Y / B 閉じる", "RB 切换栏位   X 下一件装备   Y / B 关闭" }[language >= 0 && language <= 4 ? language : 0];
+            case 676: return new[] { "Stick page  A close", "스틱 넘기기  A 닫기", "Stick page  A close", "スティック ページ送り  A 閉じる", "摇杆 翻页  A 关闭" }[language >= 0 && language <= 4 ? language : 0];
             case 690: return new[] { "Fell to {1} on floor {0}", "{0}층에서 {1}에게 쓰러졌다", "Fell to {1} on floor {0}", "{0}階で{1}に倒された", "在第{0}层倒在{1}面前" }[language >= 0 && language <= 4 ? language : 0];
             case 691: return new[] { "Fight cost {0}", "싸움의 값 {0}", "Fight cost {0}", "戦いの値 {0}", "这一战的代价 {0}" }[language >= 0 && language <= 4 ? language : 0];
             case 692: return new[] { "Your HP {0}", "가진 체력 {0}", "Your HP {0}", "体力 {0}", "生命 {0}" }[language >= 0 && language <= 4 ? language : 0];
@@ -283,6 +284,8 @@ public static class GeneratedUiText
             case 381: return new[] { "Hold Tab: skip", "Tab 길게: 건너뛰기", "Hold Tab: skip", "Tab長押し: スキップ", "长按Tab: 跳过" }[language >= 0 && language <= 4 ? language : 0];
             case 382: return new[] { "Tab: skip (seen)", "Tab: 건너뛰기 (본 장면)", "Tab: skip (seen)", "Tab: スキップ (既読)", "Tab: 跳过 (已读)" }[language >= 0 && language <= 4 ? language : 0];
             case 300: return new[] { "Pick with the arrow keys then press Enter", "방향키로 고른 뒤 Enter", "Pick with the arrow keys then press Enter", "方向キーで選んでからEnter", "用方向键选择后按Enter" }[language >= 0 && language <= 4 ? language : 0];
+            case 301: return new[] { "Dialogue log", "지난 대사", "Dialogue log", "セリフ履歴", "对话记录" }[language >= 0 && language <= 4 ? language : 0];
+            case 302: return new[] { "W S page  Enter close", "W S 넘기기  Enter 닫기", "W S page  Enter close", "W S ページ送り  Enter 閉じる", "W S 翻页  Enter 关闭" }[language >= 0 && language <= 4 ? language : 0];
             case 180: return new[] { "Restart floor", "이 층 다시 시작", "Restart floor", "この階をやり直す", "重新开始本层" }[language >= 0 && language <= 4 ? language : 0];
             case 181: return new[] { "Checkpoints", "체크포인트", "Checkpoints", "チェックポイント", "检查点" }[language >= 0 && language <= 4 ? language : 0];
             case 182: return new[] { "Back to title", "타이틀로", "Back to title", "タイトルへ", "返回标题" }[language >= 0 && language <= 4 ? language : 0];
@@ -333,6 +336,7 @@ public static class GeneratedUiText
             case 481: return 673;
             case 535: return 674;
             case 204: return 675;
+            case 302: return 676;
             default: return 0;
         }
     }

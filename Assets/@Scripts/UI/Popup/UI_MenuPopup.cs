@@ -129,6 +129,13 @@ public class UI_MenuPopup : UI_Popup
         {
             Transform buttons = GetObject((int)GameObjects.Buttons).transform;
             _checkpointRow = CloneRow(quit, "CheckpointButton", MENU_CHECKPOINTS, OnClickCheckpoints, buttons, 0f);
+            // 지난 대사 — 이번 실행에서 나눈 대사가 있을 때만 줄을 세운다 (11-28, UI_BacklogPopup)
+            if (StoryUI.Log.Count > 0)
+            {
+                Row backlog = CloneRow(quit, "BacklogButton", UI_BacklogPopup.Title, OnClickBacklog, buttons, 0f);
+                backlog.Button.transform.SetSiblingIndex(quit.Button.transform.GetSiblingIndex());
+                _main.Add(backlog);
+            }
             Row[] extra =
             {
                 CloneRow(quit, "LedgerButton", MENU_LEDGER, OnClickLedger, buttons, 0f),    // 마검의 장부 — 이번 판의 중간 결산 (11-28)
@@ -230,8 +237,10 @@ public class UI_MenuPopup : UI_Popup
 
         float height = ((RectTransform)GetImage((int)Images.QuitGameButton).transform).rect.height;
         float box = ((RectTransform)layout.transform).rect.height;
-        float firstCenter = (count - 1) * (height + GameRowSpacing) / 2f;
-        layout.spacing = GameRowSpacing;
+        // 줄이 여덟·아홉(장부·지난 대사, 11-28)이면 간격을 줄인다 — 70 그대로면 맨 윗줄이 화면 끝에 닿고 맨 아랫줄이 빌드 번호를 덮었다.
+        float spacing = Mathf.Max(40f, GameRowSpacing - Mathf.Max(0, count - 7) * 12f);
+        float firstCenter = (count - 1) * (height + spacing) / 2f;
+        layout.spacing = spacing;
         layout.padding = new RectOffset(layout.padding.left, layout.padding.right,
             Mathf.RoundToInt(box / 2f - height / 2f - firstCenter), layout.padding.bottom);
     }
@@ -350,6 +359,13 @@ public class UI_MenuPopup : UI_Popup
         Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Click_SFX");
         CloseSubPanels();
         UI_ConfirmPopup.AskDestructive(Managers.GetString(ASK_RESTART_FLOOR), () => Restart(null));
+    }
+
+    void OnClickBacklog()
+    {
+        Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Click_SFX");
+        CloseSubPanels();
+        UI_BacklogPopup.Show();
     }
 
     void OnClickLedger()
