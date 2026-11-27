@@ -90,6 +90,7 @@ public static class FastChecks
     static void Execute(StringBuilder sb)
     {
         CheckUiText(sb);
+        CheckStoryUi(sb);
 
         Data.MonsterDataLoader monsters = Json<Data.MonsterDataLoader>("MonsterData");
         Data.EquipDataLoader equips = Json<Data.EquipDataLoader>("EquipData");
@@ -113,6 +114,41 @@ public static class FastChecks
         CheckPortalSeal(sb, mapDic, stageDic);
         // 씬에 오브젝트를 만드는 것은 이것뿐이라 맨 뒤에 둔다.
         CheckDoorArt(sb, mapDic, stageDic);
+    }
+
+    /// <summary>
+    /// 이야기 화면의 작은 셈(11-28): 자동 넘김이 머무는 시간(StoryUI.AutoHold)과 지난 대사 기록(StoryUI.Remember).
+    /// 화면 없이 잴 수 있는 것만 — 읽는 속도는 글이 길수록 오래, 1.4~7초 안. 기록은 같은 줄을 두 번 적지 않고 80줄에서 앞을 버린다.
+    /// </summary>
+    static void CheckStoryUi(StringBuilder sb)
+    {
+        bool pace = StoryUI.ReadPace;
+        try
+        {
+            StoryUI.ReadPace = true;
+            float shortLine = StoryUI.AutoHold(3), mid = StoryUI.AutoHold(40), longLine = StoryUI.AutoHold(500);
+            if (Mathf.Approximately(shortLine, 1.4f) == false || mid <= shortLine || mid >= longLine || Mathf.Approximately(longLine, 7f) == false)
+                Errors.Add($"StoryUI.AutoHold 가 1.4~7초 안에서 글 길이를 따르지 않는다 ({shortLine} / {mid} / {longLine})");
+            StoryUI.ReadPace = false;
+            if (Application.isPlaying == false && Mathf.Approximately(StoryUI.AutoHold(40), StoryUI.AutoDelay) == false && GameSettings.AutoAdvance == false)
+                Errors.Add("읽는 속도·자동 넘김이 꺼졌는데 StoryUI.AutoHold 가 AutoDelay 가 아니다");
+        }
+        finally { StoryUI.ReadPace = pace; }
+
+        // 기록은 플레이 중인 판의 것을 건드리지 않게 플레이 밖에서만 잰다(플레이가 뜰 때 SubsystemRegistration 이 비운다)
+        if (Application.isPlaying == false)
+        {
+            int before = StoryUI.Log.Count;
+            StoryUI.Remember("검사", "같은 줄");
+            StoryUI.Remember("검사", "같은 줄");
+            if (StoryUI.Log.Count != before + 1)
+                Errors.Add("StoryUI.Remember 가 같은 줄을 두 번 적는다");
+            for (int i = 0; i < 200; i++)
+                StoryUI.Remember("검사", "줄 " + i);
+            if (StoryUI.Log.Count != 80 || StoryUI.Log[StoryUI.Log.Count - 1].Value != "줄 199")
+                Errors.Add($"StoryUI.Log 가 최근 80줄을 지키지 않는다 ({StoryUI.Log.Count}줄)");
+        }
+        sb.AppendLine("  이야기 화면: 자동 넘김 시간·지난 대사 기록 확인");
     }
 
     /// <summary>
