@@ -14,6 +14,7 @@ public static class LastBattle
     public static bool SkillsUsed;      // 스킬을 하나라도 썼다
     public static bool FirstHitCrit;    // 플레이어의 첫 타가 치명타였다
     public static int Foretold = -1;    // 전투를 열 때의 예측 피해 (BattleForecast.Result.Damage). 잴 수 없었으면 -1
+    public static bool ForetoldKills;   // 그 예측이 "체력만 넉넉하면 쓰러뜨린다" 였는가 (Result.Kills) — 죽음 되짚기가 값을 말해도 되는지 본다
     public static float HpBefore;       // 전투를 열 때의 HP
     public static float HpAfter;        // 끝났을 때의 HP (죽었으면 0 이하)
     public static float MaxHp;          // 전투를 열 때의 최대 HP. 이겨서 레벨이 오르면 지금 체력도 는다 — 잃은 값 = HpBefore - HpAfter + (지금 MaxHP - MaxHp)
@@ -22,6 +23,6 @@ public static class LastBattle
     public static void Clear()
     {
         MonsterId = 0; Boss = Won = Skipped = SkillsUsed = FirstHitCrit = false;
-        Foretold = -1; HpBefore = HpAfter = MaxHp = 0f;
+        Foretold = -1; ForetoldKills = false; HpBefore = HpAfter = MaxHp = 0f;
     }
 }

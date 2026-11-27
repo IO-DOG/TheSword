@@ -31,6 +31,7 @@ TEXT = {
 #   440-469 records/title/Steam   470-529 ledger/tally/altar/fullness/run card   530-559 mode (Tower's Law)
 #   560-589 Steam 2 (demo card)   590-609 input (click-to-move)   610-629 look (polish)
 #   630-659 credits (third-party block)   660-689 pad twins of the key legends (TWIN, GameKeys.PromptId)
+#   690-709 death recap (game-over screen)
 TWIN = {}   # keyboard legend id -> its pad twin (ui_text_parts/pad.py), baked into GeneratedUiText.PadTwin
 
 

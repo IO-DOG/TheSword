@@ -164,6 +164,7 @@ public class UI_BattlePopup : UI_Popup
         LastBattle.MonsterId = _monsterId;
         LastBattle.Boss = _boss;
         LastBattle.Foretold = forecast.Ok ? forecast.Damage : -1;
+        LastBattle.ForetoldKills = forecast.Ok && forecast.Kills;
         LastBattle.HpBefore = p.CurHP;
         LastBattle.MaxHp = p.MaxHP;
     }

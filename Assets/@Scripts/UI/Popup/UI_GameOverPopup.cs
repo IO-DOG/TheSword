@@ -1,6 +1,7 @@
 ﻿using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,11 +33,112 @@ public class UI_GameOverPopup : UI_Popup
 
         GetImage((int)Images.BG).gameObject.SetActive(false);
         GetImage((int)Images.GameOverIllust).gameObject.SetActive(false);
+        ShowRecap();
 
         DeadAni();
 
         return true;
     }
+
+    #region 죽음 되짚기
+    // 죽으면 그 층 입구로 돌아갈 뿐 무엇이 모자랐는지는 말해 주지 않았다(11-28). 사실만 적는다 — 누구에게·어느 층에서,
+    // 외눈이 보인 값과 그때 가진 체력, 싸우지 않고 닿는데 남긴 물약, 안 쓴 스킬. 되살리기까지 2초(SkipAfter)는 넘길 수 없으니
+    // 그림보다 먼저, 창이 서자마자 띄운다. 연출 글이라 무엇이 틀어져도 되살리기를 막지 않는다.
+    const int RecapWho = 690, RecapCost = 691, RecapHp = 692, RecapShort = 693, RecapPotions = 694, RecapSkills = 695;
+    const int SkillNameFirst = 191;     // 강타·철벽·흡혈 (ui_text_parts/ui.py)
+
+    void ShowRecap()
+    {
+        try
+        {
+            List<string> lines = RecapLines();
+            if (lines.Count == 0)
+                return;
+            TMP_FontAsset font = CodeUI.ProseFont;
+            if (font == null)
+                return;
+            TextMeshProUGUI text = CodeUI.NewText(transform, "Recap", font, 44f, new Color(0.88f, 0.88f, 0.88f), TextAlignmentOptions.Bottom);
+            CodeUI.Place(text.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(1700f, 200f));
+            text.fontSharedMaterial = CodeUI.Outlined(font, 0.25f);     // 처음 2.4초는 맵 위에 뜬다
+            text.text = string.Join("\n", lines);
+            text.alpha = 0f;
+            text.DOFade(1f, 0.4f).SetUpdate(true).SetLink(text.gameObject);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"[GameOver] 되짚기를 못 띄웠다: {e.Message}");
+        }
+    }
+
+    /// <summary>방금 진 싸움의 되짚기 줄. 싸움 밖에서 죽었거나 몬스터를 모르면 비어 있다.</summary>
+    public static List<string> RecapLines()
+    {
+        var lines = new List<string>();
+        GameManager g = Managers.Game;
+        GameManager.CurPlayerData p = g != null ? g.PlayerData : null;
+        Data.MonsterData md;
+        if (p == null || LastBattle.Won || Managers.Data.MonsterDic.TryGetValue(LastBattle.MonsterId, out md) == false)
+            return lines;
+
+        lines.Add(string.Format(Managers.GetString(RecapWho), p.CurStageid + 1, Managers.GetString(md.MonsterNameId)));
+
+        // 값은 마검의 외눈이 보는 것이라 계약 뒤에만 말한다. 못 쓰러뜨리는 상대(Kills 가 아님)의 값은 뜻이 없다.
+        int hp = Mathf.FloorToInt(LastBattle.HpBefore);
+        int lack = LastBattle.Foretold - hp + 1;        // 이기려면 체력이 값보다 커야 한다 (BattleForecast.Win)
+        if (p.IsContractedSword && LastBattle.ForetoldKills && lack > 0)
+            lines.Add(string.Format(Managers.GetString(RecapCost), "-" + LastBattle.Foretold) + "   "
+                      + string.Format(Managers.GetString(RecapHp), hp) + "   "
+                      + "<color=#FF7A5C>" + string.Format(Managers.GetString(RecapShort), lack) + "</color>");
+
+        var left = new List<string>();
+        int potions = PotionsInReach(g);
+        if (potions > 0)
+            left.Add(string.Format(Managers.GetString(RecapPotions), potions));
+        if (BattleSkills.Unlocked)
+        {
+            string names = "";
+            for (int i = 0; i < BattleSkills.Count; i++)
+                if (BattleSkills.IsUsed(i) == false)
+                    names += " " + Managers.GetString(SkillNameFirst + i);
+            if (names.Length > 0)
+                left.Add(Managers.GetString(RecapSkills) + " " + names);
+        }
+        if (left.Count > 0)
+            lines.Add(string.Join("      ", left));
+        return lines;
+    }
+
+    /// <summary>
+    /// 지금 선 자리에서 싸우지도 문을 열지도 않고 닿는 회복 물약 수. 클릭 이동과 같은 격자(PathMover, 열쇠 안 씀)로 잰다 —
+    /// 물건 칸은 막힌 칸으로 세니 옆 칸에 닿으면 닿는 것이다.
+    /// </summary>
+    static int PotionsInReach(GameManager g)
+    {
+        GameObject map;
+        if (g.Player == null || g.Maps.TryGetValue(g.PlayerData.CurStageid, out map) == false || map == null)
+            return 0;
+        var grid = new PathMover { UseKeys = false };
+        grid.Begin(map, g.Player.transform.position.y + PathMover.Tile * 0.5f);
+        grid.Flood(PathMover.Cell(map, g.Player.transform.position));
+
+        int count = 0;
+        foreach (ConsumableItem item in map.GetComponentsInChildren<ConsumableItem>(false))
+        {
+            Data.ConsumableItemData d;
+            if (item.id < ConsumableItem.NUM_OF_KEYS || item.id >= ConsumableItem.NUM_OF_POTIONS
+                || Managers.Data.ConsumableItemDic.TryGetValue(item.id, out d) == false || d.Heal <= 0)
+                continue;
+            Vector2Int cell = PathMover.Cell(map, item.transform.position);
+            foreach (Vector2Int dir in PathMover.Dirs)
+                if (grid.Dist.ContainsKey(cell + dir))
+                {
+                    count++;
+                    break;
+                }
+        }
+        return count;
+    }
+    #endregion
 
     void DeadAni()
     {
