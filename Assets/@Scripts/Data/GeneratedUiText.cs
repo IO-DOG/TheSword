@@ -224,6 +224,9 @@ public static class GeneratedUiText
             case 502: return new[] { "Score {0}", "점수 {0}", "Score {0}", "スコア {0}", "分数 {0}" }[language >= 0 && language <= 4 ? language : 0];
             case 503: return new[] { "lower is better", "낮을수록 좋다", "lower is better", "低いほど良い", "越低越好" }[language >= 0 && language <= 4 ? language : 0];
             case 504: return new[] { "Ch. {0}", "{0}장", "Ch. {0}", "第{0}章", "第{0}章" }[language >= 0 && language <= 4 ? language : 0];
+            case 505: return new[] { "Time {0}  Deaths {1}", "걸린 시간 {0}  쓰러짐 {1}", "Time {0}  Deaths {1}", "プレイ時間 {0}  倒れた回数 {1}", "用时 {0}  倒下 {1} 次" }[language >= 0 && language <= 4 ? language : 0];
+            case 506: return new[] { "This run", "이번 판", "This run", "今回", "本局" }[language >= 0 && language <= 4 ? language : 0];
+            case 507: return new[] { "Best", "최고", "Best", "最高", "最佳" }[language >= 0 && language <= 4 ? language : 0];
             case 530: return new[] { "Choose the rules", "규칙을 고르세요", "Choose the rules", "ルールを選んでください", "请选择规则" }[language >= 0 && language <= 4 ? language : 0];
             case 531: return new[] { "Normal", "보통", "Normal", "ノーマル", "普通" }[language >= 0 && language <= 4 ? language : 0];
             case 532: return new[] { "Recommended for your first climb. Potions leave some room for error.", "처음이라면 이쪽을 권합니다. 물약에 여유가 있습니다.", "Recommended for your first climb. Potions leave some room for error.", "初めてならこちらがおすすめです。ポーションに余裕があります。", "初次攀登推荐选择此项。药水较为充裕。" }[language >= 0 && language <= 4 ? language : 0];
@@ -268,6 +271,7 @@ public static class GeneratedUiText
             case 237: return new[] { "Screen shake", "화면 흔들림", "Screen shake", "画面の揺れ", "屏幕震动" }[language >= 0 && language <= 4 ? language : 0];
             case 238: return new[] { "Game", "게임", "Game", "ゲーム", "游戏" }[language >= 0 && language <= 4 ? language : 0];
             case 239: return new[] { "Auto-advance dialogue", "대사 자동 넘김", "Auto-advance dialogue", "セリフの自動送り", "对话自动播放" }[language >= 0 && language <= 4 ? language : 0];
+            case 240: return new[] { "AUTO", "자동", "AUTO", "オート", "自动" }[language >= 0 && language <= 4 ? language : 0];
             case 560: return new[] { "The demo ends here", "체험판은 여기까지", "The demo ends here", "体験版はここまで", "试玩版到此为止" }[language >= 0 && language <= 4 ? language : 0];
             case 561: return new[] { "The Tower goes on to floor 100. The full game picks up this save at floor 21.", "탑은 100층까지 이어집니다. 본편에서 이 저장으로 21층부터 이어 갑니다.", "The Tower goes on to floor 100. The full game picks up this save at floor 21.", "塔は100階まで続きます。製品版ではこのセーブで21階から続けられます。", "塔一直延伸到第100层。正式版可以用这个存档从第21层继续。" }[language >= 0 && language <= 4 ? language : 0];
             case 562: return new[] { "The Sword's Ledger", "마검의 장부", "The Sword's Ledger", "魔剣の帳簿", "魔剑的账簿" }[language >= 0 && language <= 4 ? language : 0];

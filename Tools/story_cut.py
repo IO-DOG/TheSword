@@ -28,6 +28,7 @@ FLOOR = re.compile(r"\[Playthrough\] 층 t=([\d.]+) (\d+)층")
 PAD = 0.7          # 구간 앞뒤로 더 담는 초 — 대화창이 뜨고 걷히는 모습까지
 JOIN = 2.5         # 이보다 가까운 구간은 하나로 잇는다(끊겼다 이어지는 장면이 깜빡이지 않게)
 CHAPTER_NAMES = {1: "이끼 낀 지하 묘소", 21: "무너진 수로", 41: "잿빛 용광로", 61: "얼어붙은 심층", 81: "왕좌의 균열"}
+BOSS_NAMES = {20: "종뿔사슴", 40: "수문을 진 소라", 60: "잿불풀무나방", 80: "빙성고래", 100: "검은 태양"}
 
 
 def ffmpeg():
@@ -90,18 +91,18 @@ def stamp(t):
 
 def chapters(floors, spans, total):
     """유튜브 챕터: 0:00 부터, 챕터 첫 층과 보스 층. 10초보다 가까운 것은 뒤의 것을 뺀다."""
-    marks = [(0.0, "시작 — 프롤로그")]
+    marks = [(0.0, "1층 — 프롤로그, 마검과의 계약")]
     seen = set()
     for t, floor in floors:
         if floor in seen:
             continue
         seen.add(floor)
         if floor in CHAPTER_NAMES and floor > 1:
-            marks.append((t, f"{floor}층 — {CHAPTER_NAMES[floor]}"))
+            marks.append((t, f"{CHAPTER_NAMES[floor]} ({floor}층~)"))
         elif floor == 5:
-            marks.append((t, f"5층 — {CHAPTER_NAMES[1]}"))
-        elif floor % 20 == 0:
-            marks.append((t, f"{floor}층 — 챕터 보스"))
+            marks.append((t, f"{CHAPTER_NAMES[1]} (5층~)"))
+        elif floor in BOSS_NAMES:
+            marks.append((t, f"{floor}층 보스 — {BOSS_NAMES[floor]}"))
     for k, a, _, _ in spans:
         if k == "ending":
             marks.append((a, "결말"))
@@ -135,8 +136,8 @@ def self_check():
     assert merge(spans, 120.0, True) == [[0.0, 27.0], [39.3, 43.7], [99.3, 120.0]]
     assert stamp(59) == "0:59" and stamp(3723) == "1:02:03"
     marks = chapters([(22.0, 1), (300.0, 5), (301.0, 5), (900.0, 20), (1000.0, 21)], [("ending", 2000.0, None, 100)], 2100.0)
-    assert marks == ["0:00 시작 — 프롤로그", "5:00 5층 — 이끼 낀 지하 묘소", "15:00 20층 — 챕터 보스",
-                     "16:40 21층 — 무너진 수로", "33:20 결말"], marks
+    assert marks == ["0:00 1층 — 프롤로그, 마검과의 계약", "5:00 이끼 낀 지하 묘소 (5층~)", "15:00 20층 보스 — 종뿔사슴",
+                     "16:40 무너진 수로 (21층~)", "33:20 결말"], marks
     print("story_cut 자기검사 통과")
 
 

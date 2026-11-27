@@ -87,6 +87,7 @@ public class UI_EndingScene : UI_Scene
     const int CardScore = 502;      // 점수 {0}
     const int CardLower = 503;      // 낮을수록 좋다
     const int CardChapter = 504;    // {0}장
+    const int CardTime = 505;       // 걸린 시간 {0}  쓰러짐 {1}
     const int AnyKey = 143;         // 아무 키나 누르세요 (Tools/ui_text.py)
 
     /// <summary>
@@ -114,6 +115,10 @@ public class UI_EndingScene : UI_Scene
         CardLine(box, number, 44f, ink, ref y, 64f).text =
             string.Format(Managers.GetString(UI_TallyPopup.TotalsText), run.Foretold, run.Paid, run.Par);
         CardLine(box, prose, 30f, soft, ref y, 46f).text = string.Format(Managers.GetString(CardExtra), run.AltarPaid, run.Spill);
+        // 걸린 시간과 쓰러진 횟수(11-28) — 둘 다 체크포인트를 불러도 줄지 않는 값이다(GameManager.PlayTime, DEATHCOUNT).
+        int seconds = Mathf.Max(0, Mathf.RoundToInt(Mathf.Max(Managers.Game.PlayTime, PlayerPrefs.GetFloat("PLAYTIME", 0f))));
+        CardLine(box, prose, 30f, soft, ref y, 46f).text = string.Format(Managers.GetString(CardTime),
+            $"{seconds / 3600}:{seconds % 3600 / 60:00}:{seconds % 60:00}", PlayerPrefs.GetInt("DEATHCOUNT", 0));
 
         // 낸 점수만 보인다 — 같은 판을 다시 끝냈으면(결말을 본 뒤 100층 입구에서) 기록되지 않으니 숫자를 내걸지 않는다.
         // 봇 판은 내지 않아도 보인다 — 녹화·스토어 미디어가 이 카드를 찍는다.

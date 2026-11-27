@@ -102,6 +102,32 @@ public class UI_ConversationPopup : UI_Popup
         return popup;
     }
 
+    // 설정의 "대사 자동 넘김" 이 켜져 있다는 표시 — 화살표 왼쪽에 작게. 왜 스스로 넘어가는지 모르는 채 두지 않는다(11-28).
+    const int AutoMarkText = 240;
+    TMP_Text _autoMark;
+
+    void ShowAutoMark(bool on)
+    {
+        if (_autoMark == null)
+        {
+            if (on == false)
+                return;
+            RectTransform arrow = GetImage((int)Images.ConversationArrow).rectTransform;
+            TMP_Text body = GetText((int)Texts.ConversationText);
+            TextMeshProUGUI mark = CodeUI.NewText(arrow.parent, "AutoMark", body.font, body.fontSize * 0.6f, new Color(0.75f, 0.78f, 0.86f), TextAlignmentOptions.Right);
+            RectTransform rt = mark.rectTransform;
+            rt.anchorMin = arrow.anchorMin;
+            rt.anchorMax = arrow.anchorMax;
+            rt.pivot = new Vector2(1f, 0.5f);
+            rt.sizeDelta = new Vector2(240f, arrow.rect.height);
+            rt.anchoredPosition = arrow.anchoredPosition + new Vector2(-arrow.rect.width, 0f);
+            mark.text = Managers.GetString(AutoMarkText);
+            _autoMark = mark;
+        }
+        if (_autoMark.gameObject.activeSelf != on)
+            _autoMark.gameObject.SetActive(on);
+    }
+
     public override bool Init()
     {
         if (base.Init() == false)
@@ -182,6 +208,7 @@ public class UI_ConversationPopup : UI_Popup
             _isAllTextShown = true;
 
         GetImage((int)Images.ConversationArrow).gameObject.SetActive(_isAllTextShown && _choosing == false);
+        ShowAutoMark(StoryUI.AutoRead && _choosing == false);
 
         // 자동 플레이: 다 보이면 잠깐 뒤에 넘긴다.
         if (_isAllTextShown == false)

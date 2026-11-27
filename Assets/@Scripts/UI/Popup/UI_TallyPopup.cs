@@ -123,6 +123,19 @@ public class UI_TallyPopup : UI_Popup
             TextMeshProUGUI starText = CodeUI.NewText(root, "Stars", number, 52f, Gold, TextAlignmentOptions.Right);
             CodeUI.Place(starText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-Pad, -Pad), new Vector2(300f, 56f));
             starText.text = StarText(stars);
+            // 이번 판에서 지금까지 모은 별 / 받을 수 있었던 별(기준이 있던 띠마다 셋) — 판 카드를 보기 전에도 어디쯤인지 알게(11-28).
+            int sum = 0, max = 0;
+            foreach (int s in SwordLedger.State.BandStars)
+            {
+                sum += s;
+                max += s > 0 ? 3 : 0;
+            }
+            if (max > 3)        // 첫 띠에서는 위의 별과 같은 말이다
+            {
+                TextMeshProUGUI total = CodeUI.NewText(root, "StarsTotal", number, 22f, Soft, TextAlignmentOptions.Right);
+                CodeUI.Place(total.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-Pad, -Pad - 58f), new Vector2(300f, 30f));
+                total.text = $"★ {sum}/{max}";
+            }
         }
 
         // 띠 합은 기준이 있는 싸움만 센다 — 기준이 없으면(자료가 0) 셀 것도 별도 없다.

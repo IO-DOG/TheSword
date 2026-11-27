@@ -51,6 +51,7 @@ public class UI_MenuPopup : UI_Popup
 
     #region 문구 (Tools/ui_text_parts/ui.py)
     public const int MENU_RESTART_FLOOR = 180;
+    public const int MENU_LEDGER = 500;         // 마검의 장부 (ledger.py — 판 카드의 제목과 같은 말)
     public const int MENU_CHECKPOINTS = 181;
     public const int MENU_TO_TITLE = 182;
     public const int ASK_RESTART_FLOOR = 183;
@@ -130,6 +131,7 @@ public class UI_MenuPopup : UI_Popup
             _checkpointRow = CloneRow(quit, "CheckpointButton", MENU_CHECKPOINTS, OnClickCheckpoints, buttons, 0f);
             Row[] extra =
             {
+                CloneRow(quit, "LedgerButton", MENU_LEDGER, OnClickLedger, buttons, 0f),    // 마검의 장부 — 이번 판의 중간 결산 (11-28)
                 CloneRow(quit, "RestartFloorButton", MENU_RESTART_FLOOR, OnClickRestartFloor, buttons, 0f),
                 _checkpointRow,
                 CloneRow(quit, "TitleButton", MENU_TO_TITLE, OnClickTitle, buttons, 0f),
@@ -348,6 +350,13 @@ public class UI_MenuPopup : UI_Popup
         Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Click_SFX");
         CloseSubPanels();
         UI_ConfirmPopup.AskDestructive(Managers.GetString(ASK_RESTART_FLOOR), () => Restart(null));
+    }
+
+    void OnClickLedger()
+    {
+        Managers.Sound.Play(Define.Sound.Effect, "SettingMenuUI_Click_SFX");
+        CloseSubPanels();
+        UI_LedgerPopup.Show();
     }
 
     void OnClickCheckpoints()

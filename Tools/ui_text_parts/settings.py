@@ -13,4 +13,6 @@ TEXT = {
     238: ("게임", "Game", "ゲーム", "游戏"),
     # dialogue lines move on by themselves after a reading-time hold (GameSettings.AutoAdvance, StoryUI.AutoRead). Choices never do.
     239: ("대사 자동 넘김", "Auto-advance dialogue", "セリフの自動送り", "对话自动播放"),
+    # small mark on the dialogue box while 239 is on (UI_ConversationPopup.ShowAutoMark)
+    240: ("자동", "AUTO", "オート", "自动"),
 }

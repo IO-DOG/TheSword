@@ -370,7 +370,8 @@ public static class FastChecks
         // 컨트롤러 경로를 적어 두지 않는다. 게임이 실제로 만드는 프리팹에서 타고 들어간다.
         HashSet<string> mapStates = StatesOf("Monster", null);
         HashSet<string> bossStates = StatesOf("BossMonster", null);
-        HashSet<string> cardStates = StatesOf("UI_MonsterCard", "CreatureImage");
+        var cardNoExit = new HashSet<string>();     // 전투 카드 컨트롤러에서 나가는 연결이 없는 상태
+        HashSet<string> cardStates = StatesOf("UI_MonsterCard", "CreatureImage", cardNoExit);
         HashSet<string> equipStates = StatesOf("EquipItem", null);
 
         int kinds = 0;
@@ -385,6 +386,11 @@ public static class FastChecks
                          md.IdleAnimStr, $"몬스터 {id} 대기");
             RequireState(cardStates, "UI_MonsterCard/CreatureImage", md.IdleAnimStr, $"몬스터 {id} 대기");
             RequireState(cardStates, "UI_MonsterCard/CreatureImage", md.AttackAnimStr, $"몬스터 {id} 공격");
+            // 공격 상태는 한 번 돌고 대기로 돌아가야 한다. 연결이 없으면 첫 공격 뒤 전투 내내 공격 동작을 되풀이한다 —
+            // 챕터 전용 스무 종이 그랬다(11-28). MonsterArtSetup.Build 가 연결을 단다(EnsureReturns).
+            if (cardStates != null && md.AttackAnimStr != md.IdleAnimStr     // 공격 시트가 없는 종(Mob_C0_I008)은 대기를 공격 자리에 쓴다 — 돌아갈 데가 제자리다
+                && cardNoExit.Contains(md.AttackAnimStr) && Reported.Add($"loop|{md.AttackAnimStr}"))
+                Errors.Add($"UI_MonsterCard 컨트롤러의 '{md.AttackAnimStr}' 가 대기로 돌아가는 연결이 없다 (몬스터 {id}) — MonsterArtSetup.Build 를 돌릴 것");
             kinds++;
         }
 
@@ -396,7 +402,7 @@ public static class FastChecks
 
     /// <summary>프리팹(또는 그 자식)에 붙은 애니메이터의 상태 이름을 모은다.
     /// 못 찾으면 null 을 주고 <b>검사를 건너뛴다</b> — 못 본 것을 통과로 적지 않는다.</summary>
-    static HashSet<string> StatesOf(string address, string childName)
+    static HashSet<string> StatesOf(string address, string childName, HashSet<string> noExit = null)
     {
         string path;
         if (Preload.TryGetValue(address, out path) == false)
@@ -442,21 +448,24 @@ public static class FastChecks
         }
 
         foreach (AnimatorControllerLayer layer in controller.layers)
-            CollectStates(layer.stateMachine, states);
+            CollectStates(layer.stateMachine, states, noExit);
         return states;
     }
 
-    static void CollectStates(AnimatorStateMachine machine, HashSet<string> into)
+    static void CollectStates(AnimatorStateMachine machine, HashSet<string> into, HashSet<string> noExit = null)
     {
         if (machine == null)
             return;
         foreach (ChildAnimatorState s in machine.states)
         {
-            if (s.state != null)
-                into.Add(s.state.name);
+            if (s.state == null)
+                continue;
+            into.Add(s.state.name);
+            if (noExit != null && s.state.transitions.Length == 0)
+                noExit.Add(s.state.name);
         }
         foreach (ChildAnimatorStateMachine sub in machine.stateMachines)
-            CollectStates(sub.stateMachine, into);
+            CollectStates(sub.stateMachine, into, noExit);
     }
 
     static Transform FindDeep(Transform root, string name)

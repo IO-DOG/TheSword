@@ -57,6 +57,11 @@ TEXT = {
     503: ("낮을수록 좋다", "lower is better", "低いほど良い", "越低越好"),
     # {0} = chapter number, followed by its four bands' stars
     504: ("{0}장", "Ch. {0}", "第{0}章", "第{0}章"),
+    # {0} = play time h:mm:ss / {1} = times fallen in this run (neither shrinks when a checkpoint is loaded)
+    505: ("걸린 시간 {0}  쓰러짐 {1}", "Time {0}  Deaths {1}", "プレイ時間 {0}  倒れた回数 {1}", "用时 {0}  倒下 {1} 次"),
+    # UI_LedgerPopup (the menu's mid-run ledger): labels in front of star counts and of the per-band best-stars rows
+    506: ("이번 판", "This run", "今回", "本局"),
+    507: ("최고", "Best", "最高", "最佳"),
 }
 
 
@@ -73,7 +78,7 @@ if __name__ == "__main__":
         return {int(u) for u in re.findall(r"m_Unicode: (\d+)", table)}
 
     args = {470: 2, 471: 3, 472: 2, 473: 1, 474: 0, 475: 1, 476: 1, 477: 0, 478: 1, 479: 1, 480: 0, 481: 0, 482: 2, 483: 1, 484: 0,
-            490: 3, 491: 1, 492: 0, 500: 0, 501: 2, 502: 1, 503: 0, 504: 1}
+            490: 3, 491: 1, 492: 0, 500: 0, 501: 2, 502: 1, 503: 0, 504: 1, 505: 2, 506: 0, 507: 0}
     assert set(args) == set(TEXT), set(args) ^ set(TEXT)
     fonts = {name: glyphs(name) for name in ("Silver SDF", "DNFBitBitv2 SDF")}
     for sid, values in TEXT.items():

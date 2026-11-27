@@ -118,7 +118,8 @@ public class MonsterController : MonoBehaviour
     {
         // 챕터 보스의 그림은 MapBuilder.SetupLook 이 이미 걸었다(BossArt) — 애니메이터를 다시 틀면 몹 시트로 덮인다.
         if (BossArt.Of(id) == null)
-            GetComponent<Animator>().Play($"{Managers.Data.MonsterDic[id].IdleAnimStr}");
+            // 같은 종 셋이 한 박자로 까딱이면 복사해 붙인 것처럼 보인다 — 대기 동작을 id 마다 다른 자리에서 시작한다(11-28). 같은 id 는 늘 같은 자리다.
+            GetComponent<Animator>().Play($"{Managers.Data.MonsterDic[id].IdleAnimStr}", 0, Mathf.Repeat(id * 0.37f, 1f));
         GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>(Managers.Data.MonsterDic[id].Shadow);
         //id = 1;
     }

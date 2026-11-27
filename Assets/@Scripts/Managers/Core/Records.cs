@@ -124,6 +124,9 @@ public static class Records
         });
         return old;
     }
+    // 그 띠에서 받은 가장 많은 별(없으면 0) — 장부 창(UI_LedgerPopup)의 "최고" 줄
+    public static int BandStarsBest(GameMode mode, int band) =>
+        Current.BandStars != null && Current.BandStars.TryGetValue(mode + ":" + band, out int v) ? v : 0;
     /// <summary>그 규칙에서 띠마다 받은 가장 많은 별의 합(타이틀 "★ 47/60"). 띠는 20개, 띠마다 셋까지.</summary>
     public static int StarsTotal(GameMode mode)
     {
