@@ -72,6 +72,11 @@ public static class PlaythroughRecorder
     const double StuckSeconds = 20.0;
 
     static RecorderController _controller;
+    // 이야기 구간 표시(11-28): THESWORD_RECORD_READ=1 이면 대사가 읽힐 속도로 돌고(StoryUI.ReadPace), 대화·카드·크레딧·결말이
+    // 시작하고 끝나는 영상 시각을 로그에 남긴다 — 그 줄로 이야기만 모은 영상을 자른다. 형식을 바꾸지 말 것.
+    static bool ReadPace => System.Environment.GetEnvironmentVariable("THESWORD_RECORD_READ") == "1";
+    static int _recStartFrame;
+    static string _storyKind;
     static double _nextLog;
     static double _startedAt;
     static double _lockedTime;
@@ -167,6 +172,8 @@ public static class PlaythroughRecorder
             AutoPlayer.ResumeFromSave =
                 System.Environment.GetEnvironmentVariable("THESWORD_RECORD_RESUME") == "1";
             AutoPlayer.Spawn();
+            StoryUI.ReadPace = ReadPace;
+            _storyKind = null;
             if (mode == "record")
             {
                 StartRecording();
@@ -239,6 +246,7 @@ public static class PlaythroughRecorder
 
         _controller = new RecorderController(settings);
         _controller.PrepareRecording();
+        _recStartFrame = Time.frameCount;
         if (_controller.StartRecording())
             Debug.Log($"[Playthrough] 녹화 시작 -> {movie.OutputFile}.mp4 ({Width}x{Height} {Fps}fps)");
         else
@@ -263,6 +271,7 @@ public static class PlaythroughRecorder
             return;
 
         Unstick();
+        TrackStory();
 
         AutoPlayer bot = AutoPlayer.Instance;
         if (bot == null)
@@ -358,6 +367,40 @@ public static class PlaythroughRecorder
                 Debug.LogWarning($"[Playthrough] Unstick 예외: {e.Message}");
             }
         }
+    }
+
+    /// <summary>지금 화면이 이야기인가 — 종류가 바뀔 때마다 영상 시각(녹화 프레임 / fps)과 함께 한 줄 남긴다.</summary>
+    static void TrackStory()
+    {
+        if (_controller == null)
+            return;
+        string kind = null;
+        try
+        {
+            string scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            if (scene.Contains("Intro")) kind = "intro";
+            else if (scene.Contains("Ending")) kind = "ending";
+            else if (UnityEngine.Object.FindFirstObjectByType<UI_StoryCreditsPopup>() != null) kind = "credits";
+            else if (UnityEngine.Object.FindFirstObjectByType<UI_ConversationPopup>() != null
+                     || UnityEngine.Object.FindFirstObjectByType<UI_StoryCardPopup>() != null) kind = "scene";
+            else
+            {
+                // 바크 창은 한 번 뜨면 투명한 채 남는다 — 보이는 동안만 센다
+                UI_StoryBark bark = UnityEngine.Object.FindFirstObjectByType<UI_StoryBark>();
+                CanvasGroup group = bark != null ? bark.GetComponent<CanvasGroup>() : null;
+                if (group != null && group.alpha > 0.05f) kind = "bark";
+            }
+        }
+        catch (Exception) { return; }
+        if (kind == _storyKind)
+            return;
+        double t = (Time.frameCount - _recStartFrame) / (double)Fps;
+        int floor = Managers.Game != null && Managers.Game.PlayerData != null ? Managers.Game.PlayerData.CurStageid + 1 : 0;
+        if (_storyKind != null)
+            Debug.Log($"[Playthrough] 이야기 끝 t={t:0.00} {_storyKind}");
+        if (kind != null)
+            Debug.Log($"[Playthrough] 이야기 시작 t={t:0.00} {kind} {floor}층");
+        _storyKind = kind;
     }
 
     static void LogProgress()

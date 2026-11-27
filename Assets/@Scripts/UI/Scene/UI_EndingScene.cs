@@ -165,7 +165,7 @@ public class UI_EndingScene : UI_Scene
             bool here = StoryUI.Auto || (Application.isFocused && SteamManager.OverlayActive == false);
             shown += dt;
             back = here ? back + dt : 0f;
-            if (shown > 2f && (StoryUI.Auto || (back > 0.3f && GameKeys.AnyDown)))
+            if (shown > 2f && (StoryUI.Fast || (back > 0.3f && GameKeys.AnyDown)))     // 읽는 속도의 봇은 끝까지 기다린다(영상)
                 yield break;
             if (here)
                 t += dt;

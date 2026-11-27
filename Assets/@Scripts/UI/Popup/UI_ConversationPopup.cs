@@ -187,7 +187,7 @@ public class UI_ConversationPopup : UI_Popup
         if (StoryUI.Auto && top && _isAllTextShown)
         {
             _autoTimer += Time.unscaledDeltaTime;
-            if (_autoTimer >= StoryUI.AutoDelay)
+            if (_autoTimer >= StoryUI.AutoHold(GetText((int)Texts.ConversationText).textInfo.characterCount))
             {
                 _autoTimer = 0f;
                 ShowNextScript();
@@ -597,7 +597,7 @@ public class UI_ConversationPopup : UI_Popup
     {
         if (StoryUI.Auto)
         {
-            if (Time.unscaledTime - _choiceOpenedAt >= StoryUI.AutoDelay)
+            if (Time.unscaledTime - _choiceOpenedAt >= StoryUI.AutoHold(40))      // 읽는 속도면 선택지를 읽을 만큼(3.7초)
                 Choose(AutoChoice());
             return;
         }

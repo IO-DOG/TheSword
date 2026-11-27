@@ -126,25 +126,25 @@ public class UI_StoryCreditsPopup : UI_Popup
     IEnumerator CoRoll()
     {
         yield return null;      // 캔버스가 화면 크기를 잡은 뒤
-        yield return _group.DOFade(1f, StoryUI.Auto ? 0.1f : 1f).SetLink(gameObject).WaitForCompletion();
+        yield return _group.DOFade(1f, StoryUI.Fast ? 0.1f : 1f).SetLink(gameObject).WaitForCompletion();
 
         float stop = ((RectTransform)transform).rect.height * 0.5f + _lastCenter;
         while (_content.anchoredPosition.y < stop)
         {
-            float speed = Speed * (StoryUI.Auto ? 12f : Held() ? 5f : 1f);
+            float speed = Speed * (StoryUI.Fast ? 12f : StoryUI.ReadPace ? 2.5f : Held() ? 5f : 1f);   // 읽는 속도(영상)면 2.5배
             _content.anchoredPosition = new Vector2(0f, Mathf.Min(stop, _content.anchoredPosition.y + speed * Time.unscaledDeltaTime));
             yield return null;
         }
 
         // 마지막 인사는 가운데에 잠깐 둔다. 한 번 더 누르면 바로 넘어간다.
-        float hold = StoryUI.Auto ? 0.3f : 3f;
+        float hold = StoryUI.Fast ? 0.3f : 3f;
         for (float t = 0f; t < hold; t += Time.unscaledDeltaTime)
         {
             if (t > 0.5f && StoryUI.NextPressed())
                 break;
             yield return null;
         }
-        yield return _group.DOFade(0f, StoryUI.Auto ? 0.1f : 1f).SetLink(gameObject).WaitForCompletion();
+        yield return _group.DOFade(0f, StoryUI.Fast ? 0.1f : 1f).SetLink(gameObject).WaitForCompletion();
         Done();
         ClosePopupUI();
     }

@@ -140,6 +140,7 @@ public class AutoPlayer : MonoBehaviour
 
     /// <summary>"새 게임"은 한 방향 전환이라 딱 한 번만 누른다.</summary>
     bool _pressedTitle;
+    bool _endingSeen;       // 읽는 속도에서 결말 씬에 들어섰다 — 그 씬을 나오면 끝낸다
     /// <summary>연출이 이 시간(초) 넘게 안 끝나면 잠금을 강제로 푼다.</summary>
     public float LockTimeout = 15f;
     float _lastReal;
@@ -227,7 +228,19 @@ public class AutoPlayer : MonoBehaviour
                                  .GetActiveScene().name.Contains("Ending");
             if (endingByGame || endingByUnity)
             {
+                // 읽는 속도(완주 영상)면 결말의 마지막 장·판 카드가 다 돈 뒤, 타이틀로 돌아올 때 끝낸다 —
+                // 씬이 서자마자 끝내면 녹화가 결말 첫 장에서 끊긴다(11-28).
+                if (StoryUI.ReadPace)
+                {
+                    _endingSeen = true;
+                    continue;
+                }
                 Succeed($"엔딩 도달 (최고 {_maxFloor}층)");
+                yield break;
+            }
+            if (_endingSeen)
+            {
+                Succeed($"엔딩 끝까지 (최고 {_maxFloor}층)");
                 yield break;
             }
 
@@ -464,7 +477,8 @@ public class AutoPlayer : MonoBehaviour
         if (Handle<UI_GameOverPopup>(p => Fail("플레이어 사망")))
             return;
         // 대사: 한 장씩 넘긴다. 마지막 장에서 스스로 닫는다.
-        if (Handle<UI_ConversationPopup>(p => p.ShowNextScript()))
+        // 읽는 속도(StoryUI.ReadPace, 완주 영상)면 누르지 않는다 — 대화창이 줄 길이만큼 머문 뒤 스스로 넘긴다. 여기서 2초마다 누르면 그 머묾이 잘린다.
+        if (Handle<UI_ConversationPopup>(p => { if (StoryUI.ReadPace == false) p.ShowNextScript(); }))
             return;
         // 예/아니오는 "예"로 간다 — 보스방/마검 계약 둘 다 진행 쪽이 예다.
         // 버튼을 "누르는" 대신 그 버튼이 부르는 메서드를 직접 호출한다.

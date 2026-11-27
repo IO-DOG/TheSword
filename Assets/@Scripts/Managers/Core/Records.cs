@@ -102,6 +102,8 @@ public static class Records
     /// <summary>띠 결산을 올리고 그 전의 최고 점수를 돌려준다(없었으면 0). 점수는 더 낮을 때, 별은 더 많을 때만 적는다. 봇 판은 적지 않는다(Change).</summary>
     public static int SubmitBand(GameMode mode, int band, int score, int stars)
     {
+        if (GameEvents.IsAutoPlaying)       // 봇 판은 적지도 견주지도 않는다 — 사람의 최고에 대고 "새 기록" 을 띄우지 않게
+            return 0;
         int old = BandBest(mode, band);
         string key = mode + ":" + band;
         Change(d =>

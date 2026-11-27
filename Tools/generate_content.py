@@ -2128,7 +2128,11 @@ def emit_ui_text_only():
     path = os.path.join(JSOND, "ScriptData.json")
     with open(path, "r", encoding="utf-8") as f:
         scripts = json.load(f)["scripts"]
-    clash = sorted(sid for sid in UI_TEXT if any(lo <= sid <= hi for lo, hi in GENERATED_SCRIPT_RANGES))
+    # 구간 밖에서 생성기가 쓰는 id 도 같이 본다(--write 의 made 와 같은 것: 특성 이름·설명, 도감·반지) — 여기서 안 막으면 다음 --write 에서야 멈춘다.
+    with open(os.path.join(JSOND, "MonsterClassData.json"), "r", encoding="utf-8") as f:
+        owned = {c[k] for c in json.load(f)["monsterClasses"] for k in ("ClassName", "ClassDesc")}
+    owned |= {EQUIPS[eid][k] for eid in (BOOK_EQUIP_ID, RING_EQUIP_ID) for k in ("NameId", "DescId")}
+    clash = sorted(sid for sid in UI_TEXT if sid in owned or any(lo <= sid <= hi for lo, hi in GENERATED_SCRIPT_RANGES))
     assert not clash, f"ScriptData {clash} 를 생성기와 ui_text 가 같이 쓴다 — 한쪽에서 지울 것"
     append_rows(scripts)
     emit_bootstrap(ROOT)

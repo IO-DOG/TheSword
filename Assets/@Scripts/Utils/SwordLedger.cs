@@ -185,7 +185,7 @@ public static class SwordLedger
         // 창이 못 떠도 계단은 가야 한다 — 이 코루틴은 계단 코루틴 안에서 돈다(예외가 나면 계단째 죽는다).
         UI_TallyPopup popup = null;
         // 띠 기록(11-28): 이번 점수와 그 전의 최고. 기준이 없는 띠는 점수도 없다.
-        int score = par > 0 ? (int)Math.Round(1000.0 * paid / par) : 0;
+        int score = par > 0 ? Math.Max(1, (int)Math.Round(1000.0 * paid / par)) : 0;   // 한 대도 안 맞은 띠도 기록이다 — 0 은 "점수 없음" 표시라 1 로 올린다
         int best = 0;
         try { best = Records.SubmitBand(Managers.Game.PlayerData.Mode, band, score, stars); }
         catch (Exception e) { Debug.LogException(e); }

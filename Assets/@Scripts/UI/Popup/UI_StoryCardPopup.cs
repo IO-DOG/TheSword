@@ -294,7 +294,7 @@ public class UI_StoryCardPopup : UI_Popup
         if (StoryUI.Auto && _allShown)
         {
             _autoTimer += Time.unscaledDeltaTime;
-            if (_autoTimer >= StoryUI.AutoDelay)
+            if (_autoTimer >= StoryUI.AutoHold(_text != null ? _text.textInfo.characterCount : 0))
                 _advance = true;
         }
     }

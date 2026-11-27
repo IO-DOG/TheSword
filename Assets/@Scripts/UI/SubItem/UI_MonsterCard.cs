@@ -377,7 +377,10 @@ public class UI_MonsterCard : UI_BaseCard
         string animStr = _creature.AttackAnimStr;
         // 처음부터 다시 튼다 — 이름만 주면 이미 그 상태일 때(배속이 높아 앞 공격 동작이 안 끝났다) 아무 일도 안 한다.
         GetImage((int)Images.CreatureImage).GetComponent<Animator>().Play(animStr, 0, 0f);
+        _attackFrame = Time.frameCount;
     }
+
+    int _attackFrame = -1;      // 공격 동작을 튼 프레임 — Play 는 다음 애니메이터 갱신에야 먹어서, 같은 프레임의 PlayHit 이 상태를 물으면 아직 대기다
 
     /// <summary>
     /// 맞는 동작이 있는 종(Mob_C{챕터}_H{번호} — MonsterArtSetup 이 Hit 시트로 만든다)이면 튼다. 공격 동작 도중에는 끊지 않는다.
@@ -394,7 +397,9 @@ public class UI_MonsterCard : UI_BaseCard
         Animator animator = GetImage((int)Images.CreatureImage).GetComponent<Animator>();
         if (animator == null || animator.HasState(0, Animator.StringToHash(hit)) == false)
             return null;
-        if (string.IsNullOrEmpty(_creature.AttackAnimStr) == false && animator.GetCurrentAnimatorStateInfo(0).IsName(_creature.AttackAnimStr))
+        // 배속이 높으면 한 프레임에 여러 걸음이 돌아 놈의 공격과 내 타격이 같은 프레임에 온다 — 방금 튼 공격 동작을 덮지 않는다(11-28 리뷰).
+        if (Time.frameCount == _attackFrame
+            || (string.IsNullOrEmpty(_creature.AttackAnimStr) == false && animator.GetCurrentAnimatorStateInfo(0).IsName(_creature.AttackAnimStr)))
             return null;
         animator.Play(hit, 0, 0f);
         return hit;

@@ -27,6 +27,18 @@ public static class StoryUI
     /// <summary>자동 플레이에서 한 줄을 다 보인 뒤 넘기기까지 (초).</summary>
     public const float AutoDelay = 0.35f;
 
+    /// <summary>
+    /// 읽는 속도(11-28, 완주 영상용). 봇은 대사를 0.35초 만에 넘겨서 영상에서는 한 줄도 읽을 수 없었다 — 켜면 줄마다 글자 수만큼
+    /// 머물고(AutoHold), 연출의 기다림도 사람이 볼 때의 길이로 돈다(Fast 가 꺼진다). 봇이 대화창을 따로 누르지도 않는다(AutoPlayer.TickUI).
+    /// 검증용 봇 판은 끈 채로 돈다(기본). 녹화 스크립트가 플레이가 뜬 뒤 켠다: StoryUI.ReadPace = true;
+    /// </summary>
+    public static bool ReadPace;
+    /// <summary>자동 플레이이고 읽는 속도가 아니다 — 연출의 기다림을 줄여도 된다.</summary>
+    public static bool Fast => Auto && ReadPace == false;
+    /// <summary>자동 플레이에서 다 보인 줄을 넘기기까지(초). 읽는 속도면 0.9초 + 글자마다 0.07초, 1.4~7초.</summary>
+    public static float AutoHold(int characters) =>
+        ReadPace ? Mathf.Clamp(0.9f + 0.07f * characters, 1.4f, 7f) : AutoDelay;
+
     /// <summary>건너뛰기 키. 패드는 LB 다(GameKeys) — 전투 건너뛰기와 같은 키다.</summary>
     public const KeyCode SkipKey = KeyCode.Tab;
     /// <summary>이만큼(실시간 초) 누르고 있으면 지금 장면을 끝까지 넘긴다.</summary>
@@ -57,6 +69,7 @@ public static class StoryUI
     static void ResetStatics()
     {
         Skipping = false;
+        ReadPace = false;
         s_hint = null;
         s_hintText = null;
         s_hintFill = null;

@@ -1053,7 +1053,7 @@ public class StoryDirector : MonoBehaviour
             if (letterbox)
             {
                 Letterbox(false);
-                yield return new WaitForSeconds(StoryUI.Auto ? 0.2f : 1f);
+                yield return new WaitForSeconds(StoryUI.Fast ? 0.2f : 1f);
             }
         }
         finally
@@ -1115,18 +1115,18 @@ public class StoryDirector : MonoBehaviour
                 if (Managers.UI.BossNamePopup != null && Managers.Data.MonsterDic.TryGetValue(boss.id, out Data.MonsterData data))
                     Managers.UI.BossNamePopup.GetText(0).text = Managers.GetString(data.MonsterNameId);   // 그 창의 글은 BossNameText 하나다
                 // 봇도 이름이 다 써질 때까지는 본다(녹화 영상에 이름이 0.3초 스쳤다).
-                yield return new WaitForSeconds(StoryUI.Auto ? 1.5f : 2.2f);
+                yield return new WaitForSeconds(StoryUI.Fast ? 1.5f : 2.2f);
                 Managers.UI.CloseBossNamePopup();
             }
             else
             {
-                yield return new WaitForSeconds(StoryUI.Auto ? 0.2f : 0.8f);
+                yield return new WaitForSeconds(StoryUI.Fast ? 0.2f : 0.8f);
             }
             yield return CoChain(chain);
             Letterbox(false);
             FollowPlayer();
             // 레터박스가 걷히기를 기다린다 — 전투창이 이 화면을 찍어 배경으로 쓴다.
-            yield return new WaitForSeconds(StoryUI.Auto ? 0.3f : 1f);
+            yield return new WaitForSeconds(StoryUI.Fast ? 0.3f : 1f);
         }
         finally
         {
@@ -1302,14 +1302,14 @@ public class StoryDirector : MonoBehaviour
                 SwordLedger.FinishRun();
             }
             Managers.UI.CloseGameSceneUI();
-            yield return new WaitForSeconds(StoryUI.Auto ? 0.3f : 1.5f);   // 거수의 폭발·흰 빛은 전투 결말이 튼다
+            yield return new WaitForSeconds(StoryUI.Fast ? 0.3f : 1.5f);   // 거수의 폭발·흰 빛은 전투 결말이 튼다
 
             // 왕좌의 입: 쓰러진 자리에 보스 포탈(검은 손)과 보라 소용돌이. 화면이 흔들리고 레터박스, 카메라는 내려다본다.
             OpenThroneMouth();
             StartCoroutine(Safe(CameraController.CoShakeCamera(0.8f, 0.6f)));
             Letterbox(true);
             MoveOffset(new Vector3(0f, 14f, -3f), 2f);
-            yield return new WaitForSeconds(StoryUI.Auto ? 0.3f : 2f);
+            yield return new WaitForSeconds(StoryUI.Fast ? 0.3f : 2f);
 
             StoryEnding ending = StoryEnding.Seal;
             StoryScene choice = First(StoryTrigger.Ending, (int)StoryEnding.Choice);
@@ -1425,7 +1425,7 @@ public class StoryDirector : MonoBehaviour
             catch (Exception e) { Debug.LogException(e); }
         }
         if (wait > 0f)
-            yield return new WaitForSeconds(StoryUI.Auto ? Mathf.Min(wait, 0.3f) : wait);
+            yield return new WaitForSeconds(StoryUI.Fast ? Mathf.Min(wait, 0.3f) : wait);
     }
 
     // 신호 하나를 친다. 돌려주는 값은 그 신호가 화면을 차지하는 시간이다.

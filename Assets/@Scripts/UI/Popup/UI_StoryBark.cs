@@ -109,7 +109,7 @@ public class UI_StoryBark : MonoBehaviour
 
         if (hidden == false)
             _shownFor += Time.unscaledDeltaTime;
-        bool expired = _shownFor >= (StoryUI.Auto ? 1.5f : Hold);
+        bool expired = _shownFor >= (StoryUI.Fast ? 1.5f : Hold);
         float target = hidden || expired ? 0f : 1f;
         _group.alpha = Mathf.MoveTowards(_group.alpha, target, Time.unscaledDeltaTime / FadeTime);
         if (expired && _group.alpha <= 0f)

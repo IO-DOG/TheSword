@@ -302,7 +302,7 @@ public class UI_TallyPopup : UI_Popup
         float t = Time.unscaledTime - _opened;
         if (GameEvents.IsAutoPlaying)       // 봇은 늘 지나간다 — 녹화에 잠깐 비친다
         {
-            if (t >= BotClose)
+            if (t >= (StoryUI.ReadPace ? 4f : BotClose))    // 읽는 속도(완주 영상)면 결산을 읽을 만큼
                 Close();
             return;
         }
