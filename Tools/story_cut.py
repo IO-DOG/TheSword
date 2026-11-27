@@ -115,19 +115,30 @@ def chapters(floors, spans, total):
 
 
 def cut(video, keep, out):
-    expr = "+".join(f"between(t,{a:.3f},{b:.3f})" for a, b in keep)
-    graph = (f"[0:v]select='{expr}',setpts=N/FRAME_RATE/TB[v];"
-             f"[0:a]aselect='{expr}',asetpts=N/SR/TB[a]")
-    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False, encoding="utf-8") as f:
-        f.write(graph)
+    """구간마다 따로 잘라(같은 인코딩) 이어 붙인다. 한 번에 select/aselect 로 고르면 구간마다 소리·그림이 한 프레임 안쪽으로
+    어긋난 채 쌓여 백 구간쯤이면 0.1초를 넘는다(11-28 리뷰) — 따로 자르면 구간 머리에서 매번 다시 맞는다."""
+    tmp = tempfile.mkdtemp(prefix="story_cut_")
+    parts = []
     try:
-        r = subprocess.run([ffmpeg(), "-hide_banner", "-loglevel", "error", "-y", "-i", video, "-filter_complex_script", f.name,
-                            "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-preset", "veryfast", "-crf", "22", "-pix_fmt", "yuv420p",
-                            "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", out])
+        for i, (a, b) in enumerate(keep):
+            part = os.path.join(tmp, f"p{i:04d}.mp4")
+            r = subprocess.run([ffmpeg(), "-hide_banner", "-loglevel", "error", "-y", "-ss", f"{a:.3f}", "-i", video, "-t", f"{b - a:.3f}",
+                                "-c:v", "libx264", "-preset", "veryfast", "-crf", "22", "-pix_fmt", "yuv420p", "-r", "30",
+                                "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "2", part])
+            if r.returncode != 0 or not os.path.exists(part):
+                sys.exit(f"ffmpeg 가 구간 {i}({stamp(a)}~{stamp(b)})에서 실패했다")
+            parts.append(part)
+        listing = os.path.join(tmp, "list.txt")
+        with open(listing, "w", encoding="utf-8") as f:
+            for p in parts:
+                f.write("file '" + p.replace(os.sep, "/") + "'" + os.linesep)
+        r = subprocess.run([ffmpeg(), "-hide_banner", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", listing,
+                            "-c", "copy", "-movflags", "+faststart", out])
+        if r.returncode != 0 or not os.path.exists(out):
+            sys.exit("ffmpeg 가 잇는 데서 실패했다")
     finally:
-        os.unlink(f.name)
-    if r.returncode != 0 or not os.path.exists(out):
-        sys.exit("ffmpeg 가 실패했다")
+        import shutil
+        shutil.rmtree(tmp, ignore_errors=True)
 
 
 def self_check():

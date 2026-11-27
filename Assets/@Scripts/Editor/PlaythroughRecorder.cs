@@ -76,6 +76,7 @@ public static class PlaythroughRecorder
     // 시작하고 끝나는 영상 시각을 로그에 남긴다 — 그 줄로 이야기만 모은 영상을 자른다. 형식을 바꾸지 말 것.
     static bool ReadPace => System.Environment.GetEnvironmentVariable("THESWORD_RECORD_READ") == "1";
     static int _recStartFrame;
+    static bool _wasMuted;      // Game view 의 "Mute Audio" — 켜져 있으면 녹화에 소리가 하나도 안 담긴다(11-28: 지금까지의 완주 영상이 전부 무음이었다)
     static string _storyKind;
     static int _floorLogged;
     static double _nextLog;
@@ -249,6 +250,9 @@ public static class PlaythroughRecorder
         _controller = new RecorderController(settings);
         _controller.PrepareRecording();
         _recStartFrame = Time.frameCount;
+        // StoreCapture 와 같다: 에디터의 소리 끔을 녹화 동안만 푼다. 녹화 중에는 AudioRenderer 가 스피커로 내보내지 않으니 시끄럽지 않다.
+        _wasMuted = EditorUtility.audioMasterMute;
+        EditorUtility.audioMasterMute = false;
         if (_controller.StartRecording())
             Debug.Log($"[Playthrough] 녹화 시작 -> {movie.OutputFile}.mp4 ({Width}x{Height} {Fps}fps)");
         else
@@ -262,6 +266,7 @@ public static class PlaythroughRecorder
         if (_controller.IsRecording())
             _controller.StopRecording();
         _controller = null;
+        EditorUtility.audioMasterMute = _wasMuted;
         Debug.Log("[Playthrough] 녹화 종료");
     }
     #endregion

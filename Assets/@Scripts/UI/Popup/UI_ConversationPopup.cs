@@ -562,6 +562,7 @@ public class UI_ConversationPopup : UI_Popup
     void OpenChoices()
     {
         StoryUI.EndSkip();      // 건너뛰기는 선택지 앞에서 선다 — 결말의 선택은 건너뛰지 못한다
+        ShowAutoMark(false);    // 자동 넘김은 선택지를 고르지 않는다 — 표시도 내린다
         _choosing = true;
         _choice = -1;
         _choiceOpenedAt = Time.unscaledTime;

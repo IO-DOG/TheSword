@@ -7,7 +7,7 @@ public static class GameSettings
 {
     const string KeyLanguage = "SET_LANGUAGE";
     const string KeyShake = "SET_SCREEN_SHAKE";
-    const string KeyAutoAdvance = "AUTOADVANCE";
+    const string KeyAutoAdvance = "SET_AUTO_ADVANCE";
     const string KeyTextSpeed = "SET_TEXT_SPEED";
     const string KeyForecast = "SET_SHOW_FORECAST";
     const string KeyVSync = "SET_VSYNC";

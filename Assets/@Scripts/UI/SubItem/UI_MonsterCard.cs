@@ -219,6 +219,7 @@ public class UI_MonsterCard : UI_BaseCard
         if (Quiet)
             return;
         StartCoroutine(CoDamagedMat(PlayHit()));
+        Recoil();
     }
 
     IEnumerator CoDamagedMat(string pose)
@@ -381,6 +382,21 @@ public class UI_MonsterCard : UI_BaseCard
     }
 
     int _attackFrame = -1;      // 공격 동작을 튼 프레임 — Play 는 다음 애니메이터 갱신에야 먹어서, 같은 프레임의 PlayHit 이 상태를 물으면 아직 대기다
+
+    /// <summary>
+    /// 맞으면 그림이 뒤로(오른쪽으로) 살짝 밀렸다 돌아온다(11-28). 맞는 동작 시트는 세 종에만 있어서 나머지는 흰 번쩍임뿐이었다 —
+    /// 어느 종이든 맞은 티가 나게 한다. 챕터 보스(한 장 그림)는 뺀다: 공격 때 같은 자리를 미는 BossArt.Lunge 와 겹치면 제자리를 잃는다.
+    /// 화면 흔들림을 끈 사람에게는 밀지 않는다. 건너뛰는 전투(Quiet)는 여기까지 오지 않는다.
+    /// </summary>
+    void Recoil()
+    {
+        if (_staticArt || GameSettings.ScreenShake == false)
+            return;
+        RectTransform rt = GetImage((int)Images.CreatureImage).rectTransform;
+        string key = "MobRecoil" + rt.GetInstanceID();
+        DOTween.Complete(key);      // 밀린 자리를 제자리로 알고 돌아오지 않게, 앞의 것을 끝내 놓고 다시
+        rt.DOPunchAnchorPos(new Vector2(10f, 0f), 0.18f, 1, 0f).SetId(key).SetLink(rt.gameObject);
+    }
 
     /// <summary>
     /// 맞는 동작이 있는 종(Mob_C{챕터}_H{번호} — MonsterArtSetup 이 Hit 시트로 만든다)이면 튼다. 공격 동작 도중에는 끊지 않는다.

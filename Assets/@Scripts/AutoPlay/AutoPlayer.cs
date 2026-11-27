@@ -478,7 +478,9 @@ public class AutoPlayer : MonoBehaviour
             return;
         // 대사: 한 장씩 넘긴다. 마지막 장에서 스스로 닫는다.
         // 읽는 속도(StoryUI.ReadPace, 완주 영상)면 누르지 않는다 — 대화창이 줄 길이만큼 머문 뒤 스스로 넘긴다. 여기서 2초마다 누르면 그 머묾이 잘린다.
-        if (Handle<UI_ConversationPopup>(p => { if (StoryUI.ReadPace == false) p.ShowNextScript(); }))
+        // 다만 대화창 위에 다른 창이 얹혔으면(안내·확인) 그 창을 먼저 처리해야 대화창이 맨 위로 돌아와 스스로 넘어간다 — 여기서 서지 않는다.
+        if (Handle<UI_ConversationPopup>(p => { if (StoryUI.ReadPace == false) p.ShowNextScript(); })
+            && (StoryUI.ReadPace == false || Managers.UI.TopPopup is UI_ConversationPopup))
             return;
         // 예/아니오는 "예"로 간다 — 보스방/마검 계약 둘 다 진행 쪽이 예다.
         // 버튼을 "누르는" 대신 그 버튼이 부르는 메서드를 직접 호출한다.
@@ -733,6 +735,13 @@ public class AutoPlayer : MonoBehaviour
             return;   // 전투는 스스로 끝난다
         // 결말은 자동 진행으로도 25~30초 걸린다 — 잠금이 오래 걸렸다고 중간에 풀면 장면이 반쯤 끊긴다.
         if (StoryDirector.IsPlaying)
+        {
+            _lastReal = Time.unscaledTime;
+            return;
+        }
+        // 읽는 속도(완주 영상)에서는 대사 한 줄이 7초까지 머문다 — 손수 만든 도입부의 대화(StoryDirector 밖)가 15초를 넘겨도 끊지 않는다.
+        // 녹화기의 Unstick 도 같은 것을 봐준다(11-28 리뷰).
+        if (StoryUI.ReadPace && Managers.UI.TopPopup is UI_ConversationPopup)
         {
             _lastReal = Time.unscaledTime;
             return;
