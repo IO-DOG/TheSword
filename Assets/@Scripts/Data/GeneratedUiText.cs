@@ -267,6 +267,7 @@ public static class GeneratedUiText
             case 236: return new[] { "Instant", "즉시", "Instant", "瞬時", "瞬间" }[language >= 0 && language <= 4 ? language : 0];
             case 237: return new[] { "Screen shake", "화면 흔들림", "Screen shake", "画面の揺れ", "屏幕震动" }[language >= 0 && language <= 4 ? language : 0];
             case 238: return new[] { "Game", "게임", "Game", "ゲーム", "游戏" }[language >= 0 && language <= 4 ? language : 0];
+            case 239: return new[] { "Auto-advance dialogue", "대사 자동 넘김", "Auto-advance dialogue", "セリフの自動送り", "对话自动播放" }[language >= 0 && language <= 4 ? language : 0];
             case 560: return new[] { "The demo ends here", "체험판은 여기까지", "The demo ends here", "体験版はここまで", "试玩版到此为止" }[language >= 0 && language <= 4 ? language : 0];
             case 561: return new[] { "The Tower goes on to floor 100. The full game picks up this save at floor 21.", "탑은 100층까지 이어집니다. 본편에서 이 저장으로 21층부터 이어 갑니다.", "The Tower goes on to floor 100. The full game picks up this save at floor 21.", "塔は100階まで続きます。製品版ではこのセーブで21階から続けられます。", "塔一直延伸到第100层。正式版可以用这个存档从第21层继续。" }[language >= 0 && language <= 4 ? language : 0];
             case 562: return new[] { "The Sword's Ledger", "마검의 장부", "The Sword's Ledger", "魔剣の帳簿", "魔剑的账簿" }[language >= 0 && language <= 4 ? language : 0];

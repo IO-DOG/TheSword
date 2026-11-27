@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class UI_SettingPopup : UI_Popup
 {
     // 새 줄의 이름 (Tools/ui_text_parts/settings.py). 예상 피해 표시는 전투 예측 줄의 이름(133)을 그대로 쓴다.
-    const int RESOLUTION = 230, VSYNC = 231, TEXT_SPEED = 232, TEXT_SPEED_SLOW = 233, SCREEN_SHAKE = 237, GAME = 238;
+    const int RESOLUTION = 230, VSYNC = 231, TEXT_SPEED = 232, TEXT_SPEED_SLOW = 233, SCREEN_SHAKE = 237, GAME = 238, AUTO_ADVANCE = 239;
     const int FORECAST = 133;
     // 전투 속도 줄 (Tools/ui_text_parts/battle.py): 이름, "{0}배속". 고를 수 있는 값은 GameSettings.BattleSpeed 와 같다.
     const int BATTLE_SPEED = 350, BATTLE_SPEED_VALUE = 351;
@@ -366,10 +366,11 @@ public class UI_SettingPopup : UI_Popup
             i => GameSettings.BattleSpeed = BattleSpeeds[i]);
         AddToggle(check, game, -227f, SCREEN_SHAKE, () => GameSettings.ScreenShake, on => GameSettings.ScreenShake = on);
         AddToggle(check, game, -237f, FORECAST, () => GameSettings.ShowForecast, on => GameSettings.ShowForecast = on);
+        AddToggle(check, game, -247f, AUTO_ADVANCE, () => GameSettings.AutoAdvance, on => GameSettings.AutoAdvance = on);   // 대사 자동 넘김 (StoryUI.AutoRead)
 
         // 판을 늘리고 셋을 가운데로 모은다. 9분할로 그려 위쪽 테두리 무늬는 늘어나지 않게 한다
         // (스프라이트 테두리 값은 임포트 설정에 있다).
-        const float top = 110f, bottom = -262f;
+        const float top = 110f, bottom = -272f;     // 11-28 대사 자동 넘김 줄(-247)이 들어가 10 늘렸다
         board.type = Image.Type.Sliced;
         board.rectTransform.sizeDelta = new Vector2(board.rectTransform.sizeDelta.x, top - bottom);
         foreach (Transform block in new[] { screen, sound, game })

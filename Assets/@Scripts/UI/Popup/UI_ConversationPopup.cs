@@ -184,9 +184,12 @@ public class UI_ConversationPopup : UI_Popup
         GetImage((int)Images.ConversationArrow).gameObject.SetActive(_isAllTextShown && _choosing == false);
 
         // 자동 플레이: 다 보이면 잠깐 뒤에 넘긴다.
-        if (StoryUI.Auto && top && _isAllTextShown)
+        if (_isAllTextShown == false)
+            _autoTimer = 0f;        // 손으로 넘긴 줄의 기다림이 다음 줄로 넘어가지 않게
+        if ((StoryUI.Auto || StoryUI.AutoRead) && top && _isAllTextShown)
         {
-            _autoTimer += Time.unscaledDeltaTime;
+            // 끊긴 프레임(창을 옮겼다·로딩)의 몇 초가 한 번에 더해지면 줄이 읽히기도 전에 넘어간다 — 프레임마다 0.1초까지만 센다.
+            _autoTimer += Mathf.Min(Time.unscaledDeltaTime, 0.1f);
             if (_autoTimer >= StoryUI.AutoHold(GetText((int)Texts.ConversationText).textInfo.characterCount))
             {
                 _autoTimer = 0f;

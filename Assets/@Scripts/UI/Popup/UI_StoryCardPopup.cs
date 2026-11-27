@@ -291,9 +291,11 @@ public class UI_StoryCardPopup : UI_Popup
         if (_arrow != null)
             _arrow.SetActive(_allShown);
 
-        if (StoryUI.Auto && _allShown)
+        if (_allShown == false)
+            _autoTimer = 0f;
+        if ((StoryUI.Auto || StoryUI.AutoRead) && _allShown)
         {
-            _autoTimer += Time.unscaledDeltaTime;
+            _autoTimer += Mathf.Min(Time.unscaledDeltaTime, 0.1f);     // 끊긴 프레임이 줄을 넘기지 않게 (UI_ConversationPopup 과 같다)
             if (_autoTimer >= StoryUI.AutoHold(_text != null ? _text.textInfo.characterCount : 0))
                 _advance = true;
         }

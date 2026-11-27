@@ -11,4 +11,6 @@ TEXT = {
     236: ("즉시", "Instant", "瞬時", "瞬间"),
     237: ("화면 흔들림", "Screen shake", "画面の揺れ", "屏幕震动"),
     238: ("게임", "Game", "ゲーム", "游戏"),
+    # dialogue lines move on by themselves after a reading-time hold (GameSettings.AutoAdvance, StoryUI.AutoRead). Choices never do.
+    239: ("대사 자동 넘김", "Auto-advance dialogue", "セリフの自動送り", "对话自动播放"),
 }

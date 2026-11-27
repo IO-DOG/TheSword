@@ -7,6 +7,7 @@ public static class GameSettings
 {
     const string KeyLanguage = "SET_LANGUAGE";
     const string KeyShake = "SET_SCREEN_SHAKE";
+    const string KeyAutoAdvance = "AUTOADVANCE";
     const string KeyTextSpeed = "SET_TEXT_SPEED";
     const string KeyForecast = "SET_SHOW_FORECAST";
     const string KeyVSync = "SET_VSYNC";
@@ -59,6 +60,13 @@ public static class GameSettings
     {
         get => PlayerPrefs.GetInt(KeyShake, 1) == 1;
         set { PlayerPrefs.SetInt(KeyShake, value ? 1 : 0); Commit(); }
+    }
+
+    // 대사 자동 넘김(11-28). 켜면 다 보인 줄이 글자 수만큼 머문 뒤 스스로 넘어간다(StoryUI.AutoHold) — 선택지는 넘기지 않는다. 기본 꺼짐.
+    public static bool AutoAdvance
+    {
+        get => PlayerPrefs.GetInt(KeyAutoAdvance, 0) == 1;
+        set { PlayerPrefs.SetInt(KeyAutoAdvance, value ? 1 : 0); Commit(); }
     }
 
     // 대사 글자가 찍히는 속도. 0 느림, 1 보통, 2 빠름, 3 한 번에.

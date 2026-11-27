@@ -37,7 +37,10 @@ public static class StoryUI
     public static bool Fast => Auto && ReadPace == false;
     /// <summary>자동 플레이에서 다 보인 줄을 넘기기까지(초). 읽는 속도면 0.9초 + 글자마다 0.07초, 1.4~7초.</summary>
     public static float AutoHold(int characters) =>
-        ReadPace ? Mathf.Clamp(0.9f + 0.07f * characters, 1.4f, 7f) : AutoDelay;
+        ReadPace || AutoRead ? Mathf.Clamp(0.9f + 0.07f * characters, 1.4f, 7f) : AutoDelay;
+    /// <summary>사람이 설정에서 켠 대사 자동 넘김(GameSettings.AutoAdvance). 봇의 Auto 와 달리 선택지는 고르지 않고 연출도 줄이지 않는다 —
+    /// 다 보인 대사·카드만 읽을 만큼 머문 뒤 넘긴다. 누르면 평소처럼 바로 넘어간다.</summary>
+    public static bool AutoRead => Auto == false && GameSettings.AutoAdvance;
 
     /// <summary>건너뛰기 키. 패드는 LB 다(GameKeys) — 전투 건너뛰기와 같은 키다.</summary>
     public const KeyCode SkipKey = KeyCode.Tab;
