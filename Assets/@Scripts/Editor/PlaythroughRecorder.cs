@@ -37,9 +37,11 @@ public static class PlaythroughRecorder
     // 1280x720 30fps 로는 30분에 70층 언저리에서 끊겼다. 화면이 도트 그림이라
     // 960x540 24fps 로 낮춰도 알아보는 데 지장이 없고, 처리량은 두 배 가까이 는다.
     // 사람이 볼 영상이면 THESWORD_RECORD_HQ=1 — 1280x720 30fps 보통 화질(실행 시간이 두 배 남짓 는다).
-    static bool HQ => System.Environment.GetEnvironmentVariable("THESWORD_RECORD_HQ") == "1";
-    static int Width => HQ ? 1280 : 960;
-    static int Height => HQ ? 720 : 540;
+    // THESWORD_RECORD_HQ=2 는 1920x1080 30fps(11-28) — 유튜브에 올릴 영상. 화면의 글자가 1080p 기준이라 720p 보다 또렷하다.
+    static bool FullHD => System.Environment.GetEnvironmentVariable("THESWORD_RECORD_HQ") == "2";
+    static bool HQ => FullHD || System.Environment.GetEnvironmentVariable("THESWORD_RECORD_HQ") == "1";
+    static int Width => FullHD ? 1920 : HQ ? 1280 : 960;
+    static int Height => FullHD ? 1080 : HQ ? 720 : 540;
     // 프레임 상한을 풀어 두었으므로(CapFrameRate=false) 인코딩 비용이 곧 실행 시간이다.
     // 20fps 로는 100층이 38분쯤 걸려 배경 실행 예산(약 29분)을 넘겨 77층에서 잘렸다.
     // 15 로 내리면 인코딩할 프레임이 4분의 1 줄어든다. 해상도는 그대로 둔다 —
