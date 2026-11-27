@@ -22,6 +22,7 @@ public class UI_TallyPopup : UI_Popup
     public const int TitleText = 470;       // {0}~{1}층 결산
     public const int TotalsText = 471;      // 예언 {0}  치름 {1}  기준 {2}
     const int StarsLegend = 472;
+    const int BandScore = 482, BandFirst = 483, BandNewBest = 484;
     const int NextText = 473;               // 다음 다섯 층: {0}
     const int AltarTitle = 474;
     const int AltarDesc = 475;              // 최대 체력의 {0}%를 바치고 하나를 받는다
@@ -59,12 +60,12 @@ public class UI_TallyPopup : UI_Popup
     bool ClickReady => Time.unscaledTime - _opened >= ClickDelay;
 
     /// <summary>창을 띄운다. 닫히면(파괴되면) 부른 쪽의 기다림이 끝난다.</summary>
-    public static UI_TallyPopup Show(int stageId, int stars, int foretold, int paid, int par)
+    public static UI_TallyPopup Show(int stageId, int stars, int foretold, int paid, int par, int score = 0, int best = 0)
     {
         UI_TallyPopup popup = new GameObject(nameof(UI_TallyPopup), typeof(RectTransform)).AddComponent<UI_TallyPopup>();
         Managers.UI.PushPopup(popup);
         popup.Init();
-        popup.Build(stageId, stars, foretold, paid, par);
+        popup.Build(stageId, stars, foretold, paid, par, score, best);
         return popup;
     }
 
@@ -91,7 +92,7 @@ public class UI_TallyPopup : UI_Popup
     }
 
     #region 그리기
-    void Build(int stageId, int stars, int foretold, int paid, int par)
+    void Build(int stageId, int stars, int foretold, int paid, int par, int score, int best)
     {
         _stage = stageId;
         _opened = Time.unscaledTime;
@@ -135,6 +136,14 @@ public class UI_TallyPopup : UI_Popup
             SwordLedger.StarLimits(stageId, out int great, out int good);
             Line(root, "Legend", number, 20f, Soft, ref y, 32f).text =
                 string.Format(Managers.GetString(StarsLegend), par * good / 100, par * great / 100);
+            // 띠 기록 — 이번 점수와 지난 최고(Records.SubmitBand). 더 낮으면 금빛 "새 기록".
+            if (score > 0)
+            {
+                string record = best > 0 ? string.Format(Managers.GetString(BandScore), score, best) : string.Format(Managers.GetString(BandFirst), score);
+                if (best > 0 && score < best)
+                    record += "  <color=#FFD24A>" + Managers.GetString(BandNewBest) + "</color>";
+                Line(root, "Record", number, 24f, Ink, ref y, 36f).text = record;
+            }
         }
 
         string next = NextTraits(band);

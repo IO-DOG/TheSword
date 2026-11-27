@@ -33,6 +33,8 @@ public static class Records
         public HashSet<string> ClearedModes = new HashSet<string>();         // 결말까지 간 규칙 (GameMode 이름)
         public HashSet<string> Feats = new HashSet<string>();                // 그 순간에만 풀리는 업적 id (SteamHooks.Earn)
         public HashSet<string> ScoredRuns = new HashSet<string>();           // 점수를 낸 판(LedgerState.RunId) — SwordLedger.FinishRun
+        public Dictionary<string, int> BandBest = new Dictionary<string, int>();   // 띠(다섯 층) 최고 점수(낮을수록 좋다), "Normal:3" (규칙:띠 0부터)
+        public Dictionary<string, int> BandStars = new Dictionary<string, int>();  // 띠에서 받은 가장 많은 별(1~3), 같은 키
     }
 
     static Data s_data;
@@ -93,6 +95,43 @@ public static class Records
     // 동기화된 100층 입구 체크포인트로 같은 판을 다시 끝내 순위표에 또 올릴 수 있었다(11-21 리뷰).
     public static bool RunScored(string runId) => Current.ScoredRuns != null && Current.ScoredRuns.Contains(runId);
     public static void MarkRunScored(string runId) => Change(d => (d.ScoredRuns ??= new HashSet<string>()).Add(runId));
+
+    // 띠(다섯 층)의 최고 점수 = round(1000·치름/기준), 낮을수록 좋다(판 점수와 같은 셈 — 곁길을 걸러 치름만 줄여서는 안 좋아진다). 없으면 0.
+    public static int BandBest(GameMode mode, int band) =>
+        Current.BandBest != null && Current.BandBest.TryGetValue(mode + ":" + band, out int v) ? v : 0;
+    /// <summary>띠 결산을 올리고 그 전의 최고 점수를 돌려준다(없었으면 0). 점수는 더 낮을 때, 별은 더 많을 때만 적는다. 봇 판은 적지 않는다(Change).</summary>
+    public static int SubmitBand(GameMode mode, int band, int score, int stars)
+    {
+        int old = BandBest(mode, band);
+        string key = mode + ":" + band;
+        Change(d =>
+        {
+            bool changed = false;
+            if (score > 0 && (old == 0 || score < old))
+            {
+                (d.BandBest ??= new Dictionary<string, int>())[key] = score;
+                changed = true;
+            }
+            d.BandStars ??= new Dictionary<string, int>();
+            if (stars > 0 && (d.BandStars.TryGetValue(key, out int had) == false || stars > had))
+            {
+                d.BandStars[key] = stars;
+                changed = true;
+            }
+            return changed;
+        });
+        return old;
+    }
+    /// <summary>그 규칙에서 띠마다 받은 가장 많은 별의 합(타이틀 "★ 47/60"). 띠는 20개, 띠마다 셋까지.</summary>
+    public static int StarsTotal(GameMode mode)
+    {
+        int sum = 0;
+        if (Current.BandStars != null)
+            foreach (KeyValuePair<string, int> kv in Current.BandStars)
+                if (kv.Key.StartsWith(mode + ":"))
+                    sum += kv.Value;
+        return sum;
+    }
 
     static GameMode CurrentMode => Managers.Game?.PlayerData?.Mode ?? GameMode.Normal;
 

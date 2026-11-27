@@ -2118,6 +2118,27 @@ def emit_scripts(monsters):
     write_csv(os.path.join(EXCEL, "ScriptData.csv"), header, [[row.get(k, "") for k in header] for row in scripts])
 
 
+def emit_ui_text_only():
+    """ui_text(_parts)의 문구만 다시 굽는다(`--text`) — 몬스터·지도·이름은 지금 파일 그대로.
+
+    `--write` 는 층을 전부 다시 뽑아 검사하느라 13분쯤 걸리는데, UI 문구 한 줄을 고칠 때도 그 길뿐이었다(11-28).
+    하는 일은 emit_scripts 의 끝부분과 같다: ui_text 행을 덮어 넣고(append_rows) GeneratedUiText.cs 를 쓴다.
+    그 뒤 story_gen.py 를 돌리는 것은 같다. 생성기가 쓰는 구간과 겹치는 id 는 여기서도 막는다.
+    """
+    path = os.path.join(JSOND, "ScriptData.json")
+    with open(path, "r", encoding="utf-8") as f:
+        scripts = json.load(f)["scripts"]
+    clash = sorted(sid for sid in UI_TEXT if any(lo <= sid <= hi for lo, hi in GENERATED_SCRIPT_RANGES))
+    assert not clash, f"ScriptData {clash} 를 생성기와 ui_text 가 같이 쓴다 — 한쪽에서 지울 것"
+    append_rows(scripts)
+    emit_bootstrap(ROOT)
+    scripts.sort(key=lambda s: s["id"])
+    write_json(path, "scripts", scripts)
+    header = ["id", "ScriptKr", "ScriptEn", "ScriptJp", "ScriptCn"]
+    write_csv(os.path.join(EXCEL, "ScriptData.csv"), header, [[row.get(k, "") for k in header] for row in scripts])
+    print(f"      UI 문구 {len(UI_TEXT)}개를 다시 구웠다 (몬스터·지도는 그대로) — 다음: python Tools/story_gen.py")
+
+
 # ------------------------------------------------------------------ 층 레이아웃
 
 WATER_TRIES = 60   # 수로 층에서 물살이 들어가는 씨앗을 찾을 때까지 더 뽑는 횟수
@@ -2585,5 +2606,8 @@ def build_all(dry_run=False):
 
 if __name__ == "__main__":
     import sys
+    if "--text" in sys.argv:        # UI 문구만 (emit_ui_text_only)
+        emit_ui_text_only()
+        sys.exit(0)
     ok = build_all(dry_run="--write" not in sys.argv)
     sys.exit(0 if ok else 1)

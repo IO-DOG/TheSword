@@ -213,6 +213,9 @@ public static class GeneratedUiText
             case 479: return new[] { "Received: {0}", "받았다: {0}", "Received: {0}", "受け取った: {0}", "获得：{0}" }[language >= 0 && language <= 4 ? language : 0];
             case 480: return new[] { "←→ choose  Enter receive  Esc pass", "←→ 고르기  Enter 받기  Esc 지나간다", "←→ choose  Enter receive  Esc pass", "←→ 選ぶ  Enter 受け取る  Esc 通り過ぎる", "←→ 选择  Enter 领取  Esc 离开" }[language >= 0 && language <= 4 ? language : 0];
             case 481: return new[] { "Enter continue", "Enter 계속", "Enter continue", "Enter 続ける", "Enter 继续" }[language >= 0 && language <= 4 ? language : 0];
+            case 482: return new[] { "Score {0}  Best so far {1}", "점수 {0}  지난 최고 {1}", "Score {0}  Best so far {1}", "スコア {0}  これまでの最高 {1}", "分数 {0}  此前最佳 {1}" }[language >= 0 && language <= 4 ? language : 0];
+            case 483: return new[] { "Score {0}  First record", "점수 {0}  첫 기록", "Score {0}  First record", "スコア {0}  初記録", "分数 {0}  首次记录" }[language >= 0 && language <= 4 ? language : 0];
+            case 484: return new[] { "New best", "새 기록", "New best", "新記録", "新纪录" }[language >= 0 && language <= 4 ? language : 0];
             case 490: return new[] { "Lv {0}  Par {1} ({2})", "Lv {0}  기준 {1} ({2})", "Lv {0}  Par {1} ({2})", "Lv {0}  基準 {1} ({2})", "Lv {0}  基准 {1} ({2})" }[language >= 0 && language <= 4 ? language : 0];
             case 491: return new[] { "At the Throne: Lv {0}", "왕좌에서 Lv {0}", "At the Throne: Lv {0}", "玉座で Lv {0}", "抵达王座时 Lv {0}" }[language >= 0 && language <= 4 ? language : 0];
             case 492: return new[] { "Tower's Law", "탑의 법", "Tower's Law", "塔の掟", "塔之法则" }[language >= 0 && language <= 4 ? language : 0];

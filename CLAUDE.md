@@ -240,6 +240,7 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
 - **판 끝**: 100층 보스를 쓰러뜨리면 계단 없이 `StoryDirector.CoEnding` 이 바로 돌므로, 거기서 마지막 띠를 닫고
   `FinishRun` 이 점수 = round(1000·치름/기준)(낮을수록 좋다)를 **판(RunId)마다 한 번** `RunScored` 로 알린다(낸 판은 `Records.json` 의 `ScoredRuns` — 클라우드로 오가서 다른 기기에서 같은 판을 다시 끝내도 안 낸다)
   (`Records` 최고 점수·순위표·`ACH_DAWN_PAR`). 엔딩 씬이 판 카드를 보인다. 계단 쪽에도 같은 호출이 있다 — 장부가 두 번 세지 않는다.
+- **띠 기록**(11-28): 띠를 닫을 때 `Records.SubmitBand` 가 그 띠의 점수(= round(1000·치름/기준), 판 점수와 같은 셈 — 곁길을 걸러 치름만 줄여서는 안 좋아진다)와 별을 규칙마다 적는다(`Records.json` 의 `BandBest`·`BandStars`, 키 "Normal:3"). 결산 창에 "점수 650  지난 최고 712  새 기록", 타이틀 기록 줄에 띠마다 받은 가장 많은 별의 합 "★ 47/60". 봇 판은 적지 않는다.
 - HUD 의 배부름 게이지: "Lv 58 기준 56 (+2)"(`StageInfoData.ParLevelIn`), 90층부터 "왕좌에서 Lv {DawnLevel}" — 참 결말의
   문턱이 더는 숨어 있지 않다. 탑의 법이면 배지.
 - **탑의 법**: 새 게임에서 고른다(`UI_ModePopup`, 기본 보통). `CurPlayerData.Mode` 가 체크포인트에 남고,
@@ -977,6 +978,7 @@ UI에 노출되는 문자열은 하드코딩하지 않고 `ScriptData` 테이블
 `ScriptData` 와 함께 `GeneratedUiText.cs` 로도 구워지고, 어드레서블을 못 올려 표가 빈 때
 `GetString` 이 그쪽으로 되돌아간다("불러오지 못했습니다" 가 그때 뜬다).
 굽기는 `generate_content.py --write` 가 한다(데이터가 그대로면 MapData·MonsterData 해시도 그대로다) — 그 뒤 `story_gen.py`.
+**UI 문구만 고쳤으면 `generate_content.py --text`**(11-28) — `--write` 는 층을 전부 다시 뽑아 13분쯤 걸리는데 `--text` 는 `ui_text` 행과 `GeneratedUiText.cs` 만 몇 초에 다시 쓴다(같은 입력이면 `--write` 와 바이트까지 같다). 그 뒤 `story_gen.py` 는 같다.
 `{0}` 같은 자리표시가 언어마다 다르면 `ui_text` 가 굽기 전에 멈춘다(한 언어에서만 FormatException 이 나던 것).
 데이터 시트 이스케이프: `\n`=줄바꿈, `^`=쉼표.
 

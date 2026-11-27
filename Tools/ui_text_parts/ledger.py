@@ -33,6 +33,11 @@ TEXT = {
     480: ("←→ 고르기  Enter 받기  Esc 지나간다", "←→ choose  Enter receive  Esc pass",
           "←→ 選ぶ  Enter 受け取る  Esc 通り過ぎる", "←→ 选择  Enter 领取  Esc 离开"),
     481: ("Enter 계속", "Enter continue", "Enter 続ける", "Enter 继续"),
+    # band record (Records.SubmitBand): this band's score = round(1000 * paid / par) as the run card's 502 - lower is better.
+    # {0} = this time / {1} = the best before this time. 483 when there was none. 484 is appended in gold when {0} beats {1}.
+    482: ("점수 {0}  지난 최고 {1}", "Score {0}  Best so far {1}", "スコア {0}  これまでの最高 {1}", "分数 {0}  此前最佳 {1}"),
+    483: ("점수 {0}  첫 기록", "Score {0}  First record", "スコア {0}  初記録", "分数 {0}  首次记录"),
+    484: ("새 기록", "New best", "新記録", "新纪录"),
 
     # UI_GameScene fullness gauge: {0} level now, {1} this floor's par level (ParLevelIn), {2} difference (+2 / -1)
     490: ("Lv {0}  기준 {1} ({2})", "Lv {0}  Par {1} ({2})", "Lv {0}  基準 {1} ({2})", "Lv {0}  基准 {1} ({2})"),
@@ -67,7 +72,7 @@ if __name__ == "__main__":
         table = text.split("  m_CharacterTable:", 1)[1].split("\n  m_", 1)[0]
         return {int(u) for u in re.findall(r"m_Unicode: (\d+)", table)}
 
-    args = {470: 2, 471: 3, 472: 2, 473: 1, 474: 0, 475: 1, 476: 1, 477: 0, 478: 1, 479: 1, 480: 0, 481: 0,
+    args = {470: 2, 471: 3, 472: 2, 473: 1, 474: 0, 475: 1, 476: 1, 477: 0, 478: 1, 479: 1, 480: 0, 481: 0, 482: 2, 483: 1, 484: 0,
             490: 3, 491: 1, 492: 0, 500: 0, 501: 2, 502: 1, 503: 0, 504: 1}
     assert set(args) == set(TEXT), set(args) ^ set(TEXT)
     fonts = {name: glyphs(name) for name in ("Silver SDF", "DNFBitBitv2 SDF")}

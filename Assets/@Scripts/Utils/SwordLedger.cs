@@ -48,6 +48,7 @@ public class LedgerState
 /// </summary>
 public static class SwordLedger
 {
+    public const int BandCount = 20;        // 100층 / 5 — 타이틀의 별 합계(Records.StarsTotal)가 쓴다
     public const int BandFloors = 5;        // 띠 = 다섯 층, (층-1)/5 — generate_content.BAND_FLOORS·MonsterTint 와 같은 경계
     const string ScoredRunKey = "LEDGER_SCORED_RUN";    // 점수를 낸 판(RunId) — 이어하기로 100층을 다시 올라도 두 번 내지 않는다
 
@@ -183,7 +184,12 @@ public static class SwordLedger
 
         // 창이 못 떠도 계단은 가야 한다 — 이 코루틴은 계단 코루틴 안에서 돈다(예외가 나면 계단째 죽는다).
         UI_TallyPopup popup = null;
-        try { popup = UI_TallyPopup.Show(stageId, stars, foretold, paid, par); }
+        // 띠 기록(11-28): 이번 점수와 그 전의 최고. 기준이 없는 띠는 점수도 없다.
+        int score = par > 0 ? (int)Math.Round(1000.0 * paid / par) : 0;
+        int best = 0;
+        try { best = Records.SubmitBand(Managers.Game.PlayerData.Mode, band, score, stars); }
+        catch (Exception e) { Debug.LogException(e); }
+        try { popup = UI_TallyPopup.Show(stageId, stars, foretold, paid, par, score, best); }
         catch (Exception e) { Debug.LogException(e); }
         while (popup != null)
             yield return null;

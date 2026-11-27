@@ -580,10 +580,13 @@ public class UI_TitleScene : UI_Scene
         {
             int best = Records.BestScore(mode);
             bool cleared = mode == GameMode.Tower && Records.ModeCleared(mode);
-            if (best <= 0 && cleared == false)
+            int stars = Records.StarsTotal(mode);      // 띠마다 받은 가장 많은 별의 합 (11-28)
+            if (best <= 0 && cleared == false && stars <= 0)
                 continue;
             string name = Managers.GetString(mode == GameMode.Tower ? MODE_TOWER : MODE_NORMAL);
             string line = best > 0 ? string.Format(Managers.GetString(BEST_SCORE), name, best) : name;
+            if (stars > 0)
+                line += $"  <color=#FFD24A>★ {stars}/{SwordLedger.BandCount * 3}</color>";
             lines.Add(cleared ? $"{line}  <color=#F0D28A>{Managers.GetString(MODE_CLEARED)}</color>" : line);
         }
         _records.gameObject.SetActive(lines.Count > 0);
