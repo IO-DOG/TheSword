@@ -107,8 +107,12 @@ public class UI_LedgerPopup : UI_Popup
                 // 아직 닫지 않은 띠는 빈 별 셋(어둡게), 기준이 없던 띠는 "-"(StarText)
                 // 두 줄의 글자 크기가 달라도 띠마다 같은 자리에 오게 가로 자리를 박는다(TMP <pos>)
                 string at = $"<pos={150 + (band - chapter * BandsPerChapter) * 190}>";
-                mine += at + (band < run.BandStars.Count ? UI_TallyPopup.StarText(run.BandStars[band]) : "<color=#3A4050>☆☆☆</color>");
-                best += at + UI_TallyPopup.StarText(Records.BandStarsBest(player.Mode, band));
+                // 별 옆에 띠 점수(낮을수록 좋다)를 작게 — 이번 판 것과 최고를 나란히 봐야 어느 띠에 줄일 값이 남았는지 보인다
+                int myScore = run.BandScores != null && band < run.BandScores.Count ? run.BandScores[band] : 0;
+                int bestScore = Records.BandBest(player.Mode, band);
+                mine += at + (band < run.BandStars.Count ? UI_TallyPopup.StarText(run.BandStars[band]) : "<color=#3A4050>☆☆☆</color>")
+                        + (myScore > 0 ? $" <size=60%>{myScore}</size>" : "");
+                best += at + UI_TallyPopup.StarText(Records.BandStarsBest(player.Mode, band)) + (bestScore > 0 ? $" {bestScore}" : "");
             }
             Line(root, number, 34f, Ink, ref y, 46f).text = string.Format(Managers.GetString(CardChapter), chapter + 1) + mine;
             Line(root, number, 20f, Soft, ref y, 30f).text = Managers.GetString(Best) + best;

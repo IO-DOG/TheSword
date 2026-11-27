@@ -26,6 +26,7 @@ public class LedgerState
     public int BandPaid;        // 이 띠(5층)에서 — 띠가 끝날 때 집계하고 0 으로
     public int BandPar;
     public List<int> BandStars = new List<int>();   // 띠마다 별 (1~3, 기준이 없던 띠는 0), 띠 순서대로
+    public List<int> BandScores = new List<int>();  // 띠마다 점수(1000·치름/기준, 기준이 없던 띠는 0) — 장부 창이 보인다(11-28). 이 칸이 없던 옛 체크포인트면 비어 있다
     public int BandForetold;    // 이 띠의 예언 합 (결산 창의 "예언")
     public int FloorStage;      // Floor* 가 어느 층(stageId) 몫인가. 새 층에 처음 들어설 때 이 층을 한 번 닫는다
     // 판의 이름 — 새 게임(CurPlayerData.Clear)이 짓는다. 점수는 판마다 한 번 낸다. 장부 없이 저장된 옛 체크포인트는 비어 있다:
@@ -176,6 +177,12 @@ public static class SwordLedger
         int stars = Stars(l.BandPaid, l.BandPar, great, good);
         l.BandStars.Add(stars);
         int foretold = l.BandForetold, paid = l.BandPaid, par = l.BandPar;
+        // 띠 점수 — 한 대도 안 맞은 띠도 기록이다(0 은 "점수 없음" 표시라 1 로 올린다). 별과 같은 자리에 적어 체크포인트에 같이 실린다.
+        int score = par > 0 ? Math.Max(1, (int)Math.Round(1000.0 * paid / par)) : 0;
+        l.BandScores ??= new List<int>();
+        while (l.BandScores.Count < band)   // 이 칸이 없던 체크포인트에서 이어 온 판 — 모르는 띠는 0
+            l.BandScores.Add(0);
+        l.BandScores.Add(score);
         l.BandForetold = l.BandPaid = l.BandPar = 0;
         // 봇 완주 기록에서 띠마다 치름/기준을 견준다(재미 검증 v2 4절 "기준점 8% 차이" — fun_sim [7] 과 층 단위로 맞춘다).
         Debug.Log($"[Ledger] 띠 {band + 1}: 예언 {foretold} 치름 {paid} 기준 {par} 별 {stars}");
@@ -185,7 +192,6 @@ public static class SwordLedger
         // 창이 못 떠도 계단은 가야 한다 — 이 코루틴은 계단 코루틴 안에서 돈다(예외가 나면 계단째 죽는다).
         UI_TallyPopup popup = null;
         // 띠 기록(11-28): 이번 점수와 그 전의 최고. 기준이 없는 띠는 점수도 없다.
-        int score = par > 0 ? Math.Max(1, (int)Math.Round(1000.0 * paid / par)) : 0;   // 한 대도 안 맞은 띠도 기록이다 — 0 은 "점수 없음" 표시라 1 로 올린다
         int best = 0;
         try { best = Records.SubmitBand(Managers.Game.PlayerData.Mode, band, score, stars); }
         catch (Exception e) { Debug.LogException(e); }
