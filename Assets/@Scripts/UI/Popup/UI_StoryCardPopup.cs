@@ -254,6 +254,7 @@ public class UI_StoryCardPopup : UI_Popup
     {
         _shade.enabled = true;
         _text.text = value;
+        StoryUI.Remember("", value);     // 지난 대사 창 — 카드의 글은 화자 없는 줄로 남긴다
         _textFrame = Time.frameCount;
         _textShown = true;
         _allShown = false;
