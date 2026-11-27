@@ -77,6 +77,7 @@ public static class PlaythroughRecorder
     static bool ReadPace => System.Environment.GetEnvironmentVariable("THESWORD_RECORD_READ") == "1";
     static int _recStartFrame;
     static string _storyKind;
+    static int _floorLogged;
     static double _nextLog;
     static double _startedAt;
     static double _lockedTime;
@@ -174,6 +175,7 @@ public static class PlaythroughRecorder
             AutoPlayer.Spawn();
             StoryUI.ReadPace = ReadPace;
             _storyKind = null;
+            _floorLogged = 0;
             if (mode == "record")
             {
                 StartRecording();
@@ -392,6 +394,16 @@ public static class PlaythroughRecorder
             }
         }
         catch (Exception) { return; }
+        // 층이 바뀐 영상 시각도 남긴다 — 영상 설명의 챕터 표를 만든다. 게임 씬에서만(타이틀·인트로의 PlayerData 는 지난 값이다).
+        if (kind != "intro" && kind != "ending" && Managers.Game != null && Managers.Game.PlayerData != null && Managers.Game.Player != null)
+        {
+            int now = Managers.Game.PlayerData.CurStageid + 1;
+            if (now != _floorLogged)
+            {
+                _floorLogged = now;
+                Debug.Log($"[Playthrough] 층 t={(Time.frameCount - _recStartFrame) / (double)Fps:0.00} {now}층");
+            }
+        }
         if (kind == _storyKind)
             return;
         double t = (Time.frameCount - _recStartFrame) / (double)Fps;
