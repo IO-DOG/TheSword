@@ -81,7 +81,8 @@ Stylized fantasy combat against monsters, in pixel art.
 The story script, the names and descriptions of monsters, bosses and traits, and the guide, help and interface text were written with the help of AI tools, as were all translations of the game's text (English, Japanese and Simplified Chinese).
 The chapter walls in the environment art were made with an AI 3D generation tool (Tripo).
 The artwork of the five chapter bosses was made with an AI image generation tool.
-The art for the twenty chapter-specific monsters was drawn in code by an AI tool (Claude), by repainting existing monster sprites or drawing new ones; no image generation model was used.
+The art for seventeen of the twenty chapter-specific monsters was drawn in code by an AI tool (Claude), by repainting existing monster sprites or drawing new ones; no image generation model was used for these.
+The art for the other three (Shell Crab, Slag Golem and Shell Centipede) was made with an AI image generation tool.
 ```
 
 사람 검수가 끝난 뒤에만 " The developers reviewed and edited them." 를 붙인다. 그림·음악 규칙은 `ko.md` 와 같다(생성 코드·스토어 글 문장은 11-05 에 뺐다 — `ko.md`).
