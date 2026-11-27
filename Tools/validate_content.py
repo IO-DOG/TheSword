@@ -249,7 +249,11 @@ def check_map_archive(json_path=None, archive_dir=None):
     path = os.path.join(archive_dir, f"MapData_{hashlib.sha256(raw).hexdigest()[:16].upper()}.json.gz")
     if not os.path.exists(path):
         return f"지금 지도의 세이브 옮기기 보관본이 없다({os.path.basename(path)}) — 다음 빌드가 만든다, 그 파일을 커밋한다(K1)"
-    if gzip.open(path).read() != raw:
+    try:
+        same = gzip.open(path).read() == raw
+    except (OSError, EOFError):            # 반쯤 받은·충돌 난 .gz — C# Archive 는 이름이 있으면 건너뛰어 저절로 안 고쳐진다
+        return f"{os.path.basename(path)} 이 깨졌다(gzip 을 못 연다) — 지우고 다시 빌드"
+    if not same:
         return f"{os.path.basename(path)} 내용이 지금 MapData 와 다르다 — 지우고 다시 빌드"
     return None
 
@@ -706,7 +710,7 @@ def main():
         errors.append(f"{floor}층: 물살·화로 층인데 레버가 {n}개 — 수문·밸브 표지가 첫 레버에 붙는다(하나여야 한다)")
     why = check_map_archive()
     if why:
-        warnings.append(why)
+        warnings.insert(0, why)            # 경고는 앞 10건만 찍힌다 — 지도를 다시 뽑은 직후엔 장식 경고가 쌓여 이것이 묻혔다
 
     # ---- 공통 프리팹
     # 문은 색x방향 여섯 종이 다 있어야 한다 — 하나라도 없으면 BuildDoor 가

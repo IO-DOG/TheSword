@@ -118,7 +118,8 @@ for md in sorted((HERE / "store").glob("*.md")):
 # ---------------------------------------------------------------- store AI 공개 (## …AI… 뒤 첫 ```text 블록) — 다섯 언어가 ko 와 같은 줄 수·같은 도구 이름
 # 한 언어만 고치고 나머지를 잊으면 스토어 페이지마다 공개가 달라진다(11-27). 줄마다의 뜻은 사람이 본다 — 여기선 줄 수와 이름만.
 def ai_lines(md):
-    m = re.search(r"^## [^\n]*AI[^\n]*\n.*?```text\n(.*?)\n```", md.read_text(encoding="utf-8"), re.S | re.M)
+    # 제목을 고정하고 그 절 안(다음 ## 전)의 첫 ```text 만 — "AI" 가 든 다른 제목이나 절 밖 블록(Meshy 등)을 잡지 않게(11-27 리뷰)
+    m = re.search(r"^## AI 사용 공개[^\n]*\n(?:(?!^## ).)*?^```text\n(.*?)\n```", md.read_text(encoding="utf-8"), re.S | re.M)
     return [l for l in m.group(1).splitlines() if l.strip()] if m else None
 
 ai_ref = ai_lines(HERE / "store" / "ko.md")
