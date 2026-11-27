@@ -46,7 +46,7 @@ public static class StoryUI
     /// 지난 대사(11-28): 이번 실행에서 뜬 대사·바크를 최근 LogMax 줄까지 기억한다(화자, 글 — 뜰 때의 언어 그대로). 메뉴의 "지난 대사"
     /// (UI_BacklogPopup)가 보인다. 저장하지 않는다 — ponytail: 끄면 사라진다, 판을 넘겨 남기려면 StorySeen 처럼 파일로.
     /// </summary>
-    const int LogMax = 80;
+    static readonly int LogMax = 80;    // const int 로 두면 FastChecks 가 문구 id 로 읽는다(이 타입의 정수 상수는 전부 문구 id 다)
     static readonly System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<string, string>> s_log =
         new System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<string, string>>();
     public static System.Collections.Generic.IReadOnlyList<System.Collections.Generic.KeyValuePair<string, string>> Log => s_log;
