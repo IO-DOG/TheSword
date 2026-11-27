@@ -573,6 +573,18 @@ public class UI_TitleScene : UI_Scene
         // 판을 넘어 남는 기록: 본 결말 수, 규칙마다 최고 점수(낮을수록 좋다, 없으면 그 줄을 뺀다), 탑의 법을 끝까지 갔다는 표시.
         // 하나라도 있어야 뜬다 — 처음 켠 사람에게 "0/3" 은 숙제일 뿐이다. 언어가 바뀌어도 여기로 온다.
         List<string> lines = new List<string>();
+        // 이어하기가 어디로 돌아가는지(11-28) — 저장된 층·레벨·체력을 체크포인트 목록과 같은 꼴(187)로. 못 읽는 저장이면 줄을 뺀다
+        // (왜 못 읽는지는 이어하기를 눌렀을 때 알린다). 읽기만 한다.
+        try
+        {
+            if (Managers.Game.HasSave && SaveStore.TryRead(SaveStore.DirectoryPath, out SaveStore.Snapshot snap, out _) && snap != null && snap.Player != null)
+                lines.Add(Managers.GetString(Define.TITLE_CONTINUE) + "  " + string.Format(Managers.GetString(UI_MenuPopup.CHECKPOINT_ROW),
+                    snap.Player.CurStageid + 1, snap.Player.Level, Mathf.CeilToInt(snap.Player.CurHP), Mathf.CeilToInt(snap.Player.MaxHP)));
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"[Title] 저장 요약을 못 읽었다: {e.Message}");
+        }
         int seen = Records.EndingsSeen;
         if (seen > 0)
             lines.Add(string.Format(Managers.GetString(ENDINGS_SEEN), seen, Records.EndingCount));
