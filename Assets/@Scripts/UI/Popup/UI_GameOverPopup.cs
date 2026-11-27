@@ -57,6 +57,10 @@ public class UI_GameOverPopup : UI_Popup
             TMP_FontAsset font = CodeUI.ProseFont;
             if (font == null)
                 return;
+            // 글 밑에 어두운 띠 — 게임오버 그림의 아래쪽(주인공의 발치·검날 끝)과 겹쳐도 읽히게. 줄 수만큼의 높이.
+            Image back = CodeUI.NewImage(transform, "RecapBack", null, new Color(0f, 0f, 0f, 0f));
+            CodeUI.Place(back.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 28f), new Vector2(1500f, lines.Count * 56f + 24f));
+            back.DOFade(0.55f, 0.4f).SetUpdate(true).SetLink(back.gameObject);
             TextMeshProUGUI text = CodeUI.NewText(transform, "Recap", font, 44f, new Color(0.88f, 0.88f, 0.88f), TextAlignmentOptions.Bottom);
             CodeUI.Place(text.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(1700f, 200f));
             text.fontSharedMaterial = CodeUI.Outlined(font, 0.25f);     // 처음 2.4초는 맵 위에 뜬다
