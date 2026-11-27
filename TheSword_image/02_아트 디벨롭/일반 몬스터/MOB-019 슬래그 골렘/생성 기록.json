@@ -1,0 +1,77 @@
+{
+    "tool":  "OpenAI built-in imagegen",
+    "author":  "Codex",
+    "date":  "2026-11-27",
+    "ai_used":  true,
+    "status":  "대기·공격·피격 애니메이션 시트 및 GIF 검토본",
+    "plan_and_terms":  "계정 플랜·상업 이용 약관 확인 전",
+    "hand_edit_notes":  "선택한 고해상도 투명 시안에서 대기·타격 포즈를 분리해 공통 배율로 86×86 RGBA에 맞췄다. 발 기준선과 공용 램프, 챕터 외곽선·포인트 색을 적용했다.",
+    "seed":  "미제공",
+    "reviewer":  "아트 승인 전",
+    "brief":  "Documents/TheSword_Art_Music_Prompts.md §3.2·3.5·4.3",
+    "outputs":  [
+                    "대기 포즈.png",
+                    "양주먹 내려찍기 포즈.png",
+                    "고해상도 시안.png"
+                ],
+    "selected_generation":  "exec-1a834ad9-c1b7-4ca9-b609-342d8765aab9.png",
+    "assets":  [
+                   {
+                       "prompt_id":  "MOB-019 KEY-IDLE + KEY-IMPACT",
+                       "id":  "exec-1a834ad9-c1b7-4ca9-b609-342d8765aab9.png",
+                       "reference_images":  [
+                                                "Assets/@Resources/Sprites/MonsterSprites/Chapter/Mob_C2_04_Idle.png",
+                                                "TheSword_image/챕터 보스/60F_엘린_잿불풀무나방/기본 자세.png"
+                                            ],
+                       "prompt":  "Use case: stylized-concept | The Sword low-resolution ordinary enemy sprites. Make a brand-new design and draw a matching pair of full-body gameplay key poses. Image 1 is the original tiny game sprite sheet, for creature identity and face direction only. Image 2 is the in-house pixel-art quality target for its chapter: crisp angular silhouettes, deep colored shadows, big balanced flat clusters and a few bright material edge highlights. Do not copy its creature or ornaments. Use bold and organic 16-bit forms with varied diagonals and anatomically sensible joints rather than rigid blocks and mirrored geometric pieces. Visible low-resolution square pixel grid is consistent, 1px ink outline, no blur, no gradients, no tiny dithering, no high-resolution illustration. The brightest pixels are small and belong to surface reflections, not neon eyes. Muted dark fantasy color with light-dark separation, cool or warm material accents. Low top-down with full front body visible (up to 15 degrees off forward). Light from top/front. Place ONLY two poses in this wide image, left idle, right contact; identical creature, anatomy, scale, and square pixel size. Both feet/bodies land on a common baseline, each half has plenty of margin and the gap between figures is fully empty. True transparent alpha. Do not add lettering, props, ground, effects or cast shadows.\nMOB-019 slag golem. Roughly 60×68 at idle. A lanky, heavy forearmed iron-slag creature forged by a dead furnace. A tall jagged shoulder on screen-right made of three broken diagonal slabs of charcoal clinker, the other shoulder should be low and broad. A small dark wedge head with an overhanging brow, wedged between shoulders, with one subdued narrow ember slit. Round-arched, recessed furnace hollow in the rib area recessed deep in dark stone with retained orange coal at the bottom, ringed by broken russet rib slabs. Angular asymmetrical slag with warm dark metal and grey planar highlights, two or three hot cracks. No humanoid armour, helmet, face smile, teeth, symmetrical robot, mechanical girders, squares in a grid, gauntlets, or belt. Knuckles of the hanging oversized uneven rocky hands reach its knees, with sturdy stone legs visibly separate. Idle planted slightly staggered and tower-like. Impact frame is a decisive full-body double ground slam, torso hinged down and forward, both fists crushing the ground together at slightly different distances from camera, weight over fists, back arched, knees bowed. Huge angular vertical change between poses. Same identifiable high shoulder, chest hollow remains visible and a little more orange as the furnace vents. Keep stone feet visible behind the hands and the overall pose narrow enough to fit one tile."
+                   }
+               ],
+    "animation":  {
+                      "tool":  "Codex · System.Drawing · Pillow GIF 인코딩",
+                      "source_frames":  [
+                                            "대기 포즈.png",
+                                            "양주먹 내려찍기 포즈.png"
+                                        ],
+                      "cell_pixels":  [
+                                          86,
+                                          86
+                                      ],
+                      "fps":  12,
+                      "ground_line_y":  85,
+                      "counts":  {
+                                     "idle":  8,
+                                     "attack":  6,
+                                     "hit":  2
+                                 },
+                      "idle_sequence":  [
+                                            "A",
+                                            "A",
+                                            "B",
+                                            "B",
+                                            "C",
+                                            "C",
+                                            "B",
+                                            "B"
+                                        ],
+                      "attack_sequence":  [
+                                              "무릎 굽혀 버팀",
+                                              "양팔 들어 올림",
+                                              "몸을 숙이며 낙하",
+                                              "양주먹 접지",
+                                              "반동",
+                                              "다시 일어섬"
+                                          ],
+                      "hit_sequence":  [
+                                           "움찔",
+                                           "제자리"
+                                       ],
+                      "art_notes":  "가슴 화구의 불빛을 대기·피격에 맞춰 조절했다. 두 주먹이 닿는 순간 바닥에서 파편이 튄다.",
+                      "preview":  "2.93초 반복. 타격과 피격을 확인하기 쉽도록 GIF의 해당 프레임을 길게 표시.",
+                      "outputs":  [
+                                      "Mob_C2_04_Idle.png",
+                                      "Mob_C2_04_Attack.png",
+                                      "Mob_C2_04_Hit.png",
+                                      "움직임.gif"
+                                  ]
+                  }
+}

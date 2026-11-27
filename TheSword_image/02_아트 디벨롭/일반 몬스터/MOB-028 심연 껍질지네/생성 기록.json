@@ -1,0 +1,84 @@
+{
+    "tool":  "OpenAI built-in imagegen",
+    "author":  "Codex",
+    "date":  "2026-11-27",
+    "ai_used":  true,
+    "status":  "대기·공격·피격 애니메이션 시트 및 GIF 검토본",
+    "plan_and_terms":  "계정 플랜·상업 이용 약관 확인 전",
+    "hand_edit_notes":  "선택한 고해상도 투명 시안에서 대기·타격 포즈를 분리해 공통 배율로 86×86 RGBA에 맞췄다. 발 기준선과 공용 램프, 챕터 외곽선·포인트 색을 적용했다.",
+    "seed":  "미제공",
+    "reviewer":  "아트 승인 전",
+    "brief":  "Documents/TheSword_Art_Music_Prompts.md §3.2·3.5·4.3",
+    "outputs":  [
+                    "대기 포즈.png",
+                    "턱 타격 포즈.png",
+                    "고해상도 시안.png"
+                ],
+    "selected_generation":  "exec-9db03803-9a15-400d-9df1-0eee74b88dfa.png",
+    "assets":  [
+                   {
+                       "prompt_id":  "MOB-028 KEY-IDLE + KEY-IMPACT",
+                       "id":  "exec-97aaf8d0-7b9b-4a2e-9aae-82206f67530f.png",
+                       "reference_images":  [
+                                                "Assets/@Resources/Sprites/MonsterSprites/Chapter/Mob_C4_03_Idle.png",
+                                                "TheSword_image/챕터 보스/100F_검은태양_왕관 일식체/기본 자세.png"
+                                            ],
+                       "prompt":  "Use case: stylized-concept | The Sword low-resolution ordinary enemy sprites. Make a brand-new design and draw a matching pair of full-body gameplay key poses. Image 1 is the original tiny game sprite sheet, for creature identity and face direction only. Image 2 is the in-house pixel-art quality target for its chapter: crisp angular silhouettes, deep colored shadows, big balanced flat clusters and a few bright material edge highlights. Do not copy its creature or ornaments. Use bold and organic 16-bit forms with varied diagonals and anatomically sensible joints rather than rigid blocks and mirrored geometric pieces. Visible low-resolution square pixel grid is consistent, 1px ink outline, no blur, no gradients, no tiny dithering, no high-resolution illustration. The brightest pixels are small and belong to surface reflections, not neon eyes. Muted dark fantasy color with light-dark separation, cool or warm material accents. Low top-down with full front body visible (up to 15 degrees off forward). Light from top/front. Place ONLY two poses in this wide image, left idle, right contact; identical creature, anatomy, scale, and square pixel size. Both feet/bodies land on a common baseline, each half has plenty of margin and the gap between figures is fully empty. True transparent alpha. Do not add lettering, props, ground, effects or cast shadows.\nMOB-028 abyssal shell centipede. This is a living lithic centipede whose obsidian armor has tapered overlapping purple-black plates like chipped flint, with small pale lilac connective tissue edges in two or three joints, sparse desaturated slate-violet reflected edge light. Reading target roughly 58×36. The head is an actual centipede head: flat insect eyeless wedge with a tiny pair of dark maroon ocelli, two slim wavy antennae curling outward, two hooked pale amber-grey venom claws attached under its tapered head. Keep a readable trail of many articulated legs attached along the whole trunk. Pose BOTH as front approach, no long side view. Idle raises the front two segments at center, then the long abdomen recedes upward behind them into depth in a very compact shallow S, the tapered rear curling to the upper right. Keep silhouette as unmistakable elongated arthropod with at least six distinct plated body segments visible despite perspective. Both sides of the body have stacks of bent legs. Impact is a low pounce muzzle-first toward the viewer, upper plates shift forward in a curved motion as antennae sweep backward, two separate open hooks are now the closest and distinct at small size, the rear keeps anchoring the pose. Preserve leg count and path of tail, and avoid copying the same front pose or only opening the mouth. No face helmet, no shark teeth, no big white cheeks or glowing eye slits, no spidery body, no humanoid chest, no purple blocks with identical horizontal seams."
+                   },
+                   {
+                       "prompt_id":  "MOB-028 KEY-IDLE + KEY-IMPACT 수정",
+                       "id":  "exec-9db03803-9a15-400d-9df1-0eee74b88dfa.png",
+                       "reference_images":  [
+                                                "exec-97aaf8d0-7b9b-4a2e-9aae-82206f67530f.png"
+                                            ],
+                       "prompt":  "Use case: identity-preserve. Redraw this The Sword centipede keypose pair with ONE correction: turn the tall tail receding directly behind the head into a much broader, lower S-curving trunk that sweeps low to screen-right and then curls backward to the left, with all legs physically attached to the sweeping body. Change the anatomy arrangement, never squash/stretch the artwork. It is a squat sweeping creature at about 58 px wide by 36 px high when reduced. It must look naturally wider than tall, target aspect ratio 1.6:1 in BOTH poses. Keep head facing the viewer at front-left and both mandible hooks, expressive thin antennae, chipped dark-violet flint scale plates with pale lavender seam accents, actual centipede legs and number of legs identical in both poses. Reinforce the motion: left idle has raised front arch and hooked mandibles drawn together, right impact has head thrust distinctly low and forward-left with wider open hooks, foreshortened head larger to viewer, body still an S shape, same exact design. Low oblique camera just above the creature, full front face and both antennae visible with sweeping segmented trunk. Crisp coarse 16-bit pixel art, flat shallow facets and dark exterior outline, matched to the input style. Two separate disjoint full-body sprites only, same size and shared bottom contact line, centered in separate halves of a wide transparent canvas. No shadow, ground, background, text, or frame."
+                   }
+               ],
+    "animation":  {
+                      "tool":  "Codex · System.Drawing · Pillow GIF 인코딩",
+                      "source_frames":  [
+                                            "대기 포즈.png",
+                                            "턱 타격 포즈.png"
+                                        ],
+                      "cell_pixels":  [
+                                          86,
+                                          86
+                                      ],
+                      "fps":  12,
+                      "ground_line_y":  85,
+                      "counts":  {
+                                     "idle":  8,
+                                     "attack":  5,
+                                     "hit":  2
+                                 },
+                      "idle_sequence":  [
+                                            "A",
+                                            "A",
+                                            "B",
+                                            "B",
+                                            "C",
+                                            "C",
+                                            "B",
+                                            "B"
+                                        ],
+                      "attack_sequence":  [
+                                              "앞마디를 감음",
+                                              "앞마디를 펴며 접근",
+                                              "턱 돌진",
+                                              "앞마디 회수",
+                                              "다시 몸을 세움"
+                                          ],
+                      "hit_sequence":  [
+                                           "움찔",
+                                           "제자리"
+                                       ],
+                      "art_notes":  "더듬이와 앞마디에 움직임을 주고, 돌진하는 턱 끝에 밝은 모서리를 더했다.",
+                      "preview":  "2.93초 반복. 타격과 피격을 확인하기 쉽도록 GIF의 해당 프레임을 길게 표시.",
+                      "outputs":  [
+                                      "Mob_C4_03_Idle.png",
+                                      "Mob_C4_03_Attack.png",
+                                      "Mob_C4_03_Hit.png",
+                                      "움직임.gif"
+                                  ]
+                  }
+}
