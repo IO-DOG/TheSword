@@ -7,6 +7,8 @@
 
 - `Build/Playtest/TheSword_Demo_<날짜>.zip` — 체험판 빌드 + 이 문서의 "2. 테스터에게" 부분(`테스터_안내.txt`). Steam 없이 켜진다.
 - 저장소에 올리지 않는다(`Build/` 는 커밋 안 함). 파일 공유(드라이브 등)로 보낸다.
+- 묶기: 체험판을 다시 구운 뒤 `python Tools/playtest_zip.py`(오늘 날짜 zip). 안내 글은 아래 2절 블록 그대로 들어간다 — 2절을 고치면 다시 묶고,
+  보내기 전에 `python Tools/playtest_zip.py --check <zip>` 이 "같다" 인지 본다.
 
 ## 2. 테스터에게 (zip 안의 `테스터_안내.txt` 와 같은 글)
 

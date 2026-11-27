@@ -5,6 +5,14 @@
 
 ---
 
+## 2026-11-27 (13시) — 플레이테스트 zip 묶기를 도구로(Tools/playtest_zip.py)
+
+- 지금까지 zip 은 회차마다 스크래치에서 손으로 묶었다 — 4시에 "아래 설문" 의 물음이 빠진 채 나간 것도 그래서다. `Tools/playtest_zip.py` 가
+  `Build/WindowsDemo` + 문서 2절 블록 그대로(BOM·CRLF)를 `Build/Playtest/TheSword_Demo_<오늘>.zip` 으로 묶고(실행 파일·어드레서블 번들이 없으면 멈춘다),
+  `--check <zip>` 은 zip 의 안내가 지금 문서와 같은지 본다.
+- 시험: 새 도구로 다시 묶은 zip 이 4시 zip 과 파일 337개 이름·CRC 까지 같다. `--check` 는 지금 zip "같다", 안내 한 줄을 바꾼 사본 "다르다"(종료 1).
+- 안내 문서 1절에 묶는 법 두 줄. 규칙 검사 13개 통과. 에디터 안 씀. 게임은 그대로.
+
 ## 2026-11-27 (12시) — Deck 문서의 그래픽 API 근거, 남은 이야기 자리 확인
 
 - 체험판 빌드 폴더에 `D3D12/D3D12Core.dll` 이 있어 `Steam/deck.md` 의 "Direct3D 11 전용" 이 틀렸나 봤다 — 맞다. 플레이어 설정의 Windows API 는
