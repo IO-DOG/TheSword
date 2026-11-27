@@ -97,6 +97,14 @@ public class UI_StoryBark : MonoBehaviour
     {
         GameManager g = Managers.Game;
         bool hidden = g == null || g.OnBattle || g.OnConversation || g.OnDirect || Managers.UI.IsPaused;
+        // 계단을 밟아 층 그림이 덮였다 — 바크는 캔버스 순서가 높아 그림 위에 그대로 떠 있었다(11-28 녹화에서 봄). 떠 있던 줄은 거기서 끝낸다.
+        if (g != null && g.GameScene != null && g.GameScene.IllustCovering)
+        {
+            hidden = true;
+            if (_shownFor >= 0f)
+                _shownFor = Hold;
+            _group.alpha = 0f;      // 그림이 0.4초에 덮는다 — 서서히 걷히면 그 위에 비친다
+        }
         if (_shownFor < 0f)
         {
             if (hidden || _queue.Count == 0)

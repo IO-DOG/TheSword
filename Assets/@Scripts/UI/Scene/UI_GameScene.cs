@@ -958,6 +958,16 @@ public class UI_GameScene : UI_Scene
         catch (Exception e) { Debug.LogException(e); }
     }
 
+    /// <summary>층 그림(로딩 삽화)이 화면을 덮고 있다 — 그 위에 뜨는 것(걸으며 한마디)이 비켜 설 때 본다.</summary>
+    public bool IllustCovering
+    {
+        get
+        {
+            Image illust = GetImage((int)Images.LoadingIllustImage);
+            return illust != null && illust.gameObject.activeInHierarchy && illust.color.a > 0.02f;
+        }
+    }
+
     public IEnumerator CoShowLoadingIllust(bool chapter = false, Action covered = null)
     {
         yield return null;
