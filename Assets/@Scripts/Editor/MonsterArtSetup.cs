@@ -32,6 +32,8 @@ public static class MonsterArtSetup
     const string ChapterDir = "Assets/@Resources/Sprites/MonsterSprites/Chapter";
 
     const float Fps = 12f;
+    // 맞는 동작은 칸마다 0.25초 — 12fps 면 두 칸이 0.17초라 타격 이펙트(약 0.3초)에 다 가렸다(11-28 녹화로 확인).
+    const float HitFps = 4f;
 
     /// <summary>클립 이름 -> 스프라이트 시트 경로.</summary>
     static Dictionary<string, string> Wanted()
@@ -58,7 +60,8 @@ public static class MonsterArtSetup
                 string[] p = Path.GetFileNameWithoutExtension(file).Split('_');   // Mob, C3, 04, Idle
                 if (p.Length != 4 || int.TryParse(p[2], out int n) == false)
                     continue;
-                string kind = p[3] == "Idle" ? "I" : p[3] == "Attack" ? "A" : null;
+                // Hit(맞는 동작)은 있는 종만 — 11-28, 오너가 올린 세 종의 두 칸 시트. 전투 카드가 맞을 때 튼다(UI_MonsterCard.PlayHit).
+                string kind = p[3] == "Idle" ? "I" : p[3] == "Attack" ? "A" : p[3] == "Hit" ? "H" : null;
                 if (kind != null)
                     map[$"Mob_{p[1]}_{kind}{n:000}"] = file.Replace('\\', '/');
             }
@@ -127,7 +130,8 @@ public static class MonsterArtSetup
                 continue;
             }
 
-            if (WriteClip($"{ClipDir}/{pair.Key}.anim", pair.Key, frames))
+            bool hit = IdleOf(pair.Key) != null && pair.Key.Contains("_H");
+            if (WriteClip($"{ClipDir}/{pair.Key}.anim", pair.Key, frames, hit ? HitFps : Fps))
                 made.Add($"{pair.Key} ({frames.Length}프레임)");
         }
 
@@ -137,7 +141,7 @@ public static class MonsterArtSetup
         int added = Register(MapController) + Register(UIController);
         added += BuildEquipDropClips();
 
-        Debug.Log($"[MonsterArt] 클립 {made.Count}개 생성/갱신, 컨트롤러에 {added}개 상태 추가");
+        Debug.Log($"[MonsterArt] 클립 {made.Count}개 생성/갱신, 컨트롤러에 상태·돌아가는 연결 {added}개 추가");
         foreach (string s in made)
             Debug.Log($"[MonsterArt]   + {s}");
         foreach (string s in missing)
@@ -182,7 +186,7 @@ public static class MonsterArtSetup
                 continue;
             }
             string clipName = $"EquipItem_{pair.Key}";
-            WriteClip($"{EquipClipDir}/{clipName}.anim", clipName, new[] { sprite });
+            WriteClip($"{EquipClipDir}/{clipName}.anim", clipName, new[] { sprite }, Fps);
             names.Add(clipName);
         }
 
@@ -310,7 +314,7 @@ public static class MonsterArtSetup
         return 0;
     }
 
-    static bool WriteClip(string path, string clipName, Sprite[] frames)
+    static bool WriteClip(string path, string clipName, Sprite[] frames, float fps)
     {
         AnimationClip clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(path);
         bool isNew = clip == null;
@@ -318,11 +322,11 @@ public static class MonsterArtSetup
             clip = new AnimationClip();
 
         clip.name = clipName;
-        clip.frameRate = Fps;
+        clip.frameRate = fps;
 
         var keys = new ObjectReferenceKeyframe[frames.Length];
         for (int i = 0; i < frames.Length; i++)
-            keys[i] = new ObjectReferenceKeyframe { time = i / Fps, value = frames[i] };
+            keys[i] = new ObjectReferenceKeyframe { time = i / fps, value = frames[i] };
 
         EditorCurveBinding binding = EditorCurveBinding.PPtrCurve("", typeof(SpriteRenderer), "m_Sprite");
         AnimationUtility.SetObjectReferenceCurve(clip, binding, keys);
@@ -373,8 +377,43 @@ public static class MonsterArtSetup
             added++;
         }
 
+        added += EnsureReturns(machine);
         if (added > 0)
             EditorUtility.SetDirty(controller);
         return added;
+    }
+
+    /// <summary>
+    /// 공격(A)·맞는(H) 상태가 한 번 돌고 제 대기(I) 상태로 돌아가게 잇는다. 손으로 만든 옛 상태(Mob_C0_A000~A007)에는 이 연결이 있었는데
+    /// 이 도구가 더한 상태에는 없어서, 챕터 전용 종은 처음 공격한 뒤 전투가 끝날 때까지 공격 동작을 되풀이했다(11-28 — 다섯·여섯 칸짜리
+    /// 새 시트에서 눈에 띄었다). 이미 연결이 있는 상태는 건드리지 않는다.
+    /// </summary>
+    static int EnsureReturns(AnimatorStateMachine machine)
+    {
+        var byName = new Dictionary<string, AnimatorState>();
+        foreach (ChildAnimatorState st in machine.states)
+            byName[st.state.name] = st.state;
+
+        int added = 0;
+        foreach (AnimatorState state in byName.Values)
+        {
+            string idle = IdleOf(state.name);
+            if (idle == null || state.transitions.Length > 0 || byName.TryGetValue(idle, out AnimatorState to) == false)
+                continue;
+            AnimatorStateTransition t = state.AddTransition(to);
+            t.hasExitTime = true;
+            t.exitTime = 1f;        // 끝 칸까지 다 보인 뒤 — 그림 바꾸기 곡선은 섞이지 않는다
+            t.duration = 0f;
+            t.hasFixedDuration = true;
+            added++;
+        }
+        return added;
+    }
+
+    /// <summary>Mob_C1_A003·Mob_C1_H003 -> Mob_C1_I003. 그 밖의 이름은 null.</summary>
+    public static string IdleOf(string state)
+    {
+        var m = System.Text.RegularExpressions.Regex.Match(state, @"^(Mob_C\d+_)[AH](\d{3})$");
+        return m.Success ? m.Groups[1].Value + "I" + m.Groups[2].Value : null;
     }
 }

@@ -218,10 +218,10 @@ public class UI_MonsterCard : UI_BaseCard
     {
         if (Quiet)
             return;
-        StartCoroutine(CoDamagedMat());
+        StartCoroutine(CoDamagedMat(PlayHit()));
     }
 
-    IEnumerator CoDamagedMat()
+    IEnumerator CoDamagedMat(string pose)
     {
         WaitForSeconds delay = new WaitForSeconds(0.1f);
         GameObject go = Managers.Resource.Instantiate("UI_CreatureCardCopyImage", GetImage((int)Images.CreatureImage).transform);
@@ -232,7 +232,7 @@ public class UI_MonsterCard : UI_BaseCard
         if (_staticArt)
             animator.enabled = false;      // 보스 그림을 몹 시트로 덮지 않는다
         else
-            animator.Play($"{_creature.IdleAnimStr}");
+            animator.Play(pose ?? _creature.IdleAnimStr);
         image.sprite = GetImage((int)Images.CreatureImage).sprite;
         image.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         image.color = Util.DamagedColor();
@@ -375,7 +375,29 @@ public class UI_MonsterCard : UI_BaseCard
             return;
         }
         string animStr = _creature.AttackAnimStr;
-        GetImage((int)Images.CreatureImage).GetComponent<Animator>().Play(animStr);
+        // 처음부터 다시 튼다 — 이름만 주면 이미 그 상태일 때(배속이 높아 앞 공격 동작이 안 끝났다) 아무 일도 안 한다.
+        GetImage((int)Images.CreatureImage).GetComponent<Animator>().Play(animStr, 0, 0f);
+    }
+
+    /// <summary>
+    /// 맞는 동작이 있는 종(Mob_C{챕터}_H{번호} — MonsterArtSetup 이 Hit 시트로 만든다)이면 튼다. 공격 동작 도중에는 끊지 않는다.
+    /// 튼 상태 이름을 준다(없으면 null) — 흰 번쩍임 사본이 같은 자세를 쓴다.
+    /// </summary>
+    string PlayHit()
+    {
+        if (_staticArt || string.IsNullOrEmpty(_creature.IdleAnimStr))
+            return null;
+        int at = _creature.IdleAnimStr.LastIndexOf("_I");
+        if (at < 0)
+            return null;
+        string hit = _creature.IdleAnimStr.Substring(0, at) + "_H" + _creature.IdleAnimStr.Substring(at + 2);
+        Animator animator = GetImage((int)Images.CreatureImage).GetComponent<Animator>();
+        if (animator == null || animator.HasState(0, Animator.StringToHash(hit)) == false)
+            return null;
+        if (string.IsNullOrEmpty(_creature.AttackAnimStr) == false && animator.GetCurrentAnimatorStateInfo(0).IsName(_creature.AttackAnimStr))
+            return null;
+        animator.Play(hit, 0, 0f);
+        return hit;
     }
 
     bool _deadHandled = false;
