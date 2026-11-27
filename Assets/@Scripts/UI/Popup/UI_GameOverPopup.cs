@@ -80,11 +80,19 @@ public class UI_GameOverPopup : UI_Popup
         var lines = new List<string>();
         GameManager g = Managers.Game;
         GameManager.CurPlayerData p = g != null ? g.PlayerData : null;
-        Data.MonsterData md;
-        if (p == null || LastBattle.Won || Managers.Data.MonsterDic.TryGetValue(LastBattle.MonsterId, out md) == false)
+        if (p == null || LastBattle.Won || LastBattle.MonsterId <= 0)
+            return lines;
+        // 이름: 표에 있는 몬스터는 표에서, 킹 슬라임·분열 슬라임(9001~, 연출이 세워 표에 없다)은 방금 싸운 상대의 자료에서
+        int nameId = 0;
+        if (Managers.Data.MonsterDic.TryGetValue(LastBattle.MonsterId, out Data.MonsterData md))
+            nameId = md.MonsterNameId;
+        else if (g.MonsterData != null && g.MonsterData.Count > 0 && g.MonsterData[0] != null)
+            nameId = g.MonsterData[0].MonsterNameId;
+        string who = nameId != 0 ? Managers.GetString(nameId) : "";
+        if (string.IsNullOrEmpty(who))
             return lines;
 
-        lines.Add(string.Format(Managers.GetString(RecapWho), p.CurStageid + 1, Managers.GetString(md.MonsterNameId)));
+        lines.Add(string.Format(Managers.GetString(RecapWho), p.CurStageid + 1, who));
 
         // 값은 마검의 외눈이 보는 것이라 계약 뒤에만 말한다. 못 쓰러뜨리는 상대(Kills 가 아님)의 값은 뜻이 없다.
         int hp = Mathf.FloorToInt(LastBattle.HpBefore);
