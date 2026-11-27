@@ -29,7 +29,7 @@ The sword's single eye shows the price of every fight. It hides only one: the pr
 [*][b]Find the ATK that saves a hit[/b]: the Monster Manual lists every species on the floor with its stats, how many are left, the price of the next fight, the hits you'll take, and "ATK +k → one hit fewer". Hover over an ATK or DEF rune to see which monsters it would make cheaper, and by how much.
 [*][b]Eight monster traits[/b]: Beast, Magic, Guardian, Immortal, Swordsman, Titan, Assassin and Armor. Assassins dodge every plain hit until a critical hit reveals them; Armored foes hide behind a shell you must break first; Titans roar back every fifth hit they take. Each chapter asks for a different answer.
 [*][b]Gauge combat you can read[/b]: both sides attack and guard automatically as their gauges fill. Critical hits aren't a dice roll. They land every Nth hit, and the count carries over from one fight to the next, so who you cut first changes the price. The HUD counts down to your next crit. You get Smash, Bulwark and Drain once each per floor: spend them on the right fights to beat the forecast.
-[*][b]Less waiting[/b]: set battle speed to 1×, 2× or 4× in the options and hold Space for 8×. Press Tab to skip a fight and pay exactly its forecast price. Boss fights always play out. Dialogue can also advance on its own at reading pace (an option).
+[*][b]Less waiting[/b]: set battle speed to 1×, 2× or 4× in the options and hold Space for 8×. Press Tab to skip a fight and pay exactly its forecast price. Boss fights always play out. An option also lets dialogue advance on its own at reading pace.
 [/list]
 
 [h2]Climb 100 floors[/h2]

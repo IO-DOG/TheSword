@@ -49,7 +49,7 @@ TEXT = {
     675: ("RB 칸 바꾸기   X 다음 장비   Y / B 닫기", "RB Next slot   X Next item   Y / B Close",
           "RB 欄を切替   X 次の装備   Y / B 閉じる", "RB 切换栏位   X 下一件装备   Y / B 关闭"),
     # 302 (UI_BacklogPopup): the stick turns pages
-    676: ("스틱 넘기기  A 닫기", "Stick page  A close", "スティック ページ送り  A 閉じる", "摇杆 翻页  A 关闭"),
+    676: ("스틱 넘기기  A 닫기", "Stick turn page  A close", "スティック ページ送り  A 閉じる", "摇杆 翻页  A 关闭"),
 }
 
 

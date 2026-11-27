@@ -9,11 +9,11 @@ TEXT = {
     # {0} = floor number, {1} = monster name
     690: ("{0}층에서 {1}에게 쓰러졌다", "Fell to {1} on floor {0}", "{0}階で{1}に倒された", "在第{0}层倒在{1}面前"),
     # second line, three parts joined with spaces by C#: price of the fight, HP at its start, the shortfall (shown in red)
-    691: ("싸움의 값 {0}", "Fight cost {0}", "戦いの値 {0}", "这一战的代价 {0}"),
+    691: ("싸움의 값 {0}", "Fight price {0}", "戦いの値段 {0}", "这一战的价码 {0}"),
     692: ("가진 체력 {0}", "Your HP {0}", "体力 {0}", "生命 {0}"),
     693: ("{0} 모자랐다", "Short by {0}", "{0} 足りなかった", "还差 {0}"),
     # potions that could be walked to without a fight or a door when the fight was started. {0} = count
-    694: ("싸우지 않고 닿는 물약 {0}개를 남겼다", "Potions left within reach: {0}", "戦わずに届く薬を {0} 個残した", "不用战斗就能拿到的药水还剩 {0} 瓶"),
+    694: ("싸우지 않고 닿는 물약 {0}개를 남겼다", "Potions left within reach: {0}", "戦わずに届くポーションを {0} 個残した", "不用战斗就能拿到的药水还剩 {0} 瓶"),
     # followed by the skill names (191-193) joined with spaces
     695: ("쓰지 않은 스킬", "Unused skills", "未使用のスキル", "未使用的技能"),
 }

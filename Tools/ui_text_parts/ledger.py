@@ -35,7 +35,7 @@ TEXT = {
     481: ("Enter 계속", "Enter continue", "Enter 続ける", "Enter 继续"),
     # band record (Records.SubmitBand): this band's score = round(1000 * paid / par) as the run card's 502 - lower is better.
     # {0} = this time / {1} = the best before this time. 483 when there was none. 484 is appended in gold when {0} beats {1}.
-    482: ("점수 {0}  지난 최고 {1}", "Score {0}  Best so far {1}", "スコア {0}  これまでの最高 {1}", "分数 {0}  此前最佳 {1}"),
+    482: ("점수 {0}  지난 최고 {1}", "Score {0}  Previous best {1}", "スコア {0}  これまでのベスト {1}", "分数 {0}  此前最佳 {1}"),
     483: ("점수 {0}  첫 기록", "Score {0}  First record", "スコア {0}  初記録", "分数 {0}  首次记录"),
     484: ("새 기록", "New best", "新記録", "新纪录"),
 
@@ -61,7 +61,7 @@ TEXT = {
     505: ("걸린 시간 {0}  쓰러짐 {1}", "Time {0}  Deaths {1}", "プレイ時間 {0}  倒れた回数 {1}", "用时 {0}  倒下 {1} 次"),
     # UI_LedgerPopup (the menu's mid-run ledger): labels in front of star counts and of the per-band best-stars rows
     506: ("이번 판", "This run", "今回", "本局"),
-    507: ("최고", "Best", "最高", "最佳"),
+    507: ("최고", "Best", "ベスト", "最佳"),
 }
 
 
