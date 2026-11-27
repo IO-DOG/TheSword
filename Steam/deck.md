@@ -88,5 +88,5 @@ Steamworks → App Admin → Application → **Steam Input** 에서:
 | 터치스크린 | 지원하지 않는다. 시험하지 않았다. 터치가 마우스 클릭처럼 들어갈 수는 있지만 가리키기(툴팁)는 안 된다 | 괜찮다(필수가 아니다) |
 | 글자 입력 | 이름 입력 같은 것이 없다 | 해당 없음 |
 | 런처·안티치트·동영상 | 없다 | 해당 없음 |
-| 그래픽 API | Direct3D 11 전용 → Deck 에서는 Proton 의 DXVK | 실기에서 확인 |
+| 그래픽 API | Direct3D 11 전용(플레이어 설정 Windows API = Direct3D11 하나, 11-26 체험판 실행 로그 "Direct3D 11.0") → Deck 에서는 Proton 의 DXVK. 빌드 폴더의 `D3D12/D3D12Core.dll` 은 Unity 가 늘 같이 넣는 것이라 D3D12 를 쓴다는 뜻이 아니다 | 실기에서 확인 |
 | 프레임 제한 | 게임에 fps 상한이 없다(VSync 끄면 무제한) | Deck 은 시스템 제한기로 막을 수 있다 |
