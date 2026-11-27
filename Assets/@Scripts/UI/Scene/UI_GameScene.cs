@@ -488,6 +488,9 @@ public class UI_GameScene : UI_Scene
     {
         if (isOpenInfoPopup || CanShowTooltip() == false)
             return;
+        // 완주 영상을 찍는 동안(읽는 속도)은 띄우지 않는다 — 에디터의 마우스가 우연히 놓인 자리의 몬스터 설명이 영상에 떴다(11-28 예행 13:15).
+        if (StoryUI.ReadPace)
+            return;
 
         if (Pointed(_mask, out Collider pointed, out Vector3 at))
         {
