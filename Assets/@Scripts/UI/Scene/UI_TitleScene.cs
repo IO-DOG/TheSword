@@ -579,7 +579,8 @@ public class UI_TitleScene : UI_Scene
         {
             if (Managers.Game.HasSave && SaveStore.TryRead(SaveStore.DirectoryPath, out SaveStore.Snapshot snap, out _) && snap != null && snap.Player != null)
                 lines.Add(Managers.GetString(Define.TITLE_CONTINUE) + "  " + string.Format(Managers.GetString(UI_MenuPopup.CHECKPOINT_ROW),
-                    snap.Player.CurStageid + 1, snap.Player.Level, Mathf.CeilToInt(snap.Player.CurHP), Mathf.CeilToInt(snap.Player.MaxHP)));
+                    snap.Player.CurStageid + 1, snap.Player.Level, Mathf.CeilToInt(snap.Player.CurHP), Mathf.CeilToInt(snap.Player.MaxHP))
+                    + (snap.Player.Mode == GameMode.Tower ? "  <color=#FF8068>" + Managers.GetString(MODE_TOWER) + "</color>" : ""));    // 탑의 법으로 하던 판이면 그 표시
         }
         catch (System.Exception e)
         {
