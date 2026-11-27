@@ -115,6 +115,24 @@ for md in sorted((HERE / "store").glob("*.md")):
     else:
         print(f"OK  store/{md.name} 짧은 설명 {len(m.group(1).strip())}자")
 
+# ---------------------------------------------------------------- store AI 공개 (## …AI… 뒤 첫 ```text 블록) — 다섯 언어가 ko 와 같은 줄 수·같은 도구 이름
+# 한 언어만 고치고 나머지를 잊으면 스토어 페이지마다 공개가 달라진다(11-27). 줄마다의 뜻은 사람이 본다 — 여기선 줄 수와 이름만.
+def ai_lines(md):
+    m = re.search(r"^## [^\n]*AI[^\n]*\n.*?```text\n(.*?)\n```", md.read_text(encoding="utf-8"), re.S | re.M)
+    return [l for l in m.group(1).splitlines() if l.strip()] if m else None
+
+ai_ref = ai_lines(HERE / "store" / "ko.md")
+for md in sorted((HERE / "store").glob("*.md")):
+    got = ai_lines(md)
+    if got is None or ai_ref is None:
+        fail(f"store/{md.name}: AI 공개 블록이 없다")
+    elif len(got) != len(ai_ref):
+        fail(f"store/{md.name}: AI 공개 {len(got)}줄 != ko {len(ai_ref)}줄")
+    elif any((tool in " ".join(got)) != (tool in " ".join(ai_ref)) for tool in ("Tripo", "Meshy", "Claude")):
+        fail(f"store/{md.name}: AI 공개의 도구 이름(Tripo·Meshy·Claude)이 ko 와 다르다")
+    else:
+        print(f"OK  store/{md.name} AI 공개 {len(got)}줄")
+
 # ---------------------------------------------------------------- SteamPipe 스크립트
 for vdf in sorted((HERE / "scripts").glob("app_build_*.vdf")):
     for depot in re.findall(r'"(depot_build_[^"]+\.vdf)"', vdf.read_text(encoding="utf-8")):
