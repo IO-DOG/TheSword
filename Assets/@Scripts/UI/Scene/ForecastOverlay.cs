@@ -89,7 +89,8 @@ public class ForecastOverlay : MonoBehaviour
     Material _material;
     UI_GameScene _hudScene;
     readonly Rect[] _hud = new Rect[2];     // 왼쪽 위 HUD 가 차지한 자리(층 이름 판, 배부름 줄)
-    readonly Rect[] _side = new Rect[4];    // 화면 옆 HUD(UI_GameScene.SideHud — 열쇠 칸 묶음 하나 + 단추 셋)
+    readonly Rect[] _bottom = new Rect[4];  // 왼쪽 아래 HUD 글자(UI_GameScene.BottomHud — 레벨·치명까지·방패·스킬)
+    readonly Rect[] _side = new Rect[5];    // 화면 옆 HUD(UI_GameScene.SideHud — 열쇠 칸 묶음 하나 + 단추 넷)
     bool _dirty = true;
     bool _visible;
     bool _setting;                  // GameSettings.ShowForecast. PlayerPrefs 를 매 프레임 읽지 않게 들고 있는다
@@ -538,6 +539,7 @@ public class ForecastOverlay : MonoBehaviour
             _hudScene = GetComponentInParent<UI_GameScene>();
         int huds = _hudScene != null ? _hudScene.TopLeftHud(_hud) : 0;
         int sides = _hudScene != null ? _hudScene.SideHud(_side) : 0;
+        int bottoms = _hudScene != null ? _hudScene.BottomHud(_bottom) : 0;
         _placing.Sort(_leftFirst);
         for (int i = 0; i < _placing.Count; i++)
         {
@@ -546,6 +548,20 @@ public class ForecastOverlay : MonoBehaviour
             // 화면 왼쪽·오른쪽 끝에 걸친 몬스터의 숫자가 반쯤 잘렸다("-10" 이 "10" 으로) — 화면 안에 붙든다.
             float half = label.Size.x * 0.5f * scale;
             at.x = Mathf.Clamp(at.x, half, Screen.width - half);
+            // 화면 옆 HUD 뒤에 가린 숫자는 먼저 화면 안쪽으로 뺀다 — 그래야 아래의 겹침 풀기가 옮긴 자리로 견준다
+            // (비킨 숫자끼리 한 자리에 겹쳤다: 6층 열쇠 칸 옆의 "-9" 와 "+0", 14층 가방 단추 옆의 "-16" 와 "+0").
+            ClearOfSideHud(ref at, half, label.Size.y * scale, Gap * scale, sides);
+            // 화면 아래쪽에 선 몬스터의 숫자가 왼쪽 아래 HUD 글자("LEVEL", "치명까지", 남은 스킬)에 얹혔다(35·72·82층) — 그 글자 위로 올린다.
+            // 겹침 풀기보다 먼저 해야 올린 자리로 견준다. 두 번 도는 것은 한 글자를 비킨 자리가 옆 글자일 수 있어서다.
+            for (int pass = 0; pass < 2; pass++)
+            {
+                for (int h = 0; h < bottoms; h++)
+                {
+                    Rect r = _bottom[h];
+                    if (at.x + half > r.xMin && at.x - half < r.xMax && at.y < r.yMax && at.y + label.Size.y * scale > r.yMin)
+                        at.y = r.yMax + Gap * scale;
+                }
+            }
             // ponytail: 먼저 놓인 모두와 견준다(n²) — 한 층에 열 남짓이다. 수십이 되면 x 로 정렬돼 있으니 가까운 것만 보면 된다.
             // 올릴 때마다 처음부터 다시 본다. 늘 위로만 가니 끝난다.
             for (int j = 0; j < i; j++)
@@ -569,19 +585,9 @@ public class ForecastOverlay : MonoBehaviour
                 if (at.x + half > r.xMin - pad && at.x - half < r.xMax + pad && at.y + label.Size.y * scale > r.yMin && at.y < r.yMax)
                     at.y = r.yMin - label.Size.y * scale;
             }
-            // 화면 옆 HUD 뒤에 반쯤 가린 숫자는 화면 안쪽으로 뺀다 — 왼쪽 열쇠 칸(60층: 화면 왼쪽 끝 몬스터의 "-65" 가 "-6" 으로 보였다),
-            // 오른쪽 아래 워프·마검·가방 단추(74층: "-185" 가 "85"). 두 번 도는 것은 한 단추를 비킨 자리가 옆 단추일 수 있어서다.
-            // ponytail: 옮긴 자리가 다른 숫자와 겹치는지는 안 본다 — 화면 구석의 일이다.
-            for (int pass = 0; pass < 2; pass++)
-            {
-                for (int h = 0; h < sides; h++)
-                {
-                    Rect r = _side[h];
-                    if (at.x - half < r.xMax && at.x + half > r.xMin && at.y < r.yMax && at.y + label.Size.y * scale > r.yMin)
-                        at.x = r.center.x < Screen.width * 0.5f ? r.xMax + half + Gap * scale : r.xMin - half - Gap * scale;
-                }
-            }
-            at.x = Mathf.Clamp(at.x, half, Screen.width - half);    // 아주 좁은 창에서 반대쪽 끝을 넘지 않게
+            // 위로 올리거나 HUD 밑으로 내린 자리가 화면 옆 HUD 의 높이에 새로 걸렸을 수 있다 — 한 번 더 뺀다.
+            // ponytail: 이 두 번째에서 옮겨진 자리는 다른 숫자와 다시 견주지 않는다 — 앞에서 이미 비킨 것이 또 걸리는 드문 경우다.
+            ClearOfSideHud(ref at, half, label.Size.y * scale, Gap * scale, sides);
             // 위 끝·HUD 에 막혀 내려온 자리가 먼저 놓인 숫자와 다시 겹칠 수 있다(54층 — 맨 윗줄 물약의 "+0" 과 그 아래 박쥐의 "-89" 가
             // 둘 다 위 끝에 붙어 한 덩어리였다). 그때는 둘 중 아래(남쪽) 것을 밑으로 내린다 — 위의 것이 윗자리를 가져야 누구 값인지 읽힌다.
             // 늘 아래로만 가니 끝난다(guard 는 만일의 맴돌이 막이).
@@ -617,6 +623,25 @@ public class ForecastOverlay : MonoBehaviour
                 label.Rect.position = label.At;
             }
         }
+    }
+
+    /// <summary>
+    /// 화면 옆 HUD 뒤에 반쯤 가린 숫자를 화면 안쪽으로 뺀다 — 왼쪽 열쇠 칸(60층: 화면 왼쪽 끝 몬스터의 "-65" 가 "-6" 으로 보였다),
+    /// 오른쪽 아래 워프·마검·가방 단추(74층: "-185" 가 "85"), 오른쪽 위 설정 단추(9·14·16·18층). 두 번 도는 것은 한 단추를 비킨 자리가
+    /// 옆 단추일 수 있어서다.
+    /// </summary>
+    void ClearOfSideHud(ref Vector3 at, float half, float height, float gap, int sides)
+    {
+        for (int pass = 0; pass < 2; pass++)
+        {
+            for (int h = 0; h < sides; h++)
+            {
+                Rect r = _side[h];
+                if (at.x - half < r.xMax && at.x + half > r.xMin && at.y < r.yMax && at.y + height > r.yMin)
+                    at.x = r.center.x < Screen.width * 0.5f ? r.xMax + half + gap : r.xMin - half - gap;
+            }
+        }
+        at.x = Mathf.Clamp(at.x, half, Screen.width - half);    // 아주 좁은 창에서 반대쪽 끝을 넘지 않게
     }
 
     // 둘 다 가운데 아래(피벗 0.5, 0)에 선다. 가로는 글자 너비 + 틈, 세로는 글자 높이로 잰다.

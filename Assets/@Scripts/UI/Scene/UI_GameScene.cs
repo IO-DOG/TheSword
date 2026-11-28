@@ -773,8 +773,8 @@ public class UI_GameScene : UI_Scene
     }
 
     /// <summary>
-    /// 화면 옆 HUD 가 차지하는 화면 자리 — 왼쪽 열쇠 칸(켜진 것만 묶어서 하나), 오른쪽 아래 워프·마검·가방 단추(켜진 것마다).
-    /// 맵 위 예측 숫자가 그 뒤에 가리지 않게 비키는 데 쓴다(ForecastOverlay). into 는 넷 이상.
+    /// 화면 옆 HUD 가 차지하는 화면 자리 — 왼쪽 열쇠 칸(켜진 것만 묶어서 하나), 오른쪽 아래 워프·마검·가방 단추와 오른쪽 위 설정 단추(켜진 것마다).
+    /// 맵 위 예측 숫자가 그 뒤에 가리지 않게 비키는 데 쓴다(ForecastOverlay). into 는 다섯 이상.
     /// </summary>
     public int SideHud(Rect[] into)
     {
@@ -796,6 +796,37 @@ public class UI_GameScene : UI_Scene
         n = AddButton(into, n, Images.MainUIWarpAImage, Images.MainUIWarpBImage);
         n = AddButton(into, n, Images.MainUISwordAImage, Images.MainUISwordBImage);
         n = AddButton(into, n, Images.MainUIInventoryAImage, Images.MainUIInventoryBImage);
+        n = AddButton(into, n, Images.MainUIOptionAImage, Images.MainUIOptionBImage);     // 오른쪽 위 설정 단추
+        return n;
+    }
+
+    /// <summary>
+    /// 화면 왼쪽 아래 HUD 의 글자(레벨, "치명까지", 방패 준비, 남은 스킬)가 실제로 찍힌 화면 자리 — 켜진 것마다. 맵 위 예측 숫자가
+    /// 그 글자에 얹히지 않게 위로 비키는 데 쓴다(ForecastOverlay). into 는 넷 이상.
+    /// </summary>
+    public int BottomHud(Rect[] into)
+    {
+        int n = 0;
+        n = AddText(into, n, GetText((int)Texts.PlayerLevelText));
+        n = AddText(into, n, _critText);
+        n = AddText(into, n, _guardText);
+        n = AddText(into, n, _skillText);
+        return n;
+    }
+
+    static int AddText(Rect[] into, int n, TMP_Text text)
+    {
+        if (text == null || text.gameObject.activeInHierarchy == false || string.IsNullOrEmpty(text.text) || n >= into.Length)
+            return n;
+        if (text.textInfo == null || text.textInfo.characterCount == 0)
+            return n;
+        Bounds b = text.textBounds;     // 틀이 아니라 찍힌 글자만큼(로컬)
+        Vector3 lo = text.transform.TransformPoint(b.min), hi = text.transform.TransformPoint(b.max);
+        Rect r = Rect.MinMaxRect(Mathf.Min(lo.x, hi.x), Mathf.Min(lo.y, hi.y), Mathf.Max(lo.x, hi.x), Mathf.Max(lo.y, hi.y));
+        // 메시가 아직 안 짜인 글은 헛값을 준다 — 화면보다 큰 상자면 버린다(모든 숫자를 밀어 올린다).
+        if (r.width <= 0f || r.height <= 0f || r.width > Screen.width || r.height > Screen.height)
+            return n;
+        into[n++] = r;
         return n;
     }
 
