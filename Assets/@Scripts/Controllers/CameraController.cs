@@ -143,6 +143,8 @@ public class CameraController : MonoBehaviour
     //        go.transform.localScale = new Vector3(_goOriginScale.x, _goOriginScale.y * _scaleMultiplier, _goOriginScale.z);
     //}
 
+    const float BossHeadroom = 0.3f;    // 보스 그림 위로 남기는 자리(머리 위 예측 숫자·층 이름)
+
     public void SetupCameraConfiner()
     {
         // 여기서 터지면 부르는 쪽(포탈 워프)이 통째로 죽어서 플레이어가 새 맵으로
@@ -183,6 +185,20 @@ public class CameraController : MonoBehaviour
         {
             Debug.LogWarning($"[Camera] {curDungeonName} 의 범위를 잴 수 없어 경계를 그대로 둔다");
             return;
+        }
+
+        // 맵 윗변 가까이 선 챕터 보스는 그림 위쪽이 화면 밖으로 잘린다 — 20층 종뿔사슴은 셋째 줄에 서서 뿔·종이 잘리고
+        // 얼굴이 화면 맨 윗줄(층 이름 밑)에 걸렸다(11-28 오너 "잘 안 보이고"·"얼굴이 안 보이는 거 같음", 그림의 위 36%).
+        // 그림 위끝이 보일 만큼만 범위를 북쪽으로 늘린다. 살아 있는 보스만 — 쓰러뜨린 뒤 다시 오면 늘리지 않는다.
+        // 카메라가 60도로 내려다보니 높이 y 는 바닥의 y/√3 만큼 북쪽에 그려진다.
+        foreach (MonsterController mc in dungeon.GetComponentsInChildren<MonsterController>(false))
+        {
+            SpriteRenderer sr = BossArt.IsChapterBoss(mc.id) ? mc.GetComponent<SpriteRenderer>() : null;
+            if (sr == null)
+                continue;
+            float seenZ = sr.bounds.max.z + sr.bounds.max.y / Mathf.Sqrt(3) + BossHeadroom;
+            if (seenZ > area.max.z)
+                area.SetMinMax(area.min, new Vector3(area.max.x, area.max.y, seenZ));
         }
 
         if (confinerCollider != null)
