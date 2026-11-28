@@ -1,5 +1,7 @@
 # 스토어 문구 — 영어 (english)
 
+**스토어 이름**(2026-11-28 오너 결정 — README 0절 A안): `The Sword: Tower of the Hungry Blade` — 기본 이름 — 스토어·라이브러리·검색의 기준. 로고는 "THE SWORD" 그대로, 부제만 얹는다.
+
 붙일 곳: 스토어 페이지 관리 → **설명** 탭, 언어 = English. 기본 언어라서 다른 언어에 빈칸이 있으면 이 글이 대신 뜬다.
 규칙·태그·콘텐츠 설문 메모·줄마다의 근거는 `ko.md` 와 같다(태그는 언어별로 따로 없다). 게임 안 이름은 ScriptData 의 영어와 맞췄다
 (Forecast·Monster Manual·Foretold/Paid/Par·Altar·The Sword's Ledger·Tower's Law·Warpstone Ring·Smash/Bulwark/Drain).
