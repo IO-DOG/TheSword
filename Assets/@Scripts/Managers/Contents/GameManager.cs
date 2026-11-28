@@ -371,6 +371,11 @@ public class GameManager
 
             map.transform.position = new Vector3(count * 100, 0f, 0f);
             Maps.Add(i, map);
+            // 손수 만든 층의 몬스터(보스·연출이 세우는 놈은 뺀다)는 제 Start 에서 칸 가운데·바닥 위로 옮겨 선다 — 프리팹은 남쪽으로 0.1 내려 세워 두었다
+            if (MapBuilder.IsHandAuthored(dungeonId))
+                foreach (MonsterController mc in map.GetComponentsInChildren<MonsterController>(true))
+                    if (mc.GetType() == typeof(MonsterController) && mc.CompareTag("Boss") == false)
+                        mc.SeatOnStart = true;
             BindKingSlime(map);
             RefreshMap(i);
             count++;

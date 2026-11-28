@@ -31,6 +31,27 @@ public static class BossArt
         return true;
     }
 
+    /// <summary>
+    /// 맵에 선 챕터 보스에 빛 하나(11-28 오너 "종뿔사슴은 잘 안 보이고"). 보스 그림은 조명을 받는 재질이라 챕터의 어두운 조명 아래에서
+    /// 벽에 묻혔다 — 몸이 가늘고 잿빛인 종뿔사슴은 거의 안 보였다. 몸 앞(카메라 쪽) 위에서 비춘다: 0.4 앞·세기 2.5 는 하얗게 날아갔고
+    /// 세기 0.55 는 티가 안 났다. 보스 밑에 달아 쓰러지면 같이 꺼진다. 층마다 하나뿐이라(보스 층 다섯) 값이 싸다.
+    /// 트랜스폼이 다 선 뒤(MonsterController.Init)에 부른다 — 자리를 월드 기준으로 잡는다(보스는 세로 배율이 2 다).
+    /// </summary>
+    public static void Glow(Transform boss)
+    {
+        if (boss == null || boss.Find("BossGlow") != null)
+            return;
+        GameObject go = new GameObject("BossGlow");
+        go.transform.SetParent(boss, false);
+        go.transform.position = boss.position + new Vector3(0f, 0.7f, -1.0f);
+        Light light = go.AddComponent<Light>();
+        light.type = LightType.Point;
+        light.range = 2.8f;
+        light.intensity = 1.4f;
+        light.color = new Color(1f, 0.94f, 0.82f);
+        light.shadows = LightShadows.None;
+    }
+
     const float BreathSeconds = 0.6f;
     static System.Collections.Generic.Dictionary<int, Sprite> s_raised;
 

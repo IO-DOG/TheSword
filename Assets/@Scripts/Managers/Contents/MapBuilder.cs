@@ -696,6 +696,55 @@ public static class MapBuilder
     }
 
     /// <summary>
+    /// 손수 만든 1~4층의 몬스터를 제 칸에 세운다(11-28 오너 "몬스터가 땅에 박혀 있다"). 그 층은 프리팹이라 이 클래스의 조립을 지나지 않는다.
+    /// (가) 그림 아래끝이 뿌리보다 낮은 시트(크로우 — 0.67)는 몸이 통째로 바닥 밑에 그려졌고,
+    /// (나) 프리팹이 몬스터를 칸 가운데에서 남쪽으로 0.1 내려 세워(콜라이더만 칸 가운데) 남쪽 벽 윗면에 발치가 가렸다 — 작은 놈은 몸의 43%.
+    /// 뿌리(그림·애니메이터가 붙은 곳)를 칸 가운데·바닥 위로 옮기고 <b>콜라이더는 있던 자리에 둔다</b> — 걸음·길찾기·부딪힘은 한 칸도 달라지지 않는다.
+    /// MonsterController.Init 이 대기 동작을 튼 뒤에 부른다(프리팹에 박힌 그림은 전부 슬라임이라 그 전에는 잴 수 없다).
+    /// </summary>
+    public static void SeatHandmade(GameObject go)
+    {
+        if (go == null)
+            return;
+        SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
+        if (sr == null)
+            return;
+        // 방금 튼 대기 동작의 그림으로 — 컬링이 걸린 몬스터는 한 번도 안 그려졌으면 Update 를 불러도 그림을 안 넣는다(SitOnFloor 와 같은 함정).
+        // 1~4층은 한꺼번에 지어져 대부분 화면 밖이다. 이 한 번만 컬링을 풀고 돌린 뒤 되돌린다.
+        Animator anim = go.GetComponent<Animator>();
+        if (anim != null && anim.isActiveAndEnabled)
+        {
+            AnimatorCullingMode cull = anim.cullingMode;
+            anim.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            anim.Update(0f);
+            anim.cullingMode = cull;
+        }
+        if (sr.sprite == null)
+            return;
+
+        // 칸을 차지한 보통 몬스터만 — 콜라이더가 꺼져 있거나 없는 놈(연출이 다루는 킹 슬라임 등)은 프리팹이 세운 그대로 둔다
+        BoxCollider col = go.GetComponent<BoxCollider>();
+        if (col == null || col.enabled == false || col.bounds.size.x < 0.01f)
+            return;
+        Vector3 colWorld = col.transform.TransformPoint(col.center);
+        Vector3 pos = go.transform.position;
+
+        // (가) 그려진 아래끝을 바닥(프리팹이 세운 높이)에
+        float low = float.MaxValue;
+        foreach (Vector2 v in sr.sprite.vertices)
+            low = Mathf.Min(low, v.y);
+        float bottom = go.transform.TransformPoint(new Vector3(0f, low, 0f)).y;
+        if (bottom < pos.y - 0.01f)
+            pos.y += pos.y - bottom;
+        // (나) 칸 가운데로 — 콜라이더가 칸 가운데에 있다
+        if (Mathf.Abs(colWorld.z - pos.z) < Define.TILE_SIZE * 0.5f)
+            pos.z = colWorld.z;
+
+        go.transform.position = pos;
+        col.center = col.transform.InverseTransformPoint(colWorld);
+    }
+
+    /// <summary>
     /// 그림의 아래끝을 바닥에 앉힌다.
     ///
     /// 스프라이트의 피벗이 가운데라 그대로 놓으면 절반이 바닥에 묻힌다. 그림마다

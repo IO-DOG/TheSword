@@ -120,9 +120,16 @@ public class MonsterController : MonoBehaviour
         if (BossArt.Of(id) == null)
             // 같은 종 셋이 한 박자로 까딱이면 복사해 붙인 것처럼 보인다 — 대기 동작을 id 마다 다른 자리에서 시작한다(11-28). 같은 id 는 늘 같은 자리다.
             GetComponent<Animator>().Play($"{Managers.Data.MonsterDic[id].IdleAnimStr}", 0, Mathf.Repeat(id * 0.37f, 1f));
+        else
+            BossArt.Glow(transform);    // 맵의 챕터 보스를 비추는 빛 하나
         GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>(Managers.Data.MonsterDic[id].Shadow);
         //id = 1;
+        if (SeatOnStart)
+            MapBuilder.SeatHandmade(gameObject);
     }
+
+    /// <summary>손수 만든 1~4층의 프리팹 몬스터다 — 대기 동작을 튼 뒤 제 칸·바닥 위에 세운다(GameManager.GenerateMap 이 켠다, MapBuilder.SeatHandmade).</summary>
+    [System.NonSerialized] public bool SeatOnStart;
 
     private void Start()
     {

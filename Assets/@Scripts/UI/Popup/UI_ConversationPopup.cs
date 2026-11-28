@@ -43,8 +43,10 @@ public class UI_ConversationPopup : UI_Popup
     }
 
     const float ChoiceGuard = 0.6f;         // 선택지가 뜬 뒤 이 시간 동안은 누르지 않는다 — 대사를 넘기던 Enter 연타가 고르지 않게
-    const float BossBodyHeight = 460f;      // 보스 초상화에서 그려진 몸의 키 (캔버스 단위)
-    const float BossBodyWidth = 620f;       // 넓은 놈(검은 태양)은 이 폭에서 멈춘다
+    // 11-28 오너 "보스랑 대화할 때 보스들의 크기가 좀 작아" — 460·620 일 때 사슴 3배·검은 태양 2배(화면 키의 3~4할)로 데미안 초상의 절반이었다.
+    // 대화 상자 위 빈 자리(약 600)에 정수 배로 들어가는 가장 큰 값: 사슴·소라·나방·고래 4배, 검은 태양 3배.
+    const float BossBodyHeight = 620f;      // 보스 초상화에서 그려진 몸의 키 (캔버스 단위)
+    const float BossBodyWidth = 760f;       // 넓은 놈(나방)은 이 폭에서 멈춘다
     const float BossFromRight = 480f;       // 화면 오른끝에서 몸 한가운데까지 — 대화 상자 오른끝 안쪽에 선다
     const float BossDimFloor = 0.75f;       // 보스가 곁에 설 때(남이 말할 때)의 가장 어두운 밝기
     static readonly Color Dim = new Color(0.5f, 0.5f, 0.5f, 1f);
@@ -471,6 +473,9 @@ public class UI_ConversationPopup : UI_Popup
 
     void SetRightSword(Image right)
     {
+        Outline rim = right.GetComponent<Outline>();     // 보스 초상의 어두운 띠(SetRightBoss)
+        if (rim != null)
+            rim.enabled = false;
         if (_bossAnim != null)
             _bossAnim.enabled = false;
         right.gameObject.SetActive(true);
@@ -511,6 +516,14 @@ public class UI_ConversationPopup : UI_Popup
             _bossAnim.Update(0f);       // Play 만으로는 이 프레임에 그림이 바뀌지 않는다
         }
         right.preserveAspect = true;
+        // 몸 둘레에 어두운 띠 — 종뿔사슴처럼 옅고 가는 놈이 밝은 바닥 위에서 배경에 묻혔다(11-28 오너 "잘 안 보인다"). 마검 차례에는 끈다(SetRightSword).
+        Outline rim = right.GetComponent<Outline>();
+        if (rim == null)
+            rim = right.gameObject.AddComponent<Outline>();
+        rim.effectColor = new Color(0f, 0f, 0f, 0.7f);
+        rim.effectDistance = new Vector2(5f, -5f);
+        rim.useGraphicAlpha = true;
+        rim.enabled = true;
         // 색조는 색만 입히고 밝기는 빼지 않는다. ForBoss 가 0.8 을 곱해서 원래 검은 놈(잿빛 파수꾼)은 어두운 바닥에 묻혔고,
         // 데미안 차례에 반으로 더 어두워지면 거의 사라졌다. 곁에 설 때도 BossDimFloor 밑으로는 내리지 않는다.
         _rightColor = AtLeast(MonsterTint.Of(id), 1f);
