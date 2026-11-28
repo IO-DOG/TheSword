@@ -121,7 +121,10 @@ public class MonsterController : MonoBehaviour
             // 같은 종 셋이 한 박자로 까딱이면 복사해 붙인 것처럼 보인다 — 대기 동작을 id 마다 다른 자리에서 시작한다(11-28). 같은 id 는 늘 같은 자리다.
             GetComponent<Animator>().Play($"{Managers.Data.MonsterDic[id].IdleAnimStr}", 0, Mathf.Repeat(id * 0.37f, 1f));
         else
+        {
             BossArt.Glow(transform);    // 맵의 챕터 보스를 비추는 빛 하나
+            BossSeeThrough.Attach(gameObject);     // 주인공이 그림 뒤(북쪽)에 서면 비쳐 보인다
+        }
         GetComponent<SpriteRenderer>().material = Managers.Resource.Load<Material>(Managers.Data.MonsterDic[id].Shadow);
         //id = 1;
         if (SeatOnStart)

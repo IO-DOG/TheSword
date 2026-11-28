@@ -547,6 +547,7 @@ public class UI_MonsterCard : UI_BaseCard
         // GetComponentInChildren 으로 찾는다). 루트만 보면 못 찾아 그대로 남는다.
         StripColliders(Managers.Game.Monster.gameObject);
         Managers.Game.Monster.gameObject.GetComponent<Animator>().Play("Stop");
+        BossSeeThrough.Stop(Managers.Game.Monster.gameObject);    // 비치던 보스는 제 재질로 되돌리고 끈다 — 아래 복사본이 꺼진 채로 복사된다
         SpriteRenderer sr = Managers.Game.Monster.gameObject.GetOrAddComponent<SpriteRenderer>();
         sr.material = Managers.Resource.Load<Material>("PaintWhiteMat");
         sr.color = Util.DamagedColor();
