@@ -62,6 +62,9 @@ TEXT = {
     # UI_LedgerPopup (the menu's mid-run ledger): labels in front of star counts and of the per-band best-stars rows
     506: ("이번 판", "This run", "今回", "本局"),
     507: ("최고", "Best", "ベスト", "最佳"),
+    # UI_LedgerPopup: the band still open — {0}-{1} its floors. Followed by 471 with the band's sums so far, the stars it would
+    # get if it closed now, and 472 (the thresholds in HP for the par fought so far).
+    508: ("{0}~{1}층 지금까지", "Floors {0}-{1} so far", "{0}〜{1}階 ここまで", "第{0}~{1}层 至今"),
 }
 
 
@@ -78,7 +81,7 @@ if __name__ == "__main__":
         return {int(u) for u in re.findall(r"m_Unicode: (\d+)", table)}
 
     args = {470: 2, 471: 3, 472: 2, 473: 1, 474: 0, 475: 1, 476: 1, 477: 0, 478: 1, 479: 1, 480: 0, 481: 0, 482: 2, 483: 1, 484: 0,
-            490: 3, 491: 1, 492: 0, 500: 0, 501: 2, 502: 1, 503: 0, 504: 1, 505: 2, 506: 0, 507: 0}
+            490: 3, 491: 1, 492: 0, 500: 0, 501: 2, 502: 1, 503: 0, 504: 1, 505: 2, 506: 0, 507: 0, 508: 2}
     assert set(args) == set(TEXT), set(args) ^ set(TEXT)
     fonts = {name: glyphs(name) for name in ("Silver SDF", "DNFBitBitv2 SDF")}
     for sid, values in TEXT.items():

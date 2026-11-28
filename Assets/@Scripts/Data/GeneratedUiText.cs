@@ -227,6 +227,7 @@ public static class GeneratedUiText
             case 505: return new[] { "Time {0}  Deaths {1}", "걸린 시간 {0}  쓰러짐 {1}", "Time {0}  Deaths {1}", "プレイ時間 {0}  倒れた回数 {1}", "用时 {0}  倒下 {1} 次" }[language >= 0 && language <= 4 ? language : 0];
             case 506: return new[] { "This run", "이번 판", "This run", "今回", "本局" }[language >= 0 && language <= 4 ? language : 0];
             case 507: return new[] { "Best", "최고", "Best", "ベスト", "最佳" }[language >= 0 && language <= 4 ? language : 0];
+            case 508: return new[] { "Floors {0}-{1} so far", "{0}~{1}층 지금까지", "Floors {0}-{1} so far", "{0}〜{1}階 ここまで", "第{0}~{1}层 至今" }[language >= 0 && language <= 4 ? language : 0];
             case 530: return new[] { "Choose the rules", "규칙을 고르세요", "Choose the rules", "ルールを選んでください", "请选择规则" }[language >= 0 && language <= 4 ? language : 0];
             case 531: return new[] { "Normal", "보통", "Normal", "ノーマル", "普通" }[language >= 0 && language <= 4 ? language : 0];
             case 532: return new[] { "Recommended for your first climb. Potions leave some room for error.", "처음이라면 이쪽을 권합니다. 물약에 여유가 있습니다.", "Recommended for your first climb. Potions leave some room for error.", "初めてならこちらがおすすめです。ポーションに余裕があります。", "初次攀登推荐选择此项。药水较为充裕。" }[language >= 0 && language <= 4 ? language : 0];

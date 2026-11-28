@@ -12,7 +12,7 @@ using UnityEngine.UI;
 public class UI_LedgerPopup : UI_Popup
 {
     const int CardTitle = 500, CardExtra = 501, CardScore = 502, CardLower = 503, CardChapter = 504, CardTime = 505;
-    const int ThisRun = 506, Best = 507;
+    const int ThisRun = 506, Best = 507, BandSoFar = 508;
     const int ContinueKey = 481;
 
     const float Width = 1000f, Pad = 32f;
@@ -85,6 +85,22 @@ public class UI_LedgerPopup : UI_Popup
         int seconds = Mathf.Max(0, Mathf.RoundToInt(Mathf.Max(Managers.Game.PlayTime, PlayerPrefs.GetFloat("PLAYTIME", 0f))));
         Line(root, prose, 26f, Soft, ref y, 36f).text = string.Format(Managers.GetString(CardTime),
             $"{seconds / 3600}:{seconds % 3600 / 60:00}:{seconds % 60:00}", PlayerPrefs.GetInt("DEATHCOUNT", 0));
+
+        // 지금 띠(11-28): 결산은 띠를 닫는 순간에만 떠서, 닫기 전에 "이대로면 별 몇 개" 를 볼 곳이 없었다. 이 띠에서 지금까지 싸운 것만으로
+        // 결산 창과 같은 셈·같은 말로 잰다(문턱은 지금까지의 기준에 대한 HP). 아직 기준을 매긴 싸움이 없으면 줄을 뺀다.
+        int open = run.FloorStage / SwordLedger.BandFloors;
+        if (run.BandPar > 0 && run.BandStars.Count <= open)
+        {
+            int first = open * SwordLedger.BandFloors;
+            SwordLedger.StarLimits(first + SwordLedger.BandFloors - 1, out int great, out int good);
+            y -= 10f;
+            Line(root, number, 26f, Ink, ref y, 38f).text =
+                $"<color=#F0D28A>{string.Format(Managers.GetString(BandSoFar), first + 1, first + SwordLedger.BandFloors)}</color>  "
+                + string.Format(Managers.GetString(UI_TallyPopup.TotalsText), run.BandForetold, run.BandPaid, run.BandPar)
+                + "  " + UI_TallyPopup.StarText(SwordLedger.Stars(run.BandPaid, run.BandPar, great, good));
+            Line(root, number, 20f, Soft, ref y, 30f).text =
+                string.Format(Managers.GetString(UI_TallyPopup.StarsLegend), run.BandPar * good / 100, run.BandPar * great / 100);
+        }
 
         // 별 합계: 이번 판(닫은 띠) / 지금까지의 최고(규칙마다)
         int sum = 0, max = 0;

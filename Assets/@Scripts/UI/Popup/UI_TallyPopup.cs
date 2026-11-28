@@ -21,7 +21,7 @@ public class UI_TallyPopup : UI_Popup
     // 문구 (Tools/ui_text_parts/ledger.py)
     public const int TitleText = 470;       // {0}~{1}층 결산
     public const int TotalsText = 471;      // 예언 {0}  치름 {1}  기준 {2}
-    const int StarsLegend = 472;
+    public const int StarsLegend = 472;
     const int BandScore = 482, BandFirst = 483, BandNewBest = 484;
     const int NextText = 473;               // 다음 다섯 층: {0}
     const int AltarTitle = 474;
