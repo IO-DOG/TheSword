@@ -522,7 +522,7 @@ Unity.exe -projectPath . -executeMethod MapDecoSetup.Build
 
 **스킬(강타·철벽·흡혈)은 층마다 한 번씩이다**(`BattleSkills`). 처음 오는 층에 들어설 때 다시 찬다 — `PortalController.LoadingAndWarp`
 가 체크포인트(`EnterFloor`)보다 먼저 `RefillForFloor` 를 부른다. 다녀온 층(내려가기·워프)으로는 안 찬다. 쓴 것은
-`CurPlayerData.SkillsUsed`(비트)라 체크포인트에 같이 남고, HUD 체력 칸 위에 이 층에 남은 스킬이 보인다. 예전에는 전투마다
+`CurPlayerData.SkillsUsed`(비트)라 체크포인트에 같이 남고, HUD 체력 칸 위에 이 층에 남은 스킬이 보인다. 전투창의 스킬 칸은 눌러도 쓴다(11-28, `UI_BattlePopup.TryUseSkill` — 키 1·2·3 과 같은 문. 마우스만 쥔 사람은 누를 길이 없었다). 예전에는 전투마다
 찼는데, 시작하자마자 셋을 누르면 싸움값이 기준의 5% 로 떨어져 별·점수가 "스킬을 눌렀나" 로 갈렸다(재미 검증 v2 R1).
 예측은 그대로 스킬 없이 잰다. `LastBattle.SkillsUsed` 는 그 싸움에서 실제로 쓴 것만이다(`BattleSkills.Use`).
 

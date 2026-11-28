@@ -305,6 +305,30 @@ App Admin → Application → **Steam Cloud** [S9].
 - [ ] **한국 등급(GRAC)**: Steam 은 한국 자체등급 사업자가 아니어서 직접 받아야 한다고 조사됐다(r04, 게임메카 2025 보도 — 직접 확인하지 않았다).
       소규모 개발사는 수수료 감면이 있다고 한다. 신청 전에 게임물관리위원회에서 확인한다.
 
+### 7.1 접근성 기능 설문 (Store Page → Basic Info → Accessibility Feature Wizard) [S20]
+
+스토어 페이지에 표시되고 검색 필터로도 쓰인다. 마법사가 묻는 대로 답하면 되고, 아래는 지금 빌드(2026-11-28) 기준으로 미리 채운 답이다.
+**"예" 는 게임에서 확인한 것만** 적었다 — 기능을 더하거나 빼면 이 표부터 고친다.
+
+| 분류 | 항목 | 답 | 근거 |
+|---|---|---|---|
+| Gameplay | Adjustable Difficulty | 오너 판단 | 새 게임에서 보통 / 탑의 법을 고른다. 판 도중에는 못 바꾼다 |
+| Gameplay | Save Anytime | 아니오 | 저장은 층 입구 체크포인트(자동)뿐이다 |
+| Audio | Custom Volume Controls | 예 | 설정에 전체·배경음·효과음 슬라이더(각각 0 까지) |
+| Audio | Narrated Game Menus · Stereo · Surround · Captions | 아니오 | 읽어 주기 없음, 방향을 알려 주는 소리 없음. 음성이 없어 대사는 전부 글이다(자막 항목이 아니라 본문) |
+| Visual | Adjustable Text Size | 아니오 | 글자 크기 설정이 없다(작은 화면에서 창을 키우는 것은 자동) |
+| Visual | Subtitle Options | 아니오 | 대사 창은 고정 꼴이다(화자 이름·어두운 바탕은 늘 있다) |
+| Visual | Color Alternatives | 예 | 열쇠·문은 색마다 모양 표지(● ▲ ◆), 계단은 ⇧ ⇩, 싸움 값은 숫자·못 이기면 ✖ — 색만으로 알리는 핵심 정보가 없다 |
+| Visual | Contrast Controls | 아니오 | |
+| Visual | Camera Comfort | 예 | 설정의 "화면 흔들림" 끄기, "번쩍임 줄이기"(11-28). 카메라 흔들림·모션 블러는 원래 없다 |
+| Visual | Playable without Vision | 아니오 | |
+| Input | Keyboard Only Option | 예 | 타이틀·메뉴·이동·전투·제단·결말 선택까지 키보드만으로 된다(패드도 같다) |
+| Input | Mouse Only Option | 확인 뒤 | 클릭 이동·창 클릭·메뉴 단추·전투의 스킬 칸(11-28 부터 눌러진다)은 된다. **처음부터 끝까지 마우스만으로** 한 판 해 본 적은 없다 — 확인하고 답한다(11-28 10:14 빌드에는 스킬 칸 클릭이 아직 없다) |
+| Input | Touch Only Option | 아니오 | |
+| Input | Playable without Quick Time Events | 예 | 때맞춰 눌러야 하는 입력이 없다(전투는 자동, 스킬은 선택) |
+| Input | Playable at Your Own Pace | 오너 판단 | 탐험은 시간 압박이 없다. 전투는 자동으로 흐르고 스킬은 그 싸움이 도는 동안 누른다(전투 속도 1배, 메뉴로 멈춤은 된다) |
+| Input | Chat Text-to-speech · Speech-to-text | 해당 없음 | 채팅이 없다 |
+
 ## 8. 가격 (D2 — 소유자 결정)
 
 같은 장르의 Steam 가격(Steam 스토어, 2026-09-30 수집):
@@ -364,4 +388,5 @@ App Admin → Application → **Steam Cloud** [S9].
 - [S17] 태그 — https://partner.steamgames.com/doc/store/tags
 - [S18] Content Survey — https://partner.steamgames.com/doc/gettingstarted/contentsurvey · 독일 — https://partner.steamgames.com/doc/gettingstarted/contentsurvey/germany
 - [S19] Valve 발표 "Localizing your game's presence on Steam"(언어별 게임 이름) — https://steamcdn-a.akamaihd.net/steamcommunity/public/images/steamworks_docs/english/LocalizingYourGamesPresenceonSteam.pdf
+- [S20] 접근성 기능 — https://partner.steamgames.com/doc/accessibility_features (2026-11-28 읽음)
 - 내부: MASTER_PLAN §1·§7·§8·§10, 조사 r04(Steam), r07(완성도), `Tools/story/GLOSSARY.md`

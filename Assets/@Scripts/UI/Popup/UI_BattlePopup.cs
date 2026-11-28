@@ -231,6 +231,10 @@ public class UI_BattlePopup : UI_Popup
             int skill = i;
             PromptText.Set(CodeUI.Fit(label, 14f), () => $"<color=#F0D28A>{PromptText.SkillKey(skill)}</color>  {Managers.GetString(SkillTextIds[skill])}");
 
+            // 칸을 눌러도 쓴다(11-28) — 클릭 이동으로 마우스만 쥐고 하는 사람은 1·2·3 을 누를 길이 없었다. 키와 같은 문을 지난다.
+            slot.raycastTarget = true;
+            slot.gameObject.BindEvent(() => TryUseSkill(skill));
+
             _skillSlots[i] = slot.gameObject.AddComponent<CanvasGroup>();
             _skillPainted[i] = !BattleSkills.IsUsed(i);     // 처음 한 번은 반드시 칠한다
         }
@@ -360,15 +364,20 @@ public class UI_BattlePopup : UI_Popup
             Skip();
             return;
         }
-        if (BattleSkills.Unlocked == false || Managers.Game.OnBattle == false || Managers.UI.IsPaused)
-            return;
-
         if (GameKeys.Down(KeyCode.Alpha1))
-            BattleSkills.Use((int)BattleSkills.Kind.Smash, playerCard, monsterCard);
+            TryUseSkill((int)BattleSkills.Kind.Smash);
         else if (GameKeys.Down(KeyCode.Alpha2))
-            BattleSkills.Use((int)BattleSkills.Kind.Guard, playerCard, monsterCard);
+            TryUseSkill((int)BattleSkills.Kind.Guard);
         else if (GameKeys.Down(KeyCode.Alpha3))
-            BattleSkills.Use((int)BattleSkills.Kind.Drain, playerCard, monsterCard);
+            TryUseSkill((int)BattleSkills.Kind.Drain);
+    }
+
+    // 스킬 하나를 쓴다 — 키(1·2·3)와 스킬 칸 클릭이 같이 지나는 문. 치명타 수업이 전투를 세워 둔 동안·전투 밖·메뉴가 떠 있는 동안은 받지 않는다.
+    void TryUseSkill(int kind)
+    {
+        if (StoryDirector.HoldsBattle || BattleSkills.Unlocked == false || Managers.Game.OnBattle == false || Managers.UI.IsPaused)
+            return;
+        BattleSkills.Use(kind, playerCard, monsterCard);
     }
 
     public void RaisePlayerGuard() => _battle?.Guard(true);
