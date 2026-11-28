@@ -143,6 +143,7 @@ public class CameraController : MonoBehaviour
     //        go.transform.localScale = new Vector3(_goOriginScale.x, _goOriginScale.y * _scaleMultiplier, _goOriginScale.z);
     //}
 
+    const float TopHeadroom = 0.24f;    // 생성 층 맨 윗줄 위로 남기는 자리(바닥 거리 — 화면에서 62px. 주인공 머리 위 체력바)
     const float BossHeadroom = 0.3f;    // 보스 그림 위로 남기는 자리(머리 위 예측 숫자·층 이름)
 
     public void SetupCameraConfiner()
@@ -186,6 +187,12 @@ public class CameraController : MonoBehaviour
             Debug.LogWarning($"[Camera] {curDungeonName} 의 범위를 잴 수 없어 경계를 그대로 둔다");
             return;
         }
+
+        // 생성 층은 범위 위끝이 맨 윗줄 벽의 북쪽 변이라, 둘째 줄에 서면 발에서 화면 위끝까지 125px(1080p)뿐이다 — 주인공 머리가 화면 끝에
+        // 붙고 머리 위 체력바가 화면 밖이었다(5·13층은 입구가 그 줄이라 들어서자마자, 11-28). 체력바가 들어올 만큼만 북쪽으로 늘린다.
+        // 손수 만든 1~4층은 도입부 연출에 맞춰져 있어 그대로 둔다(생성 층에도 바닥 그림 Decos/BG 가 있다 — 그것으로 가르면 안 된다).
+        if (MapBuilder.IsHandAuthored(info.DungeonID) == false)
+            area.SetMinMax(area.min, area.max + Vector3.forward * TopHeadroom);
 
         // 맵 윗변 가까이 선 챕터 보스는 그림 위쪽이 화면 밖으로 잘린다 — 20층 종뿔사슴은 셋째 줄에 서서 뿔·종이 잘리고
         // 얼굴이 화면 맨 윗줄(층 이름 밑)에 걸렸다(11-28 오너 "잘 안 보이고"·"얼굴이 안 보이는 거 같음", 그림의 위 36%).

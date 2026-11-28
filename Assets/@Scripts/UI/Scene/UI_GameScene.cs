@@ -747,6 +747,31 @@ public class UI_GameScene : UI_Scene
         _towerBadge.color = new Color32(255, 128, 104, 255);
     }
 
+    static readonly Vector3[] s_corners = new Vector3[4];
+
+    /// <summary>
+    /// 왼쪽 위 HUD(층 이름 판, 그 밑 배부름 줄)가 차지하는 화면 자리 — 위에서 아래 순서. 맵 위 예측 숫자가 그 글자에 얹히지 않게
+    /// 비키는 데 쓴다(ForecastOverlay). 배부름 줄은 틀(620)이 아니라 실제로 찍힌 글자만큼만 센다.
+    /// </summary>
+    public int TopLeftHud(Rect[] into)
+    {
+        int n = 0;
+        RectTransform name = GetText((int)Texts.MainUIMapNameText).transform.parent as RectTransform;
+        if (name != null && name.gameObject.activeInHierarchy)
+        {
+            name.GetWorldCorners(s_corners);
+            into[n++] = Rect.MinMaxRect(s_corners[0].x, s_corners[0].y, s_corners[2].x, s_corners[2].y);
+        }
+        if (_fullnessText != null && _fullnessText.gameObject.activeInHierarchy && string.IsNullOrEmpty(_fullnessText.text) == false)
+        {
+            _fullnessText.rectTransform.GetWorldCorners(s_corners);     // [1] = 왼쪽 위 (글은 TopLeft 정렬)
+            float k = _fullnessText.rectTransform.lossyScale.x;
+            into[n++] = Rect.MinMaxRect(s_corners[1].x, s_corners[1].y - _fullnessText.renderedHeight * k,
+                                        s_corners[1].x + _fullnessText.renderedWidth * k, s_corners[1].y);
+        }
+        return n;
+    }
+
     static TMP_Text HudLine(Transform after, string name, TMP_FontAsset font, float size, Vector2 pos, Vector2 box)
     {
         TextMeshProUGUI text = CodeUI.NewText(after.parent, name, font, size, Color.white, TextAlignmentOptions.TopLeft);

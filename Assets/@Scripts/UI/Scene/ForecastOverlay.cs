@@ -85,6 +85,8 @@ public class ForecastOverlay : MonoBehaviour
     Canvas _canvas;
     TMP_FontAsset _font;
     Material _material;
+    UI_GameScene _hudScene;
+    readonly Rect[] _hud = new Rect[2];     // 왼쪽 위 HUD 가 차지한 자리(층 이름 판, 배부름 줄)
     bool _dirty = true;
     bool _visible;
     bool _setting;                  // GameSettings.ShowForecast. PlayerPrefs 를 매 프레임 읽지 않게 들고 있는다
@@ -518,11 +520,17 @@ public class ForecastOverlay : MonoBehaviour
         // 같은 종 셋이 한 줄로 선다(층마다 앞 세 자리). 숫자가 칸보다 넓으면 옆 숫자에 붙어 "-42 -42 -42" 가
         // 한 덩어리로 읽혔다. 왼쪽부터 놓고, 먼저 놓인 것과 겹치면 그 위로 올린다 — 셋이면 아래·위·아래로 엇갈린다.
         // 줌을 바꾸지 않는 한 순서와 겹침이 그대로라 카메라가 따라가도 흔들리지 않는다.
+        if (_hudScene == null)
+            _hudScene = GetComponentInParent<UI_GameScene>();
+        int huds = _hudScene != null ? _hudScene.TopLeftHud(_hud) : 0;
         _placing.Sort(_leftFirst);
         for (int i = 0; i < _placing.Count; i++)
         {
             Label label = _placing[i];
             Vector3 at = label.Want;
+            // 화면 왼쪽·오른쪽 끝에 걸친 몬스터의 숫자가 반쯤 잘렸다("-10" 이 "10" 으로) — 화면 안에 붙든다.
+            float half = label.Size.x * 0.5f * scale;
+            at.x = Mathf.Clamp(at.x, half, Screen.width - half);
             // ponytail: 먼저 놓인 모두와 견준다(n²) — 한 층에 열 남짓이다. 수십이 되면 x 로 정렬돼 있으니 가까운 것만 보면 된다.
             // 올릴 때마다 처음부터 다시 본다. 늘 위로만 가니 끝난다.
             for (int j = 0; j < i; j++)
@@ -536,6 +544,14 @@ public class ForecastOverlay : MonoBehaviour
             }
             // 보스는 덩치 2 라(MapBuilder.MonsterBulk) 화면 위쪽에 서면 머리 위 숫자가 화면 밖으로 나갔다 — 위 가장자리 안에 붙든다.
             at.y = Mathf.Min(at.y, Screen.height - label.Size.y * scale);
+            // 왼쪽 위 HUD(층 이름·배부름 줄) 글자 위에 숫자가 얹혀 둘 다 안 읽혔다(6·10층) — 그 자리면 HUD 밑으로 내린다(제 몸에 조금 얹힌다).
+            // ponytail: 내린 자리가 먼저 놓인 숫자와 겹치는지는 다시 안 본다 — 구석 한 곳이다. 겹치는 층이 보이면 위 루프로 돌려보낸다.
+            for (int h = 0; h < huds; h++)
+            {
+                Rect r = _hud[h];
+                if (at.x + half > r.xMin && at.x - half < r.xMax && at.y + label.Size.y * scale > r.yMin && at.y < r.yMax)
+                    at.y = r.yMin - label.Size.y * scale;
+            }
             if ((at - label.Last).sqrMagnitude > 0.01f || float.IsNaN(label.Last.x))
             {
                 label.Last = at;
