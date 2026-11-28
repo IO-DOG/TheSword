@@ -232,8 +232,9 @@ public class CameraController : MonoBehaviour
 
     public static IEnumerator CoExposure(float time, Exposure exposure)
     {
-        if (exposure == Exposure.White && GameSettings.ReduceFlash)     // 하얗게 올리는 쪽만 뺀다 — 되돌리는 쪽(Default)은 그대로 돌아야 한다
-            yield break;
+        // 번쩍임 줄이기: 하얗게 올리는 대신 보통 밝기로 간다 — 그냥 건너뛰면 앞 신호가 어둡게 둔 화면이 "하얗게" 에서도 검은 채 남는다
+        if (exposure == Exposure.White && GameSettings.ReduceFlash)
+            exposure = Exposure.Default;
         Volume postProcessingVolume = Managers.Game.MainCamera.GetComponent<Volume>();
         ColorAdjustments colorAdjustment;
 

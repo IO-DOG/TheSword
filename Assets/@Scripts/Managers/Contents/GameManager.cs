@@ -979,6 +979,11 @@ public class GameManager
             SaveMigration.Apply(snapshot, Managers.Data.MapDic);
     }
 
+    /// <summary>이어하기가 읽을 체크포인트를 읽기만 한다(타이틀의 한 줄 요약) — 이어하기와 같은 검사(규칙 표·지도 해시·옛 지도 옮기기)를 지나야 준다.
+    /// 검사 없이 읽으면 이어하기가 거절할 저장을 "51층 Lv 62" 로 내걸었다. 디스크는 건드리지 않는다.</summary>
+    public bool TryPeekSave(out SaveStore.Snapshot snapshot) =>
+        SaveStore.TryRead(SaveStore.DirectoryPath, out snapshot, out _, ValidateCheckpoint) && snapshot != null && snapshot.Player != null;
+
     /// <summary>체크포인트를 불러 지금 판에 입힌다. file 이 null 이면 Checkpoint.json(없으면 .bak),
     /// 아니면 SaveStore.History 가 준 층별 사본. 읽지 못하면 아무것도 바꾸지 않고 false.</summary>
     public bool LoadGame(string file = null)

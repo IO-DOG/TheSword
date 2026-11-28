@@ -577,7 +577,7 @@ public class UI_TitleScene : UI_Scene
         // (왜 못 읽는지는 이어하기를 눌렀을 때 알린다). 읽기만 한다.
         try
         {
-            if (Managers.Game.HasSave && SaveStore.TryRead(SaveStore.DirectoryPath, out SaveStore.Snapshot snap, out _) && snap != null && snap.Player != null)
+            if (Managers.Game.HasSave && Managers.Game.TryPeekSave(out SaveStore.Snapshot snap))
                 lines.Add(Managers.GetString(Define.TITLE_CONTINUE) + "  " + string.Format(Managers.GetString(UI_MenuPopup.CHECKPOINT_ROW),
                     snap.Player.CurStageid + 1, snap.Player.Level, Mathf.CeilToInt(snap.Player.CurHP), Mathf.CeilToInt(snap.Player.MaxHP))
                     + (snap.Player.Mode == GameMode.Tower ? "  <color=#FF8068>" + Managers.GetString(MODE_TOWER) + "</color>" : ""));    // 탑의 법으로 하던 판이면 그 표시
