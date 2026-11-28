@@ -772,22 +772,47 @@ public class UI_GameScene : UI_Scene
         return n;
     }
 
-    /// <summary>왼쪽 열쇠 칸(켜진 것만 묶어서)이 차지하는 화면 자리 — 맵 위 예측 숫자가 그 뒤에 가리지 않게 비키는 데 쓴다(ForecastOverlay).</summary>
-    public bool KeyHud(out Rect area)
+    /// <summary>
+    /// 화면 옆 HUD 가 차지하는 화면 자리 — 왼쪽 열쇠 칸(켜진 것만 묶어서 하나), 오른쪽 아래 워프·마검·가방 단추(켜진 것마다).
+    /// 맵 위 예측 숫자가 그 뒤에 가리지 않게 비키는 데 쓴다(ForecastOverlay). into 는 넷 이상.
+    /// </summary>
+    public int SideHud(Rect[] into)
     {
-        area = default;
+        int n = 0;
+        Rect keys = default;
         bool any = false;
         for (int id = (int)GameObjects.GreenKey; id <= (int)GameObjects.RedKey; id++)
         {
             GameObject slot = GetObject(id);
-            if (slot == null || slot.activeInHierarchy == false)
+            if (slot == null || slot.activeInHierarchy == false || slot.transform is RectTransform == false)
                 continue;
-            ((RectTransform)slot.transform).GetWorldCorners(s_corners);
-            Rect r = Rect.MinMaxRect(s_corners[0].x, s_corners[0].y, s_corners[2].x, s_corners[2].y);
-            area = any ? Rect.MinMaxRect(Mathf.Min(area.xMin, r.xMin), Mathf.Min(area.yMin, r.yMin), Mathf.Max(area.xMax, r.xMax), Mathf.Max(area.yMax, r.yMax)) : r;
+            Rect r = ScreenRect((RectTransform)slot.transform);
+            keys = any ? Rect.MinMaxRect(Mathf.Min(keys.xMin, r.xMin), Mathf.Min(keys.yMin, r.yMin), Mathf.Max(keys.xMax, r.xMax), Mathf.Max(keys.yMax, r.yMax)) : r;
             any = true;
         }
-        return any;
+        if (any && n < into.Length)
+            into[n++] = keys;
+        // 단추는 보통 그림(A)과 눌린 그림(B)이 같은 자리에 번갈아 켜진다.
+        n = AddButton(into, n, Images.MainUIWarpAImage, Images.MainUIWarpBImage);
+        n = AddButton(into, n, Images.MainUISwordAImage, Images.MainUISwordBImage);
+        n = AddButton(into, n, Images.MainUIInventoryAImage, Images.MainUIInventoryBImage);
+        return n;
+    }
+
+    int AddButton(Rect[] into, int n, Images a, Images b)
+    {
+        Image image = GetImage((int)a);
+        if (image == null || image.gameObject.activeInHierarchy == false)
+            image = GetImage((int)b);
+        if (image != null && image.gameObject.activeInHierarchy && n < into.Length)
+            into[n++] = ScreenRect(image.rectTransform);
+        return n;
+    }
+
+    static Rect ScreenRect(RectTransform rt)
+    {
+        rt.GetWorldCorners(s_corners);
+        return Rect.MinMaxRect(s_corners[0].x, s_corners[0].y, s_corners[2].x, s_corners[2].y);
     }
 
     static TMP_Text HudLine(Transform after, string name, TMP_FontAsset font, float size, Vector2 pos, Vector2 box)

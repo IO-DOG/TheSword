@@ -89,6 +89,7 @@ public class ForecastOverlay : MonoBehaviour
     Material _material;
     UI_GameScene _hudScene;
     readonly Rect[] _hud = new Rect[2];     // 왼쪽 위 HUD 가 차지한 자리(층 이름 판, 배부름 줄)
+    readonly Rect[] _side = new Rect[4];    // 화면 옆 HUD(UI_GameScene.SideHud — 열쇠 칸 묶음 하나 + 단추 셋)
     bool _dirty = true;
     bool _visible;
     bool _setting;                  // GameSettings.ShowForecast. PlayerPrefs 를 매 프레임 읽지 않게 들고 있는다
@@ -536,8 +537,7 @@ public class ForecastOverlay : MonoBehaviour
         if (_hudScene == null)
             _hudScene = GetComponentInParent<UI_GameScene>();
         int huds = _hudScene != null ? _hudScene.TopLeftHud(_hud) : 0;
-        Rect keyHud = default;
-        bool keys = _hudScene != null && _hudScene.KeyHud(out keyHud);
+        int sides = _hudScene != null ? _hudScene.SideHud(_side) : 0;
         _placing.Sort(_leftFirst);
         for (int i = 0; i < _placing.Count; i++)
         {
@@ -569,10 +569,19 @@ public class ForecastOverlay : MonoBehaviour
                 if (at.x + half > r.xMin - pad && at.x - half < r.xMax + pad && at.y + label.Size.y * scale > r.yMin && at.y < r.yMax)
                     at.y = r.yMin - label.Size.y * scale;
             }
-            // 왼쪽 열쇠 칸 뒤에 반쯤 가린 숫자(60층 — 화면 왼쪽 끝 몬스터의 "-65" 가 "-6" 으로 보였다)는 칸 오른쪽으로 뺀다.
-            // ponytail: 옮긴 자리가 다른 숫자와 겹치는지는 안 본다 — 열쇠 칸 옆 한 곳이다.
-            if (keys && at.x - half < keyHud.xMax && at.x + half > keyHud.xMin && at.y < keyHud.yMax && at.y + label.Size.y * scale > keyHud.yMin)
-                at.x = keyHud.xMax + half + Gap * scale;
+            // 화면 옆 HUD 뒤에 반쯤 가린 숫자는 화면 안쪽으로 뺀다 — 왼쪽 열쇠 칸(60층: 화면 왼쪽 끝 몬스터의 "-65" 가 "-6" 으로 보였다),
+            // 오른쪽 아래 워프·마검·가방 단추(74층: "-185" 가 "85"). 두 번 도는 것은 한 단추를 비킨 자리가 옆 단추일 수 있어서다.
+            // ponytail: 옮긴 자리가 다른 숫자와 겹치는지는 안 본다 — 화면 구석의 일이다.
+            for (int pass = 0; pass < 2; pass++)
+            {
+                for (int h = 0; h < sides; h++)
+                {
+                    Rect r = _side[h];
+                    if (at.x - half < r.xMax && at.x + half > r.xMin && at.y < r.yMax && at.y + label.Size.y * scale > r.yMin)
+                        at.x = r.center.x < Screen.width * 0.5f ? r.xMax + half + Gap * scale : r.xMin - half - Gap * scale;
+                }
+            }
+            at.x = Mathf.Clamp(at.x, half, Screen.width - half);    // 아주 좁은 창에서 반대쪽 끝을 넘지 않게
             // 위 끝·HUD 에 막혀 내려온 자리가 먼저 놓인 숫자와 다시 겹칠 수 있다(54층 — 맨 윗줄 물약의 "+0" 과 그 아래 박쥐의 "-89" 가
             // 둘 다 위 끝에 붙어 한 덩어리였다). 그때는 둘 중 아래(남쪽) 것을 밑으로 내린다 — 위의 것이 윗자리를 가져야 누구 값인지 읽힌다.
             // 늘 아래로만 가니 끝난다(guard 는 만일의 맴돌이 막이).
