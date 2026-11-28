@@ -27,6 +27,7 @@ public class ForecastOverlay : MonoBehaviour
     const float FontSize = 24f;
     const float Lift = 4f;          // 그림 윗변에서 띄우는 거리 (캔버스 단위)
     const float Gap = 4f;           // 이웃 숫자 사이 (캔버스 단위)
+    const float HudPad = 24f;       // 왼쪽 위 HUD 글자와 숫자 사이 가로 여백 (캔버스 단위)
     const float CountTime = 0.6f;   // 값이 바뀌면 옛 값에서 새 값까지 세는 시간 (실시간)
     const float MarkTime = 1.2f;    // ▼▲ 가 옅어져 사라질 때까지 (실시간)
     // 값이 바뀐 순간의 짧은 소리 — 대사 글자 소리(0.1초)를 빌린다. 음높이가 바뀌어도 딸깍이다.
@@ -549,7 +550,9 @@ public class ForecastOverlay : MonoBehaviour
             for (int h = 0; h < huds; h++)
             {
                 Rect r = _hud[h];
-                if (at.x + half > r.xMin && at.x - half < r.xMax && at.y + label.Size.y * scale > r.yMin && at.y < r.yMax)
+                // 옆에 딱 붙어도 한 글로 읽힌다(26층 — 배부름 줄 "(+0)" 바로 옆의 물약 "+0" 이 "(+0)+0") — 가로로 HudPad 만큼 띄운다.
+                float pad = HudPad * scale;
+                if (at.x + half > r.xMin - pad && at.x - half < r.xMax + pad && at.y + label.Size.y * scale > r.yMin && at.y < r.yMax)
                     at.y = r.yMin - label.Size.y * scale;
             }
             if ((at - label.Last).sqrMagnitude > 0.01f || float.IsNaN(label.Last.x))
