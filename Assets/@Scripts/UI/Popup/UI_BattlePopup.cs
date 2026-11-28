@@ -358,7 +358,10 @@ public class UI_BattlePopup : UI_Popup
             _skipButton.SetActive(CanSkip);
         // 치명타 수업(StoryDirector)이 전투를 세워 두고 말하는 동안은 키도 받지 않는다 — 시계는 멈췄는데 스킬만 들어가면 안 된다.
         if (StoryDirector.HoldsBattle)
+        {
+            _heldAt = Time.unscaledTime;
             return;
+        }
         if (GameKeys.Down(KeyCode.Tab) && CanSkip)
         {
             Skip();
@@ -373,8 +376,13 @@ public class UI_BattlePopup : UI_Popup
     }
 
     // 스킬 하나를 쓴다 — 키(1·2·3)와 스킬 칸 클릭이 같이 지나는 문. 치명타 수업이 전투를 세워 둔 동안·전투 밖·메뉴가 떠 있는 동안은 받지 않는다.
+    float _heldAt = -1f;    // 치명타 수업이 전투를 세워 두던 마지막 순간
+
     void TryUseSkill(int kind)
     {
+        // 수업의 마지막 줄을 스킬 칸 위에서 클릭으로 넘기면, 누름은 대사를 닫고 뗌은 칸의 클릭이 되어 스킬까지 나간다 — 수업이 풀린 직후 0.3초는 받지 않는다
+        if (Time.unscaledTime - _heldAt < 0.3f)
+            return;
         if (StoryDirector.HoldsBattle || BattleSkills.Unlocked == false || Managers.Game.OnBattle == false || Managers.UI.IsPaused)
             return;
         BattleSkills.Use(kind, playerCard, monsterCard);
