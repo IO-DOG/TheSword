@@ -134,7 +134,7 @@ DOTween Pro 도 2026-11-05 에 뺐다 — Pro 컴포넌트(`DOTweenAnimation`·`
 `BossArt.Apply` 가 맵(`MapBuilder.SetupLook`)·전투 카드(`UI_MonsterCard`)·대화 초상(`SetRightBoss`)·도감에서 애니메이터를 끄고 이 그림을 건다 — 데이터의
 `IdleAnimStr` 는 그대로 둔다(`FastChecks` 가 두 컨트롤러의 상태인지 본다). 공격 동작은 `BossArt.Lunge`(카드를 내민다). 맵의 보스에는 빛 하나를 단다(`BossArt.Glow`, 11-28 오너 "종뿔사슴은 잘 안 보이고" — 조명을 받는 재질이라 어두운 챕터 조명 아래에서 벽에 묻혔다. 몸 앞 1.0·위 0.7 에서 세기 1.4: 0.4 앞·2.5 는 하얗게 날아갔다). 대화 초상은 대화 상자 위 자리에 정수 배로 가장 크게(사슴·소라·나방·고래 4배, 검은 태양 3배 — `BossBodyHeight` 620·`BossBodyWidth` 760)에 어두운 띠(`Outline`)를 두른다. 맵의 대기 동작은 한 점 위에 그린 판(피벗을 한 점 내린 `Sprite.Create`)과 0.6초마다 번갈아 건다(`BossArt.Breathe`) — 트랜스폼을 안 옮겨 콜라이더·예측 자리가 그대로다. 그림은 이미 챕터 색이라 `MonsterTint` 를 안 곱하고,
 몸집은 1 이다(172칸 = 옛 86칸 x2). `MonsterController.Init` 이 애니메이터를 다시 틀지 않게 막는다 — 틀면 몹 시트가 덮는다. 들이기 설정은 `BossArtImport`(점 필터·발밑 피벗·100 PPU),
-어드레서블은 `AddressableSetup.Required`. 그림이 없으면(null) 예전 몹 시트로 돌아간다. **오너가 AI 이미지 생성으로 뽑은 시안이다** — Steam AI 공개 셋째 줄(`Steam/store/ko.md`).
+어드레서블은 `AddressableSetup.Required`. 그림이 없으면(null) 예전 몹 시트로 돌아간다. **오너가 AI 이미지 생성으로 뽑은 시안이다** — Steam AI 공개 셋째 줄(`Steam/store/ko.md`). 종뿔사슴(`BossCh0`)은 머리가 잿빛으로 뭉개져 얼굴이 안 읽혀(11-28 오너 "얼굴이 안 보이는 거 같음") 눈 둘(어두운 2x2 에 반짝임 한 점)과 코끝을 점 열 개로 찍었다 — 그림에 이미 있는 세 색만 썼고, 앞 판은 git(c91e9d13)에 있다. 업적 아이콘 `ACH_BOSS20` 과 `TheSword_image` 의 aseprite 원본은 아직 옛 얼굴이다.
 업적 아이콘 `ACH_BOSS20~100` 도 이 그림이다(11-20, 1배 — 만든 법은 `Steam/art/README.md` 업적 아이콘 절).
 
 **챕터 전용 종**(11-24 오너 "얼음맵이면 얼음 특성이 있는 듯한 몬스터"): `Sprites/MonsterSprites/Chapter/Mob_C{챕터}_{번호}_Idle|Attack.png` 를 두면
