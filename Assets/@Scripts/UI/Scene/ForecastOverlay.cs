@@ -43,7 +43,8 @@ public class ForecastOverlay : MonoBehaviour
         public float Side;          // 그림 가운데에서 그려진 좌우 끝 중 먼 쪽까지 (월드)
         public Vector2 Size;        // 글자가 차지하는 너비·높이 (캔버스 단위). 글자를 바꿀 때 잰다
         public Vector3 Want;        // 이번 프레임에 서고 싶은 자리 (화면)
-        public Vector3 Last;        // 지금 선 자리 (화면)
+        public Vector3 Last;        // 지금 선 자리 (화면) — 그려진 것
+        public Vector3 At;          // 이번 프레임에 정한 자리. 다 정한 뒤 달라졌을 때만 Last·Rect 로 옮긴다(먼저 놓인 숫자를 뒤의 것이 밀 수 있다)
         public bool Shown;
         public BattleForecast.Result Result;
         public Color Tone;
@@ -431,7 +432,7 @@ public class ForecastOverlay : MonoBehaviour
         return side > 0f ? side * Mathf.Abs(sr.transform.lossyScale.x) : Define.TILE_SIZE * 0.5f;
     }
 
-    /// <summary>바로 북쪽 칸에 살아 있는 다른 몬스터가 서 있는가. 몬스터는 걷지 않으니 칸 가운데끼리 잰다.</summary>
+    /// <summary>바로 북쪽 칸에 살아 있는 다른 몬스터·주인공·아이템이 있는가. 몬스터는 걷지 않으니 칸 가운데끼리 잰다.</summary>
     bool UnderAnother(MonsterController mc)
     {
         Vector3 at = mc.transform.position;
@@ -445,6 +446,12 @@ public class ForecastOverlay : MonoBehaviour
             if (other == null || other == mc || other.gameObject.activeInHierarchy == false)
                 continue;
             if (JustNorth(other.transform.position - at))
+                return true;
+        }
+        // 바로 북쪽 칸의 아이템도 같다 — 머리 위 숫자가 열쇠·물약과 그 표지를 덮었다(60층: 초록 열쇠 위의 "-64").
+        foreach (ConsumableItem item in _items)
+        {
+            if (item != null && item.gameObject.activeInHierarchy && JustNorth(item.transform.position - at))
                 return true;
         }
         return false;
@@ -529,6 +536,8 @@ public class ForecastOverlay : MonoBehaviour
         if (_hudScene == null)
             _hudScene = GetComponentInParent<UI_GameScene>();
         int huds = _hudScene != null ? _hudScene.TopLeftHud(_hud) : 0;
+        Rect keyHud = default;
+        bool keys = _hudScene != null && _hudScene.KeyHud(out keyHud);
         _placing.Sort(_leftFirst);
         for (int i = 0; i < _placing.Count; i++)
         {
@@ -544,14 +553,14 @@ public class ForecastOverlay : MonoBehaviour
                 Label other = _placing[j];
                 if (Overlaps(label, at, other, scale))
                 {
-                    at.y = other.Last.y + (other.Size.y + Gap) * scale;
+                    at.y = other.At.y + (other.Size.y + Gap) * scale;
                     j = -1;
                 }
             }
             // 보스는 덩치 2 라(MapBuilder.MonsterBulk) 화면 위쪽에 서면 머리 위 숫자가 화면 밖으로 나갔다 — 위 가장자리 안에 붙든다.
+            float free = at.y;
             at.y = Mathf.Min(at.y, Screen.height - label.Size.y * scale);
             // 왼쪽 위 HUD(층 이름·배부름 줄) 글자 위에 숫자가 얹혀 둘 다 안 읽혔다(6·10층) — 그 자리면 HUD 밑으로 내린다(제 몸에 조금 얹힌다).
-            // ponytail: 내린 자리가 먼저 놓인 숫자와 겹치는지는 다시 안 본다 — 구석 한 곳이다. 겹치는 층이 보이면 위 루프로 돌려보낸다.
             for (int h = 0; h < huds; h++)
             {
                 Rect r = _hud[h];
@@ -560,10 +569,43 @@ public class ForecastOverlay : MonoBehaviour
                 if (at.x + half > r.xMin - pad && at.x - half < r.xMax + pad && at.y + label.Size.y * scale > r.yMin && at.y < r.yMax)
                     at.y = r.yMin - label.Size.y * scale;
             }
-            if ((at - label.Last).sqrMagnitude > 0.01f || float.IsNaN(label.Last.x))
+            // 왼쪽 열쇠 칸 뒤에 반쯤 가린 숫자(60층 — 화면 왼쪽 끝 몬스터의 "-65" 가 "-6" 으로 보였다)는 칸 오른쪽으로 뺀다.
+            // ponytail: 옮긴 자리가 다른 숫자와 겹치는지는 안 본다 — 열쇠 칸 옆 한 곳이다.
+            if (keys && at.x - half < keyHud.xMax && at.x + half > keyHud.xMin && at.y < keyHud.yMax && at.y + label.Size.y * scale > keyHud.yMin)
+                at.x = keyHud.xMax + half + Gap * scale;
+            // 위 끝·HUD 에 막혀 내려온 자리가 먼저 놓인 숫자와 다시 겹칠 수 있다(54층 — 맨 윗줄 물약의 "+0" 과 그 아래 박쥐의 "-89" 가
+            // 둘 다 위 끝에 붙어 한 덩어리였다). 그때는 둘 중 아래(남쪽) 것을 밑으로 내린다 — 위의 것이 윗자리를 가져야 누구 값인지 읽힌다.
+            // 늘 아래로만 가니 끝난다(guard 는 만일의 맴돌이 막이).
+            // ponytail: 밀려 내려간 먼저 놓인 숫자가 또 다른 숫자와 겹치는지는 안 본다 — 위 끝 한 줄의 일이다.
+            if (at.y < free)
             {
-                label.Last = at;
-                label.Rect.position = at;
+                for (int j = 0, guard = 0; j < i && guard < 32; j++)
+                {
+                    Label other = _placing[j];
+                    if (Overlaps(label, at, other, scale) == false)
+                        continue;
+                    guard++;
+                    if (label.Want.y >= other.Want.y)
+                    {
+                        other.At.y = at.y - (other.Size.y + Gap) * scale;
+                    }
+                    else
+                    {
+                        at.y = other.At.y - (label.Size.y + Gap) * scale;
+                        j = -1;
+                    }
+                }
+            }
+            label.At = at;
+        }
+        // 다 정한 뒤 한 번만 옮긴다 — 놓을 때마다 쓰면 뒤의 숫자에 밀린 것이 프레임마다 두 번 옮겨져 캔버스를 매번 다시 짰다.
+        for (int i = 0; i < _placing.Count; i++)
+        {
+            Label label = _placing[i];
+            if ((label.At - label.Last).sqrMagnitude > 0.01f || float.IsNaN(label.Last.x))
+            {
+                label.Last = label.At;
+                label.Rect.position = label.At;
             }
         }
     }
@@ -571,9 +613,9 @@ public class ForecastOverlay : MonoBehaviour
     // 둘 다 가운데 아래(피벗 0.5, 0)에 선다. 가로는 글자 너비 + 틈, 세로는 글자 높이로 잰다.
     static bool Overlaps(Label a, Vector3 at, Label b, float scale)
     {
-        return Mathf.Abs(at.x - b.Last.x) < ((a.Size.x + b.Size.x) * 0.5f + Gap) * scale
-            && at.y < b.Last.y + b.Size.y * scale
-            && b.Last.y < at.y + a.Size.y * scale;
+        return Mathf.Abs(at.x - b.At.x) < ((a.Size.x + b.Size.x) * 0.5f + Gap) * scale
+            && at.y < b.At.y + b.Size.y * scale
+            && b.At.y < at.y + a.Size.y * scale;
     }
 
     static void SetShown(Label label, bool on)

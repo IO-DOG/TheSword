@@ -772,6 +772,24 @@ public class UI_GameScene : UI_Scene
         return n;
     }
 
+    /// <summary>왼쪽 열쇠 칸(켜진 것만 묶어서)이 차지하는 화면 자리 — 맵 위 예측 숫자가 그 뒤에 가리지 않게 비키는 데 쓴다(ForecastOverlay).</summary>
+    public bool KeyHud(out Rect area)
+    {
+        area = default;
+        bool any = false;
+        for (int id = (int)GameObjects.GreenKey; id <= (int)GameObjects.RedKey; id++)
+        {
+            GameObject slot = GetObject(id);
+            if (slot == null || slot.activeInHierarchy == false)
+                continue;
+            ((RectTransform)slot.transform).GetWorldCorners(s_corners);
+            Rect r = Rect.MinMaxRect(s_corners[0].x, s_corners[0].y, s_corners[2].x, s_corners[2].y);
+            area = any ? Rect.MinMaxRect(Mathf.Min(area.xMin, r.xMin), Mathf.Min(area.yMin, r.yMin), Mathf.Max(area.xMax, r.xMax), Mathf.Max(area.yMax, r.yMax)) : r;
+            any = true;
+        }
+        return any;
+    }
+
     static TMP_Text HudLine(Transform after, string name, TMP_FontAsset font, float size, Vector2 pos, Vector2 box)
     {
         TextMeshProUGUI text = CodeUI.NewText(after.parent, name, font, size, Color.white, TextAlignmentOptions.TopLeft);
