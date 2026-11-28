@@ -435,17 +435,22 @@ public class ForecastOverlay : MonoBehaviour
     bool UnderAnother(MonsterController mc)
     {
         Vector3 at = mc.transform.position;
+        // 주인공이 바로 북쪽 칸에 서 있어도 같다 — 숫자가 주인공 몸 위에 얹혔다(41층 입구: 들어서자마자 남쪽 몬스터의 "-41" 이 가슴에).
+        PlayerController player = Managers.Game.Player;
+        if (player != null && JustNorth(player.transform.position - at))
+            return true;
         for (int i = 0; i < _used; i++)
         {
             MonsterController other = _labels[i].Monster;
             if (other == null || other == mc || other.gameObject.activeInHierarchy == false)
                 continue;
-            Vector3 d = other.transform.position - at;
-            if (Mathf.Abs(d.x) < Define.TILE_SIZE * 0.5f && Mathf.Abs(d.z - Define.TILE_SIZE) < Define.TILE_SIZE * 0.5f)
+            if (JustNorth(other.transform.position - at))
                 return true;
         }
         return false;
     }
+
+    static bool JustNorth(Vector3 d) => Mathf.Abs(d.x) < Define.TILE_SIZE * 0.5f && Mathf.Abs(d.z - Define.TILE_SIZE) < Define.TILE_SIZE * 0.5f;
 
     Label NewLabel()
     {
