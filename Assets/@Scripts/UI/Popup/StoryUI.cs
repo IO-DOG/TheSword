@@ -99,16 +99,22 @@ public static class StoryUI
         s_hintText = null;
         s_hintFill = null;
         s_hintId = 0;
+        s_hintHeld = false;
     }
 
     /// <summary>
     /// 오른쪽 위 구석의 건너뛰기 안내와 누른 만큼 차는 막대 (StoryDirector 가 매 프레임 부른다). 지난 판들에서 본 장면은
     /// 한 번 누르면 넘어가니 막대가 없다. 팝업 스택 밖의 캔버스라 "맨 위 창" 판정·Esc 에 끼지 않는다.
     /// </summary>
+    static bool s_hintHeld;
+    /// <summary>건너뛰기 표시(오른쪽 위)를 마우스로 누르고 있다 — Tab 을 누르고 있는 것으로 친다(11-28, 마우스만 쥔 사람의 길). 표시가 꺼지면 같이 풀린다.</summary>
+    public static bool SkipHintHeld => s_hintHeld && Input.GetMouseButton(0) && s_hint != null && s_hint.gameObject.activeInHierarchy;
+
     public static void SkipHint(bool show, bool seen, float fill)
     {
         if (show == false)
         {
+            s_hintHeld = false;
             if (s_hint != null)
                 s_hint.gameObject.SetActive(false);
             return;
@@ -141,10 +147,12 @@ public static class StoryUI
         scaler.matchWidthOrHeight = 0.5f;
         WideScreenCanvas.Attach(go);
         s_hint = go.AddComponent<CanvasGroup>();
-        s_hint.interactable = false;
-        s_hint.blocksRaycasts = false;
+        go.AddComponent<GraphicRaycaster>();     // 판만 누를 수 있다 — 나머지는 raycastTarget 이 꺼져 있어 밑으로 지나간다
 
         Image plate = CodeUI.NewImage(go.transform, "Plate", null, new Color(0f, 0f, 0f, 0.55f));
+        plate.raycastTarget = true;
+        plate.gameObject.BindEvent(() => s_hintHeld = true, type: Define.UIEvent.PointerDown);
+        plate.gameObject.BindEvent(() => s_hintHeld = false, type: Define.UIEvent.PointerUp);
         CodeUI.Place(plate.rectTransform, Vector2.one, Vector2.one, new Vector2(-32f, -28f), new Vector2(420f, 58f));
         s_hintText = CodeUI.Fit(CodeUI.NewText(plate.transform, "Text", ProseFont, 32f, new Color(0.9f, 0.9f, 0.9f, 1f),
             TextAlignmentOptions.Center), 18f);

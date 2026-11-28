@@ -36,6 +36,10 @@ public class UI_BattlePopup : UI_Popup
     // Space 를 누르고 있는 동안의 배속. Shift 는 안 쓴다 — Shift+Tab(건너뛰기)이 Steam 오버레이다.
     // const 가 아닌 것은 FastChecks.MissingUiText 가 이 타입의 정수 상수를 문구 id 로 보기 때문이다(8 을 빈 문구로 잡았다).
     static readonly int HoldSpeed = 8;
+    static bool s_holdByMouse;      // "Space 길게" 표시를 마우스로 누르고 있다
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetHold() => s_holdByMouse = false;
     // 건너뛰기가 끝나지 않는 싸움(둘 다 상대를 못 깎는다)을 붙잡고 영영 돌지 않게 하는 마개. 예측(BattleForecast)과 같은 600초.
     const float MaxSkipSeconds = 600f;
     const float SummarySeconds = 0.5f;          // 건너뛴 싸움의 값을 보여 주고 창이 닫히기까지
@@ -78,7 +82,8 @@ public class UI_BattlePopup : UI_Popup
         {
             if (GameEvents.IsAutoPlaying)
                 return Mathf.Max(1, Managers.Game.GameSpeed);
-            if (GameKeys.Held(KeyCode.Space))
+            // 단추가 실제로 눌려 있을 때만 — 누른 채 창을 떠나면(알트탭) 뗌이 오지 않아 8배속이 남는다
+            if (GameKeys.Held(KeyCode.Space) || (s_holdByMouse && Input.GetMouseButton(0)))
                 return HoldSpeed;
             return GameSettings.BattleSpeed;
         }
@@ -281,6 +286,10 @@ public class UI_BattlePopup : UI_Popup
         CodeUI.Place(hold.rectTransform, new Vector2(0.5f, 0f), new Vector2(bar ? 1f : 0.5f, 0f),
             new Vector2(bar ? -(SkillBarWidth / 2f + SkillGap) : 0f, SkillBottom), new Vector2(HintWidth, SkillHeight));
         PromptText.Set(CodeUI.Fit(hold, 12f), HoldHintText);
+        // 표시를 누르고 있어도 8배속(11-28) — Space 만 받아서 마우스만 쥔 사람은 쓸 수 없었다. 창이 닫히면 풀린다(OnDestroy).
+        hold.raycastTarget = true;
+        hold.gameObject.BindEvent(() => s_holdByMouse = true, type: Define.UIEvent.PointerDown);
+        hold.gameObject.BindEvent(() => s_holdByMouse = false, type: Define.UIEvent.PointerUp);
 
         if (_skipAllowed == false)
             return;
@@ -485,6 +494,7 @@ public class UI_BattlePopup : UI_Popup
 
     void OnDestroy()
     {
+        s_holdByMouse = false;      // 누른 채 전투가 끝나면 뗌이 오지 않는다 — 다음 전투가 8배속으로 시작하지 않게
         ShowWorld();
         _battle?.Dispose();
         // 메뉴에서 다시 시작하거나 타이틀로 나가면 전투가 끝나지 않은 채 파괴된다 — 남은 구독이 다음 전투를 닫으면 안 된다.

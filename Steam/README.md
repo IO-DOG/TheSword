@@ -323,7 +323,7 @@ App Admin → Application → **Steam Cloud** [S9].
 | Visual | Camera Comfort | 예 | 설정의 "화면 흔들림" 끄기, "번쩍임 줄이기"(11-28). 카메라 흔들림·모션 블러는 원래 없다 |
 | Visual | Playable without Vision | 아니오 | |
 | Input | Keyboard Only Option | 예 | 타이틀·메뉴·이동·전투·제단·결말 선택까지 키보드만으로 된다(패드도 같다) |
-| Input | Mouse Only Option | 확인 뒤 | 클릭 이동·창 클릭·메뉴 단추·전투의 스킬 칸(11-28 부터 눌러진다)은 된다. **처음부터 끝까지 마우스만으로** 한 판 해 본 적은 없다 — 확인하고 답한다(11-28 10:14 빌드에는 스킬 칸 클릭이 아직 없다) |
+| Input | Mouse Only Option | 예(사람 손 확인 권장) | 11-28 에 모든 화면을 코드로 조사했다 — 본편 흐름은 전부 클릭을 받고, 키만 받던 네 곳(스킬 칸·8배속·이야기 건너뛰기·지난 대사 쪽 넘기기)과 불러오기 실패 화면에 마우스 길을 냈다(UI 광선 시험 통과). 사람이 마우스만으로 한 판을 끝까지 해 본 것은 아니다 — 플레이테스트에서 확인하면 좋다. 11-28 10:14 빌드에는 이 고침이 없다 |
 | Input | Touch Only Option | 아니오 | |
 | Input | Playable without Quick Time Events | 예 | 때맞춰 눌러야 하는 입력이 없다(전투는 자동, 스킬은 선택) |
 | Input | Playable at Your Own Pace | 오너 판단 | 탐험은 시간 압박이 없다. 전투는 자동으로 흐르고 스킬은 그 싸움이 도는 동안 누른다(전투 속도 1배, 메뉴로 멈춤은 된다) |

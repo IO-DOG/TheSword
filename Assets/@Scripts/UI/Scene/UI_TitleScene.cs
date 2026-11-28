@@ -246,7 +246,8 @@ public class UI_TitleScene : UI_Scene
                 _loading = false;
                 Loading();
             }
-            if (_loadFailed && GameKeys.Down(KeyCode.Return)) Loading();
+            // 클릭도 다시 부른다(11-28) — 이 화면은 Enter·Esc 만 받아서 마우스만 쥔 사람은 다시 해 볼 길도 나갈 길도 없었다
+            if (_loadFailed && (GameKeys.Down(KeyCode.Return) || Input.GetMouseButtonDown(0))) Loading();
             if (_loadFailed && GameKeys.Down(KeyCode.Escape)) Application.Quit();
             return;
         }

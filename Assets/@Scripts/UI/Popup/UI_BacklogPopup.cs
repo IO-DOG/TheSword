@@ -21,7 +21,7 @@ public class UI_BacklogPopup : UI_Popup
     static readonly Color Soft = new Color32(174, 182, 200, 255);
     static readonly Color Ink = new Color32(236, 236, 242, 255);
 
-    TextMeshProUGUI _body, _page;
+    TextMeshProUGUI _body, _page, _older, _newer;
     readonly System.Collections.Generic.List<string> _pages = new System.Collections.Generic.List<string>();   // 0 = 가장 최근 쪽
     int _at;
     float _opened;
@@ -72,8 +72,11 @@ public class UI_BacklogPopup : UI_Popup
         TextMeshProUGUI title = CodeUI.NewText(root, "Title", prose, 44f, Gold);
         CodeUI.Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -Pad), new Vector2(Width - Pad * 2f, 56f));
         title.text = Managers.GetString(Title);
-        _page = CodeUI.NewText(root, "Page", CodeUI.NumberFont, 26f, Soft, TextAlignmentOptions.Right);
-        CodeUI.Place(_page.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -Pad - 10f), new Vector2(Width - Pad * 2f, 40f));
+        // 쪽 넘기기를 마우스로도(11-28) — W·S 만 받아서 마우스만 쥔 사람은 처음 뜨는 쪽밖에 못 봤다. ← 예전 쪽, → 최근 쪽, 그 사이에 쪽 번호.
+        _newer = Arrow(root, "Newer", "→", -Pad, () => Turn(_at - 1));
+        _page = CodeUI.NewText(root, "Page", CodeUI.NumberFont, 26f, Soft, TextAlignmentOptions.Center);
+        CodeUI.Place(_page.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-Pad - ArrowSize, -Pad - 10f), new Vector2(96f, 40f));
+        _older = Arrow(root, "Older", "←", -Pad - ArrowSize - 96f, () => Turn(_at + 1));
 
         float bodyWidth = Width - Pad * 2f, bodyHeight = Height - Pad * 2f - 72f - 56f;
         _body = CodeUI.NewText(root, "Lines", prose, 40f, Ink, TextAlignmentOptions.TopLeft);
@@ -120,6 +123,25 @@ public class UI_BacklogPopup : UI_Popup
         _at = at;
         _body.text = _pages[at];
         _page.text = _pages.Count > 1 ? $"{_pages.Count - at}/{_pages.Count}" : "";
+        _older.gameObject.SetActive(at < _pages.Count - 1);
+        _newer.gameObject.SetActive(at > 0);
+    }
+
+    const float ArrowSize = 48f;
+
+    // 누를 수 있는 화살표 하나(창 오른쪽 위, x 는 오른쪽 끝에서). 글꼴은 대사 글꼴 — 두 픽셀 글꼴 모두에 ← → 가 있다.
+    TextMeshProUGUI Arrow(Transform root, string name, string glyph, float x, System.Action onClick)
+    {
+        TextMeshProUGUI arrow = CodeUI.NewText(root, name, CodeUI.ProseFont, 44f, Gold, TextAlignmentOptions.Center);
+        CodeUI.Place(arrow.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(x, -Pad - 6f), new Vector2(ArrowSize, ArrowSize));
+        arrow.text = glyph;
+        arrow.raycastTarget = true;
+        arrow.gameObject.BindEvent(() =>
+        {
+            if (_closing == false && Time.unscaledTime - _opened >= InputDelay)
+                onClick();
+        });
+        return arrow;
     }
 
     void Update()
