@@ -88,7 +88,8 @@ public class UI_LedgerPopup : UI_Popup
 
         // 지금 띠(11-28): 결산은 띠를 닫는 순간에만 떠서, 닫기 전에 "이대로면 별 몇 개" 를 볼 곳이 없었다. 이 띠에서 지금까지 싸운 것만으로
         // 결산 창과 같은 셈·같은 말로 잰다(문턱은 지금까지의 기준에 대한 HP). 아직 기준을 매긴 싸움이 없으면 줄을 뺀다.
-        int open = run.FloorStage / SwordLedger.BandFloors;
+        // 장부 없이 저장된 옛 체크포인트는 FloorStage 가 0 인 채 지금 층의 싸움을 적는다 — 서 있는 층과 큰 쪽으로 띠를 고른다
+        int open = Mathf.Max(run.FloorStage, player.CurStageid) / SwordLedger.BandFloors;
         if (run.BandPar > 0 && run.BandStars.Count <= open)
         {
             int first = open * SwordLedger.BandFloors;

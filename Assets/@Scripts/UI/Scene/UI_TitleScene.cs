@@ -553,6 +553,9 @@ public class UI_TitleScene : UI_Scene
         }
     }
 
+    bool _savePeeked;
+    GameManager.CurPlayerData _savePeek;    // 이어하기가 읽을 저장의 주인공(읽지 못하면 null)
+
     void ButtonsSetting()
     {
         GetText((int)Texts.NewGameText).color = new Color(0.5f, 0.5f, 0.5f);
@@ -577,10 +580,16 @@ public class UI_TitleScene : UI_Scene
         // (왜 못 읽는지는 이어하기를 눌렀을 때 알린다). 읽기만 한다.
         try
         {
-            if (Managers.Game.HasSave && Managers.Game.TryPeekSave(out SaveStore.Snapshot snap))
+            // 저장은 타이틀에 있는 동안 한 번만 읽는다 — 이 함수는 메뉴를 한 칸 옮길 때마다 돌고, 옛 지도의 저장이면 읽을 때마다 보관 지도를 풀어 옮긴다
+            if (_savePeeked == false && isPreload)     // 표가 올라온 뒤에 — 그 전에는 검사가 늘 거절한다
+            {
+                _savePeeked = true;
+                _savePeek = Managers.Game.HasSave && Managers.Game.TryPeekSave(out SaveStore.Snapshot snap) ? snap.Player : null;
+            }
+            if (Managers.Game.HasSave && _savePeek != null)
                 lines.Add(Managers.GetString(Define.TITLE_CONTINUE) + "  " + string.Format(Managers.GetString(UI_MenuPopup.CHECKPOINT_ROW),
-                    snap.Player.CurStageid + 1, snap.Player.Level, Mathf.CeilToInt(snap.Player.CurHP), Mathf.CeilToInt(snap.Player.MaxHP))
-                    + (snap.Player.Mode == GameMode.Tower ? "  <color=#FF8068>" + Managers.GetString(MODE_TOWER) + "</color>" : ""));    // 탑의 법으로 하던 판이면 그 표시
+                    _savePeek.CurStageid + 1, _savePeek.Level, Mathf.CeilToInt(_savePeek.CurHP), Mathf.CeilToInt(_savePeek.MaxHP))
+                    + (_savePeek.Mode == GameMode.Tower ? "  <color=#FF8068>" + Managers.GetString(MODE_TOWER) + "</color>" : ""));    // 탑의 법으로 하던 판이면 그 표시
         }
         catch (System.Exception e)
         {
