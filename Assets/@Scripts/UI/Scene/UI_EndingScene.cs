@@ -88,6 +88,7 @@ public class UI_EndingScene : UI_Scene
     const int CardLower = 503;      // 낮을수록 좋다
     const int CardChapter = 504;    // {0}장
     const int CardTime = 505;       // 걸린 시간 {0}  쓰러짐 {1}
+    const int BestText = 507, NewBestText = 484;   // 최고 / 새 기록 (장부 창·띠 결산과 같은 말)
     const int AnyKey = 143;         // 아무 키나 누르세요 (Tools/ui_text.py)
 
     /// <summary>
@@ -128,6 +129,11 @@ public class UI_EndingScene : UI_Scene
             y -= 16f;
             CardLine(box, number, 84f, gold, ref y, 104f).text = string.Format(Managers.GetString(CardScore), score);
             CardLine(box, prose, 28f, soft, ref y, 40f).text = Managers.GetString(CardLower);
+            // 지난 최고와 견준다(11-28, 띠 결산과 같은 말) — 낸 판만, 그리고 앞선 기록이 있을 때만
+            int before = SwordLedger.FinishedRunScored ? SwordLedger.FinishedRunPrevBest : 0;
+            if (before > 0)
+                CardLine(box, number, 30f, soft, ref y, 44f).text = Managers.GetString(BestText) + " " + before
+                    + (score < before ? "  <color=#F0D28A>" + Managers.GetString(NewBestText) + "</color>" : "");
         }
 
         y -= 24f;

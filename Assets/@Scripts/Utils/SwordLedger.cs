@@ -58,12 +58,15 @@ public static class SwordLedger
     /// <summary>방금 끝낸 판이 점수를 냈다(기록·순위표). 결말을 본 뒤 100층 입구에서 다시 끝내면 같은 판이라 내지 않는다 —
     /// 그때 판 카드가 기록되지도 않을 점수를 보였다.</summary>
     public static bool FinishedRunScored { get; private set; }
+    /// <summary>그 판을 내기 전의 최고 점수(없으면 0) — 판 카드가 "최고 575  새 기록" 을 적는다. 낸 뒤에 물으면 이번 판이 이미 들어 있다.</summary>
+    public static int FinishedRunPrevBest { get; private set; }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void ResetStatics()
     {
         s_finished = null;
         FinishedRunScored = false;
+        FinishedRunPrevBest = 0;
     }
 
     // GameEvents 는 SubsystemRegistration 에서 구독자를 비우므로 그 뒤(BeforeSceneLoad)에 붙는다.
@@ -222,6 +225,7 @@ public static class SwordLedger
         PlayerPrefs.SetString(ScoredRunKey, l.RunId);   // 이 판 전의 빌드가 남긴 표시와 같은 자리(옛 판은 여기에만 있다)
         PlayerPrefs.Save();
         FinishedRunScored = true;
+        FinishedRunPrevBest = Records.BestScore(Managers.Game.PlayerData.Mode);
         GameEvents.RaiseRunScored(score);
     }
 

@@ -241,7 +241,7 @@ Unity.exe -quit -batchmode -nographics -projectPath . -executeMethod GameBuild.W
   `FinishRun` 이 점수 = round(1000·치름/기준)(낮을수록 좋다)를 **판(RunId)마다 한 번** `RunScored` 로 알린다(낸 판은 `Records.json` 의 `ScoredRuns` — 클라우드로 오가서 다른 기기에서 같은 판을 다시 끝내도 안 낸다)
   (`Records` 최고 점수·순위표·`ACH_DAWN_PAR`). 엔딩 씬이 판 카드를 보인다. 계단 쪽에도 같은 호출이 있다 — 장부가 두 번 세지 않는다.
 - **띠 기록**(11-28): 띠를 닫을 때 `Records.SubmitBand` 가 그 띠의 점수(= round(1000·치름/기준), 판 점수와 같은 셈 — 곁길을 걸러 치름만 줄여서는 안 좋아진다)와 별을 규칙마다 적는다(`Records.json` 의 `BandBest`·`BandStars`, 키 "Normal:3"). 결산 창에 "점수 650  지난 최고 712  새 기록", 타이틀 기록 줄에 띠마다 받은 가장 많은 별의 합 "★ 47/60". 봇 판은 적지 않는다.
-- **장부 창**(11-28, `UI_LedgerPopup` — 메뉴의 "마검의 장부" 줄): 판 도중에 지금까지의 예언·치름·기준·점수, 제단·넘친 회복, 걸린 시간·쓰러진 횟수, 챕터마다 네 띠의 별(이번 판)과 그 띠의 최고 별을 본다 — 별 옆에 띠 점수(이번 판은 `LedgerState.BandScores`, 체크포인트에 실린다 · 최고는 `Records.BandBest`). 읽기만 한다. 결산 창 별 밑에는 이번 판에서 모은 별 "★ 6/9", 판 카드에는 "걸린 시간 · 쓰러짐" 줄(문구 505~507). 두 줄의 글자 크기가 달라도 띠가 같은 자리에 오게 TMP `<pos>` 로 가로 자리를 박는다.
+- **장부 창**(11-28, `UI_LedgerPopup` — 메뉴의 "마검의 장부" 줄): 판 도중에 지금까지의 예언·치름·기준·점수, 제단·넘친 회복, 걸린 시간·쓰러진 횟수, 챕터마다 네 띠의 별(이번 판)과 그 띠의 최고 별을 본다 — 별 옆에 띠 점수(이번 판은 `LedgerState.BandScores`, 체크포인트에 실린다 · 최고는 `Records.BandBest`). 읽기만 한다. 결산 창 별 밑에는 이번 판에서 모은 별 "★ 6/9", 판 카드에는 "걸린 시간 · 쓰러짐" 줄(문구 505~507)과, 낸 판이고 앞선 기록이 있으면 "최고 700  새 기록"(`SwordLedger.FinishedRunPrevBest` — 내기 전에 잡아 둔다). 두 줄의 글자 크기가 달라도 띠가 같은 자리에 오게 TMP `<pos>` 로 가로 자리를 박는다.
 - HUD 의 배부름 게이지: "Lv 58 기준 56 (+2)"(`StageInfoData.ParLevelIn`), 90층부터 "왕좌에서 Lv {DawnLevel}" — 참 결말의
   문턱이 더는 숨어 있지 않다. 탑의 법이면 배지.
 - **탑의 법**: 새 게임에서 고른다(`UI_ModePopup`, 기본 보통). `CurPlayerData.Mode` 가 체크포인트에 남고,
